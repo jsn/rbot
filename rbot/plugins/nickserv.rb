@@ -42,11 +42,12 @@ class NickServPlugin < Plugin
     when (/^register$/)
       passwd = genpasswd
       @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
-      @registry[nick] = passwd
+      @registry[@bot.nick] = passwd
       @bot.okay m.replyto
     when (/^register\s*(.*)\s*$/)
       passwd = $1
       @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
+      @registry[@bot.nick] = passwd
       @bot.okay m.replyto
     when (/^listnicks$/)
       if @bot.auth.allow?("config", m.source, m.replyto)

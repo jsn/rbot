@@ -1,4 +1,5 @@
 o runtime language changing
+o keyword searching
 o maybe runtime language configuration?
 o freeze/thaw factoids (make them readonly) at higher auth
 o respond to insults
