@@ -1,0 +1,41 @@
+Ruby modules needed for rbot
+============================
+
+Core requirements
+      bdb (berkley db) http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb
+                       (which requires libdb2 or better, from
+                       www.sleepycat.com)
+      net/http 1.1+
+      socket
+      uri
+
+Plugin requirements
+(these are all optional, if you don't have them, the plugins just won't
+function)
+
+babelfish, wserver:
+      net/http 1.2+
+
+
+excuse,insult:
+      net/telnet
+
+nslookup:
+      resolv-replace (optional)
+
+slashdot:
+      REXML
+
+External programs needed for rbot
+=================================
+
+Plugin requirements
+(These are all optional)
+
+host plugin:
+      host(1)
+
+spell plugin:
+      ispell(1)
+
+

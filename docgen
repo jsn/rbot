@@ -1,0 +1,3 @@
+#!/bin/sh
+rdoc -a --exclude 'rbot/(db)?plugins/' --main rbot.rb -d
+

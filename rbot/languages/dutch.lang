@@ -1,0 +1,73 @@
+okay:
+  ok
+  ok dan :)
+  goed
+  mooi
+  voila
+  in orde
+  't is gebeurd
+  zeker
+  dat kan ik!
+  komt in orde
+  k
+  ik zal het eens doen
+dunno:
+  geen idee
+  dat weet ik niet
+  dat gaat m'n petje te boven
+  *haal schouder op*
+  vraag dat aan iemand anders
+  dat moet je niet aan mij vragen
+  wie weet dat?
+  dat kan ik niet
+  laat je eens nakijken...
+  wat vraag je nu?
+dunno_about_X:
+  maar ik weet niks over %s
+  Ik heb nog nooit van %s gehoord :(
+  maar wat is %s?
+insult:
+  %s: idioot!
+  %s: :(
+  %s: Ik haat je:(
+  %s: val dood!
+  %s: Ik ben beledigd!
+hello:
+  hallo :)
+  hey!
+  hi
+  yo
+  yow
+  joe
+  jowjowjow
+hello_X:
+  hallo %s :)
+  %s: hallo
+  hey %s :)
+  %s: hi!
+  yo %s!
+  joe %s!
+  alles ok %s?
+  %s: alles goed?
+welcome:
+  geen probleem
+  't is niks
+  altijd welkom
+  graag gedaan
+  np :)
+thanks:
+  danku :)
+  bedankt!
+  thx :)
+  =D
+  je bent een schatje :)
+thanks_X:
+  %s: danku :)
+  %s: bedankt!
+  %s: =D
+  %s: thx :)
+  %s: je bent een schatje :)
+quit:
+  ok ik ben weg
+  yo
+  ciao

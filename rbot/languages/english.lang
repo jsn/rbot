@@ -1,0 +1,71 @@
+okay:
+  okay
+  okay then :)
+  fine
+  done
+  can do!
+  alright
+  sure
+  aight
+  lemme take care of that for you
+dunno:
+  dunno
+  beats me
+  no idea
+  no clue
+  *shrug*
+  don't ask me
+  who knows?
+  I can't do that Dave.
+  you best check yo'self
+dunno_about_X:
+  but I dunno anything about %s
+  I never heard of %s :(
+  but what's %s?
+insult:
+  %s: wanker!
+  %s: :(
+  %s: I hate you :(
+  %s: die!
+  %s: I'm offended!
+hello:
+  hello :)
+  hola :)
+  salut
+  hey!
+  word.
+  hi
+  yo
+  'sup?
+hello_X:
+  hello %s :)
+  %s: hey there
+  %s: hola :)
+  %s: salut
+  hey %s :)
+  %s: word
+  %s: hi!
+  yo %s!
+  %s: 'sup?
+  'sup %s?
+welcome:
+  no probbie
+  you're welcome
+  de nada
+  any time
+  np :)
+thanks:
+  thanks :)
+  schweet!
+  ta :)
+  =D
+  cheers!
+thanks_X:
+  %s: thanks :)
+  %s: schweet!
+  %s: =D
+  %s: ta :)
+  %s: cheers
+quit:
+  okay bye
+  seeya

@@ -1,0 +1,8 @@
+Just stick the directory somewhere for now, edit rbotconf/conf.rbot and run
+./rbot.rb.
+
+You can maintain multiple configurations at once, start rbot with the
+location you want it to store runtime data in. By default, running ./rbot.rb
+uses the rbotconf subdirectory which contains a sample configuration. If you
+run ./rbot.rb ~/.rbot, then the configuration will be stored and read from
+there instead.

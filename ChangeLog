@@ -1,0 +1,258 @@
+Fri Oct 08 00:40:07 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * fixed insult plugin
+  * fixed excuse plugin
+
+Thu Oct 07 23:28:05 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * searching for urls in the url plugin
+  * roshambo (rock/paper/scissors) plugin from Hans Fugal <hans@fugal.net>
+
+Sat Apr 17 20:56:50 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Oh, found new tv plugin in my inbox from ages ago, but it's still not
+  working so I guess it changed again since then
+  * New eightball plugin from Daniel Free
+
+Sat Apr 17 20:44:43 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Fixed the babelfish parser so translate works again.
+  * Misc other fixes
+  * Note some plugins are broken (excuse,insult) because the server they use
+    went away. I don't know of a replacement right now.
+  * tv plugin seems broken, perhaps the html changed.
+
+Thu Jan 15 21:37:38 GMT 2004  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Fixes for ruby 1.8
+
+0.9.8
+* new plugin from Alan Third <alan@idiocy.org>, allows you to search and list
+  UK TV programmes.
+
+0.9.7
+* various plugin updates
+* fix (again) for C to F temp conversion in weather plugin
+* channel topic patch from Peter Suschlik, gives plugin better access to topic
+  changes and related information
+
+0.9.6
+* changes to layout of slashdot plugin output
+* freshmeat plugin, show latest updates or search
+* fix to C to F temp conversion in weather plugin
+* status command returns some bot status
+* fortune plugin
+* using BDB::Btree everywhere now, instead of BDB::Hash, because the Btree api
+  allows me to set my own key comparison function. This is needed to keep
+  supporting case insensitivity (vital for IRC), which was sadly broken in
+  0.9.5 :( All existing dbs will be upgraded automatically.
+* roulette plugin - play russian roulette :) also keeps game stats.
+* new config option, NO_KEYWORD_ADDRESS. If set to "true", the bot will always
+  respond to keywords it knows even when not addressed and the message doesn't
+  start with '. Message must end with "?" however.
+* hopefully fixed welcome message parsing from certain server types
+
+0.9.5
+* plugin object registry
+  This provides persistant storage for plugins via a hash interface. The
+  default mode is an object store, so you can store ruby objects and reference
+  them with hash keys. This is because the default store/restore methods of
+  the plugins' RegistryAccessor are calls to Marshal.dump and Marshal.restore,
+  for example:
+    blah = Hash.new
+    blah[:foo] = "fum"
+    @registry[:blah] = blah
+  then, even after the bot is shut down and disconnected, on the next run you
+  can access the blah object as it was, with:
+    blah = @registry[:blah]
+  The registry can of course be used to store simple strings, fixnums, etc as
+  well, and should be useful to store or cache plugin data or dynamic plugin
+  configuration. 
+
+  If you don't need to store objects, and strictly want a persistant hash of
+  strings, you can override the store/restore methods to suit your needs, for
+  example (in your plugin):
+    def initialize
+      class << @registry
+        def store(val)
+          val
+        end
+        def restore(val)
+          val
+        end
+      end
+    end
+  Your plugins section of the registry is private, it has its own namespace
+  (derived from the plugin's class name, so change it and lose your data).
+  Calls to registry.each etc, will only iterate over your namespace.
+
+  The nickserv and karma plugins use the new registry and should serve as a
+  useful example. Basic usage of the registry is simple, just treat it as a
+  hash, with values that never die (unless you delete() them).
+* Change to the nickserv plugin. The old method of putting the nickserv
+  password in rbot.conf was useless for multiple nicks or easy updates. The
+  plugin now uses the plugin registry to store passwords for any nicks it
+  owns. The plugin can be told to register the current nick (supply a password
+  or it'll generate one), identify for the current nick (if the password is
+  known), and can be told the passwords for other nicks. If NickServ asks the
+  bot to identify, it will automatically do so if it knows the appropriate
+  password.
+* karma plugin now uses the plugin registry, it should automatically import
+  your existing, stored karma data into the registry.
+* The babelfish plugin now caches results in the bot registry to speed up
+  common lookups.
+* New message types and plugin methods to grab them,
+  quit(QuitMessage):   Called when a user (or the bot) quits IRC
+  nick(NickMessage):   Called when a user (or the bot) changes Nick
+  topic(TopicMessage): Called when a user (or the bot) changes a channel topic
+* A plugin's listen() method will now receive any kind of Message, e.g.
+  PrivMessage, NoticeMessage, NickMessage, JoinMessage, etc
+* New plugins:
+  seen: the usual "seen" stuff: 
+        rbot: seen giblet?
+        giblet was last seen xxx ago doing xxx
+  cal:  calls the unix cal program to display a calendar
+  math: evaluates mathematical expressions:
+        rbot: math 2+2
+        rbot: math 4 to the power of 8
+        rbot: math ((232+432) - 4) / 2
+        (ported from infobot. Thanks to Kevin Lenzo, who wrote the
+        original infobot math module)
+  slashdot: displays latest headlines or searches for articles
+  url:  stores urls mentioned in channels for regurgitation later
+  weather: grabs and parses METAR weather data, will remember the last weather
+           code you asked for so you don't have to :)
+* New utility function, Util.http_get(url) for getting remote data via http,
+  just dumps response.body into a string and returns it, or nil if anything at
+  all goes wrong. Useful for simple plugins.
+* random quit messages if none specified, messages set in language description
+  file
+* keywords are now stored in bdb databases - your old keywords.rbot will be
+  imported. Static keywords (fact packs) are also stored in bdb databases, and
+  rbot will automatically convert any text .fact file dropped in the confdir's
+  keywords subdirectory, at startup, into a bdb file. If both a db and a text
+  file exist of the same name (except the extension), the text file will be
+  imported and merged into the database.
+  static keywords will be looked up in each factpack db in turn, in
+  alphabetical filename order - so you can prioritise using the filename if
+  you wish.
+* fixed a bug with autsplitting long sent lines, the last line was often being
+  split unnecessarily.
+
+0.9.4
+* Massive cleanup of rfc2812.rb, contributed by Lars Christensen
+  <dsl8950@vip.cybercity.dk>, gets rid of a lot of regexps
+* Fixed bug reading static keyword files - "foo <=is=> bar" may not have
+  worked for a couple of releases, only "foo<=is=>bar" was working - this was
+  not intended and should be fixed now
+* Experimental send queue, to prevent the bot from flooding out, the delay
+  between sending messages to the server defaults to 2s, but is configurable
+  in conf.rbot, set SENDQ_DELAY (0 to disable queueing). You can also set/get
+  the value from the bot, "rbot: options get sendq_delay", and 
+  "rbot: options set sendq_delay 1.5", if you have sufficient auth for "config"
+  This is a bursting sendq, most ircd's allow bursts of up to 5
+  lines, with non-burst limits of 512 bytes/2 seconds. To set the burst limit,
+  configure SENDQ_BURST in conf.rbot, or do the same kind of stuff with
+  "rbot: options set sendq_burst 2", etc.
+  The defaults are 2s/4 burst, which seem to work okay for me.
+* support for multiple, customisable, addressing prefixes. Set ADDRESS_PREFIX
+  in conf.rbot to a space separate list of addressing prefixes, e.g
+  ADDRESS_PREFIX = | ! =>
+  Would mean that all of the following in channel messages would cause the bot
+  to respond:
+              rbot: version
+              |version
+              !version
+              =>version
+* bb plugin removed, bb is nearly over and it doesn't work 100% anyway
+* Two plugins from brailsmt (from #ruby-lang on openprojects), a stats plugin
+  which monitors usage of 1-word sentences, and lart, which allows you to ask
+  rbot to lart people - with an optional reason - larts are user-definable and
+  can be added on the fly.
+* made google.rb work for people with 1.6 ruby's net/http
+
+0.9.3
+
+* fix quit messages
+* new plugin for handling nickserv-protected nicks, use NICKSERV_PASSWORD in
+  the config file.
+* fixes to a few other buglets
+* new plugin to grab bigbrother headlines, still buggy and only useful for UK
+  folks who love bb :-)
+* fixes to various plugins
+* Patch from akira yamada <akira@ruby-lang.org>
+  DNS plugin: Use resolv-replace if found, do lookup in new thread
+  Fix bug joining channels with keys
+
+0.9.2
+
+* better "connect failure" error message
+* better option parsing, and --debug option
+* access to bot's online help via commandline, eg:
+  ./rbot.rb --help
+  ./rbot.rb --help core
+  ./rbot.rb --help "core save"
+* Fix broken help from last point release
+* Plugin API modification and cleanup. You no longer need to set @listen to
+  true in order to get all NOTICE and PRIVMSGs, you just need to define the
+  method. The method is now called listen(), renamed from listener(). This
+  should be the last time the plugin api is changed incompatibly.
+* New plugin method kick(). Use it to see kicks (duh :))
+* New plugin methods join(), part(). Obvious uses.
+* Example plugin autorejoin.rb, uses kick event to rejoin channel and insult
+  kicker
+* fix bug in remind plugins "remind me no more" recognition.
+
+0.9.1
+
+* Fix welcome message recognition for certain IRCd's.
+
+0.9
+
+* Allow keyword definitions which end in '?', like this:
+  bot: foo is bar\?
+* rdoc documentation!
+* fixed broken address regexp, "rbot: .foo" was being treated as an addressed
+  form of "foo" (lost the .)
+* fix stupid bug in last release (looking for wrong default conf dir)
+
+0.8
+
+* Tarball layout change. modules all in rbot/ now, and the rbot/ default
+  configuration moved to rbotconf/. This lets the thing run from an unpacked
+  tarball while also being ready to run with the modules installed somewhere
+  else.
+* change hashbang to /usr/bin/env ruby, in order to use PATH looking for ruby,
+  it's BSD friendly!
+* allow "botnick : foo" style addressing, and even "botnick... foo"
+* slap plugin (contributed by oct)
+* renamed bot.send to bot.sendmsg, I didn't really want to override send() ;D
+  (thanks Kero)
+
+0.7.1
+* Made sane for packagers. Looks in the right places for plugins and language
+  files now, so extra effort shouldn't be needed there.
+
+0.7
+
+* Fixed "nick taken on join" bug
+* Dice plugin patch from David Dorward
+* fix searchquote regexp
+* conf.rbot: PASSWORD -> SERVER_PASSWORD, to prevent confusion with PASSWD,
+  which is for master auth.
+
+0.6
+
+* Fixed addquote (was incrementing quote ID twice)
+* now strips colour/bold escapes from incoming messages (rbot was ignoring
+  messages addressed using a bolded colon, for example).
+* minor bugfixes
+* more language breadth
+* Addressing works better now
+* Can autojoin channels with keys, conf.rbot line is:
+  autojoin_channels #chan1, #chan2, #chan3 key, #chan4 key, #chan5
+* dice plugin fixes
+
+0.5
+
+* Initial release
