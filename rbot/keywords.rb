@@ -1,3 +1,5 @@
+require 'pp'
+
 module Irc
 
   # Keyword class
@@ -339,8 +341,10 @@ module Irc
           return "<who> => replaced with questioner in reply"
         when "<topic>"
           return "<topic> => respond by setting the topic to the rest of the definition"
+        when "keywords search"
+          return "keywords search [--all] [--full] <regexp> => search keywords for <regexp>. If --all is set, search static keywords too, if --full is set, search definitions too."
         else
-          return "Keyword module (Fact learning and regurgitation) topics: overview, set, plurals, override, also, random, get, tell, forget, keywords, <reply>, <action>, <who>, <topic>"
+          return "Keyword module (Fact learning and regurgitation) topics: overview, set, plurals, override, also, random, get, tell, forget, keywords, keywords search, <reply>, <action>, <who>, <topic>"
       end
     end
 
@@ -366,6 +370,46 @@ module Irc
               length += v.length
             }
             m.reply "There are currently #{@keywords.length} keywords, #{length} static facts defined."
+          end
+        elsif (m.message =~ /^keywords search\s+(.*)$/)
+          str = $1
+          all = false
+          all = true if str.gsub!(/--all\s+/, "")
+          full = false
+          full = true if str.gsub!(/--full\s+/, "")
+
+          re = Regexp.new(str, Regexp::IGNORECASE)
+          if(@bot.auth.allow?("keyword", m.source, m.replyto))
+            matches = Array.new
+            @keywords.each {|k,v|
+              kw = Keyword.restore(v)
+              if re.match(k) || (full && re.match(kw.desc))
+                matches << [k,kw]
+              end
+            }
+            if all
+              @statickeywords.each {|k,v|
+                v.each {|kk,vv|
+                  kw = Keyword.restore(vv)
+                  if re.match(kk) || (full && re.match(kw.desc))
+                    matches << [kk,kw]
+                  end
+                }
+              }
+            end
+            if matches.length == 1
+              rkw = matches[0]
+              m.reply "#{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+            elsif matches.length > 0
+              i = 0
+              matches.each {|rkw|
+                m.reply "[#{i+1}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+                i += 1
+                break if i == 3
+              }
+            else
+              m.reply "no keywords match #{str}"
+            end
           end
         end
       else
