@@ -69,6 +69,9 @@ class IrcBot
   # storage (hash interface tied to a bdb file, plugins use Accessors to store
   # and restore objects in their own namespaces.)
   attr_reader :registry
+
+  # our webrick instance
+  attr_reader :http_server
   
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
@@ -392,6 +395,7 @@ class IrcBot
     @socket.flush
     @socket.shutdown
     @registry.close
+    @http_server.shutdown
     puts "rbot quit (#{message})"
     exit 0
   end

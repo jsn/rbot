@@ -9,7 +9,7 @@ class NickServPlugin < Plugin
     when "password"
       return "nickserv password <nick> <passwd>: remember the password for nick <nick> and use it to identify in future"
     when "register"
-      return "nickserv register [<password>]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work"
+      return "nickserv register [<password> [<email>]]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work. Also specify email if required by your services"
     when "identify"
       return "nickserv identify: identify with nickserv - shouldn't be needed - bot should identify with nickserv immediately on request - however this could be useful after splits or service disruptions, or when you just set the password for the current nick"
     when "listnicks"
@@ -42,6 +42,12 @@ class NickServPlugin < Plugin
     when (/^register$/)
       passwd = genpasswd
       @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
+      @registry[@bot.nick] = passwd
+      @bot.okay m.replyto
+    when (/^register\s*(\S*)\s*(.*)$/)
+      passwd = $1
+      email = $2
+      @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd + " " + email
       @registry[@bot.nick] = passwd
       @bot.okay m.replyto
     when (/^register\s*(.*)\s*$/)

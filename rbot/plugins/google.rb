@@ -29,21 +29,21 @@ class GooglePlugin < Plugin
 
     http = Net::HTTP.new("www.google.com", 80, proxy_host, proxy_port)
 
-    http.start {|http|
-      begin
-        resp , = http.get(query)
+    begin
+      http.start {|http|
+        resp = http.get(query)
         if resp.code == "302"
           result = resp['location']
         end
-      rescue => e
-        p e
-        if e.response && e.response['location']
-          result = e.response['location']
-        else
-          result = "error!"
-        end
+      }
+    rescue => e
+      p e
+      if e.response && e.response['location']
+        result = e.response['location']
+      else
+        result = "error!"
       end
-    }
+    end
     m.reply "#{m.params}: #{result}"
   end
 end

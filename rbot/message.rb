@@ -22,7 +22,10 @@ module Irc
     
     # contents of the message
     attr_accessor :message
-    
+
+    # has the message been replied to/handled by a plugin?
+    attr_accessor :replied
+
     # instantiate a new Message
     # bot::      associated bot class
     # source::   hostmask of the message source
@@ -35,6 +38,7 @@ module Irc
       @address = false
       @target = target
       @message = BasicUserMessage.stripcolour message
+      @replied = false
 
       # split source into consituent parts
       if source =~ /^((\S+)!(\S+))$/
@@ -54,6 +58,11 @@ module Irc
     # a kick message when bot was kicked etc.
     def address?
       return @address
+    end
+
+    # has this message been replied to by a plugin?
+    def replied?
+      return @replied
     end
 
     # strip mIRC colour escapes from a string
@@ -163,6 +172,7 @@ module Irc
     # in a channel, it will reply in the channel.
     def reply(string)
       @bot.say @replyto, string
+      @replied = true
     end
 
   end

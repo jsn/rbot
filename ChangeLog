@@ -1,3 +1,14 @@
+Wed Oct 13 16:16:31 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Fix bug with quotes plugin where it gets confused and sees both a quote
+  and a keyword, both plugins are triggered by, for example "addquote foo is
+  bar"
+  * fixed this by implementing the "has_responded" flag on a message. When a
+  plugin replied to a message (or it manually sets m.replied to true), the
+  keywords plugin will honour that flag and not examine the message for
+  keywords. This flag can also be checked by listen plugins that don't want to
+  interfere with other plugin commands.
+
 Mon Oct 11 00:37:52 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Fixes to the NickServ plugin

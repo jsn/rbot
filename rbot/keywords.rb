@@ -350,6 +350,7 @@ module Irc
 
     # privmsg handler
     def privmsg(m)
+      return if m.replied?
       if(m.address?)
         if(!(m.message =~ /\\\?\s*$/) && m.message =~ /^(.*\S)\s*\?\s*$/)
           keyword m, $1 if(@bot.auth.allow?("keyword", m.source, m.replyto))

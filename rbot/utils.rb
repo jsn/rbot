@@ -166,18 +166,18 @@ module Irc
       http.open_timeout = opentimeout
       http.read_timeout = readtimeout
 
-      http.start {|http|
-        begin
+      begin
+        http.start {|http|
           resp = http.get(query)
           if resp.code == "200"
             return resp.body
           end
-        rescue => e
-          # cheesy for now
-          $stderr.puts "Utils.http_get exception: #{e}, while trying to get #{uristr}"
-          return nil
-        end
-      }
+        }
+      rescue => e
+        # cheesy for now
+        $stderr.puts "Utils.http_get exception: #{e}, while trying to get #{uristr}"
+        return nil
+      end
     end
 
     # This is nasty-ass. I hate writing parsers.
