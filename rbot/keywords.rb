@@ -341,7 +341,7 @@ module Irc
           return "<who> => replaced with questioner in reply"
         when "<topic>"
           return "<topic> => respond by setting the topic to the rest of the definition"
-        when "keywords search"
+        when "search"
           return "keywords search [--all] [--full] <regexp> => search keywords for <regexp>. If --all is set, search static keywords too, if --full is set, search definitions too."
         else
           return "Keyword module (Fact learning and regurgitation) topics: overview, set, plurals, override, also, random, get, tell, forget, keywords, keywords search, <reply>, <action>, <who>, <topic>"
