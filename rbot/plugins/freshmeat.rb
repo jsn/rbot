@@ -70,7 +70,7 @@ class FreshmeatPlugin < Plugin
   
   def freshmeat(m, max=4)
     max = 8 if max > 8
-    xml = Utils.http_get("http://download.freshmeat.net/backend/fm-releases-software.rdf")
+    xml = Utils.http_get("http://images.feedstermedia.com/feedcache/ostg/freshmeat/fm-releases-global.xml")
     unless xml
       m.reply "freshmeat news parse failed"
       return
@@ -84,7 +84,7 @@ class FreshmeatPlugin < Plugin
     max_width = 60
     title_width = 0
     done = 0
-    doc.elements.each("*/item") {|e|
+    doc.elements.each("*/channel/item") {|e|
       desc = e.elements["description"].text
       title = e.elements["title"].text
       #title.gsub!(/\s+\(.*\)\s*$/, "")
@@ -96,10 +96,10 @@ class FreshmeatPlugin < Plugin
     }
     matches.each {|mat|
       title = mat[0]
-      desc = mat[1]
-      desc.gsub!(/(.{#{max_width - 3 - title_width}}).*/, '\1..')
-      reply = sprintf("%#{title_width}s | %s", title, desc)
-      m.reply reply
+      #desc = mat[1]
+      #desc.gsub!(/(.{#{max_width - 3 - title_width}}).*/, '\1..')
+      #reply = sprintf("%#{title_width}s | %s", title, desc)
+      m.reply title
     }
   end
 end
