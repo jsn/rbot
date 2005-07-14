@@ -331,7 +331,7 @@ class IrcBot
 
   # say something (PRIVMSG) to channel/nick +where+
   def say(where, message)
-    message.to_s.each_line { |line|
+    message.to_s.gsub(/[\r\n]+/, "\n").each_line { |line|
       line.chomp!
       next unless(line.length > 0)
       unless((where =~ /^#/) && (@channels.has_key?(where) && @channels[where].quiet))
