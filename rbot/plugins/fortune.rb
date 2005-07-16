@@ -17,7 +17,10 @@ class FortunePlugin < Plugin
     end
     fortune = nil
     ["/usr/games/fortune", "/usr/bin/fortune", "/usr/local/bin/fortune"].each {|f|
-      fortune = f if FileTest.executable? f
+      if FileTest.executable? f
+        fortune = f
+        break
+      end
     }
     m.reply "fortune not found" unless fortune
     ret = Utils.safe_exec(fortune, "-n", "255", "-s", db)
