@@ -1,0 +1,67 @@
+okay:
+  okay
+  okay na dann :)
+  gut
+  gemacht
+  wird gemacht!
+  also los
+  sicher
+  klar
+  lass mich sorge tragen :-)
+dunno:
+  kann nicht
+  schlag mich
+  habe keine Idee
+  habe keine Ahnung
+  *achselzuck*
+  frag mich nicht
+  wer weiss?
+  ich kann es nicht tun
+  am besten du schaust selber nach
+dunno_about_X:
+  ich weiss nichts uber %s
+  was zum Teufel ist %s?
+insult:
+  %s: Arsch!
+  %s: :(
+  %s: Ich hasse dich :(
+  %s: Stirb!
+  %s: Ich bin beleidigt!
+hello:
+  hallo :)
+  hola :)
+  salut
+  hey!
+  sag nichts.
+  hi
+  yo
+  Was geht?
+hello_X:
+  hallo %s :)
+  %s: guggus
+  %s: hola :)
+  %s: salut
+  hey %s :)
+  %s: sag nichts
+  %s: hi!
+  yo %s!
+  %s: Was geht?
+  Was geht %s?
+welcome:
+  no probbie
+  you're welcome
+  de nada
+  any time
+  np :)
+thanks:
+  Danke :)
+  juhu :)
+  :-D
+  Prost!
+thanks_X:
+  %s: danke :)
+  %s: :-D
+  %s: juhu :)
+  %s: Prost
+quit:
+  forkbomb rockt
