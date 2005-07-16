@@ -1,3 +1,9 @@
+Sat Jul 16 02:23:13 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Apply most of Rene's patch and fix various plugins.
+	* New plugin: autoop (auto ops via hostmask)
+	* New feature: karmastats
+
 Wed Oct 13 16:16:31 BST 2004  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Fix bug with quotes plugin where it gets confused and sees both a quote
