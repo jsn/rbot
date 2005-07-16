@@ -56,6 +56,16 @@ class KarmaPlugin < Plugin
     end
   end
   def privmsg(m)
+    if (m.plugin == "karmastats")
+      if (@registry.length)
+        max = @registry.values.max
+        min = @registry.values.min
+        best = @registry.to_hash.index(max)
+        worst = @registry.to_hash.index(min)
+        m.reply "#{@registry.length} votes. Best: #{best} (#{max}); Worst: #{worst} (#{min})"
+        return
+      end
+    end
     unless(m.params)
       m.reply "incorrect usage: " + m.plugin
       return
@@ -73,3 +83,4 @@ class KarmaPlugin < Plugin
 end
 plugin = KarmaPlugin.new
 plugin.register("karma")
+plugin.register("karmastats")
