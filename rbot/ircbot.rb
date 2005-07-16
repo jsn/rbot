@@ -236,7 +236,7 @@ class IrcBot
       end
       @channels[channel].users.clear
       users.each {|u|
-        @channels[channel].users[u[0]] = ["mode", u[1]]
+        @channels[channel].users[u[0].sub(/^[@&~+]/, '')] = ["mode", u[1]]
       }
     }
     @client["UNKNOWN"] = proc {|data|
@@ -432,6 +432,11 @@ class IrcBot
   def nickchg(name)
       sendq "NICK #{name}"
   end
+
+  # changing mode
+  def mode(channel, mode, target)
+      sendq "MODE #{channel} #{mode} #{target}"
+  end
   
   # m::     message asking for help
   # topic:: optional topic help is requested for
@@ -556,6 +561,8 @@ class IrcBot
           action $1, $2 if(@auth.allow?("say", m.source, m.replyto))
         when (/^topic\s+(\S+)\s+(.*)$/i)
           topic $1, $2 if(@auth.allow?("topic", m.source, m.replyto))
+        when (/^mode\s+(\S+)\s+(\S+)\s+(.*)$/i)
+          mode $1, $2, $3 if(@auth.allow?("mode", m.source, m.replyto))
         when (/^ping$/i)
           say m.replyto, "pong"
         when (/^rescan$/i)

@@ -38,7 +38,7 @@ class DnsPlugin < Plugin
        rescue StandardError => err
          m.reply "#{m.params}: not found"
        end
-      elsif(m.params =~ /^(\w|\.)+$/)
+      elsif(m.params =~ /^\S+$/)
        begin
          a = getaddresses(m.params)
          m.reply m.params + ": " + a.join(", ")

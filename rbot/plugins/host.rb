@@ -3,7 +3,7 @@ class HostPlugin < Plugin
     "host <domain> => query nameserver about domain names and zones for <domain>"
   end
   def privmsg(m)
-    unless(m.params =~ /^(\w|\.)+$/)
+    unless(m.params =~ /^(\w|-|\.)+$/)
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end

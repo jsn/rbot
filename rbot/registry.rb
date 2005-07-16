@@ -207,13 +207,13 @@ module Irc
     
     # just like Hash#has_value?
     def has_value?(value)
-      return @registry.has_value(store(value))
+      return @registry.has_value?(store(value))
     end
 
     # just like Hash#index?
     def index(value)
       ind = @registry.index(store(value))
-      if ind.gsub!(/^#{Regexp.escape(@prefix)}/, "")
+      if ind && ind.gsub!(/^#{Regexp.escape(@prefix)}/, "")
         return ind
       else
         return nil
@@ -228,12 +228,12 @@ module Irc
     # returns a list of your keys
     def keys
       return @registry.keys.collect {|key|
-          if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")  
-            key
-          else
-            nil
-          end
-        }.compact
+        if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")  
+          key
+        else
+          nil
+        end
+      }.compact
     end
 
     # Return an array of all associations [key, value] in your namespace
@@ -272,9 +272,7 @@ module Irc
     def values
       ret = Array.new
       self.each {|k,v|
-        if key =~ /^#{Regexp.escape(@prefix)}/
-          Array << restore(v)
-        end
+        ret << restore(v)
       }
       return ret
     end

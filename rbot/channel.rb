@@ -39,6 +39,10 @@ module Irc
       # topic set by
       attr_accessor :by
 
+      def initialize
+        @name = ""
+      end
+
       # when called like "puts @bots.channels[chan].topic"
       def to_s
         @name

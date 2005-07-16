@@ -1,6 +1,7 @@
 okay:
   okay
   okay then :)
+  okies!
   fine
   done
   can do!
@@ -13,14 +14,16 @@ dunno:
   beats me
   no idea
   no clue
+  ...eh?
   *shrug*
   don't ask me
   who knows?
   I can't do that Dave.
-  you best check yo'self
+  you best check yo'self!
 dunno_about_X:
   but I dunno anything about %s
   I never heard of %s :(
+  %s? what's that then?
   but what's %s?
 insult:
   %s: wanker!
@@ -28,6 +31,7 @@ insult:
   %s: I hate you :(
   %s: die!
   %s: I'm offended!
+  %s: you hurt my feelings
 hello:
   hello :)
   hola :)

@@ -15,8 +15,13 @@ class FortunePlugin < Plugin
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
-    ret = Utils.safe_exec("/usr/games/fortune", "-n", "255", "-s", db)
-    m.reply ret.split("\n").join(" ")
+    fortune = nil
+    ["/usr/games/fortune", "/usr/bin/fortune", "/usr/local/bin/fortune"].each {|f|
+      fortune = f if FileTest.executable? f
+    }
+    m.reply "fortune not found" unless fortune
+    ret = Utils.safe_exec(fortune, "-n", "255", "-s", db)
+    m.reply ret.gsub(/\t/, "  ").split(/\n/).join(" ")
     return
   end
 end

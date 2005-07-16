@@ -64,7 +64,7 @@ class QuotePlugin < Plugin
     return 0 unless(@lists.has_key?(channel))
     return 0 unless(@lists[channel].length > 0)
     if(regexp)
-      matches = @lists[channel].compact.find_all {|a| a.quote =~ /#{regexp}/ }
+      matches = @lists[channel].compact.find_all {|a| a.quote =~ /#{regexp}/i }
     else
       matches = @lists[channel].compact
     end
@@ -73,7 +73,7 @@ class QuotePlugin < Plugin
   def searchquote(source, channel, regexp)
     return nil unless(@lists.has_key?(channel))
     return nil unless(@lists[channel].length > 0)
-    matches = @lists[channel].compact.find_all {|a| a.quote =~ /#{regexp}/ }
+    matches = @lists[channel].compact.find_all {|a| a.quote =~ /#{regexp}/i }
     if(matches.length > 0)
        return matches[rand(matches.length)], @lists[channel].length - 1
     else

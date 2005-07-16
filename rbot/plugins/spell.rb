@@ -3,7 +3,7 @@ class SpellPlugin < Plugin
     "spell <word> => check spelling of <word>, suggest alternatives"
   end
   def privmsg(m)
-    unless(m.params && m.params =~ /^\w+$/)
+    unless(m.params && m.params =~ /^\S+$/)
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
