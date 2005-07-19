@@ -5,12 +5,12 @@ class OpMehPlugin < Plugin
   end
 
   def privmsg(m)
-    unless(m.params)
-      m.reply "usage: " + help(m.plugin)
-      return
+    if(m.params)
+      channel = m.params
+    else
+      channel = m.channel
     end
     target = m.sourcenick
-    channel = m.params
     @bot.sendq("MODE #{channel} +o #{target}")
   end
 end
