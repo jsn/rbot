@@ -162,11 +162,11 @@ module Irc
         proxy_port = proxy_uri.port
       end
 
-      http = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port)
-      http.open_timeout = opentimeout
-      http.read_timeout = readtimeout
-
       begin
+        http = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port)
+        http.open_timeout = opentimeout
+        http.read_timeout = readtimeout
+
         http.start {|http|
           resp = http.get(query)
           if resp.code == "200"
