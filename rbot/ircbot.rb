@@ -34,6 +34,7 @@ require 'rbot/message'
 require 'rbot/language'
 require 'rbot/dbhash'
 require 'rbot/registry'
+require 'rbot/httputil'
 
 module Irc
 
@@ -70,6 +71,10 @@ class IrcBot
   # and restore objects in their own namespaces.)
   attr_reader :registry
 
+  # bot's httputil help object, for fetching resources via http. Sets up
+  # proxies etc as defined by the bot configuration/environment
+  attr_reader :httputil
+
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
     @botclass = botclass.gsub(/\/$/, "")
@@ -85,6 +90,7 @@ class IrcBot
     @channels = Hash.new
     @logs = Hash.new
     
+    @httputil = Irc::HttpUtil.new(self)
     @lang = Irc::Language.new(@config["LANGUAGE"])
     @keywords = Irc::Keywords.new(self)
     @auth = Irc::IrcAuth.new(self)
@@ -468,6 +474,13 @@ class IrcBot
     return helpstr
   end
 
+  def status
+    secs_up = Time.new - @startup_time
+    uptime = Utils.secs_to_string secs_up
+    return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
+  end
+
+
   private
 
   # handle help requests for "core" topics
@@ -723,12 +736,6 @@ class IrcBot
     @channels[m.channel].topic.by = m.source if !m.source.nil?
 
 	puts @channels[m.channel].topic
-  end
-
-  def status
-    secs_up = Time.new - @startup_time
-    uptime = Utils.secs_to_string secs_up
-    return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
   end
 
   # delegate a privmsg to auth, keyword or plugin handlers

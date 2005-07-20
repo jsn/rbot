@@ -20,7 +20,7 @@ class TubePlugin < Plugin
   
   def check_tube(m, line)
   begin
-    tube_page = Utils.http_get("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml")
+    tube_page = @bot.httputil.get(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"), 1, 1)
   rescue URI::InvalidURIError, URI::BadURIError => e
     m.reply "Cannot contact Tube Service Status page"
     return
