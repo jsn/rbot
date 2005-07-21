@@ -27,7 +27,7 @@ class GooglePlugin < Plugin
       end
     end
 
-    http = Net::HTTP.new("www.google.com", 80, proxy_host, proxy_port)
+    http = @bot.httputil.get_proxy(URI.parse("http://www.google.com"))
 
     begin
       http.start {|http|

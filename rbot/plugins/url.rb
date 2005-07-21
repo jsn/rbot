@@ -12,8 +12,8 @@ class UrlPlugin < Plugin
     return unless m.kind_of?(PrivMessage)
     return if m.address?
     # TODO support multiple urls in one line
-    if m.message =~ /(f|ht)tp:\/\//
-      if m.message =~ /((f|ht)tp:\/\/.*?)(?:\s+|$)/
+    if m.message =~ /(f|ht)tps?:\/\//
+      if m.message =~ /((f|ht)tps?:\/\/.*?)(?:\s+|$)/
         url = Url.new(m.target, m.sourcenick, Time.new, $1)
         list = @registry[m.target]
         debug "#{list.length} urls so far"

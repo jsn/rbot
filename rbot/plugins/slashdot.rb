@@ -24,7 +24,7 @@ class SlashdotPlugin < Plugin
   
   def search_slashdot(m, search, max=4)
     begin
-      xml = Utils.http_get("http://slashdot.org/search.pl?content_type=rss&query=#{URI.escape(search)}")
+      xml = @bot.httputil.get(URI.parse("http://slashdot.org/search.pl?content_type=rss&query=#{URI.escape(search)}"))
     rescue URI::InvalidURIError, URI::BadURIError => e
       m.reply "illegal search string #{search}"
       return
@@ -51,7 +51,7 @@ class SlashdotPlugin < Plugin
   end
   
   def slashdot(m, max=4)
-    xml = Utils.http_get("http://slashdot.org/slashdot.xml")
+    xml = @bot.httputil.get(URI.parse("http://slashdot.org/slashdot.xml"))
     unless xml
       m.reply "slashdot news parse failed"
       return

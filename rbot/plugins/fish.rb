@@ -8,16 +8,6 @@ class BabelPlugin < Plugin
   end
   def privmsg(m)
 
-    proxy_host = nil
-    proxy_port = nil
-
-    if(ENV['http_proxy'])
-      if(ENV['http_proxy'] =~ /^http:\/\/(.+):(\d+)$/)
-        proxy_host = $1
-        proxy_port = $2
-      end
-    end
-    
     langs = ["en", "fr", "de", "it", "pt", "es", "nl"]
 
     query = "/babelfish/tr"
@@ -53,7 +43,7 @@ class BabelPlugin < Plugin
       return
     end
 
-    http = Net::HTTP.new("babelfish.altavista.com", 80, proxy_host, proxy_port)
+    http = @bot.httputil.get_proxy(URI.parse("http://babelfish.altavista.com"))
 
     http.start {|http|
       resp = http.post(query, data, {"content-type",
