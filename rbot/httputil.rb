@@ -9,6 +9,9 @@ Net::HTTP.version_1_2
 class HttpUtil
   def initialize(bot)
     @bot = bot
+    @headers = {
+      'User-Agent' => "rbot http util #{$version} (http://linuxbrit.co.uk/rbot/)",
+    }
   end
 
   # uri:: Uri to create a proxy for
@@ -67,9 +70,11 @@ class HttpUtil
    
     begin
       proxy.start() {|http|
-        resp = http.get(uri)
+        resp = http.get(uri.request_uri(), @headers)
         if resp.code == "200"
           return resp.body
+        else
+          puts "HttpUtil.get return code #{resp.code} #{resp.body}"
         end
         return nil
       }
