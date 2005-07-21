@@ -29,26 +29,27 @@ class TubePlugin < Plugin
     m.reply "Cannot contact Tube Service Status page"
     return
   end
+  next_line = false
   tube_page.each_line {|l|
-      if (l =~ /class="#{line}"/i)
-        tube_page.each_line { |l2|
-        if (l2 =~ /^<tr valign=top> <td>\s*(.*#{line}.*)<\/td><\/tr>/i)
-          problem_message = Array.new
-          problem_message = $1.split(/<[^>]+>|&nbsp;/i)
-          m.reply problem_message.join(" ")
-          return
-        end
-        }
+    next if l == "\r\n"
+    next if l == "\n"
+    if (next_line)
+      if (l =~ /^<tr valign=top> <td>\s*(.*)<\/td><\/tr>/i)
+        m.reply $1.split(/<[^>]+>|&nbsp;/i).join(" ")
+        return
+      else
         m.reply "There are problems on the #{line} line, but I didn't understand the page format. You should check out http://www.tfl.gov.uk/tfl/service_rt_tube.shtml for more details."
         return
       end
-      }
+    end
+    next_line = true if (l =~ /class="#{line}"/i)
+    }
   m.reply "No Problems on the #{line} line."
   end
 
   def check_stations(m)
     begin
-      tube_page = Utils.http_get("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml")
+      tube_page = @bot.httputil.get(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"))
     rescue URI::InvalidURIError, URI::BadURIError => e
       m.reply "Cannot contact Tube Service Status page"
       return
