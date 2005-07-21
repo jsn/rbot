@@ -33,7 +33,13 @@ class SlashdotPlugin < Plugin
       m.reply "search for #{search} failed"
       return
     end
-    doc = Document.new xml
+    begin
+      doc = Document.new xml
+    rescue REXML::ParseException => e
+      puts e
+      m.reply "couldn't parse output XML: #{e.class}"
+      return
+    end
     unless doc
       m.reply "search for #{search} failed"
       return
@@ -58,7 +64,7 @@ class SlashdotPlugin < Plugin
     end
     doc = Document.new xml
     unless doc
-      m.reply "slashdot news parse failed"
+      m.reply "slashdot news parse failed (invalid xml)"
       return
     end
     done = 0
