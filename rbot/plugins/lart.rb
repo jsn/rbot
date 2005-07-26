@@ -28,6 +28,10 @@ class LartPlugin < Plugin
 		"rmpraise" => "handle_rmpraise"
 	}
 
+  def name
+    "lart"
+  end
+
 	#{{{
 	def initialize
 		super
