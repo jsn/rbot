@@ -4,25 +4,12 @@ require 'uri/common'
 class FreshmeatPlugin < Plugin
   include REXML
   def help(plugin, topic="")
-    "freshmeat search <string> [<max>=4] => search freshmeat for <string>, freshmeat [<max>=4] => return up to <max> freshmeat headlines"
-  end
-  def privmsg(m)
-    if m.params && m.params =~ /^search\s+(.*)\s+(\d+)$/
-      search = $1
-      limit = $2.to_i
-      search_freshmeat m, search, limit
-    elsif m.params && m.params =~ /^search\s+(.*)$/
-      search = $1
-      search_freshmeat m, search
-    elsif m.params && m.params =~ /^(\d+)$/
-      limit = $1.to_i
-      freshmeat m, limit
-    else
-      freshmeat m
-    end
+    "freshmeat search [<max>=4] <string> => search freshmeat for <string>, freshmeat [<max>=4] => return up to <max> freshmeat headlines"
   end
   
-  def search_freshmeat(m, search, max=4)
+  def search_freshmeat(m, params)
+    max = params[:limit].to_i
+    search = params[:search].to_s
     max = 8 if max > 8
     begin
       xml = @bot.httputil.get(URI.parse("http://freshmeat.net/search-xml/?orderby=locate_projectname_full_DESC&q=#{URI.escape(search)}"))
@@ -68,7 +55,8 @@ class FreshmeatPlugin < Plugin
     }
   end
   
-  def freshmeat(m, max=4)
+  def freshmeat(m, params)
+    max = params[:limit].to_i
     max = 8 if max > 8
     xml = @bot.httputil.get(URI.parse("http://images.feedstermedia.com/feedcache/ostg/freshmeat/fm-releases-global.xml"))
     unless xml
@@ -104,4 +92,7 @@ class FreshmeatPlugin < Plugin
   end
 end
 plugin = FreshmeatPlugin.new
-plugin.register("freshmeat")
+plugin.map 'freshmeat search :limit *search', :action => 'search_freshmeat',
+            :defaults => {:limit => 4}, :requirements => {:limit => /^\d+$/}
+plugin.map 'freshmeat :limit', :defaults => {:limit => 4}, 
+                               :requirements => {:limit => /^\d+$/}
