@@ -182,7 +182,7 @@ module Irc
             m.reply "user #$1 is gone"
           end
         when (/^auth\s+(\S+)/)
-          if($1 == @bot.config["PASSWD"])
+          if($1 == @bot.config["auth.password"])
             @bot.auth.useradd(Regexp.escape(m.source), 1000)
             m.reply "Identified, security level maxed out"
           else

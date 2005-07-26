@@ -5,6 +5,9 @@ module Irc
   # nick/channel and a message part)
   class BasicUserMessage
     
+    # associated bot
+    attr_reader :bot
+    
     # when the message was received
     attr_reader :time
 
@@ -173,6 +176,12 @@ module Irc
     def reply(string)
       @bot.say @replyto, string
       @replied = true
+    end
+
+    # convenience method to reply "okay" in the current language to the
+    # message
+    def okay
+      @bot.say @replyto, @bot.lang.get("okay")
     end
 
   end

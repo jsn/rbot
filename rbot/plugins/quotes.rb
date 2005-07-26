@@ -186,7 +186,7 @@ class QuotePlugin < Plugin
           num = $2.to_i
           if(@bot.auth.allow?("delquote", m.source, m.replyto))
             if(delquote(channel, num))
-              @bot.okay m.replyto
+              m.okay
             else
               m.reply "quote not found!"
             end
@@ -288,7 +288,7 @@ class QuotePlugin < Plugin
           num = $1.to_i
           if(@bot.auth.allow?("delquote", m.source, m.replyto))
             if(delquote(m.target, num))
-              @bot.okay m.replyto
+              m.okay
             else
               m.reply "quote not found!"
             end

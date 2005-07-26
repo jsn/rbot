@@ -86,20 +86,20 @@ class IrcBot
     @config = Irc::BotConfig.new(self)
     @timer = Timer::Timer.new
     @registry = BotRegistry.new self
-    @timer.add(@config["SAVE_EVERY"].to_i) { save }
+    @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
     @channels = Hash.new
     @logs = Hash.new
     
     @httputil = Irc::HttpUtil.new(self)
-    @lang = Irc::Language.new(@config["LANGUAGE"])
+    @lang = Irc::Language.new(@config['core.language'])
     @keywords = Irc::Keywords.new(self)
     @auth = Irc::IrcAuth.new(self)
     @plugins = Irc::Plugins.new(self, ["#{botclass}/plugins"])
-    @socket = Irc::IrcSocket.new(@config["SERVER"], @config["PORT"], @config["HOST"], @config["SENDQ_DELAY"], @config["SENDQ_BURST"])
-    @nick = @config["NICK"]
-    @server_password = @config["SERVER_PASSWORD"]
-    if @config["ADDRESS_PREFIX"]
-      @addressing_prefixes = @config["ADDRESS_PREFIX"].split(" ")
+
+    @socket = Irc::IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
+    @nick = @config['irc.nick']
+    if @config['core.address_prefix']
+      @addressing_prefixes = @config['core.address_prefix'].split(" ")
     else
       @addressing_prefixes = Array.new
     end
@@ -179,13 +179,13 @@ class IrcBot
       if data['NICK'] && data['NICK'].length > 0
         @nick = data['NICK']
       end
-      if(@config["QUSER"])
-        puts "authing with Q using  #{@config["QUSER"]} #{@config["QAUTH"]}"
-        @socket.puts "PRIVMSG Q@CServe.quakenet.org :auth #{@config["QUSER"]} #{@config["QAUTH"]}"
+      if(@config['irc.quser'])
+        puts "authing with Q using  #{@config['quakenet.user']} #{@config['quakenet.auth']}"
+        @socket.puts "PRIVMSG Q@CServe.quakenet.org :auth #{@config['quakenet.user']} #{@config['quakenet.auth']}"
       end
 
-      if(@config["JOIN_CHANNELS"])
-        @config["JOIN_CHANNELS"].split(", ").each {|c|
+      if(@config['irc.join_channels'])
+        @config['irc.join_channels'].split(", ").each {|c|
           puts "autojoining channel #{c}"
           if(c =~ /^(\S+)\s+(\S+)$/i)
             join $1, $2
@@ -225,8 +225,8 @@ class IrcBot
       m = TopicMessage.new(self, data["SOURCE"], data["CHANNEL"], timestamp, data["TOPIC"])
 
       ontopic(m)
-      @plugins.delegate("topic", m)
       @plugins.delegate("listen", m)
+      @plugins.delegate("topic", m)
     }
     @client["TOPIC"] = @client["TOPICINFO"] = proc {|data|
       channel = data["CHANNEL"]
@@ -258,10 +258,10 @@ class IrcBot
     begin
       @socket.connect
       rescue => e
-      raise "failed to connect to IRC server at #{@config['SERVER']} #{@config['PORT']}: " + e
+      raise "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
-    @socket.puts "PASS " + @server_password if @server_password
-    @socket.puts "NICK #{@nick}\nUSER #{@config['USER']} 4 #{@config['SERVER']} :Ruby bot. (c) Tom Gilbert"
+    @socket.puts "PASS " + @config['server.password'] if @config['server.password']
+    @socket.puts "NICK #{@nick}\nUSER #{@config['server.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
   end
 
   # begin event handling loop
@@ -563,8 +563,8 @@ class IrcBot
           join 0 if(@auth.allow?("join", m.source, m.replyto))
         when (/^save$/i)
           if(@auth.allow?("config", m.source, m.replyto))
-            okay m.replyto
             save
+            m.okay
           end
         when (/^nick\s+(\S+)$/i)
           nickchg($1) if(@auth.allow?("nick", m.source, m.replyto))
@@ -580,55 +580,55 @@ class IrcBot
           say m.replyto, "pong"
         when (/^rescan$/i)
           if(@auth.allow?("config", m.source, m.replyto))
-            okay m.replyto
+            m.okay
             rescan
           end
         when (/^quiet$/i)
           if(auth.allow?("talk", m.source, m.replyto))
-            say m.replyto, @lang.get("okay")
+            m.okay
             @channels.each_value {|c| c.quiet = true }
           end
         when (/^quiet in (\S+)$/i)
           where = $1
           if(auth.allow?("talk", m.source, m.replyto))
-            say m.replyto, @lang.get("okay")
+            m.okay
             where.gsub!(/^here$/, m.target) if m.public?
             @channels[where].quiet = true if(@channels.has_key?(where))
           end
         when (/^talk$/i)
           if(auth.allow?("talk", m.source, m.replyto))
             @channels.each_value {|c| c.quiet = false }
-            okay m.replyto
+            m.okay
           end
         when (/^talk in (\S+)$/i)
           where = $1
           if(auth.allow?("talk", m.source, m.replyto))
             where.gsub!(/^here$/, m.target) if m.public?
             @channels[where].quiet = false if(@channels.has_key?(where))
-            okay m.replyto
+            m.okay
           end
-        # TODO break this out into an options module
+        # TODO break this out into a config module
         when (/^options get sendq_delay$/i)
           if auth.allow?("config", m.source, m.replyto)
-            m.reply "options->sendq_delay = #{@socket.get_sendq}"
+            m.reply "options->sendq_delay = #{@socket.sendq_delay}"
           end
         when (/^options get sendq_burst$/i)
           if auth.allow?("config", m.source, m.replyto)
-            m.reply "options->sendq_burst = #{@socket.get_maxburst}"
+            m.reply "options->sendq_burst = #{@socket.sendq_burst}"
           end
         when (/^options set sendq_burst (.*)$/i)
           num = $1.to_i
           if auth.allow?("config", m.source, m.replyto)
-            @socket.set_maxburst(num)
-            @config["SENDQ_BURST"] = num
-            okay m.replyto
+            @socket.sendq_burst = num
+            @config['irc.sendq_burst'] = num
+            m.okay
           end
         when (/^options set sendq_delay (.*)$/i)
           freq = $1.to_f
           if auth.allow?("config", m.source, m.replyto)
-            @socket.set_sendq(freq)
-            @config["SENDQ_DELAY"] = freq
-            okay m.replyto
+            @socket.sendq_delay = freq
+            @config['irc.sendq_delay'] = freq
+            m.okay
           end
         when (/^status$/i)
           m.reply status if auth.allow?("status", m.source, m.replyto)
@@ -735,7 +735,7 @@ class IrcBot
     @channels[m.channel].topic.timestamp = m.timestamp if !m.timestamp.nil?
     @channels[m.channel].topic.by = m.source if !m.source.nil?
 
-	puts @channels[m.channel].topic
+	  debug "topic of channel #{m.channel} is now #{@channels[m.channel].topic}"
   end
 
   # delegate a privmsg to auth, keyword or plugin handlers

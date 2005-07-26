@@ -1,8 +1,50 @@
 module Irc
+  require 'rbot/messagemapper'
 
   # base class for all rbot plugins
   # certain methods will be called if they are provided, if you define one of
   # the following methods, it will be called as appropriate:
+  #
+  # map(template, options)::
+  #    map is the new, cleaner way to respond to specific message formats
+  #    without littering your plugin code with regexps
+  #    examples:
+  #      plugin.map 'karmastats', :action => 'karma_stats'
+  #
+  #      # while in the plugin...
+  #      def karma_stats(m, params)
+  #        m.reply "..."
+  #      end
+  #      
+  #      # the default action is the first component
+  #      plugin.map 'karma'
+  #
+  #      # attributes can be pulled out of the match string
+  #      plugin.map 'karma for :key'
+  #      plugin.map 'karma :key'
+  #
+  #      # while in the plugin...
+  #      def karma(m, params)
+  #        item = params[:key]
+  #        m.reply 'karma for #{item}'
+  #      end
+  #      
+  #      # you can setup defaults, to make parameters optional
+  #      plugin.map 'karma :key', :defaults => {:key => 'defaultvalue'}
+  #      
+  #      # the default auth check is also against the first component
+  #      # but that can be changed
+  #      plugin.map 'karmastats', :auth => 'karma'
+  #
+  #      # maps can be restricted to public or private message:
+  #      plugin.map 'karmastats', :private false,
+  #      plugin.map 'karmastats', :public false,
+  #    end
+  #
+  #    To activate your maps, you simply register them
+  #    plugin.register_maps
+  #    This also sets the privmsg handler to use the map lookups for
+  #    handling messages. You can still use listen(), kick() etc methods
   # 
   # listen(UserMessage)::
   #                        Called for all messages of any type. To
@@ -43,12 +85,26 @@ module Irc
   #                        plugin reload or bot quit - close any open
   #                        files/connections or flush caches here
   class Plugin
+    attr_reader :bot   # the associated bot
     # initialise your plugin. Always call super if you override this method,
     # as important variables are set up for you
     def initialize
       @bot = Plugins.bot
       @names = Array.new
+      @handler = MessageMapper.new(self)
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
+    end
+
+    def map(*args)
+      @handler.map(*args)
+      # register this map
+      name = @handler.last.items[0]
+      self.register name
+      unless self.respond_to?('privmsg')
+        def self.privmsg(m)
+          @handler.handle(m)
+        end
+      end
     end
 
     # return an identifier for this plugin, defaults to a list of the message
@@ -70,15 +126,17 @@ module Irc
     # this can be called multiple times for a plugin to handle multiple
     # message prefixes
     def register(name)
+      return if Plugins.plugins.has_key?(name)
       Plugins.plugins[name] = self
       @names << name
     end
 
-    # is this plugin listening to all messages?
-    def listen?
-      @listen
+    # default usage method provided as a utility for simple plugins. The
+    # MessageMapper uses 'usage' as its default fallback method.
+    def usage(m, params)
+      m.reply "incorrect usage, ask for help using '#{@bot.nick}: help #{m.plugin}'"
     end
-    
+
   end
 
   # class to manage multiple plugins and delegate messages to them for

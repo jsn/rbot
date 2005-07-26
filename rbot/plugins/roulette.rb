@@ -30,7 +30,7 @@ class RoulettePlugin < Plugin
     elsif m.params == "clearstats"
       if @bot.auth.allow?("config", m.source, m.replyto)
         @registry.clear
-        @bot.okay m.replyto
+        m.okay
       end
       return
     elsif m.params

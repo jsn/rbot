@@ -38,23 +38,23 @@ class NickServPlugin < Plugin
       nick = $1
       passwd = $2
       @registry[nick] = passwd
-      @bot.okay m.replyto
+      m.okay
     when (/^register$/)
       passwd = genpasswd
       @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
       @registry[@bot.nick] = passwd
-      @bot.okay m.replyto
+      m.okay
     when (/^register\s*(\S*)\s*(.*)$/)
       passwd = $1
       email = $2
       @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd + " " + email
       @registry[@bot.nick] = passwd
-      @bot.okay m.replyto
+      m.okay
     when (/^register\s*(.*)\s*$/)
       passwd = $1
       @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
       @registry[@bot.nick] = passwd
-      @bot.okay m.replyto
+      m.okay
     when (/^listnicks$/)
       if @bot.auth.allow?("config", m.source, m.replyto)
         if @registry.length > 0
@@ -68,7 +68,7 @@ class NickServPlugin < Plugin
     when (/^identify$/)
       if @registry.has_key?(@bot.nick)
         @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY " + @registry[@bot.nick]
-        @bot.okay m.replyto
+        m.okay
       else
         m.reply "I dunno the nickserv password for the nickname #{@bot.nick} :("
       end

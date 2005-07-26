@@ -1,3 +1,48 @@
+Tue Jul 26 14:41:34 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Prevent multiple plugin registrations of the same name
+	* reworking the config system to use yaml for persistence
+	* reworking the config system key names
+	* on first startup, the bot will prompt for the essential startup config
+	* new config module for configuring the bot at runtime
+	* new config module includes new configurables, for example changing the
+   	bot's language at runtime.
+	* various other fixes
+	* New way of mapping plugins to strings, using maps. These may be
+	familiar to rails users. This is to reduce the amount of regexps plugins
+	currently need to do to parse arguments. The old method (privmsg) is still
+	supported, of course. Example plugin now:
+	  def MyPlugin < Plugin
+		  def foo(m, params)
+			  m.reply "bar"
+			end
+
+			def complexfoo(m, params)
+			  m.reply "qux! (#{params[:bar]} #{params[:baz]})"
+			end
+		end
+		plugin = MyPlugin.new
+		# simple map
+		plugin.map 'foo'
+
+    # this will match "rbot: foo somestring otherstring" and pass the
+		# parameters as a hash using the names in the map.
+		plugin.map 'foo :bar :baz', :action => 'complexfoo'
+		# this means :foo is an optional parameter
+		plugin.map 'foo :foo', :defaults => {:foo => 'bar'}
+    # you can also gobble up into an array
+		plugin.map 'foo *bar' # params[:bar] will be an array of string elements
+    # and you can validate, here the first param must be a number
+		plugin.map 'foo :bar', :requirements => {:foo => /^\d+$/}
+
+
+Sat Jul 23 01:39:08 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Changed BotConfig to use yaml storage, method syntax instead of hash for
+	get/set, to allow more flexibility and encapsulation
+	* Added convenience method Message.okay (m.okay is the same as the
+	old-style @bot.okay m.replyto)
+
 Wed Jul 20 23:30:01 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Move some core plugins to use the new httputil

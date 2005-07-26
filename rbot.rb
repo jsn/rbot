@@ -49,6 +49,10 @@ opts.each {|opt, arg|
 botclass = ARGV.shift
 botclass = "rbotconf" unless(botclass);
 
+unless FileTest.directory? botclass
+  # TODO copy in samples/templates from install directory
+end
+
 if(bot = Irc::IrcBot.new(botclass))
   if($opts["help"])
     puts bot.help($opts["help"])

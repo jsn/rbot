@@ -38,7 +38,7 @@ class AutoOP < Plugin
             @registry[ma[1]] = channels.split(/,\s*/).collect { |x|
                 x.strip
             }
-            @bot.okay m.replyto
+            m.okay
         else
             m.reply @bot.lang.get('dunno')
         end
@@ -48,7 +48,7 @@ class AutoOP < Plugin
        if(!@registry.delete(params))
          m.reply @bot.lang.get('dunno')
        else
-         @bot.okay m.replyto
+         m.okay
        end
     end
 

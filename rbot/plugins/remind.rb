@@ -145,7 +145,7 @@ class RemindPlugin < Plugin
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
-    @bot.okay m.replyto
+    m.okay
   end
 end
 plugin = RemindPlugin.new

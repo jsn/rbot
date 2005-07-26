@@ -130,25 +130,25 @@ class LartPlugin < Plugin
 	#{{{
 	def handle_addlart(m)
 		@larts << m.params
-		@bot.okay m.replyto
+		m.okay
 	end
 	#}}}
 	#{{{
 	def handle_rmlart(m)
 		@larts.delete m.params
-		@bot.okay m.replyto
+		m.okay
 	end
 	#}}}
 	#{{{
 	def handle_addpraise(m)
 		@praises << m.params
-		@bot.okay m.replyto
+		m.okay
 	end
 	#}}}
 	#{{{
 	def handle_rmpraise(m)
 		@praises.delete m.params
-		@bot.okay m.replyto
+		m.okay
 	end
 	#}}}
 	#}}}

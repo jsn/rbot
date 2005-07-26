@@ -2,13 +2,14 @@ class CalPlugin < Plugin
   def help(plugin, topic="")
     "cal [options] => show current calendar [unix cal options]"
   end
-  def privmsg(m)
-    if m.params && m.params.length > 0
-      m.reply Utils.safe_exec("cal", m.params) 
+  def cal(m, params)
+    if params.has_key?(:month)
+      m.reply Utils.safe_exec("cal", params[:month], params[:year])
     else
       m.reply Utils.safe_exec("cal")
     end
   end
 end
 plugin = CalPlugin.new
-plugin.register("cal")
+plugin.map 'cal :month :year', :requirements => {:month => /^\d+$/, :year => /^\d+$/}
+plugin.map 'cal'

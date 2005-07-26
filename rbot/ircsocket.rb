@@ -8,29 +8,37 @@ module Irc
   class IrcSocket
     # total number of lines sent to the irc server
     attr_reader :lines_sent
+    
     # total number of lines received from the irc server
     attr_reader :lines_received
+    
+    # delay between lines sent
+    attr_reader :sendq_delay
+    
+    # max lines to burst
+    attr_reader :sendq_burst
+    
     # server:: server to connect to
     # port::   IRCd port
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
-    def initialize(server, port, host, sendfreq=2, maxburst=4)
+    def initialize(server, port, host, sendq_delay=2, sendq_burst=4)
       @server = server.dup
       @port = port.to_i
       @host = host
       @lines_sent = 0
       @lines_received = 0
-      if sendfreq
-        @sendfreq = sendfreq.to_f
+      if sendq_delay
+        @sendq_delay = sendq_delay.to_f
       else
-        @sendfreq = 2
+        @sendq_delay = 2
       end
-      @last_send = Time.new - @sendfreq
+      @last_send = Time.new - @sendq_delay
       @burst = 0
-      if maxburst
-        @maxburst = maxburst.to_i
+      if sendq_burst
+        @sendq_burst = sendq_burst.to_i
       else
-        @maxburst = 4
+        @sendq_burst = 4
       end
     end
     
@@ -52,15 +60,15 @@ module Irc
       @qthread = false
       @qmutex = Mutex.new
       @sendq = Array.new
-      if (@sendfreq > 0)
+      if (@sendq_delay > 0)
         @qthread = Thread.new { spooler }
       end
     end
 
-    def set_sendq(newfreq)
+    def sendq_delay=(newfreq)
       debug "changing sendq frequency to #{newfreq}"
       @qmutex.synchronize do
-        @sendfreq = newfreq
+        @sendq_delay = newfreq
         if newfreq == 0 && @qthread
           clearq
           Thread.kill(@qthread)
@@ -71,20 +79,12 @@ module Irc
       end
     end
 
-    def set_maxburst(newburst)
+    def sendq_burst=(newburst)
       @qmutex.synchronize do
-        @maxburst = newburst
+        @sendq_burst = newburst
       end
     end
 
-    def get_maxburst
-      return @maxburst
-    end
-
-    def get_sendq
-      return @sendfreq
-    end
-    
     # used to send lines to the remote IRCd
     # message: IRC message to send
     def puts(message)
@@ -106,7 +106,7 @@ module Irc
     end
 
     def queue(msg)
-      if @sendfreq > 0
+      if @sendq_delay > 0
         @qmutex.synchronize do
           # debug "QUEUEING: #{msg}"
           @sendq.push msg
@@ -120,7 +120,7 @@ module Irc
     def spooler
       while true
         spool
-        sleep 0.1
+        sleep 0.2
       end
     end
 
@@ -128,17 +128,17 @@ module Irc
     def spool
       unless @sendq.empty?
         now = Time.new
-        if (now >= (@last_send + @sendfreq))
-          # reset burst counter after @sendfreq has passed
+        if (now >= (@last_send + @sendq_delay))
+          # reset burst counter after @sendq_delay has passed
           @burst = 0
           debug "in spool, resetting @burst"
-        elsif (@burst >= @maxburst)
+        elsif (@burst >= @sendq_burst)
           # nope. can't send anything
           return
         end
         @qmutex.synchronize do
-          debug "(can send #{@maxburst - @burst} lines, there are #{@sendq.length} to send)"
-          (@maxburst - @burst).times do
+          debug "(can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send)"
+          (@sendq_burst - @burst).times do
             break if @sendq.empty?
             puts_critical(@sendq.shift)
           end

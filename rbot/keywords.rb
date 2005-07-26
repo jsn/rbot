@@ -415,9 +415,9 @@ module Irc
         end
       else
         # in channel message, not to me
-        if(m.message =~ /^'(.*)$/ || (@bot.config["NO_KEYWORD_ADDRESS"] == "true" && m.message =~ /^(.*\S)\s*\?\s*$/))
+        if(m.message =~ /^'(.*)$/ || (!@bot.config["keyword.noaddress"] && m.message =~ /^(.*\S)\s*\?\s*$/))
           keyword m, $1, false if(@bot.auth.allow?("keyword", m.source))
-        elsif(@bot.config["KEYWORD_LISTEN"] == "true" && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/))
+        elsif(@bot.config["keyword.listen"] == true && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/))
           # TODO MUCH more selective on what's allowed here
           keyword_command(m.sourcenick, m.replyto, $1, $2, $3, true) if(@bot.auth.allow?("keycmd", m.source))
         end

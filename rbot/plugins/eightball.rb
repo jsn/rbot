@@ -8,11 +8,12 @@ class EightBallPlugin < Plugin
   def help(plugin, topic="")
     "magic 8-ball ruby bot module written by novex for nvinfo on #dumber@quakenet, usage:<botname> 8ball will i ever beat this cancer?"
   end
-  def privmsg(m)
+  def eightball(m, params)
     answers = @answers[rand(@answers.length)]
     action = "shakes the magic 8-ball... #{answers}"
     @bot.action m.replyto, action
   end
 end
 plugin = EightBallPlugin.new
-plugin.register("8ball")
+plugin.map '8ball', :action => 'usage'
+plugin.map '8ball *params', :action => 'eightball'
