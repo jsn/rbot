@@ -102,8 +102,18 @@ module Irc
           options[item.to_s.sub(/^\*/,"").intern] = value
         elsif item.kind_of? Symbol
           value = components.shift || @defaults[item]
-          return nil, requirements_for(item) unless passes_requirements?(item, value)
-          options[item] = value
+          if passes_requirements?(item, value)
+            options[item] = value
+          else
+            if @defaults.has_key?(item)
+              debug "item #{item} doesn't pass reqs but has a default of #{@defaults[item]}"
+              options[item] = @defaults[item].clone
+              # push the test-failed component back on the stack
+              components.unshift value
+            else
+              return nil, requirements_for(item)
+            end
+          end
         else
           return nil, "No value available for component #{item.inspect}" if components.empty?
           component = components.shift
@@ -123,7 +133,7 @@ module Irc
     def inspect
       when_str = @requirements.empty? ? "" : " when #{@requirements.inspect}"
       default_str = @defaults.empty? ? "" : " || #{@defaults.inspect}"
-      "<#{self.class.to_s} #{@items.collect{|c| c.kind_of?(String) ? c : c.inspect}.join('/').inspect}#{default_str}#{when_str}>"
+      "<#{self.class.to_s} #{@items.collect{|c| c.kind_of?(String) ? c : c.inspect}.join(' ').inspect}#{default_str}#{when_str}>"
     end
 
     # Verify that the given value passes this route's requirements
