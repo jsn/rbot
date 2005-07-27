@@ -143,7 +143,7 @@ module Irc
           :prompt => "Language",
           :key => "core.language",
           :type => :enum,
-          :items => Dir.new(@bot.datadir + "/languages").collect {|f|
+          :items => Dir.new(CONFIG::DATADIR + "/languages").collect {|f|
             f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
           }.compact
         },

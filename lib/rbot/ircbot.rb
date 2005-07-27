@@ -20,6 +20,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require 'thread'
+require 'etc'
+require 'fileutils'
 
 require 'rbot/rfc2812'
 require 'rbot/keywords'
@@ -35,6 +37,7 @@ require 'rbot/language'
 require 'rbot/dbhash'
 require 'rbot/registry'
 require 'rbot/httputil'
+require 'rbot/rbotconfig'
 
 module Irc
 
@@ -77,12 +80,26 @@ class IrcBot
 
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
-    @botclass = botclass.gsub(/\/$/, "")
-    @startup_time = Time.new
+    unless Config::DATA_DIR && FileTest.directory? Config::DATA_DIR
+      puts "no data directory '#{Config::DATA_DIR}' found, did you run install.rb?"
+      exit 2
+    end
     
-    Dir.mkdir("#{botclass}") if(!File.exist?("#{botclass}"))
+    botclass = "/home/#{Etc.getlogin}/.rbot" unless botclass
+    @botclass = botclass.gsub(/\/$/, "")
+
+    unless FileTest.directory? botclass
+      puts "no #{botclass} directory found, creating from templates.."
+      if FileTest.exist? botclass
+        puts "Error: file #{botclass} exists but isn't a directory"
+        exit 2
+      end
+      FileUtils.cp_r Config::DATA_DIR+'/templates', botclass
+    end
+    
     Dir.mkdir("#{botclass}/logs") if(!File.exist?("#{botclass}/logs"))
 
+    @startup_time = Time.new
     @config = Irc::BotConfig.new(self)
     @timer = Timer::Timer.new
     @registry = BotRegistry.new self

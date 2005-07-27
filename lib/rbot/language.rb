@@ -1,11 +1,10 @@
 module Irc
 
   class Language
-    def initialize(bot, language, file="")
-      @bot = bot
+    def initialize(language, file="")
       @language = language
       if file.empty?
-        file = bot.datadir + "/languages/#{@language}.lang"
+        file = Config::DATADIR + "/languages/#{@language}.lang"
       end
       unless(FileTest.exist?(file))
         raise "no such language: #{@language} (no such file #{file})"
