@@ -26,6 +26,8 @@ $VERBOSE=true
 require 'etc'
 require 'getoptlong'
 require 'rbot/ircbot'
+require 'fileutils'
+require 'rbconfig'
 
 $debug = true
 $version="0.9.8"
@@ -47,22 +49,12 @@ opts.each {|opt, arg|
   $opts[opt.sub(/^-+/, "")] = arg
 }
 
-botclass = ARGV.shift
-user = Etc.getlogin
-botclass = "/home/#{user}/.rbot" unless(botclass);
-
-unless FileTest.directory? botclass
-  # TODO copy in samples/templates from install directory
-  puts "no #{botclass} directory found, creating from templates.."
-  # copy DATA/rbot/templates to botclass
-
-end
-
-if(bot = Irc::IrcBot.new(botclass))
+if(bot = Irc::IrcBot.new(ARGV.shift))
   if($opts["help"])
+    # query bot help from the commandline
     puts bot.help($opts["help"])
   else
-    # run the bot
+    # just run the bot
     bot.mainloop
   end
 end
