@@ -61,13 +61,17 @@ if ($opts["version"])
   exit 0
 end
 
+if ($opts["help"])
+  puts "usage: rbot [options] [config directory]"
+  puts "  -h, --help         this message"
+  puts "  -v, --version      version information"
+  puts "  -d, --debug        enable debug messages"
+  puts "config directory defaults to ~/.rbot"
+  exit 0
+end
+
 if(bot = Irc::IrcBot.new(ARGV.shift))
-  if($opts["help"])
-    # query bot help from the commandline
-    puts bot.help($opts["help"])
-  else
-    # just run the bot
-    bot.mainloop
-  end
+  # just run the bot
+  bot.mainloop
 end
 
