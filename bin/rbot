@@ -25,10 +25,16 @@ $VERBOSE=true
 
 require 'etc'
 require 'getoptlong'
-require 'rbot/ircbot'
 require 'fileutils'
 require 'rbconfig'
 
+begin
+  require 'rbot/ircbot'
+rescue LoadError => e
+  puts "Error: couldn't find the rbot/ircbot module for loading\n - did you install rbot using install.rb?"
+  exit 2
+end
+  
 $debug = true
 $version="0.9.8"
 $opts = Hash.new
@@ -40,14 +46,20 @@ def debug(message=nil)
 end
 
 opts = GetoptLong.new(
-  [ "--debug", "-d", GetoptLong::NO_ARGUMENT ],
-  [ "--help",  "-h", GetoptLong::OPTIONAL_ARGUMENT ]
+  ["--debug", "-d", GetoptLong::NO_ARGUMENT],
+  ["--help",  "-h", GetoptLong::OPTIONAL_ARGUMENT],
+  ["--version", "-v", GetoptLong::NO_ARGUMENT]
 )
 
 opts.each {|opt, arg|
   $debug = true if(opt == "--debug")
   $opts[opt.sub(/^-+/, "")] = arg
 }
+
+if ($opts["version"])
+  puts "rbot #{$version}"
+  exit 0
+end
 
 if(bot = Irc::IrcBot.new(ARGV.shift))
   if($opts["help"])
