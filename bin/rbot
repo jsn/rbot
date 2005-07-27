@@ -23,6 +23,7 @@
 
 $VERBOSE=true
 
+require 'etc'
 require 'getoptlong'
 require 'rbot/ircbot'
 
@@ -47,10 +48,14 @@ opts.each {|opt, arg|
 }
 
 botclass = ARGV.shift
-botclass = "rbotconf" unless(botclass);
+user = Etc.getlogin
+botclass = "/home/#{user}/.rbot" unless(botclass);
 
 unless FileTest.directory? botclass
   # TODO copy in samples/templates from install directory
+  puts "no #{botclass} directory found, creating from templates.."
+  # copy DATA/rbot/templates to botclass
+
 end
 
 if(bot = Irc::IrcBot.new(botclass))
