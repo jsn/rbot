@@ -27,7 +27,7 @@ require 'getoptlong'
 require 'rbot/ircbot'
 
 $debug = true
-$version="0.9.7"
+$version="0.9.8"
 $opts = Hash.new
 
 # print +message+ if debugging is enabled
