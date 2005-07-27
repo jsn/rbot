@@ -170,7 +170,7 @@ module Irc
     # load plugins from pre-assigned list of directories
     def scan
       dirs = Array.new
-      dirs << CONFIG::DATADIR + "/plugins"
+      dirs << Config::DATADIR + "/plugins"
       dirs += @dirs
       dirs.each {|dir|
         if(FileTest.directory?(dir))

@@ -2,7 +2,7 @@
 File.open('rbotconfig.rb', "w") {|f|
   f.puts "module Irc"
   f.puts "  module Config"
-  f.puts "    DATADIR = '#{config('datadir')}'"
+  f.puts "    DATADIR = '#{config('datadir')}/rbot'"
   f.puts "  end"
   f.puts "end"
 }

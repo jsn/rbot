@@ -80,8 +80,8 @@ class IrcBot
 
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
-    unless Config::DATA_DIR && FileTest.directory? Config::DATA_DIR
-      puts "no data directory '#{Config::DATA_DIR}' found, did you run install.rb?"
+    unless FileTest.directory? Config::DATADIR
+      puts "no data directory '#{Config::DATADIR}' found, did you run install.rb?"
       exit 2
     end
     
@@ -94,7 +94,7 @@ class IrcBot
         puts "Error: file #{botclass} exists but isn't a directory"
         exit 2
       end
-      FileUtils.cp_r Config::DATA_DIR+'/templates', botclass
+      FileUtils.cp_r Config::DATADIR+'/templates', botclass
     end
     
     Dir.mkdir("#{botclass}/logs") if(!File.exist?("#{botclass}/logs"))
