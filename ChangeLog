@@ -1,3 +1,14 @@
+Thu Jul 28 23:45:26 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Reworked the Timer module. The Timer now has a smart thread manager to
+	start/stop the tick() thread. This means the timer isn't called every 0.1
+	seconds to see what needs doing, which is much more efficient
+  * reworked the ircsocket queue mechanism to use a Timer
+	* reworked the nickserv plugin to use maps
+	* made server.reconnect_wait configurable
+	* added Class tracing mechanism to bin/rbot, use --trace Classname for
+	debugging
+
 Tue Jul 26 14:41:34 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Prevent multiple plugin registrations of the same name

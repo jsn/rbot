@@ -1,6 +1,6 @@
 class CalPlugin < Plugin
   def help(plugin, topic="")
-    "cal [options] => show current calendar [unix cal options]"
+    "cal [month year] => show current calendar [optionally specify month and year]"
   end
   def cal(m, params)
     if params.has_key?(:month)

@@ -17,6 +17,15 @@ class NickServPlugin < Plugin
     end
   end
   
+  def genpasswd
+    # generate a random password
+    passwd = ""
+    8.times do
+      passwd += (rand(26) + (rand(2) == 0 ? 65 : 97) ).chr
+    end
+    return passwd
+  end
+
   def initialize
     super
     # this plugin only wants to store strings!
@@ -29,49 +38,34 @@ class NickServPlugin < Plugin
       end
     end
   end
-  
-  def privmsg(m)
-    return unless m.params
-    
-    case m.params
-    when (/^password\s*(\S*)\s*(.*)$/)
-      nick = $1
-      passwd = $2
-      @registry[nick] = passwd
+
+  def password(m, params)
+    @registry[params[:nick]] = params[:passwd]
+    m.okay
+  end
+  def nick_register(m, params)
+    passwd = params[:passwd] ? params[:passwd] : genpasswd
+    message = "REGISTER #{passwd}"
+    message += " #{params[:email]}" if params[:email]
+    @bot.sendmsg "PRIVMSG", "NickServ", message
+    @registry[@bot.nick] = passwd
+    m.okay
+  end
+  def listnicks(m, params)
+    if @registry.length > 0
+      @registry.each {|k,v|
+        @bot.say m.sourcenick, "#{k} => #{v}"
+      }
+    else
+      m.reply "none known"
+    end
+  end
+  def identify(m, params)
+    if @registry.has_key?(@bot.nick)
+      @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY #{@registry[@bot.nick]}"
       m.okay
-    when (/^register$/)
-      passwd = genpasswd
-      @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
-      @registry[@bot.nick] = passwd
-      m.okay
-    when (/^register\s*(\S*)\s*(.*)$/)
-      passwd = $1
-      email = $2
-      @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd + " " + email
-      @registry[@bot.nick] = passwd
-      m.okay
-    when (/^register\s*(.*)\s*$/)
-      passwd = $1
-      @bot.sendmsg "PRIVMSG", "NickServ", "REGISTER " + passwd
-      @registry[@bot.nick] = passwd
-      m.okay
-    when (/^listnicks$/)
-      if @bot.auth.allow?("config", m.source, m.replyto)
-        if @registry.length > 0
-          @registry.each {|k,v|
-            @bot.say m.sourcenick, "#{k} => #{v}"
-          }
-        else
-          m.reply "none known"
-        end
-      end
-    when (/^identify$/)
-      if @registry.has_key?(@bot.nick)
-        @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY " + @registry[@bot.nick]
-        m.okay
-      else
-        m.reply "I dunno the nickserv password for the nickname #{@bot.nick} :("
-      end
+    else
+      m.reply "I dunno the nickserv password for the nickname #{@bot.nick} :("
     end
   end
   
@@ -86,14 +80,10 @@ class NickServPlugin < Plugin
     end
   end
 
-  def genpasswd
-    # generate a random password
-    passwd = ""
-    8.times do
-      passwd += (rand(26) + (rand(2) == 0 ? 65 : 97) ).chr
-    end
-    return passwd
-  end
 end
 plugin = NickServPlugin.new
-plugin.register("nickserv")
+plugin.map 'nickserv password :nick :passwd'
+plugin.map 'nickserv register :passwd :email', :action => 'nick_register',
+           :defaults => {:passwd => false, :email => false}
+plugin.map 'nickserv listnicks'
+plugin.map 'nickserv identify'

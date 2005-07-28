@@ -2,6 +2,7 @@ module Irc
 
   require 'socket'
   require 'thread'
+  require 'rbot/timer'
 
   # wrapped TCPSocket for communication with the server.
   # emulates a subset of TCPSocket functionality
@@ -23,9 +24,14 @@ module Irc
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
     def initialize(server, port, host, sendq_delay=2, sendq_burst=4)
+      @timer = Timer::Timer.new
+      @timer.add(0.2) do
+        spool
+      end
       @server = server.dup
       @port = port.to_i
       @host = host
+      @spooler = false
       @lines_sent = 0
       @lines_received = 0
       if sendq_delay
@@ -60,21 +66,17 @@ module Irc
       @qthread = false
       @qmutex = Mutex.new
       @sendq = Array.new
-      if (@sendq_delay > 0)
-        @qthread = Thread.new { spooler }
-      end
     end
 
     def sendq_delay=(newfreq)
       debug "changing sendq frequency to #{newfreq}"
       @qmutex.synchronize do
         @sendq_delay = newfreq
-        if newfreq == 0 && @qthread
+        if newfreq == 0
           clearq
-          Thread.kill(@qthread)
-          @qthread = false
-        elsif(newfreq != 0 && !@qthread)
-          @qthread = Thread.new { spooler }
+          @timer.stop
+        else
+          @timer.start
         end
       end
     end
@@ -98,9 +100,7 @@ module Irc
     def gets
       reply = @sock.gets
       @lines_received += 1
-      if(reply)
-        reply.strip!
-      end
+      reply.strip! if reply
       debug "RECV: #{reply.inspect}"
       reply
     end
@@ -108,41 +108,40 @@ module Irc
     def queue(msg)
       if @sendq_delay > 0
         @qmutex.synchronize do
-          # debug "QUEUEING: #{msg}"
           @sendq.push msg
         end
+        @timer.start
       else
         # just send it if queueing is disabled
         self.puts(msg)
       end
     end
 
-    def spooler
-      while true
-        spool
-        sleep 0.2
-      end
-    end
-
     # pop a message off the queue, send it
     def spool
-      unless @sendq.empty?
-        now = Time.new
-        if (now >= (@last_send + @sendq_delay))
-          # reset burst counter after @sendq_delay has passed
-          @burst = 0
-          debug "in spool, resetting @burst"
-        elsif (@burst >= @sendq_burst)
-          # nope. can't send anything
-          return
+      if @sendq.empty?
+        @timer.stop
+        return
+      end
+      now = Time.new
+      if (now >= (@last_send + @sendq_delay))
+        # reset burst counter after @sendq_delay has passed
+        @burst = 0
+        debug "in spool, resetting @burst"
+      elsif (@burst >= @sendq_burst)
+        # nope. can't send anything, come back to us next tick...
+        @timer.start
+        return
+      end
+      @qmutex.synchronize do
+        debug "(can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send)"
+        (@sendq_burst - @burst).times do
+          break if @sendq.empty?
+          puts_critical(@sendq.shift)
         end
-        @qmutex.synchronize do
-          debug "(can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send)"
-          (@sendq_burst - @burst).times do
-            break if @sendq.empty?
-            puts_critical(@sendq.shift)
-          end
-        end
+      end
+      if @sendq.empty?
+        @timer.stop
       end
     end
 
@@ -160,7 +159,7 @@ module Irc
     end
 
     # Wraps Kernel.select on the socket
-    def select(timeout)
+    def select(timeout=nil)
       Kernel.select([@sock], nil, nil, timeout)
     end
 

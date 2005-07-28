@@ -4,11 +4,11 @@ module Timer
   class Action
     
     # when this action is due next (updated by tick())
-    attr_accessor :in
+    attr_reader :in
     
     # is this action blocked? if so it won't be run
     attr_accessor :blocked
-    
+
     # period:: how often (seconds) to run the action
     # data::   optional data to pass to the proc
     # once::   optional, if true, this action will be run once then removed
@@ -22,11 +22,29 @@ module Timer
       @func = func
       @data = data
       @once = once
+      @last_tick = Time.new
+    end
+
+    def tick
+      diff = Time.new - @last_tick
+      @in -= diff
+      @last_tick = Time.new
+    end
+
+    def inspect 
+      "#<#{self.class}:#{@period}s:#{@once ? 'once' : 'repeat'}>"
+    end
+
+    def due?
+      @in <= 0
     end
 
     # run the action by calling its proc
     def run
       @in += @period
+      # really short duration timers can overrun and leave @in negative,
+      # for these we set @in to @period
+      @in = @period if @in <= 0
       if(@data)
         @func.call(@data)
       else
@@ -39,14 +57,19 @@ module Timer
   # timer handler, manage multiple Action objects, calling them when required.
   # The timer must be ticked by whatever controls it, i.e. regular calls to
   # tick() at whatever granularity suits your application's needs.
-  # Alternatively you can call run(), and the timer will tick itself, but this
-  # blocks so you gotta do it in a thread (remember ruby's threads block on
-  # syscalls so that can suck).
+  # 
+  # Alternatively you can call run(), and the timer will spawn a thread and
+  # tick itself, intelligently shutting down the thread if there are no
+  # pending actions.
   class Timer
-    def initialize
-      @timers = Array.new
+    def initialize(granularity = 0.1)
+      @granularity = granularity
+      @timers = Hash.new
       @handle = 0
       @lasttime = 0
+      @should_be_running = false
+      @thread = false
+      @next_action_time = 0
     end
     
     # period:: how often (seconds) to run the action
@@ -57,10 +80,11 @@ module Timer
     def add(period, data=nil, &func)
       @handle += 1
       @timers[@handle] = Action.new(period, data, &func)
+      start_on_add
       return @handle
     end
 
-    # period:: how often (seconds) to run the action
+    # period:: how long (seconds) until the action is run
     # data::   optional data to pass to the action's proc
     # func::   associate a block with add() to perform the action
     # 
@@ -68,12 +92,13 @@ module Timer
     def add_once(period, data=nil, &func)
       @handle += 1
       @timers[@handle] = Action.new(period, data, true, &func)
+      start_on_add
       return @handle
     end
 
     # remove action with handle +handle+ from the timer
     def remove(handle)
-      @timers.delete_at(handle)
+      @timers.delete(handle)
     end
     
     # block action with handle +handle+
@@ -85,39 +110,92 @@ module Timer
     def unblock(handle)
       @timers[handle].blocked = false
     end
-    
+
     # you can call this when you know you're idle, or you can split off a
     # thread and call the run() method to do it for you.
     def tick 
-      if(@lasttime != 0)
-        diff = (Time.now - @lasttime).to_f
-        @lasttime = Time.now
-        @timers.compact.each { |timer|
-          timer.in = timer.in - diff
-        }
-        @timers.compact.each { |timer|
-          if (!timer.blocked)
-            if(timer.in <= 0)
-              if(timer.run)
-                # run once
-                @timers.delete(timer)
-              end
-            end
-          end
-        }
-      else
+      if(@lasttime == 0)
         # don't do anything on the first tick
         @lasttime = Time.now
+        return
       end
+      @next_action_time = 0
+      diff = (Time.now - @lasttime).to_f
+      @lasttime = Time.now
+      @timers.each { |key,timer|
+        timer.tick
+        next if timer.blocked
+        if(timer.due?)
+          if(timer.run)
+            # run once
+            @timers.delete(key)
+          end
+        end
+        if @next_action_time == 0 || timer.in < @next_action_time
+          @next_action_time = timer.in
+        end
+      }
     end
 
-    # the timer will tick() itself. this blocks, so run it in a thread, and
-    # watch out for blocking syscalls
+    # for backwards compat - this is a bit primitive
     def run(granularity=0.1)
       while(true)
         sleep(granularity)
         tick
       end
     end
+
+    def running?
+      @thread && @thread.alive?
+    end
+
+    # return the number of seconds until the next action is due, or 0 if
+    # none are outstanding - will only be accurate immediately after a
+    # tick()
+    def next_action_time
+      @next_action_time
+    end
+
+    # start the timer, it spawns a thread to tick the timer, intelligently
+    # shutting down if no events remain and starting again when needed.
+    def start
+      return if running?
+      @should_be_running = true
+      start_thread unless @timers.empty?
+    end
+
+    # stop the timer from ticking
+    def stop
+      @should_be_running = false
+      stop_thread
+    end
+    
+    private
+    
+    def start_on_add
+      if running?
+        stop_thread
+        start_thread
+      elsif @should_be_running
+        start_thread
+      end
+    end
+    
+    def stop_thread
+      return unless running?
+      @thread.kill
+    end
+    
+    def start_thread
+      return if running?
+      @thread = Thread.new do
+        while(true)
+          tick
+          exit if @timers.empty?
+          sleep(@next_action_time)
+        end
+      end
+    end
+
   end
 end

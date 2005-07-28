@@ -185,10 +185,10 @@ module Irc
             
             begin
               plugin_string = IO.readlines(@tmpfilename).join("")
-              puts "loading module: #{@tmpfilename}"
+              debug "loading module: #{@tmpfilename}"
               plugin_module.module_eval(plugin_string)
             rescue StandardError, NameError, LoadError, SyntaxError => err
-              puts "plugin #{@tmpfilename} load failed: " + err
+              puts "warning: plugin #{@tmpfilename} load failed: " + err
               puts err.backtrace.join("\n")
             end
           }

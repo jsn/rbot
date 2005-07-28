@@ -22,6 +22,7 @@ module Irc
       @config['server.port'] = 6667
       @config['server.password'] = false
       @config['server.bindhost'] = false
+      @config['server.reconnect_wait'] = 5
       @config['irc.nick'] = "rbot"
       @config['irc.user'] = "rbot"
       @config['irc.join_channels'] = ""

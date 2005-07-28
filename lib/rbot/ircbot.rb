@@ -81,7 +81,7 @@ class IrcBot
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
     unless FileTest.directory? Config::DATADIR
-      puts "no data directory '#{Config::DATADIR}' found, did you run install.rb?"
+      puts "data directory '#{Config::DATADIR}' not found, did you install.rb?"
       exit 2
     end
     
@@ -97,11 +97,11 @@ class IrcBot
       FileUtils.cp_r Config::DATADIR+'/templates', botclass
     end
     
-    Dir.mkdir("#{botclass}/logs") if(!File.exist?("#{botclass}/logs"))
+    Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
 
     @startup_time = Time.new
     @config = Irc::BotConfig.new(self)
-    @timer = Timer::Timer.new
+    @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
     @channels = Hash.new
@@ -111,6 +111,8 @@ class IrcBot
     @lang = Irc::Language.new(@config['core.language'])
     @keywords = Irc::Keywords.new(self)
     @auth = Irc::IrcAuth.new(self)
+
+    Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Irc::Plugins.new(self, ["#{botclass}/plugins"])
 
     @socket = Irc::IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
@@ -203,7 +205,7 @@ class IrcBot
 
       if(@config['irc.join_channels'])
         @config['irc.join_channels'].split(", ").each {|c|
-          puts "autojoining channel #{c}"
+          debug "autojoining channel #{c}"
           if(c =~ /^(\S+)\s+(\S+)$/i)
             join $1, $2
           else
@@ -278,24 +280,21 @@ class IrcBot
       raise "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
     @socket.puts "PASS " + @config['server.password'] if @config['server.password']
-    @socket.puts "NICK #{@nick}\nUSER #{@config['server.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
+    @socket.puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
   end
 
   # begin event handling loop
   def mainloop
-    socket_timeout = 0.2
-    reconnect_wait = 5
-    
     while true
       connect
+      @timer.start
       
       begin
         while true
-          if @socket.select socket_timeout
+          if @socket.select
             break unless reply = @socket.gets
             @client.process reply
           end
-          @timer.tick
         end
       rescue => e
         puts "connection closed: #{e}"
@@ -307,7 +306,7 @@ class IrcBot
       @socket.clearq
       
       puts "waiting to reconnect"
-      sleep reconnect_wait
+      sleep @config['server.reconnect_wait']
     end
   end
   
