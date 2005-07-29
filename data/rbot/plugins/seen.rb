@@ -1,6 +1,23 @@
 Saw = Struct.new("Saw", :nick, :time, :type, :where, :message)
 
 class SeenPlugin < Plugin
+  # turn a number of seconds into a human readable string, e.g
+  # 2 days, 3 hours, 18 minutes, 10 seconds
+  def secs_to_string(secs)
+    ret = ""
+    days = (secs / (60 * 60 * 24)).to_i
+    secs = secs % (60 * 60 * 24)
+    hours = (secs / (60 * 60)).to_i
+    secs = (secs % (60 * 60))
+    mins = (secs / 60).to_i
+    secs = (secs % 60).to_i
+    ret += "#{days} days, " if days > 0
+    ret += "#{hours} hours, " if hours > 0 || days > 0
+    ret += "#{mins} minutes and " if mins > 0 || hours > 0 || days > 0
+    ret += "#{secs} seconds"
+    return ret
+  end
+
   def help(plugin, topic="")
     "seen <nick> => have you seen, or when did you last see <nick>"
   end
@@ -23,7 +40,7 @@ class SeenPlugin < Plugin
   def listen(m)
     # keep database up to date with who last said what
     if m.kind_of?(PrivMessage)
-      return if m.private? || m.address?
+      return if m.private?
       if m.action?
         @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "ACTION", 
                                           m.target, m.message.dup)
@@ -63,7 +80,7 @@ class SeenPlugin < Plugin
     if (ago.to_i == 0)
       ret += "just now, "
     else
-      ret += Utils.secs_to_string(ago) + " ago, "
+      ret += secs_to_string(ago) + " ago, "
     end
 
     case saw.type

@@ -25,17 +25,19 @@ class HttpUtil
     if (ENV['http_proxy'])
       proxy = URI.parse ENV['http_proxy']
     end
-    if (@bot.config["http_proxy"])
+    if (@bot.config["http.proxy"])
       proxy = URI.parse ENV['http_proxy']
     end
 
     # if http_proxy_include or http_proxy_exclude are set, then examine the
     # uri to see if this is a proxied uri
+    # the excludes are a list of regexps, and each regexp is checked against
+    # the server name, and its IP addresses
     if uri
-      if @bot.config["http_proxy_exclude"]
+      if @bot.config["http.proxy_exclude"]
         # TODO
       end
-      if @bot.config["http_proxy_include"]
+      if @bot.config["http.proxy_include"]
       end
     end
     
@@ -43,10 +45,10 @@ class HttpUtil
     proxy_port = nil
     proxy_user = nil
     proxy_pass = nil
-    if @bot.config["http_proxy_user"]
-      proxy_user = @bot.config["http_proxy_user"]
-      if @bot.config["http_proxy_pass"]
-        proxy_pass = @bot.config["http_proxy_pass"]
+    if @bot.config["http.proxy_user"]
+      proxy_user = @bot.config["http.proxy_user"]
+      if @bot.config["http.proxy_pass"]
+        proxy_pass = @bot.config["http.proxy_pass"]
       end
     end
     if proxy

@@ -3,40 +3,18 @@ RouletteHistory = Struct.new("RouletteHistory", :games, :shots, :deaths, :misses
 class RoulettePlugin < Plugin
   def initialize
     super
-    reload
+    reset_chambers
+    @players = Array.new
   end
   def help(plugin, topic="")
     "roulette => play russian roulette - starts a new game if one isn't already running. One round in a six chambered gun. Take turns to say roulette to the bot, until somebody dies. roulette reload => force the gun to reload, roulette stats => show stats from all games, roulette stats <player> => show stats for <player>, roulette clearstats => clear stats (config level auth required)"
   end
-  def privmsg(m)
-    if m.params == "reload"
-      @bot.action m.replyto, "reloads"
-      reload
-      # all players win on a reload
-      # (allows you to play 3-shot matches etc)
-      @players.each {|plyr|
-        pdata = @registry[plyr]
-        next if pdata == nil
-        pdata.wins += 1
-        @registry[plyr] = pdata
-      }
-      return
-    elsif m.params == "stats"
-      m.reply stats
-      return
-    elsif m.params =~ /^stats\s+(.+)$/
-      m.reply(playerstats($1))
-      return
-    elsif m.params == "clearstats"
-      if @bot.auth.allow?("config", m.source, m.replyto)
-        @registry.clear
-        m.okay
-      end
-      return
-    elsif m.params
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
-    end
+  def clearstats(m, params)
+    @registry.clear
+    m.okay
+  end
+
+  def roulette(m, params)
     if m.private?
       m.reply "you gotta play roulette in channel dude"
       return
@@ -74,21 +52,36 @@ class RoulettePlugin < Plugin
     @registry[m.sourcenick] = playerdata
     
     if shot || @chambers.empty?
-      @bot.action m.replyto, "reloads"
-      reload
+      reload(m)
     end
   end
-  def reload
-    @chambers = [false, false, false, false, false, false]
-    @chambers[rand(@chambers.length)] = true
+  def reload(m, params = {})
+    @bot.action m.replyto, "reloads"
+    reset_chambers
+    # all players win on a reload
+    # (allows you to play 3-shot matches etc)
+    @players.each {|plyr|
+      pdata = @registry[plyr]
+      next if pdata == nil
+      pdata.wins += 1
+      @registry[plyr] = pdata
+    }
     @players = Array.new
   end
-  def playerstats(player)
-    pstats = @registry[player]
-    return "#{player} hasn't played enough games yet" if pstats.nil?
-    return "#{player} has played #{pstats.games} games, won #{pstats.wins} and lost #{pstats.deaths}. #{player} pulled the trigger #{pstats.shots} times and found the chamber empty on #{pstats.misses} occasions."
+  def reset_chambers
+    @chambers = [false, false, false, false, false, false]
+    @chambers[rand(@chambers.length)] = true
   end
-  def stats
+  def playerstats(m, params)
+    player = params[:player]
+    pstats = @registry[player]
+    if pstats.nil?
+      m.reply "#{player} hasn't played enough games yet"
+    else
+      m.reply "#{player} has played #{pstats.games} games, won #{pstats.wins} and lost #{pstats.deaths}. #{player} pulled the trigger #{pstats.shots} times and found the chamber empty on #{pstats.misses} occasions."
+    end
+  end
+  def stats(m, params)
     total_players = 0
     total_games = 0
     total_shots = 0
@@ -139,9 +132,16 @@ class RoulettePlugin < Plugin
         won_most[0] << k
       end
     }
-    return "roulette stats: no games played yet" if total_games < 1
-    return "roulette stats: #{total_games} games completed, #{total_shots} shots fired at #{total_players} players. Luckiest: #{h_luck_percent[0].join(',')} (#{sprintf '%.1f', h_luck_percent[1]}% clicks). Unluckiest: #{l_luck_percent[0].join(',')} (#{sprintf '%.1f', l_luck_percent[1]}% clicks). Highest survival rate: #{h_win_percent[0].join(',')} (#{sprintf '%.1f', h_win_percent[1]}%). Lowest survival rate: #{l_win_percent[0].join(',')} (#{sprintf '%.1f', l_win_percent[1]}%). Most wins: #{won_most[0].join(',')} (#{won_most[1]}). Most deaths: #{died_most[0].join(',')} (#{died_most[1]})."
+    if total_games < 1
+      m.reply "roulette stats: no games played yet"
+    else
+      m.reply "roulette stats: #{total_games} games completed, #{total_shots} shots fired at #{total_players} players. Luckiest: #{h_luck_percent[0].join(',')} (#{sprintf '%.1f', h_luck_percent[1]}% clicks). Unluckiest: #{l_luck_percent[0].join(',')} (#{sprintf '%.1f', l_luck_percent[1]}% clicks). Highest survival rate: #{h_win_percent[0].join(',')} (#{sprintf '%.1f', h_win_percent[1]}%). Lowest survival rate: #{l_win_percent[0].join(',')} (#{sprintf '%.1f', l_win_percent[1]}%). Most wins: #{won_most[0].join(',')} (#{won_most[1]}). Most deaths: #{died_most[0].join(',')} (#{died_most[1]})."
+    end
   end
 end
 plugin = RoulettePlugin.new
-plugin.register("roulette")
+plugin.map 'roulette reload', :action => 'reload'
+plugin.map 'roulette stats :player', :action => 'playerstats'
+plugin.map 'roulette stats', :action => 'stats'
+plugin.map 'roulette clearstats', :action => 'clearstats', :auth => 'config'
+plugin.map 'roulette'

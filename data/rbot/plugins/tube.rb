@@ -9,16 +9,9 @@ class TubePlugin < Plugin
   def help(plugin, topic="")
   "tube [district|circle|metropolitan|central|jubilee|bakerloo|waterloo_city|hammersmith_city|victoria|eastlondon|northern|piccadilly] => display tube service status for the specified line(Docklands Light Railway is not currently supported), tube stations => list tube stations (not lines) with problems"
   end
-  def privmsg(m)
-  if m.params && m.params =~ /^stations$/
-    check_stations m
-  elsif m.params && m.params =~ /^(.*)$/
-    line = $1.downcase.capitalize
-    check_tube m, line
-  end
-  end
   
-  def check_tube(m, line)
+  def tube(m, params)
+    line = params[:line]
   begin
     tube_page = @bot.httputil.get(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"), 1, 1)
   rescue URI::InvalidURIError, URI::BadURIError => e
@@ -47,7 +40,7 @@ class TubePlugin < Plugin
   m.reply "No Problems on the #{line} line."
   end
 
-  def check_stations(m)
+  def check_stations(m, params)
     begin
       tube_page = @bot.httputil.get(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"))
     rescue URI::InvalidURIError, URI::BadURIError => e
@@ -74,4 +67,5 @@ class TubePlugin < Plugin
   end
 end
 plugin = TubePlugin.new
-plugin.register("tube")
+plugin.map 'tube stations', :action => 'check_stations'
+plugin.map 'tube :line'

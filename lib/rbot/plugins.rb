@@ -133,7 +133,7 @@ module Irc
 
     # default usage method provided as a utility for simple plugins. The
     # MessageMapper uses 'usage' as its default fallback method.
-    def usage(m, params)
+    def usage(m, params = {})
       m.reply "incorrect usage, ask for help using '#{@bot.nick}: help #{m.plugin}'"
     end
 
@@ -175,12 +175,14 @@ module Irc
       dirs.each {|dir|
         if(FileTest.directory?(dir))
           d = Dir.new(dir)
-          d.each {|file|
+          d.sort.each {|file|
             next if(file =~ /^\./)
             next unless(file =~ /\.rb$/)
             @tmpfilename = "#{dir}/#{file}"
 
             # create a new, anonymous module to "house" the plugin
+            # the idea here is to prevent namespace pollution. perhaps there
+            # is another way?
             plugin_module = Module.new
             
             begin
@@ -198,28 +200,12 @@ module Irc
 
     # call the save method for each active plugin
     def save
-      @@plugins.values.uniq.each {|p|
-        next unless(p.respond_to?("save"))
-        begin
-          p.save
-        rescue StandardError, NameError, SyntaxError => err
-          puts "plugin #{p.name} save() failed: " + err
-          puts err.backtrace.join("\n")
-        end
-      }
+      delegate 'save'
     end
 
     # call the cleanup method for each active plugin
     def cleanup
-      @@plugins.values.uniq.each {|p|
-        next unless(p.respond_to?("cleanup"))
-        begin
-          p.cleanup
-        rescue StandardError, NameError, SyntaxError => err
-          puts "plugin #{p.name} cleanup() failed: " + err
-          puts err.backtrace.join("\n")
-        end
-      }
+      delegate 'cleanup'
     end
 
     # drop all plugins and rescan plugins on disk
@@ -265,11 +251,11 @@ module Irc
     
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter
-    def delegate(method, message)
+    def delegate(method, *args)
       @@plugins.values.uniq.each {|p|
         if(p.respond_to? method)
           begin
-            p.send method, message
+            p.send method, *args
           rescue StandardError, NameError, SyntaxError => err
             puts "plugin #{p.name} #{method}() failed: " + err
             puts err.backtrace.join("\n")

@@ -34,6 +34,11 @@ module Irc
       @config['server.sendq_burst'] = 4
       @config['keyword.address'] = true
       @config['keyword.listen'] = false
+      @config['http.proxy'] = false
+      @config['http.proxy_include'] = false
+      @config['http.proxy_exclude'] = false
+      @config['http.proxy_user'] = false
+      @config['http.proxy_pass'] = false
 
       # TODO
       # have this class persist key/values in hash using yaml as it kinda

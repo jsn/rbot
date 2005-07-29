@@ -6,14 +6,10 @@ class WserverPlugin < Plugin
   def help(plugin, topic="")
     "wserver <uri> => try and determine what webserver <uri> is using"
   end
-  def privmsg(m)
-    unless(m.params && m.params =~ /^\S+$/)
-      m.reply "incorrect usage: " + help(m.plugins)
-      return
-    end
 
+  def wserver(m, params)
     redirect_count = 0
-    hostname = m.params.dup
+    hostname = params[:host].dup
     hostname = "http://#{hostname}" unless hostname =~ /:\/\//
     begin
       if(redirect_count > 3)
@@ -24,7 +20,7 @@ class WserverPlugin < Plugin
       begin
         uri = URI.parse(hostname)
       rescue URI::InvalidURIError => err
-        m.reply "#{m.params} is not a valid URI"
+        m.reply "#{hostname} is not a valid URI"
         return
       end
       
@@ -72,4 +68,4 @@ class WserverPlugin < Plugin
   end
 end
 plugin = WserverPlugin.new
-plugin.register("wserver")
+plugin.map 'wserver :host'

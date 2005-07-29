@@ -1,3 +1,10 @@
+Fri Jul 29 13:07:56 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Moved some stuff out of util.rb into the plugins that actually need
+	them. Those methods didn't belong in util as they were plugin-specific.
+	* moved a few more plugins to use map() where appropriate
+	* made the url plugin only store unique urls
+
 Thu Jul 28 23:45:26 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Reworked the Timer module. The Timer now has a smart thread manager to

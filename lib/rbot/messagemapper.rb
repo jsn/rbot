@@ -106,8 +106,7 @@ module Irc
             options[item] = value
           else
             if @defaults.has_key?(item)
-              debug "item #{item} doesn't pass reqs but has a default of #{@defaults[item]}"
-              options[item] = @defaults[item].clone
+              options[item] = @defaults[item]
               # push the test-failed component back on the stack
               components.unshift value
             else
