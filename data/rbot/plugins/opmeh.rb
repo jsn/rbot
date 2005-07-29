@@ -1,7 +1,7 @@
-class OpMehPlugin < Plugin
+class OpMePlugin < Plugin
 
   def help(plugin, topic="")
-    return "opmeh <channel> => grant user ops in <channel>"
+    return "opme <channel> => grant user ops in <channel>"
   end
 
   def privmsg(m)
@@ -15,5 +15,5 @@ class OpMehPlugin < Plugin
     m.okay
   end
 end
-plugin = OpMehPlugin.new
-plugin.register("opmeh")
+plugin = OpMePlugin.new
+plugin.register("opme")
