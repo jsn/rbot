@@ -1,6 +1,9 @@
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 
 class UrlPlugin < Plugin
+  BotConfig.register('url.max_urls', :type => :integer, :default => 100,
+    :desc => "Maximum number of urls to store. New urls replace oldest ones.")
+  
   def initialize
     super
     @registry.set_default(Array.new)
@@ -22,7 +25,7 @@ class UrlPlugin < Plugin
         }
         url = Url.new(m.target, m.sourcenick, Time.new, urlstr)
         debug "#{list.length} urls so far"
-        if list.length > 50 # TODO make this configurable
+        if list.length > @bot.config['url.max_urls']
           list.pop
         end
         debug "storing url #{url.url}"

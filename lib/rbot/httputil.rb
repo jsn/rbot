@@ -1,5 +1,6 @@
 module Irc
 
+require 'resolv'
 require 'net/http'
 Net::HTTP.version_1_2
   
@@ -7,11 +8,65 @@ Net::HTTP.version_1_2
 # this class can check the bot proxy configuration to determine if a proxy
 # needs to be used, which includes support for per-url proxy configuration.
 class HttpUtil
+    BotConfig.register('http.proxy', :default => false,
+      :desc => "Proxy server to use for HTTP requests (URI, e.g http://proxy.host:port)")
+    BotConfig.register('http.proxy_user', :default => false,
+      :desc => "User for authenticating with the http proxy (if required)")
+    BotConfig.register('http.proxy_pass', :default => false,
+      :desc => "Password for authenticating with the http proxy (if required)")
+    BotConfig.register('http.proxy_include', :type => :array, :default => [],
+      :desc => "List of regexps to check against a URI's hostname/ip to see if we should use the proxy to access this URI. All URIs are proxied by default if the proxy is set, so this is only required to re-include URIs that might have been excluded by the exclude list. e.g. exclude /.*\.foo\.com/, include bar\.foo\.com")
+    BotConfig.register('http.proxy_exclude', :type => :array, :default => [],
+      :desc => "List of regexps to check against a URI's hostname/ip to see if we should use avoid the proxy to access this URI and access it directly")
+
   def initialize(bot)
     @bot = bot
     @headers = {
       'User-Agent' => "rbot http util #{$version} (http://linuxbrit.co.uk/rbot/)",
     }
+  end
+
+  # if http_proxy_include or http_proxy_exclude are set, then examine the
+  # uri to see if this is a proxied uri
+  # the in/excludes are a list of regexps, and each regexp is checked against
+  # the server name, and its IP addresses
+  def proxy_required(uri)
+    use_proxy = true
+    if @bot.config["http.proxy_exclude"].empty? && @bot.config["http.proxy_include"].empty?
+      return use_proxy
+    end
+
+    list = [uri.host]
+    begin
+      list.push Resolv.getaddresses(uri.host)
+    rescue StandardError => err
+      puts "warning: couldn't resolve host uri.host"
+    end
+
+    unless @bot.config["http.proxy_exclude"].empty?
+      re = @bot.config["http.proxy_exclude"].collect{|r| Regexp.new(r)}
+      re.each do |r|
+        list.each do |item|
+          if r.match(item)
+            use_proxy = false
+            break
+          end
+        end
+      end
+    end
+    unless @bot.config["http.proxy_include"].empty?
+      re = @bot.config["http.proxy_include"].collect{|r| Regexp.new(r)}
+      re.each do |r|
+        list.each do |item|
+          if r.match(item)
+            use_proxy = true
+            break
+          end
+        end
+      end
+    end
+    debug "using proxy for uri #{uri}?: #{use_proxy}"
+    return use_proxy
   end
 
   # uri:: Uri to create a proxy for
@@ -29,16 +84,9 @@ class HttpUtil
       proxy = URI.parse ENV['http_proxy']
     end
 
-    # if http_proxy_include or http_proxy_exclude are set, then examine the
-    # uri to see if this is a proxied uri
-    # the excludes are a list of regexps, and each regexp is checked against
-    # the server name, and its IP addresses
-    if uri
-      if @bot.config["http.proxy_exclude"]
-        # TODO
-      end
-      if @bot.config["http.proxy_include"]
-      end
+    if proxy
+      debug "proxy is set to #{proxy.uri}"
+      proxy = nil unless proxy_required(uri)
     end
     
     proxy_host = nil

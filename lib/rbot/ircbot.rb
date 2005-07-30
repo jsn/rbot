@@ -23,21 +23,23 @@ require 'thread'
 require 'etc'
 require 'fileutils'
 
+# these first
+require 'rbot/rbotconfig'
+require 'rbot/config'
+require 'rbot/utils'
+
 require 'rbot/rfc2812'
 require 'rbot/keywords'
-require 'rbot/config'
 require 'rbot/ircsocket'
 require 'rbot/auth'
 require 'rbot/timer'
 require 'rbot/plugins'
 require 'rbot/channel'
-require 'rbot/utils'
 require 'rbot/message'
 require 'rbot/language'
 require 'rbot/dbhash'
 require 'rbot/registry'
 require 'rbot/httputil'
-require 'rbot/rbotconfig'
 
 module Irc
 
@@ -80,6 +82,44 @@ class IrcBot
 
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
+    # BotConfig for the core bot
+    BotConfig.register('server.name',
+      :default => "localhost", :requires_restart => true,
+      :desc => "What server should the bot connect to?",
+      :wizard => true)
+    BotConfig.register('server.port',
+      :default => 6667, :type => :integer, :requires_restart => true,
+      :desc => "What port should the bot connect to?",
+      :wizard => true)
+    BotConfig.register('server.password',
+      :default => false, :requires_restart => true, :type => :password, 
+      :desc => "Password for connecting to this server (if required)",
+      :wizard => true)
+    BotConfig.register('server.bindhost',
+      :default => false, :requires_restart => true,
+      :desc => "Specific local host or IP for the bot to bind to (if required)",
+      :wizard => true)
+    BotConfig.register('server.reconnect_wait',
+      :default => 5, :type => :integer,
+      :desc => "Seconds to wait before attempting to reconnect, on disconnect")
+    BotConfig.register('irc.nick', :default => "rbot",
+      :desc => "IRC nickname the bot should attempt to use", :wizard => true,
+      :on_change => Proc.new{|v| sendq "NICK #{v}" })
+    BotConfig.register('irc.user', :default => "rbot",
+      :requires_restart => true,
+      :desc => "local user the bot should appear to be", :wizard => true)
+    BotConfig.register('irc.join_channels', :default => [], :type => :array,
+      :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'", :wizard => true)
+    BotConfig.register('core.save_every', :default => 60, 
+      # TODO change timer via on_change proc
+      :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example")
+    BotConfig.register('server.sendq_delay', :default => 2.0, :type => :float,
+      :desc => "(flood prevention) the delay between sending messages to the server (in seconds)",
+      :on_change => Proc.new {|v| @socket.sendq_delay = v })
+    BotConfig.register('server.sendq_burst', :default => 4, :type => :integer,
+      :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines, with non-burst limits of 512 bytes/2 seconds",
+      :on_change => Proc.new {|v| @socket.sendq_burst = v })
+
     unless FileTest.directory? Config::DATADIR
       puts "data directory '#{Config::DATADIR}' not found, did you install.rb?"
       exit 2
@@ -199,20 +239,19 @@ class IrcBot
         @nick = data['NICK']
       end
       if(@config['irc.quser'])
-        puts "authing with Q using  #{@config['quakenet.user']} #{@config['quakenet.auth']}"
+        # TODO move this to a plugin
+        debug "authing with Q using  #{@config['quakenet.user']} #{@config['quakenet.auth']}"
         @socket.puts "PRIVMSG Q@CServe.quakenet.org :auth #{@config['quakenet.user']} #{@config['quakenet.auth']}"
       end
 
-      if(@config['irc.join_channels'])
-        @config['irc.join_channels'].split(", ").each {|c|
-          debug "autojoining channel #{c}"
-          if(c =~ /^(\S+)\s+(\S+)$/i)
-            join $1, $2
-          else
-            join c if(c)
-          end
-        }
-      end
+      @config['irc.join_channels'].each {|c|
+        debug "autojoining channel #{c}"
+        if(c =~ /^(\S+)\s+(\S+)$/i)
+          join $1, $2
+        else
+          join c if(c)
+        end
+      }
     }
     @client["JOIN"] = proc {|data|
       m = JoinMessage.new(self, data["SOURCE"], data["CHANNEL"], data["MESSAGE"])
@@ -656,12 +695,15 @@ class IrcBot
           say m.replyto, "I'm a v. #{$version} rubybot, (c) Tom Gilbert - http://linuxbrit.co.uk/rbot/"
         when (/^help(?:\s+(.*))?$/i)
           say m.replyto, help($1)
+          #TODO move these to a "chatback" plugin
         when (/^(botsnack|ciggie)$/i)
           say m.replyto, @lang.get("thanks_X") % m.sourcenick if(m.public?)
           say m.replyto, @lang.get("thanks") if(m.private?)
         when (/^(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$)).*/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick if(m.public?)
           say m.replyto, @lang.get("hello") if(m.private?)
+        when (/^config\s+/)
+          @config.privmsg(m)
         else
           delegate_privmsg(m)
       end
@@ -703,8 +745,8 @@ class IrcBot
   def onjoin(m)
     @channels[m.channel] = IRCChannel.new(m.channel) unless(@channels.has_key?(m.channel))
     if(m.address?)
+      debug "joined channel #{m.channel}"
       log "@ Joined channel #{m.channel}", m.channel
-      puts "joined channel #{m.channel}"
     else
       log "@ #{m.sourcenick} joined channel #{m.channel}", m.channel
       @channels[m.channel].users[m.sourcenick] = Hash.new
@@ -717,9 +759,9 @@ class IrcBot
 
   def onpart(m)
     if(m.address?)
+      debug "left channel #{m.channel}"
       log "@ Left channel #{m.channel} (#{m.message})", m.channel
       @channels.delete(m.channel)
-      puts "left channel #{m.channel}"
     else
       log "@ #{m.sourcenick} left channel #{m.channel} (#{m.message})", m.channel
       @channels[m.channel].users.delete(m.sourcenick)
@@ -733,9 +775,9 @@ class IrcBot
   # respond to being kicked from a channel
   def onkick(m)
     if(m.address?)
+      debug "kicked from channel #{m.channel}"
       @channels.delete(m.channel)
       log "@ You have been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
-      puts "kicked from channel #{m.channel}"
     else
       @channels[m.channel].users.delete(m.sourcenick)
       log "@ #{m.target} has been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel

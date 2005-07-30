@@ -1,3 +1,10 @@
+Sat Jul 30 01:19:32 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * config module for configuring the running bot via IRC
+	* BotConfig.register method for various modules and any plugin to register
+	bot configuration which the new config module will expose for them.
+	* various other tweaks as I continue to refactor..
+
 Fri Jul 29 13:07:56 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Moved some stuff out of util.rb into the plugins that actually need

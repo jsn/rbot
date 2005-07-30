@@ -19,6 +19,8 @@ module Irc
   # User-level authentication to allow/disallow access to bot commands based
   # on hostmask and userlevel.
   class IrcAuth
+    BotConfig.register('auth.password', :type => BotConfig::Password, :default => "Your password for maxing your auth with the bot (used to associate new hostmasks with your owner-status etc)")
+    
     # create a new IrcAuth instance.
     # bot:: associated bot class
     def initialize(bot)

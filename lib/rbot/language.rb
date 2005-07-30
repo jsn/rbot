@@ -1,6 +1,13 @@
 module Irc
 
   class Language
+    BotConfig.register('core.language', 
+      :default => "english", :type => :enum,
+      :values => Dir.new(Config::DATADIR + "/languages").collect {|f|
+                   f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
+                 }.compact,   
+      :desc => "Which language file the bot should use")
+    
     def initialize(language, file="")
       @language = language
       if file.empty?

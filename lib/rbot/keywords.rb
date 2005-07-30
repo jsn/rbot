@@ -8,7 +8,7 @@ module Irc
   # is, and has a single value of bar).
   # Keywords can have multiple values, to_s() will choose one at random
   class Keyword
-    
+
     # type of keyword (e.g. "is" or "are")
     attr_reader :type
     
@@ -81,6 +81,10 @@ module Irc
   # handle it, checks for a keyword command or lookup, otherwise the message
   # is delegated to plugins
   class Keywords
+    BotConfig.register('keyword.listen', :type => :boolean, :default => false,
+      :desc => "Should the bot listen to all chat and attempt to automatically detect keywords? (e.g. by spotting someone say 'foo is bar')")
+    BotConfig.register('keyword.address', :type => :boolean, :default => true,
+      :desc => "Should the bot require that keyword lookups are addressed to it? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
     
     # create a new Keywords instance, associated to bot +bot+
     def initialize(bot)
@@ -415,7 +419,7 @@ module Irc
         end
       else
         # in channel message, not to me
-        if(m.message =~ /^'(.*)$/ || (!@bot.config["keyword.noaddress"] && m.message =~ /^(.*\S)\s*\?\s*$/))
+        if(m.message =~ /^'(.*)$/ || (!@bot.config["keyword.address"] && m.message =~ /^(.*\S)\s*\?\s*$/))
           keyword m, $1, false if(@bot.auth.allow?("keyword", m.source))
         elsif(@bot.config["keyword.listen"] == true && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/))
           # TODO MUCH more selective on what's allowed here
