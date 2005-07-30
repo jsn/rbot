@@ -8,15 +8,20 @@ Net::HTTP.version_1_2
 # this class can check the bot proxy configuration to determine if a proxy
 # needs to be used, which includes support for per-url proxy configuration.
 class HttpUtil
-    BotConfig.register('http.proxy', :default => false,
+    BotConfig.register BotConfigBooleanValue.new('http.use_proxy',
+      :default => false, :desc => "should a proxy be used for HTTP requests?")
+    BotConfig.register BotConfigStringValue.new('http.proxy_uri', :default => false,
       :desc => "Proxy server to use for HTTP requests (URI, e.g http://proxy.host:port)")
-    BotConfig.register('http.proxy_user', :default => false,
+    BotConfig.register BotConfigStringValue.new('http.proxy_user',
+      :default => nil,
       :desc => "User for authenticating with the http proxy (if required)")
-    BotConfig.register('http.proxy_pass', :default => false,
+    BotConfig.register BotConfigStringValue.new('http.proxy_pass',
+      :default => nil,
       :desc => "Password for authenticating with the http proxy (if required)")
-    BotConfig.register('http.proxy_include', :type => :array, :default => [],
+    BotConfig.register BotConfigArrayValue.new('http.proxy_include',
+      :default => [],
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use the proxy to access this URI. All URIs are proxied by default if the proxy is set, so this is only required to re-include URIs that might have been excluded by the exclude list. e.g. exclude /.*\.foo\.com/, include bar\.foo\.com")
-    BotConfig.register('http.proxy_exclude', :type => :array, :default => [],
+    BotConfig.register BotConfigArrayValue.new('http.proxy_exclude',
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use avoid the proxy to access this URI and access it directly")
 
   def initialize(bot)
@@ -77,31 +82,27 @@ class HttpUtil
   # +http_proxy_include/exclude+ options.
   def get_proxy(uri)
     proxy = nil
-    if (ENV['http_proxy'])
-      proxy = URI.parse ENV['http_proxy']
-    end
-    if (@bot.config["http.proxy"])
-      proxy = URI.parse ENV['http_proxy']
-    end
-
-    if proxy
-      debug "proxy is set to #{proxy.uri}"
-      proxy = nil unless proxy_required(uri)
-    end
-    
     proxy_host = nil
     proxy_port = nil
     proxy_user = nil
     proxy_pass = nil
-    if @bot.config["http.proxy_user"]
-      proxy_user = @bot.config["http.proxy_user"]
-      if @bot.config["http.proxy_pass"]
-        proxy_pass = @bot.config["http.proxy_pass"]
+
+    if @bot.config["http.use_proxy"]
+      if (ENV['http_proxy'])
+        proxy = URI.parse ENV['http_proxy']
       end
-    end
-    if proxy
-      proxy_host = proxy.host
-      proxy_port = proxy.port
+      if (@bot.config["http.proxy_uri"])
+        proxy = URI.parse ENV['http_proxy_uri']
+      end
+      if proxy
+        debug "proxy is set to #{proxy.uri}"
+        if proxy_required(uri)
+          proxy_host = proxy.host
+          proxy_port = proxy.port
+          proxy_user = @bot.config["http.proxy_user"]
+          proxy_pass = @bot.config["http.proxy_pass"]
+        end
+      end
     end
     
     return Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_port)

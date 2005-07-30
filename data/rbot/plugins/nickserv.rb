@@ -73,7 +73,7 @@ class NickServPlugin < Plugin
     return unless(m.kind_of? NoticeMessage)
 
     if (m.sourcenick == "NickServ" && m.message =~ /This nickname is owned by someone else/)
-      puts "nickserv asked us to identify for nick #{@bot.nick}"
+      debug "nickserv asked us to identify for nick #{@bot.nick}"
       if @registry.has_key?(@bot.nick)
         @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY " + @registry[@bot.nick]
       end

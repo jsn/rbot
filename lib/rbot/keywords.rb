@@ -81,9 +81,11 @@ module Irc
   # handle it, checks for a keyword command or lookup, otherwise the message
   # is delegated to plugins
   class Keywords
-    BotConfig.register('keyword.listen', :type => :boolean, :default => false,
+    BotConfig.register BotConfigBooleanValue.new('keyword.listen',
+      :default => false,
       :desc => "Should the bot listen to all chat and attempt to automatically detect keywords? (e.g. by spotting someone say 'foo is bar')")
-    BotConfig.register('keyword.address', :type => :boolean, :default => true,
+    BotConfig.register BotConfigBooleanValue.new('keyword.address',
+      :default => true,
       :desc => "Should the bot require that keyword lookups are addressed to it? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
     
     # create a new Keywords instance, associated to bot +bot+

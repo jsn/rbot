@@ -3,12 +3,23 @@ module Irc
   require 'yaml'
   require 'rbot/messagemapper'
 
-  class BotConfigItem
+  class BotConfigValue
+    # allow the definition order to be preserved so that sorting by
+    # definition order is possible. The BotConfigWizard does this to allow
+    # the :wizard questions to be in a sensible order.
+    @@order = 0
     attr_reader :type
     attr_reader :desc
     attr_reader :key
-    attr_reader :values
+    attr_reader :wizard
+    attr_reader :requires_restart
+    attr_reader :order
     def initialize(key, params)
+      unless key =~ /^.+\..+$/
+        raise ArgumentError,"key must be of the form 'module.name'"
+      end
+      @order = @@order
+      @@order += 1
       @key = key
       if params.has_key? :default
         @default = params[:default]
@@ -17,40 +28,130 @@ module Irc
       end
       @desc = params[:desc]
       @type = params[:type] || String
-      @values = params[:values]
       @on_change = params[:on_change]
+      @validate = params[:validate]
+      @wizard = params[:wizard]
+      @requires_restart = params[:requires_restart]
     end
     def default
-      if @default.class == Proc
+      if @default.instance_of?(Proc)
         @default.call
       else
         @default
       end
     end
-    def on_change(newvalue)
-      return unless @on_change
-      @on_change.call(newvalue)
+    def get
+      return BotConfig.config[@key] if BotConfig.config.has_key?(@key)
+      return @default
+    end
+    alias :value :get
+    def set(value, on_change = true)
+      BotConfig.config[@key] = value
+      @on_change.call(BotConfig.bot, value) if on_change && @on_change
+    end
+    def unset
+      BotConfig.config.delete(@key)
+    end
+
+    # set string will raise ArgumentErrors on failed parse/validate
+    def set_string(string, on_change = true)
+      value = parse string
+      if validate value
+        set value, on_change
+      else
+        raise ArgumentError, "invalid value: #{string}"
+      end
+    end
+    
+    # override this. the default will work for strings only
+    def parse(string)
+      string
+    end
+
+    def to_s
+      get.to_s
+    end
+
+    private
+    def validate(value)
+      return true unless @validate
+      if @validate.instance_of?(Proc)
+        return @validate.call(value)
+      elsif @validate.instance_of?(Regexp)
+        raise ArgumentError, "validation via Regexp only supported for strings!" unless value.instance_of? String
+        return @validate.match(value)
+      else
+        raise ArgumentError, "validation type #{@validate.class} not supported"
+      end
+    end
+  end
+
+  class BotConfigStringValue < BotConfigValue
+  end
+  class BotConfigBooleanValue < BotConfigValue
+    def parse(string)
+      return true if string == "true"
+      return false if string == "false"
+      raise ArgumentError, "#{string} does not match either 'true' or 'false'"
+    end
+  end
+  class BotConfigIntegerValue < BotConfigValue
+    def parse(string)
+      raise ArgumentError, "not an integer: #{string}" unless string =~ /^-?\d+$/
+      string.to_i
+    end
+  end
+  class BotConfigFloatValue < BotConfigValue
+    def parse(string)
+      raise ArgumentError, "not a float #{string}" unless string =~ /^-?[\d.]+$/
+      string.to_f
+    end
+  end
+  class BotConfigArrayValue < BotConfigValue
+    def parse(string)
+      string.split(/,\s+/)
+    end
+    def to_s
+      get.join(", ")
+    end
+  end
+  class BotConfigEnumValue < BotConfigValue
+    def initialize(key, params)
+      super
+      @values = params[:values]
+    end
+    def parse(string)
+      unless @values.include?(string)
+        raise ArgumentError, "invalid value #{string}, allowed values are: " + @values.join(", ")
+      end
+      string
+    end
+    def desc
+      "#{@desc} [valid values are: " + @values.join(", ") + "]"
     end
   end
 
   # container for bot configuration
   class BotConfig
-    class Enum
-    end
-    class Password
-    end
-    class Boolean
-    end
-    
-    attr_reader :items
+    # Array of registered BotConfigValues for defaults, types and help
     @@items = Hash.new
+    def BotConfig.items
+      @@items
+    end
+    # Hash containing key => value pairs for lookup and serialisation
+    @@config = Hash.new(false)
+    def BotConfig.config
+      @@config
+    end
+    def BotConfig.bot
+      @@bot
+    end
     
-    def BotConfig.register(key, params)
-      unless params.nil? || params.instance_of?(Hash)
-        raise ArgumentError,"params must be a hash"
+    def BotConfig.register(item)
+      unless item.kind_of?(BotConfigValue)
+        raise ArgumentError,"item must be a BotConfigValue"
       end
-      raise ArgumentError,"params must contain a period" unless key =~ /^.+\..+$/
-      @@items[key] = BotConfigItem.new(key, params)
+      @@items[item.key] = item
     end
 
     # currently we store values in a hash but this could be changed in the
@@ -58,14 +159,19 @@ module Irc
     # components that register their config keys and setup defaults are
     # supported via []
     def [](key)
-      return @config[key] if @config.has_key?(key)
-      return @@items[key].default if @@items.has_key?(key)
+      return @@items[key].value if @@items.has_key?(key)
+      # try to still support unregistered lookups
+      return @@config[key] if @@config.has_key?(key)
       return false
     end
+
+    # TODO should I implement this via BotConfigValue or leave it direct?
+    #    def []=(key, value)
+    #    end
     
-    # pass everything through to the hash
+    # pass everything else through to the hash
     def method_missing(method, *args, &block)
-      return @config.send(method, *args, &block)
+      return @@config.send(method, *args, &block)
     end
 
     def handle_list(m, params)
@@ -74,12 +180,12 @@ module Irc
         @@items.each_key do |key|
           mod, name = key.split('.')
           next unless mod == params[:module]
-          modules.push name unless modules.include?(name)
+          modules.push key unless modules.include?(name)
         end
         if modules.empty?
           m.reply "no such module #{params[:module]}"
         else
-          m.reply "module #{params[:module]} contains: " + modules.join(", ")
+          m.reply modules.join(", ")
         end
       else
         @@items.each_key do |key|
@@ -94,13 +200,9 @@ module Irc
       key = params[:key]
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
+        return
       end
-      value = self[key]
-      if @@items[key].type == :array
-        value = self[key].join(", ")
-      elsif @@items[key].type == :password && !m.private
-        value = "******"
-      end
+      value = @@items[key].to_s
       m.reply "#{key}: #{value}"
     end
 
@@ -109,6 +211,7 @@ module Irc
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
       end
+      puts @@items[key].inspect
       m.reply "#{key}: #{@@items[key].desc}"
     end
 
@@ -117,7 +220,7 @@ module Irc
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
       end
-      @config.delete(key)
+      @@items[key].unset
       handle_get(m, params)
     end
 
@@ -127,54 +230,57 @@ module Irc
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
       end
-      item = @@items[key]
-      puts "item type is #{item.type}"
-      case item.type
-        when :string
-          @config[key] = value
-        when :password
-          @config[key] = value
-        when :integer
-          @config[key] = value.to_i
-        when :float
-          @config[key] = value.to_f
-        when :array
-          @config[key] = value.split(/,\s*/)
-        when :boolean
-          if value == "true"
-            @config[key] = true
-          else
-            @config[key] = false
-          end
-        when :enum
-          unless item.values.include?(value)
-            m.reply "invalid value #{value}, allowed values are: " + item.values.join(", ")
-            return
-          end
-          @config[key] = value
-        else
-          puts "ACK, unsupported type #{item.type}"
-          exit 2
+      begin
+        @@items[key].set_string(value)
+      rescue ArgumentError => e
+        m.reply "failed to set #{key}: #{e.message}"
+        return
       end
-      item.on_change(@config[key])
-      m.okay
+      if @@items[key].requires_restart
+        m.reply "this config change will take effect on the next restart"
+      else
+        m.okay
+      end
+    end
+
+    def handle_help(m, params)
+      topic = params[:topic]
+      case topic
+      when false
+        m.reply "config module - bot configuration. usage: list, desc, get, set, unset"
+      when "list"
+        m.reply "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
+      when "get"
+        m.reply "config get <key> => get configuration value for key <key>"
+      when "unset"
+        m.reply "reset key <key> to the default"
+      when "set"
+        m.reply "config set <key> <value> => set configuration value for key <key> to <value>"
+      when "desc"
+        m.reply "config desc <key> => describe what key <key> configures"
+      else
+        m.reply "no help for config #{topic}"
+      end
+    end
+    def usage(m,params)
+      m.reply "incorrect usage, try '#{@bot.nick}: help config'"
     end
 
     # bot:: parent bot class
     # create a new config hash from #{botclass}/conf.rbot
     def initialize(bot)
-      @bot = bot
-      @config = Hash.new(false)
+      @@bot = bot
 
       # respond to config messages, to provide runtime configuration
       # management
       # messages will be:
-      #  get (implied)
+      #  get
       #  set
       #  unset
+      #  desc
       #  and for arrays:
-      #    add
-      #    remove
+      #    add TODO
+      #    remove TODO
       @handler = MessageMapper.new(self)
       @handler.map 'config list :module', :action => 'handle_list',
                    :defaults => {:module => false}
@@ -183,48 +289,26 @@ module Irc
       @handler.map 'config describe :key', :action => 'handle_desc'
       @handler.map 'config set :key *value', :action => 'handle_set'
       @handler.map 'config unset :key', :action => 'handle_unset'
+      @handler.map 'config help :topic', :action => 'handle_help',
+                   :defaults => {:topic => false}
+      @handler.map 'help config :topic', :action => 'handle_help',
+                   :defaults => {:topic => false}
       
-      # TODO
-      # have this class persist key/values in hash using yaml as it kinda
-      # already does.
-      # have other users of the class describe config to it on init, like:
-      # @config.add(:key => 'server.name', :type => 'string',
-      #             :default => 'localhost', :restart => true,
-      #             :help => 'irc server to connect to')
-      # that way the config module doesn't have to know about all the other
-      # classes but can still provide help and defaults.
-      # Classes don't have to add keys, they can just use config as a
-      # persistent hash, but then they won't be presented by the config
-      # module for runtime display/changes.
-      # (:restart, if true, makes the bot reply to changes with "this change
-      # will take effect after the next restart)
-      #  :proc => Proc.new {|newvalue| ...}
-      # (:proc, proc to run on change of setting)
-      #  or maybe, @config.add_key(...) do |newvalue| .... end
-      #  :validate => /regex/
-      # (operates on received string before conversion)
-      # Special handling for arrays so the config module can be used to
-      # add/remove elements as well as changing the whole thing
-      # Allow config options to list possible valid values (if type is enum,
-      # for example). Then things like the language module can list the
-      # available languages for choosing.
-      
-      if(File.exist?("#{@bot.botclass}/conf.yaml"))
-        newconfig = YAML::load_file("#{@bot.botclass}/conf.yaml")
-        @config.update(newconfig)
+      if(File.exist?("#{@@bot.botclass}/conf.yaml"))
+        newconfig = YAML::load_file("#{@@bot.botclass}/conf.yaml")
+        @@config.update newconfig
       else
         # first-run wizard!
-        wiz = BotConfigWizard.new(@bot)
-        newconfig = wiz.run(@config)
-        @config.update(newconfig)
+        BotConfigWizard.new(@@bot).run
+        # save newly created config
+        save
       end
     end
 
     # write current configuration to #{botclass}/conf.rbot
     def save
-      Dir.mkdir("#{@bot.botclass}") if(!File.exist?("#{@bot.botclass}"))
-      File.open("#{@bot.botclass}/conf.yaml", "w") do |file|
-        file.puts @config.to_yaml
+      File.open("#{@@bot.botclass}/conf.yaml", "w") do |file|
+        file.puts @@config.to_yaml
       end
     end
 
@@ -233,77 +317,13 @@ module Irc
     end
   end
 
-  # I don't see a nice way to avoid the first start wizard knowing way too
-  # much about other modules etc, because it runs early and stuff it
-  # configures is used to initialise the other modules...
-  # To minimise this we'll do as little as possible and leave the rest to
-  # online modification
   class BotConfigWizard
-
-    # TODO things to configure..
-    # config directory (botclass) - people don't realise they should set
-    # this. The default... isn't good.
-    # users? - default *!*@* to 10
-    # levels? - need a way to specify a default level, methinks, for
-    # unconfigured items.
-    #
     def initialize(bot)
       @bot = bot
-      @questions = [
-        {
-          :question => "What server should the bot connect to?",
-          :key => "server.name",
-          :type => :string,
-        },
-        {
-          :question => "What port should the bot connect to?",
-          :key => "server.port",
-          :type => :number,
-        },
-        {
-          :question => "Does this IRC server require a password for access? Leave blank if not.",
-          :key => "server.password",
-          :type => :password,
-        },
-        {
-          :question => "Would you like rbot to bind to a specific local host or IP? Leave blank if not.",
-          :key => "server.bindhost",
-          :type => :string,
-        },
-        {
-          :question => "What IRC nickname should the bot attempt to use?",
-          :key => "irc.nick",
-          :type => :string,
-        },
-        {
-          :question => "What local user should the bot appear to be?",
-          :key => "irc.user",
-          :type => :string,
-        },
-        {
-          :question => "What channels should the bot always join at startup? List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'",
-          :prompt => "Channels",
-          :key => "irc.join_channels",
-          :type => :string,
-        },
-        {
-          :question => "Which language file should the bot use?",
-          :key => "core.language",
-          :type => :enum,
-          :items => Dir.new(Config::DATADIR + "/languages").collect {|f|
-            f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
-          }.compact
-        },
-        {
-          :question => "Enter your password for maxing your auth with the bot (used to associate new hostmasks with your owner-status etc)",
-          :key => "auth.password",
-          :type => :password,
-        },
-      ]
+      @questions = BotConfig.items.values.find_all {|i| i.wizard }
     end
     
-    def run(defaults)
-      config = defaults.clone
+    def run()
       puts "First time rbot configuration wizard"
       puts "===================================="
       puts "This is the first time you have run rbot with a config directory of:"
@@ -313,39 +333,23 @@ module Irc
       puts "rbot is connected and you are auth'd."
       puts "-----------------------------------"
 
-      @questions.each do |q|
-        puts q[:question]
+      return unless @questions
+      @questions.sort{|a,b| a.order <=> b.order }.each do |q|
+        puts q.desc
         begin
-          key = q[:key]
-          if q[:type] == :enum
-            puts "valid values are: " + q[:items].join(", ")
-          end
-          if (defaults.has_key?(key))
-            print q[:key] + " [#{defaults[key]}]: "
-          else
-            print q[:key] + " []: "
-          end
+          print q.key + " [#{q.to_s}]: "
           response = STDIN.gets
           response.chop!
-          response = defaults[key] if response == "" && defaults.has_key?(key)
-          case q[:type]
-            when :string
-            when :number
-              raise "value '#{response}' is not a number" unless (response.class == Fixnum || response =~ /^\d+$/)
-              response = response.to_i
-            when :password
-            when :enum
-              raise "selected value '#{response}' is not one of the valid values" unless q[:items].include?(response)
+          unless response.empty?
+            q.set_string response, false
           end
-          config[key] = response
-          puts "configured #{key} => #{config[key]}"
+          puts "configured #{q.key} => #{q.to_s}"
           puts "-----------------------------------"
-        rescue RuntimeError => e
-          puts e.message
+        rescue ArgumentError => e
+          puts "failed to set #{q.key}: #{e.message}"
           retry
         end
       end
-      return config
     end
   end
 end

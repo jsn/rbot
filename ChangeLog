@@ -1,3 +1,12 @@
+Sat Jul 30 22:33:36 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Config items are now objects, various types are available.
+	* The config wizard will now use registered config items if :wizard is set
+    to true for those items. It will ask questions in the order they were
+		registered.
+	* The config module now works for doing runtime configuration.
+	* misc refactoring
+
 Sat Jul 30 01:19:32 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * config module for configuring the running bot via IRC

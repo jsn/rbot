@@ -1,7 +1,8 @@
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 
 class UrlPlugin < Plugin
-  BotConfig.register('url.max_urls', :type => :integer, :default => 100,
+  BotConfig.register BotConfigIntegerValue.new('url.max_urls',
+    :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
   
   def initialize

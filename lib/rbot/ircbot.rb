@@ -83,42 +83,46 @@ class IrcBot
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass)
     # BotConfig for the core bot
-    BotConfig.register('server.name',
+    BotConfig.register BotConfigStringValue.new('server.name',
       :default => "localhost", :requires_restart => true,
       :desc => "What server should the bot connect to?",
       :wizard => true)
-    BotConfig.register('server.port',
+    BotConfig.register BotConfigIntegerValue.new('server.port',
       :default => 6667, :type => :integer, :requires_restart => true,
-      :desc => "What port should the bot connect to?",
-      :wizard => true)
-    BotConfig.register('server.password',
-      :default => false, :requires_restart => true, :type => :password, 
+      :desc => "What port should the bot connect to?", 
+      :validate => Proc.new {|v| v > 0}, :wizard => true)
+    BotConfig.register BotConfigStringValue.new('server.password',
+      :default => false, :requires_restart => true,
       :desc => "Password for connecting to this server (if required)",
       :wizard => true)
-    BotConfig.register('server.bindhost',
+    BotConfig.register BotConfigStringValue.new('server.bindhost',
       :default => false, :requires_restart => true,
       :desc => "Specific local host or IP for the bot to bind to (if required)",
       :wizard => true)
-    BotConfig.register('server.reconnect_wait',
-      :default => 5, :type => :integer,
+    BotConfig.register BotConfigIntegerValue.new('server.reconnect_wait',
+      :default => 5, :validate => Proc.new{|v| v >= 0},
       :desc => "Seconds to wait before attempting to reconnect, on disconnect")
-    BotConfig.register('irc.nick', :default => "rbot",
+    BotConfig.register BotConfigStringValue.new('irc.nick', :default => "rbot",
       :desc => "IRC nickname the bot should attempt to use", :wizard => true,
-      :on_change => Proc.new{|v| sendq "NICK #{v}" })
-    BotConfig.register('irc.user', :default => "rbot",
+      :on_change => Proc.new{|bot, v| bot.sendq "NICK #{v}" })
+    BotConfig.register BotConfigStringValue.new('irc.user', :default => "rbot",
       :requires_restart => true,
       :desc => "local user the bot should appear to be", :wizard => true)
-    BotConfig.register('irc.join_channels', :default => [], :type => :array,
-      :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'", :wizard => true)
-    BotConfig.register('core.save_every', :default => 60, 
+    BotConfig.register BotConfigArrayValue.new('irc.join_channels',
+      :default => [], :wizard => true,
+      :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'")
+    BotConfig.register BotConfigIntegerValue.new('core.save_every',
+      :default => 60, :validate => Proc.new{|v| v >= 0},
       # TODO change timer via on_change proc
       :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example")
-    BotConfig.register('server.sendq_delay', :default => 2.0, :type => :float,
+    BotConfig.register BotConfigFloatValue.new('server.sendq_delay',
+      :default => 2.0, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) the delay between sending messages to the server (in seconds)",
-      :on_change => Proc.new {|v| @socket.sendq_delay = v })
-    BotConfig.register('server.sendq_burst', :default => 4, :type => :integer,
+      :on_change => Proc.new {|bot, v| bot.socket.sendq_delay = v })
+    BotConfig.register BotConfigIntegerValue.new('server.sendq_burst',
+      :default => 4, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines, with non-burst limits of 512 bytes/2 seconds",
-      :on_change => Proc.new {|v| @socket.sendq_burst = v })
+      :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
 
     unless FileTest.directory? Config::DATADIR
       puts "data directory '#{Config::DATADIR}' not found, did you install.rb?"
@@ -335,7 +339,7 @@ class IrcBot
             @client.process reply
           end
         end
-      rescue => e
+      rescue => e # TODO be selective, only grab Network errors
         puts "connection closed: #{e}"
         puts e.backtrace.join("\n")
       end
@@ -490,6 +494,11 @@ class IrcBot
   end
 
   # attempt to change bot's nick to +name+
+  # FIXME
+  # if rbot is already taken, this happens:
+  #   <giblet> rbot_, nick rbot
+  #   --- rbot_ is now known as rbot__
+  # he should of course just keep his existing nick and report the error :P
   def nickchg(name)
       sendq "NICK #{name}"
   end
@@ -685,12 +694,14 @@ class IrcBot
             @config['irc.sendq_delay'] = freq
             m.okay
           end
-        when (/^status$/i)
+        when (/^status\??$/i)
           m.reply status if auth.allow?("status", m.source, m.replyto)
         when (/^registry stats$/i)
           if auth.allow?("config", m.source, m.replyto)
             m.reply @registry.stat.inspect
           end
+        when (/^(help\s+)?config(\s+|$)/)
+          @config.privmsg(m)
         when (/^(version)|(introduce yourself)$/i)
           say m.replyto, "I'm a v. #{$version} rubybot, (c) Tom Gilbert - http://linuxbrit.co.uk/rbot/"
         when (/^help(?:\s+(.*))?$/i)
@@ -702,15 +713,13 @@ class IrcBot
         when (/^(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$)).*/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick if(m.public?)
           say m.replyto, @lang.get("hello") if(m.private?)
-        when (/^config\s+/)
-          @config.privmsg(m)
         else
           delegate_privmsg(m)
       end
     else
       # stuff to handle when not addressed
       case m.message
-        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$))\s+#{@nick}$/i)
+        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$))[\s,-.]+#{@nick}$/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
         when (/^#{@nick}!*$/)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
