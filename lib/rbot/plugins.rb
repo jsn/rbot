@@ -1,4 +1,5 @@
 module Irc
+module Plugins
   require 'rbot/messagemapper'
 
   # base class for all rbot plugins
@@ -283,4 +284,5 @@ module Irc
     end
   end
 
+end
 end

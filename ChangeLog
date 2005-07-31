@@ -1,3 +1,9 @@
+Sun Jul 31 02:20:08 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Updated docgen to generate rdoc again with the new repo structure
+	* added new restart command to the core bot, quits irc and reexecs the
+	bot, to pick up new code/libraries etc.
+
 Sat Jul 30 22:33:36 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Config items are now objects, various types are available.

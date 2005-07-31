@@ -81,7 +81,7 @@ class IrcBot
   attr_reader :httputil
 
   # create a new IrcBot with botclass +botclass+
-  def initialize(botclass)
+  def initialize(botclass, params = {})
     # BotConfig for the core bot
     BotConfig.register BotConfigStringValue.new('server.name',
       :default => "localhost", :requires_restart => true,
@@ -124,6 +124,8 @@ class IrcBot
       :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines, with non-burst limits of 512 bytes/2 seconds",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
 
+    @argv = params[:argv]
+
     unless FileTest.directory? Config::DATADIR
       puts "data directory '#{Config::DATADIR}' not found, did you install.rb?"
       exit 2
@@ -144,22 +146,22 @@ class IrcBot
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
 
     @startup_time = Time.new
-    @config = Irc::BotConfig.new(self)
+    @config = BotConfig.new(self)
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
     @channels = Hash.new
     @logs = Hash.new
     
-    @httputil = Irc::HttpUtil.new(self)
-    @lang = Irc::Language.new(@config['core.language'])
-    @keywords = Irc::Keywords.new(self)
-    @auth = Irc::IrcAuth.new(self)
+    @httputil = Utils::HttpUtil.new(self)
+    @lang = Language::Language.new(@config['core.language'])
+    @keywords = Keywords.new(self)
+    @auth = IrcAuth.new(self)
 
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
-    @plugins = Irc::Plugins.new(self, ["#{botclass}/plugins"])
+    @plugins = Plugins::Plugins.new(self, ["#{botclass}/plugins"])
 
-    @socket = Irc::IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
+    @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
     @nick = @config['irc.nick']
     if @config['core.address_prefix']
       @addressing_prefixes = @config['core.address_prefix'].split(" ")
@@ -167,7 +169,7 @@ class IrcBot
       @addressing_prefixes = Array.new
     end
     
-    @client = Irc::IrcClient.new
+    @client = IrcClient.new
     @client["PRIVMSG"] = proc { |data|
       message = PrivMessage.new(self, data["SOURCE"], data["TARGET"], data["MESSAGE"])
       onprivmsg(message)
@@ -339,9 +341,14 @@ class IrcBot
             @client.process reply
           end
         end
-      rescue => e # TODO be selective, only grab Network errors
-        puts "connection closed: #{e}"
+      rescue TimeoutError, SocketError => e
+        puts "network exception: connection closed: #{e}"
         puts e.backtrace.join("\n")
+        @socket.close # now we reconnect
+      rescue => e # TODO be selective, only grab Network errors
+        puts "unexpected exception: connection closed: #{e}"
+        puts e.backtrace.join("\n")
+        exit 2
       end
       
       puts "disconnected"
@@ -439,14 +446,12 @@ class IrcBot
   def topic(where, topic)
     sendq "TOPIC #{where} :#{topic}"
   end
-  
-  # message:: optional IRC quit message
-  # quit IRC, shutdown the bot
-  def quit(message=nil)
+
+  def shutdown(message = nil)
     trap("SIGTERM", "DEFAULT")
     trap("SIGHUP", "DEFAULT")
     trap("SIGINT", "DEFAULT")
-    message = @lang.get("quit") if (!message || message.length < 1)
+    message = @lang.get("quit") if (message.nil? || message.empty?)
     @socket.clearq
     save
     @plugins.cleanup
@@ -458,7 +463,21 @@ class IrcBot
     @socket.shutdown
     @registry.close
     puts "rbot quit (#{message})"
+  end
+  
+  # message:: optional IRC quit message
+  # quit IRC, shutdown the bot
+  def quit(message=nil)
+    shutdown(message)
     exit 0
+  end
+
+  # totally shutdown and respawn the bot
+  def restart
+    shutdown("restarting, back in #{@config['server.reconnect_wait']}...")
+    sleep @config['server.reconnect_wait']
+    # now we re-exec
+    exec($0, *@argv)
   end
 
   # call the save method for bot's config, keywords, auth and all plugins
@@ -552,6 +571,8 @@ class IrcBot
     case topic
       when "quit"
         return "quit [<message>] => quit IRC with message <message>"
+      when "restart"
+        return "restart => completely stop and restart the bot (including reconnect)"
       when "join"
         return "join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{@nick} also responds to invites if you have the required access level"
       when "part"
@@ -581,7 +602,7 @@ class IrcBot
       when "hello"
         return "hello|hi|hey|yo [#{@nick}] => greet the bot"
       else
-        return "Core help topics: quit, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version, botsnack, hello"
+        return "Core help topics: quit, restart, config, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version, botsnack, hello"
     end
   end
 
@@ -623,6 +644,8 @@ class IrcBot
           part $1 if(@auth.allow?("join", m.source, m.replyto))
         when (/^quit(?:\s+(.*))?$/i)
           quit $1 if(@auth.allow?("quit", m.source, m.replyto))
+        when (/^restart$/i)
+          restart if(@auth.allow?("quit", m.source, m.replyto))
         when (/^hide$/i)
           join 0 if(@auth.allow?("join", m.source, m.replyto))
         when (/^save$/i)
@@ -669,29 +692,6 @@ class IrcBot
           if(auth.allow?("talk", m.source, m.replyto))
             where.gsub!(/^here$/, m.target) if m.public?
             @channels[where].quiet = false if(@channels.has_key?(where))
-            m.okay
-          end
-        # TODO break this out into a config module
-        when (/^options get sendq_delay$/i)
-          if auth.allow?("config", m.source, m.replyto)
-            m.reply "options->sendq_delay = #{@socket.sendq_delay}"
-          end
-        when (/^options get sendq_burst$/i)
-          if auth.allow?("config", m.source, m.replyto)
-            m.reply "options->sendq_burst = #{@socket.sendq_burst}"
-          end
-        when (/^options set sendq_burst (.*)$/i)
-          num = $1.to_i
-          if auth.allow?("config", m.source, m.replyto)
-            @socket.sendq_burst = num
-            @config['irc.sendq_burst'] = num
-            m.okay
-          end
-        when (/^options set sendq_delay (.*)$/i)
-          freq = $1.to_f
-          if auth.allow?("config", m.source, m.replyto)
-            @socket.sendq_delay = freq
-            @config['irc.sendq_delay'] = freq
             m.okay
           end
         when (/^status\??$/i)

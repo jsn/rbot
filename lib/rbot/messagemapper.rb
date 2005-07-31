@@ -9,7 +9,7 @@ module Irc
     end
     
     def map(*args)
-      @routes << Route.new(*args)
+      @routes << Template.new(*args)
     end
     
     def each
@@ -53,7 +53,7 @@ module Irc
 
   end
 
-  class Route
+  class Template
     attr_reader :defaults # The defaults hash
     attr_reader :options  # The options hash
     attr_reader :items

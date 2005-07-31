@@ -1,3 +1,3 @@
 #!/bin/sh
-rdoc -a --exclude 'rbot/(db)?plugins/' --main rbot.rb -d
+rdoc -a -i 'lib' --exclude '(data/|setup.rb|post-config.rb|rbotconfig.rb|timertest.rb)' --main lib/rbot/ircbot.rb -o doc lib bin
 

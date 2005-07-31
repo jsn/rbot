@@ -1,4 +1,5 @@
 module Irc
+module Language
 
   class Language
     BotConfig.register BotConfigEnumValue.new('core.language', 
@@ -62,4 +63,5 @@ module Irc
     end
   end
 
+end
 end

@@ -1,4 +1,5 @@
 module Irc
+module Utils
 
 require 'resolv'
 require 'net/http'
@@ -135,5 +136,5 @@ class HttpUtil
     return nil
   end
 end
-
+end
 end
