@@ -27,10 +27,10 @@ spec = Gem::Specification.new do |s|
   #### Load-time details: library and application (you will need one or both).
   s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
-  s.rdoc_options = ['--webcvs', '--include', 'lib', '--exclude',
-  '(data/|setup.rb|post-config.rb|rbotconfig.rb|timertest.rb)'
+  s.rdoc_options = ['--include', 'lib', '--exclude',
+  '(post-config.rb|rbotconfig.rb)'
   '--title', 'rbot API Documentation', '--main', 'lib/rbot/ircbot.rb', 
-  'lib', 'bin']
+  'lib', 'bin/rbot']
 
   #### Author and project details.
 
