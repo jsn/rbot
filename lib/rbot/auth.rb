@@ -20,7 +20,8 @@ module Irc
   # on hostmask and userlevel.
   class IrcAuth
     BotConfig.register BotConfigStringValue.new('auth.password',
-      :default => "Your password for maxing your auth with the bot (used to associate new hostmasks with your owner-status etc)")
+      :default => "rbotauth", :wizard => true,
+      :desc => "Your password for maxing your auth with the bot (used to associate new hostmasks with your owner-status etc)")
     
     # create a new IrcAuth instance.
     # bot:: associated bot class

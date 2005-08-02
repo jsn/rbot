@@ -28,9 +28,8 @@ spec = Gem::Specification.new do |s|
   s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
   s.rdoc_options = ['--include', 'lib', '--exclude',
-  '(post-config.rb|rbotconfig.rb)'
-  '--title', 'rbot API Documentation', '--main', 'lib/rbot/ircbot.rb', 
-  'lib', 'bin/rbot']
+  '(post-config.rb|rbotconfig.rb)', '--title', 'rbot API Documentation',
+  '--main', 'lib/rbot/ircbot.rb', 'lib', 'bin/rbot']
 
   #### Author and project details.
 

@@ -229,6 +229,7 @@ module Irc
       value = params[:value].to_s
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
+        return
       end
       begin
         @@items[key].set_string(value)
@@ -263,7 +264,7 @@ module Irc
       end
     end
     def usage(m,params)
-      m.reply "incorrect usage, try '#{@bot.nick}: help config'"
+      m.reply "incorrect usage, try '#{@@bot.nick}: help config'"
     end
 
     # bot:: parent bot class

@@ -71,6 +71,9 @@ class IrcBot
   # channel info for channels the bot is in
   attr_reader :channels
 
+  # bot's irc socket
+  attr_reader :socket
+
   # bot's object registry, plugins get an interface to this for persistant
   # storage (hash interface tied to a bdb file, plugins use Accessors to store
   # and restore objects in their own namespaces.)

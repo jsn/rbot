@@ -29,15 +29,17 @@ module Irc
         else
           action = route.options[:action] ? route.options[:action] : route.items[0]
           next unless @parent.respond_to?(action)
-          auth = route.options[:auth] ? route.options[:auth] : action
+          auth = route.options[:auth] ? route.options[:auth] : route.items[0]
+          debug "checking auth for #{auth}"
           if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "route found and auth'd: #{action.inspect} #{options.inspect}"
             @parent.send(action, m, options)
             return true
           end
+          debug "auth failed for #{auth}"
           # if it's just an auth failure but otherwise the match is good,
           # don't try any more handlers
-          break
+          return false
         end
       end
       debug failures.inspect

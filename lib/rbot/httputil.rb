@@ -44,7 +44,7 @@ class HttpUtil
 
     list = [uri.host]
     begin
-      list.push Resolv.getaddresses(uri.host)
+      list.concat Resolv.getaddresses(uri.host)
     rescue StandardError => err
       puts "warning: couldn't resolve host uri.host"
     end
@@ -90,10 +90,10 @@ class HttpUtil
 
     if @bot.config["http.use_proxy"]
       if (ENV['http_proxy'])
-        proxy = URI.parse ENV['http_proxy']
+        proxy = URI.parse ENV['http_proxy'] rescue nil
       end
       if (@bot.config["http.proxy_uri"])
-        proxy = URI.parse ENV['http_proxy_uri']
+        proxy = URI.parse @bot.config["http.proxy_uri"] rescue nil
       end
       if proxy
         debug "proxy is set to #{proxy.uri}"
