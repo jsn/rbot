@@ -16,14 +16,7 @@ function)
 babelfish, wserver:
       net/http 1.2+
 
-
-excuse,insult:
-      net/telnet
-
-nslookup:
-      resolv-replace (optional)
-
-slashdot:
+slashdot, freshmeat, rss:
       REXML
 
 External programs needed for rbot

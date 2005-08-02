@@ -1,8 +1,5 @@
-o runtime language changing
-o maybe runtime language configuration?
 o freeze/thaw factoids (make them readonly) at higher auth
 o respond to insults
 o feed back errors from plugins (optional)
 o Allow users to leave messages to named users.
 o wtf plugin (bsdgames)
-o weather plugin C->F conversion is wrong?
