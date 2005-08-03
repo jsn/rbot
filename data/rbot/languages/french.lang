@@ -1,0 +1,39 @@
+okay:
+  d'accord
+dunno:
+  de quoi est mort votre dernier esclave?
+  je vous aurais bien aide, mais je ne vous aime pas
+  faites-le vous-même
+  parle à mon cul, ma tête est malade
+  je ne sais pas
+  je ne peut pas faire ca Dave.
+dunno_about_X:
+  qu'est-ce c'est %s?
+insult:
+  %s: putin!
+  %s: :(
+  %s: je te déteste :(
+  %s: tu es completement debile
+  %s: mais t'as une tête a faire sauter les plaques d'egouts!
+  %s: est-ce que vous êtes ivre?
+hello:
+  bonjour
+  salut
+  bonsoir
+hello_X:
+  bonjour %s :)
+  %s: salut
+welcome:
+  de rien
+  aucun probleme
+thanks:
+  merci :)
+  tu es trop gentil!
+  je vous remerci bien
+thanks_X:
+  %s: merci :)
+  %s: tu es trop gentil!
+  %s: je vous remerci bien
+quit:
+  d'accord, au revoir
+  a demain
