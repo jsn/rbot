@@ -22,13 +22,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 $VERBOSE=true
-$debug = false
-
-# print +message+ if debugging is enabled
-def debug(message=nil)
-  print "DEBUG: #{message}\n" if($debug && message)
-  #yield
-end
 
 require 'etc'
 require 'getoptlong'
@@ -65,7 +58,6 @@ rescue LoadError => e
   puts "Error: couldn't find the rbot/ircbot module for loading\n - did you install rbot using install.rb?"
   exit 2
 end
-  
 
 if ($opts["version"])
   puts "rbot #{$version}"

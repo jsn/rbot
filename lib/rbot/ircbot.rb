@@ -2,6 +2,13 @@ require 'thread'
 require 'etc'
 require 'fileutils'
 
+$debug = false unless $debug
+# print +message+ if debugging is enabled
+def debug(message=nil)
+  print "DEBUG: #{message}\n" if($debug && message)
+  #yield
+end
+
 # these first
 require 'rbot/rbotconfig'
 require 'rbot/config'
@@ -369,6 +376,7 @@ class IrcBot
     end while(message.length > 0)
   end
 
+  # queue an arbitraty message for the server
   def sendq(message="")
     # temporary
     @socket.queue(message)
@@ -429,6 +437,7 @@ class IrcBot
     sendq "TOPIC #{where} :#{topic}"
   end
 
+  # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
     trap("SIGTERM", "DEFAULT")
     trap("SIGHUP", "DEFAULT")
@@ -539,6 +548,7 @@ class IrcBot
     return helpstr
   end
 
+  # returns a string describing the current status of the bot (uptime etc)
   def status
     secs_up = Time.new - @startup_time
     uptime = Utils.secs_to_string secs_up

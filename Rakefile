@@ -16,7 +16,7 @@ spec = Gem::Specification.new do |s|
   s.requirements << 'Ruby, version 1.8.0 (or newer)'
 
   #  s.files = Dir.glob("**/*").delete_if { |item| item.include?(".svn") }
-  s.files = FileList['lib/**/*.rb', 'bin/*', 'data/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL', 'rbot.gemspec', 'Usage_en.txt', 'setup.rb'].to_a
+  s.files = FileList['lib/**/*.rb', 'bin/*', 'data/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL',  'Usage_en.txt', 'setup.rb'].to_a
   s.executables << 'rbot'
 
   s.autorequire = 'rbot/ircbot'

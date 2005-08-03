@@ -8,8 +8,8 @@ module Plugins
   #
   # map(template, options)::
   #    map is the new, cleaner way to respond to specific message formats
-  #    without littering your plugin code with regexps
-  #    examples:
+  #    without littering your plugin code with regexps. examples:
+  #
   #      plugin.map 'karmastats', :action => 'karma_stats'
   #
   #      # while in the plugin...

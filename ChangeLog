@@ -1,3 +1,8 @@
+Thu Aug 04 00:11:52 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Tweaked the debug() stuff a bit. Need to do this more cleanly really
+	* Added a fair bit of documentation for some of the new features
+
 Wed Aug 03 15:25:07 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Added french language file (TODO most of the plugins just talk english)
