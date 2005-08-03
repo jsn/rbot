@@ -4,9 +4,11 @@ module Language
   class Language
     BotConfig.register BotConfigEnumValue.new('core.language', 
       :default => "english", :wizard => true,
-      :values => Dir.new(Config::DATADIR + "/languages").collect {|f|
-                   f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
-                 }.compact,   
+      :values => Proc.new{|bot|
+            Dir.new(Config::datadir + "/languages").collect {|f|
+              f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
+            }.compact
+          },   
       :on_change => Proc.new {|bot, v| bot.lang.set_language v},
       :desc => "Which language file the bot should use")
     
@@ -15,7 +17,7 @@ module Language
     end
 
     def set_language(language)
-      file = Config::DATADIR + "/languages/#{language}.lang"
+      file = Config::datadir + "/languages/#{language}.lang"
       unless(FileTest.exist?(file))
         raise "no such language: #{language} (no such file #{file})"
       end

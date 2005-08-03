@@ -171,7 +171,7 @@ module Plugins
     # load plugins from pre-assigned list of directories
     def scan
       dirs = Array.new
-      dirs << Config::DATADIR + "/plugins"
+      dirs << Config::datadir + "/plugins"
       dirs += @dirs
       dirs.each {|dir|
         if(FileTest.directory?(dir))
@@ -179,7 +179,7 @@ module Plugins
           d.sort.each {|file|
             next if(file =~ /^\./)
             next unless(file =~ /\.rb$/)
-            @tmpfilename = "#{dir}/#{file}"
+            tmpfilename = "#{dir}/#{file}"
 
             # create a new, anonymous module to "house" the plugin
             # the idea here is to prevent namespace pollution. perhaps there
@@ -187,11 +187,11 @@ module Plugins
             plugin_module = Module.new
             
             begin
-              plugin_string = IO.readlines(@tmpfilename).join("")
-              debug "loading module: #{@tmpfilename}"
+              plugin_string = IO.readlines(tmpfilename).join("")
+              debug "loading plugin #{tmpfilename}"
               plugin_module.module_eval(plugin_string)
             rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
-              puts "warning: plugin #{@tmpfilename} load failed: " + err
+              puts "warning: plugin #{tmpfilename} load failed: " + err
               puts err.backtrace.join("\n")
             end
           }

@@ -21,7 +21,7 @@ spec = Gem::Specification.new do |s|
 
   s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
-  s.rdoc_options = ['--exclude', '(post-config.rb|rbotconfig.rb)',
+  s.rdoc_options = ['--exclude', 'post-install.rb',
   '--title', 'rbot API Documentation', '--main', 'README', 'README']
 
   s.author = 'Tom Gilbert'

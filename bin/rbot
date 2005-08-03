@@ -22,28 +22,20 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 $VERBOSE=true
-
-require 'etc'
-require 'getoptlong'
-require 'fileutils'
-require 'rbconfig'
-
-begin
-  require 'rbot/ircbot'
-rescue LoadError => e
-  puts "Error: couldn't find the rbot/ircbot module for loading\n - did you install rbot using install.rb?"
-  exit 2
-end
-  
 $debug = false
-$version="0.9.9"
-$opts = Hash.new
 
 # print +message+ if debugging is enabled
 def debug(message=nil)
   print "DEBUG: #{message}\n" if($debug && message)
   #yield
 end
+
+require 'etc'
+require 'getoptlong'
+require 'fileutils'
+
+$version="0.9.9"
+$opts = Hash.new
 
 orig_opts = ARGV.dup
 
@@ -67,6 +59,13 @@ if ($opts["trace"])
   }
 end
 
+begin
+  require 'rbot/ircbot'
+rescue LoadError => e
+  puts "Error: couldn't find the rbot/ircbot module for loading\n - did you install rbot using install.rb?"
+  exit 2
+end
+  
 
 if ($opts["version"])
   puts "rbot #{$version}"

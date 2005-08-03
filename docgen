@@ -1,3 +1,3 @@
 #!/bin/sh
-rdoc -a -i 'lib' --exclude '(post-config.rb|rbotconfig.rb)' --main lib/rbot/ircbot.rb -o doc lib bin/rbot
+rdoc -a -i 'lib' --exclude 'post-install.rb' --main lib/rbot/ircbot.rb -o doc lib bin/rbot
 

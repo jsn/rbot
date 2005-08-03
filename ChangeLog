@@ -1,3 +1,15 @@
+Wed Aug 03 15:25:07 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Added french language file (TODO most of the plugins just talk english)
+	* The way the Enum configs were set up, it wasn't possible to add language
+	files to rbot at runtime (the directory was only scanned at startup). Now
+	you can set a values Proc, which is called to return a list of allowed
+	values whenever it's queried.
+	* Added Config module for determining where we were installed.
+	Unfortunately rubygems is a total whore in this regard, and I hope the
+	current hackery I have to do to support it becomes redundant in the
+	future.
+
 Wed Aug 03 00:31:41 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Added Rakefile, tweaked gemspec

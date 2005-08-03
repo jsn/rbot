@@ -108,8 +108,8 @@ class IrcBot
 
     @argv = params[:argv]
 
-    unless FileTest.directory? Config::DATADIR
-      puts "data directory '#{Config::DATADIR}' not found, did you install.rb?"
+    unless FileTest.directory? Config::datadir
+      puts "data directory '#{Config::datadir}' not found, did you install.rb?"
       exit 2
     end
     
@@ -122,7 +122,7 @@ class IrcBot
         puts "Error: file #{botclass} exists but isn't a directory"
         exit 2
       end
-      FileUtils.cp_r Config::DATADIR+'/templates', botclass
+      FileUtils.cp_r Config::datadir+'/templates', botclass
     end
     
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")

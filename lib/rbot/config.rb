@@ -120,6 +120,13 @@ module Irc
       super
       @values = params[:values]
     end
+    def values
+      if @values.instance_of?(Proc)
+        return @values.call(BotConfig.bot)
+      else
+        return @values
+      end
+    end
     def parse(string)
       unless @values.include?(string)
         raise ArgumentError, "invalid value #{string}, allowed values are: " + @values.join(", ")
