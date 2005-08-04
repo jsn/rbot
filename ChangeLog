@@ -1,3 +1,10 @@
+Thu Aug 04 23:03:30 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Improved ircd recognition of rfc2812.rb
+	* de-string'd, de-cap'd rfc2812.rb, looks less shouty now
+	* moved the Q auth stuff (for quakenet) into a new qauth plugin (untested!)
+	* finish fixing the httputil
+
 Thu Aug 04 00:11:52 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Tweaked the debug() stuff a bit. Need to do this more cleanly really

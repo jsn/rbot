@@ -23,6 +23,7 @@ class HttpUtil
       :default => [],
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use the proxy to access this URI. All URIs are proxied by default if the proxy is set, so this is only required to re-include URIs that might have been excluded by the exclude list. e.g. exclude /.*\.foo\.com/, include bar\.foo\.com")
     BotConfig.register BotConfigArrayValue.new('http.proxy_exclude',
+      :default => [],
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use avoid the proxy to access this URI and access it directly")
 
   def initialize(bot)

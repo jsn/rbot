@@ -78,6 +78,9 @@ module Plugins
   # topic(TopicMessage)::
   #                        Called when a user (or the bot) changes a channel
   #                        topic
+  #
+  # connect()::            Called when a server is joined successfully, but
+  #                        before autojoin channels are joined (no params)
   # 
   # save::                 Called when you are required to save your plugin's
   #                        state, if you maintain data between sessions

@@ -15,8 +15,10 @@ module Irc
   # - The server sends Replies 001 to 004 to a user upon
   # successful registration.
   # 
-  RPL_BOUNCE=005
-  # "Try server <server name>, port <port number>"
+  # RPL_BOUNCE=005
+  # # "Try server <server name>, port <port number>"
+  RPL_ISUPPORT=005
+  # "005 nick PREFIX=(ov)@+ CHANTYPES=#& :are supported by this server"
   # 
   # - Sent by the server to a user to suggest an alternative
   # server.  This is often used when the connection is
@@ -354,6 +356,13 @@ module Irc
   # being displayed anyway.
   # RPL_TRACEEND is sent to indicate the end of the list.
   # 
+  RPL_LOCALUSERS=265
+  # ":Current local  users: 3  Max: 4"
+  RPL_GLOBALUSERS=266
+  # ":Current global users: 3  Max: 4"
+  RPL_STATSCONN=250
+  # "::Highest connection count: 4 (4 clients) (251 since server was
+  # (re)started)"
   RPL_STATSLINKINFO=211
   # "<linkname> <sendq> <sent messages>
   # <sent Kbytes> <received messages>
@@ -799,7 +808,6 @@ module Irc
   RPL_STATSSLINE=244
   RPL_STATSPING=246  
   RPL_STATSBLINE=247
-  RPL_STATSDLINE=250
   ERR_NOSERVICEHOST=492
   
   # implements RFC 2812 and prior IRC RFCs.
@@ -818,29 +826,31 @@ module Irc
     #
     # ==server events currently supported:
     #
-    # PING::        server pings you (default handler returns a pong)
-    # NICKTAKEN::   you tried to change nick to one that's in use
-    # BADNICK::     you tried to change nick to one that's invalid
-    # TOPIC::       someone changed the topic of a channel
-    # TOPICINFO::   on joining a channel or asking for the topic, tells you
-    #               who set it and when
-    # NAMES::       server sends list of channel members when you join
-    # WELCOME::     server welcome message on connect
-    # MOTD::        server message of the day
-    # PRIVMSG::     privmsg, the core of IRC, a message to you from someone
-    # PUBLIC::      optionally instead of getting privmsg you can hook to only
-    #               the public ones...
-    # MSG::         or only the private ones, or both
-    # KICK::        someone got kicked from a channel
-    # PART::        someone left a channel
-    # QUIT::        someone quit IRC
-    # JOIN::        someone joined a channel
-    # CHANGETOPIC:: the topic of a channel changed
-    # INVITE::      you are invited to a channel
-    # NICK::        someone changed their nick
-    # MODE::        a mode change
-    # NOTICE::      someone sends you a notice
-    # UNKNOWN::     any other message not handled by the above
+    # :created       when the server was started
+    # :yourhost      your host details (on connection)
+    # :ping::        server pings you (default handler returns a pong)
+    # :nicktaken::   you tried to change nick to one that's in use
+    # :badnick::     you tried to change nick to one that's invalid
+    # :topic::       someone changed the topic of a channel
+    # :topicinfo::   on joining a channel or asking for the topic, tells you
+    #                who set it and when
+    # :names::       server sends list of channel members when you join
+    # :welcome::     server welcome message on connect
+    # :motd::        server message of the day
+    # :privmsg::     privmsg, the core of IRC, a message to you from someone
+    # :public::      optionally instead of getting privmsg you can hook to only
+    #                the public ones...
+    # :msg::         or only the private ones, or both
+    # :kick::        someone got kicked from a channel
+    # :part::        someone left a channel
+    # :quit::        someone quit IRC
+    # :join::        someone joined a channel
+    # :changetopic:: the topic of a channel changed
+    # :invite::      you are invited to a channel
+    # :nick::        someone changed their nick
+    # :mode::        a mode change
+    # :notice::      someone sends you a notice
+    # :unknown::     any other message not handled by the above
     def []=(key, value)
       @handlers[key] = value
     end
@@ -856,7 +866,7 @@ module Irc
     # sending it a hash containing the data from the server
     def process(serverstring)
       data = Hash.new
-      data["SERVERSTRING"] = serverstring
+      data[:serverstring] = serverstring
       
       unless serverstring =~ /^(:(\S+)\s)?(\S+)(\s(.*))?/
 	      raise "Unparseable Server Message!!!: #{serverstring}"
@@ -865,10 +875,10 @@ module Irc
       prefix, command, params = $2, $3, $5
       
       if prefix != nil
-        data['SOURCE'] = prefix
+        data[:source] = prefix
         if prefix =~ /^(\S+)!(\S+)$/
-          data['SOURCENICK'] = $1
-          data['SOURCEADDRESS'] = $2
+          data[:sourcenick] = $1
+          data[:sourceaddress] = $2
         end
       end
 
@@ -878,31 +888,47 @@ module Irc
       
       case command
       when 'PING'
-        data['PINGID'] = argv[0]
-        handle('PING', data)
+        data[:pingid] = argv[0]
+        handle(:ping, data)
       when /^(\d+)$/		# numeric server message
         num=command.to_i
         case num
+        when RPL_YOURHOST
+          # "Your host is <servername>, running version <ver>"
+          # TODO how standard is this "version <ver>? should i parse it?
+          data[:message] = argv[1]
+          handle(:yourhost, data)
+        when RPL_CREATED
+          # "This server was created <date>"
+          data[:message] = argv[1]
+          handle(:created, data)
+        when RPL_MYINFO
+          # "<servername> <version> <available user modes>
+          # <available channel modes>"
+          data[:servername] = argv[1]
+          data[:version] = argv[2]
+          data[:usermodes] = argv[3]
+          data[:chanmodes] = argv[4]
         when ERR_NICKNAMEINUSE
           # "* <nick> :Nickname is already in use"
-          data['NICK'] = argv[1]
-          data['MESSAGE'] = argv[2]
-          handle('NICKTAKEN', data)
+          data[:nick] = argv[1]
+          data[:message] = argv[2]
+          handle(:nicktaken, data)
         when ERR_ERRONEUSNICKNAME
           # "* <nick> :Erroneous nickname"
-          data['NICK'] = argv[1]
-          data['MESSAGE'] = argv[2]
-          handle('BADNICK', data)
+          data[:nick] = argv[1]
+          data[:message] = argv[2]
+          handle(:badnick, data)
         when RPL_TOPIC
-          data['CHANNEL'] = argv[1]
-          data['TOPIC'] = argv[2]
-          handle('TOPIC', data)
+          data[:channel] = argv[1]
+          data[:topic] = argv[2]
+          handle(:topic, data)
         when RPL_TOPIC_INFO
-          data['NICK'] = argv[0]
-          data['CHANNEL'] = argv[1]
-          data['SOURCE'] = argv[2]
-          data['UNIXTIME'] = argv[3]
-          handle('TOPICINFO', data)
+          data[:nick] = argv[0]
+          data[:channel] = argv[1]
+          data[:source] = argv[2]
+          data[:unixtime] = argv[3]
+          handle(:topicinfo, data)
         when RPL_NAMREPLY
           # "( "=" / "*" / "@" ) <channel>
           # :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
@@ -916,26 +942,77 @@ module Irc
             end
           }
         when RPL_ENDOFNAMES
-          data['CHANNEL'] = argv[1]
-          data['USERS'] = @users
-          handle('NAMES', data)
+          data[:channel] = argv[1]
+          data[:users] = @users
+          handle(:names, data)
           @users = Array.new
+        when RPL_ISUPPORT
+          # "PREFIX=(ov)@+ CHANTYPES=#& :are supported by this server"
+          # "MODES=4 CHANLIMIT=#:20 NICKLEN=16 USERLEN=10 HOSTLEN=63
+          # TOPICLEN=450 KICKLEN=450 CHANNELLEN=30 KEYLEN=23 CHANTYPES=#
+          # PREFIX=(ov)@+ CASEMAPPING=ascii CAPAB IRCD=dancer :are available
+          # on this server"
+          # 
+          argv.each {|a|
+            if a =~ /^(.*)=(.*)$/
+              data[$1.downcase.to_sym] = $2
+            end
+          }
+          handle(:isupport, data)
+        when RPL_LUSERCLIENT
+          # ":There are <integer> users and <integer>
+          # services on <integer> servers"
+          data[:message] = argv[1]
+          handle(:luserclient, data)
+        when RPL_LUSEROP
+          # "<integer> :operator(s) online"
+          data[:ops] = argv[1].to_i
+          handle(:luserop, data)
+        when RPL_LUSERUNKNOWN
+          # "<integer> :unknown connection(s)"
+          data[:unknown] = argv[1].to_i
+          handle(:luserunknown, data)
+        when RPL_LUSERCHANNELS
+          # "<integer> :channels formed"
+          data[:channels] = argv[1].to_i
+          handle(:luserchannels, data)
+        when RPL_LUSERME
+          # ":I have <integer> clients and <integer> servers"
+          data[:message] = argv[1]
+          handle(:luserme, data)
+        when ERR_NOMOTD
+          # ":MOTD File is missing"
+          data[:message] = argv[1]
+          handle(:motd_missing, data)
+        when RPL_LOCALUSERS
+          # ":Current local  users: 3  Max: 4"
+          data[:message] = argv[1]
+          handle(:localusers, data)
+        when RPL_GLOBALUSERS
+          # ":Current global users: 3  Max: 4"
+          data[:message] = argv[1]
+          handle(:globalusers, data)
+        when RPL_STATSCONN
+          # ":Highest connection count: 4 (4 clients) (251 since server was
+          # (re)started)"
+          data[:message] = argv[1]
+          handle(:statsconn, data)
         when RPL_WELCOME
           # "Welcome to the Internet Relay Network
           # <nick>!<user>@<host>"
           case argv[1]
           when /((\S+)!(\S+))/
-            data['NETMASK'] = $1
-            data['NICK'] = $2
-            data['ADDRESS'] = $3
+            data[:netmask] = $1
+            data[:nick] = $2
+            data[:address] = $3
           when /Welcome to the Internet Relay Network\s(\S+)/
-            data['NICK'] = $1
+            data[:nick] = $1
           when /Welcome.*\s+(\S+)$/
-            data['NICK'] = $1
+            data[:nick] = $1
           when /^(\S+)$/
-            data['NICK'] = $1
+            data[:nick] = $1
           end
-          handle('WELCOME', data)
+          handle(:welcome, data)
         when RPL_MOTDSTART
           # "<nick> :- <server> Message of the Day -"
           if argv[1] =~ /^-\s+(\S+)\s/
@@ -948,68 +1025,68 @@ module Irc
             @motd << "\n"
           end
         when RPL_ENDOFMOTD
-          data['MOTD'] = @motd
-          handle('MOTD', data)
+          data[:motd] = @motd
+          handle(:motd, data)
         else
-          handle('UNKNOWN', data)
+          handle(:unknown, data)
         end
       # end of numeric replies
       when 'PRIVMSG'
         # you can either bind to 'PRIVMSG', to get every one and
         # parse it yourself, or you can bind to 'MSG', 'PUBLIC',
         # etc and get it all nicely split up for you.
-        data['TARGET'] = argv[0]
-        data['MESSAGE'] = argv[1]
-        handle('PRIVMSG', data)
+        data[:target] = argv[0]
+        data[:message] = argv[1]
+        handle(:privmsg, data)
         
         # Now we split it
-        if(data['TARGET'] =~ /^(#|&).*/)
-          handle('PUBLIC', data)
+        if(data[:target] =~ /^(#|&).*/)
+          handle(:public, data)
         else
-          handle('MSG', data)
+          handle(:msg, data)
         end
       when 'KICK'
-        data['CHANNEL'] = argv[0]
-        data['TARGET'] = argv[1]
-        data['MESSAGE'] = argv[2]
-        handle('KICK', data)
+        data[:channel] = argv[0]
+        data[:target] = argv[1]
+        data[:message] = argv[2]
+        handle(:kick, data)
       when 'PART'
-        data['CHANNEL'] = argv[0]
-        data['MESSAGE'] = argv[1]
-        handle('PART', data)
+        data[:channel] = argv[0]
+        data[:message] = argv[1]
+        handle(:part, data)
       when 'QUIT'
-        data['MESSAGE'] = argv[0]
-        handle('QUIT', data)
+        data[:message] = argv[0]
+        handle(:quit, data)
       when 'JOIN'
-        data['CHANNEL'] = argv[0]
-        handle('JOIN', data)
+        data[:channel] = argv[0]
+        handle(:join, data)
       when 'TOPIC'
-        data['CHANNEL'] = argv[0]
-        data['TOPIC'] = argv[1]
-        handle('CHANGETOPIC', data)
+        data[:channel] = argv[0]
+        data[:topic] = argv[1]
+        handle(:changetopic, data)
       when 'INVITE'
-        data['TARGET'] = argv[0]
-        data['CHANNEL'] = argv[1]
-        handle('INVITE', data)
+        data[:target] = argv[0]
+        data[:channel] = argv[1]
+        handle(:invite, data)
       when 'NICK'
-        data['NICK'] = argv[0]
-        handle('NICK', data)
+        data[:nick] = argv[0]
+        handle(:nick, data)
       when 'MODE'
-        data['CHANNEL'] = argv[0]
-        data['MODESTRING'] = argv[1]
-        data['TARGETS'] = argv[2]
-        handle('MODE', data)
+        data[:channel] = argv[0]
+        data[:modestring] = argv[1]
+        data[:targets] = argv[2]
+        handle(:mode, data)
       when 'NOTICE'
-        data['TARGET'] = argv[0]
-        data['MESSAGE'] = argv[1]
-        if data['SOURCENICK']
-          handle('NOTICE', data)
+        data[:target] = argv[0]
+        data[:message] = argv[1]
+        if data[:sourcenick]
+          handle(:notice, data)
         else
           # "server notice" (not from user, noone to reply to
-          handle('SNOTICE', data)
+          handle(:snotice, data)
         end
       else
-        handle('UNKNOWN', data)
+        handle(:unknown, data)
       end
     end
 

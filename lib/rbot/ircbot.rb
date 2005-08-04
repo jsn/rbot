@@ -159,35 +159,36 @@ class IrcBot
     end
     
     @client = IrcClient.new
-    @client["PRIVMSG"] = proc { |data|
-      message = PrivMessage.new(self, data["SOURCE"], data["TARGET"], data["MESSAGE"])
+    @client[:privmsg] = proc { |data|
+      message = PrivMessage.new(self, data[:source], data[:target], data[:message])
       onprivmsg(message)
     }
-    @client["NOTICE"] = proc { |data|
-      message = NoticeMessage.new(self, data["SOURCE"], data["TARGET"], data["MESSAGE"])
+    @client[:notice] = proc { |data|
+      message = NoticeMessage.new(self, data[:source], data[:target], data[:message])
       # pass it off to plugins that want to hear everything
       @plugins.delegate "listen", message
     }
-    @client["MOTD"] = proc { |data|
-      data['MOTD'].each_line { |line|
+    @client[:motd] = proc { |data|
+      data[:motd].each_line { |line|
         log "MOTD: #{line}", "server"
       }
     }
-    @client["NICKTAKEN"] = proc { |data| 
-      nickchg "#{@nick}_"
+    @client[:nicktaken] = proc { |data| 
+      nickchg "#{data[:nick]}_"
     }
-    @client["BADNICK"] = proc {|data| 
-      puts "WARNING, bad nick (#{data['NICK']})"
+    @client[:badnick] = proc {|data| 
+      puts "WARNING, bad nick (#{data[:nick]})"
     }
-    @client["PING"] = proc {|data|
+    @client[:ping] = proc {|data|
       # (jump the queue for pongs)
-      @socket.puts "PONG #{data['PINGID']}"
+      @socket.puts "PONG #{data[:pingid]}"
     }
-    @client["NICK"] = proc {|data|
-      sourcenick = data["SOURCENICK"]
-      nick = data["NICK"]
-      m = NickMessage.new(self, data["SOURCE"], data["SOURCENICK"], data["NICK"])
+    @client[:nick] = proc {|data|
+      sourcenick = data[:sourcenick]
+      nick = data[:nick]
+      m = NickMessage.new(self, data[:source], data[:sourcenick], data[:nick])
       if(sourcenick == @nick)
+        debug "my nick is now #{nick}"
         @nick = nick
       end
       @channels.each {|k,v|
@@ -200,13 +201,13 @@ class IrcBot
       @plugins.delegate("listen", m)
       @plugins.delegate("nick", m)
     }
-    @client["QUIT"] = proc {|data|
-      source = data["SOURCE"]
-      sourcenick = data["SOURCENICK"]
-      sourceurl = data["SOURCEADDRESS"]
-      message = data["MESSAGE"]
-      m = QuitMessage.new(self, data["SOURCE"], data["SOURCENICK"], data["MESSAGE"])
-      if(data["SOURCENICK"] =~ /#{@nick}/i)
+    @client[:quit] = proc {|data|
+      source = data[:source]
+      sourcenick = data[:sourcenick]
+      sourceurl = data[:sourceaddress]
+      message = data[:message]
+      m = QuitMessage.new(self, data[:source], data[:sourcenick], data[:message])
+      if(data[:sourcenick] =~ /#{@nick}/i)
       else
         @channels.each {|k,v|
           if(v.users.has_key?(sourcenick))
@@ -218,26 +219,23 @@ class IrcBot
       @plugins.delegate("listen", m)
       @plugins.delegate("quit", m)
     }
-    @client["MODE"] = proc {|data|
-      source = data["SOURCE"]
-      sourcenick = data["SOURCENICK"]
-      sourceurl = data["SOURCEADDRESS"]
-      channel = data["CHANNEL"]
-      targets = data["TARGETS"]
-      modestring = data["MODESTRING"]
+    @client[:mode] = proc {|data|
+      source = data[:source]
+      sourcenick = data[:sourcenick]
+      sourceurl = data[:sourceaddress]
+      channel = data[:channel]
+      targets = data[:targets]
+      modestring = data[:modestring]
       log "@ Mode #{modestring} #{targets} by #{sourcenick}", channel
     }
-    @client["WELCOME"] = proc {|data|
-      log "joined server #{data['SOURCE']} as #{data['NICK']}", "server"
-      debug "I think my nick is #{@nick}, server thinks #{data['NICK']}"
-      if data['NICK'] && data['NICK'].length > 0
-        @nick = data['NICK']
+    @client[:welcome] = proc {|data|
+      log "joined server #{data[:source]} as #{data[:nick]}", "server"
+      debug "I think my nick is #{@nick}, server thinks #{data[:nick]}"
+      if data[:nick] && data[:nick].length > 0
+        @nick = data[:nick]
       end
-      if(@config['irc.quser'])
-        # TODO move this to a plugin
-        debug "authing with Q using  #{@config['quakenet.user']} #{@config['quakenet.auth']}"
-        @socket.puts "PRIVMSG Q@CServe.quakenet.org :auth #{@config['quakenet.user']} #{@config['quakenet.auth']}"
-      end
+
+      @plugins.delegate("connect")
 
       @config['irc.join_channels'].each {|c|
         debug "autojoining channel #{c}"
@@ -248,47 +246,47 @@ class IrcBot
         end
       }
     }
-    @client["JOIN"] = proc {|data|
-      m = JoinMessage.new(self, data["SOURCE"], data["CHANNEL"], data["MESSAGE"])
+    @client[:join] = proc {|data|
+      m = JoinMessage.new(self, data[:source], data[:channel], data[:message])
       onjoin(m)
     }
-    @client["PART"] = proc {|data|
-      m = PartMessage.new(self, data["SOURCE"], data["CHANNEL"], data["MESSAGE"])
+    @client[:part] = proc {|data|
+      m = PartMessage.new(self, data[:source], data[:channel], data[:message])
       onpart(m)
     }
-    @client["KICK"] = proc {|data|
-      m = KickMessage.new(self, data["SOURCE"], data["TARGET"],data["CHANNEL"],data["MESSAGE"]) 
+    @client[:kick] = proc {|data|
+      m = KickMessage.new(self, data[:source], data[:target],data[:channel],data[:message]) 
       onkick(m)
     }
-    @client["INVITE"] = proc {|data|
-      if(data["TARGET"] =~ /^#{@nick}$/i)
-        join data["CHANNEL"] if (@auth.allow?("join", data["SOURCE"], data["SOURCENICK"]))
+    @client[:invite] = proc {|data|
+      if(data[:target] =~ /^#{@nick}$/i)
+        join data[:channel] if (@auth.allow?("join", data[:source], data[:sourcenick]))
       end
     }
-    @client["CHANGETOPIC"] = proc {|data|
-      channel = data["CHANNEL"]
-      sourcenick = data["SOURCENICK"]
-      topic = data["TOPIC"]
-      timestamp = data["UNIXTIME"] || Time.now.to_i
+    @client[:changetopic] = proc {|data|
+      channel = data[:channel]
+      sourcenick = data[:sourcenick]
+      topic = data[:topic]
+      timestamp = data[:unixtime] || Time.now.to_i
       if(sourcenick == @nick)
         log "@ I set topic \"#{topic}\"", channel
       else
         log "@ #{sourcenick} set topic \"#{topic}\"", channel
       end
-      m = TopicMessage.new(self, data["SOURCE"], data["CHANNEL"], timestamp, data["TOPIC"])
+      m = TopicMessage.new(self, data[:source], data[:channel], timestamp, data[:topic])
 
       ontopic(m)
       @plugins.delegate("listen", m)
       @plugins.delegate("topic", m)
     }
-    @client["TOPIC"] = @client["TOPICINFO"] = proc {|data|
-      channel = data["CHANNEL"]
-      m = TopicMessage.new(self, data["SOURCE"], data["CHANNEL"], data["UNIXTIME"], data["TOPIC"])
+    @client[:topic] = @client[:topicinfo] = proc {|data|
+      channel = data[:channel]
+      m = TopicMessage.new(self, data[:source], data[:channel], data[:unixtime], data[:topic])
         ontopic(m)
     }
-    @client["NAMES"] = proc {|data|
-      channel = data["CHANNEL"]
-      users = data["USERS"]
+    @client[:names] = proc {|data|
+      channel = data[:channel]
+      users = data[:users]
       unless(@channels[channel])
         puts "bug: got names for channel '#{channel}' I didn't think I was in\n"
         exit 2
@@ -298,8 +296,9 @@ class IrcBot
         @channels[channel].users[u[0].sub(/^[@&~+]/, '')] = ["mode", u[1]]
       }
     }
-    @client["UNKNOWN"] = proc {|data|
-      debug "UNKNOWN: #{data['SERVERSTRING']}"
+    @client[:unknown] = proc {|data|
+      #debug "UNKNOWN: #{data[:serverstring]}"
+      log data[:serverstring], ":unknown"
     }
   end
 

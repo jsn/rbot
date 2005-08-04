@@ -134,7 +134,7 @@ module Irc
       string
     end
     def desc
-      "#{@desc} [valid values are: " + @values.join(", ") + "]"
+      "#{@desc} [valid values are: " + values.join(", ") + "]"
     end
   end
 
