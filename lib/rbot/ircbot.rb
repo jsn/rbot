@@ -136,6 +136,7 @@ class IrcBot
 
     @startup_time = Time.new
     @config = BotConfig.new(self)
+# TODO background self after botconfig has a chance to run wizard
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
