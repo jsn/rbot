@@ -39,6 +39,7 @@ opts = GetoptLong.new(
   ["--version", "-v", GetoptLong::NO_ARGUMENT]
 )
 
+$debug = false
 opts.each {|opt, arg|
   $debug = true if(opt == "--debug")
   $opts[opt.sub(/^-+/, "")] = arg
