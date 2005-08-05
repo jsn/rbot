@@ -826,8 +826,8 @@ module Irc
     #
     # ==server events currently supported:
     #
-    # :created       when the server was started
-    # :yourhost      your host details (on connection)
+    # :created::     when the server was started
+    # :yourhost::    your host details (on connection)
     # :ping::        server pings you (default handler returns a pong)
     # :nicktaken::   you tried to change nick to one that's in use
     # :badnick::     you tried to change nick to one that's invalid
