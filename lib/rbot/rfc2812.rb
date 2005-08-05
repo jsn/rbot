@@ -826,31 +826,31 @@ module Irc
     #
     # ==server events currently supported:
     #
-    # :created::     when the server was started
-    # :yourhost::    your host details (on connection)
-    # :ping::        server pings you (default handler returns a pong)
-    # :nicktaken::   you tried to change nick to one that's in use
-    # :badnick::     you tried to change nick to one that's invalid
-    # :topic::       someone changed the topic of a channel
-    # :topicinfo::   on joining a channel or asking for the topic, tells you
-    #                who set it and when
-    # :names::       server sends list of channel members when you join
-    # :welcome::     server welcome message on connect
-    # :motd::        server message of the day
-    # :privmsg::     privmsg, the core of IRC, a message to you from someone
-    # :public::      optionally instead of getting privmsg you can hook to only
-    #                the public ones...
-    # :msg::         or only the private ones, or both
-    # :kick::        someone got kicked from a channel
-    # :part::        someone left a channel
-    # :quit::        someone quit IRC
-    # :join::        someone joined a channel
-    # :changetopic:: the topic of a channel changed
-    # :invite::      you are invited to a channel
-    # :nick::        someone changed their nick
-    # :mode::        a mode change
-    # :notice::      someone sends you a notice
-    # :unknown::     any other message not handled by the above
+    # created::     when the server was started
+    # yourhost::    your host details (on connection)
+    # ping::        server pings you (default handler returns a pong)
+    # nicktaken::   you tried to change nick to one that's in use
+    # badnick::     you tried to change nick to one that's invalid
+    # topic::       someone changed the topic of a channel
+    # topicinfo::   on joining a channel or asking for the topic, tells you
+    #               who set it and when
+    # names::       server sends list of channel members when you join
+    # welcome::     server welcome message on connect
+    # motd::        server message of the day
+    # privmsg::     privmsg, the core of IRC, a message to you from someone
+    # public::      optionally instead of getting privmsg you can hook to only
+    #               the public ones...
+    # msg::         or only the private ones, or both
+    # kick::        someone got kicked from a channel
+    # part::        someone left a channel
+    # quit::        someone quit IRC
+    # join::        someone joined a channel
+    # changetopic:: the topic of a channel changed
+    # invite::      you are invited to a channel
+    # nick::        someone changed their nick
+    # mode::        a mode change
+    # notice::      someone sends you a notice
+    # unknown::     any other message not handled by the above
     def []=(key, value)
       @handlers[key] = value
     end
