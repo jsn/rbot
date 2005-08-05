@@ -19,7 +19,7 @@ spec = Gem::Specification.new do |s|
   s.files = FileList['lib/**/*.rb', 'bin/*', 'data/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL',  'Usage_en.txt', 'setup.rb'].to_a.delete_if {|item| item == ".svn"}
   s.executables << 'rbot'
 
-  s.autorequire = 'rbot/ircbot'
+#  s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
   s.rdoc_options = ['--exclude', 'post-install.rb',
   '--title', 'rbot API Documentation', '--main', 'README', 'README']
