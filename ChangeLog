@@ -1,3 +1,8 @@
+Sun Aug 07 17:53:06 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * workaround for people without YAML::load_file
+	* quit message for restart
+
 Sun Aug 07 15:11:07 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * fix address_prefix, broken in 0.9.9, reported by ruskie.

@@ -459,8 +459,9 @@ class IrcBot
   end
 
   # totally shutdown and respawn the bot
-  def restart
-    shutdown("restarting, back in #{@config['server.reconnect_wait']}...")
+  def restart(message = false)
+    msg = message ? message : "restarting, back in #{@config['server.reconnect_wait']}..."
+    shutdown(msg)
     sleep @config['server.reconnect_wait']
     # now we re-exec
     exec($0, *@argv)
@@ -631,8 +632,8 @@ class IrcBot
           part $1 if(@auth.allow?("join", m.source, m.replyto))
         when (/^quit(?:\s+(.*))?$/i)
           quit $1 if(@auth.allow?("quit", m.source, m.replyto))
-        when (/^restart$/i)
-          restart if(@auth.allow?("quit", m.source, m.replyto))
+        when (/^restart(?:\s+(.*))?$/i)
+          restart $1 if(@auth.allow?("quit", m.source, m.replyto))
         when (/^hide$/i)
           join 0 if(@auth.allow?("join", m.source, m.replyto))
         when (/^save$/i)
