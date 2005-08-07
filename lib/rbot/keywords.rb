@@ -421,6 +421,8 @@ module Irc
         end
       else
         # in channel message, not to me
+        # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
+        # keyword lookup.
         if(m.message =~ /^'(.*)$/ || (!@bot.config["keyword.address"] && m.message =~ /^(.*\S)\s*\?\s*$/))
           keyword m, $1, false if(@bot.auth.allow?("keyword", m.source))
         elsif(@bot.config["keyword.listen"] == true && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/))

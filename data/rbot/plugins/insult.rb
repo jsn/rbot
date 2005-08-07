@@ -233,7 +233,11 @@ class InsultPlugin < Plugin
     elsif(m.params =~ /^me$/)
       prefix = "you are "
     else
-      prefix = "#{m.params} is "
+      who = m.params
+      if (who == @bot.nick)
+        who = m.sourcenick
+      end
+      prefix = "#{who} is "
     end
     insult = generate_insult
     @bot.say msgto, prefix + insult + suffix

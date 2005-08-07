@@ -1,3 +1,7 @@
+Sun Aug 07 18:20:24 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * stop insult plugin being used to insult the bot
+
 Sun Aug 07 17:53:06 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * workaround for people without YAML::load_file
