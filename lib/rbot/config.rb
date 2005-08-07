@@ -3,6 +3,16 @@ module Irc
   require 'yaml'
   require 'rbot/messagemapper'
 
+  unless YAML.respond_to?(:load_file)
+    module YAML
+      def YAML.load_file( filepath )
+        File.open( filepath ) do |f|
+          YAML::load( f )
+        end
+      end
+    end
+  end
+
   class BotConfigValue
     # allow the definition order to be preserved so that sorting by
     # definition order is possible. The BotConfigWizard does this to allow
