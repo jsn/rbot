@@ -7,7 +7,7 @@ module Irc
     module YAML
       def YAML.load_file( filepath )
         File.open( filepath ) do |f|
-          YAML::load( f )
+          load( f )
         end
       end
     end
