@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'rake/gempackagetask'
 
-task :default => [:package]
+task :default => [:repackage]
 
 spec = Gem::Specification.new do |s|
   s.name = 'rbot'

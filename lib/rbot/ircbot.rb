@@ -153,11 +153,6 @@ class IrcBot
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
     @nick = @config['irc.nick']
-    if @config['core.address_prefix']
-      @addressing_prefixes = @config['core.address_prefix'].split(" ")
-    else
-      @addressing_prefixes = Array.new
-    end
     
     @client = IrcClient.new
     @client[:privmsg] = proc { |data|
@@ -711,7 +706,7 @@ class IrcBot
     else
       # stuff to handle when not addressed
       case m.message
-        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$))[\s,-.]+#{@nick}$/i)
+        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{@nick}$/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
         when (/^#{@nick}!*$/)
           say m.replyto, @lang.get("hello_X") % m.sourcenick

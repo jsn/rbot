@@ -1,3 +1,11 @@
+Sun Aug 07 15:11:07 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * fix address_prefix, broken in 0.9.9, reported by ruskie.
+
+Sat Aug 06 00:54:34 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Released 0.9.9
+
 Fri Aug 05 23:55:20 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * few more tweaks preparing to release 0.9.9

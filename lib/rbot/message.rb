@@ -1,4 +1,8 @@
 module Irc
+  BotConfig.register BotConfigArrayValue.new('core.address_prefix',
+    :default => [], :wizard => true,
+    :desc => "what non nick-matching prefixes should the bot respond to as if addressed (e.g !, so that '!foo' is treated like 'rbot: foo')"
+  )
 
   # base user message class, all user messages derive from this
   # (a user message is defined as having a source hostmask, a target
@@ -127,7 +131,7 @@ module Irc
 
       # check for option extra addressing prefixes, e.g "|search foo", or
       # "!version" - first match wins
-      bot.addressing_prefixes.each {|mprefix|
+      bot.config['core.address_prefix'].each {|mprefix|
         if @message.gsub!(/^#{Regexp.escape(mprefix)}\s*/, "")
           @address = true
           break
