@@ -4,13 +4,11 @@ module Irc
   require 'rbot/messagemapper'
 
   unless YAML.respond_to?(:load_file)
-    module YAML
       def YAML.load_file( filepath )
         File.open( filepath ) do |f|
-          load( f )
+          YAML::load( f )
         end
       end
-    end
   end
 
   class BotConfigValue
