@@ -52,7 +52,7 @@ class KarmaPlugin < Plugin
   
   
   def help(plugin, topic="")
-    "karma module: <thing>++/<thing>-- => increase/decrease karma for <thing>, karma for <thing>? => show karma for <thing>, karmastats => show stats. Karma is a community rating system - only in-channel messages can affect karma and you cannot adjust your own."
+    "karma module: Listens to everyone's chat. <thing>++/<thing>-- => increase/decrease karma for <thing>, karma for <thing>? => show karma for <thing>, karmastats => show stats. Karma is a community rating system - only in-channel messages can affect karma and you cannot adjust your own."
   end
   def listen(m)
     return unless m.kind_of?(PrivMessage) && m.public?

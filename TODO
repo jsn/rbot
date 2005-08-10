@@ -1,3 +1,5 @@
+o if searchquote (or similar) has 3 results, roundrobin between them as
+asked, don't respond a random one
 o freeze/thaw factoids (make them readonly) at higher auth
 o respond to insults
 o feed back errors from plugins (optional)

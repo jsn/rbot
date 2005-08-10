@@ -3,12 +3,17 @@ o Tom Gilbert (giblet) <tom@linuxbrit.co.uk>
 
 Patch contributors
 o Peter Suschlik (pesu) <peter@zilium.de>
+o Alexey I. Froloff <raorn@altlinux.ru>
+o Ari Pollak <ajp@aripollak.com>
+o Rudolf Polzer <atfield-dt@durchnull.de>
+o René Nussbaumer <public@killerfox.forkbomb.ch>
 
 Module contributors
 o dice.rb  - David Dorward (Dorward) <david@david.us-lot.org>
 o lart.rb  - Michael Brailsford <brailsmt@yahoo.com>
 o stats.rb - Michael Brailsford <brailsmt@yahoo.com>
 o ri.rb    - Michael Brailsford <brailsmt@yahoo.com>
+o bash/threat - Robin Kearney <robin@riviera.org.uk>
 
 "Testing" (having fun breaking rbot creatively)
 o Paul Duncan (pabs) <pabs@pablotron.org>

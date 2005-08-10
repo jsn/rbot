@@ -1,3 +1,13 @@
+Thu Aug 11 00:04:31 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Patches from "Alexey I. Froloff" <raorn@altlinux.ru>
+	* Do not use "/home/#{Etc.getlogin}/" for default home directory, use
+	"#{Etc.getpwnam(Etc.getlogin).dir}/" instead.
+	* Do not try to load same plugin from different locations.  Added ability
+	to disable system-wide plugins - create PLUGIN.rb.disabled in user's
+	plugins directory.
+	* For example, to disable freshmeat plugin installed in /usr/share/rbot/plugins/freshmeat.rb one can create empty file ~/.rbot/plugins/freshmeat.rb.disabled
+
 Mon Aug 08 23:08:01 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * new markov plugin for random inane chat
