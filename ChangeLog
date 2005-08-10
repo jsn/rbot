@@ -1,3 +1,9 @@
+Thu Aug 11 00:13:11 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Added two plugins from Robin Kearney <robin@riviera.org.uk>
+	* Threat (US threat level :P)
+	* bash (bash.org quotes)
+
 Thu Aug 11 00:04:31 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Patches from "Alexey I. Froloff" <raorn@altlinux.ru>
