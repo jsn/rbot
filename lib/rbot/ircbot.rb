@@ -120,7 +120,7 @@ class IrcBot
       exit 2
     end
     
-    botclass = "/home/#{Etc.getlogin}/.rbot" unless botclass
+    botclass = "#{Etc.getpwnam(Etc.getlogin).dir}/.rbot" unless botclass
     @botclass = botclass.gsub(/\/$/, "")
 
     unless FileTest.directory? botclass
