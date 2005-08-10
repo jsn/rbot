@@ -173,14 +173,20 @@ module Plugins
 
     # load plugins from pre-assigned list of directories
     def scan
+      processed = Array.new
       dirs = Array.new
       dirs << Config::datadir + "/plugins"
       dirs += @dirs
-      dirs.each {|dir|
+      dirs.reverse.each {|dir|
         if(FileTest.directory?(dir))
           d = Dir.new(dir)
           d.sort.each {|file|
             next if(file =~ /^\./)
+            next if(processed.include?(file))
+            if(file =~ /^(.+\.rb)\.disabled$/)
+              processed << $1
+              next
+            end
             next unless(file =~ /\.rb$/)
             tmpfilename = "#{dir}/#{file}"
 
@@ -193,6 +199,7 @@ module Plugins
               plugin_string = IO.readlines(tmpfilename).join("")
               debug "loading plugin #{tmpfilename}"
               plugin_module.module_eval(plugin_string)
+              processed << file
             rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
               puts "warning: plugin #{tmpfilename} load failed: " + err
               puts err.backtrace.join("\n")
