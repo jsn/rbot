@@ -1,8 +1,8 @@
 class AutoOP < Plugin
     @@handlers = {
-        "addop" => "handle_addop",
-        "rmop" => "handle_rmop",
-        "listop" => "handle_listop"
+        "add" => "handle_addop",
+        "rm" => "handle_rmop",
+        "list" => "handle_listop"
     }
     
     def help(plugin, topic="")
@@ -28,16 +28,16 @@ class AutoOP < Plugin
           elsif (m.params =~ /^rm\s+(.+)$/)
             handle_rmop(m, $1)
           end
+        else
+          m.reply "private message only please!"
         end
     end
 
     def handle_addop(m, params)
         ma = /^(.+?)(\s+(.+))?$/.match(params)
-        channels = ma[2] ? ma[2] : @bot.config['JOIN_CHANNELS']
+        channels = ma[2] ? ma[2] : @bot.config['irc.join_channels']
         if(ma[1] && channels)
-            @registry[ma[1]] = channels.split(/,\s*/).collect { |x|
-                x.strip
-            }
+            @registry[ma[1]] = channels
             m.okay
         else
             m.reply @bot.lang.get('dunno')
