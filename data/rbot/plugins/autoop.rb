@@ -24,24 +24,27 @@ class AutoOP < Plugin
         m.reply @bot.lang.get('dunno')
         return
       end
-      if (params[:channels] && @registry[params[:mask]] != nil)
+      if (!params[:channels].empty? && @registry[params[:mask]] != nil)
         params[:channels].each do |c|
           @registry[params[:mask]] = @registry[params[:mask]].reject {|ele| ele =~ /^#{c}$/i}
         end
-      elsif(!@registry.delete(params[:mask]))
-        m.reply @bot.lang.get('dunno')
+        if @registry[params[:mask]].empty?
+          @registry.delete(params[:mask])
+        end
       else
-        m.okay
+        @registry.delete(params[:mask])
       end
+      m.okay
     end
 
     def list(m, params)
-      if(@registry.length)
+      debug @registry.length
+      if(@registry.length > 0)
         @registry.each { |mask,channels|
           m.reply "#{mask} in #{channels.empty? ? 'all channels' : channels.join(', ')}"
         }
       else
-        m.reply "No entrys"
+        m.reply "No entries"
       end
     end
 end
