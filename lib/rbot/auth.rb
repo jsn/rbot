@@ -6,7 +6,7 @@ module Irc
   # match *!*@baz.com, foo!*@*, *!bar@*, etc.
   def Irc.netmaskmatch(globmask, netmask)
     regmask = globmask.gsub(/\*/, ".*?")
-    return true if(netmask =~ /#{regmask}/)
+    return true if(netmask =~ /#{regmask}/i)
     return false
   end
 

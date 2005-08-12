@@ -22,6 +22,9 @@ class MathPlugin < Plugin
      "ten" => "10"
   };
 
+  def name
+    "math"
+  end
   def help(plugin, topic="")
     "math <expression>, evaluate mathematical expression"
   end
@@ -120,3 +123,4 @@ class MathPlugin < Plugin
 end
 plugin = MathPlugin.new
 plugin.register("math")
+plugin.register("maths")

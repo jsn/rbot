@@ -121,7 +121,10 @@ module Irc
           failures << [tmpl, failure]
         else
           action = tmpl.options[:action] ? tmpl.options[:action] : tmpl.items[0]
-          next unless @parent.respond_to?(action)
+          unless @parent.respond_to?(action)
+            failures << [tmpl, "class does not respond to action #{action}"]
+            next
+          end
           auth = tmpl.options[:auth] ? tmpl.options[:auth] : tmpl.items[0]
           debug "checking auth for #{auth}"
           if m.bot.auth.allow?(auth, m.source, m.replyto)
@@ -135,7 +138,9 @@ module Irc
           return false
         end
       end
-      debug failures.inspect
+      failures.each {|f, r|
+        debug "#{f.inspect} => #{r}"
+      }
       debug "no handler found, trying fallback"
       if @fallback != nil && @parent.respond_to?(@fallback)
         if m.bot.auth.allow?(@fallback, m.source, m.replyto)
