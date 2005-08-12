@@ -24,7 +24,7 @@ class MarkovPlugin < Plugin
     "markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. usage: 'markov' to attempt to say something relevant to the last line of chat, if it can."
   end
   
-  def cleanup(s)
+  def clean_str(s)
     str = s.dup
     str.gsub!(/^.+:/, "")
     str.gsub!(/^.+,/, "")
@@ -34,7 +34,7 @@ class MarkovPlugin < Plugin
   def listen(m)
     return unless m.kind_of?(PrivMessage) && m.public?
     return if m.address?
-    message = cleanup m.message
+    message = clean_str m.message
     # in channel message, the kind we are interested in
     wordlist = message.split(/\s+/)
     return unless wordlist.length > 2
