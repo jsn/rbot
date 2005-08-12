@@ -1,68 +1,56 @@
 class AutoOP < Plugin
-    @@handlers = {
-        "add" => "handle_addop",
-        "rm" => "handle_rmop",
-        "list" => "handle_listop"
-    }
-    
     def help(plugin, topic="")
-        "perform autoop based on hostmask - usage: addop <hostmask>, rmop <hostmask>, listop"
+        "perform autoop based on hostmask - usage: addop <hostmask> [channel channel ...], rmop <hostmask> [channel], list - list current ops. If you don't specify which channels, all channels are assumed"
     end
     
     def join(m)
-        if(!m.address?)
-          @registry.each { |mask,channels|
-            if(Irc.netmaskmatch(mask, m.source) && channels.include?(m.channel))
-              @bot.mode(m.channel, "+o", m.sourcenick)
-            end
-          }
+      return if m.address?
+      @registry.each { |mask,channels|
+        if(Irc.netmaskmatch(mask, m.source) &&
+            (channels.empty? || channels.include?(m.channel)))
+          @bot.mode(m.channel, "+o", m.sourcenick)
+          return
         end
-    end
-    
-    def privmsg(m)
-        if(m.private?)
-          if (!m.params || m.params == "list")
-            handle_listop(m)
-          elsif (m.params =~ /^add\s+(.+)$/)
-            handle_addop(m, $1)
-          elsif (m.params =~ /^rm\s+(.+)$/)
-            handle_rmop(m, $1)
-          end
-        else
-          m.reply "private message only please!"
-        end
+      }
     end
 
-    def handle_addop(m, params)
-        ma = /^(.+?)(\s+(.+))?$/.match(params)
-        channels = ma[2] ? ma[2] : @bot.config['irc.join_channels']
-        if(ma[1] && channels)
-            @registry[ma[1]] = channels
-            m.okay
-        else
-            m.reply @bot.lang.get('dunno')
-        end
+    def add(m, params)
+      @registry[params[:mask]] = params[:channels].dup
+      m.okay
     end
 
-    def handle_rmop(m, params)
-       if(!@registry.delete(params))
-         m.reply @bot.lang.get('dunno')
-       else
-         m.okay
-       end
+    def rm(m, params)
+      unless @registry.has_key?(params[:mask])
+        m.reply @bot.lang.get('dunno')
+        return
+      end
+      if (params[:channels] && @registry[params[:mask]] != nil)
+        params[:channels].each do |c|
+          @registry[params[:mask]] = @registry[params[:mask]].reject {|ele| ele =~ /^#{c}$/i}
+        end
+      elsif(!@registry.delete(params[:mask]))
+        m.reply @bot.lang.get('dunno')
+      else
+        m.okay
+      end
     end
 
-    def handle_listop(m)
-        if(@registry.length)
-            @registry.each { |mask,channels|
-                m.reply "#{mask} in #{channels.join(', ')}"
-            }
-        else
-            m.reply "No entrys"
-        end
+    def list(m, params)
+      if(@registry.length)
+        @registry.each { |mask,channels|
+          m.reply "#{mask} in #{channels.empty? ? 'all channels' : channels.join(', ')}"
+        }
+      else
+        m.reply "No entrys"
+      end
     end
 end
 
 plugin = AutoOP.new
-plugin.register("autoop")
+
+plugin.map 'autoop list', :action => 'list'
+plugin.map 'autoop add :mask *channels', :action => 'add'
+plugin.map 'autoop add :mask', :action => 'add'
+plugin.map 'autoop rm :mask *channels', :action => 'rm'
+plugin.map 'autoop rm :mask', :action => 'rm'
 
