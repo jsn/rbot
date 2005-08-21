@@ -203,7 +203,7 @@ class IrcBot
       sourceurl = data[:sourceaddress]
       message = data[:message]
       m = QuitMessage.new(self, data[:source], data[:sourcenick], data[:message])
-      if(data[:sourcenick] =~ /#{@nick}/i)
+      if(data[:sourcenick] =~ /#{Regexp.escape(@nick)}/i)
       else
         @channels.each {|k,v|
           if(v.users.has_key?(sourcenick))
@@ -255,7 +255,7 @@ class IrcBot
       onkick(m)
     }
     @client[:invite] = proc {|data|
-      if(data[:target] =~ /^#{@nick}$/i)
+      if(data[:target] =~ /^#{Regexp.escape(@nick)}$/i)
         join data[:channel] if (@auth.allow?("join", data[:source], data[:sourcenick]))
       end
     }
@@ -500,11 +500,6 @@ class IrcBot
   end
 
   # attempt to change bot's nick to +name+
-  # FIXME
-  # if rbot is already taken, this happens:
-  #   <giblet> rbot_, nick rbot
-  #   --- rbot_ is now known as rbot__
-  # he should of course just keep his existing nick and report the error :P
   def nickchg(name)
       sendq "NICK #{name}"
   end
@@ -707,9 +702,9 @@ class IrcBot
     else
       # stuff to handle when not addressed
       case m.message
-        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{@nick}$/i)
+        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{Regexp.escape(@nick)}$/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
-        when (/^#{@nick}!*$/)
+        when (/^#{Regexp.escape(@nick)}!*$/)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
         else
           @keywords.privmsg(m)

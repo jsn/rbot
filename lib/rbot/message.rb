@@ -141,7 +141,7 @@ module Irc
       # even if they used above prefixes, we allow for silly people who
       # combine all possible types, e.g. "|rbot: hello", or 
       # "/msg rbot rbot: hello", etc
-      if @message.gsub!(/^\s*#{bot.nick}\s*([:;,>]|\s)\s*/, "")
+      if @message.gsub!(/^\s*#{Regexp.escape(bot.nick)}\s*([:;,>]|\s)\s*/, "")
         @address = true
       end
       

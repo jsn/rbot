@@ -27,7 +27,7 @@ class QPlugin < Plugin
   end
 
   def set(m, params)
-    @registry['quakenet.user'] = params[:user]
+    @registry['quakenet.user'] = params[:nick]
     @registry['quakenet.auth'] = params[:passwd]
     m.okay
   end

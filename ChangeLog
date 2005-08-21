@@ -1,3 +1,8 @@
+Sun Aug 21 13:29:55 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * fix for bug in quakenet plugin (trac #14)
+	* multiple fixes for unescaped bot nick in regexp's (trac #13)
+
 Fri Aug 12 20:51:38 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * fix up autoop plugin a bit
