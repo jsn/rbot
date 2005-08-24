@@ -325,7 +325,11 @@ class IrcBot
             @client.process reply
           end
         end
-      rescue TimeoutError, SocketError => e
+      # I despair of this. Some of my users get "connection reset by peer"
+      # exceptions that ARENT SocketError's. How am I supposed to handle
+      # that?
+      #rescue TimeoutError, SocketError => e
+      rescue Exception => e
         puts "network exception: connection closed: #{e}"
         puts e.backtrace.join("\n")
         @socket.close # now we reconnect
