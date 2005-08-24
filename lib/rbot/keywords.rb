@@ -215,6 +215,7 @@ module Irc
     
     # lookup keyword +key+, return it or nil
     def [](key)
+      return nil if key.nil?
       debug "keywords module: looking up key #{key}"
       if(@keywords.has_key?(key))
         return Keyword.restore(@keywords[key])
