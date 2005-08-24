@@ -116,7 +116,7 @@ class IrcBot
     @argv = params[:argv]
 
     unless FileTest.directory? Config::datadir
-      puts "data directory '#{Config::datadir}' not found, did you install.rb?"
+      puts "data directory '#{Config::datadir}' not found, did you setup.rb?"
       exit 2
     end
     
@@ -330,7 +330,7 @@ class IrcBot
         puts e.backtrace.join("\n")
         @socket.close # now we reconnect
       rescue => e # TODO be selective, only grab Network errors
-        puts "unexpected exception: connection closed: #{e}"
+        puts "unexpected exception: connection closed: #{e.inspect}"
         puts e.backtrace.join("\n")
         exit 2
       end
