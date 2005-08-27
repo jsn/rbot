@@ -113,9 +113,9 @@ class IrcBot
       :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines, with non-burst limits of 512 bytes/2 seconds",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
     BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
-      :default => false, :validate => Proc.new{|v| v > 0},
-      :on_change => Proc.new {|bot, v| bot.start_ping_timer},
-      :desc => "reconnect after this many seconds if no new ping event came in (unset to disable)")
+      :default => 10, :validate => Proc.new{|v| v >= 0},
+      :on_change => Proc.new {|bot, v| bot.start_server_pings},
+      :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
 
     @argv = params[:argv]
 
@@ -139,8 +139,8 @@ class IrcBot
     
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
 
-    @ping_timer = false
-    @last_ping = nil
+    @ping_timer = nil
+    @timeout_timer = nil
     @startup_time = Time.new
     @config = BotConfig.new(self)
 # TODO background self after botconfig has a chance to run wizard
@@ -160,8 +160,6 @@ class IrcBot
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
     @nick = @config['irc.nick']
 
-    start_ping_timer
-    
     @client = IrcClient.new
     @client[:privmsg] = proc { |data|
       message = PrivMessage.new(self, data[:source], data[:target], data[:message])
@@ -185,8 +183,12 @@ class IrcBot
     }
     @client[:ping] = proc {|data|
       # (jump the queue for pongs)
-      @last_ping = Time.now
       @socket.puts "PONG #{data[:pingid]}"
+    }
+    @client[:pong] = proc {|data|
+      # cancel the timeout timer
+      debug "got a pong from the server, cancelling timeout"
+      remove_timeout_timer
     }
     @client[:nick] = proc {|data|
       sourcenick = data[:sourcenick]
@@ -319,6 +321,7 @@ class IrcBot
     end
     @socket.puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
+    start_server_pings
   end
 
   # begin event handling loop
@@ -559,29 +562,41 @@ class IrcBot
     return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
   end
 
-  def start_ping_timer
-    # stop existing timer if running
-    if @ping_timer
+  # we'll ping the server every 30 seconds or so, and expect a response
+  # before the next one come around..
+  def start_server_pings
+    # stop existing timers if running
+    unless @ping_timer.nil?
       @timer.remove @ping_timer
-      @ping_timer = false
+      @ping_timer = nil
     end
-    return unless @config['server.ping_timeout']
+    remove_timeout_timer
+    timeout = @config['server.ping_timeout']
+    return unless timeout > 0
+    timeout = 30 if timeout > 30
     # we want to respond to a hung server within 30 secs or so
     @ping_timer = @timer.add(30) {
-      unless @last_ping.nil?
-        diff = Time.now - @last_ping
-        if diff > @config['server.ping_timeout']
-          debug "no PING from server for #{diff} seconds, reconnecting"
-          @last_ping = nil
+      remove_timeout_timer
+      @socket.puts "PING :rbot"
+      @timeout_timer = @timer.add_once(timeout) {
+        debug "no PONG from server for #{timeout} seconds, reconnecting"
+        begin
           @socket.shutdown
-        else
-          debug "last ping was #{diff} seconds ago, okay"
+        rescue
+          debug "couldn't shutdown connection (already shutdown?)"
         end
-      end
+      } if @config['server.ping_timeout']
     }
   end
 
   private
+
+  def remove_timeout_timer
+    unless @timeout_timer.nil?
+      @timer.remove(@timeout_timer)
+      @timeout_timer = nil
+    end
+  end
 
   # handle help requests for "core" topics
   def corehelp(topic="")
@@ -828,8 +843,6 @@ class IrcBot
       break if m.privmsg(message)
     }
   end
-
-
 end
 
 end

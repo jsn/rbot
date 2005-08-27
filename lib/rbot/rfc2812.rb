@@ -890,6 +890,9 @@ module Irc
       when 'PING'
         data[:pingid] = argv[0]
         handle(:ping, data)
+      when 'PONG'
+        data[:pingid] = argv[0]
+        handle(:pong, data)
       when /^(\d+)$/		# numeric server message
         num=command.to_i
         case num
