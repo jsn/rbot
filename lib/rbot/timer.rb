@@ -78,6 +78,7 @@ module Timer
     # 
     # add an action to the timer
     def add(period, data=nil, &func)
+      debug "adding timer, period #{period}"
       @handle += 1
       @timers[@handle] = Action.new(period, data, &func)
       start_on_add
@@ -90,6 +91,7 @@ module Timer
     # 
     # add an action to the timer which will be run just once, after +period+
     def add_once(period, data=nil, &func)
+      debug "adding one-off timer, period #{period}"
       @handle += 1
       @timers[@handle] = Action.new(period, data, true, &func)
       start_on_add
@@ -135,6 +137,8 @@ module Timer
           @next_action_time = timer.in
         end
       }
+      #debug "ticked. now #{@timers.length} timers remain"
+      #debug "next timer due at #{@next_action_time}"
     end
 
     # for backwards compat - this is a bit primitive

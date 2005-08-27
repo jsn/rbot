@@ -140,7 +140,8 @@ class IrcBot
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
 
     @ping_timer = nil
-    @timeout_timer = nil
+    @pong_timer = nil
+    @last_ping = nil
     @startup_time = Time.new
     @config = BotConfig.new(self)
 # TODO background self after botconfig has a chance to run wizard
@@ -186,9 +187,7 @@ class IrcBot
       @socket.puts "PONG #{data[:pingid]}"
     }
     @client[:pong] = proc {|data|
-      # cancel the timeout timer
-      debug "got a pong from the server, cancelling timeout"
-      remove_timeout_timer
+      @last_ping = nil
     }
     @client[:nick] = proc {|data|
       sourcenick = data[:sourcenick]
@@ -574,33 +573,32 @@ class IrcBot
       @timer.remove @ping_timer
       @ping_timer = nil
     end
-    remove_timeout_timer
-    timeout = @config['server.ping_timeout']
-    return unless timeout > 0
-    timeout = 30 if timeout > 30
+    unless @pong_timer.nil?
+      @timer.remove @pong_timer
+      @pong_timer = nil
+    end
+    return unless @config['server.ping_timeout'] > 0
     # we want to respond to a hung server within 30 secs or so
     @ping_timer = @timer.add(30) {
-      remove_timeout_timer
+      @last_ping = Time.now
       @socket.puts "PING :rbot"
-      @timeout_timer = @timer.add_once(timeout) {
-        debug "no PONG from server for #{timeout} seconds, reconnecting"
-        begin
-          @socket.shutdown
-        rescue
-          debug "couldn't shutdown connection (already shutdown?)"
+    }
+    @pong_timer = @timer.add(10) {
+      unless @last_ping.nil?
+        diff = Time.now - @last_ping
+        unless diff < @config['server.ping_timeout']
+          debug "no PONG from server for #{diff} seconds, reconnecting"
+          begin
+            @socket.shutdown
+          rescue
+            debug "couldn't shutdown connection (already shutdown?)"
+          end
         end
-      } if @config['server.ping_timeout']
+      end
     }
   end
 
   private
-
-  def remove_timeout_timer
-    unless @timeout_timer.nil?
-      @timer.remove(@timeout_timer)
-      @timeout_timer = nil
-    end
-  end
 
   # handle help requests for "core" topics
   def corehelp(topic="")
