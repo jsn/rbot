@@ -112,6 +112,10 @@ class IrcBot
       :default => 4, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines, with non-burst limits of 512 bytes/2 seconds",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
+    BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
+      :default => false, :validate => Proc.new{|v| v > 0},
+      :on_change => Proc.new {|bot, v| bot.start_ping_timer},
+      :desc => "reconnect after this many seconds if no new ping event came in (unset to disable)")
 
     @argv = params[:argv]
 
@@ -135,6 +139,8 @@ class IrcBot
     
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
 
+    @ping_timer = false
+    @last_ping = nil
     @startup_time = Time.new
     @config = BotConfig.new(self)
 # TODO background self after botconfig has a chance to run wizard
@@ -143,7 +149,6 @@ class IrcBot
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
     @channels = Hash.new
     @logs = Hash.new
-    
     @httputil = Utils::HttpUtil.new(self)
     @lang = Language::Language.new(@config['core.language'])
     @keywords = Keywords.new(self)
@@ -154,6 +159,8 @@ class IrcBot
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
     @nick = @config['irc.nick']
+
+    start_ping_timer
     
     @client = IrcClient.new
     @client[:privmsg] = proc { |data|
@@ -178,6 +185,7 @@ class IrcBot
     }
     @client[:ping] = proc {|data|
       # (jump the queue for pongs)
+      @last_ping = Time.now
       @socket.puts "PONG #{data[:pingid]}"
     }
     @client[:nick] = proc {|data|
@@ -333,8 +341,8 @@ class IrcBot
       rescue Exception => e
         puts "network exception: connection closed: #{e}"
         puts e.backtrace.join("\n")
-        @socket.close # now we reconnect
-      rescue => e # TODO be selective, only grab Network errors
+        @socket.shutdown # now we reconnect
+      rescue => e
         puts "unexpected exception: connection closed: #{e.inspect}"
         puts e.backtrace.join("\n")
         exit 2
@@ -551,6 +559,27 @@ class IrcBot
     return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
   end
 
+  def start_ping_timer
+    # stop existing timer if running
+    if @ping_timer
+      @timer.remove @ping_timer
+      @ping_timer = false
+    end
+    return unless @config['server.ping_timeout']
+    # we want to respond to a hung server within 30 secs or so
+    @ping_timer = @timer.add(30) {
+      unless @last_ping.nil?
+        diff = Time.now - @last_ping
+        if diff > @config['server.ping_timeout']
+          debug "no PING from server for #{diff} seconds, reconnecting"
+          @last_ping = nil
+          @socket.shutdown
+        else
+          debug "last ping was #{diff} seconds ago, okay"
+        end
+      end
+    }
+  end
 
   private
 
@@ -799,6 +828,7 @@ class IrcBot
       break if m.privmsg(message)
     }
   end
+
 
 end
 
