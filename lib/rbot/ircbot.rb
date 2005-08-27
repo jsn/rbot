@@ -311,9 +311,13 @@ class IrcBot
 
   # connect the bot to IRC
   def connect
-    trap("SIGTERM") { quit }
-    trap("SIGHUP") { quit }
-    trap("SIGINT") { quit }
+    begin
+      trap("SIGTERM") { quit }
+      trap("SIGHUP") { quit }
+      trap("SIGINT") { quit }
+    rescue
+      debug "failed to trap signals, probably running on windows?"
+    end
     begin
       @socket.connect
       rescue => e
