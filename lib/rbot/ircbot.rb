@@ -355,6 +355,7 @@ class IrcBot
       end
       
       puts "disconnected"
+      @last_ping = nil
       @channels.clear
       @socket.clearq
       
@@ -568,6 +569,7 @@ class IrcBot
   # we'll ping the server every 30 seconds or so, and expect a response
   # before the next one come around..
   def start_server_pings
+    @last_ping = nil
     # stop existing timers if running
     unless @ping_timer.nil?
       @timer.remove @ping_timer
@@ -593,6 +595,7 @@ class IrcBot
           rescue
             debug "couldn't shutdown connection (already shutdown?)"
           end
+          @last_ping = nil
         end
       end
     }
