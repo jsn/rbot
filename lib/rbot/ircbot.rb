@@ -330,10 +330,10 @@ class IrcBot
   # begin event handling loop
   def mainloop
     while true
+      begin
       connect
       @timer.start
       
-      begin
         while true
           if @socket.select
             break unless reply = @socket.gets
