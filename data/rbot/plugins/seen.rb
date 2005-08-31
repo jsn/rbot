@@ -21,6 +21,7 @@ class SeenPlugin < Plugin
   end
 
   def listen(m)
+    return if m.sourcenick.nil?
     # keep database up to date with who last said what
     if m.kind_of?(PrivMessage)
       return if m.private?

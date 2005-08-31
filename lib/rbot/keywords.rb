@@ -250,6 +250,7 @@ module Irc
     # 
     # handle a message asking about a keyword
     def keyword(m, key, dunno=true)
+      return if key.nil?
        unless(kw = self[key])
          m.reply @bot.lang.get("dunno") if (dunno)
          return

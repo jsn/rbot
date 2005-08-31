@@ -311,20 +311,30 @@ module Irc
                    :defaults => {:topic => false}
       
       if(File.exist?("#{@@bot.botclass}/conf.yaml"))
-        newconfig = YAML::load_file("#{@@bot.botclass}/conf.yaml")
-        @@config.update newconfig
-      else
-        # first-run wizard!
-        BotConfigWizard.new(@@bot).run
-        # save newly created config
-        save
+        begin
+          newconfig = YAML::load_file("#{@@bot.botclass}/conf.yaml")
+          @@config.update newconfig
+          return
+        rescue
+          $stderr.puts "failed to read conf.yaml: #{$!}"
+        end
       end
+      # if we got here, we need to run the first-run wizard
+      BotConfigWizard.new(@@bot).run
+      # save newly created config
+      save
     end
 
     # write current configuration to #{botclass}/conf.rbot
     def save
-      File.open("#{@@bot.botclass}/conf.yaml", "w") do |file|
-        file.puts @@config.to_yaml
+      begin
+        File.open("#{@@bot.botclass}/conf.yaml.new", "w") do |file|
+          file.puts @@config.to_yaml
+        end
+        File.rename("#{@@bot.botclass}/conf.yaml.new",
+                    "#{@@bot.botclass}/conf.yaml")
+      rescue
+        $stderr.puts "failed to write configuration file conf.yaml! #{$!}"
       end
     end
 
