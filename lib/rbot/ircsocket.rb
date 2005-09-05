@@ -31,6 +31,7 @@ module Irc
       @server = server.dup
       @port = port.to_i
       @host = host
+      @sock = nil
       @spooler = false
       @lines_sent = 0
       @lines_received = 0
@@ -50,6 +51,7 @@ module Irc
     
     # open a TCP connection to the server
     def connect
+      @sock = nil
       if(@host)
         begin
           @sock=TCPSocket.new(@server, @port, @host)
@@ -165,7 +167,8 @@ module Irc
 
     # shutdown the connection to the server
     def shutdown(how=2)
-      @sock.shutdown(how)
+      @sock.shutdown(how) unless @sock.nil?
+      @sock = nil
     end
 
     private

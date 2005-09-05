@@ -51,9 +51,6 @@ class IrcBot
   # bot's Language data
   attr_reader :lang
 
-  # bot's configured addressing prefixes
-  attr_reader :addressing_prefixes
-
   # channel info for channels the bot is in
   attr_reader :channels
 
