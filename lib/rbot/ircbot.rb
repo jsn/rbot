@@ -308,9 +308,9 @@ class IrcBot
   # connect the bot to IRC
   def connect
     begin
+      trap("SIGINT") { quit }
       trap("SIGTERM") { quit }
       trap("SIGHUP") { quit }
-      trap("SIGINT") { quit }
     rescue
       debug "failed to trap signals, probably running on windows?"
     end
@@ -454,9 +454,9 @@ class IrcBot
   # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
     begin
+      trap("SIGINT", "DEFAULT")
       trap("SIGTERM", "DEFAULT")
       trap("SIGHUP", "DEFAULT")
-      trap("SIGINT", "DEFAULT")
     rescue
       debug "failed to trap signals, probably running on windows?"
     end
