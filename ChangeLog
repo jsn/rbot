@@ -1,3 +1,8 @@
+Wed Sep 07 20:16:46 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * Fixed quit, broke it last commit
+	* Fixed trap() for win32
+
 Sun Aug 21 13:29:55 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * fix for bug in quakenet plugin (trac #14)
