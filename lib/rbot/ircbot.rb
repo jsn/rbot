@@ -316,7 +316,7 @@ class IrcBot
     end
     begin
       @socket.connect
-      rescue => e
+    rescue => e
       raise "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
     @socket.puts "PASS " + @config['server.password'] if @config['server.password']
@@ -341,8 +341,10 @@ class IrcBot
       # exceptions that ARENT SocketError's. How am I supposed to handle
       # that?
       #rescue TimeoutError, SocketError => e
+      rescue SystemExit
+        exit 0
       rescue Exception => e
-        puts "network exception: connection closed: #{e}"
+        puts "network exception: connection closed: #{e.inspect}"
         puts e.backtrace.join("\n")
         @socket.shutdown # now we reconnect
       rescue => e
@@ -451,9 +453,13 @@ class IrcBot
 
   # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
-    trap("SIGTERM", "DEFAULT")
-    trap("SIGHUP", "DEFAULT")
-    trap("SIGINT", "DEFAULT")
+    begin
+      trap("SIGTERM", "DEFAULT")
+      trap("SIGHUP", "DEFAULT")
+      trap("SIGINT", "DEFAULT")
+    rescue
+      debug "failed to trap signals, probably running on windows?"
+    end
     message = @lang.get("quit") if (message.nil? || message.empty?)
     @socket.clearq
     save
@@ -461,18 +467,21 @@ class IrcBot
     @channels.each_value {|v|
       log "@ quit (#{message})", v.name
     }
+    @registry.close
     @socket.puts "QUIT :#{message}"
     @socket.flush
     @socket.shutdown
-    @registry.close
     puts "rbot quit (#{message})"
   end
   
   # message:: optional IRC quit message
   # quit IRC, shutdown the bot
   def quit(message=nil)
-    shutdown(message)
-    exit 0
+    begin
+      shutdown(message)
+    ensure
+      exit 0
+    end
   end
 
   # totally shutdown and respawn the bot
