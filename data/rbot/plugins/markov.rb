@@ -3,9 +3,10 @@ class MarkovPlugin < Plugin
     super
     @registry.set_default([])
     @lastline = false
+    @enabled = false
   end
 
-  def markov(m, params)
+  def get_line
     # limit to max of 50 words
     return unless @lastline
     word1, word2 = @lastline.split(/\s+/)
@@ -17,7 +18,11 @@ class MarkovPlugin < Plugin
       output = output + " " + word3
       word1, word2 = word2, word3
     end
-    m.reply output
+    return output
+  end
+
+  def markov(m, params)
+    m.reply get_line
   end
   
   def help(plugin, topic="")
@@ -29,6 +34,30 @@ class MarkovPlugin < Plugin
     str.gsub!(/^.+:/, "")
     str.gsub!(/^.+,/, "")
     return str.strip
+  end
+
+  def enable(m, params)
+    @enabled = true
+    m.okay
+  end
+
+  def disable(m, params)
+    @enabled = false
+    m.okay
+  end
+
+  def should_talk
+    return false unless @enabled
+    # 50:50
+    return false if rand(2) == 1
+    return true
+  end
+
+  def random_markov(m)
+    return unless should_talk
+    line = get_line
+    puts "got line #{line}"
+    m.reply line unless line == @lastline
   end
 
   def listen(m)
@@ -45,7 +74,10 @@ class MarkovPlugin < Plugin
       word1, word2 = word2, word3
     end
     @registry["#{word1}/#{word2}"] = [:nonword]
+    random_markov(m)
   end
 end
 plugin = MarkovPlugin.new
+plugin.map 'markov enable', :action => "enable"
+plugin.map 'markov disable', :action => "disable"
 plugin.map 'markov'
