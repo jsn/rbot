@@ -136,7 +136,7 @@ module Irc
       end
     end
     def parse(string)
-      unless @values.include?(string)
+      unless values.include?(string)
         raise ArgumentError, "invalid value #{string}, allowed values are: " + @values.join(", ")
       end
       string
