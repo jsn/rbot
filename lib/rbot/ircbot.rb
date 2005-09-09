@@ -5,7 +5,8 @@ require 'fileutils'
 $debug = false unless $debug
 # print +message+ if debugging is enabled
 def debug(message=nil)
-  print "DEBUG: #{message}\n" if($debug && message)
+  stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+  print "D: [#{stamp}] #{message}\n" if($debug && message)
   #yield
 end
 
