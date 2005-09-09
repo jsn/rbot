@@ -82,8 +82,8 @@ class NickServPlugin < Plugin
 
 end
 plugin = NickServPlugin.new
-plugin.map 'nickserv password :nick :passwd'
+plugin.map 'nickserv password :nick :passwd', :action => "password"
 plugin.map 'nickserv register :passwd :email', :action => 'nick_register',
            :defaults => {:passwd => false, :email => false}
-plugin.map 'nickserv listnicks'
-plugin.map 'nickserv identify'
+plugin.map 'nickserv listnicks', :action => "listnicks"
+plugin.map 'nickserv identify', :action => "identify"
