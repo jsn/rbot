@@ -153,11 +153,6 @@ class MarkovPlugin < Plugin
     # in channel message, the kind we are interested in
     message = clean_str m.message
     
-    # we respond first. otherwise if we add this line to the db first, and
-    # it's fairly unique, there's a good chance we'll just parrot it back
-    # here.
-    random_markov(m, message)
-    
     wordlist = message.split(/\s+/)
     return unless wordlist.length > 2
     @lastline = message
@@ -167,6 +162,8 @@ class MarkovPlugin < Plugin
       word1, word2 = word2, word3
     end
     @registry["#{word1}/#{word2}"] = [:nonword]
+
+    random_markov(m, message)
   end
 end
 plugin = MarkovPlugin.new
