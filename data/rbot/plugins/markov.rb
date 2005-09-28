@@ -3,16 +3,16 @@ class MarkovPlugin < Plugin
     super
     @registry.set_default([])
     @lastline = false
-    @enabled = false
   end
 
-  def get_line
+  def generate_string(seedline)
     # limit to max of 50 words
-    return unless @lastline
-    word1, word2 = @lastline.split(/\s+/)
+    return unless seedline
+    word1, word2 = seedline.split(/\s+/)
     output = word1 + " " + word2
     50.times do
       wordlist = @registry["#{word1}/#{word2}"]
+      break if wordlist.empty?
       word3 = wordlist[rand(wordlist.length)]
       break if word3 == :nonword
       output = output + " " + word3
@@ -21,50 +21,143 @@ class MarkovPlugin < Plugin
     return output
   end
 
-  def markov(m, params)
-    m.reply get_line
-  end
-  
   def help(plugin, topic="")
-    "markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. usage: 'markov' to attempt to say something relevant to the last line of chat, if it can."
+    "markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. usage: 'markov' to attempt to say something relevant to the last line of chat, if it can.  other options to markov: 'ignore' => ignore a hostmask (accept no input), 'status' => show current status, 'probability' => set the % chance of rbot responding to input, 'chat' => try and say something intelligent, 'chat about <foo> <bar>' => riff on a word pair (if possible)"
   end
-  
+
   def clean_str(s)
     str = s.dup
-    str.gsub!(/^.+:/, "")
-    str.gsub!(/^.+,/, "")
+    str.gsub!(/^\S+[:,;]/, "")
+    str.gsub!(/\s{2,}/, ' ') # fix for two or more spaces
     return str.strip
   end
 
+  def probability?
+    prob = @registry['probability']
+    prob = 25 if prob.kind_of? Array;
+    prob = 0 if prob < 0
+    prob = 100 if prob > 100
+    return prob
+  end
+
+  def status(m,params)
+    enabled = @registry['enabled']
+    if (enabled)
+      m.reply "markov is currently enabled, #{probability?}% chance of chipping in"
+    else
+      m.reply "markov is currently disabled"
+    end
+  end
+
+  def ignore?(user=nil)
+    return @registry['ignore_users'].include?(user)
+  end
+
+  def ignore(m, params)
+    if @registry['ignore_users'].nil?
+      @registry['ignore_users'] = []
+    end
+    action = params[:action]
+    user = params[:option]
+    case action
+    when 'remove':
+      if @registry['ignore_users'].include? user
+        s = @registry['ignore_users']
+        s.delete user
+        @registry['ignore_users'] = s
+        m.reply "#{user} removed"
+      else
+        m.reply "not found in list"
+      end
+    when 'add':
+      if user
+        if @registry['ignore_users'].include?(user)
+          m.reply "#{user} already in list"
+        else
+          @registry['ignore_users'] = @registry['ignore_users'].push user 
+          m.reply "#{user} added to markov ignore list"
+        end
+      else
+        m.reply "give the name of a person to ignore"
+      end
+    when 'list':
+      m.reply "I'm ignoring #{@registry['ignore_users'].join(", ")}"
+    else
+      m.reply "have markov ignore the input from a hostmask.  usage: markov ignore add <mask>; markov ignore remove <mask>; markov ignore list"
+    end
+  end
+
   def enable(m, params)
-    @enabled = true
+    @registry['enabled'] = true
+    m.okay
+  end
+
+  def probability(m, params)
+    @registry['probability'] = params[:probability].to_i
     m.okay
   end
 
   def disable(m, params)
-    @enabled = false
+    @registry['enabled'] = false
     m.okay
   end
 
   def should_talk
-    return false unless @enabled
-    # 50:50
-    return false if rand(2) == 1
-    return true
+    return false unless @registry['enabled']
+    prob = probability?
+    return true if prob > rand(100)
+    return false
   end
 
-  def random_markov(m)
+  def random_markov(m, message)
     return unless should_talk
-    line = get_line
-    puts "got line #{line}"
-    m.reply line unless line == @lastline
+    line = generate_string(message)
+    return unless line
+    m.reply line unless line == message
   end
 
+  def chat(m, params)
+    seed = "#{params[:seed1]} #{params[:seed2]}"
+    line = generate_string seed
+    if line != seed
+      m.reply line 
+    else
+      m.reply "I can't :("
+    end
+  end
+
+  def rand_chat(m, params)
+    # pick a random pair from the db and go from there
+    word1, word2 = :nonword, :nonword
+    output = Array.new
+    50.times do
+      wordlist = @registry["#{word1}/#{word2}"]
+      break if wordlist.empty?
+      word3 = wordlist[rand(wordlist.length)]
+      break if word3 == :nonword
+      output << word3
+      word1, word2 = word2, word3
+    end
+    if output.length > 1
+      m.reply output.join(" ")
+    else
+      m.reply "I can't :("
+    end
+  end
+  
   def listen(m)
     return unless m.kind_of?(PrivMessage) && m.public?
     return if m.address?
-    message = clean_str m.message
+    return if ignore? m.source
+
     # in channel message, the kind we are interested in
+    message = clean_str m.message
+    
+    # we respond first. otherwise if we add this line to the db first, and
+    # it's fairly unique, there's a good chance we'll just parrot it back
+    # here.
+    random_markov(m, message)
+    
     wordlist = message.split(/\s+/)
     return unless wordlist.length > 2
     @lastline = message
@@ -74,10 +167,16 @@ class MarkovPlugin < Plugin
       word1, word2 = word2, word3
     end
     @registry["#{word1}/#{word2}"] = [:nonword]
-    random_markov(m)
   end
 end
 plugin = MarkovPlugin.new
+plugin.map 'markov ignore :action :option', :action => "ignore"
+plugin.map 'markov ignore :action', :action => "ignore"
+plugin.map 'markov ignore', :action => "ignore"
 plugin.map 'markov enable', :action => "enable"
 plugin.map 'markov disable', :action => "disable"
-plugin.map 'markov'
+plugin.map 'markov status', :action => "status"
+plugin.map 'chat about :seed1 :seed2', :action => "chat"
+plugin.map 'chat', :action => "rand_chat"
+plugin.map 'markov probability :probability', :action => "probability",
+           :requirements => {:probability => /^\d+$/}
