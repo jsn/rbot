@@ -72,7 +72,7 @@ class NickServPlugin < Plugin
   def listen(m)
     return unless(m.kind_of? NoticeMessage)
 
-    if (m.sourcenick == "NickServ" && m.message =~ /\002IDENTIFY\002/)
+    if (m.sourcenick == "NickServ" && m.message =~ /IDENTIFY/)
       debug "nickserv asked us to identify for nick #{@bot.nick}"
       if @registry.has_key?(@bot.nick)
         @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY " + @registry[@bot.nick]
