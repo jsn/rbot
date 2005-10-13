@@ -79,7 +79,7 @@ class SeenPlugin < Plugin
     when "JOIN"
       ret += "joining #{saw.where}"
     when "QUIT"
-      ret += "quiting IRC (#{saw.message})"
+      ret += "quitting IRC (#{saw.message})"
     when "TOPIC"
       ret += "changing the topic of #{saw.where} to #{saw.message}"
     end

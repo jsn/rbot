@@ -599,6 +599,8 @@ class IrcBot
           debug "no PONG from server for #{diff} seconds, reconnecting"
           begin
             @socket.shutdown
+            # TODO
+            # raise an exception to get back to the mainloop
           rescue
             debug "couldn't shutdown connection (already shutdown?)"
           end

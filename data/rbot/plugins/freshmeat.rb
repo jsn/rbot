@@ -58,16 +58,22 @@ class FreshmeatPlugin < Plugin
   def freshmeat(m, params)
     max = params[:limit].to_i
     max = 8 if max > 8
-    xml = @bot.httputil.get(URI.parse("http://images.feedstermedia.com/feedcache/ostg/freshmeat/fm-releases-global.xml"))
-    unless xml
+    begin
+      xml = @bot.httputil.get(URI.parse("http://images.feedstermedia.com/feedcache/ostg/freshmeat/fm-releases-global.xml"))
+      unless xml
+        m.reply "freshmeat news parse failed"
+        return
+      end
+      doc = Document.new xml
+      unless doc
+        m.reply "freshmeat news parse failed"
+        return
+      end
+    rescue
       m.reply "freshmeat news parse failed"
       return
     end
-    doc = Document.new xml
-    unless doc
-      m.reply "freshmeat news parse failed"
-      return
-    end
+
     matches = Array.new
     max_width = 60
     title_width = 0

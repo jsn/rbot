@@ -1,6 +1,6 @@
 class AutoOP < Plugin
     def help(plugin, topic="")
-        "perform autoop based on hostmask - usage: addop <hostmask> [channel channel ...], rmop <hostmask> [channel], list - list current ops. If you don't specify which channels, all channels are assumed"
+        "perform autoop based on hostmask - usage: add <hostmask> [channel channel ...], rm <hostmask> [channel], list - list current ops. If you don't specify which channels, all channels are assumed"
     end
     
     def join(m)

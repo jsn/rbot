@@ -50,7 +50,10 @@ class MarkovPlugin < Plugin
   end
 
   def ignore?(user=nil)
-    return @registry['ignore_users'].include?(user)
+    @registry['ignore_users'].each do |mask|
+      return true if Irc.netmaskmatch mask, user
+    end
+    return false
   end
 
   def ignore(m, params)
@@ -154,7 +157,7 @@ class MarkovPlugin < Plugin
     message = clean_str m.message
     
     wordlist = message.split(/\s+/)
-    return unless wordlist.length > 2
+    return unless wordlist.length >= 2
     @lastline = message
     word1, word2 = :nonword, :nonword
     wordlist.each do |word3|
@@ -163,6 +166,7 @@ class MarkovPlugin < Plugin
     end
     @registry["#{word1}/#{word2}"] = [:nonword]
 
+    return if m.replied?
     random_markov(m, message)
   end
 end
