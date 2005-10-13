@@ -112,6 +112,10 @@ class MarkovPlugin < Plugin
     return false
   end
 
+  def delay
+    1 + rand(5)
+  end
+
   def random_markov(m, message)
     return unless should_talk
     line = generate_string(message)
