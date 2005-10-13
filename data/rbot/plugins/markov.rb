@@ -116,7 +116,10 @@ class MarkovPlugin < Plugin
     return unless should_talk
     line = generate_string(message)
     return unless line
-    m.reply line unless line == message
+    return if line == message
+    @bot.timer.add_once(delay, m) {|m|
+      m.reply line
+    }
   end
 
   def chat(m, params)
