@@ -302,7 +302,7 @@ class IrcBot
     }
     @client[:unknown] = proc {|data|
       #debug "UNKNOWN: #{data[:serverstring]}"
-      log data[:serverstring], ":unknown"
+      log data[:serverstring], ".unknown"
     }
   end
 
