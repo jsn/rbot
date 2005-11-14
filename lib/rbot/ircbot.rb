@@ -122,8 +122,8 @@ class IrcBot
       exit 2
     end
     
-    #botclass = "#{Etc.getpwnam(Etc.getlogin).dir}/.rbot" unless botclass
-    botclass = "#{ENV['HOME']}/.rbot" unless botclass
+    botclass = "#{Etc.getpwuid(Process::Sys.geteuid)[:dir]}/.rbot" unless botclass
+    #botclass = "#{ENV['HOME']}/.rbot" unless botclass
     @botclass = botclass.gsub(/\/$/, "")
 
     unless FileTest.directory? botclass
