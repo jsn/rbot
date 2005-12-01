@@ -15,7 +15,7 @@ module Irc
       else
         debug "not installed via rubygems"
       end
-    rescue LoadError
+    rescue LoadError,NameError,NoMethodError
       debug "no rubygems installed"
     end
 

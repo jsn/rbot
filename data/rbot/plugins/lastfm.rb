@@ -1,14 +1,20 @@
 require 'open-uri'
 
 # plugin submitted by Jeremy Voorhis (jvoorhis)
- 
+
 class LastFmPlugin < Plugin
   def help(plugin, topic="")
     "lastfm <function> <user> => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]"
   end
- 
+
   def do_lastfm (m, params)
     begin
+      if params[:action] == "neighbors" then
+        params[:action]="neighbours"
+      elsif params[:action] == "neighbours" then
+        m.reply "Thats not how you spell neighbors, you dolt!"
+        return
+      end
       data = open("http://ws.audioscrobbler.com/1.0/user/#{params[:user]}/#{params[:action]}.txt")
       m.reply "#{params[:action]} for #{params[:user]}:"
       data.to_a[0..2].each do |line|
@@ -19,6 +25,6 @@ class LastFmPlugin < Plugin
     end
   end
 end
- 
+
 plugin = LastFmPlugin.new
 plugin.map 'lastfm :action :user', :action => 'do_lastfm'
