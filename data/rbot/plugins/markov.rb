@@ -162,6 +162,10 @@ class MarkovPlugin < Plugin
 
     # in channel message, the kind we are interested in
     message = clean_str m.message
+
+    if m.action?
+      message = "#{m.sourcenick} #{message}"
+    end
     
     wordlist = message.split(/\s+/)
     return unless wordlist.length >= 2
