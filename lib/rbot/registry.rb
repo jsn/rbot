@@ -120,7 +120,20 @@ module Irc
     #     val
     #   end
     def restore(val)
-      Marshal.restore(val)
+      begin
+        Marshal.restore(val)
+      rescue
+        $stderr.puts "failed to restore marshal data, falling back to default"
+        if @default != nil
+          begin
+            return Marshal.restore(@default)
+          rescue
+            return nil
+          end
+        else
+          return nil
+        end
+      end
     end
 
     # lookup a key in the registry
