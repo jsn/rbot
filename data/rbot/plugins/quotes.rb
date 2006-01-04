@@ -99,7 +99,7 @@ class QuotePlugin < Plugin
       when "whenquote"
         return "whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
       else
-        return "Quote module (Quote storage and retrieval) topics: addquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
+        return "Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
     end
   end
   def listen(m)

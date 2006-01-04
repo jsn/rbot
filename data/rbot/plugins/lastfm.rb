@@ -9,11 +9,8 @@ class LastFmPlugin < Plugin
 
   def do_lastfm (m, params)
     begin
-      if params[:action] == "neighbors" then
+      if params[:action] == "neighbors" || params[:action] == "neighbours" then
         params[:action]="neighbours"
-      elsif params[:action] == "neighbours" then
-        m.reply "Thats not how you spell neighbors, you dolt!"
-        return
       end
       data = open("http://ws.audioscrobbler.com/1.0/user/#{params[:user]}/#{params[:action]}.txt")
       m.reply "#{params[:action]} for #{params[:user]}:"

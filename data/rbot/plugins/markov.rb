@@ -2,6 +2,7 @@ class MarkovPlugin < Plugin
   def initialize
     super
     @registry.set_default([])
+    @registry['enabled'] = false unless @registry.has_key?('enabled')
     @lastline = false
   end
 
