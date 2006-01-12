@@ -110,6 +110,7 @@ class HttpUtil
     
     h = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_port)
     h.use_ssl = true if uri.scheme == "https"
+    return h
   end
 
   # uri::         uri to query (Uri object)
