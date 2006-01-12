@@ -3,6 +3,7 @@ module Utils
 
 require 'resolv'
 require 'net/http'
+require 'net/https'
 Net::HTTP.version_1_2
   
 # class for making http requests easier (mainly for plugins to use)
@@ -107,7 +108,8 @@ class HttpUtil
       end
     end
     
-    return Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_port)
+    h = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_port)
+    h.use_ssl = true if uri.scheme == "https"
   end
 
   # uri::         uri to query (Uri object)
