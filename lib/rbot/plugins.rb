@@ -200,7 +200,8 @@ module Plugins
               debug "loading plugin #{tmpfilename}"
               plugin_module.module_eval(plugin_string)
               processed << file
-            rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
+            rescue Exception => err
+              # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
               puts "warning: plugin #{tmpfilename} load failed: " + err
               puts err.backtrace.join("\n")
             end
@@ -250,7 +251,8 @@ module Plugins
         if(@@plugins.has_key?(key))
           begin
             return @@plugins[key].help(key, params)
-          rescue TimeoutError, StandardError, NameError, SyntaxError => err
+          rescue Exception => err
+          #rescue TimeoutError, StandardError, NameError, SyntaxError => err
             puts "plugin #{@@plugins[key].name} help() failed: " + err
             puts err.backtrace.join("\n")
           end
@@ -267,7 +269,8 @@ module Plugins
         if(p.respond_to? method)
           begin
             p.send method, *args
-          rescue TimeoutError, StandardError, NameError, SyntaxError => err
+          rescue Exception => err
+            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
             puts "plugin #{p.name} #{method}() failed: " + err
             puts err.backtrace.join("\n")
           end
@@ -284,7 +287,8 @@ module Plugins
           @@bot.auth.allow?(m.plugin, m.source, m.replyto))
         begin
           @@plugins[m.plugin].privmsg(m)
-        rescue TimeoutError, StandardError, NameError, SyntaxError => err
+        rescue Exception => err
+          #rescue TimeoutError, StandardError, NameError, SyntaxError => err
           puts "plugin #{@@plugins[m.plugin].name} privmsg() failed: " + err
           puts err.backtrace.join("\n")
         end

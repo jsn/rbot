@@ -329,8 +329,8 @@ class IrcBot
   def mainloop
     while true
       begin
-      connect
-      @timer.start
+        connect
+        @timer.start
       
         while true
           if @socket.select

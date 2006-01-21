@@ -56,7 +56,8 @@ end
 begin
   require 'rbot/ircbot'
 rescue LoadError => e
-  puts "Error: couldn't find the rbot/ircbot module for loading\n - did you install rbot using setup.rb?"
+  puts "Error: couldn't find the rbot/ircbot module (or one of its dependencies)\n - did you install rbot using setup.rb?"
+  puts e
   exit 2
 end
 
