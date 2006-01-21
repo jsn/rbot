@@ -14,9 +14,7 @@ class LastFmPlugin < Plugin
       end
       data = open("http://ws.audioscrobbler.com/1.0/user/#{params[:user]}/#{params[:action]}.txt")
       m.reply "#{params[:action]} for #{params[:user]}:"
-      data.to_a[0..2].each do |line|
-        m.reply line.split(',')[-1]
-      end
+      m.reply data.to_a[0..3].map{|l| l.split(',')[-1].chomp}.join(", ")
     rescue
       m.reply "could not find #{params[:action]} for #{params[:user]} (is #{params[:user]} a user?)"
     end
