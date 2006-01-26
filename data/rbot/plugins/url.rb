@@ -60,8 +60,7 @@ class UrlPlugin < Plugin
             # content is 'text/*'
             # retrieve the title from the page
             puts "+ getting #{url.path}"
-            response = http.request_get(url.path)
-            return get_title_from_html(response.body)
+            return get_title_from_html(@bot.httputil.get(url))
           else
             # content isn't 'text/*'... display info about the file.
             size = head['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
