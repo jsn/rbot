@@ -39,7 +39,8 @@ class UrlPlugin < Plugin
     return if url.scheme !~ /https?/
     
     puts "+ connecting to #{url.host}:#{url.port}"
-    title = Net::HTTP.start(url.host, url.port) do |http|
+    http = @bot.httputil.get_proxy(url) 
+    title = http.start do |http|
       url.path = '/' if url.path == ''
       head = http.request_head(url.path)
       case head
@@ -70,9 +71,9 @@ class UrlPlugin < Plugin
             return "[Link Info] type: #{head['content-type']}#{size ? ", size: #{size} bytes" : ""}"
           end
         when Net::HTTPClientError then
-          return "Error getting link (#{response.code} - #{response.message})"
+          return "[Link Info] Error getting link (#{head.code} - #{head.message})"
         when Net::HTTPServerError then
-          return "Error getting link (#{response.code} - #{response.message})"
+          return "[Link Info] Error getting link (#{head.code} - #{head.message})"
       end
     end
   rescue SocketError => e
