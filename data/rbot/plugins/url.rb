@@ -1,5 +1,6 @@
 require 'net/http'
 require 'uri'
+require 'cgi'
 
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 TITLE_RE = /<\s*title\s*>(.+)<\s*\/title\s*>/im
@@ -8,9 +9,9 @@ class UrlPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
     :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
-  BotConfig.register BotConfigBooleanValue.new('url.say_titles',
+  BotConfig.register BotConfigBooleanValue.new('url.display_link_info',
     :default => true, 
-    :desc => "Get the title of any links pasted to the channel and display it (Also, tells if the link is broken)")
+    :desc => "Get the title of any links pasted to the channel and display it (also tells if the link is broken or the site is down)")
   
   def initialize
     super
@@ -24,21 +25,21 @@ class UrlPlugin < Plugin
   def get_title_from_html(pagedata)
     return unless TITLE_RE.match(pagedata)
     title = $1.strip.gsub(/\s*\n+\s*/, " ")
-    title = title[0..255] if title.length > 255 
-    "[Title] #{title}"
+    title = CGI::unescapeHTML title
+    title = title[0..255] if title.length > 255
+    "[Link Info] title: #{title}"
   end
 
   def get_title_for_url(uri_str)
     # This god-awful mess is what the ruby http library has reduced me to.
-    # Python's is so much nicer. :~(
+    # Python's HTTP lib is so much nicer. :~(
     
     puts "+ Getting #{uri_str}"
     url = URI.parse(uri_str)
     return if url.scheme !~ /https?/
     
     puts "+ connecting to #{url.host}:#{url.port}"
-    http = @bot.httputil.get_proxy(url)
-    title = http.start do |http|
+    title = Net::HTTP.start(url.host, url.port) do |http|
       url.path = '/' if url.path == ''
       head = http.request_head(url.path)
       case head
@@ -60,7 +61,8 @@ class UrlPlugin < Plugin
             # content is 'text/*'
             # retrieve the title from the page
             puts "+ getting #{url.path}"
-            return get_title_from_html(@bot.httputil.get(url))
+            response = http.request_get(url.path)
+            return get_title_from_html(response.body)
           else
             # content isn't 'text/*'... display info about the file.
             size = head['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
@@ -68,13 +70,13 @@ class UrlPlugin < Plugin
             return "[Link Info] type: #{head['content-type']}#{size ? ", size: #{size} bytes" : ""}"
           end
         when Net::HTTPClientError then
-          return "[Title] Error getting link (#{response.code} - #{response.message})"
+          return "Error getting link (#{response.code} - #{response.message})"
         when Net::HTTPServerError then
-          return "[Title] Error getting link (#{response.code} - #{response.message})"
+          return "Error getting link (#{response.code} - #{response.message})"
       end
     end
   rescue SocketError => e
-    return "[Title] Error connecting to site (#{e.message})"
+    return "[Link Info] Error connecting to site (#{e.message})"
   end
 
   def listen(m)
@@ -162,7 +164,3 @@ plugin.map 'urls :channel :limit', :defaults => {:limit => 4},
 plugin.map 'urls :limit', :defaults => {:limit => 4},
                           :requirements => {:limit => /^\d+$/},
                           :private => false
-
-
-
-
