@@ -3,7 +3,7 @@ require 'uri'
 require 'cgi'
 
 Url = Struct.new("Url", :channel, :nick, :time, :url)
-TITLE_RE = /<\s*title\s*>(.+)<\s*\/title\s*>/im
+TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
 
 class UrlPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
