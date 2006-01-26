@@ -1,4 +1,5 @@
-require 'open-uri'
+require 'net/http'
+require 'uri'
 
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 TITLE_RE = /<\s*title\s*>(.+)<\s*\/title\s*>/im
@@ -20,21 +21,60 @@ class UrlPlugin < Plugin
     "urls [<max>=4] => list <max> last urls mentioned in current channel, urls search [<max>=4] <regexp> => search for matching urls. In a private message, you must specify the channel to query, eg. urls <channel> [max], urls search <channel> [max] <regexp>"
   end
 
-  def get_title_for_url(url)
-    begin
-      pagedata = open(url).read
-      return unless TITLE_RE.match(pagedata)
-      title = $1.strip.gsub(/\s*\n\s*/, " ")
-      title = title[0..255] if title.length > 255 
-      "Title: #{title}"
+  def get_title_from_html(pagedata)
+    return unless TITLE_RE.match(pagedata)
+    title = $1.strip.gsub(/\s*\n+\s*/, " ")
+    title = title[0..255] if title.length > 255 
+    "[Title] #{title}"
+  end
 
-    rescue SocketError => e
-      "Title: ^- Error connecting to site (#{e.message})"
-    rescue OpenURI::HTTPError => e
-      "Title: ^- Error getting page (#{e.message})"
-    rescue Exception => e
-      "Title: ^- Error: #{e.inspect}"
+  def get_title_for_url(uri_str)
+    # This god-awful mess is what the ruby http library has reduced me to.
+    # Python's is so much nicer. :~(
+    
+    puts "+ Getting #{uri_str}"
+    url = URI.parse(uri_str)
+    return if url.scheme !~ /https?/
+    
+    puts "+ connecting to #{url.host}:#{url.port}"
+    title = Net::HTTP.start(url.host, url.port) do |http|
+      url.path = '/' if url.path == ''
+      head = http.request_head(url.path)
+      case head
+        when Net::HTTPRedirection then
+          # call self recursively if this is a redirect
+          redirect_to = head['location']
+          puts "+ redirect location: #{redirect_to}"
+          absolute_uris = URI.extract redirect_to
+          raise "wtf! redirect = #{redirect_to}" if absolute_uris.size > 1
+          if absolute_uris.size == 1
+            url = URI.parse absolute_uris[0]
+          else
+            url.path = redirect_to
+          end
+          puts "+ whee, redirect to #{url.to_s}!"
+          title = get_title_for_url(url.to_s)
+        when Net::HTTPSuccess then
+          if head['content-type'] =~ /^text\//
+            # content is 'text/*'
+            # retrieve the title from the page
+            puts "+ getting #{url.path}"
+            response = http.request_get(url.path)
+            return get_title_from_html(response.body)
+          else
+            # content isn't 'text/*'... display info about the file.
+            size = head['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+            #lastmod = head['last-modified']
+            return "[Link Info] type: #{head['content-type']}#{size ? ", size: #{size} bytes" : ""}"
+          end
+        when Net::HTTPClientError then
+          return "[Title] Error getting link (#{response.code} - #{response.message})"
+        when Net::HTTPServerError then
+          return "[Title] Error getting link (#{response.code} - #{response.message})"
+      end
     end
+  rescue SocketError => e
+    return "[Title] Error connecting to site (#{e.message})"
   end
 
   def listen(m)
@@ -122,3 +162,7 @@ plugin.map 'urls :channel :limit', :defaults => {:limit => 4},
 plugin.map 'urls :limit', :defaults => {:limit => 4},
                           :requirements => {:limit => /^\d+$/},
                           :private => false
+
+
+
+
