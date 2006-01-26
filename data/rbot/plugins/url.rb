@@ -37,7 +37,8 @@ class UrlPlugin < Plugin
     return if url.scheme !~ /https?/
     
     puts "+ connecting to #{url.host}:#{url.port}"
-    title = Net::HTTP.start(url.host, url.port) do |http|
+    http = @bot.httputil.get_proxy(url)
+    title = http.start do |http|
       url.path = '/' if url.path == ''
       head = http.request_head(url.path)
       case head
