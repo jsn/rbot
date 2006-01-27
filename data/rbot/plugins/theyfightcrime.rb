@@ -104,7 +104,7 @@ class TheyFightCrime < Plugin
     def do_movieplot(m, params)
         he_things = get_random_things(HE)
         she_things = get_random_things(SHE)
-        m.reply "Summary: He's a #{he_things.join " "} She's a #{she_things.join " "} They fight crime."
+        m.reply "Summary: He's #{he_things.join " "} She's #{she_things.join " "} They fight crime."
     end
 
     def do_movietitle(m, params)
