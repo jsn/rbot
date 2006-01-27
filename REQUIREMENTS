@@ -32,3 +32,12 @@ spell plugin:
       ispell(1)
 
 
+Running rbot on win32
+=====================
+
+here is bdb:
+http://ftp.ruby-lang.org/pub/ruby/binaries/mingw/1.8/ext/bdb-0.5.1-i386-mingw32-1.8.tar.gz
+
+and you need the Win32 MinGW version of Ruby:
+http://ftp.ruby-lang.org/pub/ruby/binaries/mingw/1.8/ruby-1.8.4-i386-mingw32.tar.gz
+

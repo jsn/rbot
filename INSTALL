@@ -1,3 +1,5 @@
+Run setup.rb to install the bot.
+
 Just run rbot, it'll ask you for any core information it needs before it can
 start, after that you can configure everything else online using the config
 module.
@@ -6,3 +8,5 @@ You can maintain multiple configurations at once. Start rbot with the
 location you want it to store runtime data in. By default, running rbot
 uses the ~/.rbot config directory. If you run 'rbot /path/to/foo', then the
 configuration will be stored to and read from there instead.
+
+Instructions for windows in REQUIREMENTS
