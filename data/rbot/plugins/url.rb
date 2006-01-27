@@ -48,21 +48,15 @@ class UrlPlugin < Plugin
           # call self recursively if this is a redirect
           redirect_to = head['location']
           puts "+ redirect location: #{redirect_to}"
-          absolute_uris = URI.extract redirect_to
-          raise "wtf! redirect = #{redirect_to}" if absolute_uris.size > 1
-          if absolute_uris.size == 1
-            url = URI.parse absolute_uris[0]
-          else
-            url.path = redirect_to
-          end
-          puts "+ whee, redirect to #{url.to_s}!"
+          url = URI.join url.to_s, redirect_to
+          puts "+ whee, redirecting to #{url.to_s}!"
           title = get_title_for_url(url.to_s)
         when Net::HTTPSuccess then
           if head['content-type'] =~ /^text\//
             # content is 'text/*'
             # retrieve the title from the page
             puts "+ getting #{url.path}"
-            response = http.request_get(url.path)
+            response = http.request_get(url.request_uri)
             return get_title_from_html(response.body)
           else
             # content isn't 'text/*'... display info about the file.
