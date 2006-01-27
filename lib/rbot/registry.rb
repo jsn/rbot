@@ -2,19 +2,13 @@ require 'rbot/dbhash'
 
 module Irc
 
-  # this is the backend of the RegistryAccessor class, which ties it to a
-  # DBHash object called plugin_registry(.db). All methods are delegated to
-  # the DBHash.
+  # this class is now used purely for upgrading from prior versions of rbot
+  # the new registry is split into multiple DBHash objects, one per plugin
   class BotRegistry
     def initialize(bot)
       @bot = bot
       upgrade_data
-      @db = DBTree.new @bot, "plugin_registry"
-    end
-
-    # delegation hack
-    def method_missing(method, *args, &block)
-      @db.send(method, *args, &block)
+      upgrade_data2
     end
 
     # check for older versions of rbot with data formats that require updating
@@ -23,13 +17,13 @@ module Irc
     def upgrade_data
       if File.exist?("#{@bot.botclass}/registry.db")
         puts "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
-        old = BDB::Hash.open "#{@bot.botclass}/registry.db", nil, 
+        old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil, 
                              "r+", 0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [0, 32 * 1024, 0]
-        new = BDB::CIBtree.open "#{@bot.botclass}/plugin_registry.db", nil, 
+                             "set_cachesize" => [0, 32 * 1024, 0])
+        new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
                                 BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
                                 0600, "set_pagesize" => 1024,
-                                "set_cachesize" => [0, 32 * 1024, 0]
+                                "set_cachesize" => [0, 32 * 1024, 0])
         old.each {|k,v|
           new[k] = v
         }
@@ -38,7 +32,37 @@ module Irc
         File.delete("#{@bot.botclass}/registry.db")
       end
     end
+    
+    def upgrade_data2
+      if File.exist?("#{@bot.botclass}/plugin_registry.db")
+        Dir.mkdir("#{@bot.botclass}/registry")
+        dbs = Hash.new
+        puts "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
+        old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
+          "r+", 0600, "set_pagesize" => 1024,
+          "set_cachesize" => [0, 32 * 1024, 0])
+        old.each {|k,v|
+          prefix,key = k.split("/", 2)
+          prefix.downcase!
+          unless dbs.has_key?(prefix)
+            puts "creating db #{@bot.botclass}/registry/#{prefix}.db"
+            dbs[prefix] = BDB::CIBtree.open("#{@bot.botclass}/registry/#{prefix}.db",
+              nil, BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
+              0600, "set_pagesize" => 1024,
+              "set_cachesize" => [0, 32 * 1024, 0])
+          end
+          dbs[prefix][key] = v
+        }
+        old.close
+        File.rename("#{@bot.botclass}/plugin_registry.db", "#{@bot.botclass}/plugin_registry.db.old")
+        dbs.each {|k,v|
+          puts "closing db #{k}"
+          v.close
+        }
+      end
+    end
   end
+  
 
   # This class provides persistent storage for plugins via a hash interface.
   # The default mode is an object store, so you can store ruby objects and
@@ -86,19 +110,12 @@ module Irc
   class BotRegistryAccessor
     # plugins don't call this - a BotRegistryAccessor is created for them and
     # is accessible via @registry.
-    def initialize(bot, prefix)
+    def initialize(bot, name)
       @bot = bot
-      @registry = @bot.registry
-      @orig_prefix = prefix
-      @prefix = prefix + "/"
+      @name = name.downcase
+      @registry = DBTree.new bot, "registry/#{@name}"
       @default = nil
-      # debug "initializing registry accessor with prefix #{@prefix}"
-    end
-
-    # use this to chop up your namespace into bits, so you can keep and
-    # reference separate object stores under the same registry
-    def sub_registry(prefix)
-      return BotRegistryAccessor.new(@bot, @orig_prefix + "+" + prefix)
+      # debug "initializing registry accessor with name #{@name}"
     end
 
     # convert value to string form for storing in the registry
@@ -122,7 +139,7 @@ module Irc
     def restore(val)
       begin
         Marshal.restore(val)
-      rescue
+      rescue Exception
         $stderr.puts "failed to restore marshal data, falling back to default"
         if @default != nil
           begin
@@ -138,8 +155,8 @@ module Irc
 
     # lookup a key in the registry
     def [](key)
-      if @registry.has_key?(@prefix + key)
-        return restore(@registry[@prefix + key])
+      if @registry.has_key?(key)
+        return restore(@registry[key])
       elsif @default != nil
         return restore(@default)
       else
@@ -149,7 +166,7 @@ module Irc
 
     # set a key in the registry
     def []=(key,value)
-      @registry[@prefix + key] = store(value)
+      @registry[key] = store(value)
     end
 
     # set the default value for registry lookups, if the key sought is not
@@ -161,40 +178,34 @@ module Irc
     # just like Hash#each
     def each(&block)
       @registry.each {|key,value|
-        if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")
-          block.call(key, restore(value))
-        end
+        block.call(key, restore(value))
       }
     end
     
     # just like Hash#each_key
     def each_key(&block)
       @registry.each {|key, value|
-        if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")
-          block.call(key)
-        end
+        block.call(key)
       }
     end
     
     # just like Hash#each_value
     def each_value(&block)
       @registry.each {|key, value|
-        if key =~ /^#{Regexp.escape(@prefix)}/
-          block.call(restore(value))
-        end
+        block.call(restore(value))
       }
     end
 
     # just like Hash#has_key?
     def has_key?(key)
-      return @registry.has_key?(@prefix + key)
+      return @registry.has_key?(key)
     end
     alias include? has_key?
     alias member? has_key?
 
     # just like Hash#has_both?
     def has_both?(key, value)
-      return @registry.has_both?(@prefix + key, store(value))
+      return @registry.has_both?(key, store(value))
     end
     
     # just like Hash#has_value?
@@ -205,7 +216,7 @@ module Irc
     # just like Hash#index?
     def index(value)
       ind = @registry.index(store(value))
-      if ind && ind.gsub!(/^#{Regexp.escape(@prefix)}/, "")
+      if ind
         return ind
       else
         return nil
@@ -214,27 +225,19 @@ module Irc
     
     # delete a key from the registry
     def delete(key)
-      return @registry.delete(@prefix + key)
+      return @registry.delete(key)
     end
 
     # returns a list of your keys
     def keys
-      return @registry.keys.collect {|key|
-        if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")  
-          key
-        else
-          nil
-        end
-      }.compact
+      return @registry.keys
     end
 
     # Return an array of all associations [key, value] in your namespace
     def to_a
       ret = Array.new
       @registry.each {|key, value|
-        if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")
-          ret << [key, restore(value)]
-        end
+        ret << [key, restore(value)]
       }
       return ret
     end
@@ -243,20 +246,14 @@ module Irc
     def to_hash
       ret = Hash.new
       @registry.each {|key, value|
-        if key.gsub!(/^#{Regexp.escape(@prefix)}/, "")
-          ret[key] = restore(value)
-        end
+        ret[key] = restore(value)
       }
       return ret
     end
 
     # empties the registry (restricted to your namespace)
     def clear
-      @registry.each_key {|key|
-        if key =~ /^#{Regexp.escape(@prefix)}/
-          @registry.delete(key)
-        end
-      }
+      @registry.clear
     end
     alias truncate clear
 
