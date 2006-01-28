@@ -55,7 +55,7 @@ class UrlPlugin < Plugin
           if head['content-type'] =~ /^text\//
             # content is 'text/*'
             # retrieve the title from the page
-            puts "+ getting #{url.path}"
+            puts "+ getting #{url.request_uri}"
             response = http.request_get(url.request_uri)
             return get_title_from_html(response.body)
           else

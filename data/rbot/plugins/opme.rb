@@ -11,8 +11,8 @@ class OpMePlugin < Plugin
       channel = m.channel
     end
     target = m.sourcenick
-    @bot.sendq("MODE #{channel} +o #{target}")
     m.okay
+    @bot.sendq("MODE #{channel} +o #{target}")
   end
 end
 plugin = OpMePlugin.new
