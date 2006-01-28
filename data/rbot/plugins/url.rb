@@ -83,7 +83,7 @@ class UrlPlugin < Plugin
         urlstr = $1
         list = @registry[m.target]
 
-        if @bot.config['url.say_titles']
+        if @bot.config['url.display_link_info']
           debug "Getting title for #{urlstr}..."
           title = get_title_for_url urlstr
           if title
