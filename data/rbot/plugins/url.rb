@@ -52,14 +52,14 @@ class UrlPlugin < Plugin
           puts "+ whee, redirecting to #{url.to_s}!"
           title = get_title_for_url(url.to_s)
         when Net::HTTPSuccess then
-          if head['content-type'] =~ /^text\//
-            # content is 'text/*'
-            # retrieve the title from the page
+          if head['content-type'] =~ /^text\// and (not head['content-length'] or head['content-length'].to_i < 400000)
+            # since the content is 'text/*' and is small enough to
+            # be a webpage, retrieve the title from the page
             puts "+ getting #{url.request_uri}"
             response = http.request_get(url.request_uri)
             return get_title_from_html(response.body)
           else
-            # content isn't 'text/*'... display info about the file.
+            # content doesn't have title, just display info.
             size = head['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
             #lastmod = head['last-modified']
             return "[Link Info] type: #{head['content-type']}#{size ? ", size: #{size} bytes" : ""}"
