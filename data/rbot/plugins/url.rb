@@ -30,9 +30,13 @@ class UrlPlugin < Plugin
     "[Link Info] title: #{title}"
   end
 
-  def get_title_for_url(uri_str)
+  def get_title_for_url(uri_str, depth=10)
     # This god-awful mess is what the ruby http library has reduced me to.
     # Python's HTTP lib is so much nicer. :~(
+    
+    if depth == 0
+        raise "Error: Maximum redirects hit."
+    end
     
     puts "+ Getting #{uri_str}"
     url = URI.parse(uri_str)
@@ -50,7 +54,7 @@ class UrlPlugin < Plugin
           puts "+ redirect location: #{redirect_to}"
           url = URI.join url.to_s, redirect_to
           puts "+ whee, redirecting to #{url.to_s}!"
-          title = get_title_for_url(url.to_s)
+          title = get_title_for_url(url.to_s, depth-1)
         when Net::HTTPSuccess then
           if head['content-type'] =~ /^text\// and (not head['content-length'] or head['content-length'].to_i < 400000)
             # since the content is 'text/*' and is small enough to
