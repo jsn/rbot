@@ -135,7 +135,7 @@ class UrlPlugin < Plugin
     string = params[:string]
     max = 10 if max > 10
     max = 1 if max < 1
-    regex = Regexp.new(string)
+    regex = Regexp.new(string, Regexp::IGNORECASE)
     list = @registry[channel].find_all {|url|
       regex.match(url.url) || regex.match(url.nick)
     }
