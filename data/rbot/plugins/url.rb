@@ -5,6 +5,21 @@ require 'cgi'
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
 
+UNESCAPE_TABLE = {
+    'raquo' => '>>',
+    '#8220' => '"',
+    '#8221' => '"',
+    '#8212' => '--',
+    '#39' => '\'',
+    '#174' => '(R)',
+    'micro' => 'u',
+    '' => '',
+    '' => '',
+    '' => '',
+    '' => '',
+    #'' => '',
+}
+
 class UrlPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
     :default => 100, :validate => Proc.new{|v| v > 0},
@@ -22,10 +37,28 @@ class UrlPlugin < Plugin
     "urls [<max>=4] => list <max> last urls mentioned in current channel, urls search [<max>=4] <regexp> => search for matching urls. In a private message, you must specify the channel to query, eg. urls <channel> [max], urls search <channel> [max] <regexp>"
   end
 
+  def unescape_title(htmldata)
+    # first pass -- let CGI try to attack it...
+    htmldata = CGI::unescapeHTML htmldata
+    
+    # second pass -- destroy the remaining bits...
+    htmldata.gsub(/(&(.+?);)/) {
+        symbol = $2
+        
+        # remove the 0-paddng from unicode integers
+        if symbol =~ /#(.+)/
+            symbol = "##{$1.to_i.to_s}"
+        end
+        
+        # output the symbol's irc-translated character, or a * if it's unknown
+        UNESCAPE_TABLE[symbol] || '*'
+    }
+  end
+
   def get_title_from_html(pagedata)
     return unless TITLE_RE.match(pagedata)
     title = $1.strip.gsub(/\s*\n+\s*/, " ")
-    title = CGI::unescapeHTML title
+    title = unescape_title title
     title = title[0..255] if title.length > 255
     "[Link Info] title: #{title}"
   end
