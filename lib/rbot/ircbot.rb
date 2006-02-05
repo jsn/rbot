@@ -497,7 +497,6 @@ class IrcBot
 
   # call the save method for bot's config, keywords, auth and all plugins
   def save
-    @registry.flush
     @config.save
     @keywords.save
     @auth.save
