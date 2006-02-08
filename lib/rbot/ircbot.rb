@@ -437,9 +437,9 @@ class IrcBot
   # log message +message+ to a file determined by +where+. +where+ can be a
   # channel name, or a nick for private message logging
   def log(message, where="server")
-    message.chomp!
+    message = message.chomp
     stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    where.gsub!(/[:!?$*()\/\\<>|"']/, "_")
+    where = where.gsub(/[:!?$*()\/\\<>|"']/, "_")
     unless(@logs.has_key?(where))
       @logs[where] = File.new("#{@botclass}/logs/#{where}", "a")
       @logs[where].sync = true
