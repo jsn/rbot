@@ -360,8 +360,8 @@ class UrlPlugin < Plugin
         case response
           when Net::HTTPRedirection then
             # call self recursively if this is a redirect
-            redirect_to = response['location']
-            puts "+ redirect location: #{redirect_to}"
+            redirect_to = response['location']  || './'
+            puts "+ redirect location: #{redirect_to.inspect}"
             url = URI.join url.to_s, redirect_to
             puts "+ whee, redirecting to #{url.to_s}!"
             title = get_title_for_url(url.to_s, depth-1)
