@@ -99,6 +99,10 @@ module Plugins
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
     end
 
+    def flush_registry
+      @registry.flush
+    end
+
     def map(*args)
       @handler.map(*args)
       # register this map
@@ -212,6 +216,7 @@ module Plugins
 
     # call the save method for each active plugin
     def save
+      delegate 'flush_registry'
       delegate 'save'
     end
 

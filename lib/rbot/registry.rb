@@ -118,6 +118,10 @@ module Irc
       # debug "initializing registry accessor with name #{@name}"
     end
 
+    def flush
+      @registry.flush
+    end
+
     # convert value to string form for storing in the registry
     # defaults to Marshal.dump(val) but you can override this in your module's
     # registry object to use any method you like.
