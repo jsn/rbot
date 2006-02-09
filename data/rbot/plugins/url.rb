@@ -355,7 +355,7 @@ class UrlPlugin < Plugin
     title = http.start { |http|
       url.path = '/' if url.path == ''
 
-      http.request_get(url.path) { |response|
+      http.request_get(url.path, "User-Agent" => "rbot-url_plugin/666.666") { |response|
         
         case response
           when Net::HTTPRedirection then
