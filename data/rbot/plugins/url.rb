@@ -313,6 +313,31 @@ class UrlPlugin < Plugin
     "[Link Info] title: #{title}"
   end
 
+  def read_data_from_response(response, amount)
+    
+    amount_read = 0
+    chunks = []
+    
+    response.read_body do |chunk|   # read body now
+      
+      amount_read += chunk.length
+      
+      if amount_read > amount
+        amount_of_overflow = amount_read - amount
+        chunk = chunk[0...-amount_of_overflow]
+      end
+      
+      chunks << chunk
+
+      break if amount_read >= amount
+      
+    end
+    
+    chunks.join('')
+    
+  end
+
+
   def get_title_for_url(uri_str, depth=10)
     # This god-awful mess is what the ruby http library has reduced me to.
     # Python's HTTP lib is so much nicer. :~(
@@ -326,37 +351,41 @@ class UrlPlugin < Plugin
     return if url.scheme !~ /https?/
     
     puts "+ connecting to #{url.host}:#{url.port}"
-    http = @bot.httputil.get_proxy(url) 
-    title = http.start do |http|
+    http = @bot.httputil.get_proxy(url)
+    title = http.start { |http|
       url.path = '/' if url.path == ''
-      head = http.request_head(url.path)
-      case head
-        when Net::HTTPRedirection then
-          # call self recursively if this is a redirect
-          redirect_to = head['location']
-          puts "+ redirect location: #{redirect_to}"
-          url = URI.join url.to_s, redirect_to
-          puts "+ whee, redirecting to #{url.to_s}!"
-          title = get_title_for_url(url.to_s, depth-1)
-        when Net::HTTPSuccess then
-          if head['content-type'] =~ /^text\// and (not head['content-length'] or head['content-length'].to_i < 400000)
-            # since the content is 'text/*' and is small enough to
-            # be a webpage, retrieve the title from the page
-            puts "+ getting #{url.request_uri}"
-            response = http.request_get(url.request_uri)
-            return get_title_from_html(response.body)
-          else
-            # content doesn't have title, just display info.
-            size = head['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
-            #lastmod = head['last-modified']
-            return "[Link Info] type: #{head['content-type']}#{size ? ", size: #{size} bytes" : ""}"
-          end
-        when Net::HTTPClientError then
-          return "[Link Info] Error getting link (#{head.code} - #{head.message})"
-        when Net::HTTPServerError then
-          return "[Link Info] Error getting link (#{head.code} - #{head.message})"
-      end
-    end
+
+      http.request_get(url.path) { |response|
+        
+        case response
+          when Net::HTTPRedirection then
+            # call self recursively if this is a redirect
+            redirect_to = response['location']
+            puts "+ redirect location: #{redirect_to}"
+            url = URI.join url.to_s, redirect_to
+            puts "+ whee, redirecting to #{url.to_s}!"
+            title = get_title_for_url(url.to_s, depth-1)
+          when Net::HTTPSuccess then
+            if response['content-type'] =~ /^text\//
+              # since the content is 'text/*' and is small enough to
+              # be a webpage, retrieve the title from the page
+              puts "+ getting #{url.request_uri}"
+              data = read_data_from_response(response, 50000)
+              return get_title_from_html(data)
+            else
+              # content doesn't have title, just display info.
+              size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+              return "[Link Info] type: #{response['content-type']}#{size ? ", size: #{size} bytes" : ""}"
+            end
+          when Net::HTTPClientError then
+            return "[Link Info] Error getting link (#{response.code} - #{response.message})"
+          when Net::HTTPServerError then
+            return "[Link Info] Error getting link (#{response.code} - #{response.message})"
+        end # end of "case response"
+          
+      } # end of request block
+    } # end of http start block
+    
   rescue SocketError => e
     return "[Link Info] Error connecting to site (#{e.message})"
   end
