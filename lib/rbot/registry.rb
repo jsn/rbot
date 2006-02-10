@@ -18,12 +18,10 @@ module Irc
       if File.exist?("#{@bot.botclass}/registry.db")
         puts "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
         old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil, 
-                             "r+", 0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [0, 32 * 1024, 0])
+                             "r+", 0600) 
         new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
-                                BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
-                                0600, "set_pagesize" => 1024,
-                                "set_cachesize" => [0, 32 * 1024, 0])
+                                BDB::CREATE | BDB::EXCL,
+                                0600) 
         old.each {|k,v|
           new[k] = v
         }
@@ -35,21 +33,21 @@ module Irc
     
     def upgrade_data2
       if File.exist?("#{@bot.botclass}/plugin_registry.db")
-        Dir.mkdir("#{@bot.botclass}/registry")
+        Dir.mkdir("#{@bot.botclass}/registry") unless File.exist?("#{@bot.botclass}/registry")
+        env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)
         dbs = Hash.new
         puts "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
         old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
-          "r+", 0600, "set_pagesize" => 1024,
-          "set_cachesize" => [0, 32 * 1024, 0])
+          "r+", 0600, "env" => env)
         old.each {|k,v|
           prefix,key = k.split("/", 2)
           prefix.downcase!
           unless dbs.has_key?(prefix)
             puts "creating db #{@bot.botclass}/registry/#{prefix}.db"
             dbs[prefix] = BDB::CIBtree.open("#{@bot.botclass}/registry/#{prefix}.db",
-              nil, BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
-              0600, "set_pagesize" => 1024,
-              "set_cachesize" => [0, 32 * 1024, 0])
+              nil, BDB::CREATE | BDB::EXCL,
+              0600, "env" => env)
+              
           end
           dbs[prefix][key] = v
         }
@@ -59,6 +57,7 @@ module Irc
           puts "closing db #{k}"
           v.close
         }
+        env.close
       end
     end
   end
@@ -276,10 +275,6 @@ module Irc
     end
     alias size length
 
-    def flush
-      @registry.flush
-    end
-    
   end
 
 end

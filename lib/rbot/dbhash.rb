@@ -50,16 +50,12 @@ module Irc
     def DBHash.create_db(name)
       debug "DBHash: creating empty db #{name}"
       return BDB::Hash.open(name, nil, 
-                             BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
-                             0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [(0), (32 * 1024), (0)])
+                             BDB::CREATE | BDB::EXCL, 0600)
     end
 
     def DBHash.open_db(name)
       debug "DBHash: opening existing db #{name}"
-      return BDB::Hash.open(name, nil, 
-                             "r+", 0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [(0), (32 * 1024), (0)])
+      return BDB::Hash.open(name, nil, "r+", 0600)
     end
     
   end
@@ -67,12 +63,16 @@ module Irc
   
   # DBTree is a BTree equivalent of DBHash, with case insensitive lookups.
   class DBTree
-    
+    @@env=nil
     # absfilename:: use +key+ as an actual filename, don't prepend the bot's
     #               config path and don't append ".db"
     def initialize(bot, key, absfilename=false)
       @bot = bot
       @key = key
+      if @@env.nil?
+        @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
+      end
+      
       if absfilename && File.exist?(key)
         # db already exists, use it
         @db = DBTree.open_db(key)
@@ -95,16 +95,14 @@ module Irc
     def DBTree.create_db(name)
       debug "DBTree: creating empty db #{name}"
       return BDB::CIBtree.open(name, nil, 
-                             BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
-                             0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [(0), (32 * 1024), (0)])
+                             BDB::CREATE | BDB::EXCL,
+                             0600, "env" => @@env)
     end
 
     def DBTree.open_db(name)
       debug "DBTree: opening existing db #{name}"
       return BDB::CIBtree.open(name, nil, 
-                             "r+", 0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [0, 32 * 1024, 0])
+                             "r+", 0600, "env" => @@env)
     end
     
   end

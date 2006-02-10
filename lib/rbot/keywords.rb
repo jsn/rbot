@@ -131,12 +131,10 @@ module Irc
         puts "upgrading keyword db #{f} (rbot 0.9.5 or prior) database format"
         newname = f.gsub(/\.db$/, ".kdb")
         old = BDB::Hash.open f, nil, 
-                             "r+", 0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [0, 32 * 1024, 0]
-        new = BDB::CIBtree.open newname, nil, 
-                                BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
-                                0600, "set_pagesize" => 1024,
-                                "set_cachesize" => [0, 32 * 1024, 0]
+                             "r+", 0600
+        new = BDB::CIBtree.open(newname, nil, 
+                                BDB::CREATE | BDB::EXCL,
+                                0600)
         old.each {|k,v|
           new[k] = v
         }
@@ -186,12 +184,10 @@ module Irc
       if File.exist?("#{@bot.botclass}/keywords.db")
         puts "upgrading old keywords (rbot 0.9.5 or prior) database format"
         old = BDB::Hash.open "#{@bot.botclass}/keywords.db", nil, 
-                             "r+", 0600, "set_pagesize" => 1024,
-                             "set_cachesize" => [0, 32 * 1024, 0]
+                             "r+", 0600
         new = BDB::CIBtree.open "#{@bot.botclass}/keyword.db", nil, 
-                                BDB::CREATE | BDB::EXCL | BDB::TRUNCATE,
-                                0600, "set_pagesize" => 1024,
-                                "set_cachesize" => [0, 32 * 1024, 0]
+                                BDB::CREATE | BDB::EXCL,
+                                0600
         old.each {|k,v|
           new[k] = v
         }
