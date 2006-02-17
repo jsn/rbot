@@ -70,7 +70,8 @@ module Irc
       @bot = bot
       @key = key
       if @@env.nil?
-        @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
+        #@@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
+        @@env = BDB::Env.open("#{@bot.botclass}", BDB::CREATE | BDB::INIT_MPOOL | BDB::RECOVER)
       end
       
       if absfilename && File.exist?(key)
