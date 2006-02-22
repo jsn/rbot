@@ -349,22 +349,24 @@ class UrlPlugin < Plugin
     puts "+ Getting #{uri_str}"
     url = URI.parse(uri_str)
     return if url.scheme !~ /https?/
+
+    title = nil
     
     puts "+ connecting to #{url.host}:#{url.port}"
     http = @bot.httputil.get_proxy(url)
-    title = http.start { |http|
+    http.start { |http|
       url.path = '/' if url.path == ''
 
-      http.request_get(url.path, "User-Agent" => "rbot-url_plugin/666.666") { |response|
+      http.request_get(url.path, "User-Agent" => "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)") { |response|
         
         case response
-          when Net::HTTPRedirection then
+          when Net::HTTPRedirection, Net::HTTPMovedPermanently then
             # call self recursively if this is a redirect
             redirect_to = response['location']  || './'
             puts "+ redirect location: #{redirect_to.inspect}"
             url = URI.join url.to_s, redirect_to
             puts "+ whee, redirecting to #{url.to_s}!"
-            title = get_title_for_url(url.to_s, depth-1)
+            return get_title_for_url(url.to_s, depth-1)
           when Net::HTTPSuccess then
             if response['content-type'] =~ /^text\//
               # since the content is 'text/*' and is small enough to
@@ -381,10 +383,14 @@ class UrlPlugin < Plugin
             return "[Link Info] Error getting link (#{response.code} - #{response.message})"
           when Net::HTTPServerError then
             return "[Link Info] Error getting link (#{response.code} - #{response.message})"
+          else
+            return nil
         end # end of "case response"
           
       } # end of request block
     } # end of http start block
+
+    return title
     
   rescue SocketError => e
     return "[Link Info] Error connecting to site (#{e.message})"
