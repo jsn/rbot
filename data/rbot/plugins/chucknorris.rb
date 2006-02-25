@@ -25,7 +25,15 @@ class ChuckNorrisPlugin < Plugin
     
     # pick a random person
     if who == 'random'
-      who = FACTMAP.keys[rand(FACTMAP.length)]
+      if substitute_name
+        # take out the Mr. T facts if you're inserting someone's name
+        # beacuse tons of them suck, and most of them revolve around
+        # "pitying" someone or something.
+        people = FACTMAP.keys - ["mrt"]
+        who = people[rand(people.length)]
+      else
+        who = FACTMAP.keys[rand(FACTMAP.length)]
+      end
     end
     
     # get the long name
