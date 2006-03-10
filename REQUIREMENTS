@@ -9,6 +9,8 @@ Core requirements
       socket
       uri
 
+      (for debian, you'll also need libopenssl-ruby)
+
 Plugin requirements
 (these are all optional, if you don't have them, the plugins just won't
 function)
