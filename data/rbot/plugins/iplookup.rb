@@ -41,11 +41,11 @@ module ArinWhois
     end
     
     def location
-      "#{self['City']}, #{self['StateProv']}, #{self['Country']}"
+      [ self['City'], self['StateProv'], self['Country'] ].compact.join(', ')
     end
     
     def address
-      "#{self['Address']}, #{location}  #{self['PostalCode']}"
+      [ self['Address'], location, self['PostalCode'] ].compact.join(', ')
     end
     
   end
@@ -104,8 +104,8 @@ module ArinWhois
         result = Chunk.new
         
         chunk[0].scan(/([A-Za-z]+?):(.*)/).each do |tuple|
-          #puts tuple.inspect
-          result[tuple[0]] = tuple[1].strip
+          tuple[1].strip!
+          result[tuple[0]] = tuple[1].empty? ? nil : tuple[1]
         end
         
         result
@@ -192,9 +192,10 @@ class IPLookupPlugin < Plugin
     if params[:domain]
       begin
         ip = Resolv.getaddress(params[:domain])
-        reply += "(#{params[:domain]} = #{ip}) "
+        reply += "#{params[:domain]} | "
       rescue => e
         m.reply "#{e.message}"
+        return
       end
     else
       ip = params[:ip]
@@ -220,7 +221,7 @@ plugin.map 'userip :user', :action => 'userip', :requirements => {:user => /\w+/
 
 if __FILE__ == $0
   include ArinWhois
-  data = open('whoiscgm.txt').read
+  data = open('whoistest.txt').read
   c = ArinWhoisParser.new data
   puts c.get_parsed_data.inspect
 end
