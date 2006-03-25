@@ -190,8 +190,12 @@ class IPLookupPlugin < Plugin
   def iplookup(m, params)
     reply = ""
     if params[:domain]
-      ip = Resolv.getaddress(params[:domain])
-      reply += "(#{params[:domain]} = #{ip}) "
+      begin
+        ip = Resolv.getaddress(params[:domain])
+        reply += "(#{params[:domain]} = #{ip}) "
+      rescue => e
+        m.reply "#{e.message}"
+      end
     else
       ip = params[:ip]
     end
