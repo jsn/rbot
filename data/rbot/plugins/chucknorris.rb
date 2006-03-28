@@ -1,151 +1,52 @@
-require 'uri/common'
-require 'cgi'
-
-# the 4q.cc "id => full name" mapping
-FACTMAP = { "mrt" => "Mr\. T",
-            "vin" => "Vin Diesel",
-            "chuck" => "Chuck Norris" }
+require 'yaml'
 
 MIN_RATING = 6.0
 
-PISSED_EXPRESSIONS = [
-    "fuck this, i'm going to go get toed up.",
-    "screw this, i'm going to get hammered.",
-    "forget this, i'm going to iron some shirts.",
-    "disregard this, i'm going out to kill me some prostitutes.",
-]
-
-# exceptions
-class HTTPError < Exception; end
-class ParseError < Exception; end
+FACTS_FILE =  File.join Config::datadir, "plugins", "chucknorris.yml"
+puts "+ [chucknorris] Loading #{FACTS_FILE}..."
+FACTS = YAML.load_file(FACTS_FILE).map{|k,v| [v,k]}
+puts "+ [chucknorris] #{FACTS.length} Chuck Norris facts loaded..."
+puts "Sample: #{FACTS[rand(FACTS.size)].inspect}"
 
 # the plugin
 class ChuckNorrisPlugin < Plugin
 
-  def help(plugin, topic="")
-    "fact [person] => \"fact\" shows a random Chuck Norris, Vin Diesel, or Mr. T fact. \"fact [person]\" shows a fact about someone in the channel. || chucknorris, chuck, norris => random Chuck Norris fact || vindiesel, vin, diesel => random Vin Diesel fact || mrt => I pity the foo who can't figure this one out."
-  end
-
-  def getfact(who)
-      raise "Unknown name: #{who}" unless FACTMAP.keys.include? who
-      # get the fact
-      factdata = @bot.httputil.get(URI.parse("http://www.4q.cc/index.php?pid=fact&person=#{who}"))
-      unless factdata
-        raise HTTPError
-      end
-    
-      longwho = FACTMAP[who]
-
-      # regexes
-      fact_matcher = %r{<h1> And now a random fact about #{longwho}...</h1>(.+?)<hr />}
-      rating_matcher = %r{Current Rating: <b>(\d+\.\d+)</b>}
-
-      # parse the fact
-      if factdata =~ fact_matcher
-        fact = CGI::unescapeHTML($1)
-        if factdata =~ rating_matcher
-            rating = $1.to_f
-            puts "fact=[#{fact}], rating=[#{rating}]"
-            return [fact, rating]
-        end
-      end
-        
-      raise ParseError
-    
+  def help(plugin, topic="chuck")
+    "fact|chuck|norris|chucknorris [min_rating] => \"fact\" shows a random Chuck Norris fact (optional minimum rating from 1-10, default=6.0)."
+    #\"fact [person]\" shows a fact about someone in the channel. 
   end
 
   def fact(m, params)
-    who = params[:who]
-    max_tries = (params[:tries] or "10").to_i
-    
-    valid_people = FACTMAP.keys + ["random"]
-    
-    # if the person wants a fact about themselves, then it'll substitute the name.
-    if valid_people.include? who
-      substitute_name = nil
-    else
-      substitute_name = who
-      who = 'random'
-    end
-    
-    # pick a random person
-    if who == 'random'
-      if substitute_name
-        # take out the Mr. T facts if you're inserting someone's name
-        # beacuse tons of them suck, and most of them revolve around
-        # "pitying" someone or something.
-        people = FACTMAP.keys - ["mrt"]
-        who = people[rand(people.length)]
-      else
-        who = FACTMAP.keys[rand(FACTMAP.length)]
+    min = params[:minrating].to_f
+    puts "+ Getting Chuck Norris fact (rating > #{min})..."
+
+    rating = -1000.0
+    count = 0
+
+    while rating < min
+      count += 1
+
+      rating, fact = FACTS[rand(FACTS.length)]
+
+      if count > 1000
+        puts "  - gave up searching"
+        m.reply "Looks like I ain't finding a quote with a rating higher than #{min} any time today."
+        return
       end
-    end
-    
-    # get the long name
-    longwho = FACTMAP[who]
-    unless longwho
-      m.reply "Who the crap is #{who}?!?!"
-      return
-    end
-    
-    # get the fact
 
-    m.reply "alright, let's see if I can find a good one..."
-
-    tries = 0
-    results = []
-    loop do
-        
-        begin
-        
-            puts "[chucknorris] Try number #{tries}/#{max_tries}..."
-
-            tries += 1
-            fact, rating = getfact(who)
-            
-            if rating >= MIN_RATING
-                fact.gsub!(longwho, substitute_name) if substitute_name
-                m.reply "#{results.join(', ') + "... "}hrm, this one's not bad:"
-                m.reply "#{fact} [rating: #{rating}]"
-                return
-            else
-                results << "lame"
-            end
-    
-            if tries > max_tries
-                m.reply "#{results.join(', ')}... these all suck. #{PISSED_EXPRESSIONS[rand(PISSED_EXPRESSIONS.length)]}"
-                return
-            end
-            
-        rescue HTTPError
-          #m.reply "This #{longwho} fact punched my teeth in. (HTTP error)"
-          results << "DOH!"
-          tries += 1
-        rescue ParseError
-          #m.reply "This #{longwho} fact made my brain explode. (Parse error)"
-          results << "wtf?"
-          tries += 1
-        end
-      
     end
-  
+
+    puts "  - got > #{min} fact in #{count} tries..."
+    m.reply "#{fact} [score=#{rating}]"
+
   end
-
 
 end
 
 plugin = ChuckNorrisPlugin.new
 
-plugin.map 'fact :who :tries', :action => 'fact',
-                          :defaults => {:who => 'random', :tries=>10}
-
-plugin.map 'chucknorris :who', :action => 'fact', :defaults => {:who => "chuck"}
-plugin.map 'chuck :who', :action => 'fact', :defaults => {:who => "chuck"}
-plugin.map 'norris :who', :action => 'fact', :defaults => {:who => "chuck"}
-
-plugin.map 'vindiesel :who', :action => 'fact', :defaults => {:who => "vin"}
-plugin.map 'diesel :who', :action => 'fact', :defaults => {:who => "vin"}
-plugin.map 'vin :who', :action => 'fact', :defaults => {:who => "vin"}
-
-plugin.map 'mrt :who', :action => 'fact', :defaults => {:who => "mrt"}
+plugin.map 'fact :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
+plugin.map 'chucknorris :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
+plugin.map 'chuck :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
+plugin.map 'norris :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
 
