@@ -1,44 +1,62 @@
 require 'yaml'
+require 'zlib'
 
 MIN_RATING = 6.0
-
-FACTS_FILE =  File.join Config::datadir, "plugins", "chucknorris.yml"
-puts "+ [chucknorris] Loading #{FACTS_FILE}..."
-FACTS = YAML.load_file(FACTS_FILE).map{|k,v| [v,k]}
-puts "+ [chucknorris] #{FACTS.length} Chuck Norris facts loaded..."
-puts "Sample: #{FACTS[rand(FACTS.size)].inspect}"
+MIN_VOTES = 25
 
 # the plugin
 class ChuckNorrisPlugin < Plugin
 
+  # Loadez les factes
+  def initialize
+    if path = find_facts_file('chucknorris.yml.gz')
+      fyml = Zlib::GzipReader.open(path)
+    elsif path = find_facts_File('chucknorris.yml')
+      fyml = open(path)
+    else
+      raise "Error: Couldn't find chucknorris.yml[.gz]"
+    end
+    
+    puts "+ [chucknorris] Loading #{path}..."
+    
+    @@facts = YAML.load(fyml).map{|fact,(score,votes)| votes >= MIN_VOTES ? [score,fact] : nil}.compact
+    puts "+ [chucknorris] #{@@facts.length} Chuck Norris facts loaded..."
+    puts "  Random fact: #{@@facts[rand(@@facts.size)].inspect}"
+    
+    super
+  end
+  
+  # Just a little helper for the initialize method...
+  def find_facts_file(name)
+    full_path = File.join Config::datadir, "plugins", name
+    found_files = Dir[full_path]
+    if found_files.empty?
+      nil
+    else
+      found_files[0]
+    end
+  end
+  
+  # HELP!
   def help(plugin, topic="chuck")
     "fact|chuck|norris|chucknorris [min_rating] => \"fact\" shows a random Chuck Norris fact (optional minimum rating from 1-10, default=6.0)."
     #\"fact [person]\" shows a fact about someone in the channel. 
   end
 
+  # The meat.
   def fact(m, params)
     min = params[:minrating].to_f
     puts "+ Getting Chuck Norris fact (rating > #{min})..."
 
-    rating = -1000.0
-    count = 0
-
-    while rating < min
-      count += 1
-
-      rating, fact = FACTS[rand(FACTS.length)]
-
-      if count > 1000
-        puts "  - gave up searching"
-        m.reply "Looks like I ain't finding a quote with a rating higher than #{min} any time today."
-        return
-      end
-
+    viable_facts = @@facts.select {|rating, fact| rating >= min}
+    if viable_facts.empty?
+      puts "  - no facts found with rating >= #{min}"
+      m.reply "Are you nuts?!? There are no facts better than #{min}!!!"
+      return
     end
 
-    puts "  - got > #{min} fact in #{count} tries..."
+    rating, fact = viable_facts[rand(viable_facts.length)]
     m.reply "#{fact} [score=#{rating}]"
-
   end
 
 end
