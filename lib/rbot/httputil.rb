@@ -98,7 +98,7 @@ class HttpUtil
         proxy = URI.parse @bot.config["http.proxy_uri"] rescue nil
       end
       if proxy
-        debug "proxy is set to #{proxy.uri}"
+        debug "proxy is set to #{proxy.host} port #{proxy.port}"
         if proxy_required(uri)
           proxy_host = proxy.host
           proxy_port = proxy.port
