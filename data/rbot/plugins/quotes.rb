@@ -49,6 +49,7 @@ class QuotePlugin < Plugin
     return false unless(@lists[channel].length > 0)
     if(@lists[channel][num])
       @lists[channel][num] = nil
+      @lists[channel].pop if num == @lists[channel].length - 1
       return true
     end
     return false
