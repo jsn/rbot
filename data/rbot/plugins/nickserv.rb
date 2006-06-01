@@ -51,6 +51,7 @@ class NickServPlugin < Plugin
     @registry[@bot.nick] = passwd
     m.okay
   end
+
   def listnicks(m, params)
     if @registry.length > 0
       @registry.each {|k,v|
@@ -60,13 +61,25 @@ class NickServPlugin < Plugin
       m.reply "none known"
     end
   end
-  def identify(m, params)
+
+  def do_identify
     if @registry.has_key?(@bot.nick)
       @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY #{@registry[@bot.nick]}"
+      return true
+    end
+    return false
+  end
+
+  def identify(m, params)
+    if do_identify
       m.okay
     else
       m.reply "I dunno the nickserv password for the nickname #{@bot.nick} :("
     end
+  end
+  
+  def connect
+    do_identify
   end
   
   def listen(m)
@@ -74,9 +87,7 @@ class NickServPlugin < Plugin
 
     if (m.sourcenick == "NickServ" && m.message =~ /IDENTIFY/)
       debug "nickserv asked us to identify for nick #{@bot.nick}"
-      if @registry.has_key?(@bot.nick)
-        @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY " + @registry[@bot.nick]
-      end
+      do_identify
     end
   end
 
