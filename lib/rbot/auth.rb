@@ -41,7 +41,7 @@ module Irc
         File.open( "#{@bot.botclass}/users.yaml" ) { |file|
           # work around YAML not maintaining the default proc
           @loadedusers = YAML::parse(file).transform
-          @users.merge(@loadedusers)
+          @users.update(@loadedusers)
         }
       end
       if(File.exist?("#{@bot.botclass}/levels.rbot"))
@@ -125,7 +125,7 @@ module Irc
               return true
           else
             debug "usermod: Tried to modify unknown item #{item}"
-            @bot.say tell, "Unknown item #{item}" if tell
+	    # @bot.say tell, "Unknown item #{item}" if tell
         end
       end
       return false
@@ -155,8 +155,9 @@ module Irc
     end
 
     def identify( mask, username, password )
-      usermod( username, '+hostmask', mask ) if @users.has_key? username && @users[username].password == password
-      debug "User identified: #{username}"
+      return false unless @users.has_key?(username) && @users[username].password == password
+      @bot.auth.usermod( username, '+hostmask', mask )
+      return true
     end
 
     # return all currently defined commands (for which auth is required) and
@@ -241,27 +242,39 @@ module Irc
               m.reply "Failed to set #$2 of #$1 to #$3"
             end
           end
+        when( /^setpassword\s+(\S+)/ )
+	  password = $1
+          user = @bot.auth.matchingUser( m.source )
+          if user
+	    if @bot.auth.usermod(user, 'password', password)
+	      m.reply "Your password has been set to #{password}"
+	    else
+	      m.reply "Couldn't set password"
+	    end
+          else
+            m.reply 'You don\'t belong to any user.'
+          end
         when (/^auth\s+(\S+)/)
           if( $1 == @bot.config['auth.password'] )
             if ! @users.has_key? 'master'
               @bot.auth.useradd( 'master', 1000, @bot.config['auth.password'], m.source )
             else
-              @bot.usermod( 'master', '+hostmask', m.source )
+              @bot.auth.usermod( 'master', '+hostmask', m.source )
             end
             m.reply 'Identified, security level maxed out'
           else
             m.reply 'Incorrect password'
           end
         when( /^identify\s+(\S+)\s+(\S+)/ )
-          if( @bot.auth.identify( m.source, $1, $2 ) )
-            m.reply "Identified as #$1(#{@users[$1].level($1)}"
+          if @bot.auth.identify( m.source, $1, $2 )
+            m.reply "Identified as #$1 (#{@users[$1].level})"
           else
             m.reply 'Incorrect username/password'
           end
         when( 'whoami' )
           user = @bot.auth.matchingUser( m.source )
           if user
-            m.reply "I recognize you as #{user}(#{@users[user].level})"
+            m.reply "I recognize you as #{user} (#{@users[user].level})"
           else
             m.reply 'You don\'t belong to any user.'
           end
