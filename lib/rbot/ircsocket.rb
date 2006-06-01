@@ -100,11 +100,15 @@ module Irc
 
     # get the next line from the server (blocks)
     def gets
-      reply = @sock.gets
-      @lines_received += 1
-      reply.strip! if reply
-      debug "RECV: #{reply.inspect}"
-      reply
+      begin
+	reply = @sock.gets
+	@lines_received += 1
+	reply.strip! if reply
+	debug "RECV: #{reply.inspect}"
+	return reply
+      rescue
+	return nil
+      end
     end
 
     def queue(msg)
