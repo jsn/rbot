@@ -21,35 +21,48 @@ class RoulettePlugin < Plugin
     end
 
     playerdata = nil
-    if @registry.has_key?(m.sourcenick)
-      playerdata = @registry[m.sourcenick]
+    if @registry.has_key?("player " + m.sourcenick)
+      playerdata = @registry["player " + m.sourcenick]
     else
       playerdata = RouletteHistory.new(0,0,0,0,0)
     end
-    
+
+    totals = nil
+    if @registry.has_key?("totals")
+      totals = @registry["totals"]
+    else
+      totals = RouletteHistory.new(0,0,0,0,0)
+    end
+
     unless @players.include?(m.sourcenick)
       @players << m.sourcenick
       playerdata.games += 1
     end
     playerdata.shots += 1
+    totals.shots += 1
     
     shot = @chambers.pop
     if shot
       m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => *BANG*"
       playerdata.deaths += 1
+      totals.deaths += 1
       @players.each {|plyr|
         next if plyr == m.sourcenick
-        pdata = @registry[plyr]
+        pdata = @registry["player " + plyr]
         next if pdata == nil
         pdata.wins += 1
-        @registry[plyr] = pdata
+        totals.wins += 1
+        @registry["player " + plyr] = pdata
       }
+      @players = Array.new
     else
       m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => +click+"
       playerdata.misses += 1
+      totals.misses += 1
     end
 
-    @registry[m.sourcenick] = playerdata
+    @registry["player " + m.sourcenick] = playerdata
+    @registry["totals"] = totals
     
     if shot || @chambers.empty?
       reload(m)
@@ -60,12 +73,24 @@ class RoulettePlugin < Plugin
     reset_chambers
     # all players win on a reload
     # (allows you to play 3-shot matches etc)
+    totals = nil
+    if @registry.has_key?("totals")
+      totals = @registry["totals"]
+    else
+      totals = RouletteHistory.new(0,0,0,0,0)
+    end
+
     @players.each {|plyr|
-      pdata = @registry[plyr]
+      pdata = @registry["player " + plyr]
       next if pdata == nil
       pdata.wins += 1
-      @registry[plyr] = pdata
+      totals.wins += 1
+      @registry["player " + plyr] = pdata
     }
+
+    totals.games += 1
+    @registry["totals"] = totals
+
     @players = Array.new
   end
   def reset_chambers
@@ -74,7 +99,7 @@ class RoulettePlugin < Plugin
   end
   def playerstats(m, params)
     player = params[:player]
-    pstats = @registry[player]
+    pstats = @registry["player " + player]
     if pstats.nil?
       m.reply "#{player} hasn't played enough games yet"
     else
@@ -82,10 +107,17 @@ class RoulettePlugin < Plugin
     end
   end
   def stats(m, params)
+    if @registry.has_key?("totals")
+      totals = @registry["totals"]
+      total_games = totals.games
+      total_shots = totals.shots
+    else
+      total_games = 0
+      total_shots = 0
+    end
+
     total_players = 0
-    total_games = 0
-    total_shots = 0
-    
+
     died_most = [nil,0]
     won_most = [nil,0]
     h_win_percent = [nil,0]
@@ -93,9 +125,11 @@ class RoulettePlugin < Plugin
     h_luck_percent = [nil,0]
     l_luck_percent = [nil,0]
     @registry.each {|k,v|
+      match = /player (.+)/.match(k)
+      next unless match
+      k = match[1]
+
       total_players += 1
-      total_games += v.deaths
-      total_shots += v.shots
       
       win_rate = v.wins.to_f / v.games * 100
       if h_win_percent[0].nil? || win_rate > h_win_percent[1] && v.games > 2
@@ -133,7 +167,7 @@ class RoulettePlugin < Plugin
       end
     }
     if total_games < 1
-      m.reply "roulette stats: no games played yet"
+      m.reply "roulette stats: no games completed yet"
     else
       m.reply "roulette stats: #{total_games} games completed, #{total_shots} shots fired at #{total_players} players. Luckiest: #{h_luck_percent[0].join(',')} (#{sprintf '%.1f', h_luck_percent[1]}% clicks). Unluckiest: #{l_luck_percent[0].join(',')} (#{sprintf '%.1f', l_luck_percent[1]}% clicks). Highest survival rate: #{h_win_percent[0].join(',')} (#{sprintf '%.1f', h_win_percent[1]}%). Lowest survival rate: #{l_win_percent[0].join(',')} (#{sprintf '%.1f', l_win_percent[1]}%). Most wins: #{won_most[0].join(',')} (#{won_most[1]}). Most deaths: #{died_most[0].join(',')} (#{died_most[1]})."
     end
