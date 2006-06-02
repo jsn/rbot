@@ -6,13 +6,21 @@ class MarkovPlugin < Plugin
     @lastline = false
   end
 
-  def generate_string(seedline)
+  def generate_string(word1, word2)
     # limit to max of 50 words
-    return unless seedline
-    word1, word2 = seedline.split(/\s+/)
     output = word1 + " " + word2
-    50.times do
-      wordlist = @registry["#{word1}/#{word2}"]
+
+    # try to avoid :nonword in the first iteration
+    wordlist = @registry["#{word1} #{word2}"]
+    wordlist.delete(:nonword)
+    if not wordlist.empty?
+      word3 = wordlist[rand(wordlist.length)]
+      output = output + " " + word3
+      word1, word2 = word2, word3
+    end
+
+    49.times do
+      wordlist = @registry["#{word1} #{word2}"]
       break if wordlist.empty?
       word3 = wordlist[rand(wordlist.length)]
       break if word3 == :nonword
@@ -119,7 +127,9 @@ class MarkovPlugin < Plugin
 
   def random_markov(m, message)
     return unless should_talk
-    line = generate_string(message)
+
+    word1, word2 = message.split(/\s+/)
+    line = generate_string(word1, word2)
     return unless line
     return if line == message
     @bot.timer.add_once(delay, m) {|m|
@@ -128,9 +138,8 @@ class MarkovPlugin < Plugin
   end
 
   def chat(m, params)
-    seed = "#{params[:seed1]} #{params[:seed2]}"
-    line = generate_string seed
-    if line != seed
+    line = generate_string(params[:seed1], params[:seed2])
+    if line != "#{params[:seed1]} #{params[:seed2]}"
       m.reply line 
     else
       m.reply "I can't :("
@@ -142,7 +151,7 @@ class MarkovPlugin < Plugin
     word1, word2 = :nonword, :nonword
     output = Array.new
     50.times do
-      wordlist = @registry["#{word1}/#{word2}"]
+      wordlist = @registry["#{word1} #{word2}"]
       break if wordlist.empty?
       word3 = wordlist[rand(wordlist.length)]
       break if word3 == :nonword
@@ -173,10 +182,10 @@ class MarkovPlugin < Plugin
     @lastline = message
     word1, word2 = :nonword, :nonword
     wordlist.each do |word3|
-      @registry["#{word1}/#{word2}"] = @registry["#{word1}/#{word2}"].push(word3)
+      @registry["#{word1} #{word2}"] = @registry["#{word1} #{word2}"].push(word3)
       word1, word2 = word2, word3
     end
-    @registry["#{word1}/#{word2}"] = [:nonword]
+    @registry["#{word1} #{word2}"] = @registry["#{word1} #{word2}"].push(:nonword)
 
     return if m.replied?
     random_markov(m, message)
@@ -192,4 +201,4 @@ plugin.map 'markov status', :action => "status"
 plugin.map 'chat about :seed1 :seed2', :action => "chat"
 plugin.map 'chat', :action => "rand_chat"
 plugin.map 'markov probability :probability', :action => "probability",
-           :requirements => {:probability => /^\d+$/}
+           :requirements => {:probability => /^\d+%?$/}
