@@ -635,8 +635,8 @@ class IrcBot
         return "say <channel>|<nick> <message> => say <message> to <channel> or in private message to <nick>"
       when "action"
         return "action <channel>|<nick> <message> => does a /me <message> to <channel> or in private message to <nick>"
-      when "topic"
-        return "topic <channel> <message> => set topic of <channel> to <message>"
+	#       when "topic"
+	#         return "topic <channel> <message> => set topic of <channel> to <message>"
       when "quiet"
         return "quiet [in here|<channel>] => with no arguments, stop speaking in all channels, if \"in here\", stop speaking in this channel, or stop speaking in <channel>"
       when "talk"
@@ -679,6 +679,7 @@ class IrcBot
     end
 
     if(m.address?)
+      delegate_privmsg(m)
       case m.message
         when (/^join\s+(\S+)\s+(\S+)$/i)
           join $1, $2 if(@auth.allow?("join", m.source, m.replyto))
@@ -705,16 +706,19 @@ class IrcBot
           say $1, $2 if(@auth.allow?("say", m.source, m.replyto))
         when (/^action\s+(\S+)\s+(.*)$/i)
           action $1, $2 if(@auth.allow?("say", m.source, m.replyto))
-        when (/^topic\s+(\S+)\s+(.*)$/i)
-          topic $1, $2 if(@auth.allow?("topic", m.source, m.replyto))
+	  # when (/^topic\s+(\S+)\s+(.*)$/i)
+          #   topic $1, $2 if(@auth.allow?("topic", m.source, m.replyto))
         when (/^mode\s+(\S+)\s+(\S+)\s+(.*)$/i)
           mode $1, $2, $3 if(@auth.allow?("mode", m.source, m.replyto))
         when (/^ping$/i)
           say m.replyto, "pong"
         when (/^rescan$/i)
           if(@auth.allow?("config", m.source, m.replyto))
-            m.okay
+            m.reply "Saving ..."
+            save
+            m.reply "Rescanning ..."
             rescan
+            m.okay
           end
         when (/^quiet$/i)
           if(auth.allow?("talk", m.source, m.replyto))
@@ -759,8 +763,6 @@ class IrcBot
         when (/^(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$)).*/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick if(m.public?)
           say m.replyto, @lang.get("hello") if(m.private?)
-        else
-          delegate_privmsg(m)
       end
     else
       # stuff to handle when not addressed
