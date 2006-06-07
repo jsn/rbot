@@ -269,6 +269,10 @@ module Irc
       return ret
     end
 
+    def sub_registry(prefix)
+      return BotRegistryAccessor.new(@bot, @name + "/" + prefix)
+    end
+
     # returns the number of keys in your registry namespace
     def length
       self.keys.length
