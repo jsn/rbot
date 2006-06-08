@@ -106,7 +106,8 @@ module Irc
 	reply.strip! if reply
 	debug "RECV: #{reply.inspect}"
 	return reply
-      rescue
+      rescue => e
+        debug "socket get failed: #{e}"
 	return nil
       end
     end
