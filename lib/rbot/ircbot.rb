@@ -463,15 +463,25 @@ class IrcBot
       debug "failed to trap signals, probably running on windows?"
     end
     message = @lang.get("quit") if (message.nil? || message.empty?)
+    debug "Clearing socket"
     @socket.clearq
+    debug "Saving"
     save
+    debug "Cleaning up"
     @plugins.cleanup
+    debug "Logging quits"
     @channels.each_value {|v|
       log "@ quit (#{message})", v.name
     }
-    @registry.close
+    # debug "Closing registries"
+    # @registry.close
+    debug "Cleaning up the db environment"
+    DBTree.cleanup_env
+    debug "Sending quit message"
     @socket.puts "QUIT :#{message}"
+    debug "Flushing socket"
     @socket.flush
+    debug "Shutting down socket"
     @socket.shutdown
     puts "rbot quit (#{message})"
   end
@@ -570,7 +580,8 @@ class IrcBot
   def status
     secs_up = Time.new - @startup_time
     uptime = Utils.secs_to_string secs_up
-    return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
+    # return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
+    return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
   end
 
   # we'll ping the server every 30 seconds or so, and expect a response

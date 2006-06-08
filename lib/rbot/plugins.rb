@@ -16,7 +16,7 @@ module Plugins
   #      def karma_stats(m, params)
   #        m.reply "..."
   #      end
-  #      
+  #
   #      # the default action is the first component
   #      plugin.map 'karma'
   #
@@ -29,10 +29,10 @@ module Plugins
   #        item = params[:key]
   #        m.reply 'karma for #{item}'
   #      end
-  #      
+  #
   #      # you can setup defaults, to make parameters optional
   #      plugin.map 'karma :key', :defaults => {:key => 'defaultvalue'}
-  #      
+  #
   #      # the default auth check is also against the first component
   #      # but that can be changed
   #      plugin.map 'karmastats', :auth => 'karma'
@@ -46,14 +46,14 @@ module Plugins
   #    plugin.register_maps
   #    This also sets the privmsg handler to use the map lookups for
   #    handling messages. You can still use listen(), kick() etc methods
-  # 
+  #
   # listen(UserMessage)::
   #                        Called for all messages of any type. To
   #                        differentiate them, use message.kind_of? It'll be
   #                        either a PrivMessage, NoticeMessage, KickMessage,
   #                        QuitMessage, PartMessage, JoinMessage, NickMessage,
   #                        etc.
-  #                              
+  #
   # privmsg(PrivMessage)::
   #                        called for a PRIVMSG if the first word matches one
   #                        the plugin register()d for. Use m.plugin to get
@@ -70,7 +70,7 @@ module Plugins
   # part(PartMessage)::
   #                        Called when a user (or the bot) parts a channel
   #
-  # quit(QuitMessage)::    
+  # quit(QuitMessage)::
   #                        Called when a user (or the bot) quits IRC
   #
   # nick(NickMessage)::
@@ -81,7 +81,7 @@ module Plugins
   #
   # connect()::            Called when a server is joined successfully, but
   #                        before autojoin channels are joined (no params)
-  # 
+  #
   # save::                 Called when you are required to save your plugin's
   #                        state, if you maintain data between sessions
   #
@@ -100,7 +100,13 @@ module Plugins
     end
 
     def flush_registry
+      # debug "Flushing #{@registry}"
       @registry.flush
+    end
+
+    def cleanup
+      # debug "Closing #{@registry}"
+      @registry.close
     end
 
     def map(*args)
@@ -120,7 +126,7 @@ module Plugins
     def name
       @names.join("|")
     end
-    
+
     # return a help string for your module. for complex modules, you may wish
     # to break your help into topics, and return a list of available topics if
     # +topic+ is nil. +plugin+ is passed containing the matching prefix for
@@ -129,7 +135,7 @@ module Plugins
     def help(plugin, topic)
       "no help"
     end
-    
+
     # register the plugin as a handler for messages prefixed +name+
     # this can be called multiple times for a plugin to handle multiple
     # message prefixes
@@ -164,7 +170,7 @@ module Plugins
       @dirs = dirlist
       scan
     end
-    
+
     # access to associated bot
     def Plugins.bot
       @@bot
@@ -198,7 +204,7 @@ module Plugins
             # the idea here is to prevent namespace pollution. perhaps there
             # is another way?
             plugin_module = Module.new
-            
+
             begin
               plugin_string = IO.readlines(tmpfilename).join("")
               debug "loading plugin #{tmpfilename}"
@@ -266,7 +272,7 @@ module Plugins
         end
       end
     end
-    
+
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter
     def delegate(method, *args)

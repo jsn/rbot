@@ -119,6 +119,11 @@ module Irc
 
     def flush
       @registry.flush
+      @registry.sync
+    end
+
+    def close
+      @registry.close
     end
 
     # convert value to string form for storing in the registry

@@ -22,7 +22,7 @@ module Irc
   # mydata.db, if it exists, it will load and reference that db.
   # Otherwise it'll create and empty db called mydata.db
   class DBHash
-    
+
     # absfilename:: use +key+ as an actual filename, don't prepend the bot's
     #               config path and don't append ".db"
     def initialize(bot, key, absfilename=false)
@@ -50,30 +50,39 @@ module Irc
     def DBHash.create_db(name)
       debug "DBHash: creating empty db #{name}"
       return BDB::Hash.open(name, nil, 
-                             BDB::CREATE | BDB::EXCL, 0600)
+      BDB::CREATE | BDB::EXCL, 0600)
     end
 
     def DBHash.open_db(name)
       debug "DBHash: opening existing db #{name}"
       return BDB::Hash.open(name, nil, "r+", 0600)
     end
-    
+
   end
 
-  
+
   # DBTree is a BTree equivalent of DBHash, with case insensitive lookups.
   class DBTree
     @@env=nil
+    # TODO: make this customizable
+    # Note that it must be at least four times lg_bsize
+    @@lg_max = 2*1024*1024
     # absfilename:: use +key+ as an actual filename, don't prepend the bot's
     #               config path and don't append ".db"
     def initialize(bot, key, absfilename=false)
       @bot = bot
       @key = key
       if @@env.nil?
-        #@@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
-        @@env = BDB::Env.open("#{@bot.botclass}", BDB::CREATE | BDB::INIT_MPOOL | BDB::RECOVER)
+        begin
+          @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER, "set_lg_max" => @@lg_max)
+          debug "DBTree: environment opened with max log size #{@@env.conf['lg_max']}"
+        rescue => e
+          debug "DBTree: failed to open environment: #{e}. Retrying ..."
+          @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
+        end
+        #@@env = BDB::Env.open("#{@bot.botclass}", BDB::CREATE | BDB::INIT_MPOOL | BDB::RECOVER)
       end
-      
+
       if absfilename && File.exist?(key)
         # db already exists, use it
         @db = DBTree.open_db(key)
@@ -95,17 +104,43 @@ module Irc
 
     def DBTree.create_db(name)
       debug "DBTree: creating empty db #{name}"
-      return BDB::CIBtree.open(name, nil, 
-                             BDB::CREATE | BDB::EXCL,
-                             0600, "env" => @@env)
+      return @@env.open_db(BDB::CIBtree, name, nil, BDB::CREATE | BDB::EXCL, 0600)
     end
 
     def DBTree.open_db(name)
       debug "DBTree: opening existing db #{name}"
-      return BDB::CIBtree.open(name, nil, 
-                             "r+", 0600, "env" => @@env)
+      return @@env.open_db(BDB::CIBtree, name, nil, "r+", 0600)
     end
-    
+
+    def DBTree.cleanup_env()
+      begin
+        debug "DBTree: checking transactions ..."
+        has_active_txn = @@env.txn_stat["st_nactive"] > 0
+        if has_active_txn
+          debug "DBTree: WARNING: not all transactions completed!"
+        end
+        debug "DBTree: flushing log ..."
+        @@env.log_flush
+        logs = @@env.log_archive(BDB::ARCH_ABS)
+        debug "DBTree: deleting archivable logs: #{logs.join(', ')}."
+        logs.each { |log|
+          File.delete(log)
+        }
+        debug "DBTree: closing environment #{@@env}"
+        path = @@env.home
+        @@env.close
+        @@env = nil
+        if has_active_txn
+          debug "DBTree: keeping file because of incomplete transactions"
+        else
+          debug "DBTree: cleaning up environment in #{path}"
+          BDB::Env.remove("#{path}")
+        end
+      rescue => e
+        debug "Failed: #{e}"
+      end
+    end
+
   end
 
 end
