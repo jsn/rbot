@@ -511,6 +511,7 @@ class IrcBot
     @keywords.save
     @auth.save
     @plugins.save
+    DBTree.cleanup_logs
   end
 
   # call the rescan method for the bot's lang, keywords and all plugins

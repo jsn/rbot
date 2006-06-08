@@ -112,13 +112,14 @@ module Irc
       return @@env.open_db(BDB::CIBtree, name, nil, "r+", 0600)
     end
 
-    def DBTree.cleanup_env()
+    def DBTree.cleanup_logs()
       begin
-        debug "DBTree: checking transactions ..."
-        has_active_txn = @@env.txn_stat["st_nactive"] > 0
-        if has_active_txn
-          debug "DBTree: WARNING: not all transactions completed!"
-        end
+        debug "DBTree: checkpointing ..."
+        @@env.checkpoint
+      rescue => e
+        debug "Failed: #{e}"
+      end
+      begin
         debug "DBTree: flushing log ..."
         @@env.log_flush
         logs = @@env.log_archive(BDB::ARCH_ABS)
@@ -126,6 +127,19 @@ module Irc
         logs.each { |log|
           File.delete(log)
         }
+      rescue => e
+        debug "Failed: #{e}"
+      end
+    end
+
+    def DBTree.cleanup_env()
+      begin
+        debug "DBTree: checking transactions ..."
+        has_active_txn = @@env.txn_stat["st_nactive"] > 0
+        if has_active_txn
+          debug "DBTree: WARNING: not all transactions completed!"
+        end
+        DBTree.cleanup_logs
         debug "DBTree: closing environment #{@@env}"
         path = @@env.home
         @@env.close
