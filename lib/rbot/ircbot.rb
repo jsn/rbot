@@ -124,6 +124,7 @@ class IrcBot
     
     botclass = "#{Etc.getpwuid(Process::Sys.geteuid)[:dir]}/.rbot" unless botclass
     #botclass = "#{ENV['HOME']}/.rbot" unless botclass
+    botclass = File.expand_path(botclass)
     @botclass = botclass.gsub(/\/$/, "")
 
     unless FileTest.directory? botclass
@@ -136,6 +137,7 @@ class IrcBot
     end
     
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
+    Dir.mkdir("#{botclass}/registry") unless File.exist?("#{botclass}/registry")
 
     @ping_timer = nil
     @pong_timer = nil
