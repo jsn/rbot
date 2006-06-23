@@ -45,7 +45,7 @@ class TopicPlugin < Plugin
     cmd = param[:command]
     txt = param[:text].join(" ")
     case cmd
-    when /a(dd|ppend)/
+    when /^a(dd|ppend)$/
       topicappend(m, ch, txt)
     when 'prepend'
       topicprepend(m, ch, txt)
@@ -56,19 +56,19 @@ class TopicPlugin < Plugin
         txt = $2
         topicaddat(m, ch, num, txt)
       end
-    when /del(ete)?/
+    when /^del(ete)?$/
       if txt =~ /\s*(-?\d+)\s*/
         num=$1.to_i - 1
         num += 1 if num < 0
         topicdel(m, ch, num)
       end
-    when /set/
+    when 'set'
       topicset(m, ch, txt)
-    when /sep(arator)?/
+    when /^sep(arator)?$/
       topicsep(m, ch, txt)
-    when /learn/
+    when 'learn'
       learntopic(m, ch)
-    when /restore/
+    when 'restore'
       restoretopic(m, ch)
     else
       m.reply 'unknown command'
@@ -107,7 +107,7 @@ class TopicPlugin < Plugin
   def topicaddat(m, channel, num, txt)
     sep = getsep(channel)
     topic = @bot.channels[channel].topic.to_s
-    topicarray = topic.split(/\s+#{sep}\s*/)
+    topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray.insert(num, txt)
     newtopic = topicarray.join(" #{sep} ")
     @bot.topic channel, newtopic
@@ -124,7 +124,7 @@ class TopicPlugin < Plugin
   def topicdel(m, channel, num)
     sep = getsep(channel)
     topic = @bot.channels[channel].topic.to_s
-    topicarray = topic.split(/\s+#{sep}\s*/)
+    topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray.delete_at(num)
     newtopic = topicarray.join(" #{sep} ")
     @bot.topic channel, newtopic
