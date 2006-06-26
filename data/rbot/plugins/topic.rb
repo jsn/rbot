@@ -23,12 +23,14 @@ class TopicPlugin < Plugin
         return "topic sep(arator) [<text>] => get or set the topic section separator"
       when "learn"
         return "topic learn => remembers the topic for later"
+      when "replace"
+        return "topic replace <num> <text> => Replaces section <num> with <text>"
       when "restore"
         return "topic restore => resets the topic to the latest remembered one"
       when "set"
         return "topic set <text> => sets the topic to <text>"
       else
-        return "topic add(at)|prepend|del|sep(arator)|learn|restore|set: " + \
+        return "topic add(at)|prepend|del|sep(arator)|learn|replace|restore|set: " + \
                "manipulate the topic of the current channel; use topic <#channel> <command> " + \
                "for private addressing"
       end
@@ -68,6 +70,13 @@ class TopicPlugin < Plugin
       topicsep(m, ch, txt)
     when 'learn'
       learntopic(m, ch)
+    when 'replace'
+      if txt =~ /\s*(-?\d+)\s+(.*)\s*/
+        num = $1.to_i - 1
+        num += 1 if num < 0
+        txt = $2
+        replacetopic(m, ch, num, txt)
+      end
     when 'restore'
       restoretopic(m, ch)
     else
@@ -143,6 +152,16 @@ class TopicPlugin < Plugin
     m.okay
   end
 
+  def replacetopic(m, channel, num, txt)
+    return if !@bot.auth.allow?("topic", m.source, m.replyto)
+    sep = getsep(channel)
+    topic = @bot.channels[channel].topic.to_s
+    topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
+    topicarray[num] = txt
+    newtopic = topicarray.join(" #{sep} ")
+    @bot.topic channel, newtopic
+  end
+  
   def restoretopic(m, channel)
     return if !@bot.auth.allow?("restoretopic", m.source, m.replyto)
     if @registry.has_key?(channel) && @registry[channel].has_key?(:topic)
