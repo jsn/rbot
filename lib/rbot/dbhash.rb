@@ -10,7 +10,10 @@ end
 module BDB
   class CIBtree < Btree
     def bdb_bt_compare(a, b)
-      a.downcase <=> b.downcase
+      if a == nil || b == nil
+        debug "CIBTree: WARNING: comparing #{a.inspect} (#{self[a].inspect}) with #{b.inspect} (#{self[b].inspect})"
+      end
+      (a||'').downcase <=> (b||'').downcase
     end
   end
 end
