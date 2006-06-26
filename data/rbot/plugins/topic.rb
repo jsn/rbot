@@ -17,20 +17,22 @@ class TopicPlugin < Plugin
         return "topic prepend <text> => add <text> at the beginning of the topic"
       when "addat"
         return "topic addat <num> <text> => add <text> at position <num> of the topic"
-      when "del"
+      when "del", "delete"
         return "topic del <num> => remove section <num> from the topic"
-      when "separator"
+      when "replace"
+        return "topic replace <num> <text> => Replaces section <num> with <text>"
+      when "sep", "separator"
         return "topic sep(arator) [<text>] => get or set the topic section separator"
       when "learn"
         return "topic learn => remembers the topic for later"
-      when "replace"
-        return "topic replace <num> <text> => Replaces section <num> with <text>"
       when "restore"
         return "topic restore => resets the topic to the latest remembered one"
+      when "clear"
+        return "topic clear => clears the topic"
       when "set"
         return "topic set <text> => sets the topic to <text>"
       else
-        return "topic add(at)|prepend|del|sep(arator)|learn|replace|restore|set: " + \
+        return "topic add(at)|prepend|del(ete)|replace|sep(arator)|learn|restore|clear|set: " + \
                "manipulate the topic of the current channel; use topic <#channel> <command> " + \
                "for private addressing"
       end
@@ -46,6 +48,12 @@ class TopicPlugin < Plugin
     end
     cmd = param[:command]
     txt = param[:text].join(" ")
+
+    unless @bot.channels.has_key?(ch)
+      m.reply "I am not in channel #{ch}"
+      return
+    end
+
     case cmd
     when /^a(dd|ppend)$/
       topicappend(m, ch, txt)
@@ -66,6 +74,8 @@ class TopicPlugin < Plugin
       end
     when 'set'
       topicset(m, ch, txt)
+    when 'clear'
+      topicset(m, ch, '')
     when /^sep(arator)?$/
       topicsep(m, ch, txt)
     when 'learn'
@@ -100,6 +110,16 @@ class TopicPlugin < Plugin
     else
       data = Hash.new
     end
+
+    oldsep = getsep(ch)
+    topic = @bot.channels[ch].topic.to_s
+    topicarray = topic.split(/\s+#{Regexp.escape(oldsep)}\s*/)
+
+    if sep != oldsep and topicarray.length > 0
+      newtopic = topicarray.join(" #{sep} ")
+      @bot.topic ch, newtopic
+    end
+
     data[:separator] = sep
     @registry[ch] = data
   end
