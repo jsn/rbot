@@ -334,7 +334,7 @@ class IrcBot
         connect
         @timer.start
       
-        while true
+        while @socket.connected?
           if @socket.select
             break unless reply = @socket.gets
             @client.process reply
@@ -346,8 +346,10 @@ class IrcBot
       #rescue TimeoutError, SocketError => e
       rescue SystemExit
         exit 0
+      rescue TimeoutError => e
+        puts e
       rescue Exception => e
-        puts "network exception: connection closed: #{e.inspect}"
+        puts "network exception: #{e.inspect}"
         puts e.backtrace.join("\n")
         @socket.shutdown # now we reconnect
       rescue => e
@@ -613,10 +615,10 @@ class IrcBot
           debug "no PONG from server for #{diff} seconds, reconnecting"
           begin
             @socket.shutdown
-            # TODO
-            # raise an exception to get back to the mainloop
           rescue
             debug "couldn't shutdown connection (already shutdown?)"
+          ensure
+            raise TimeoutError, "no PONG from server in #{diff} seconds"
           end
           @last_ping = nil
         end

@@ -49,9 +49,15 @@ module Irc
       end
     end
     
+    def connected?
+      !@sock.nil?
+    end
+
     # open a TCP connection to the server
     def connect
-      @sock = nil
+      if connected?
+	shutdown
+      end
       if(@host)
         begin
           @sock=TCPSocket.new(@server, @port, @host)
