@@ -296,7 +296,7 @@ class IrcBot
       users = data[:users]
       unless(@channels[channel])
         puts "bug: got names for channel '#{channel}' I didn't think I was in\n"
-        exit 2
+        # exit 2
       end
       @channels[channel].users.clear
       users.each {|u|
@@ -839,7 +839,12 @@ class IrcBot
       @channels.delete(m.channel)
     else
       log "@ #{m.sourcenick} left channel #{m.channel} (#{m.message})", m.channel
-      @channels[m.channel].users.delete(m.sourcenick)
+      if @channels.has_key?(m.channel)
+        @channels[m.channel].users.delete(m.sourcenick)
+      else
+        puts "bug: got part for channel '#{channel}' I didn't think I was in\n"
+        # exit 2
+      end
     end
     
     # delegate to plugins
