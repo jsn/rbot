@@ -178,6 +178,7 @@ class IrcBot
     }
     @client[:nicktaken] = proc { |data| 
       nickchg "#{data[:nick]}_"
+      @plugins.delegate "nicktaken", data[:nick]
     }
     @client[:badnick] = proc {|data| 
       puts "WARNING, bad nick (#{data[:nick]})"
@@ -301,6 +302,7 @@ class IrcBot
       users.each {|u|
         @channels[channel].users[u[0].sub(/^[@&~+]/, '')] = ["mode", u[1]]
       }
+      @plugins.delegate "names"
     }
     @client[:unknown] = proc {|data|
       #debug "UNKNOWN: #{data[:serverstring]}"

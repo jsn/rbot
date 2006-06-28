@@ -1,7 +1,19 @@
 # automatically lookup nicks in @registry and identify when asked
+# TODO customize name of nickserv
 
 class NickServPlugin < Plugin
   
+  BotConfig.register BotConfigStringValue.new('nickserv.name',
+    :default => "NickServ", :requires_restart => false,
+    :desc => "Name of the nick server")
+  BotConfig.register BotConfigStringValue.new('nickserv.ident_request',
+    :default => "IDENTIFY", :requires_restart => false,
+    :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
+    :desc => "String to look for to see if the nick server is asking us to identify")
+  BotConfig.register BotConfigIntegerValue.new('nickserv.wait',
+    :default => 30, :validate => Proc.new { |v| v > 0 }, :requires_restart => false,
+    :desc => "Seconds to wait after sending a message to nickserv, e.g. after ghosting")
+
   def help(plugin, topic="")
     case topic
     when ""
@@ -26,6 +38,10 @@ class NickServPlugin < Plugin
     return passwd
   end
 
+  def set_ident_request(val)
+    @ident_request = Regexp.new(val)
+  end
+
   def initialize
     super
     # this plugin only wants to store strings!
@@ -37,17 +53,19 @@ class NickServPlugin < Plugin
         val
       end
     end
+    set_ident_request(@bot.config['nickserv.ident_request'])
   end
 
   def password(m, params)
     @registry[params[:nick]] = params[:passwd]
     m.okay
   end
+
   def nick_register(m, params)
     passwd = params[:passwd] ? params[:passwd] : genpasswd
     message = "REGISTER #{passwd}"
     message += " #{params[:email]}" if params[:email]
-    @bot.sendmsg "PRIVMSG", "NickServ", message
+    @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], message
     @registry[@bot.nick] = passwd
     m.okay
   end
@@ -64,7 +82,7 @@ class NickServPlugin < Plugin
 
   def do_identify
     if @registry.has_key?(@bot.nick)
-      @bot.sendmsg "PRIVMSG", "NickServ", "IDENTIFY #{@registry[@bot.nick]}"
+      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{@registry[@bot.nick]}"
       return true
     end
     return false
@@ -82,10 +100,18 @@ class NickServPlugin < Plugin
     do_identify
   end
   
+  def nicktaken(nick)
+    if @registry.has_key?(nick)
+      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "GHOST #{nick} #{@registry[@bot.nick]}"
+      sleep @bot.config['nickserv.wait']
+      @bot.nickchg nick
+    end
+  end
+  
   def listen(m)
     return unless(m.kind_of? NoticeMessage)
 
-    if (m.sourcenick == "NickServ" && m.message =~ /IDENTIFY/)
+    if (m.sourcenick == @bot.config['nickserv.name'] && m.message =~ @ident_request)
       debug "nickserv asked us to identify for nick #{@bot.nick}"
       do_identify
     end
