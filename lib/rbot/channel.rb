@@ -4,23 +4,23 @@ module Irc
   class IRCChannel
     # name of channel
     attr_reader :name
-    
+
     # current channel topic
     attr_reader :topic
-    
+
     # hash containing users currently in the channel
     attr_accessor :users
-    
+
     # if true, bot won't talk in this channel
     attr_accessor :quiet
-    
+
     # name:: channel name
     # create a new IRCChannel
     def initialize(name)
       @name = name
       @users = Hash.new
       @quiet = false
-	  @topic = Topic.new
+      @topic = Topic.new
     end
 
     # eg @bot.channels[chan].topic = topic
