@@ -302,7 +302,7 @@ class IrcBot
       users.each {|u|
         @channels[channel].users[u[0].sub(/^[@&~+]/, '')] = ["mode", u[1]]
       }
-      @plugins.delegate "names"
+      @plugins.delegate "names", data[:channel], data[:users]
     }
     @client[:unknown] = proc {|data|
       #debug "UNKNOWN: #{data[:serverstring]}"
