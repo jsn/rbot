@@ -5,8 +5,11 @@ require 'fileutils'
 $debug = false unless $debug
 # print +message+ if debugging is enabled
 def debug(message=nil)
-  stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-  print "D: [#{stamp}] #{message}\n" if($debug && message)
+  if ($debug && message)
+    stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+    print "D: [#{stamp}] #{message}\n"
+    $stdout.flush
+  end
   #yield
 end
 
