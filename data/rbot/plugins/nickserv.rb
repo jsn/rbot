@@ -80,9 +80,9 @@ class NickServPlugin < Plugin
     end
   end
 
-  def do_identify
-    if @registry.has_key?(@bot.nick)
-      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{@registry[@bot.nick]}"
+  def do_identify(nick=@bot.nick)
+    if @registry.has_key?(nick)
+      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{nick} #{@registry[nick]}"
       return true
     end
     return false
@@ -103,6 +103,7 @@ class NickServPlugin < Plugin
   def nicktaken(nick)
     if @registry.has_key?(nick)
       @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "GHOST #{nick} #{@registry[@bot.nick]}"
+      do_identify nick
       sleep @bot.config['nickserv.wait']
       @bot.nickchg nick
     end
