@@ -7,7 +7,9 @@ $debug = false unless $debug
 def debug(message=nil)
   if ($debug && message)
     stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    print "D: [#{stamp}] #{message}\n"
+    message.to_s.each_line { |l|
+      $stdout.puts "D: [#{stamp}] #{l}"
+    }
     $stdout.flush
   end
   #yield
@@ -38,20 +40,20 @@ module Irc
 class IrcBot
   # the bot's current nickname
   attr_reader :nick
-  
+
   # the bot's IrcAuth data
   attr_reader :auth
-  
+
   # the bot's BotConfig data
   attr_reader :config
-  
+
   # the botclass for this bot (determines configdir among other things)
   attr_reader :botclass
-  
+
   # used to perform actions periodically (saves configuration once per minute
   # by default)
   attr_reader :timer
-  
+
   # bot's Language data
   attr_reader :lang
 
@@ -79,7 +81,7 @@ class IrcBot
       :wizard => true)
     BotConfig.register BotConfigIntegerValue.new('server.port',
       :default => 6667, :type => :integer, :requires_restart => true,
-      :desc => "What port should the bot connect to?", 
+      :desc => "What port should the bot connect to?",
       :validate => Proc.new {|v| v > 0}, :wizard => true)
     BotConfig.register BotConfigStringValue.new('server.password',
       :default => false, :requires_restart => true,
@@ -124,7 +126,7 @@ class IrcBot
       puts "data directory '#{Config::datadir}' not found, did you setup.rb?"
       exit 2
     end
-    
+
     botclass = "#{Etc.getpwuid(Process::Sys.geteuid)[:dir]}/.rbot" unless botclass
     #botclass = "#{ENV['HOME']}/.rbot" unless botclass
     botclass = File.expand_path(botclass)
@@ -138,7 +140,7 @@ class IrcBot
       end
       FileUtils.cp_r Config::datadir+'/templates', botclass
     end
-    
+
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
     Dir.mkdir("#{botclass}/registry") unless File.exist?("#{botclass}/registry")
 
@@ -179,11 +181,11 @@ class IrcBot
         log "MOTD: #{line}", "server"
       }
     }
-    @client[:nicktaken] = proc { |data| 
+    @client[:nicktaken] = proc { |data|
       nickchg "#{data[:nick]}_"
       @plugins.delegate "nicktaken", data[:nick]
     }
-    @client[:badnick] = proc {|data| 
+    @client[:badnick] = proc {|data|
       puts "WARNING, bad nick (#{data[:nick]})"
     }
     @client[:ping] = proc {|data|
@@ -265,7 +267,7 @@ class IrcBot
       onpart(m)
     }
     @client[:kick] = proc {|data|
-      m = KickMessage.new(self, data[:source], data[:target],data[:channel],data[:message]) 
+      m = KickMessage.new(self, data[:source], data[:target],data[:channel],data[:message])
       onkick(m)
     }
     @client[:invite] = proc {|data|
@@ -325,7 +327,7 @@ class IrcBot
     begin
       @socket.connect
     rescue => e
-      raise "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
+      raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
     @socket.puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
@@ -338,7 +340,7 @@ class IrcBot
       begin
         connect
         @timer.start
-      
+
         while @socket.connected?
           if @socket.select
             break unless reply = @socket.gets
@@ -351,8 +353,9 @@ class IrcBot
       #rescue TimeoutError, SocketError => e
       rescue SystemExit
         exit 0
-      rescue TimeoutError => e
-        puts e
+      rescue TimeoutError, SocketError => e
+        puts "#{e.class}: #{e}"
+        debug e.backtrace.join("\n")
       rescue Exception => e
         puts "network exception: #{e.inspect}"
         puts e.backtrace.join("\n")
@@ -362,17 +365,18 @@ class IrcBot
         puts e.backtrace.join("\n")
         exit 2
       end
-      
+
       puts "disconnected"
-      @last_ping = nil
+
+      stop_server_pings
       @channels.clear
       @socket.clearq
-      
+
       puts "waiting to reconnect"
       sleep @config['server.reconnect_wait']
     end
   end
-  
+
   # type:: message type
   # where:: message target
   # message:: message text
@@ -456,7 +460,7 @@ class IrcBot
     @logs[where].puts "[#{stamp}] #{message}"
     #debug "[#{stamp}] <#{where}> #{message}"
   end
-  
+
   # set topic of channel +where+ to +topic+
   def topic(where, topic)
     sendq "TOPIC #{where} :#{topic}"
@@ -494,7 +498,7 @@ class IrcBot
     @socket.shutdown
     puts "rbot quit (#{message})"
   end
-  
+
   # message:: optional IRC quit message
   # quit IRC, shutdown the bot
   def quit(message=nil)
@@ -529,7 +533,7 @@ class IrcBot
     @plugins.rescan
     @keywords.rescan
   end
-  
+
   # channel:: channel to join
   # key::     optional channel key if channel is +s
   # join a channel
@@ -555,7 +559,7 @@ class IrcBot
   def mode(channel, mode, target)
       sendq "MODE #{channel} #{mode} #{target}"
   end
-  
+
   # m::     message asking for help
   # topic:: optional topic help is requested for
   # respond to online help requests
@@ -597,16 +601,7 @@ class IrcBot
   # we'll ping the server every 30 seconds or so, and expect a response
   # before the next one come around..
   def start_server_pings
-    @last_ping = nil
-    # stop existing timers if running
-    unless @ping_timer.nil?
-      @timer.remove @ping_timer
-      @ping_timer = nil
-    end
-    unless @pong_timer.nil?
-      @timer.remove @pong_timer
-      @pong_timer = nil
-    end
+    stop_server_pings
     return unless @config['server.ping_timeout'] > 0
     # we want to respond to a hung server within 30 secs or so
     @ping_timer = @timer.add(30) {
@@ -622,13 +617,25 @@ class IrcBot
             @socket.shutdown
           rescue
             debug "couldn't shutdown connection (already shutdown?)"
-          ensure
-            raise TimeoutError, "no PONG from server in #{diff} seconds"
           end
           @last_ping = nil
+          raise TimeoutError, "no PONG from server in #{diff} seconds"
         end
       end
     }
+  end
+
+  def stop_server_pings
+    @last_ping = nil
+    # stop existing timers if running
+    unless @ping_timer.nil?
+      @timer.remove @ping_timer
+      @ping_timer = nil
+    end
+    unless @pong_timer.nil?
+      @timer.remove @pong_timer
+      @pong_timer = nil
+    end
   end
 
   private
@@ -849,7 +856,7 @@ class IrcBot
         # exit 2
       end
     end
-    
+
     # delegate to plugins
     @plugins.delegate("listen", m)
     @plugins.delegate("part", m)

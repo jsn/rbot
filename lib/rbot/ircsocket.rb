@@ -9,16 +9,16 @@ module Irc
   class IrcSocket
     # total number of lines sent to the irc server
     attr_reader :lines_sent
-    
+
     # total number of lines received from the irc server
     attr_reader :lines_received
-    
+
     # delay between lines sent
     attr_reader :sendq_delay
-    
+
     # max lines to burst
     attr_reader :sendq_burst
-    
+
     # server:: server to connect to
     # port::   IRCd port
     # host::   optional local host to bind to (ruby 1.7+ required)
@@ -48,7 +48,7 @@ module Irc
         @sendq_burst = 4
       end
     end
-    
+
     def connected?
       !@sock.nil?
     end
@@ -56,7 +56,8 @@ module Irc
     # open a TCP connection to the server
     def connect
       if connected?
-	shutdown
+        debug "reconnecting socket while connected"
+        shutdown
       end
       if(@host)
         begin
@@ -70,7 +71,7 @@ module Irc
         end
       else
         @sock=TCPSocket.new(@server, @port)
-      end 
+      end
       @qthread = false
       @qmutex = Mutex.new
       @sendq = Array.new
@@ -106,15 +107,19 @@ module Irc
 
     # get the next line from the server (blocks)
     def gets
+      if @sock.nil?
+        debug "socket get attempted while closed"
+        return nil
+      end
       begin
-	reply = @sock.gets
-	@lines_received += 1
-	reply.strip! if reply
-	debug "RECV: #{reply.inspect}"
-	return reply
+        reply = @sock.gets
+        @lines_received += 1
+        reply.strip! if reply
+        debug "RECV: #{reply.inspect}"
+        return reply
       rescue => e
-        debug "socket get failed: #{e}"
-	return nil
+        debug "socket get failed: #{e.inspect}"
+        return nil
       end
     end
 
@@ -183,7 +188,7 @@ module Irc
     end
 
     private
-    
+
     # same as puts, but expects to be called with a mutex held on @qmutex
     def puts_critical(message)
       # debug "in puts_critical"
