@@ -490,12 +490,14 @@ class IrcBot
     # @registry.close
     debug "Cleaning up the db environment"
     DBTree.cleanup_env
-    debug "Sending quit message"
-    @socket.puts "QUIT :#{message}"
-    debug "Flushing socket"
-    @socket.flush
-    debug "Shutting down socket"
-    @socket.shutdown
+    if @socket.connected?
+      debug "Sending quit message"
+      @socket.puts "QUIT :#{message}"
+      debug "Flushing socket"
+      @socket.flush
+      debug "Shutting down socket"
+      @socket.shutdown
+    end
     puts "rbot quit (#{message})"
   end
 
