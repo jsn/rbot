@@ -164,9 +164,11 @@ module Irc
     end
 
     def clearq
-      unless @sendq.empty?
-        @qmutex.synchronize do
-          @sendq.clear
+      if @sock
+        unless @sendq.empty?
+          @qmutex.synchronize do
+            @sendq.clear
+          end
         end
       end
     end
