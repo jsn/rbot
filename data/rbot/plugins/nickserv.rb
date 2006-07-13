@@ -1,5 +1,8 @@
-# automatically lookup nicks in @registry and identify when asked
-# TODO customize name of nickserv
+# Automatically lookup nicks in @registry and identify when asked
+# Takes over proper nick if required and nick is registered
+# TODO allow custom IDENTIFY and GHOST names
+# TODO instead of nickserv.wait it would be ideal if we could just
+# set up "don't send further commands until you receive this particular message"
 
 class NickServPlugin < Plugin
   
@@ -106,6 +109,10 @@ class NickServPlugin < Plugin
       do_identify nick
       sleep @bot.config['nickserv.wait']
       @bot.nickchg nick
+      # We need to wait after changing nick, otherwise the server
+      # might refuse to execute further commangs, e.g. subsequent JOIN
+      # commands until the nick has changed.
+      sleep @bot.config['nickserv.wait']
     end
   end
   
