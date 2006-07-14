@@ -383,38 +383,45 @@ module Irc
           full = false
           full = true if str.gsub!(/--full\s+/, "")
 
-          re = Regexp.new(str, Regexp::IGNORECASE)
-          if(@bot.auth.allow?("keyword", m.source, m.replyto))
-            matches = Array.new
-            @keywords.each {|k,v|
-              kw = Keyword.restore(v)
-              if re.match(k) || (full && re.match(kw.desc))
-                matches << [k,kw]
-              end
-            }
-            if all
-              @statickeywords.each {|k,v|
-                v.each {|kk,vv|
-                  kw = Keyword.restore(vv)
-                  if re.match(kk) || (full && re.match(kw.desc))
-                    matches << [kk,kw]
-                  end
+          begin
+            re = Regexp.new(str, Regexp::IGNORECASE)
+            if(@bot.auth.allow?("keyword", m.source, m.replyto))
+              matches = Array.new
+              @keywords.each {|k,v|
+                kw = Keyword.restore(v)
+                if re.match(k) || (full && re.match(kw.desc))
+                  matches << [k,kw]
+                end
+              }
+              if all
+                @statickeywords.each {|k,v|
+                  v.each {|kk,vv|
+                    kw = Keyword.restore(vv)
+                    if re.match(kk) || (full && re.match(kw.desc))
+                      matches << [kk,kw]
+                    end
+                  }
                 }
-              }
+              end
+              if matches.length == 1
+                rkw = matches[0]
+                m.reply "#{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+              elsif matches.length > 0
+                i = 0
+                matches.each {|rkw|
+                  m.reply "[#{i+1}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+                  i += 1
+                  break if i == 3
+                }
+              else
+                m.reply "no keywords match #{str}"
+              end
             end
-            if matches.length == 1
-              rkw = matches[0]
-              m.reply "#{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
-            elsif matches.length > 0
-              i = 0
-              matches.each {|rkw|
-                m.reply "[#{i+1}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
-                i += 1
-                break if i == 3
-              }
-            else
-              m.reply "no keywords match #{str}"
-            end
+          rescue RegexpError => e
+            m.reply "no keywords match #{str}: #{e}"
+          rescue
+            debug e.inspect
+            m.reply "no keywords match #{str}: an error occurred"
           end
         end
       else
