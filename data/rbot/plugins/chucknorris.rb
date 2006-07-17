@@ -17,11 +17,11 @@ class ChuckNorrisPlugin < Plugin
       raise "Error: Couldn't find chucknorris.yml[.gz]"
     end
     
-    puts "+ [chucknorris] Loading #{path}..."
+    debug "+ [chucknorris] Loading #{path}..."
     
     @@facts = YAML.load(fyml).map{|fact,(score,votes)| votes >= MIN_VOTES ? [score,fact] : nil}.compact
-    puts "+ [chucknorris] #{@@facts.length} Chuck Norris facts loaded..."
-    puts "  Random fact: #{@@facts[rand(@@facts.size)].inspect}"
+    debug "+ [chucknorris] #{@@facts.length} Chuck Norris facts loaded..."
+    debug "  Random fact: #{@@facts[rand(@@facts.size)].inspect}"
     
     super
   end
@@ -46,11 +46,11 @@ class ChuckNorrisPlugin < Plugin
   # The meat.
   def fact(m, params)
     min = params[:minrating].to_f
-    puts "+ Getting Chuck Norris fact (rating > #{min})..."
+    debug "+ Getting Chuck Norris fact (rating > #{min})..."
 
     viable_facts = @@facts.select {|rating, fact| rating >= min}
     if viable_facts.empty?
-      puts "  - no facts found with rating >= #{min}"
+      debug "  - no facts found with rating >= #{min}"
       m.reply "Are you nuts?!? There are no facts better than #{min}!!!"
       return
     end
