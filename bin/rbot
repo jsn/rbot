@@ -27,7 +27,7 @@ require 'etc'
 require 'getoptlong'
 require 'fileutils'
 
-$version="0.9.9"
+$version="0.9.10"
 $opts = Hash.new
 
 orig_opts = ARGV.dup
@@ -53,10 +53,18 @@ if ($opts["trace"])
   }
 end
 
+defaultlib = File.expand_path(File.dirname($0) + '/../lib')
+
+if File.directory? "#{defaultlib}/rbot"
+  unless $:.include? defaultlib
+    $:.push defaultlib
+  end
+end
+  
 begin
   require 'rbot/ircbot'
 rescue LoadError => e
-  puts "Error: couldn't find the rbot/ircbot module (or one of its dependencies)\n - did you install rbot using setup.rb?"
+  puts "Error: couldn't find the rbot/ircbot module (or one of its dependencies)\n"
   puts e
   exit 2
 end
