@@ -16,7 +16,12 @@ module Irc
         debug "trying to load rubygems"
         require 'rubygems'
         debug "loaded rubygems, looking for rbot-#$version"
-        gemname, gem = Gem.source_index.find{|name, spec| spec.name == 'rbot' && spec.version.version == $version}
+        if $version =~ /(.*)-svn\Z/
+          version = $1
+        else
+          version = $version
+        end
+        gemname, gem = Gem.source_index.find{|name, spec| spec.name == 'rbot' && spec.version.version == version}
         debug "got gem #{gem}"
         if gem && path = gem.full_gem_path
           debug "installed via rubygems to #{path}"

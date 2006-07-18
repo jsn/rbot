@@ -6,7 +6,7 @@ task :default => [:repackage]
 
 spec = Gem::Specification.new do |s|
   s.name = 'rbot'
-  s.version = '0.9.9'
+  s.version = '0.9.10'
   s.summary = <<-EOF
     A modular ruby IRC bot.
   EOF
