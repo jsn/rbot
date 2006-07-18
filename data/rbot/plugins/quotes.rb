@@ -7,6 +7,7 @@ class QuotePlugin < Plugin
     super
     @lists = Hash.new
     Dir["#{@bot.botclass}/quotes/*"].each {|f|
+      next if File.directory?(f)
       channel = File.basename(f)
       @lists[channel] = Array.new if(!@lists.has_key?(channel))
       IO.foreach(f) {|line|
