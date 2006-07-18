@@ -15,6 +15,9 @@ def debug(message=nil)
   #yield
 end
 
+# The following global is used for the improved signal handling.
+$interrupted = 0
+
 # these first
 require 'rbot/rbotconfig'
 require 'rbot/config'
@@ -315,14 +318,27 @@ class IrcBot
     }
   end
 
+  def got_sig(sig)
+    debug "received #{sig}, queueing quit"
+    $interrupted += 1
+    debug "interrupted #{$interrupted} times"
+    if $interrupted >= 5
+      debug "drastic!"
+      exit 2
+    elsif $interrupted >= 3
+      debug "quitting"
+      quit
+    end
+  end
+
   # connect the bot to IRC
   def connect
     begin
-      trap("SIGINT") { quit }
-      trap("SIGTERM") { quit }
-      trap("SIGHUP") { quit }
-    rescue
-      debug "failed to trap signals, probably running on windows?"
+      trap("SIGINT") { got_sig("SIGINT") }
+      trap("SIGTERM") { got_sig("SIGTERM") }
+      trap("SIGHUP") { got_sig("SIGHUP") }
+    rescue => e
+      debug "failed to trap signals: #{e.inspect}\nProbably running on windows?"
     end
     begin
       @socket.connect
@@ -346,11 +362,12 @@ class IrcBot
             break unless reply = @socket.gets
             @client.process reply
           end
+          quit if $interrupted > 0
         end
+
       # I despair of this. Some of my users get "connection reset by peer"
       # exceptions that ARENT SocketError's. How am I supposed to handle
       # that?
-      #rescue TimeoutError, SocketError => e
       rescue SystemExit
         exit 0
       rescue TimeoutError, SocketError => e
@@ -468,29 +485,19 @@ class IrcBot
 
   # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
-    begin
-      trap("SIGINT", "DEFAULT")
-      trap("SIGTERM", "DEFAULT")
-      trap("SIGHUP", "DEFAULT")
-    rescue
-      debug "failed to trap signals, probably running on windows?"
-    end
+    debug "Shutting down ..."
+    ## No we don't restore them ... let everything run through
+    # begin
+    #   trap("SIGINT", "DEFAULT")
+    #   trap("SIGTERM", "DEFAULT")
+    #   trap("SIGHUP", "DEFAULT")
+    # rescue => e
+    #   debug "failed to restore signals: #{e.inspect}\nProbably running on windows?"
+    # end
     message = @lang.get("quit") if (message.nil? || message.empty?)
-    debug "Clearing socket"
-    @socket.clearq
-    debug "Saving"
-    save
-    debug "Cleaning up"
-    @plugins.cleanup
-    debug "Logging quits"
-    @channels.each_value {|v|
-      log "@ quit (#{message})", v.name
-    }
-    # debug "Closing registries"
-    # @registry.close
-    debug "Cleaning up the db environment"
-    DBTree.cleanup_env
     if @socket.connected?
+      debug "Clearing socket"
+      @socket.clearq
       debug "Sending quit message"
       @socket.puts "QUIT :#{message}"
       debug "Flushing socket"
@@ -498,6 +505,18 @@ class IrcBot
       debug "Shutting down socket"
       @socket.shutdown
     end
+    debug "Logging quits"
+    @channels.each_value {|v|
+      log "@ quit (#{message})", v.name
+    }
+    debug "Saving"
+    save
+    debug "Cleaning up"
+    @plugins.cleanup
+    # debug "Closing registries"
+    # @registry.close
+    debug "Cleaning up the db environment"
+    DBTree.cleanup_env
     puts "rbot quit (#{message})"
   end
 

@@ -170,6 +170,8 @@ module Irc
             @sendq.clear
           end
         end
+      else
+        debug "Clearing socket while disconnected"
       end
     end
 
