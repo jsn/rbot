@@ -328,13 +328,17 @@ module Irc
     # write current configuration to #{botclass}/conf.rbot
     def save
       begin
+        debug "Writing new conf.yaml ..."
         File.open("#{@@bot.botclass}/conf.yaml.new", "w") do |file|
           file.puts @@config.to_yaml
         end
+        debug "Officializing conf.yaml ..."
         File.rename("#{@@bot.botclass}/conf.yaml.new",
                     "#{@@bot.botclass}/conf.yaml")
-      rescue
+      rescue => e
         $stderr.puts "failed to write configuration file conf.yaml! #{$!}"
+        debug "#{e.class}: #{e}"
+        debug e.backtrace.join("\n")
       end
     end
 

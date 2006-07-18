@@ -1,3 +1,5 @@
+# GB: Ok, we *really* need to switch to db for this plugin too
+
 Quote = Struct.new("Quote", "num", "date", "source", "quote")
 
 class QuotePlugin < Plugin
@@ -17,12 +19,23 @@ class QuotePlugin < Plugin
   end
   def save
     Dir.mkdir("#{@bot.botclass}/quotes") if(!FileTest.directory?("#{@bot.botclass}/quotes"))
+    Dir.mkdir("#{@bot.botclass}/quotes/new") if(!FileTest.directory?("#{@bot.botclass}/quotes/new"))
     @lists.each {|channel, quotes|
-      File.open("#{@bot.botclass}/quotes/#{channel}", "w") {|file|
-        quotes.compact.each {|q| 
-          file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
+      begin
+        debug "Writing new quotefile for channel #{channel} ..."
+        File.open("#{@bot.botclass}/quotes/new/#{channel}", "w") {|file|
+          quotes.compact.each {|q| 
+            file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
+          }
         }
-      }
+        debug "Officializing quotefile for channel #{channel} ..."
+        File.rename("#{@bot.botclass}/quotes/new/#{channel}",
+                    "#{@bot.botclass}/quotes/#{channel}")
+      rescue => e
+        $stderr.puts "failed to write quotefile for channel #{channel}!\n#{$!}"
+        debug "#{e.class}: #{e}"
+        debug e.backtrace.join("\n")
+      end
     }
   end
   def addquote(source, channel, quote)
@@ -41,7 +54,7 @@ class QuotePlugin < Plugin
     else
       # random quote
       return @lists[channel].compact[rand(@lists[channel].nitems)],
-                                       @lists[channel].length - 1
+      @lists[channel].length - 1
     end
   end
   def delquote(channel, num)
@@ -76,31 +89,31 @@ class QuotePlugin < Plugin
     return nil unless(@lists[channel].length > 0)
     matches = @lists[channel].compact.find_all {|a| a.quote =~ /#{regexp}/i }
     if(matches.length > 0)
-       return matches[rand(matches.length)], @lists[channel].length - 1
+      return matches[rand(matches.length)], @lists[channel].length - 1
     else
       return nil
     end
   end
   def help(plugin, topic="")
     case topic
-      when "addquote"
-        return "addquote [<channel>] <quote> => Add quote <quote> for channel <channel>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !addquote without addressing if so configured"
-      when "delquote"
-        return "delquote [<channel>] <num> => delete quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !delquote without addressing if so configured"
-      when "getquote"
-        return "getquote [<channel>] [<num>] => get quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Without <num>, a random quote will be returned. Responds to !getquote without addressing if so configured"
-      when "searchquote"
-        return "searchquote [<channel>] <regexp> => search for quote from <channel> that matches <regexp>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !searchquote without addressing if so configured"
-      when "topicquote"
-        return "topicquote [<channel>] [<num>] => set topic to quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Without <num>, a random quote will be set. Responds to !topicquote without addressing if so configured"
-      when "countquote"
-        return "countquote [<channel>] <regexp> => count quotes from <channel> that match <regexp>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !countquote without addressing if so configured"
-      when "whoquote"
-        return "whoquote [<channel>] <num> => show who added quote <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
-      when "whenquote"
-        return "whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
-      else
-        return "Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
+    when "addquote"
+      return "addquote [<channel>] <quote> => Add quote <quote> for channel <channel>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !addquote without addressing if so configured"
+    when "delquote"
+      return "delquote [<channel>] <num> => delete quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !delquote without addressing if so configured"
+    when "getquote"
+      return "getquote [<channel>] [<num>] => get quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Without <num>, a random quote will be returned. Responds to !getquote without addressing if so configured"
+    when "searchquote"
+      return "searchquote [<channel>] <regexp> => search for quote from <channel> that matches <regexp>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !searchquote without addressing if so configured"
+    when "topicquote"
+      return "topicquote [<channel>] [<num>] => set topic to quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Without <num>, a random quote will be set. Responds to !topicquote without addressing if so configured"
+    when "countquote"
+      return "countquote [<channel>] <regexp> => count quotes from <channel> that match <regexp>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !countquote without addressing if so configured"
+    when "whoquote"
+      return "whoquote [<channel>] <num> => show who added quote <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
+    when "whenquote"
+      return "whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
+    else
+      return "Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
     end
   end
   def listen(m)

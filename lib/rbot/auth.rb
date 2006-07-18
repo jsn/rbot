@@ -60,13 +60,33 @@ module Irc
     # users are written to #{botclass}/users.yaml
     def save
       Dir.mkdir("#{@bot.botclass}") if(!File.exist?("#{@bot.botclass}"))
-      File.open("#{@bot.botclass}/users.yaml", 'w') do |file|
-        file.puts @users.to_yaml
-      end
-      File.open("#{@bot.botclass}/levels.rbot", 'w') do |file|
-        @levels.each do |key, value|
-          file.puts "#{value} #{key}"
+      begin
+        debug "Writing new users.yaml ..."
+        File.open("#{@bot.botclass}/users.yaml.new", 'w') do |file|
+          file.puts @users.to_yaml
         end
+        debug "Officializing users.yaml ..."
+        File.rename("#{@bot.botclass}/users.yaml.new",
+                    "#{@bot.botclass}/users.yaml")
+      rescue
+        $stderr.puts "failed to write configuration file users.yaml! #{$!}"
+        debug "#{e.class}: #{e}"
+        debug e.backtrace.join("\n")
+      end
+      begin
+        debug "Writing new levels.rbot ..."
+        File.open("#{@bot.botclass}/levels.rbot.new", 'w') do |file|
+          @levels.each do |key, value|
+            file.puts "#{value} #{key}"
+          end
+        end
+        debug "Officializing levels.rbot ..."
+        File.rename("#{@bot.botclass}/levels.rbot.new",
+                    "#{@bot.botclass}/levels.rbot")
+      rescue
+        $stderr.puts "failed to write configuration file levels.rbot! #{$!}"
+        debug "#{e.class}: #{e}"
+        debug e.backtrace.join("\n")
       end
     end
 
