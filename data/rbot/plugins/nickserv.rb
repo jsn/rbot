@@ -13,6 +13,9 @@ class NickServPlugin < Plugin
     :default => "IDENTIFY", :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
     :desc => "String to look for to see if the nick server is asking us to identify")
+  BotConfig.register BotConfigBooleanValue.new('nickserv.wants_nick',
+    :default => true, :requires_restart => false,
+    :desc => "Set to false if the nick server doesn't expect the nick as a parameter in the identify command")
   BotConfig.register BotConfigIntegerValue.new('nickserv.wait',
     :default => 30, :validate => Proc.new { |v| v > 0 }, :requires_restart => false,
     :desc => "Seconds to wait after sending a message to nickserv, e.g. after ghosting")
@@ -85,7 +88,16 @@ class NickServPlugin < Plugin
 
   def do_identify(nick=@bot.nick)
     if @registry.has_key?(nick)
-      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{nick} #{@registry[nick]}"
+      if @bot.config['nickserv.wants_nick']
+        @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{nick} #{@registry[nick]}"
+      else
+        if nick == @bot.nick
+          @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{@registry[nick]}"
+        else
+          # We cannot identify for different nicks if we can't use the nickname ...
+          return false
+        end
+      end
       return true
     end
     return false
@@ -105,17 +117,20 @@ class NickServPlugin < Plugin
   
   def nicktaken(nick)
     if @registry.has_key?(nick)
-      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "GHOST #{nick} #{@registry[@bot.nick]}"
-      do_identify nick
-      sleep @bot.config['nickserv.wait']
-      @bot.nickchg nick
-      # We need to wait after changing nick, otherwise the server
-      # might refuse to execute further commangs, e.g. subsequent JOIN
-      # commands until the nick has changed.
-      sleep @bot.config['nickserv.wait']
+      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "GHOST #{nick} #{@registry[nick]}"
+      if do_identify nick
+        sleep @bot.config['nickserv.wait']
+        @bot.nickchg nick
+        # We need to wait after changing nick, otherwise the server
+        # might refuse to execute further commangs, e.g. subsequent JOIN
+        # commands until the nick has changed.
+        sleep @bot.config['nickserv.wait']
+      else
+        debug "Failed to identify for nick #{nick}, cannot take over"
+      end
     end
   end
-  
+
   def listen(m)
     return unless(m.kind_of? NoticeMessage)
 
