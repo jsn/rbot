@@ -13,6 +13,15 @@ module Irc
     # total number of lines received from the irc server
     attr_reader :lines_received
 
+    # total number of bytes sent to the irc server
+    attr_reader :bytes_sent
+
+    # total number of bytes received from the irc server
+    attr_reader :bytes_received
+
+    # accumulator for the throttle
+    attr_reader :throttle_bytes
+
     # delay between lines sent
     attr_reader :sendq_delay
 
@@ -23,7 +32,7 @@ module Irc
     # port::   IRCd port
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
-    def initialize(server, port, host, sendq_delay=2, sendq_burst=4)
+    def initialize(server, port, host, sendq_delay=2, sendq_burst=4, brt="400/2")
       @timer = Timer::Timer.new
       @timer.add(0.2) do
         spool
@@ -41,11 +50,28 @@ module Irc
         @sendq_delay = 2
       end
       @last_send = Time.new - @sendq_delay
+      @last_throttle = Time.new
       @burst = 0
       if sendq_burst
         @sendq_burst = sendq_burst.to_i
       else
         @sendq_burst = 4
+      end
+      @bytes_per = 400
+      @seconds_per = 2
+      @throttle_bytes = 0
+      setbyterate(brt)
+    end
+
+    def setbyterate(brt)
+      if brt.match(/(\d+)\/(\d)/)
+        @bytes_per = $1.to_i
+        @seconds_per = $2.to_i
+        debug "Byterate now #{byterate}"
+        return true
+      else
+        debug "Couldn't set byterate #{brt}"
+        return false
       end
     end
 
@@ -96,6 +122,16 @@ module Irc
       end
     end
 
+    def byterate
+      return "#{@bytes_per}/#{@seconds_per}"
+    end
+
+    def byterate=(newrate)
+      @qmutex.synchronize do
+        setbyterate(newrate)
+      end
+    end
+
     # used to send lines to the remote IRCd
     # message: IRC message to send
     def puts(message)
@@ -142,6 +178,11 @@ module Irc
         return
       end
       now = Time.new
+      if @throttle_bytes > 0
+        @throttle_bytes -= (now - @last_throttle)*@bytes_per/@seconds_per
+        @throttle_bytes = 0 if @throttle_bytes < 0
+        @last_throttle = now
+      end
       if (now >= (@last_send + @sendq_delay))
         # reset burst counter after @sendq_delay has passed
         @burst = 0
@@ -155,7 +196,15 @@ module Irc
         debug "(can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send)"
         (@sendq_burst - @burst).times do
           break if @sendq.empty?
-          puts_critical(@sendq.shift)
+          mess = @sendq[0]
+          if @throttle_bytes == 0 or mess.length+@throttle_bytes < @bytes_per
+            puts_critical(@sendq.shift)
+          else
+            debug "(flood protection: breaking at message of length #{mess.length})"
+            debug "(Throttle bytes: #{@throttle_bytes})"
+            debug "(Byterate: #{byterate})"
+            break
+          end
         end
       end
       if @sendq.empty?
@@ -201,6 +250,7 @@ module Irc
       @last_send = Time.new
       @lines_sent += 1
       @burst += 1
+      @throttle_bytes += message.length
     end
 
   end

@@ -78,6 +78,7 @@ class IrcBot
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass, params = {})
     # BotConfig for the core bot
+    # TODO should we split socket stuff into ircsocket, etc?
     BotConfig.register BotConfigStringValue.new('server.name',
       :default => "localhost", :requires_restart => true,
       :desc => "What server should the bot connect to?",
@@ -116,8 +117,12 @@ class IrcBot
       :on_change => Proc.new {|bot, v| bot.socket.sendq_delay = v })
     BotConfig.register BotConfigIntegerValue.new('server.sendq_burst',
       :default => 4, :validate => Proc.new{|v| v >= 0},
-      :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines, with non-burst limits of 512 bytes/2 seconds",
+      :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
+    BotConfig.register BotConfigStringValue.new('server.byterate',
+      :default => "400/2", :validate => Proc.new{|v| v.match(/\d+\/\d/)},
+      :desc => "(flood prevention) max bytes/seconds rate to send the server. Most ircd's have limits of 512 bytes/2 seconds",
+      :on_change => Proc.new {|bot, v| bot.socket.byterate = v })
     BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
       :default => 10, :validate => Proc.new{|v| v >= 0},
       :on_change => Proc.new {|bot, v| bot.start_server_pings},
