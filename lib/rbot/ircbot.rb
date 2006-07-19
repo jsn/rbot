@@ -407,8 +407,12 @@ class IrcBot
   # relevant say() or notice() methods. This one should be used for IRCd
   # extensions you want to use in modules.
   def sendmsg(type, where, message)
-    # limit it 440 chars + CRLF.. so we have to split long lines
-    left = 440 - type.length - where.length - 3
+    # limit it according to the byterate, splitting the message
+    # taking into consideration the actual message length
+    # and all the extra stuff
+    # TODO allow something to do for commands that produce too many messages
+    # TODO example: math 10**10000
+    left = @socket.bytes_per - type.length - where.length - 4
     begin
       if(left >= message.length)
         sendq("#{type} #{where} :#{message}")

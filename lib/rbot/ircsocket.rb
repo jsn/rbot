@@ -22,6 +22,10 @@ module Irc
     # accumulator for the throttle
     attr_reader :throttle_bytes
 
+    # byterate components
+    attr_reader :bytes_per
+    attr_reader :seconds_per
+
     # delay between lines sent
     attr_reader :sendq_delay
 
@@ -179,9 +183,12 @@ module Irc
       end
       now = Time.new
       if @throttle_bytes > 0
-        @throttle_bytes -= (now - @last_throttle)*@bytes_per/@seconds_per
-        @throttle_bytes = 0 if @throttle_bytes < 0
-        @last_throttle = now
+        delta = ((now - @last_throttle)*@bytes_per/@seconds_per).floor
+        if delta > 0
+          @throttle_bytes -= delta
+          @throttle_bytes = 0 if @throttle_bytes < 0
+          @last_throttle = now
+        end
       end
       if (now >= (@last_send + @sendq_delay))
         # reset burst counter after @sendq_delay has passed
@@ -200,9 +207,8 @@ module Irc
           if @throttle_bytes == 0 or mess.length+@throttle_bytes < @bytes_per
             puts_critical(@sendq.shift)
           else
-            debug "(flood protection: breaking at message of length #{mess.length})"
-            debug "(Throttle bytes: #{@throttle_bytes})"
-            debug "(Byterate: #{byterate})"
+            debug "(flood protection: throttling message of length #{mess.length})"
+	    debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
             break
           end
         end
@@ -250,7 +256,8 @@ module Irc
       @last_send = Time.new
       @lines_sent += 1
       @burst += 1
-      @throttle_bytes += message.length
+      @throttle_bytes += message.length + 1
+      @last_throttle = Time.new
     end
 
   end
