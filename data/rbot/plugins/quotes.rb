@@ -33,9 +33,9 @@ class QuotePlugin < Plugin
         File.rename("#{@bot.botclass}/quotes/new/#{channel}",
                     "#{@bot.botclass}/quotes/#{channel}")
       rescue => e
-        $stderr.puts "failed to write quotefile for channel #{channel}!\n#{$!}"
-        debug "#{e.class}: #{e}"
-        debug e.backtrace.join("\n")
+        error "failed to write quotefile for channel #{channel}!\n#{$!}"
+        error "#{e.class}: #{e}"
+        error e.backtrace.join("\n")
       end
     }
   end

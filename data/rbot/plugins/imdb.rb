@@ -39,7 +39,7 @@ class Imdb
   def info(rawstr)
     sr = search(rawstr)
     if !sr
-      puts "IMDB : search returned NIL"
+      debug "IMDB: search returned NIL"
       return nil
     end
     resp, data = @http.get(sr, "User-Agent" =>

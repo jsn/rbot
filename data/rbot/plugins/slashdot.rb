@@ -21,11 +21,11 @@ class SlashdotPlugin < Plugin
       m.reply "search for #{search} failed"
       return
     end
-    puts xml.inspect
+    debug xml.inspect
     begin
       doc = Document.new xml
     rescue REXML::ParseException => e
-      puts e
+      warning e.inspect
       m.reply "couldn't parse output XML: #{e.class}"
       return
     end
@@ -33,7 +33,7 @@ class SlashdotPlugin < Plugin
       m.reply "search for #{search} failed"
       return
     end
-    puts doc.inspect
+    debug doc.inspect
     max = 8 if max > 8
     done = 0
     doc.elements.each("*/item") {|e|
@@ -50,9 +50,9 @@ class SlashdotPlugin < Plugin
   end
   
   def slashdot(m, params)
-    puts params.inspect
+    debug params.inspect
     max = params[:limit].to_i
-    puts "max is #{max}"
+    debug "max is #{max}"
     xml = @bot.httputil.get(URI.parse("http://slashdot.org/slashdot.xml"))
     unless xml
       m.reply "slashdot news parse failed"

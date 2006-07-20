@@ -175,7 +175,7 @@ class RemindPlugin < Plugin
   def remind(m, params)
     who = params.has_key?(:who) ? params[:who] : m.sourcenick
     string = params[:string].to_s
-    puts "in remind, string is: #{string}"
+    debug "in remind, string is: #{string}"
     if(string =~ /^(.*)\s+in\s+(.*)$/)
       subject = $1
       period = $2

@@ -57,6 +57,7 @@ class LartPlugin < Plugin
 	#{{{
 	def save
 		Dir.mkdir("#{@bot.botclass}/lart") if not FileTest.directory? "#{@bot.botclass}/lart"
+		# TODO implement safe saving here too
 		File.open("#{@bot.botclass}/lart/larts", "w") { |file|
 			file.puts @larts
 		}

@@ -346,13 +346,13 @@ class UrlPlugin < Plugin
         raise "Error: Maximum redirects hit."
     end
     
-    puts "+ Getting #{uri_str}"
+    debug "+ Getting #{uri_str}"
     url = URI.parse(uri_str)
     return if url.scheme !~ /https?/
 
     title = nil
     
-    puts "+ connecting to #{url.host}:#{url.port}"
+    debug "+ connecting to #{url.host}:#{url.port}"
     http = @bot.httputil.get_proxy(url)
     http.start { |http|
       url.path = '/' if url.path == ''
@@ -363,15 +363,15 @@ class UrlPlugin < Plugin
           when Net::HTTPRedirection, Net::HTTPMovedPermanently then
             # call self recursively if this is a redirect
             redirect_to = response['location']  || './'
-            puts "+ redirect location: #{redirect_to.inspect}"
+            debug "+ redirect location: #{redirect_to.inspect}"
             url = URI.join url.to_s, redirect_to
-            puts "+ whee, redirecting to #{url.to_s}!"
+            debug "+ whee, redirecting to #{url.to_s}!"
             return get_title_for_url(url.to_s, depth-1)
           when Net::HTTPSuccess then
             if response['content-type'] =~ /^text\//
               # since the content is 'text/*' and is small enough to
               # be a webpage, retrieve the title from the page
-              puts "+ getting #{url.request_uri}"
+              debug "+ getting #{url.request_uri}"
               data = read_data_from_response(response, 50000)
               return get_title_from_html(data)
             else

@@ -61,7 +61,7 @@ class WserverPlugin < Plugin
       hostname = err.message
       retry
     rescue StandardError => err
-      puts err
+      error err.inspect
       m.reply "couldn't connect to #{uri.host}:#{uri.port} :("
       return
     end

@@ -12,7 +12,7 @@ class DiggPlugin < Plugin
   
   def digg(m, params)
     max = params[:limit].to_i
-    puts "max is #{max}"
+    debug "max is #{max}"
     xml = @bot.httputil.get(URI.parse("http://digg.com/rss/index.xml"))
     unless xml
       m.reply "digg news parse failed"

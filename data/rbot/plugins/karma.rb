@@ -15,7 +15,7 @@ class KarmaPlugin < Plugin
 
     # import if old file format found
     if(File.exist?("#{@bot.botclass}/karma.rbot"))
-      puts "importing old karma data"
+      log "importing old karma data"
       IO.foreach("#{@bot.botclass}/karma.rbot") do |line|
         if(line =~ /^(\S+)<=>([\d-]+)$/)
           item = $1
