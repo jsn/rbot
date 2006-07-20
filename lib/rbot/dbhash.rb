@@ -1,8 +1,8 @@
 begin
   require 'bdb'
 rescue Exception => e
-  puts "Got exception: "+e
-  puts "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
+  error "Got exception: "+e
+  error "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
   exit 2
 end
 
@@ -11,7 +11,7 @@ module BDB
   class CIBtree < Btree
     def bdb_bt_compare(a, b)
       if a == nil || b == nil
-        debug "CIBTree: WARNING: comparing #{a.inspect} (#{self[a].inspect}) with #{b.inspect} (#{self[b].inspect})"
+        warning "CIBTree: comparing #{a.inspect} (#{self[a].inspect}) with #{b.inspect} (#{self[b].inspect})"
       end
       (a||'').downcase <=> (b||'').downcase
     end
@@ -155,7 +155,7 @@ module Irc
         debug "DBTree: checking transactions ..."
         has_active_txn = @@env.txn_stat["st_nactive"] > 0
         if has_active_txn
-          debug "DBTree: WARNING: not all transactions completed!"
+          warning "DBTree: not all transactions completed!"
         end
         DBTree.cleanup_logs
         debug "DBTree: closing environment #{@@env}"
@@ -169,7 +169,7 @@ module Irc
           BDB::Env.remove("#{path}")
         end
       rescue => e
-        debug "Failed: #{e}"
+        error "failed to clean up environment: #{e.inspect}"
       end
     end
 

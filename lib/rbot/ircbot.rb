@@ -3,16 +3,39 @@ require 'etc'
 require 'fileutils'
 
 $debug = false unless $debug
-# print +message+ if debugging is enabled
-def debug(message=nil)
-  if ($debug && message)
-    stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    message.to_s.each_line { |l|
-      $stdout.puts "D: [#{stamp}] #{l}"
-    }
-    $stdout.flush
+$daemonize = false unless $daemonize
+
+def rawlog(code="", message=nil)
+  if !code || code.empty?
+    c = "  "
+  else
+    c = code.to_s[0,1].upcase + ":"
   end
-  #yield
+  stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+  message.to_s.each_line { |l|
+    $stdout.puts "#{c} [#{stamp}] #{l}"
+  }
+  $stdout.flush
+end
+
+def log(message=nil)
+  rawlog("", message)
+end
+
+def log_session_end
+   log("\n=== #{botclass} session ended ===") if $daemonize
+end
+
+def debug(message=nil)
+  rawlog("D", message) if $debug
+end
+
+def warning(message=nil)
+  rawlog("W", message)
+end
+
+def error(message=nil)
+  rawlog("E", message)
 end
 
 # The following global is used for the improved signal handling.
@@ -147,7 +170,7 @@ class IrcBot
     @argv = params[:argv]
 
     unless FileTest.directory? Config::datadir
-      puts "data directory '#{Config::datadir}' not found, did you setup.rb?"
+      error "data directory '#{Config::datadir}' not found, did you setup.rb?"
       exit 2
     end
 
@@ -157,9 +180,9 @@ class IrcBot
     @botclass = botclass.gsub(/\/$/, "")
 
     unless FileTest.directory? botclass
-      puts "no #{botclass} directory found, creating from templates.."
+      log "no #{botclass} directory found, creating from templates.."
       if FileTest.exist? botclass
-        puts "Error: file #{botclass} exists but isn't a directory"
+        error "file #{botclass} exists but isn't a directory"
         exit 2
       end
       FileUtils.cp_r Config::datadir+'/templates', botclass
@@ -189,13 +212,13 @@ class IrcBot
         Process.setsid
         exit if fork
       rescue NotImplementedError
-        puts "Could not background, fork not supported"
+        warning "Could not background, fork not supported"
       rescue => e
-        puts "Could not background. #{e.inspect}"
+        warning "Could not background. #{e.inspect}"
       end
       Dir.chdir botclass
       # File.umask 0000                # Ensure sensible umask. Adjust as needed.
-      puts "Redirecting standard input/output/error"
+      log "Redirecting standard input/output/error"
       begin
         STDIN.reopen "/dev/null"
       rescue Errno::ENOENT
@@ -204,6 +227,7 @@ class IrcBot
       end
       STDOUT.reopen @logfile, "a"
       STDERR.reopen STDOUT
+      log "\n=== #{botclass} session started ==="
     end
 
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
@@ -234,7 +258,7 @@ class IrcBot
     }
     @client[:motd] = proc { |data|
       data[:motd].each_line { |line|
-        log "MOTD: #{line}", "server"
+        irclog "MOTD: #{line}", "server"
       }
     }
     @client[:nicktaken] = proc { |data|
@@ -242,7 +266,7 @@ class IrcBot
       @plugins.delegate "nicktaken", data[:nick]
     }
     @client[:badnick] = proc {|data|
-      puts "WARNING, bad nick (#{data[:nick]})"
+      warning "bad nick (#{data[:nick]})"
     }
     @client[:ping] = proc {|data|
       # (jump the queue for pongs)
@@ -261,7 +285,7 @@ class IrcBot
       end
       @channels.each {|k,v|
         if(v.users.has_key?(sourcenick))
-          log "@ #{sourcenick} is now known as #{nick}", k
+          irclog "@ #{sourcenick} is now known as #{nick}", k
           v.users[nick] = v.users[sourcenick]
           v.users.delete(sourcenick)
         end
@@ -279,7 +303,7 @@ class IrcBot
       else
         @channels.each {|k,v|
           if(v.users.has_key?(sourcenick))
-            log "@ Quit: #{sourcenick}: #{message}", k
+            irclog "@ Quit: #{sourcenick}: #{message}", k
             v.users.delete(sourcenick)
           end
         }
@@ -294,10 +318,10 @@ class IrcBot
       channel = data[:channel]
       targets = data[:targets]
       modestring = data[:modestring]
-      log "@ Mode #{modestring} #{targets} by #{sourcenick}", channel
+      irclog "@ Mode #{modestring} #{targets} by #{sourcenick}", channel
     }
     @client[:welcome] = proc {|data|
-      log "joined server #{data[:source]} as #{data[:nick]}", "server"
+      irclog "joined server #{data[:source]} as #{data[:nick]}", "server"
       debug "I think my nick is #{@nick}, server thinks #{data[:nick]}"
       if data[:nick] && data[:nick].length > 0
         @nick = data[:nick]
@@ -337,9 +361,9 @@ class IrcBot
       topic = data[:topic]
       timestamp = data[:unixtime] || Time.now.to_i
       if(sourcenick == @nick)
-        log "@ I set topic \"#{topic}\"", channel
+        irclog "@ I set topic \"#{topic}\"", channel
       else
-        log "@ #{sourcenick} set topic \"#{topic}\"", channel
+        irclog "@ #{sourcenick} set topic \"#{topic}\"", channel
       end
       m = TopicMessage.new(self, data[:source], data[:channel], timestamp, data[:topic])
 
@@ -356,7 +380,7 @@ class IrcBot
       channel = data[:channel]
       users = data[:users]
       unless(@channels[channel])
-        puts "bug: got names for channel '#{channel}' I didn't think I was in\n"
+        warning "got names for channel '#{channel}' I didn't think I was in\n"
         # exit 2
       end
       @channels[channel].users.clear
@@ -367,7 +391,7 @@ class IrcBot
     }
     @client[:unknown] = proc {|data|
       #debug "UNKNOWN: #{data[:serverstring]}"
-      log data[:serverstring], ".unknown"
+      irclog data[:serverstring], ".unknown"
     }
   end
 
@@ -377,6 +401,7 @@ class IrcBot
     debug "interrupted #{$interrupted} times"
     if $interrupted >= 5
       debug "drastic!"
+      log_session_end
       exit 2
     elsif $interrupted >= 3
       debug "quitting"
@@ -424,35 +449,38 @@ class IrcBot
       # exceptions that ARENT SocketError's. How am I supposed to handle
       # that?
       rescue SystemExit
+        log_session_end
         exit 0
       rescue TimeoutError, SocketError => e
-        puts "network exception: #{e.class}: #{e}"
+        error "network exception: #{e.class}: #{e}"
         debug e.inspect
         debug e.backtrace.join("\n")
       rescue BDB::Fatal => e
-        puts "fatal bdb error: #{e.class}: #{e}"
-        debug e.inspect
-        debug e.backtrace.join("\n")
+        error "fatal bdb error: #{e.class}: #{e}"
+        error e.inspect
+        error e.backtrace.join("\n")
         DBTree.stats
         restart("Oops, we seem to have registry problems ...")
       rescue Exception => e
-        puts "non-net exception: #{e.class}: #{e}"
-        debug e.inspect
-        debug e.backtrace.join("\n")
+        error "non-net exception: #{e.class}: #{e}"
+        error e.inspect
+        error e.backtrace.join("\n")
         @socket.shutdown # now we reconnect
       rescue => e
-        puts "unexpected exception: connection closed: #{e.inspect}"
-        puts e.backtrace.join("\n")
+        error "unexpected exception: #{e.class}: #{e}"
+        error e.inspect
+        error e.backtrace.join("\n")
+        log_session_end
         exit 2
       end
 
-      puts "disconnected"
+      log "disconnected"
 
       stop_server_pings
       @channels.clear
       @socket.clearq
 
-      puts "waiting to reconnect"
+      log "waiting to reconnect"
       sleep @config['server.reconnect_wait']
     end
   end
@@ -518,11 +546,11 @@ class IrcBot
   def action(where, message)
     sendq("PRIVMSG #{where} :\001ACTION #{message}\001")
     if(where =~ /^#/)
-      log "* #{@nick} #{message}", where
+      irclog "* #{@nick} #{message}", where
     elsif (where =~ /^(\S*)!.*$/)
-         log "* #{@nick}[#{where}] #{message}", $1
+         irclog "* #{@nick}[#{where}] #{message}", $1
     else
-         log "* #{@nick}[#{where}] #{message}", where
+         irclog "* #{@nick}[#{where}] #{message}", where
     end
   end
 
@@ -531,9 +559,9 @@ class IrcBot
     say where, @lang.get("okay")
   end
 
-  # log message +message+ to a file determined by +where+. +where+ can be a
-  # channel name, or a nick for private message logging
-  def log(message, where="server")
+  # log IRC-related message +message+ to a file determined by +where+.
+  # +where+ can be a channel name, or a nick for private message logging
+  def irclog(message, where="server")
     message = message.chomp
     stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
     where = where.gsub(/[:!?$*()\/\\<>|"']/, "_")
@@ -574,7 +602,7 @@ class IrcBot
     end
     debug "Logging quits"
     @channels.each_value {|v|
-      log "@ quit (#{message})", v.name
+      irclog "@ quit (#{message})", v.name
     }
     debug "Saving"
     save
@@ -584,7 +612,7 @@ class IrcBot
     # @registry.close
     debug "Cleaning up the db environment"
     DBTree.cleanup_env
-    puts "rbot quit (#{message})"
+    log "rbot quit (#{message})"
   end
 
   # message:: optional IRC quit message
@@ -593,6 +621,7 @@ class IrcBot
     begin
       shutdown(message)
     ensure
+      log_session_end
       exit 0
     end
   end
@@ -774,15 +803,15 @@ class IrcBot
     # log it first
     if(m.action?)
       if(m.private?)
-        log "* [#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
+        irclog "* [#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
       else
-        log "* #{m.sourcenick} #{m.message}", m.target
+        irclog "* #{m.sourcenick} #{m.message}", m.target
       end
     else
       if(m.public?)
-        log "<#{m.sourcenick}> #{m.message}", m.target
+        irclog "<#{m.sourcenick}> #{m.message}", m.target
       else
-        log "[#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
+        irclog "[#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
       end
     end
 
@@ -791,7 +820,7 @@ class IrcBot
 
     if(m.private? && m.message =~ /^\001PING\s+(.+)\001/)
       notice m.sourcenick, "\001PING #$1\001"
-      log "@ #{m.sourcenick} pinged me"
+      irclog "@ #{m.sourcenick} pinged me"
       return
     end
 
@@ -899,19 +928,19 @@ class IrcBot
     case type
       when "NOTICE"
         if(where =~ /^#/)
-          log "-=#{@nick}=- #{message}", where
+          irclog "-=#{@nick}=- #{message}", where
         elsif (where =~ /(\S*)!.*/)
-             log "[-=#{where}=-] #{message}", $1
+             irclog "[-=#{where}=-] #{message}", $1
         else
-             log "[-=#{where}=-] #{message}"
+             irclog "[-=#{where}=-] #{message}"
         end
       when "PRIVMSG"
         if(where =~ /^#/)
-          log "<#{@nick}> #{message}", where
+          irclog "<#{@nick}> #{message}", where
         elsif (where =~ /^(\S*)!.*$/)
-          log "[msg(#{where})] #{message}", $1
+          irclog "[msg(#{where})] #{message}", $1
         else
-          log "[msg(#{where})] #{message}", where
+          irclog "[msg(#{where})] #{message}", where
         end
     end
   end
@@ -920,9 +949,9 @@ class IrcBot
     @channels[m.channel] = IRCChannel.new(m.channel) unless(@channels.has_key?(m.channel))
     if(m.address?)
       debug "joined channel #{m.channel}"
-      log "@ Joined channel #{m.channel}", m.channel
+      irclog "@ Joined channel #{m.channel}", m.channel
     else
-      log "@ #{m.sourcenick} joined channel #{m.channel}", m.channel
+      irclog "@ #{m.sourcenick} joined channel #{m.channel}", m.channel
       @channels[m.channel].users[m.sourcenick] = Hash.new
       @channels[m.channel].users[m.sourcenick]["mode"] = ""
     end
@@ -934,14 +963,14 @@ class IrcBot
   def onpart(m)
     if(m.address?)
       debug "left channel #{m.channel}"
-      log "@ Left channel #{m.channel} (#{m.message})", m.channel
+      irclog "@ Left channel #{m.channel} (#{m.message})", m.channel
       @channels.delete(m.channel)
     else
-      log "@ #{m.sourcenick} left channel #{m.channel} (#{m.message})", m.channel
+      irclog "@ #{m.sourcenick} left channel #{m.channel} (#{m.message})", m.channel
       if @channels.has_key?(m.channel)
         @channels[m.channel].users.delete(m.sourcenick)
       else
-        puts "bug: got part for channel '#{channel}' I didn't think I was in\n"
+        warning "got part for channel '#{channel}' I didn't think I was in\n"
         # exit 2
       end
     end
@@ -956,10 +985,10 @@ class IrcBot
     if(m.address?)
       debug "kicked from channel #{m.channel}"
       @channels.delete(m.channel)
-      log "@ You have been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
+      irclog "@ You have been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
     else
       @channels[m.channel].users.delete(m.sourcenick)
-      log "@ #{m.target} has been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
+      irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
     end
 
     @plugins.delegate("listen", m)
@@ -972,7 +1001,7 @@ class IrcBot
     @channels[m.channel].topic.timestamp = m.timestamp if !m.timestamp.nil?
     @channels[m.channel].topic.by = m.source if !m.source.nil?
 
-	  debug "topic of channel #{m.channel} is now #{@channels[m.channel].topic}"
+    debug "topic of channel #{m.channel} is now #{@channels[m.channel].topic}"
   end
 
   # delegate a privmsg to auth, keyword or plugin handlers
