@@ -376,11 +376,19 @@ class IrcBot
       rescue SystemExit
         exit 0
       rescue TimeoutError, SocketError => e
-        puts "#{e.class}: #{e}"
+        puts "network exception: #{e.class}: #{e}"
+        debug e.inspect
         debug e.backtrace.join("\n")
+      rescue BDB::Fatal => e
+        puts "fatal bdb error: #{e.class}: #{e}"
+        debug e.inspect
+        debug e.backtrace.join("\n")
+        DBTree.stats
+        restart("Oops, we seem to have registry problems ...")
       rescue Exception => e
-        puts "network exception: #{e.inspect}"
-        puts e.backtrace.join("\n")
+        puts "non-net exception: #{e.class}: #{e}"
+        debug e.inspect
+        debug e.backtrace.join("\n")
         @socket.shutdown # now we reconnect
       rescue => e
         puts "unexpected exception: connection closed: #{e.inspect}"
@@ -545,6 +553,7 @@ class IrcBot
     shutdown(msg)
     sleep @config['server.reconnect_wait']
     # now we re-exec
+    # Note, this fails on Windows
     exec($0, *@argv)
   end
 

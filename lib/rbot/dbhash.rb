@@ -135,6 +135,21 @@ module Irc
       end
     end
 
+    def DBTree.stats()
+      begin
+        debug "General stats:"
+        debug @@env.stat
+        debug "Lock stats:"
+        debug @@env.lock_stat
+        debug "Log stats:"
+        debug @@env.log_stat
+        debug "Txn stats:"
+        debug @@env.txn_stat
+      rescue
+        debug "Couldn't dump stats"
+      end
+    end
+
     def DBTree.cleanup_env()
       begin
         debug "DBTree: checking transactions ..."
