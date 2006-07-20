@@ -147,6 +147,9 @@ class IrcBot
     BotConfig.register BotConfigArrayValue.new('irc.join_channels',
       :default => [], :wizard => true,
       :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'")
+    BotConfig.register BotConfigArrayValue.new('irc.ignore_users',
+      :default => [], 
+      :desc => "Which users to ignore input from. This is mainly to avoid bot-wars triggered by creative people")
 
     BotConfig.register BotConfigIntegerValue.new('core.save_every',
       :default => 60, :validate => Proc.new{|v| v >= 0},
@@ -814,6 +817,8 @@ class IrcBot
         irclog "[#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
       end
     end
+
+    @config['irc.ignore_users'].each { |mask| return if Irc.netmaskmatch(mask,m.source) }
 
     # pass it off to plugins that want to hear everything
     @plugins.delegate "listen", m
