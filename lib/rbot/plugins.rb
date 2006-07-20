@@ -264,7 +264,7 @@ module Plugins
             return @@plugins[key].help(key, params)
           rescue Exception => err
           #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            puts "plugin #{@@plugins[key].name} help() failed: " + err
+            puts "plugin #{@@plugins[key].name} help() failed: #{err.class}: #{err}"
             puts err.backtrace.join("\n")
           end
         else
@@ -282,7 +282,7 @@ module Plugins
             p.send method, *args
           rescue Exception => err
             #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            puts "plugin #{p.name} #{method}() failed: " + err
+            puts "plugin #{p.name} #{method}() failed: #{err.class}: #{err}"
             puts err.backtrace.join("\n")
           end
         end
@@ -300,7 +300,7 @@ module Plugins
           @@plugins[m.plugin].privmsg(m)
         rescue Exception => err
           #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-          puts "plugin #{@@plugins[m.plugin].name} privmsg() failed: " + err
+          puts "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"
           puts err.backtrace.join("\n")
         end
         return true
