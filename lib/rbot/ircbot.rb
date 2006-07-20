@@ -98,19 +98,6 @@ class IrcBot
     BotConfig.register BotConfigIntegerValue.new('server.reconnect_wait',
       :default => 5, :validate => Proc.new{|v| v >= 0},
       :desc => "Seconds to wait before attempting to reconnect, on disconnect")
-    BotConfig.register BotConfigStringValue.new('irc.nick', :default => "rbot",
-      :desc => "IRC nickname the bot should attempt to use", :wizard => true,
-      :on_change => Proc.new{|bot, v| bot.sendq "NICK #{v}" })
-    BotConfig.register BotConfigStringValue.new('irc.user', :default => "rbot",
-      :requires_restart => true,
-      :desc => "local user the bot should appear to be", :wizard => true)
-    BotConfig.register BotConfigArrayValue.new('irc.join_channels',
-      :default => [], :wizard => true,
-      :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'")
-    BotConfig.register BotConfigIntegerValue.new('core.save_every',
-      :default => 60, :validate => Proc.new{|v| v >= 0},
-      # TODO change timer via on_change proc
-      :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example")
     BotConfig.register BotConfigFloatValue.new('server.sendq_delay',
       :default => 2.0, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) the delay between sending messages to the server (in seconds)",
@@ -127,6 +114,35 @@ class IrcBot
       :default => 10, :validate => Proc.new{|v| v >= 0},
       :on_change => Proc.new {|bot, v| bot.start_server_pings},
       :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
+
+    BotConfig.register BotConfigStringValue.new('irc.nick', :default => "rbot",
+      :desc => "IRC nickname the bot should attempt to use", :wizard => true,
+      :on_change => Proc.new{|bot, v| bot.sendq "NICK #{v}" })
+    BotConfig.register BotConfigStringValue.new('irc.user', :default => "rbot",
+      :requires_restart => true,
+      :desc => "local user the bot should appear to be", :wizard => true)
+    BotConfig.register BotConfigArrayValue.new('irc.join_channels',
+      :default => [], :wizard => true,
+      :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'")
+
+    BotConfig.register BotConfigIntegerValue.new('core.save_every',
+      :default => 60, :validate => Proc.new{|v| v >= 0},
+      # TODO change timer via on_change proc
+      :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example)")
+      # BotConfig.register BotConfigBooleanValue.new('core.debug',
+      #   :default => false, :requires_restart => true,
+      #   :on_change => Proc.new { |v|
+      #     debug ((v ? "Enabling" : "Disabling") + " debug output.")
+      #     $debug = v
+      #     debug (($debug ? "Enabled" : "Disabled") + " debug output.")
+      #   },
+      #   :desc => "Should the bot produce debug output?")
+    BotConfig.register BotConfigBooleanValue.new('core.run_as_daemon',
+      :default => false, :requires_restart => true,
+      :desc => "Should the bot run as a daemon?")
+    BotConfig.register BotConfigStringValue.new('core.logfile',
+      :default => false, :requires_restart => true,
+      :desc => "Name of the logfile to which console messages will be redirected when the bot is run as a daemon")
 
     @argv = params[:argv]
 
@@ -157,7 +173,43 @@ class IrcBot
     @last_ping = nil
     @startup_time = Time.new
     @config = BotConfig.new(self)
-# TODO background self after botconfig has a chance to run wizard
+    # background self after botconfig has a chance to run wizard
+    @logfile = @config['core.logfile']
+    if @logfile.class!=String || @logfile.empty?
+      @logfile = File.basename(botclass)+".log"
+    end
+    if @config['core.run_as_daemon']
+      $daemonize = true
+    end
+    # See http://blog.humlab.umu.se/samuel/archives/000107.html
+    # for the backgrounding code 
+    if $daemonize
+      begin
+        exit if fork
+        Process.setsid
+        exit if fork
+      rescue NotImplementedError
+        puts "Could not background, fork not supported"
+        $daemonize = false
+      rescue => e
+        puts "Could not background. #{e.inspect}"
+        $daemonize = false
+      end
+    end
+
+    if $daemonize
+      Dir.chdir botclass
+      # File.umask 0000                # Ensure sensible umask. Adjust as needed.
+      begin
+        STDIN.reopen "/dev/null"
+      rescue Errno::ENOENT
+        # On Windows, there's not such thing as /dev/null
+        STDIN.reopen "NUL"
+      end
+      STDOUT.reopen @logfile, "a"
+      STDERR.reopen STDOUT
+    end
+
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
@@ -342,11 +394,13 @@ class IrcBot
       trap("SIGINT") { got_sig("SIGINT") }
       trap("SIGTERM") { got_sig("SIGTERM") }
       trap("SIGHUP") { got_sig("SIGHUP") }
+    rescue ArgumentError => e
+      debug "failed to trap signals (#{e.inspect}): running on Windows?"
     rescue => e
-      debug "failed to trap signals: #{e.inspect}\nProbably running on windows?"
+      debug "failed to trap signals: #{e.inspect}"
     end
     begin
-      @socket.connect
+      @socket.connect unless $interrupted > 0
     rescue => e
       raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
