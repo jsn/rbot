@@ -190,16 +190,12 @@ class IrcBot
         exit if fork
       rescue NotImplementedError
         puts "Could not background, fork not supported"
-        $daemonize = false
       rescue => e
         puts "Could not background. #{e.inspect}"
-        $daemonize = false
       end
-    end
-
-    if $daemonize
       Dir.chdir botclass
       # File.umask 0000                # Ensure sensible umask. Adjust as needed.
+      puts "Redirecting standard input/output/error"
       begin
         STDIN.reopen "/dev/null"
       rescue Errno::ENOENT
