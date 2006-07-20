@@ -212,8 +212,8 @@ module Plugins
               processed << file
             rescue Exception => err
               # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
-              puts "warning: plugin #{tmpfilename} load failed: " + err
-              puts err.backtrace.join("\n")
+              warning "plugin #{tmpfilename} load failed: " + err.inspect
+              warning err.backtrace.join("\n")
             end
           }
         end
@@ -264,8 +264,8 @@ module Plugins
             return @@plugins[key].help(key, params)
           rescue Exception => err
           #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            puts "plugin #{@@plugins[key].name} help() failed: #{err.class}: #{err}"
-            puts err.backtrace.join("\n")
+            error "plugin #{@@plugins[key].name} help() failed: #{err.class}: #{err}"
+            error err.backtrace.join("\n")
           end
         else
           return false
@@ -282,8 +282,8 @@ module Plugins
             p.send method, *args
           rescue Exception => err
             #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            puts "plugin #{p.name} #{method}() failed: #{err.class}: #{err}"
-            puts err.backtrace.join("\n")
+            error "plugin #{p.name} #{method}() failed: #{err.class}: #{err}"
+            error err.backtrace.join("\n")
           end
         end
       }
@@ -300,8 +300,8 @@ module Plugins
           @@plugins[m.plugin].privmsg(m)
         rescue Exception => err
           #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-          puts "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"
-          puts err.backtrace.join("\n")
+          error "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"
+          error err.backtrace.join("\n")
         end
         return true
       end

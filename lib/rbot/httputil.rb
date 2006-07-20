@@ -48,7 +48,7 @@ class HttpUtil
     begin
       list.concat Resolv.getaddresses(uri.host)
     rescue StandardError => err
-      puts "warning: couldn't resolve host uri.host"
+      warning "couldn't resolve host uri.host"
     end
 
     unless @bot.config["http.proxy_exclude"].empty?
@@ -130,12 +130,12 @@ class HttpUtil
         if resp.code == "200"
           return resp.body
         else
-          puts "HttpUtil.get return code #{resp.code} #{resp.body}"
+          log "HttpUtil.get return code #{resp.code} #{resp.body}"
         end
         return nil
       }
     rescue StandardError, Timeout::Error => e
-      $stderr.puts "HttpUtil.get exception: #{e}, while trying to get #{uri}"
+      error "HttpUtil.get exception: #{e.inspect}, while trying to get #{uri}"
     end
     return nil
   end

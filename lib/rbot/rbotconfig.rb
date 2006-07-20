@@ -39,7 +39,7 @@ module Irc
         require 'rbot/pkgconfig'
         @@datadir = PKGConfig::DATADIR
       rescue LoadError
-        puts "fatal - no way to determine data dir"
+        error "fatal - no way to determine data dir"
         exit 2
       end
     end

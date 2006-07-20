@@ -16,7 +16,7 @@ module Irc
     # work with is @bot.botclass.
     def upgrade_data
       if File.exist?("#{@bot.botclass}/registry.db")
-        puts "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
+        log "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
         old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil, 
                              "r+", 0600) 
         new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
@@ -36,14 +36,14 @@ module Irc
         Dir.mkdir("#{@bot.botclass}/registry") unless File.exist?("#{@bot.botclass}/registry")
         env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)
         dbs = Hash.new
-        puts "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
+        log "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
         old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
           "r+", 0600, "env" => env)
         old.each {|k,v|
           prefix,key = k.split("/", 2)
           prefix.downcase!
           unless dbs.has_key?(prefix)
-            puts "creating db #{@bot.botclass}/registry/#{prefix}.db"
+            log "creating db #{@bot.botclass}/registry/#{prefix}.db"
             dbs[prefix] = BDB::CIBtree.open("#{@bot.botclass}/registry/#{prefix}.db",
               nil, BDB::CREATE | BDB::EXCL,
               0600, "env" => env)
@@ -54,7 +54,7 @@ module Irc
         old.close
         File.rename("#{@bot.botclass}/plugin_registry.db", "#{@bot.botclass}/plugin_registry.db.old")
         dbs.each {|k,v|
-          puts "closing db #{k}"
+          log "closing db #{k}"
           v.close
         }
         env.close
@@ -147,8 +147,10 @@ module Irc
     def restore(val)
       begin
         Marshal.restore(val)
-      rescue Exception
-        $stderr.puts "failed to restore marshal data, falling back to default"
+      rescue Exception => e
+        warning "failed to restore marshal data for #{val.inspect}, falling back to default"
+	debug e.inspect
+	debug e.backtrace.join("\n")
         if @default != nil
           begin
             return Marshal.restore(@default)

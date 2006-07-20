@@ -316,7 +316,7 @@ module Irc
           @@config.update newconfig
           return
         rescue
-          $stderr.puts "failed to read conf.yaml: #{$!}"
+          error "failed to read conf.yaml: #{$!}"
         end
       end
       # if we got here, we need to run the first-run wizard
@@ -336,9 +336,9 @@ module Irc
         File.rename("#{@@bot.botclass}/conf.yaml.new",
                     "#{@@bot.botclass}/conf.yaml")
       rescue => e
-        $stderr.puts "failed to write configuration file conf.yaml! #{$!}"
-        debug "#{e.class}: #{e}"
-        debug e.backtrace.join("\n")
+        error "failed to write configuration file conf.yaml! #{$!}"
+        error "#{e.class}: #{e}"
+        error e.backtrace.join("\n")
       end
     end
 

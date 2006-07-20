@@ -33,7 +33,7 @@ module Irc
             $stderr = $stdout
             exec(command, *args)
           rescue Exception => e
-            puts "exec of #{command} led to exception: #{e}"
+            puts "exec of #{command} led to exception: #{e.inspect}"
             Kernel::exit! 0
           end
           puts "exec of #{command} failed"
@@ -75,7 +75,7 @@ module Irc
         }
       rescue => e
         # cheesy for now
-        $stderr.puts "Utils.http_get exception: #{e}, while trying to get #{uristr}"
+        error "Utils.http_get exception: #{e.inspect}, while trying to get #{uristr}"
         return nil
       end
     end

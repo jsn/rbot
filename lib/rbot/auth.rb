@@ -69,9 +69,9 @@ module Irc
         File.rename("#{@bot.botclass}/users.yaml.new",
                     "#{@bot.botclass}/users.yaml")
       rescue
-        $stderr.puts "failed to write configuration file users.yaml! #{$!}"
-        debug "#{e.class}: #{e}"
-        debug e.backtrace.join("\n")
+        error "failed to write configuration file users.yaml! #{$!}"
+        error "#{e.class}: #{e}"
+        error e.backtrace.join("\n")
       end
       begin
         debug "Writing new levels.rbot ..."
@@ -84,9 +84,9 @@ module Irc
         File.rename("#{@bot.botclass}/levels.rbot.new",
                     "#{@bot.botclass}/levels.rbot")
       rescue
-        $stderr.puts "failed to write configuration file levels.rbot! #{$!}"
-        debug "#{e.class}: #{e}"
-        debug e.backtrace.join("\n")
+        error "failed to write configuration file levels.rbot! #{$!}"
+        error "#{e.class}: #{e}"
+        error e.backtrace.join("\n")
       end
     end
 

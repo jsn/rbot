@@ -93,10 +93,10 @@ module Irc
         begin
           @sock=TCPSocket.new(@server, @port, @host)
         rescue ArgumentError => e
-          $stderr.puts "Your version of ruby does not support binding to a "
-          $stderr.puts "specific local address, please upgrade if you wish "
-          $stderr.puts "to use HOST = foo"
-          $stderr.puts "(this option has been disabled in order to continue)"
+          error "Your version of ruby does not support binding to a "
+          error "specific local address, please upgrade if you wish "
+          error "to use HOST = foo"
+          error "(this option has been disabled in order to continue)"
           @sock=TCPSocket.new(@server, @port)
         end
       else

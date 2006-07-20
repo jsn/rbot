@@ -99,7 +99,7 @@ module Irc
       
       # import old format keywords into DBHash
       if(File.exist?("#{@bot.botclass}/keywords.rbot"))
-        puts "auto importing old keywords.rbot"
+        log "auto importing old keywords.rbot"
         IO.foreach("#{@bot.botclass}/keywords.rbot") do |line|
           if(line =~ /^(.*?)\s*<=(is|are)?=?>\s*(.*)$/)
             lhs = $1
@@ -128,7 +128,7 @@ module Irc
       # first scan for old DBHash files, and convert them
       Dir["#{@bot.botclass}/keywords/*"].each {|f|
         next unless f =~ /\.db$/
-        puts "upgrading keyword db #{f} (rbot 0.9.5 or prior) database format"
+        log "upgrading keyword db #{f} (rbot 0.9.5 or prior) database format"
         newname = f.gsub(/\.db$/, ".kdb")
         old = BDB::Hash.open f, nil, 
                              "r+", 0600
@@ -156,7 +156,7 @@ module Irc
       Dir["#{@bot.botclass}/keywords/*"].each {|f|
         next if f =~ /\.kdb$/
         next if f =~ /CVS$/
-        puts "auto converting keywords from #{f}"
+        log "auto converting keywords from #{f}"
         key = File.basename(f)
         unless @statickeywords.has_key?(key)
           @statickeywords[key] = DBHash.new @bot, "#{f}.db", true
@@ -182,7 +182,7 @@ module Irc
     # upgrade data files found in old rbot formats to current
     def upgrade_data
       if File.exist?("#{@bot.botclass}/keywords.db")
-        puts "upgrading old keywords (rbot 0.9.5 or prior) database format"
+        log "upgrading old keywords (rbot 0.9.5 or prior) database format"
         old = BDB::Hash.open "#{@bot.botclass}/keywords.db", nil, 
                              "r+", 0600
         new = BDB::CIBtree.open "#{@bot.botclass}/keyword.db", nil, 
