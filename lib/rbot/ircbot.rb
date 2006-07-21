@@ -272,8 +272,7 @@ class IrcBot
       warning "bad nick (#{data[:nick]})"
     }
     @client[:ping] = proc {|data|
-      # (jump the queue for pongs)
-      @socket.puts "PONG #{data[:pingid]}"
+      @socket.queue "PONG #{data[:pingid]}"
     }
     @client[:pong] = proc {|data|
       @last_ping = nil
@@ -428,8 +427,8 @@ class IrcBot
     rescue => e
       raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
-    @socket.puts "PASS " + @config['server.password'] if @config['server.password']
-    @socket.puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
+    @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
+    @socket.emergency_puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
     start_server_pings
   end
 
@@ -468,7 +467,6 @@ class IrcBot
         error "non-net exception: #{e.class}: #{e}"
         error e.inspect
         error e.backtrace.join("\n")
-        @socket.shutdown # now we reconnect
       rescue => e
         error "unexpected exception: #{e.class}: #{e}"
         error e.inspect
@@ -477,11 +475,14 @@ class IrcBot
         exit 2
       end
 
-      log "disconnected"
-
       stop_server_pings
       @channels.clear
-      @socket.clearq
+      if @socket.connected?
+        @socket.clearq
+        @socket.shutdown
+      end
+
+      log "disconnected"
 
       log "waiting to reconnect"
       sleep @config['server.reconnect_wait']
@@ -495,7 +496,7 @@ class IrcBot
   # Type can be PRIVMSG, NOTICE, etc, but those you should really use the
   # relevant say() or notice() methods. This one should be used for IRCd
   # extensions you want to use in modules.
-  def sendmsg(type, where, message)
+  def sendmsg(type, where, message, chan=nil, ring=0)
     # limit it according to the byterate, splitting the message
     # taking into consideration the actual message length
     # and all the extra stuff
@@ -504,7 +505,7 @@ class IrcBot
     left = @socket.bytes_per - type.length - where.length - 4
     begin
       if(left >= message.length)
-        sendq("#{type} #{where} :#{message}")
+        sendq "#{type} #{where} :#{message}", chan, ring
         log_sent(type, where, message)
         return
       end
@@ -514,46 +515,88 @@ class IrcBot
         message = line.slice!(lastspace, line.length) + message
         message.gsub!(/^\s+/, "")
       end
-      sendq("#{type} #{where} :#{line}")
+      sendq "#{type} #{where} :#{line}", chan, ring
       log_sent(type, where, line)
     end while(message.length > 0)
   end
 
   # queue an arbitraty message for the server
-  def sendq(message="")
+  def sendq(message="", chan=nil, ring=0)
     # temporary
-    @socket.queue(message)
+    @socket.queue(message, chan, ring)
   end
 
   # send a notice message to channel/nick +where+
-  def notice(where, message)
+  def notice(where, message, mchan=nil, mring=-1)
+    if mchan == ""
+      chan = mchan
+    else
+      chan = where
+    end
+    if mring < 0
+      if where =~ /^#/
+        ring = 2
+      else
+        ring = 1
+      end
+    else
+      ring = mring
+    end
     message.each_line { |line|
       line.chomp!
       next unless(line.length > 0)
-      sendmsg("NOTICE", where, line)
+      sendmsg "NOTICE", where, line, chan, ring
     }
   end
 
   # say something (PRIVMSG) to channel/nick +where+
-  def say(where, message)
+  def say(where, message, mchan="", mring=-1)
+    if mchan == ""
+      chan = mchan
+    else
+      chan = where
+    end
+    if mring < 0
+      if where =~ /^#/
+        ring = 2
+      else
+        ring = 1
+      end
+    else
+      ring = mring
+    end
     message.to_s.gsub(/[\r\n]+/, "\n").each_line { |line|
       line.chomp!
       next unless(line.length > 0)
       unless((where =~ /^#/) && (@channels.has_key?(where) && @channels[where].quiet))
-        sendmsg("PRIVMSG", where, line)
+        sendmsg "PRIVMSG", where, line, chan, ring 
       end
     }
   end
 
   # perform a CTCP action with message +message+ to channel/nick +where+
-  def action(where, message)
-    sendq("PRIVMSG #{where} :\001ACTION #{message}\001")
+  def action(where, message, mchan="", mring=-1)
+    if mchan == ""
+      chan = mchan
+    else
+      chan = where
+    end
+    if mring < 0
+      if where =~ /^#/
+        ring = 2
+      else
+        ring = 1
+      end
+    else
+      ring = mring
+    end
+    sendq "PRIVMSG #{where} :\001ACTION #{message}\001", chan, ring
     if(where =~ /^#/)
       irclog "* #{@nick} #{message}", where
     elsif (where =~ /^(\S*)!.*$/)
-         irclog "* #{@nick}[#{where}] #{message}", $1
+      irclog "* #{@nick}[#{where}] #{message}", $1
     else
-         irclog "* #{@nick}[#{where}] #{message}", where
+      irclog "* #{@nick}[#{where}] #{message}", where
     end
   end
 
@@ -578,7 +621,7 @@ class IrcBot
 
   # set topic of channel +where+ to +topic+
   def topic(where, topic)
-    sendq "TOPIC #{where} :#{topic}"
+    sendq "TOPIC #{where} :#{topic}", where, 2
   end
 
   # disconnect from the server and cleanup all plugins and modules
@@ -597,7 +640,7 @@ class IrcBot
       debug "Clearing socket"
       @socket.clearq
       debug "Sending quit message"
-      @socket.puts "QUIT :#{message}"
+      @socket.emergency_puts "QUIT :#{message}"
       debug "Flushing socket"
       @socket.flush
       debug "Shutting down socket"
@@ -660,15 +703,15 @@ class IrcBot
   # join a channel
   def join(channel, key=nil)
     if(key)
-      sendq "JOIN #{channel} :#{key}"
+      sendq "JOIN #{channel} :#{key}", channel, 2
     else
-      sendq "JOIN #{channel}"
+      sendq "JOIN #{channel}", channel, 2
     end
   end
 
   # part a channel
   def part(channel, message="")
-    sendq "PART #{channel} :#{message}"
+    sendq "PART #{channel} :#{message}", channel, 2
   end
 
   # attempt to change bot's nick to +name+
@@ -678,7 +721,7 @@ class IrcBot
 
   # changing mode
   def mode(channel, mode, target)
-      sendq "MODE #{channel} #{mode} #{target}"
+      sendq "MODE #{channel} #{mode} #{target}", channel, 2
   end
 
   # m::     message asking for help
@@ -727,7 +770,7 @@ class IrcBot
     # we want to respond to a hung server within 30 secs or so
     @ping_timer = @timer.add(30) {
       @last_ping = Time.now
-      @socket.puts "PING :rbot"
+      @socket.queue "PING :rbot"
     }
     @pong_timer = @timer.add(10) {
       unless @last_ping.nil?
