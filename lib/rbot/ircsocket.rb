@@ -64,6 +64,7 @@ module Irc
       @bytes_per = 400
       @seconds_per = 2
       @throttle_bytes = 0
+      @throttle_div = 1
       setbyterate(brt)
     end
 
@@ -136,6 +137,38 @@ module Irc
       end
     end
 
+    def run_throttle(more=0)
+      now = Time.new
+      if @throttle_bytes > 0
+        # If we ever reach the limit, we halve the actual allowed byterate
+        # until we manage to reset the throttle.
+        # I don't know if this is the best way, though, because the real
+        # problem is probably non-queued messages like PINGs and PONGs.
+        # A better solution would probably be to have two queues,
+        # one for priority messages and another one for normal messages.
+        # Even better, we should have:
+        # * one queue for server stuff
+        # * one for each channel
+        # * one for each private communication
+        # The server queue would have priority, everything else would be served
+        # round-robin, so that someone making the bot flood one channel wouldn't
+        # prevent the bot from working on other channels (or private communications)
+        if @throttle_bytes >= @bytes_per
+          @throttle_div = 0.5
+        end
+        delta = ((now - @last_throttle)*@throttle_div*@bytes_per/@seconds_per).floor
+        if delta > 0
+          @throttle_bytes -= delta
+          @throttle_bytes = 0 if @throttle_bytes < 0
+          @last_throttle = now
+        end
+      end
+      if @throttle_bytes == 0
+        @throttle_div = 1
+      end
+      @throttle_bytes += more
+    end
+
     # used to send lines to the remote IRCd
     # message: IRC message to send
     def puts(message)
@@ -182,14 +215,6 @@ module Irc
         return
       end
       now = Time.new
-      if @throttle_bytes > 0
-        delta = ((now - @last_throttle)*@bytes_per/@seconds_per).floor
-        if delta > 0
-          @throttle_bytes -= delta
-          @throttle_bytes = 0 if @throttle_bytes < 0
-          @last_throttle = now
-        end
-      end
       if (now >= (@last_send + @sendq_delay))
         # reset burst counter after @sendq_delay has passed
         @burst = 0
@@ -209,6 +234,7 @@ module Irc
           else
             debug "(flood protection: throttling message of length #{mess.length})"
 	    debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
+            run_throttle
             break
           end
         end
@@ -256,8 +282,7 @@ module Irc
       @last_send = Time.new
       @lines_sent += 1
       @burst += 1
-      @throttle_bytes += message.length + 1
-      @last_throttle = Time.new
+      run_throttle(message.length + 1)
     end
 
   end
