@@ -21,7 +21,11 @@ module Irc
     end
 
     def length
-      @storage.length
+      length = 0
+      @storage.each {|c|
+        length += c[1].length 
+      }
+      return length
     end
 
     def empty?
