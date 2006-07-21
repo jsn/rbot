@@ -272,7 +272,7 @@ UNESCAPE_TABLE = {
 
 class UrlPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
-8    :default => 100, :validate => Proc.new{|v| v > 0},
+    :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
   BotConfig.register BotConfigBooleanValue.new('url.display_link_info',
     :default => false, 
