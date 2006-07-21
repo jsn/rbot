@@ -529,9 +529,9 @@ class IrcBot
   # send a notice message to channel/nick +where+
   def notice(where, message, mchan=nil, mring=-1)
     if mchan == ""
-      chan = mchan
-    else
       chan = where
+    else
+      chan = mchan
     end
     if mring < 0
       if where =~ /^#/
@@ -552,9 +552,9 @@ class IrcBot
   # say something (PRIVMSG) to channel/nick +where+
   def say(where, message, mchan="", mring=-1)
     if mchan == ""
-      chan = mchan
-    else
       chan = where
+    else
+      chan = mchan
     end
     if mring < 0
       if where =~ /^#/
@@ -577,9 +577,9 @@ class IrcBot
   # perform a CTCP action with message +message+ to channel/nick +where+
   def action(where, message, mchan="", mring=-1)
     if mchan == ""
-      chan = mchan
-    else
       chan = where
+    else
+      chan = mchan
     end
     if mring < 0
       if where =~ /^#/

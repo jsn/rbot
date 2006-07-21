@@ -52,7 +52,7 @@ module Irc
       @last_idx = (@last_idx + 1) % @storage.length
       mess = @storage[@last_idx][1].first
       @last_idx = save_idx
-      mess
+      return mess
     end
 
     def shift
@@ -63,7 +63,7 @@ module Irc
       @last_idx = (@last_idx + 1) % @storage.length
       mess = @storage[@last_idx][1].shift
       @storage.delete(@storage[@last_idx]) if @storage[@last_idx][1] == []
-      mess
+      return mess
     end
 
   end
@@ -118,7 +118,7 @@ module Irc
       @rings.each { |r|
         len += r.length
       }
-      len  
+      len
     end
 
     def next
@@ -126,12 +126,13 @@ module Irc
         warning "trying to access empty ring"
         return nil
       end
+      mess = nil
       if !@rings[0].empty?
         mess = @rings[0].first
       else
         save_ring = @last_ring
         (@rings.length - 1).times {
-          @last_ring = ((@last_ring + 1) % (@rings.length - 1)) + 1
+          @last_ring = (@last_ring % (@rings.length - 1)) + 1
           if !@rings[@last_ring].empty?
             mess = @rings[@last_ring].next
             break
@@ -139,6 +140,7 @@ module Irc
         }
         @last_ring = save_ring
       end
+      error "nil message" if mess.nil?
       return mess
     end
 
@@ -147,15 +149,18 @@ module Irc
         warning "trying to access empty ring"
         return nil
       end
+      mess = nil
       if !@rings[0].empty?
         return @rings[0].shift
       end
       (@rings.length - 1).times {
-        @last_ring = ((@last_ring + 1) % (@rings.length - 1)) + 1
+        @last_ring = (@last_ring % (@rings.length - 1)) + 1
         if !@rings[@last_ring].empty?
           return @rings[@last_ring].shift
         end
       }
+      error "nil message" if mess.nil?
+      return mess
     end
 
   end
@@ -328,7 +333,7 @@ module Irc
     # get the next line from the server (blocks)
     def gets
       if @sock.nil?
-        debug "socket get attempted while closed"
+        warning "socket get attempted while closed"
         return nil
       end
       begin
@@ -338,7 +343,8 @@ module Irc
         debug "RECV: #{reply.inspect}"
         return reply
       rescue => e
-        debug "socket get failed: #{e.inspect}"
+        warning "socket get failed: #{e.inspect}"
+        debug e.backtrace.join("\n")
         return nil
       end
     end
@@ -358,44 +364,47 @@ module Irc
     # pop a message off the queue, send it
     def spool
       @qmutex.synchronize do
-        debug "in spooler"
-        if @sendq.empty?
-          @timer.stop
-          return
-        end
-        now = Time.new
-        if (now >= (@last_send + @sendq_delay))
-          # reset burst counter after @sendq_delay has passed
-          debug "resetting @burst"
-          @burst = 0
-        elsif (@burst >= @sendq_burst)
-          # nope. can't send anything, come back to us next tick...
-          debug "can't send yet"
-          @timer.start
-          return
-        end
-        # debug "Queue: #{@sendq.inspect}"
-        debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send"
-        (@sendq_burst - @burst).times do
-          break if @sendq.empty?
-          mess = @sendq.next
-          # debug "Next message is #{mess.inspect}"
-          if @throttle_bytes == 0 or mess.length+@throttle_bytes < @bytes_per
-            debug "flood protection: sending message of length #{mess.length}"
-            debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
-            puts_critical(@sendq.shift)
-          else
-            debug "flood protection: throttling message of length #{mess.length}"
-            debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
-            run_throttle
-            break
+        begin
+          debug "in spooler"
+          if @sendq.empty?
+            @timer.stop
+            return
           end
+          now = Time.new
+          if (now >= (@last_send + @sendq_delay))
+            # reset burst counter after @sendq_delay has passed
+            debug "resetting @burst"
+            @burst = 0
+          elsif (@burst >= @sendq_burst)
+            # nope. can't send anything, come back to us next tick...
+            debug "can't send yet"
+            @timer.start
+            return
+          end
+          debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send"
+          (@sendq_burst - @burst).times do
+            break if @sendq.empty?
+            mess = @sendq.next
+            if @throttle_bytes == 0 or mess.length+@throttle_bytes < @bytes_per
+              debug "flood protection: sending message of length #{mess.length}"
+              debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
+              puts_critical(@sendq.shift)
+            else
+              debug "flood protection: throttling message of length #{mess.length}"
+              debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
+              run_throttle
+              break
+            end
+          end
+          if @sendq.empty?
+            @timer.stop
+          end
+        rescue => e
+          error "Spooling failed: #{e.inspect}"
+          error e.backtrace.join("\n")
         end
-        if @sendq.empty?
-          @timer.stop
         end
       end
-    end
 
     def clearq
       if @sock
@@ -405,7 +414,7 @@ module Irc
           end
         end
       else
-        debug "Clearing socket while disconnected"
+        warning "Clearing socket while disconnected"
       end
     end
 
