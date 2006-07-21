@@ -17,11 +17,11 @@ module Irc
     def upgrade_data
       if File.exist?("#{@bot.botclass}/registry.db")
         log "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
-        old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil, 
-                             "r+", 0600) 
-        new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
+        old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil,
+                             "r+", 0600)
+        new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
                                 BDB::CREATE | BDB::EXCL,
-                                0600) 
+                                0600)
         old.each {|k,v|
           new[k] = v
         }
@@ -30,24 +30,34 @@ module Irc
         File.delete("#{@bot.botclass}/registry.db")
       end
     end
-    
+
     def upgrade_data2
       if File.exist?("#{@bot.botclass}/plugin_registry.db")
         Dir.mkdir("#{@bot.botclass}/registry") unless File.exist?("#{@bot.botclass}/registry")
         env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)
         dbs = Hash.new
         log "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
-        old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil, 
+        old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
           "r+", 0600, "env" => env)
         old.each {|k,v|
           prefix,key = k.split("/", 2)
           prefix.downcase!
+          # subregistries were split with a +, now they are in separate folders
+          if prefix.gsub!(/\+/, "/")
+            dirs = File.dirname("#{@bot.botclass}/registry/#{prefix}.db").split("/")
+            dirs.length.times { |i|
+              dir = dirs[0,i+1].join("/")
+              unless File.exist?(dir)
+                log "creating subregistry directory #{dir}"
+                Dir.mkdir(dir) 
+              end
+            }
+          end
           unless dbs.has_key?(prefix)
             log "creating db #{@bot.botclass}/registry/#{prefix}.db"
             dbs[prefix] = BDB::CIBtree.open("#{@bot.botclass}/registry/#{prefix}.db",
               nil, BDB::CREATE | BDB::EXCL,
               0600, "env" => env)
-              
           end
           dbs[prefix][key] = v
         }
@@ -61,7 +71,7 @@ module Irc
       end
     end
   end
-  
+
 
   # This class provides persistent storage for plugins via a hash interface.
   # The default mode is an object store, so you can store ruby objects and
@@ -77,7 +87,7 @@ module Irc
   #   blah = @registry[:blah]
   # The registry can of course be used to store simple strings, fixnums, etc as
   # well, and should be useful to store or cache plugin data or dynamic plugin
-  # configuration. 
+  # configuration.
   #
   # WARNING:
   # in object store mode, don't make the mistake of treating it like a live
@@ -149,8 +159,8 @@ module Irc
         Marshal.restore(val)
       rescue Exception => e
         warning "failed to restore marshal data for #{val.inspect}, falling back to default"
-	debug e.inspect
-	debug e.backtrace.join("\n")
+        debug e.inspect
+        debug e.backtrace.join("\n")
         if @default != nil
           begin
             return Marshal.restore(@default)
@@ -191,14 +201,14 @@ module Irc
         block.call(key, restore(value))
       }
     end
-    
+
     # just like Hash#each_key
     def each_key(&block)
       @registry.each {|key, value|
         block.call(key)
       }
     end
-    
+
     # just like Hash#each_value
     def each_value(&block)
       @registry.each {|key, value|
@@ -217,7 +227,7 @@ module Irc
     def has_both?(key, value)
       return @registry.has_both?(key, store(value))
     end
-    
+
     # just like Hash#has_value?
     def has_value?(value)
       return @registry.has_value?(store(value))
@@ -232,7 +242,7 @@ module Irc
         return nil
       end
     end
-    
+
     # delete a key from the registry
     def delete(key)
       return @registry.delete(key)
@@ -251,7 +261,7 @@ module Irc
       }
       return ret
     end
-    
+
     # Return an hash of all associations {key => value} in your namespace
     def to_hash
       ret = Hash.new
