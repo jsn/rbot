@@ -162,8 +162,7 @@ module Irc
           @throttle_bytes = 0 if @throttle_bytes < 0
           @last_throttle = now
         end
-      end
-      if @throttle_bytes == 0
+      else
         @throttle_div = 1
       end
       @throttle_bytes += more
@@ -230,6 +229,8 @@ module Irc
           break if @sendq.empty?
           mess = @sendq[0]
           if @throttle_bytes == 0 or mess.length+@throttle_bytes < @bytes_per
+            debug "(flood protection: sending message of length #{mess.length})"
+	    debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
             puts_critical(@sendq.shift)
           else
             debug "(flood protection: throttling message of length #{mess.length})"
