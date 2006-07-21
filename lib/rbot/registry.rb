@@ -46,7 +46,7 @@ module Irc
           if prefix.gsub!(/\+/, "/")
             dirs = File.dirname("#{@bot.botclass}/registry/#{prefix}.db").split("/")
             dirs.length.times { |i|
-              dir = dirs[0,i+1].join("/")
+              dir = dirs[0,i+1].join("/")+"/"
               unless File.exist?(dir)
                 log "creating subregistry directory #{dir}"
                 Dir.mkdir(dir) 
