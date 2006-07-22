@@ -423,7 +423,8 @@ class IrcBot
       debug "failed to trap signals: #{e.inspect}"
     end
     begin
-      @socket.connect unless $interrupted > 0
+      quit if $interrupted > 0
+      @socket.connect
     rescue => e
       raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
@@ -436,6 +437,7 @@ class IrcBot
   def mainloop
     while true
       begin
+	quit if $interrupted > 0
         connect
         @timer.start
 
@@ -444,7 +446,7 @@ class IrcBot
             break unless reply = @socket.gets
             @client.process reply
           end
-          quit if $interrupted > 0
+	  quit if $interrupted > 0
         end
 
       # I despair of this. Some of my users get "connection reset by peer"
@@ -453,23 +455,19 @@ class IrcBot
       rescue SystemExit
         log_session_end
         exit 0
-      rescue TimeoutError, SocketError => e
+      rescue Errno::ETIMEDOUT, TimeoutError, SocketError => e
         error "network exception: #{e.class}: #{e}"
-        debug e.inspect
         debug e.backtrace.join("\n")
       rescue BDB::Fatal => e
         error "fatal bdb error: #{e.class}: #{e}"
-        error e.inspect
         error e.backtrace.join("\n")
         DBTree.stats
         restart("Oops, we seem to have registry problems ...")
       rescue Exception => e
         error "non-net exception: #{e.class}: #{e}"
-        error e.inspect
         error e.backtrace.join("\n")
       rescue => e
         error "unexpected exception: #{e.class}: #{e}"
-        error e.inspect
         error e.backtrace.join("\n")
         log_session_end
         exit 2
@@ -483,6 +481,8 @@ class IrcBot
       end
 
       log "disconnected"
+
+      quit if $interrupted > 0
 
       log "waiting to reconnect"
       sleep @config['server.reconnect_wait']
