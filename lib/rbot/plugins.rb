@@ -1,4 +1,7 @@
 module Irc
+    BotConfig.register BotConfigArrayValue.new('plugins.blacklist',
+      :default => [], :wizard => false, :requires_restart => true,
+      :desc => "Plugins that should not be loaded")
 module Plugins
   require 'rbot/messagemapper'
 
@@ -168,6 +171,10 @@ module Plugins
     def initialize(bot, dirlist)
       @@bot = bot
       @dirs = dirlist
+      @blacklist = Array.new
+      @@bot.config['plugins.blacklist'].each { |p|
+        @blacklist << p+".rb"
+      }
       scan
     end
 
@@ -183,7 +190,7 @@ module Plugins
 
     # load plugins from pre-assigned list of directories
     def scan
-      processed = Array.new
+      processed = @blacklist
       dirs = Array.new
       dirs << Config::datadir + "/plugins"
       dirs += @dirs
