@@ -809,6 +809,7 @@ module Irc
   RPL_STATSPING=246
   RPL_STATSBLINE=247
   ERR_NOSERVICEHOST=492
+  RPL_DATASTR=290
 
   # implements RFC 2812 and prior IRC RFCs.
   # clients register handler proc{}s for different server events and IrcClient
@@ -956,9 +957,13 @@ module Irc
           # PREFIX=(ov)@+ CASEMAPPING=ascii CAPAB IRCD=dancer :are available
           # on this server"
           #
-          argv.each {|a|
+          argv[0,argv.length-1].each {|a|
             if a =~ /^(.*)=(.*)$/
               data[$1.downcase.to_sym] = $2
+              debug "server's #{$1.downcase.to_sym} is #{$2}"
+            else
+              data[a.downcase.to_sym] = true
+              debug "server supports #{a.downcase.to_sym}"
             end
           }
           handle(:isupport, data)
@@ -1030,6 +1035,9 @@ module Irc
         when RPL_ENDOFMOTD
           data[:motd] = @motd
           handle(:motd, data)
+        when RPL_DATASTR
+          data[:text] = argv[1]
+          handle(:datastr, data)
         else
           handle(:unknown, data)
         end

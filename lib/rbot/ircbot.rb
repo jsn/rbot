@@ -83,6 +83,9 @@ class IrcBot
   # bot's Language data
   attr_reader :lang
 
+  # capabilities info for the server
+  attr_reader :capabilities
+
   # channel info for channels the bot is in
   attr_reader :channels
 
@@ -250,6 +253,19 @@ class IrcBot
     @nick = @config['irc.nick']
 
     @client = IrcClient.new
+    @client[:isupport] = proc { |data|
+      if data[:capab]
+        sendq "CAPAB IDENTIFY-MSG"
+      end
+    }
+    @client[:datastr] = proc { |data|
+      debug data.inspect
+      if data[:text] == "IDENTIFY-MSG"
+        @capabilities["identify-msg".to_sym] = true
+      else
+        debug "Not handling RPL_DATASTR #{data[:servermessage]}"
+      end
+    }
     @client[:privmsg] = proc { |data|
       message = PrivMessage.new(self, data[:source], data[:target], data[:message])
       onprivmsg(message)
@@ -430,6 +446,7 @@ class IrcBot
     end
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.emergency_puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
+    @capabilities = Hash.new
     start_server_pings
   end
 

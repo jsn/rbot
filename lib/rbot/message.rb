@@ -8,25 +8,25 @@ module Irc
   # (a user message is defined as having a source hostmask, a target
   # nick/channel and a message part)
   class BasicUserMessage
-    
+
     # associated bot
     attr_reader :bot
-    
+
     # when the message was received
     attr_reader :time
 
     # hostmask of message source
     attr_reader :source
-    
+
     # nick of message source
     attr_reader :sourcenick
-    
+
     # url part of message source
     attr_reader :sourceaddress
-    
+
     # nick/channel message was sent to
     attr_reader :target
-    
+
     # contents of the message
     attr_accessor :message
 
@@ -47,18 +47,32 @@ module Irc
       @message = BasicUserMessage.stripcolour message
       @replied = false
 
+      @identified = false
+      if @msg_wants_id && @bot.capabilities["identify-msg".to_sym]
+        if @message =~ /([-+])(.*)/
+          @identified = ($1=="+")
+          @message = $2
+        else
+          warning "Message does not have identification"
+        end
+      end
+
       # split source into consituent parts
       if source =~ /^((\S+)!(\S+))$/
         @sourcenick = $2
         @sourceaddress = $3
       end
-      
+
       if target && target.downcase == @bot.nick.downcase
         @address = true
       end
-      
+
     end
-    
+
+    def identified?
+      return @identified
+    end
+
     # returns true if the message was addressed to the bot.
     # This includes any private message to the bot, or any public message
     # which looks like it's addressed to the bot, e.g. "bot: foo", "bot, foo",
@@ -87,10 +101,10 @@ module Irc
   # The +message+ member will have any bot addressing "^bot: " removed
   # (address? will return true in this case)
   class UserMessage < BasicUserMessage
-    
+
     # for plugin messages, the name of the plugin invoked by the message
     attr_reader :plugin
-    
+
     # for plugin messages, the rest of the message, with the plugin name
     # removed
     attr_reader :params
@@ -102,11 +116,11 @@ module Irc
 
     # channel the message was in, nil for privately addressed messages
     attr_reader :channel
-    
+
     # for PRIVMSGs, true if the message was a CTCP ACTION (CTCP stuff
     # will be stripped from the message)
     attr_reader :action
-    
+
     # instantiate a new UserMessage
     # bot::      associated bot class
     # source::   hostmask of the message source
@@ -118,7 +132,7 @@ module Irc
       @private = false
       @plugin = nil
       @action = false
-      
+
       if target.downcase == @bot.nick.downcase
         @private = true
         @address = true
@@ -137,19 +151,19 @@ module Irc
           break
         end
       }
-      
+
       # even if they used above prefixes, we allow for silly people who
-      # combine all possible types, e.g. "|rbot: hello", or 
+      # combine all possible types, e.g. "|rbot: hello", or
       # "/msg rbot rbot: hello", etc
       if @message.gsub!(/^\s*#{Regexp.escape(bot.nick)}\s*([:;,>]|\s)\s*/i, "")
         @address = true
       end
-      
+
       if(@message =~ /^\001ACTION\s(.+)\001/)
         @message = $1
         @action = true
       end
-      
+
       # free splitting for plugins
       @params = @message.dup
       if @params.gsub!(/^\s*(\S+)[\s$]*/, "")
@@ -192,10 +206,18 @@ module Irc
 
   # class to manage IRC PRIVMSGs
   class PrivMessage < UserMessage
+    def initialize(bot, source, target, message)
+      @msg_wants_id = true
+      super
+    end
   end
-  
+
   # class to manage IRC NOTICEs
   class NoticeMessage < UserMessage
+    def initialize(bot, source, target, message)
+      @msg_wants_id = true
+      super
+    end
   end
 
   # class to manage IRC KICKs
@@ -204,7 +226,7 @@ module Irc
   class KickMessage < BasicUserMessage
     # channel user was kicked from
     attr_reader :channel
-    
+
     def initialize(bot, source, target, channel, message="")
       super(bot, source, target, message)
       @channel = channel
@@ -252,7 +274,7 @@ module Irc
       @address = (sourcenick.downcase == @bot.nick.downcase)
     end
   end
-  
+
   # class to manage channel parts
   # same as a join, but can have a message too
   class PartMessage < JoinMessage
