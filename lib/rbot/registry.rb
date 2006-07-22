@@ -44,6 +44,7 @@ module Irc
           prefix.downcase!
           # subregistries were split with a +, now they are in separate folders
           if prefix.gsub!(/\+/, "/")
+            # Ok, this code needs to be put in the db opening routines
             dirs = File.dirname("#{@bot.botclass}/registry/#{prefix}.db").split("/")
             dirs.length.times { |i|
               dir = dirs[0,i+1].join("/")+"/"
@@ -122,6 +123,14 @@ module Irc
     def initialize(bot, name)
       @bot = bot
       @name = name.downcase
+      dirs = File.dirname("#{@bot.botclass}/registry/#{@name}").split("/")
+      dirs.length.times { |i|
+        dir = dirs[0,i+1].join("/")+"/"
+        unless File.exist?(dir)
+          debug "creating subregistry directory #{dir}"
+          Dir.mkdir(dir) 
+        end
+      }
       @registry = DBTree.new bot, "registry/#{@name}"
       @default = nil
       # debug "initializing registry accessor with name #{@name}"
