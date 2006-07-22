@@ -190,7 +190,7 @@ module Plugins
 
     # load plugins from pre-assigned list of directories
     def scan
-      processed = @blacklist
+      processed = @blacklist.dup
       dirs = Array.new
       dirs << Config::datadir + "/plugins"
       dirs += @dirs
