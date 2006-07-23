@@ -29,9 +29,19 @@ class HttpUtil
     BotConfig.register BotConfigIntegerValue.new('http.max_redir',
       :default => 5,
       :desc => "Maximum number of redirections to be used when getting a document")
+    BotConfig.register BotConfigIntegerValue.new('http.expire_time',
+      :default => 60,
+      :desc => "After how many minutes since last use a cached document is considered to be expired")
+    BotConfig.register BotConfigIntegerValue.new('http.max_cache_time',
+      :default => 60*24,
+      :desc => "After how many minutes since first use a cached document is considered to be expired")
+    BotConfig.register BotConfigIntegerValue.new('http.no_expire_cache',
+      :default => false,
+      :desc => "Set this to true if you want the bot to never expire the cached pages")
 
   def initialize(bot)
     @bot = bot
+    @cache = Hash.new
     @headers = {
       'User-Agent' => "rbot http util #{$version} (http://linuxbrit.co.uk/rbot/)",
     }
@@ -120,9 +130,10 @@ class HttpUtil
   # readtimeout:: timeout for reading the response
   # opentimeout:: timeout for opening the connection
   #
-  # simple get request, returns response body if the status code is 200 and
-  # the request doesn't timeout.
-  def get(uri, readtimeout=10, opentimeout=5, redirs=0)
+  # simple get request, returns (if possible) response body following redirs
+  # and caching if requested
+  # it yields the urls it gets redirected to, for future uses
+  def get(uri, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"], cache=false)
     proxy = get_proxy(uri)
     proxy.open_timeout = opentimeout
     proxy.read_timeout = readtimeout
@@ -130,16 +141,31 @@ class HttpUtil
     begin
       proxy.start() {|http|
         resp = http.get(uri.request_uri(), @headers)
-        case resp.code
-        when "200"
+        case resp
+        when Net::HTTPSuccess
+          if cache
+            k = uri.to_s
+            @cache[k] = Hash.new
+            @cache[k][:body] = resp.body
+            @cache[k][:last_mod] = Time.httpdate(resp['last-modified']) if resp.key?('last-modified')
+            if resp.key?('date')
+              @cache[k][:first_use] = Time.httpdate(resp['date'])
+              @cache[k][:last_use] = Time.httpdate(resp['date'])
+            else
+              now = Time.new
+              @cache[k][:first_use] = now
+              @cache[k][:last_use] = now
+            end
+            @cache[k][:count] = 1
+          end
           return resp.body
-        when "302"
+        when Net::HTTPRedirection
           debug "Redirecting #{uri} to #{resp['location']}"
-          if redirs < @bot.config["http.max_redir"]
-            return get( URI.parse(resp['location']), readtimeout, opentimeout, redirs+1 )
+          yield resp['location']
+          if max_redir > 0
+            return get( URI.parse(resp['location']), readtimeout, opentimeout, max_redir-1, cache)
           else
             warning "Max redirection reached, not going to #{resp['location']}"
-            return nil
           end
         else
           debug "HttpUtil.get return code #{resp.code} #{resp.body}"
@@ -151,6 +177,109 @@ class HttpUtil
     end
     return nil
   end
+
+  # just like the above, but only gets the head
+  def head(uri, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"])
+    proxy = get_proxy(uri)
+    proxy.open_timeout = opentimeout
+    proxy.read_timeout = readtimeout
+
+    begin
+      proxy.start() {|http|
+        resp = http.head(uri.request_uri(), @headers)
+        case resp
+        when Net::HTTPSuccess
+          return resp
+        when Net::HTTPRedirection
+          debug "Redirecting #{uri} to #{resp['location']}"
+          yield resp['location']
+          if max_redir > 0
+            return head( URI.parse(resp['location']), readtimeout, opentimeout, max_redir-1)
+          else
+            warning "Max redirection reached, not going to #{resp['location']}"
+          end
+        else
+          debug "HttpUtil.head return code #{resp.code}"
+        end
+        return nil
+      }
+    rescue StandardError, Timeout::Error => e
+      error "HttpUtil.head exception: #{e.inspect}, while trying to get #{uri}"
+    end
+    return nil
+  end
+
+  # gets a page from the cache if it's still (assumed to be) valid
+  # TODO remove stale cached pages, except when called with noexpire=true
+  def get_cached(uri, readtimeout=10, opentimeout=5,
+                 max_redir=@bot.config['http.max_redir'],
+                 noexpire=@bot.config['http.no_expire_cache'])
+    k = uri.to_s
+    if !@cache.key?(k)
+      remove_stale_cache unless noexpire
+      return get(uri, readtimeout, opentimeout, max_redir, true)
+    end
+    now = Time.new
+    begin
+      # See if the last-modified header can be used
+      # Assumption: the page was not modified if both the header
+      # and the cached copy have the last-modified value, and it's the same time
+      # If only one of the cached copy and the header have the value, or if the
+      # value is different, we assume that the cached copyis invalid and therefore
+      # get a new one.
+      # On our first try, we tested for last-modified in the webpage first,
+      # and then on the local cache. however, this is stupid (in general),
+      # so we only test for the remote page if the local copy had the header
+      # in the first place.
+      if @cache[k].key?(:last_mod)
+        h = head(uri, readtimeout, opentimeout, max_redir)
+        if h.key?('last-modified')
+          if Time.httpdate(h['last-modified']) == @cache[k][:last_mod]
+            if resp.key?('date')
+              @cache[k][:last_use] = Time.httpdate(resp['date'])
+            else
+              @cache[k][:last_use] = now
+            end
+            @cache[k][:count] += 1
+            return @cache[k][:body]
+          end
+          remove_stale_cache unless noexpire
+          return get(uri, readtimeout, opentimeout, max_redir, true)
+        end
+        remove_stale_cache unless noexpire
+        return get(uri, readtimeout, opentimeout, max_redir, true)
+      end
+    rescue => e
+      warning "Error #{e.inspect} getting the page #{uri}, using cache"
+      return @cache[k][:body]
+    end
+    # If we still haven't returned, we are dealing with a non-redirected document
+    # that doesn't have the last-modified attribute
+    debug "Could not use last-modified attribute for URL #{uri}, guessing cache validity"
+    if noexpire or !expired?(@cache[k], now)
+      @cache[k][:count] += 1
+      @cache[k][:last_use] = now
+      debug "Using cache"
+      return @cache[k][:body]
+    end
+    debug "Cache expired, getting anew"
+    @cache.delete(k)
+    remove_stale_cache unless noexpire
+    return get(uri, readtimeout, opentimeout, max_redir, true)
+  end
+
+  def expired?(hash, time)
+    (time - hash[:last_use] > @bot.config['http.expire_time']*60) or
+    (time - hash[:first_use] > @bot.config['http.max_cache_time']*60)
+  end
+
+  def remove_stale_cache
+    now = Time.new
+    @cache.reject! { |k, val|
+      !val.key?[:last_modified] && expired?(val, now)
+    }
+  end
+
 end
 end
 end
