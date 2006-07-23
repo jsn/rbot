@@ -174,6 +174,7 @@ class HttpUtil
       }
     rescue StandardError, Timeout::Error => e
       error "HttpUtil.get exception: #{e.inspect}, while trying to get #{uri}"
+      debug e.backtrace.join("\n")
     end
     return nil
   end
@@ -205,6 +206,7 @@ class HttpUtil
       }
     rescue StandardError, Timeout::Error => e
       error "HttpUtil.head exception: #{e.inspect}, while trying to get #{uri}"
+      debug e.backtrace.join("\n")
     end
     return nil
   end
@@ -251,6 +253,7 @@ class HttpUtil
       end
     rescue => e
       warning "Error #{e.inspect} getting the page #{uri}, using cache"
+      debug e.backtrace.join("\n")
       return @cache[k][:body]
     end
     # If we still haven't returned, we are dealing with a non-redirected document
