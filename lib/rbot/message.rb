@@ -39,6 +39,8 @@ module Irc
     # target::   nick/channel message is destined for
     # message::  message part
     def initialize(bot, source, target, message)
+      @msg_wants_id = false unless defined? @msg_wants_id
+
       @time = Time.now
       @bot = bot
       @source = source
