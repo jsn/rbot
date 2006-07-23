@@ -1,5 +1,12 @@
 require 'cgi'
-require 'rubyful_soup'
+begin
+  require 'rubyful_soup'
+rescue
+  warning "could not load rubyful_soup, urban dictionary disabled"
+  warning "please get it from http://www.crummy.com/software/RubyfulSoup/"
+  warning "or install it via gem"
+  return
+end
 require 'uri/common'
 
 class UrbanPlugin < Plugin
