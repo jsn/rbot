@@ -198,6 +198,16 @@ module Irc
       @replied = true
     end
 
+    # convenience method to reply to a message with an action. It's the
+    # same as doing:
+    # <tt>@bot.action m.replyto, string</tt>
+    # So if the message is private, it will reply to the user. If it was
+    # in a channel, it will reply in the channel.
+    def act(string)
+      @bot.action @replyto, string
+      @replied = true
+    end
+
     # convenience method to reply "okay" in the current language to the
     # message
     def okay
