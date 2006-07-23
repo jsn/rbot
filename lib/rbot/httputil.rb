@@ -5,7 +5,7 @@ require 'resolv'
 require 'net/http'
 require 'net/https'
 Net::HTTP.version_1_2
-  
+
 # class for making http requests easier (mainly for plugins to use)
 # this class can check the bot proxy configuration to determine if a proxy
 # needs to be used, which includes support for per-url proxy configuration.
@@ -26,6 +26,9 @@ class HttpUtil
     BotConfig.register BotConfigArrayValue.new('http.proxy_exclude',
       :default => [],
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use avoid the proxy to access this URI and access it directly")
+    BotConfig.register BotConfigIntegerValue.new('http.max_redir',
+      :default => 5,
+      :desc => "Maximum number of redirections to be used when getting a document")
 
   def initialize(bot)
     @bot = bot
@@ -80,7 +83,7 @@ class HttpUtil
   # uri:: Uri to create a proxy for
   #
   # return a net/http Proxy object, which is configured correctly for
-  # proxying based on the bot's proxy configuration. 
+  # proxying based on the bot's proxy configuration.
   # This will include per-url proxy configuration based on the bot config
   # +http_proxy_include/exclude+ options.
   def get_proxy(uri)
@@ -107,7 +110,7 @@ class HttpUtil
         end
       end
     end
-    
+
     h = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_port)
     h.use_ssl = true if uri.scheme == "https"
     return h
@@ -119,18 +122,27 @@ class HttpUtil
   #
   # simple get request, returns response body if the status code is 200 and
   # the request doesn't timeout.
-  def get(uri, readtimeout=10, opentimeout=5)
+  def get(uri, readtimeout=10, opentimeout=5, redirs=0)
     proxy = get_proxy(uri)
     proxy.open_timeout = opentimeout
     proxy.read_timeout = readtimeout
-   
+
     begin
       proxy.start() {|http|
         resp = http.get(uri.request_uri(), @headers)
-        if resp.code == "200"
+        case resp.code
+        when "200"
           return resp.body
+        when "302"
+          debug "Redirecting #{uri} to #{resp['location']}"
+          if redirs < @bot.config["http.max_redir"]
+            return get( URI.parse(resp['location']), readtimeout, opentimeout, redirs+1 )
+          else
+            warning "Max redirection reached, not going to #{resp['location']}"
+            return nil
+          end
         else
-          log "HttpUtil.get return code #{resp.code} #{resp.body}"
+          debug "HttpUtil.get return code #{resp.code} #{resp.body}"
         end
         return nil
       }
