@@ -132,7 +132,7 @@ class HttpUtil
   #
   # simple get request, returns (if possible) response body following redirs
   # and caching if requested
-  # it yields the urls it gets redirected to, for future uses
+  # if a block is given, it yields the urls it gets redirected to
   def get(uri, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"], cache=false)
     proxy = get_proxy(uri)
     proxy.open_timeout = opentimeout
@@ -140,6 +140,7 @@ class HttpUtil
 
     begin
       proxy.start() {|http|
+        yield uri.request_uri() if block_given?
         resp = http.get(uri.request_uri(), @headers)
         case resp
         when Net::HTTPSuccess
@@ -161,7 +162,7 @@ class HttpUtil
           return resp.body
         when Net::HTTPRedirection
           debug "Redirecting #{uri} to #{resp['location']}"
-          yield resp['location']
+          yield resp['location'] if block_given?
           if max_redir > 0
             return get( URI.parse(resp['location']), readtimeout, opentimeout, max_redir-1, cache)
           else
@@ -187,13 +188,14 @@ class HttpUtil
 
     begin
       proxy.start() {|http|
+        yield uri.request_uri() if block_given?
         resp = http.head(uri.request_uri(), @headers)
         case resp
         when Net::HTTPSuccess
           return resp
         when Net::HTTPRedirection
           debug "Redirecting #{uri} to #{resp['location']}"
-          yield resp['location']
+          yield resp['location'] if block_given?
           if max_redir > 0
             return head( URI.parse(resp['location']), readtimeout, opentimeout, max_redir-1)
           else
@@ -279,7 +281,7 @@ class HttpUtil
   def remove_stale_cache
     now = Time.new
     @cache.reject! { |k, val|
-      !val.key?[:last_modified] && expired?(val, now)
+      !val.key?(:last_modified) && expired?(val, now)
     }
   end
 
