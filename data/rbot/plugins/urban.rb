@@ -37,11 +37,11 @@ class UrbanPlugin < Plugin
       uri = URI.parse( "http://www.urbandictionary.com/define.php?term=#{ URI.escape query}" )
     end
 
-    soup = BeautifulSoup.new( @bot.httputil.get( uri ) )
+    soup = BeautifulSoup.new( @bot.httputil.get_cached( uri ) )
     if titleNavi = soup.find_all( 'td', :attrs => { 'class' => 'def_word' } )[0] then
       title = titleNavi.contents
       results = soup.find_all( 'div', :attrs => { 'class' => 'def_p' } )
-      debug PP.pp(results,'')
+      # debug PP.pp(results,'')
       output = Array.new
       if results[definitionN] then
         results[definitionN].p.contents.each { |s| output.push( strip_tags( s.to_s ) ) }
