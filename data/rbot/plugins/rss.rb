@@ -401,7 +401,7 @@ class RSSFeedsPlugin < Plugin
       when "gmame"
         @bot.say loc, "::amarok-devel:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)}::"
       else
-        printRSSItem(loc,item)
+        printRssItem(loc,item)
       end
     }
   end
