@@ -78,18 +78,6 @@ class RSSFeedsPlugin < Plugin
   @@watchThreads = Hash.new
   @@mutex = Mutex.new
 
-  # Keep a 1:1 relation between commands and handlers
-  @@handlers = {
-    "rss" => "handle_rss",
-    "addrss" => "handle_addrss",
-    "rmrss" => "handle_rmrss",
-    "rmwatch" => "handle_rmwatch",
-    "listrss" => "handle_listrss",
-    "listwatches" => "handle_listrsswatch",
-    "rewatch" => "handle_rewatch",
-    "watchrss" => "handle_watchrss",
-  }
-
   def initialize
     super
     kill_threads
@@ -98,7 +86,7 @@ class RSSFeedsPlugin < Plugin
     else
       @feeds = Hash.new
     end
-    handle_rewatch
+    rewatch_rss
   end
 
   def watchlist
@@ -120,61 +108,55 @@ class RSSFeedsPlugin < Plugin
         debug "Killing thread for #{url}"
         thread.kill
       }
-      # @@watchThreads.each { |url, thread|
-      #   debug "Joining on killed thread for #{url}"
-      #   thread.join
-      # }
       @@watchThreads = Hash.new
     }
   end
 
   def help(plugin,topic="")
-    "RSS Reader: rss name [limit] => read a named feed [limit maximum posts, default 5], addrss [force] name url => add a feed, listrss => list all available feeds, rmrss name => remove the named feed, watchrss url [type] => watch a rss feed for changes (type may be 'amarokblog', 'amarokforum', 'mediawiki', 'gmame' or empty - it defines special formatting of feed items), rewatch => restart all rss watches, rmwatch url => stop watching for changes in url, listwatches => see a list of watched feeds"
+    case topic
+    when "show"
+      "rss show +handle+ [+limit+] : show +limit+ (default: 5, max: 15) entries from rss +handle+"
+    when "list"
+      "rss list [+handle+] : list all rss feeds (matching +handle+)"
+    when "watched"
+      "rss watched [+handle+] : list all watched rss feeds (matching +handle+)"
+    when "add"
+      "rss add +handle+ +url+ [+type+] : add a new rss called +handle+ from url +url+ (of type +type+)"
+    when /^(del(ete)?|rm)$/
+      "rss del(ete)|rm +handle+ : delete rss feed +handle+"
+    when "replace"
+      "rss replace +handle+ +url+ [+type+] : try to replace the url of rss called +handle+ with +url+ (of type +type+); only works if nobody else is watching it"
+    when "forcereplace"
+      "rss forcereplace +handle+ +url+ [+type+] : replace the url of rss called +handle+ with +url+ (of type +type+)"
+    when "watch"
+      "rss watch +handle+ [+url+ [+type+]] : watch rss +handle+ for changes; when the other parameters are present, it will be created if it doesn't exist yet"
+    when /(un|rm)watch/
+      "rss unwatch|rmwatch +handle+ : stop watching rss +handle+ for changes"
+    when "rewatch"
+      "rss rewatch : restart threads that watch for changes in watched rss"
+    else
+      "manage RSS feeds: rss show|list|watched|add|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch"
+    end
   end
 
   def report_problem(report, m=nil)
-      if m
-        m.reply report
-      else
-        warning report
-      end
+    if m
+      m.reply report
+    else
+      warning report
+    end
   end
 
-  def privmsg(m)
-    meth = self.method(@@handlers[m.plugin])
-    meth.call(m)
-  end
-
-  def handle_rss(m)
-    unless m.params
-      m.reply("incorrect usage: " + help(m.plugin))
+  def show_rss(m, params)
+    handle = params[:handle]
+    limit = params[:limit].to_i
+    limit = 15 if limit > 15
+    limit = 1 if limit <= 0
+    feed = @feeds.fetch(handle, nil)
+    unless feed
+      m.reply "I don't know any feeds named #{handle}"
       return
     end
-    limit = 5
-    if m.params =~ /\s+(\d+)$/
-      limit = $1.to_i
-      if limit < 1 || limit > 15
-        m.reply("weird, limit not in [1..15], reverting to default")
-        limit = 5
-      end
-      m.params.gsub!(/\s+\d+$/, '')
-    end
-
-    url = ''
-    if m.params =~ /^https?:\/\//
-      url = m.params
-      @@mutex.synchronize {
-        @feeds[url] = RssBlob.new(url)
-        feed = @feeds[url]
-      }
-    else
-      feed = @feeds.fetch(m.params, nil)
-      unless feed
-        m.reply(m.params + "? what is that feed about?")
-        return
-      end
-    end
-
     m.reply("Please wait, querying...")
     title = items = nil
     @@mutex.synchronize {
@@ -183,32 +165,56 @@ class RSSFeedsPlugin < Plugin
     return unless items
     m.reply("Channel : #{title}")
     # TODO: optional by-date sorting if dates present
-    items[0...limit].each do |item|
+    items[0...limit].reverse.each do |item|
       printRssItem(m.replyto,item)
     end
   end
 
-  def handle_addrss(m)
-    unless m.params
-      m.reply "incorrect usage: " + help(m.plugin)
+  def list_rss(m, params)
+    wanted = params[:handle]
+    reply = String.new
+    @@mutex.synchronize {
+      @feeds.each { |handle, feed|
+        next if wanted and !handle.match(wanted)
+        reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
+        (reply << " (watched)") if feed.watched_by?(m.replyto)
+        reply << "\n"
+      }
+    }
+    if reply.empty?
+      reply = "no feeds found"
+      reply << " matching #{wanted}" if wanted
+    end
+    m.reply reply
+  end
+
+  def watched_rss(m, params)
+    wanted = params[:handle]
+    reply = String.new
+    @@mutex.synchronize {
+      watchlist.each { |handle, feed|
+        next if wanted and !handle.match(wanted)
+        next unless feed.watched_by?(m.replyto)
+        reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})\n"
+      }
+    }
+    if reply.empty?
+      reply = "no watched feeds"
+      reply << " matching #{wanted}" if wanted
+    end
+    m.reply reply
+  end
+
+  def add_rss(m, params, force=false)
+    handle = params[:handle]
+    url = params[:url]
+    type = params[:type]
+    if @feeds.fetch(handle, nil) && !force
+      m.reply "There is already a feed named #{handle} (URL: #{@feeds[handle].url})"
       return
     end
-    if m.params =~ /^force /
-      forced = true
-      m.params.gsub!(/^force /, '')
-    end
-    feed = m.params.scan(/\S+/)
-    if feed.nil? or feed.length < 2
-      m.reply("incorrect usage: " + help(m.plugin))
-      return
-    end
-    handle = feed[0]
-    handle.gsub!("|", '_')
-    url = feed[1]
-    type = feed[2] || nil
-    debug "Handle: #{handle.inspect}, Url: #{url.inspect}, Type: #{type.inspect}"
-    if @feeds.fetch(handle, nil) && !forced
-      m.reply("But there is already a feed named #{handle} with url #{@feeds[handle].url}")
+    unless url
+      m.reply "You must specify both a handle and an url to add an RSS feed"
       return
     end
     @@mutex.synchronize {
@@ -222,8 +228,8 @@ class RSSFeedsPlugin < Plugin
     return handle
   end
 
-  def handle_rmrss(m)
-    feed = handle_rmwatch(m, true)
+  def del_rss(m, params, pass=false)
+    feed = unwatch_rss(m, params, true)
     if feed.watched?
       m.reply "someone else is watching #{feed.handle}, I won't remove it from my list"
       return
@@ -231,16 +237,53 @@ class RSSFeedsPlugin < Plugin
     @@mutex.synchronize {
       @feeds.delete(feed.handle)
     }
-    m.okay
+    m.okay unless pass
     return
   end
 
-  def handle_rmwatch(m,pass=false)
-    unless m.params
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
+  def replace_rss(m, params)
+    handle = params[:handle]
+    if @feeds.key?(handle)
+      del_rss(m, {:handle => handle}, true)
     end
-    handle = m.params
+    if @feeds.key?(handle)
+      m.reply "can't replace #{feed.handle}"
+    else
+      add_rss(m, params, true)
+    end
+  end
+
+  def forcereplace_rss(m, params)
+    add_rss(m, params, true)
+  end
+
+  def watch_rss(m, params)
+    handle = params[:handle]
+    url = params[:url]
+    type = params[:type]
+    if url
+      add_rss(m, params)
+    end
+    feed = nil
+    @@mutex.synchronize {
+      feed = @feeds.fetch(handle, nil)
+    }
+    if feed
+      @@mutex.synchronize {
+        if feed.add_watch(m.replyto)
+          watchRss(feed, m)
+          m.okay
+        else
+          m.reply "Already watching #{feed.handle}"
+        end
+      }
+    else
+      m.reply "Couldn't watch feed #{handle} (no such feed found)"
+    end
+  end
+
+  def unwatch_rss(m, params, pass=false)
+    handle = params[:handle]
     unless @feeds.has_key?(handle)
       m.reply("dunno that feed")
       return
@@ -263,37 +306,7 @@ class RSSFeedsPlugin < Plugin
     return feed
   end
 
-  def handle_listrss(m)
-    reply = ''
-    if @feeds.length == 0
-      reply = "No feeds yet."
-    else
-      @@mutex.synchronize {
-        @feeds.each { |handle, feed|
-          reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
-          (reply << " (watched)") if feed.watched_by?(m.replyto)
-          reply << "\n"
-          debug reply
-        }
-      }
-    end
-    m.reply reply
-  end
-
-  def handle_listrsswatch(m)
-    reply = ''
-    if watchlist.length == 0
-      reply = "No watched feeds yet."
-    else
-      watchlist.each { |handle, feed|
-        (reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})\n") if feed.watched_by?(m.replyto)
-        debug reply
-      }
-    end
-    m.reply reply
-  end
-
-  def handle_rewatch(m=nil)
+  def rewatch_rss(m=nil)
     kill_threads
 
     # Read watches from list.
@@ -301,34 +314,6 @@ class RSSFeedsPlugin < Plugin
       watchRss(feed, m)
     }
     m.okay if m
-  end
-
-  def handle_watchrss(m)
-    unless m.params
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
-    end
-    if m.params =~ /\s+/
-      handle = handle_addrss(m)
-    else
-      handle = m.params
-    end
-    feed = nil
-    @@mutex.synchronize {
-      feed = @feeds.fetch(handle, nil)
-    }
-    if feed
-      @@mutex.synchronize {
-        if feed.add_watch(m.replyto)
-          watchRss(feed, m)
-          m.okay
-        else
-          m.reply "Already watching #{feed.handle}"
-        end
-      }
-    else
-      m.reply "Couldn't watch feed #{handle} (no such feed found)"
-    end
   end
 
   private
@@ -475,12 +460,38 @@ class RSSFeedsPlugin < Plugin
 end
 
 plugin = RSSFeedsPlugin.new
-plugin.register("rss")
-plugin.register("addrss")
-plugin.register("rmrss")
-plugin.register("rmwatch")
-plugin.register("listrss")
-plugin.register("rewatch")
-plugin.register("watchrss")
-plugin.register("listwatches")
 
+plugin.map 'rss show :handle :limit',
+  :action => 'show_rss',
+  :requirements => {:limit => /^\d+$/},
+  :defaults => {:limit => 5}
+plugin.map 'rss list :handle',
+  :action => 'list_rss',
+  :defaults =>  {:handle => nil}
+plugin.map 'rss watched :handle',
+  :action => 'watched_rss',
+  :defaults =>  {:handle => nil}
+plugin.map 'rss add :handle :url :type',
+  :action => 'add_rss',
+  :defaults => {:type => nil}
+plugin.map 'rss del :handle',
+  :action => 'del_rss'
+plugin.map 'rss delete :handle',
+  :action => 'del_rss'
+plugin.map 'rss rm :handle',
+  :action => 'del_rss'
+plugin.map 'rss replace :handle :url :type',
+  :action => 'replace_rss',
+  :defaults => {:type => nil}
+plugin.map 'rss forcereplace :handle :url :type',
+  :action => 'forcereplace_rss',
+  :defaults => {:type => nil}
+plugin.map 'rss watch :handle :url :type',
+  :action => 'watch_rss',
+  :defaults => {:url => nil, :type => nil}
+plugin.map 'rss unwatch :handle',
+  :action => 'unwatch_rss'
+plugin.map 'rss rmwatch :handle',
+  :action => 'unwatch_rss'
+plugin.map 'rss rewatch :handle',
+  :action => 'rewatch_rss'
