@@ -161,7 +161,7 @@ class RSSFeedsPlugin < Plugin
   end
 
   def report_problem(report, e=nil, m=nil)
-    if m && m.respond_to?(reply)
+    if m && m.respond_to?(:reply)
       m.reply report
     else
       warning report
