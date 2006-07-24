@@ -133,7 +133,13 @@ class HttpUtil
   # simple get request, returns (if possible) response body following redirs
   # and caching if requested
   # if a block is given, it yields the urls it gets redirected to
-  def get(uri, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"], cache=false)
+  def get(uri_or_str, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"], cache=false)
+    if uri_or_str.class <= URI
+      uri = uri_or_str
+    else
+      uri = URI.parse(uri_or_str.to_s)
+    end
+
     proxy = get_proxy(uri)
     proxy.open_timeout = opentimeout
     proxy.read_timeout = readtimeout
@@ -181,7 +187,13 @@ class HttpUtil
   end
 
   # just like the above, but only gets the head
-  def head(uri, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"])
+  def head(uri_or_str, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"])
+    if uri_or_str.class <= URI
+      uri = uri_or_str
+    else
+      uri = URI.parse(uri_or_str.to_s)
+    end
+
     proxy = get_proxy(uri)
     proxy.open_timeout = opentimeout
     proxy.read_timeout = readtimeout
@@ -215,9 +227,15 @@ class HttpUtil
 
   # gets a page from the cache if it's still (assumed to be) valid
   # TODO remove stale cached pages, except when called with noexpire=true
-  def get_cached(uri, readtimeout=10, opentimeout=5,
+  def get_cached(uri_or_str, readtimeout=10, opentimeout=5,
                  max_redir=@bot.config['http.max_redir'],
                  noexpire=@bot.config['http.no_expire_cache'])
+    if uri_or_str.class <= URI
+      uri = uri_or_str
+    else
+      uri = URI.parse(uri_or_str.to_s)
+    end
+
     k = uri.to_s
     if !@cache.key?(k)
       remove_stale_cache unless noexpire
@@ -239,8 +257,8 @@ class HttpUtil
         h = head(uri, readtimeout, opentimeout, max_redir)
         if h.key?('last-modified')
           if Time.httpdate(h['last-modified']) == @cache[k][:last_mod]
-            if resp.key?('date')
-              @cache[k][:last_use] = Time.httpdate(resp['date'])
+            if h.key?('date')
+              @cache[k][:last_use] = Time.httpdate(h['date'])
             else
               @cache[k][:last_use] = now
             end
