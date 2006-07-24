@@ -54,7 +54,7 @@ module Irc
     # somethingelse"
     #
     # Dynamic parameters can be specified by a colon ':' to match a single
-    # component (whitespace seperated), or a * to such up all following
+    # component (whitespace seperated), or a * to suck up all following
     # parameters into an array. Example:
     #   map 'myplugin :parameter1 *rest'
     # 

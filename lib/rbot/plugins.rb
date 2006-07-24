@@ -128,6 +128,7 @@ module Plugins
       @handler.map(*args)
       # register this map
       name = @handler.last.items[0]
+      self.register name, {:hidden => true}
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
           @handler.handle(m)
@@ -153,10 +154,11 @@ module Plugins
     # register the plugin as a handler for messages prefixed +name+
     # this can be called multiple times for a plugin to handle multiple
     # message prefixes
-    def register(name)
+    def register(name,opts={})
+      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
       return if Plugins.plugins.has_key?(name)
       Plugins.plugins[name] = self
-      @names << name
+      @names << name unless opts.fetch(:hidden, false)
     end
 
     # default usage method provided as a utility for simple plugins. The
