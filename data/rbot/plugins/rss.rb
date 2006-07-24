@@ -69,9 +69,18 @@ class ::RssBlob
     @watchers.delete(who)
   end
 
-  #  def to_ary
-  #    [@handle,@url,@type,@watchers]
-  #  end
+  def to_a
+    [@handle,@url,@type,@watchers]
+  end
+
+  def to_s(watchers=false)
+    if watchers
+      a = self.to_a.flatten
+    else
+      a = self.to_a[0,3]
+    end
+    a.join(" | ")
+  end
 end
 
 class RSSFeedsPlugin < Plugin
@@ -392,6 +401,7 @@ class RSSFeedsPlugin < Plugin
   end
 
   def printFormattedRss(feed, item)
+    debug "Printing formatted item #{item.inspect} for feed #{feed.to_s}"
     feed.watchers.each { |loc|
       case feed.type
       when 'blog'
@@ -404,9 +414,8 @@ class RSSFeedsPlugin < Plugin
       when 'gmame'
         @bot.say loc, "::#{feed.handle}:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(@bot.config['rss.text_max'])} ::"
       when 'trac'
-        @bot.say loc, "/---- #{feed.handle} :: #{item.title} :: #{item.link}"
-        @bot.say loc, "|#{item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max'])}"
-        @bot.say loc, "\\----"
+        @bot.say loc, "::#{feed.handle}:: #{item.title} :: #{item.link}"
+        @bot.say loc, "::#{feed.handle}:: #{item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max'])}"
       else
         printRssItem(loc,item)
       end
