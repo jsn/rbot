@@ -115,23 +115,23 @@ class RSSFeedsPlugin < Plugin
   def help(plugin,topic="")
     case topic
     when "show"
-      "rss show +handle+ [+limit+] : show +limit+ (default: 5, max: 15) entries from rss +handle+"
+      "rss show #{Bold}handle#{Bold} [#{Bold}limit#{Bold}] : show #{Bold}limit#{Bold} (default: 5, max: 15) entries from rss #{Bold}handle#{Bold}"
     when "list"
-      "rss list [+handle+] : list all rss feeds (matching +handle+)"
+      "rss list [#{Bold}handle#{Bold}] : list all rss feeds (matching #{Bold}handle#{Bold})"
     when "watched"
-      "rss watched [+handle+] : list all watched rss feeds (matching +handle+)"
+      "rss watched [#{Bold}handle#{Bold}] : list all watched rss feeds (matching #{Bold}handle#{Bold})"
     when "add"
-      "rss add +handle+ +url+ [+type+] : add a new rss called +handle+ from url +url+ (of type +type+)"
+      "rss add #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : add a new rss called #{Bold}handle#{Bold} from url #{Bold}url#{Bold} (of type #{Bold}type#{Bold})"
     when /^(del(ete)?|rm)$/
-      "rss del(ete)|rm +handle+ : delete rss feed +handle+"
+      "rss del(ete)|rm #{Bold}handle#{Bold} : delete rss feed #{Bold}handle#{Bold}"
     when "replace"
-      "rss replace +handle+ +url+ [+type+] : try to replace the url of rss called +handle+ with +url+ (of type +type+); only works if nobody else is watching it"
+      "rss replace #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : try to replace the url of rss called #{Bold}handle#{Bold} with #{Bold}url#{Bold} (of type #{Bold}type#{Bold}); only works if nobody else is watching it"
     when "forcereplace"
-      "rss forcereplace +handle+ +url+ [+type+] : replace the url of rss called +handle+ with +url+ (of type +type+)"
+      "rss forcereplace #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : replace the url of rss called #{Bold}handle#{Bold} with #{Bold}url#{Bold} (of type #{Bold}type#{Bold})"
     when "watch"
-      "rss watch +handle+ [+url+ [+type+]] : watch rss +handle+ for changes; when the other parameters are present, it will be created if it doesn't exist yet"
+      "rss watch #{Bold}handle#{Bold} [#{Bold}url#{Bold} [#{Bold}type#{Bold}]] : watch rss #{Bold}handle#{Bold} for changes; when the other parameters are present, it will be created if it doesn't exist yet"
     when /(un|rm)watch/
-      "rss unwatch|rmwatch +handle+ : stop watching rss +handle+ for changes"
+      "rss unwatch|rmwatch #{Bold}handle#{Bold} : stop watching rss #{Bold}handle#{Bold} for changes"
     when "rewatch"
       "rss rewatch : restart threads that watch for changes in watched rss"
     else
