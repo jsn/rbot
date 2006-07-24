@@ -92,6 +92,10 @@ class RSSFeedsPlugin < Plugin
     :default => 90, :validate => Proc.new{|v| v > 0 && v < 400},
     :desc => "How many characters to use of a RSS item text")
 
+  BotConfig.register BotConfigIntegerValue.new('rss.thread_sleep',
+    :default => 120, :validate => Proc.new{|v| v > 30},
+    :desc => "How many characters to use of a RSS item text")
+
   @@watchThreads = Hash.new
   @@mutex = Mutex.new
 
@@ -156,11 +160,15 @@ class RSSFeedsPlugin < Plugin
     end
   end
 
-  def report_problem(report, m=nil)
-    if m
+  def report_problem(report, e=nil, m=nil)
+    if m && m.respond_to?(reply)
       m.reply report
     else
       warning report
+    end
+    if e
+      debug e.inspect
+      debug e.backtrace.join("\n") if e.class >= Exception
     end
   end
 
@@ -183,7 +191,7 @@ class RSSFeedsPlugin < Plugin
     m.reply("Channel : #{title}")
     # TODO: optional by-date sorting if dates present
     items[0...limit].reverse.each do |item|
-      printRssItem(m.replyto,item)
+      printFormattedRss(feed, item, {:places=>[m.replyto],:handle=>nil,:date=>true})
     end
   end
 
@@ -225,6 +233,10 @@ class RSSFeedsPlugin < Plugin
   def add_rss(m, params, force=false)
     handle = params[:handle]
     url = params[:url]
+    unless url.match(/https?/)
+      m.reply "I only deal with feeds from HTTP sources, so I can't use #{url} (maybe you forgot the handle?)"
+      return
+    end
     type = params[:type]
     if @feeds.fetch(handle, nil) && !force
       m.reply "There is already a feed named #{handle} (URL: #{@feeds[handle].url})"
@@ -336,16 +348,16 @@ class RSSFeedsPlugin < Plugin
   private
   def watchRss(feed, m=nil)
     if @@watchThreads.has_key?(feed.handle)
-      report_problem("watcher thread for #{feed.handle} is already running", m)
+      report_problem("watcher thread for #{feed.handle} is already running", nil, m)
       return
     end
     @@watchThreads[feed.handle] = Thread.new do
-      debug 'watchRss thread started.'
+      debug "watcher for #{feed} started"
       oldItems = []
       firstRun = true
       loop do
         begin
-          debug 'Fetching rss feed...'
+          debug "fetching #{feed}"
           title = newItems = nil
           @@mutex.synchronize {
             title, newItems = fetchRss(feed)
@@ -354,7 +366,7 @@ class RSSFeedsPlugin < Plugin
             m.reply "no items in feed"
             break
           end
-          debug "Checking if new items are available"
+          debug "Checking if new items are available for #{feed}"
           if firstRun
             debug "First run, we'll see next time"
             firstRun = false
@@ -364,15 +376,14 @@ class RSSFeedsPlugin < Plugin
               otxt.include?(item.to_s)
             }
             if dispItems.length > 0
-              debug "Found #{dispItems.length} new items"
+              debug "Found #{dispItems.length} new items in #{feed}"
               dispItems.each { |item|
-                debug "showing #{item.title}"
                 @@mutex.synchronize {
                   printFormattedRss(feed, item)
                 }
               }
             else
-              debug "No new items found"
+              debug "No new items found in #{feed}"
             end
           end
           oldItems = newItems.dup
@@ -381,43 +392,44 @@ class RSSFeedsPlugin < Plugin
           debug e.backtrace.join("\n")
         end
 
-        seconds = 150 + rand(100)
-        debug "Thread going to sleep #{seconds} seconds.."
+        seconds = @bot.config['rss.thread_sleep']
+        seconds += seconds * rand(50)/100
+        debug "watcher for #{feed} going to sleep #{seconds} seconds.."
         sleep seconds
       end
     end
   end
 
-  def printRssItem(loc,item)
-    if item.kind_of?(RSS::RDF::Item)
-      @bot.say loc, item.title.chomp.riphtml.shorten(@bot.config['rss.head_max']) + " @ " + item.link
-    else
-      desc = String.new
-      desc << item.pubDate.to_s.chomp + ": " if item.pubDate
-      desc << item.title.chomp.riphtml.shorten(@bot.config['rss.head_max']) + " :: " if item.title
-      desc << " @ " + item.link.chomp if item.link
-      @bot.say loc, desc
+  def printFormattedRss(feed, item, opts=nil)
+    places = feed.watchers
+    handle = "::#{feed.handle}:: "
+    date = String.new
+    if opts
+      places = opts[:places] if opts.key?(:places)
+      handle = opts[:handle].to_s if opts.key?(:handle)
+      date = item.pubDate.strftime("%Y/%m/%d %H.%M.%S") + " :: " if (opts.key?(:date) && opts[:date] && item.pubDate)
     end
-  end
-
-  def printFormattedRss(feed, item)
-    debug "Printing formatted item #{item.inspect} for feed #{feed.to_s}"
-    feed.watchers.each { |loc|
+    title = "#{Bold}#{item.title.chomp.riphtml}#{Bold}" if item.title
+    desc = item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max']) if item.description
+    link = item.link.chomp if item.link
+    places.each { |loc|
       case feed.type
       when 'blog'
-        @bot.say loc, "::#{feed.handle}:: #{item.category.content} just blogged at #{item.link}::"
-        @bot.say loc, "::#{feed.handle}:: #{item.title.chomp.riphtml} - #{item.description.chomp.riphtml.shorten(@bot.config['rss.text_max'])}::"
+        @bot.say loc, "#{handle}#{date}#{item.category.content} blogged at #{link}"
+        @bot.say loc, "#{handle}#{title} - #{desc}"
       when 'forum'
-        @bot.say loc, "::#{feed.handle}:: #{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
+        @bot.say loc, "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
       when 'wiki'
-        @bot.say loc, "::#{feed.handle}:: #{item.title} has been edited by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(@bot.config['rss.text_max'])} #{item.link} ::"
+        @bot.say loc, "#{handle}#{date}#{item.title} has been edited by #{item.dc_creator}. #{desc} #{link}"
       when 'gmame'
-        @bot.say loc, "::#{feed.handle}:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(@bot.config['rss.text_max'])} ::"
+        @bot.say loc, "#{handle}#{date}Message #{title} sent by #{item.dc_creator}. #{desc}"
       when 'trac'
-        @bot.say loc, "::#{feed.handle}:: #{item.title} :: #{item.link}"
-        @bot.say loc, "::#{feed.handle}:: #{item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max'])}"
+        @bot.say loc, "#{handle}#{date}#{title} @ #{link}"
+        unless item.title =~ /^Changeset \[(\d+)\]/
+          @bot.say loc, "#{handle}#{desc}"
+        end
       else
-        printRssItem(loc,item)
+        @bot.say loc, "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
       end
     }
   end
@@ -427,44 +439,42 @@ class RSSFeedsPlugin < Plugin
       # Use 60 sec timeout, cause the default is too low
       xml = @bot.httputil.get_cached(feed.url,60,60)
     rescue URI::InvalidURIError, URI::BadURIError => e
-      report_problem("invalid rss feed #{feed.url}", m)
+      report_problem("invalid rss feed #{feed.url}", e, m)
       return
     end
-    debug 'fetched'
+    debug "fetched #{feed}"
     unless xml
-      report_problem("reading feed #{url} failed", m)
+      report_problem("reading feed #{feed} failed", nil, m)
       return
     end
 
     begin
       ## do validate parse
       rss = RSS::Parser.parse(xml)
-      debug 'parsed'
+      debug "parsed #{feed}"
     rescue RSS::InvalidRSSError
       ## do non validate parse for invalid RSS 1.0
       begin
         rss = RSS::Parser.parse(xml, false)
-      rescue RSS::Error
-        report_problem("parsing rss stream failed, whoops =(", m)
+      rescue RSS::Error => e
+        report_problem("parsing rss stream failed, whoops =(", e, m)
         return
       end
-    rescue RSS::Error
-      report_problem("parsing rss stream failed, oioi", m)
+    rescue RSS::Error => e
+      report_problem("parsing rss stream failed, oioi", e, m)
       return
     rescue => e
-      report_problem("processing error occured, sorry =(", m)
-      debug e.inspect
-      debug e.backtrace.join("\n")
+      report_problem("processing error occured, sorry =(", e, m)
       return
     end
     items = []
     if rss.nil?
-      report_problem("#{feed.url} does not include RSS 1.0 or 0.9x/2.0",m)
+      report_problem("#{feed} does not include RSS 1.0 or 0.9x/2.0", nil, m)
     else
       begin
-        rss.output_encoding = "euc-jp"
-      rescue RSS::UnknownConvertMethod
-        report_problem("bah! something went wrong =(",m)
+        rss.output_encoding = 'UTF-8'
+      rescue RSS::UnknownConvertMethod => e
+        report_problem("bah! something went wrong =(", e, m)
         return
       end
       rss.channel.title ||= "Unknown"
@@ -476,7 +486,7 @@ class RSSFeedsPlugin < Plugin
     end
 
     if items.empty?
-      report_problem("no items found in the feed, maybe try weed?",m)
+      report_problem("no items found in the feed, maybe try weed?", e, m)
       return
     end
     return [title, items]
