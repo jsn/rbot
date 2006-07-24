@@ -75,6 +75,14 @@ class ::RssBlob
 end
 
 class RSSFeedsPlugin < Plugin
+  BotConfig.register BotConfigIntegerValue.new('rss.head_max',
+    :default => 30, :validate => Proc.new{|v| v > 0 && v < 200},
+    :desc => "How many characters to use of a RSS item header")
+
+  BotConfig.register BotConfigIntegerValue.new('rss.text_max',
+    :default => 90, :validate => Proc.new{|v| v > 0 && v < 400},
+    :desc => "How many characters to use of a RSS item text")
+
   @@watchThreads = Hash.new
   @@mutex = Mutex.new
 
@@ -351,7 +359,7 @@ class RSSFeedsPlugin < Plugin
               dispItems.each { |item|
                 debug "showing #{item.title}"
                 @@mutex.synchronize {
-                  printFormattedRss(feed.watchers, item, feed.type)
+                  printFormattedRss(feed, item)
                 }
               }
             else
@@ -373,25 +381,32 @@ class RSSFeedsPlugin < Plugin
 
   def printRssItem(loc,item)
     if item.kind_of?(RSS::RDF::Item)
-      @bot.say loc, item.title.chomp.riphtml.shorten(20) + " @ " + item.link
+      @bot.say loc, item.title.chomp.riphtml.shorten(@bot.config['rss.head_max']) + " @ " + item.link
     else
-      @bot.say loc, "#{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml.shorten(20)+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
+      desc = String.new
+      desc << item.pubDate.to_s.chomp + ": " if item.pubDate
+      desc << item.title.chomp.riphtml.shorten(@bot.config['rss.head_max']) + " :: " if item.title
+      desc << " @ " + item.link.chomp if item.link
+      @bot.say loc, desc
     end
   end
 
-  def printFormattedRss(locs, item, type)
-    locs.each { |loc|
-      case type
-      when 'amarokblog'
-        @bot.say loc, "::#{item.category.content} just blogged at #{item.link}::"
-        @bot.say loc, "::#{item.title.chomp.riphtml} - #{item.description.chomp.riphtml.shorten(60)}::"
-      when 'amarokforum'
-        @bot.say loc, "::Forum:: #{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
-      when 'mediawiki'
-        @bot.say loc, "::Wiki:: #{item.title} has been edited by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)} #{item.link} ::"
-        debug "mediawiki #{item.title}"
-      when "gmame"
-        @bot.say loc, "::amarok-devel:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)}::"
+  def printFormattedRss(feed, item)
+    feed.watchers.each { |loc|
+      case feed.type
+      when 'blog'
+        @bot.say loc, "::#{feed.handle}:: #{item.category.content} just blogged at #{item.link}::"
+        @bot.say loc, "::#{feed.handle}:: #{item.title.chomp.riphtml} - #{item.description.chomp.riphtml.shorten(@bot.config['rss.text_max'])}::"
+      when 'forum'
+        @bot.say loc, "::#{feed.handle}:: #{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
+      when 'wiki'
+        @bot.say loc, "::#{feed.handle}:: #{item.title} has been edited by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(@bot.config['rss.text_max'])} #{item.link} ::"
+      when 'gmame'
+        @bot.say loc, "::#{feed.handle}:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(@bot.config['rss.text_max'])} ::"
+      when 'trac'
+        @bot.say loc, "/---- #{feed.handle} :: #{item.title} :: #{item.link}"
+        @bot.say loc, "|#{item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max'])}"
+        @bot.say loc, "\\----"
       else
         printRssItem(loc,item)
       end
