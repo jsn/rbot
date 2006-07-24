@@ -1,4 +1,4 @@
-Saw = Struct.new("Saw", :nick, :time, :type, :where, :message) unless defined?(Seen::Saw)
+Saw = Struct.new("Saw", :nick, :time, :type, :where, :message)
 
 class SeenPlugin < Plugin
   def help(plugin, topic="")

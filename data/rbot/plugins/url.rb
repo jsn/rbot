@@ -2,7 +2,7 @@ require 'net/http'
 require 'uri'
 require 'cgi'
 
-Url = Struct.new("Url", :channel, :nick, :time, :url) unless defined?(Struct::Url)
+Url = Struct.new("Url", :channel, :nick, :time, :url)
 TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
 
 UNESCAPE_TABLE = {
