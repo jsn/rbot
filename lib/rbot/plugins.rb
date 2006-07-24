@@ -10,8 +10,13 @@ module Plugins
   # the following methods, it will be called as appropriate:
   #
   # map(template, options)::
+  # map!(template, options)::
   #    map is the new, cleaner way to respond to specific message formats
-  #    without littering your plugin code with regexps. examples:
+  #    without littering your plugin code with regexps. The difference
+  #    between map and map! is that map! will not register the new command
+  #    as an alternative name for the plugin.
+  #
+  #    Examples:
   #
   #      plugin.map 'karmastats', :action => 'karma_stats'
   #
@@ -44,11 +49,6 @@ module Plugins
   #      plugin.map 'karmastats', :private false,
   #      plugin.map 'karmastats', :public false,
   #    end
-  #
-  #    To activate your maps, you simply register them
-  #    plugin.register_maps
-  #    This also sets the privmsg handler to use the map lookups for
-  #    handling messages. You can still use listen(), kick() etc methods
   #
   # listen(UserMessage)::
   #                        Called for all messages of any type. To
@@ -117,6 +117,17 @@ module Plugins
       # register this map
       name = @handler.last.items[0]
       self.register name
+      unless self.respond_to?('privmsg')
+        def self.privmsg(m)
+          @handler.handle(m)
+        end
+      end
+    end
+
+    def map!(*args)
+      @handler.map(*args)
+      # register this map
+      name = @handler.last.items[0]
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
           @handler.handle(m)
