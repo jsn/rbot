@@ -32,44 +32,77 @@ class ::String
   end
 end
 
+class ::RssBlob
+  attr :url
+  attr :handle
+  attr :type
+  attr :watchers
+
+  def initialize(url,handle=nil,type=nil,watchers=[])
+    @url = url
+    if handle
+      @handle = handle
+    else
+      @handle = url
+    end
+    @type = type
+    @watchers = watchers
+  end
+
+  def watched?
+    !@watchers.empty?
+  end
+
+  def watched_by?(who)
+    @watchers.include?(who)
+  end
+
+  def add_watch(who)
+    if watched_by?(who)
+      return nil
+    end
+    @watchers << who unless watched_by?(who)
+    return who
+  end
+
+  def rm_watch(who)
+    @watchers.delete(who)
+  end
+
+  #  def to_ary
+  #    [@handle,@url,@type,@watchers]
+  #  end
+end
 
 class RSSFeedsPlugin < Plugin
   @@watchThreads = Hash.new
+  @@mutex = Mutex.new
 
   # Keep a 1:1 relation between commands and handlers
   @@handlers = {
     "rss" => "handle_rss",
     "addrss" => "handle_addrss",
     "rmrss" => "handle_rmrss",
+    "rmwatch" => "handle_rmwatch",
     "listrss" => "handle_listrss",
     "listwatches" => "handle_listrsswatch",
     "rewatch" => "handle_rewatch",
     "watchrss" => "handle_watchrss",
-    "rmwatch" => "handle_rmwatch"
   }
 
   def initialize
     super
-    @feeds = Hash.new
-    @watchList = Hash.new
-    begin
-      IO.foreach("#{@bot.botclass}/rss/feeds") { |line|
-        s = line.chomp.split("|", 2)
-        @feeds[s[0]] = s[1]
-      }
-    rescue
-      log "no feeds";
+    kill_threads
+    if @registry.has_key?(:feeds)
+      @feeds = @registry[:feeds]
+    else
+      @feeds = Hash.new
     end
-    begin
-      IO.foreach("#{@bot.botclass}/rss/watchlist") { |line|
-        s = line.chomp.split("|", 3)
-        @watchList[s[0]] = [s[1], s[2]]
-        watchRss( s[2], s[0], s[1] )
-      }
-    rescue
-      log "no watchlist"
-    end
+    handle_rewatch
+  end
 
+  def watchlist
+    @feeds.select { |h, f| f.watched? }
   end
 
   def cleanup
@@ -77,38 +110,34 @@ class RSSFeedsPlugin < Plugin
   end
 
   def save
-    Dir.mkdir("#{@bot.botclass}/rss") if not FileTest.directory?("#{@bot.botclass}/rss")
-    File.open("#{@bot.botclass}/rss/feeds", "w") { |file|
-      @feeds.each { |k,v|
-        file.puts(k + "|" + v)
-      }
-    }
-    File.open("#{@bot.botclass}/rss/watchlist", "w") { |file|
-      @watchList.each { |url, d|
-        feedFormat = d[0] || ''
-        whichChan = d[1] || 'markey'
-        file.puts(url + '|' + feedFormat + '|' + whichChan)
-      }
-    }
+    @registry[:feeds] = @feeds
   end
 
   def kill_threads
-    Thread.critical=true
-    # Abort all running threads.
-    @@watchThreads.each { |url, thread|
-      debug "Killing thread for #{url}"
-      thread.kill
+    @@mutex.synchronize {
+      # Abort all running threads.
+      @@watchThreads.each { |url, thread|
+        debug "Killing thread for #{url}"
+        thread.kill
+      }
+      # @@watchThreads.each { |url, thread|
+      #   debug "Joining on killed thread for #{url}"
+      #   thread.join
+      # }
+      @@watchThreads = Hash.new
     }
-    # @@watchThreads.each { |url, thread|
-    #   debug "Joining on killed thread for #{url}"
-    #   thread.join
-    # }
-    @@watchThreads = Hash.new
-    Thread.critical=false
   end
 
   def help(plugin,topic="")
     "RSS Reader: rss name [limit] => read a named feed [limit maximum posts, default 5], addrss [force] name url => add a feed, listrss => list all available feeds, rmrss name => remove the named feed, watchrss url [type] => watch a rss feed for changes (type may be 'amarokblog', 'amarokforum', 'mediawiki', 'gmame' or empty - it defines special formatting of feed items), rewatch => restart all rss watches, rmwatch url => stop watching for changes in url, listwatches => see a list of watched feeds"
+  end
+
+  def report_problem(report, m=nil)
+      if m
+        m.reply report
+      else
+        warning report
+      end
   end
 
   def privmsg(m)
@@ -132,26 +161,30 @@ class RSSFeedsPlugin < Plugin
     end
 
     url = ''
-    if m.params =~ /^http:\/\//
+    if m.params =~ /^https?:\/\//
       url = m.params
+      @@mutex.synchronize {
+        @feeds[url] = RssBlob.new(url)
+        feed = @feeds[url]
+      }
     else
-      unless @feeds.has_key?(m.params)
+      feed = @feeds.fetch(m.params, nil)
+      unless feed
         m.reply(m.params + "? what is that feed about?")
         return
       end
-      url = @feeds[m.params]
     end
 
     m.reply("Please wait, querying...")
-    title = ''
-    items = fetchRSS(m.replyto, url, title)
-    if(items == nil)
-      return
-    end
+    title = items = nil
+    @@mutex.synchronize {
+      title, items = fetchRss(feed, m)
+    }
+    return unless items
     m.reply("Channel : #{title}")
-    # FIXME: optional by-date sorting if dates present
+    # TODO: optional by-date sorting if dates present
     items[0...limit].each do |item|
-      printRSSItem(m.replyto,item)
+      printRssItem(m.replyto,item)
     end
   end
 
@@ -164,57 +197,64 @@ class RSSFeedsPlugin < Plugin
       forced = true
       m.params.gsub!(/^force /, '')
     end
-    feed = m.params.scan(/^(\S+)\s+(\S+)$/)
-    unless feed.length == 1 && feed[0].length == 2
+    feed = m.params.match(/^(\S+)\s+(\S+)$/)
+    if feed.nil?
       m.reply("incorrect usage: " + help(m.plugin))
+    end
+    handle = feed[1]
+    url = feed[2]
+    debug "Handle: #{handle.inspect}, Url: #{url.inspect}"
+    if @feeds.fetch(handle, nil) && !forced
+      m.reply("But there is already a feed named #{handle} with url #{@feeds[handle].url}")
       return
     end
-    if @feeds.has_key?(feed[0][0]) && !forced
-      m.reply("But there is already a feed named #{feed[0][0]} with url #{@feeds[feed[0][0]]}")
-      return
-    end
-    feed[0][0].gsub!("|", '_')
-    @feeds[feed[0][0]] = feed[0][1]
-    m.reply("RSS: Added #{feed[0][1]} with name #{feed[0][0]}")
+    handle.gsub!("|", '_')
+    @@mutex.synchronize {
+      @feeds[handle] = RssBlob.new(url,handle)
+    }
+    m.reply "RSS: Added #{url} with name #{handle}"
+    return handle
   end
 
   def handle_rmrss(m)
+    feed = handle_rmwatch(m, true)
+    if feed.watched?
+      m.reply "someone else is watching #{feed.handle}, I won't remove it from my list"
+      return
+    end
+    @@mutex.synchronize {
+      @feeds.delete(feed.handle)
+    }
+    m.okay
+    return
+  end
+
+  def handle_rmwatch(m,pass=false)
     unless m.params
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
-    unless @feeds.has_key?(m.params)
+    handle = m.params
+    unless @feeds.has_key?(handle)
       m.reply("dunno that feed")
       return
     end
-    @feeds.delete(m.params)
-    @bot.okay(m.replyto)
-  end
-
-  def handle_rmwatch(m)
-    unless m.params
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
+    feed = @feeds[handle]
+    if feed.rm_watch(m.replyto)
+      m.reply "#{m.replyto} has been removed from the watchlist for #{feed.handle}"
+    else
+      m.reply("#{m.replyto} wasn't watching #{feed.handle}") unless pass
     end
-    unless @watchList.has_key?(m.params)
-      m.reply("no such watch")
-      return
+    if !feed.watched?
+      @@mutex.synchronize {
+        if @@watchThreads[handle].kind_of? Thread
+          @@watchThreads[handle].kill
+          debug "rmwatch: Killed thread for #{handle}"
+          @@watchThreads.delete(handle)
+        end
+      }
     end
-    unless @watchList[m.params][1] == m.replyto
-      m.reply("no such watch for this channel/nick")
-      return
-    end
-    @watchList.delete(m.params)
-    Thread.critical=true
-    if @@watchThreads[m.params].kind_of? Thread
-      @@watchThreads[m.params].kill
-      debug "rmwatch: Killed thread for #{m.params}"
-      # @@watchThreads[m.params].join
-      # debug "rmwatch: Joined killed thread for #{m.params}"
-      @@watchThreads.delete(m.params)
-    end
-    Thread.critical=false
-    @bot.okay(m.replyto)
+    return feed
   end
 
   def handle_listrss(m)
@@ -222,35 +262,39 @@ class RSSFeedsPlugin < Plugin
     if @feeds.length == 0
       reply = "No feeds yet."
     else
-      @feeds.each { |k,v|
-        reply << k + ": " + v + "\n"
+      @@mutex.synchronize {
+        @feeds.each { |handle, feed|
+          reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
+          (reply << " (watched)") if feed.watched_by?(m.replyto)
+          reply << "\n"
+          debug reply
+        }
       }
     end
-    m.reply(reply)
+    m.reply reply
   end
 
   def handle_listrsswatch(m)
     reply = ''
-    if @watchList.length == 0
+    if watchlist.length == 0
       reply = "No watched feeds yet."
     else
-      @watchList.each { |url,v|
-        reply << url + " for " + v[1] + " (in format: " + (v[0]?v[0]:"default") + ")\n"
+      watchlist.each { |handle, feed|
+        (reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})\n") if feed.watched_by?(m.replyto)
+        debug reply
       }
     end
-    m.reply(reply)
+    m.reply reply
   end
 
-  def handle_rewatch(m)
+  def handle_rewatch(m=nil)
     kill_threads
 
     # Read watches from list.
-    @watchList.each{ |url, d|
-      feedFormat = d[0]
-      whichChan = d[1]
-      watchRss(whichChan, url,feedFormat)
+    watchlist.each{ |handle, feed|
+      watchRss(feed, m)
     }
-    @bot.okay(m.replyto)
+    m.okay if m
   end
 
   def handle_watchrss(m)
@@ -258,61 +302,68 @@ class RSSFeedsPlugin < Plugin
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
-    feed = m.params.scan(/(\S+)/)
-    debug feed.inspect
-    if feed
-      url = feed[0]
-      feedFormat = ""
-      feedFormat = feed[1] if feed.length > 1
-      if @watchList.has_key?(url)
-        m.reply("But there is already a watch for feed #{url} on chan #{@watchList[url][1]}")
-        return
-      end
-      @watchList[url] = [feedFormat, m.replyto]
-      watchRss(m.replyto, url,feedFormat)
-      m.okay
+    if m.params =~ /\s+/
+      handle = handle_addrss(m)
     else
-      m.reply "Wrong syntax"
+      handle = m.params
+    end
+    feed = nil
+    @@mutex.synchronize {
+      feed = @feeds.fetch(handle, nil)
+    }
+    if feed
+      @@mutex.synchronize {
+        if feed.add_watch(m.replyto)
+          watchRss(feed, m)
+          m.okay
+        else
+          m.reply "Already watching #{feed.handle}"
+        end
+      }
+    else
+      m.reply "Couldn't watch feed #{handle} (no such feed found)"
     end
   end
 
   private
-  def watchRss(whichChan, url, feedFormat)
-    if @@watchThreads.has_key?(url)
-      @bot.say whichChan, "ERROR: watcher thread for #{url} is already running! #{@@watchThreads[url]}"
+  def watchRss(feed, m=nil)
+    if @@watchThreads.has_key?(feed.handle)
+      report_problem("watcher thread for #{feed.handle} is already running", m)
       return
     end
-    @@watchThreads[url] = Thread.new do
+    @@watchThreads[feed.handle] = Thread.new do
       debug 'watchRss thread started.'
       oldItems = []
       firstRun = true
       loop do
         begin
-          title = ''
-          debug 'Fetching rss feed..'
-          newItems = fetchRSS(whichChan, url, title)
-          if( newItems.empty? )
-            @bot.say whichChan, "Oops - Item is empty"
+          debug 'Fetching rss feed...'
+          title = newItems = nil
+          @@mutex.synchronize {
+            title, newItems = fetchRss(feed)
+          }
+          unless newItems
+            m.reply "no items in feed"
             break
           end
           debug "Checking if new items are available"
-          if (firstRun)
+          if firstRun
+            debug "First run, we'll see next time"
             firstRun = false
           else
-            newItems.each do |nItem|
-              showItem = true;
-              oldItems.each do |oItem|
-                if (nItem.to_s == oItem.to_s)
-                  showItem = false
-                end
-              end
-              if showItem
-                debug "showing #{nItem.title}"
-                printFormatedRSS(whichChan, nItem,feedFormat)
-              else
-                debug "not showing  #{nItem.title}"
-                break
-              end
+            dispItems = newItems.reject { |item|
+              oldItems.include?(item)
+            }
+            if dispItems.length > 0
+              debug "Found #{dispItems.length} new items"
+              dispItems.each { |item|
+                debug "showing #{item.title}"
+                @@mutex.synchronize {
+                  printFormattedRss(feed.watchers, item, feed.type)
+                }
+              }
+            else
+              debug "No new items found"
             end
           end
           oldItems = newItems
@@ -328,42 +379,44 @@ class RSSFeedsPlugin < Plugin
     end
   end
 
-  def printRSSItem(whichChan,item)
+  def printRssItem(loc,item)
     if item.kind_of?(RSS::RDF::Item)
-      @bot.say whichChan, item.title.chomp.riphtml.shorten(20) + " @ " + item.link
+      @bot.say loc, item.title.chomp.riphtml.shorten(20) + " @ " + item.link
     else
-      @bot.say whichChan, "#{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml.shorten(20)+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
+      @bot.say loc, "#{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml.shorten(20)+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
     end
   end
 
-  def printFormatedRSS(whichChan,item, type)
-    case type
-    when 'amarokblog'
-      @bot.say whichChan, "::#{item.category.content} just blogged at #{item.link}::"
-      @bot.say whichChan, "::#{item.title.chomp.riphtml} - #{item.description.chomp.riphtml.shorten(60)}::"
-    when 'amarokforum'
-      @bot.say whichChan, "::Forum:: #{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
-    when 'mediawiki'
-      @bot.say whichChan, "::Wiki:: #{item.title} has been edited by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)} #{item.link} ::"
-      debug "mediawiki #{item.title}"
-    when "gmame"
-      @bot.say whichChan, "::amarok-devel:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)}::"
-    else
-      printRSSItem(whichChan,item)
-    end
+  def printFormattedRss(locs, item, type)
+    locs.each { |loc|
+      case type
+      when 'amarokblog'
+        @bot.say loc, "::#{item.category.content} just blogged at #{item.link}::"
+        @bot.say loc, "::#{item.title.chomp.riphtml} - #{item.description.chomp.riphtml.shorten(60)}::"
+      when 'amarokforum'
+        @bot.say loc, "::Forum:: #{item.pubDate.to_s.chomp+": " if item.pubDate}#{item.title.chomp.riphtml+" :: " if item.title}#{" @ "+item.link.chomp if item.link}"
+      when 'mediawiki'
+        @bot.say loc, "::Wiki:: #{item.title} has been edited by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)} #{item.link} ::"
+        debug "mediawiki #{item.title}"
+      when "gmame"
+        @bot.say loc, "::amarok-devel:: Message #{item.title} sent by #{item.dc_creator}. #{item.description.split("\n")[0].chomp.riphtml.shorten(60)}::"
+      else
+        printRSSItem(loc,item)
+      end
+    }
   end
 
-  def fetchRSS(whichChan, url, title)
+  def fetchRss(feed, m=nil)
     begin
       # Use 60 sec timeout, cause the default is too low
-      xml = @bot.httputil.get_cached(url,60,60)
+      xml = @bot.httputil.get_cached(feed.url,60,60)
     rescue URI::InvalidURIError, URI::BadURIError => e
-      @bot.say whichChan, "invalid rss feed #{url}"
+      report_problem("invalid rss feed #{feed.url}", m)
       return
     end
     debug 'fetched'
     unless xml
-      @bot.say whichChan, "reading feed #{url} failed"
+      report_problem("reading feed #{url} failed", m)
       return
     end
 
@@ -376,30 +429,30 @@ class RSSFeedsPlugin < Plugin
       begin
         rss = RSS::Parser.parse(xml, false)
       rescue RSS::Error
-        @bot.say whichChan, "parsing rss stream failed, whoops =("
+        report_problem("parsing rss stream failed, whoops =(", m)
         return
       end
     rescue RSS::Error
-      @bot.say whichChan, "parsing rss stream failed, oioi"
+      report_problem("parsing rss stream failed, oioi", m)
       return
     rescue => e
-      @bot.say whichChan, "processing error occured, sorry =("
+      report_problem("processing error occured, sorry =(", m)
       debug e.inspect
       debug e.backtrace.join("\n")
       return
     end
     items = []
     if rss.nil?
-      @bot.say whichChan, "#{m.params} does not include RSS 1.0 or 0.9x/2.0"
+      report_problem("#{feed.url} does not include RSS 1.0 or 0.9x/2.0",m)
     else
       begin
         rss.output_encoding = "euc-jp"
       rescue RSS::UnknownConvertMethod
-        @bot.say whichChan, "bah! something went wrong =("
+        report_problem("bah! something went wrong =(",m)
         return
       end
       rss.channel.title ||= "Unknown"
-      title.replace(rss.channel.title)
+      title = rss.channel.title
       rss.items.each do |item|
         item.title ||= "Unknown"
         items << item
@@ -407,10 +460,10 @@ class RSSFeedsPlugin < Plugin
     end
 
     if items.empty?
-      @bot.say whichChan, "no items found in the feed, maybe try weed?"
+      report_problem("no items found in the feed, maybe try weed?",m)
       return
     end
-    return items
+    return [title, items]
   end
 end
 
@@ -418,9 +471,9 @@ plugin = RSSFeedsPlugin.new
 plugin.register("rss")
 plugin.register("addrss")
 plugin.register("rmrss")
+plugin.register("rmwatch")
 plugin.register("listrss")
 plugin.register("rewatch")
 plugin.register("watchrss")
 plugin.register("listwatches")
-plugin.register("rmwatch")
 
