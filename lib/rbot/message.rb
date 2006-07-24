@@ -4,6 +4,11 @@ module Irc
     :desc => "what non nick-matching prefixes should the bot respond to as if addressed (e.g !, so that '!foo' is treated like 'rbot: foo')"
   )
 
+  Color = "\003"
+  Bold = "\002"
+  Underline = "\031"
+  Reverse = "\022"
+
   # base user message class, all user messages derive from this
   # (a user message is defined as having a source hostmask, a target
   # nick/channel and a message part)
