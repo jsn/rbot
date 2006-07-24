@@ -258,16 +258,22 @@ class RSSFeedsPlugin < Plugin
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
-    feed = m.params.scan(/^(\S+)\s+(\S+)$/)
-    url = feed[0][0]
-    feedFormat = feed[0][1]
-    if @watchList.has_key?(url)
-      m.reply("But there is already a watch for feed #{url} on chan #{@watchList[url][1]}")
-      return
+    feed = m.params.scan(/(\S+)/)
+    debug feed.inspect
+    if feed
+      url = feed[0]
+      feedFormat = ""
+      feedFormat = feed[1] if feed.length > 1
+      if @watchList.has_key?(url)
+        m.reply("But there is already a watch for feed #{url} on chan #{@watchList[url][1]}")
+        return
+      end
+      @watchList[url] = [feedFormat, m.replyto]
+      watchRss(m.replyto, url,feedFormat)
+      m.okay
+    else
+      m.reply "Wrong syntax"
     end
-    @watchList[url] = [feedFormat, m.replyto]
-    watchRss(m.replyto, url,feedFormat)
-    @bot.okay(m.replyto)
   end
 
   private
@@ -350,7 +356,7 @@ class RSSFeedsPlugin < Plugin
   def fetchRSS(whichChan, url, title)
     begin
       # Use 60 sec timeout, cause the default is too low
-      xml = Utils.http_get(url,60,60)
+      xml = @bot.httputil.get_cached(url,60,60)
     rescue URI::InvalidURIError, URI::BadURIError => e
       @bot.say whichChan, "invalid rss feed #{url}"
       return
