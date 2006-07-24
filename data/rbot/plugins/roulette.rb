@@ -1,4 +1,4 @@
-RouletteHistory = Struct.new("RouletteHistory", :games, :shots, :deaths, :misses, :wins) unless defined?(RouletteHistory)
+RouletteHistory = Struct.new("RouletteHistory", :games, :shots, :deaths, :misses, :wins) unless defined?(Struct::RouletteHistory)
 
 class RoulettePlugin < Plugin
   def initialize
