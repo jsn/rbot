@@ -197,22 +197,28 @@ class RSSFeedsPlugin < Plugin
       forced = true
       m.params.gsub!(/^force /, '')
     end
-    feed = m.params.match(/^(\S+)\s+(\S+)$/)
-    if feed.nil?
+    feed = m.params.scan(/\S+/)
+    if feed.nil? or feed.length < 2
       m.reply("incorrect usage: " + help(m.plugin))
+      return
     end
-    handle = feed[1]
-    url = feed[2]
-    debug "Handle: #{handle.inspect}, Url: #{url.inspect}"
+    handle = feed[0]
+    handle.gsub!("|", '_')
+    url = feed[1]
+    type = feed[2] || nil
+    debug "Handle: #{handle.inspect}, Url: #{url.inspect}, Type: #{type.inspect}"
     if @feeds.fetch(handle, nil) && !forced
       m.reply("But there is already a feed named #{handle} with url #{@feeds[handle].url}")
       return
     end
-    handle.gsub!("|", '_')
     @@mutex.synchronize {
-      @feeds[handle] = RssBlob.new(url,handle)
+      @feeds[handle] = RssBlob.new(url,handle,type)
     }
-    m.reply "RSS: Added #{url} with name #{handle}"
+    reply = "Added RSS #{url} named #{handle}"
+    if type
+      reply << " (format: #{type})"
+    end
+    m.reply reply
     return handle
   end
 
@@ -351,8 +357,9 @@ class RSSFeedsPlugin < Plugin
             debug "First run, we'll see next time"
             firstRun = false
           else
+            otxt = oldItems.map { |item| item.to_s }
             dispItems = newItems.reject { |item|
-              oldItems.include?(item)
+              otxt.include?(item.to_s)
             }
             if dispItems.length > 0
               debug "Found #{dispItems.length} new items"
@@ -366,7 +373,7 @@ class RSSFeedsPlugin < Plugin
               debug "No new items found"
             end
           end
-          oldItems = newItems
+          oldItems = newItems.dup
         rescue Exception => e
           error "IO failed: #{e.inspect}"
           debug e.backtrace.join("\n")
