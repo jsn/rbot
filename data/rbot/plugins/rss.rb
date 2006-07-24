@@ -8,11 +8,11 @@ require 'rss/parser'
 require 'rss/1.0'
 require 'rss/2.0'
 require 'rss/dublincore'
-begin
-  # require 'rss/dublincore/2.0'
-rescue
-  warning "Unable to load RSS libraries, RSS plugin functionality crippled"
-end
+# begin
+#   require 'rss/dublincore/2.0'
+# rescue
+#   warning "Unable to load RSS libraries, RSS plugin functionality crippled"
+# end
 
 class ::String
   def shorten(limit)
@@ -168,7 +168,7 @@ class RSSFeedsPlugin < Plugin
     end
     if e
       debug e.inspect
-      debug e.backtrace.join("\n") if e.class >= Exception
+      debug e.backtrace.join("\n") if e.respond_to?(:backtrace)
     end
   end
 
@@ -363,7 +363,7 @@ class RSSFeedsPlugin < Plugin
             title, newItems = fetchRss(feed)
           }
           unless newItems
-            m.reply "no items in feed"
+            debug "no items in feed #{feed}"
             break
           end
           debug "Checking if new items are available for #{feed}"
