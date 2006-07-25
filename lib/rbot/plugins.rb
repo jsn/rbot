@@ -296,12 +296,12 @@ module Plugins
 
     # return help for +topic+ (call associated plugin's help method)
     def help(topic="")
-      if topic == "pluginfailures"
+      if topic =~ /plugin\s*fail(?:ure)?s?\s*(trace(?:back)?s?)?/
         # debug "Failures: #{@failed.inspect}"
         return "no plugins failed to load" if @failed.empty?
         return (@failed.inject(Array.new) { |list, p|
           list << "#{Bold}#{p[:name]}#{Bold} failed with #{p[:err].class}: #{p[:err]}"
-          list << "#{Bold}#{p[:name]}#{Bold} failed at #{p[:err].backtrace.join(', ')}" unless p[:err].backtrace.empty?
+          list << "#{Bold}#{p[:name]}#{Bold} failed at #{p[:err].backtrace.join(', ')}" if $1 and not p[:err].backtrace.empty?
           list
         }).join("\n")
       end
