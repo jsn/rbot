@@ -248,9 +248,10 @@ module Plugins
               }
               newerr = err.class.new(msg)
               newerr.set_backtrace(bt)
-              debug "Simplified error: " << newerr.inspect
-              debug newerr.backtrace.join("\n")
+              # debug "Simplified error: " << newerr.inspect
+              # debug newerr.backtrace.join("\n")
               @failed << { :name => tmpfilename, :err => newerr }
+              # debug "Failures: #{@failed.inspect}"
             end
           }
         end
@@ -296,10 +297,12 @@ module Plugins
     # return help for +topic+ (call associated plugin's help method)
     def help(topic="")
       if topic == "pluginfailures"
+        # debug "Failures: #{@failed.inspect}"
         return "no plugins failed to load" if @failed.empty?
-        return (@failed.inject([]) { |list, p|
+        return (@failed.inject(Array.new) { |list, p|
           list << "#{Bold}#{p[:name]}#{Bold} failed with #{p[:err].class}: #{p[:err]}"
           list << "#{Bold}#{p[:name]}#{Bold} failed at #{p[:err].backtrace.join(', ')}" unless p[:err].backtrace.empty?
+          list
         }).join("\n")
       end
       if(topic =~ /^(\S+)\s*(.*)$/)
