@@ -125,6 +125,15 @@ module Irc
     def to_s
       get.join(", ")
     end
+    def add(val)
+      curval = self.get
+      set(curval + [val]) unless curval.include?(val)
+    end
+    def rm(val)
+      curval = self.get
+      raise ArgumentError, "value #{val} not present" unless curval.include?(val)
+      set(curval - [val])
+    end
   end
   class BotConfigEnumValue < BotConfigValue
     def initialize(key, params)
@@ -249,6 +258,7 @@ module Irc
       end
       @@items[key].unset
       handle_get(m, params)
+      m.reply "this config change will take effect on the next restart" if @@items[key].requires_restart
     end
 
     def handle_set(m, params)
@@ -271,11 +281,53 @@ module Irc
       end
     end
 
+    def handle_add(m, params)
+      key = params[:key].to_s.intern
+      value = params[:value]
+      unless @@items.has_key?(key)
+        m.reply "no such config key #{key}"
+        return
+      end
+      unless @@items[key].class <= BotConfigArrayValue
+        m.reply "config key #{key} is not an array"
+        return
+      end
+      begin
+        @@items[key].add(value)
+      rescue ArgumentError => e
+        m.reply "failed to add #{value} to #{key}: #{e.message}"
+        return
+      end
+      handle_get(m,{:key => key})
+      m.reply "this config change will take effect on the next restart" if @@items[key].requires_restart
+    end
+
+    def handle_rm(m, params)
+      key = params[:key].to_s.intern
+      value = params[:value]
+      unless @@items.has_key?(key)
+        m.reply "no such config key #{key}"
+        return
+      end
+      unless @@items[key].class <= BotConfigArrayValue
+        m.reply "config key #{key} is not an array"
+        return
+      end
+      begin
+        @@items[key].rm(value)
+      rescue ArgumentError => e
+        m.reply "failed to remove #{value} from #{key}: #{e.message}"
+        return
+      end
+      handle_get(m,{:key => key})
+      m.reply "this config change will take effect on the next restart" if @@items[key].requires_restart
+    end
+
     def handle_help(m, params)
       topic = params[:topic]
       case topic
       when false
-        m.reply "config module - bot configuration. usage: list, desc, get, set, unset"
+        m.reply "config module - bot configuration. usage: list, desc, get, set, unset, add, rm"
       when "list"
         m.reply "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
       when "get"
@@ -286,6 +338,10 @@ module Irc
         m.reply "config set <key> <value> => set configuration value for key <key> to <value>"
       when "desc"
         m.reply "config desc <key> => describe what key <key> configures"
+      when "add"
+        m.reply "config add <value> to <key> => add value <value> to key <key> if <key> is an array"
+      when "rm"
+        m.reply "config rm <value> from <key> => remove value <value> from key <key> if <key> is an array"
       else
         m.reply "no help for config #{topic}"
       end
@@ -316,7 +372,12 @@ module Irc
       @handler.map 'config desc :key', :action => 'handle_desc'
       @handler.map 'config describe :key', :action => 'handle_desc'
       @handler.map 'config set :key *value', :action => 'handle_set'
+      @handler.map 'config add :value to :key', :action => 'handle_add'
+      @handler.map 'config rm :value from :key', :action => 'handle_rm'
+      @handler.map 'config del :value from :key', :action => 'handle_rm'
+      @handler.map 'config delete :value from :key', :action => 'handle_rm'
       @handler.map 'config unset :key', :action => 'handle_unset'
+      @handler.map 'config reset :key', :action => 'handle_unset'
       @handler.map 'config help :topic', :action => 'handle_help',
                    :defaults => {:topic => false}
       @handler.map 'help config :topic', :action => 'handle_help',
