@@ -184,10 +184,6 @@ module Plugins
     def initialize(bot, dirlist)
       @@bot = bot
       @dirs = dirlist
-      @blacklist = Array.new
-      @@bot.config['plugins.blacklist'].each { |p|
-        @blacklist << p+".rb"
-      }
       scan
     end
 
@@ -203,6 +199,11 @@ module Plugins
 
     # load plugins from pre-assigned list of directories
     def scan
+      @blacklist = Array.new
+      @@bot.config['plugins.blacklist'].each { |p|
+        @blacklist << p+".rb"
+      }
+      @failed = Array.new
       processed = @blacklist.dup
       dirs = Array.new
       dirs << Config::datadir + "/plugins"
@@ -232,8 +233,24 @@ module Plugins
               processed << file
             rescue Exception => err
               # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
-              warning "plugin #{tmpfilename} load failed: " + err.inspect
-              warning err.backtrace.join("\n")
+              warning "plugin #{tmpfilename} load failed\n" + err.inspect
+              debug err.backtrace.join("\n")
+              bt = err.backtrace.select { |line|
+                line.match(/^(\(eval\)|#{tmpfilename}):\d+/)
+              }
+              bt.map! { |el|
+                el.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
+                  "#{tmpfilename}#{$1}#{$3}"
+                }
+              }
+              msg = err.to_str.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
+                "#{tmpfilename}#{$1}#{$3}"
+              }
+              newerr = err.class.new(msg)
+              newerr.set_backtrace(bt)
+              debug "Simplified error: " << newerr.inspect
+              debug newerr.backtrace.join("\n")
+              @failed << { :name => tmpfilename, :err => newerr }
             end
           }
         end
@@ -263,11 +280,13 @@ module Plugins
     # return list of help topics (plugin names)
     def helptopics
       if(@@plugins.length > 0)
-        # return " [plugins: " + @@plugins.keys.sort.join(", ") + "]"
-        return " [#{length} plugins: " + @@plugins.values.uniq.collect{|p| p.name}.sort.join(", ") + "]"
+        list = " [#{length} plugin#{'s' if length > 1}: " + @@plugins.values.uniq.collect{|p| p.name}.sort.join(", ")
       else
-        return " [no plugins active]" 
+        list = " [no plugins active"
       end
+      list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}: use #{Bold}help pluginfailures#{Bold} to see why" unless @failed.empty?
+      list << "]"
+      return list
     end
 
     def length
@@ -276,6 +295,13 @@ module Plugins
 
     # return help for +topic+ (call associated plugin's help method)
     def help(topic="")
+      if topic == "pluginfailures"
+        return "no plugins failed to load" if @failed.empty?
+        return (@failed.inject([]) { |list, p|
+          list << "#{Bold}#{p[:name]}#{Bold} failed with #{p[:err].class}: #{p[:err]}"
+          list << "#{Bold}#{p[:name]}#{Bold} failed at #{p[:err].backtrace.join(', ')}" unless p[:err].backtrace.empty?
+        }).join("\n")
+      end
       if(topic =~ /^(\S+)\s*(.*)$/)
         key = $1
         params = $2
