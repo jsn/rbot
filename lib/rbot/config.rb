@@ -205,7 +205,7 @@ module Irc
       modules = []
       if params[:module]
         @@items.each_key do |key|
-          mod, name = key.split('.')
+          mod, name = key.to_s.split('.')
           next unless mod == params[:module]
           modules.push key unless modules.include?(name)
         end
