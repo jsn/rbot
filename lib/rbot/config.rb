@@ -23,12 +23,15 @@ module Irc
     attr_reader :requires_restart
     attr_reader :order
     def initialize(key, params)
-      unless key =~ /^.+\..+$/
+      # Keys must be in the form 'module.name'.
+      # They will be internally passed around as symbols,
+      # but we accept them both in string and symbol form.
+      unless key.to_s =~ /^.+\..+$/
         raise ArgumentError,"key must be of the form 'module.name'"
       end
       @order = @@order
       @@order += 1
-      @key = key
+      @key = key.intern
       if params.has_key? :default
         @default = params[:default]
       else
@@ -175,8 +178,17 @@ module Irc
     # supported via []
     def [](key)
       return @@items[key].value if @@items.has_key?(key)
+      return @@items[key.intern].value if @@items.has_key?(key.intern)
       # try to still support unregistered lookups
-      return @@config[key] if @@config.has_key?(key)
+      # but warn about them
+      if @@config.has_key?(key)
+        warning "Unregistered lookup #{key.inspect}"
+        return @@config[key]
+      end
+      if @@config.has_key?(key.intern)
+        warning "Unregistered lookup #{key.intern.inspect}"
+        return @@config[key.intern]
+      end
       return false
     end
 
@@ -204,7 +216,7 @@ module Irc
         end
       else
         @@items.each_key do |key|
-          name = key.split('.').first
+          name = key.to_s.split('.').first
           modules.push name unless modules.include?(name)
         end
         m.reply "modules: " + modules.join(", ")
@@ -212,7 +224,7 @@ module Irc
     end
 
     def handle_get(m, params)
-      key = params[:key]
+      key = params[:key].to_s.intern
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
         return
@@ -222,7 +234,7 @@ module Irc
     end
 
     def handle_desc(m, params)
-      key = params[:key]
+      key = params[:key].to_s.intern
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
       end
@@ -231,7 +243,7 @@ module Irc
     end
 
     def handle_unset(m, params)
-      key = params[:key]
+      key = params[:key].to_s.intern
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
       end
@@ -240,7 +252,7 @@ module Irc
     end
 
     def handle_set(m, params)
-      key = params[:key]
+      key = params[:key].to_s.intern
       value = params[:value].to_s
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
@@ -313,7 +325,9 @@ module Irc
       if(File.exist?("#{@@bot.botclass}/conf.yaml"))
         begin
           newconfig = YAML::load_file("#{@@bot.botclass}/conf.yaml")
-          @@config.update newconfig
+          newconfig.each { |key, val|
+            @@config[key.intern] = val
+          }
           return
         rescue
           error "failed to read conf.yaml: #{$!}"
@@ -325,12 +339,16 @@ module Irc
       save
     end
 
-    # write current configuration to #{botclass}/conf.rbot
+    # write current configuration to #{botclass}/conf.yaml
     def save
       begin
         debug "Writing new conf.yaml ..."
         File.open("#{@@bot.botclass}/conf.yaml.new", "w") do |file|
-          file.puts @@config.to_yaml
+          savehash = {}
+          @@config.each { |key, val|
+            savehash[key.to_s] = val
+          }
+          file.puts savehash.to_yaml
         end
         debug "Officializing conf.yaml ..."
         File.rename("#{@@bot.botclass}/conf.yaml.new",
@@ -367,7 +385,7 @@ module Irc
       @questions.sort{|a,b| a.order <=> b.order }.each do |q|
         puts q.desc
         begin
-          print q.key + " [#{q.to_s}]: "
+          print q.key.to_s + " [#{q.to_s}]: "
           response = STDIN.gets
           response.chop!
           unless response.empty?
