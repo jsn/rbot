@@ -1,5 +1,3 @@
-# TODO: cache definitions
-
 require 'erb'
 
 class DeMauroPlugin < Plugin
@@ -24,7 +22,7 @@ class DeMauroPlugin < Plugin
     defurls = Array.new
     begin
       http.start() { |http|
-	resp = http.get(uri)
+	resp = http.get(uri.request_uri())
 	case resp.code
 	when "200"
 	  xml = resp.body
@@ -38,8 +36,9 @@ class DeMauroPlugin < Plugin
 	end
       }
     rescue => e
-      debug "HttpUtil.get exception: #{e}, while trying to get #{uri}"
-      m.reply "Errore"
+      debug "HttpUtil.get exception: #{e.inspect}, while trying to get #{uri}"
+      debug e.backtrace.join("\n")
+      m.reply "C'è stato un errore nella ricerca"
       return
     end
     if xml
@@ -60,7 +59,7 @@ class DeMauroPlugin < Plugin
       begin
 	debug "Scanning #{url}"
 	http.start() { |http|
-	  resp = http.get(uri)
+	  resp = http.get(uri.request_uri())
 	  case resp.code
 	  when "200"
 	    debug "Got data"
@@ -80,8 +79,9 @@ class DeMauroPlugin < Plugin
 	  end
 	}
       rescue => e
-	debug "Exception '#{e}' while trying to get and parse #{uri}"
-	m.reply "Errore"
+	debug "Exception '#{e.inspect}' while trying to get and parse #{uri}"
+	debug e.backtrace.join("\n")
+	m.reply "C'è stato un errore nell'elaborazione del risultato"
 	return
       end
     }
