@@ -253,7 +253,7 @@ module Irc
 
     def handle_set(m, params)
       key = params[:key].to_s.intern
-      value = params[:value].to_s
+      value = params[:value].join(" ")
       unless @@items.has_key?(key)
         m.reply "no such config key #{key}"
         return
