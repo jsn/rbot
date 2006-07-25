@@ -6,8 +6,8 @@ module Irc
 
   Color = "\003"
   Bold = "\002"
-  Underline = "\031"
-  Reverse = "\022"
+  Underline = "\037"
+  Reverse = "\026"
 
   # base user message class, all user messages derive from this
   # (a user message is defined as having a source hostmask, a target
