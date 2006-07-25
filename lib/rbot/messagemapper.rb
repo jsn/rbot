@@ -177,8 +177,11 @@ module Irc
       # Verify uniqueness of each component.
       @items.inject({}) do |seen, item|
         if item.kind_of? Symbol
-          raise ArgumentError, "Illegal template -- duplicate item #{item}\n   #{str.inspect}" if seen.key? item
-          seen[item] = true
+          # We must remove the initial * when present,
+          # because the parameters hash will intern both :item and *item as :item
+          it = item.to_s.sub(/^\*/,"").intern
+          raise ArgumentError, "Illegal template -- duplicate item #{it} in #{str.inspect}" if seen.key? it
+          seen[it] = true
         end
         seen
       end
