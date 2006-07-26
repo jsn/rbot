@@ -204,7 +204,11 @@ module Plugins
         @blacklist << p+".rb"
       }
       @failed = Array.new
-      processed = @blacklist.dup
+      @ignored = Array.new
+      processed = Hash.new
+      @blacklist.each { |p|
+        processed[p.intern] = :blacklisted
+      }
       dirs = Array.new
       dirs << Config::datadir + "/plugins"
       dirs += @dirs
@@ -213,9 +217,17 @@ module Plugins
           d = Dir.new(dir)
           d.sort.each {|file|
             next if(file =~ /^\./)
-            next if(processed.include?(file))
+            if processed.has_key?(file.intern)
+              @ignored << {:name => file, :dir => dir, :reason => processed[file.intern]}
+              next
+            end
             if(file =~ /^(.+\.rb)\.disabled$/)
-              processed << $1
+              # GB: Do we want to do this? This means that a disabled plugin in a directory
+              #     will disable in all subsequent directories. This was probably meant
+              #     to be used before plugins.blacklist was implemented, so I think
+              #     we don't need this anymore
+              processed[$1.intern] = :disabled
+              @ignored << {:name => $1, :dir => dir, :reason => processed[$1.intern]}
               next
             end
             next unless(file =~ /\.rb$/)
@@ -230,7 +242,7 @@ module Plugins
               plugin_string = IO.readlines(tmpfilename).join("")
               debug "loading plugin #{tmpfilename}"
               plugin_module.module_eval(plugin_string)
-              processed << file
+              processed[file.intern] = :loaded
             rescue Exception => err
               # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
               warning "plugin #{tmpfilename} load failed\n" + err.inspect
@@ -250,7 +262,7 @@ module Plugins
               newerr.set_backtrace(bt)
               # debug "Simplified error: " << newerr.inspect
               # debug newerr.backtrace.join("\n")
-              @failed << { :name => tmpfilename, :err => newerr }
+              @failed << { :name => file, :dir => dir, :reason => newerr }
               # debug "Failures: #{@failed.inspect}"
             end
           }
@@ -280,12 +292,16 @@ module Plugins
 
     # return list of help topics (plugin names)
     def helptopics
+      # Active plugins first
       if(@@plugins.length > 0)
         list = " [#{length} plugin#{'s' if length > 1}: " + @@plugins.values.uniq.collect{|p| p.name}.sort.join(", ")
       else
         list = " [no plugins active"
       end
-      list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}: use #{Bold}help pluginfailures#{Bold} to see why" unless @failed.empty?
+      # Ignored plugins next
+      list << "; #{Underline}#{@ignored.length} plugin#{'s' if @ignored.length > 1} ignored#{Underline}: use #{Bold}help ignored plugins#{Bold} to see why" unless @ignored.empty?
+      # Failed plugins next
+      list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}: use #{Bold}help failed plugins#{Bold} to see why" unless @failed.empty?
       list << "]"
       return list
     end
@@ -296,23 +312,35 @@ module Plugins
 
     # return help for +topic+ (call associated plugin's help method)
     def help(topic="")
-      if topic =~ /plugin\s*fail(?:ure)?s?\s*(trace(?:back)?s?)?/
+      case topic
+      when /fail(?:ed)?\s*plugins?.*(trace(?:back)?s?)?/
         # debug "Failures: #{@failed.inspect}"
         return "no plugins failed to load" if @failed.empty?
         return (@failed.inject(Array.new) { |list, p|
-          list << "#{Bold}#{p[:name]}#{Bold} failed with #{p[:err].class}: #{p[:err]}"
-          list << "#{Bold}#{p[:name]}#{Bold} failed at #{p[:err].backtrace.join(', ')}" if $1 and not p[:err].backtrace.empty?
+          list << "#{Bold}#{p[:name]}#{Bold} in #{p[:dir]} failed"
+          list << "with error #{p[:reason].class}: #{p[:reason]}"
+          list << "at #{p[:reason].backtrace.join(', ')}" if $1 and not p[:reason].backtrace.empty?
           list
         }).join("\n")
-      end
-      if(topic =~ /^(\S+)\s*(.*)$/)
+      when /ignored?\s*plugins?/
+        return "no plugins were ignored" if @ignored.empty?
+        return (@ignored.inject(Array.new) { |list, p|
+          case p[:reason]
+          when :loaded
+            list << "#{p[:name]} in #{p[:dir]} (overruled by previous)"
+          else
+            list << "#{p[:name]} in #{p[:dir]} (#{p[:reason].to_s})"
+          end
+          list
+        }).join(", ")
+      when /^(\S+)\s*(.*)$/
         key = $1
         params = $2
         if(@@plugins.has_key?(key))
           begin
             return @@plugins[key].help(key, params)
           rescue Exception => err
-          #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
             error "plugin #{@@plugins[key].name} help() failed: #{err.class}: #{err}"
             error err.backtrace.join("\n")
           end
