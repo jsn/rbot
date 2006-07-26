@@ -429,7 +429,7 @@ class RSSFeedsPlugin < Plugin
       when 'trac'
         @bot.say loc, "#{handle}#{date}#{title} @ #{link}"
         unless item.title =~ /^Changeset \[(\d+)\]/
-          @bot.say loc, "#{handle}#{desc}"
+          @bot.say loc, "#{handle}#{date}#{desc}"
         end
       else
         @bot.say loc, "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
