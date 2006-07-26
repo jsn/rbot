@@ -93,7 +93,7 @@ class RSSFeedsPlugin < Plugin
     :desc => "How many characters to use of a RSS item text")
 
   BotConfig.register BotConfigIntegerValue.new('rss.thread_sleep',
-    :default => 120, :validate => Proc.new{|v| v > 30},
+    :default => 300, :validate => Proc.new{|v| v > 30},
     :desc => "How many characters to use of a RSS item text")
 
   @@watchThreads = Hash.new
@@ -355,6 +355,7 @@ class RSSFeedsPlugin < Plugin
       debug "watcher for #{feed} started"
       oldItems = []
       firstRun = true
+      failures = 0
       loop do
         begin
           debug "fetching #{feed}"
@@ -364,36 +365,38 @@ class RSSFeedsPlugin < Plugin
           }
           unless newItems
             debug "no items in feed #{feed}"
-            break
-          end
-          debug "Checking if new items are available for #{feed}"
-          if firstRun
-            debug "First run, we'll see next time"
-            firstRun = false
+            failures +=1
           else
-            otxt = oldItems.map { |item| item.to_s }
-            dispItems = newItems.reject { |item|
-              otxt.include?(item.to_s)
-            }
-            if dispItems.length > 0
-              debug "Found #{dispItems.length} new items in #{feed}"
-              dispItems.each { |item|
-                @@mutex.synchronize {
-                  printFormattedRss(feed, item)
-                }
-              }
+            debug "Checking if new items are available for #{feed}"
+            if firstRun
+              debug "First run, we'll see next time"
+              firstRun = false
             else
-              debug "No new items found in #{feed}"
+              otxt = oldItems.map { |item| item.to_s }
+              dispItems = newItems.reject { |item|
+                otxt.include?(item.to_s)
+              }
+              if dispItems.length > 0
+                debug "Found #{dispItems.length} new items in #{feed}"
+                dispItems.each { |item|
+                  @@mutex.synchronize {
+                    printFormattedRss(feed, item)
+                  }
+                }
+              else
+                debug "No new items found in #{feed}"
+              end
             end
+            oldItems = newItems.dup
           end
-          oldItems = newItems.dup
         rescue Exception => e
-          error "IO failed: #{e.inspect}"
+          error "Error watching #{feed}: #{e.inspect}"
           debug e.backtrace.join("\n")
+          failures += 1
         end
 
-        seconds = @bot.config['rss.thread_sleep']
-        seconds += seconds * rand(50)/100
+        seconds = @bot.config['rss.thread_sleep'] * (failures + 1)
+        seconds += seconds * (rand(100)-50)/100
         debug "watcher for #{feed} going to sleep #{seconds} seconds.."
         sleep seconds
       end
@@ -440,6 +443,9 @@ class RSSFeedsPlugin < Plugin
       xml = @bot.httputil.get_cached(feed.url,60,60)
     rescue URI::InvalidURIError, URI::BadURIError => e
       report_problem("invalid rss feed #{feed.url}", e, m)
+      return
+    rescue => e
+      report_problem("error getting #{feed.url}", e, m)
       return
     end
     debug "fetched #{feed}"
