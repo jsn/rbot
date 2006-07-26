@@ -85,11 +85,12 @@ class MyWeatherPlugin < Plugin
         met = CurrentConditions.new(where)
     end
     if met
-        # begin
-      m.reply met.update
-      @cc_cache[where] = met
-        # rescue
-        # end
+      begin
+        m.reply met.update
+        @cc_cache[where] = met
+      rescue => e
+        m.reply e.message
+      end
     else
       m.reply "couldn't find weather data for #{where}"
     end
@@ -109,5 +110,6 @@ class MyWeatherPlugin < Plugin
     end
   end
 end
+
 plugin = MyWeatherPlugin.new
 plugin.map 'weather :where', :defaults => {:where => false}
