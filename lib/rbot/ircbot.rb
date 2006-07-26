@@ -140,7 +140,7 @@ class IrcBot
       :desc => "(flood prevention) max bytes/seconds rate to send the server. Most ircd's have limits of 512 bytes/2 seconds",
       :on_change => Proc.new {|bot, v| bot.socket.byterate = v })
     BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
-      :default => 10, :validate => Proc.new{|v| v >= 0},
+      :default => 30, :validate => Proc.new{|v| v >= 0},
       :on_change => Proc.new {|bot, v| bot.start_server_pings},
       :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
 
