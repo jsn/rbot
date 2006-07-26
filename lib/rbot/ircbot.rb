@@ -5,15 +5,27 @@ require 'fileutils'
 $debug = false unless $debug
 $daemonize = false unless $daemonize
 
+# TODO we should use the actual Logger class
 def rawlog(code="", message=nil)
   if !code || code.empty?
     c = "  "
   else
     c = code.to_s[0,1].upcase + ":"
   end
+  call_stack = caller
+  case call_stack.length
+  when 0
+    $stderr.puts "ERROR IN THE LOGGING SYSTEM, THIS CAN'T HAPPEN"
+    who = "WTF1??  "
+  when 1
+    $stderr.puts "ERROR IN THE LOGGING SYSTEM, THIS CAN'T HAPPEN"
+    who = "WTF2??  "
+  else
+    who = call_stack[1].match(%r{(?:.+)/([^/]+):(\d+)(?::(in .*))?})[1,3].join(":")
+  end
   stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
   message.to_s.each_line { |l|
-    $stdout.puts "#{c} [#{stamp}] #{l}"
+    $stdout.puts "#{c} [#{stamp}] #{who} -- #{l}"
   }
   $stdout.flush
 end
@@ -23,7 +35,7 @@ def log(message=nil)
 end
 
 def log_session_end
-   log("\n=== #{botclass} session ended ===") if $daemonize
+   rawlog("", "\n=== #{botclass} session ended ===") if $daemonize
 end
 
 def debug(message=nil)
