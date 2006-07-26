@@ -112,6 +112,10 @@ module Plugins
       @registry.close
     end
 
+    def handle(m)
+      @handler.handle(m)
+    end
+
     def map(*args)
       @handler.map(*args)
       # register this map
@@ -119,7 +123,7 @@ module Plugins
       self.register name
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
-          @handler.handle(m)
+          handle(m)
         end
       end
     end
@@ -131,7 +135,7 @@ module Plugins
       self.register name, {:hidden => true}
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
-          @handler.handle(m)
+          handle(m)
         end
       end
     end
@@ -145,7 +149,7 @@ module Plugins
     # return a help string for your module. for complex modules, you may wish
     # to break your help into topics, and return a list of available topics if
     # +topic+ is nil. +plugin+ is passed containing the matching prefix for
-    # this message - if your plugin handles multiple prefixes, make sure your
+    # this message - if your plugin handles multiple prefixes, make sure you
     # return the correct help for the prefix requested
     def help(plugin, topic)
       "no help"
