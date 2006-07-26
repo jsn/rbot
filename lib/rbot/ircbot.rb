@@ -21,7 +21,7 @@ def rawlog(code="", message=nil)
     $stderr.puts "ERROR IN THE LOGGING SYSTEM, THIS CAN'T HAPPEN"
     who = "WTF2??  "
   else
-    who = call_stack[1].match(%r{(?:.+)/([^/]+):(\d+)(?::(in .*))?})[1,3].join(":")
+    who = call_stack[1].sub(%r{(?:.+)/([^/]+):(\d+)(:in .*)?}) { "#{$1}:#{$2}#{$3}" }
   end
   stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
   message.to_s.each_line { |l|
@@ -49,6 +49,11 @@ end
 def error(message=nil)
   rawlog("E", message)
 end
+
+debug "debug test"
+log "log test"
+warning "warning test"
+error "error test"
 
 # The following global is used for the improved signal handling.
 $interrupted = 0
