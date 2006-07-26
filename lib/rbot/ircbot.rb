@@ -183,8 +183,23 @@ class IrcBot
       exit 2
     end
 
-    botclass = "#{Etc.getpwuid(Process::Sys.geteuid)[:dir]}/.rbot" unless botclass
-    #botclass = "#{ENV['HOME']}/.rbot" unless botclass
+    unless botclass and not botclass.empty?
+      # We want to find a sensible default.
+      #  * On POSIX systems we prefer ~/.rbot for the effective uid of the process
+      #  * On Windows (at least the NT versions) we want to put our stuff in the
+      #    Application Data folder.
+      # We don't use any particular O/S detection magic, exploiting the fact that
+      # Etc.getpwuid is nil on Windows
+      if Etc.getpwuid(Process::Sys.geteuid)
+        botclass = Etc.getpwuid(Process::Sys.geteuid)[:dir].dup
+      else
+        if ENV.has_key?('APPDATA')
+          botclass = ENV['APPDATA'].dup
+          botclass.gsub!("\\","/")
+        end
+      end
+      botclass += "/.rbot"
+    end
     botclass = File.expand_path(botclass)
     @botclass = botclass.gsub(/\/$/, "")
 
