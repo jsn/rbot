@@ -49,3 +49,5 @@ class GooglePlugin < Plugin
 end
 plugin = GooglePlugin.new
 plugin.register("search")
+plugin.register("google")
+
