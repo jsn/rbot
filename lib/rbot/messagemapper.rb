@@ -1,9 +1,9 @@
 module Irc
-  
+
   # +MessageMapper+ is a class designed to reduce the amount of regexps and
   # string parsing plugins and bot modules need to do, in order to process
   # and respond to messages.
-  # 
+  #
   # You add templates to the MessageMapper which are examined by the handle
   # method when handling a message. The templates tell the mapper which
   # method in its parent class (your class) to invoke for that message. The
@@ -13,7 +13,7 @@ module Irc
   # A template such as "foo :option :otheroption" will match the string "foo
   # bar baz" and, by default, result in method +foo+ being called, if
   # present, in the parent class. It will receive two parameters, the
-  # Message (derived from BasicUserMessage) and a Hash containing 
+  # Message (derived from BasicUserMessage) and a Hash containing
   #   {:option => "bar", :otheroption => "baz"}
   # See the #map method for more details.
   class MessageMapper
@@ -30,7 +30,7 @@ module Irc
       @templates = Array.new
       @fallback = 'usage'
     end
-    
+
     # args:: hash format containing arguments for this template
     #
     # map a template string to an action. example:
@@ -38,7 +38,7 @@ module Irc
     # (other examples follow). By default, maps a matched string to an
     # action with the name of the first word in the template. The action is
     # a method which takes a message and a parameter hash for arguments.
-    # 
+    #
     # The :action => 'method_name' option can be used to override this
     # default behaviour. Example:
     #   map 'myplugin :parameter1 :parameter2', :action => 'mymethod'
@@ -50,14 +50,14 @@ module Irc
     # Static parameters (not prefixed with ':' or '*') must match the
     # respective component of the message exactly. Example:
     #   map 'myplugin :foo is :bar'
-    # will only match messages of the form "myplugin something is 
+    # will only match messages of the form "myplugin something is
     # somethingelse"
     #
     # Dynamic parameters can be specified by a colon ':' to match a single
     # component (whitespace seperated), or a * to suck up all following
     # parameters into an array. Example:
     #   map 'myplugin :parameter1 *rest'
-    # 
+    #
     # You can provide defaults for dynamic components using the :defaults
     # parameter. If a component has a default, then it is optional. e.g:
     #   map 'myplugin :foo :bar', :defaults => {:bar => 'qux'}
@@ -81,7 +81,7 @@ module Irc
     #   map 'karma :key', :defaults => {:key => false}
     #   # match 'karma for something' and call my karma() method
     #   map 'karma for :key'
-    #   
+    #
     #   # two matches, one for public messages in a channel, one for
     #   # private messages which therefore require a channel argument
     #   map 'urls search :channel :limit :string', :action => 'search',
@@ -91,19 +91,19 @@ module Irc
     #   plugin.map 'urls search :limit :string', :action => 'search',
     #             :defaults => {:limit => 4},
     #             :requirements => {:limit => /^\d+$/},
-    #             :private => false                                     
+    #             :private => false
     #
     def map(*args)
       @templates << Template.new(*args)
     end
-    
+
     def each
       @templates.each {|tmpl| yield tmpl}
     end
     def last
       @templates.last
     end
-    
+
     # m::  derived from BasicUserMessage
     #
     # examine the message +m+, comparing it with each map()'d template to
@@ -227,7 +227,7 @@ module Irc
 
       return nil, "template is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
       return nil, "template is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
-      
+
       options.delete_if {|k, v| v.nil?} # Remove nil values.
       return options, nil
     end
