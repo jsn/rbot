@@ -97,6 +97,9 @@ class IrcBot
   # and restore objects in their own namespaces.)
   attr_reader :registry
 
+  # bot's plugins. This is an instance of class Plugins
+  attr_reader :plugins
+
   # bot's httputil help object, for fetching resources via http. Sets up
   # proxies etc as defined by the bot configuration/environment
   attr_reader :httputil
