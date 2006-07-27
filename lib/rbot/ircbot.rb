@@ -35,23 +35,23 @@ def log_session_end
 end
 
 def debug(message=nil, who_pos=1)
-  rawlog(Logger::Severity::DEBUG, message)
+  rawlog(Logger::Severity::DEBUG, message, who_pos)
 end
 
 def log(message=nil, who_pos=1)
-  rawlog(Logger::Severity::INFO, message)
+  rawlog(Logger::Severity::INFO, message, who_pos)
 end
 
 def warning(message=nil, who_pos=1)
-  rawlog(Logger::Severity::WARN, message)
+  rawlog(Logger::Severity::WARN, message, who_pos)
 end
 
 def error(message=nil, who_pos=1)
-  rawlog(Logger::Severity::ERROR, message)
+  rawlog(Logger::Severity::ERROR, message, who_pos)
 end
 
 def fatal(message=nil, who_pos=1)
-  rawlog(Logger::Severity::FATAL, message)
+  rawlog(Logger::Severity::FATAL, message, who_pos)
 end
 
 debug "debug test"
@@ -282,8 +282,18 @@ class IrcBot
         # On Windows, there's not such thing as /dev/null
         STDIN.reopen "NUL"
       end
-      STDOUT.reopen @logfile, "a"
-      STDERR.reopen @logfile, "a"
+      def STDOUT.write(str=nil)
+        log str, 2
+        return str.to_s.length
+      end
+      def STDERR.write(str=nil)
+        if str.to_s.match(/:\d+: warning:/)
+          warning str, 2
+        else
+          error str, 2
+        end
+        return str.to_s.length
+      end
     end
 
     # Set the new logfile and loglevel. This must be done after the daemonizing
