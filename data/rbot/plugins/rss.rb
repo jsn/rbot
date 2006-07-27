@@ -136,7 +136,7 @@ class RSSFeedsPlugin < Plugin
   def help(plugin,topic="")
     case topic
     when "show"
-      "rss show #{Bold}handle#{Bold} [#{Bold}limit#{Bold}] : show #{Bold}limit#{Bold} (default: 5, max: 15) entries from rss #{Bold}handle#{Bold}"
+      "rss show #{Bold}handle#{Bold} [#{Bold}limit#{Bold}] : show #{Bold}limit#{Bold} (default: 5, max: 15) entries from rss #{Bold}handle#{Bold}; #{Bold}limit#{Bold} can also be in the form a..b, to display a specific range of items"
     when "list"
       "rss list [#{Bold}handle#{Bold}] : list all rss feeds (matching #{Bold}handle#{Bold})"
     when "watched"
@@ -174,25 +174,45 @@ class RSSFeedsPlugin < Plugin
 
   def show_rss(m, params)
     handle = params[:handle]
-    limit = params[:limit].to_i
-    limit = 15 if limit > 15
-    limit = 1 if limit <= 0
+    lims = params[:limit].to_s.match(/(\d+)(?:..(\d+))?/)
+    debug lims.to_a.inspect
+    if lims[2]
+      ll = [[lims[1].to_i-1,lims[2].to_i-1].min,  0].max
+      ul = [[lims[1].to_i-1,lims[2].to_i-1].max, 14].min
+      rev = lims[1].to_i > lims[2].to_i
+    else
+      ll = 0
+      ul = [[lims[1].to_i-1, 1].max, 14].min
+      rev = false
+    end
+
     feed = @feeds.fetch(handle, nil)
     unless feed
       m.reply "I don't know any feeds named #{handle}"
       return
     end
-    m.reply("Please wait, querying...")
+
+    m.reply "lemme fetch it..."
     title = items = nil
     @@mutex.synchronize {
       title, items = fetchRss(feed, m)
     }
     return unless items
-    m.reply("Channel : #{title}")
-    # TODO: optional by-date sorting if dates present
-    items[0...limit].reverse.each do |item|
+
+    # We sort the feeds in freshness order (newer ones first)
+    items = freshness_sort(items)
+    disp = items[ll..ul]
+    disp.reverse! if rev
+
+    m.reply "Channel : #{title}"
+    disp.each do |item|
       printFormattedRss(feed, item, {:places=>[m.replyto],:handle=>nil,:date=>true})
     end
+  end
+
+  def freshness_sort(items)
+    notime = Time.at(0)
+    items.sort { |a, b| (b.pubDate || notime) <=> (a.pubDate || notime) }
   end
 
   def list_rss(m, params)
@@ -503,7 +523,7 @@ plugin = RSSFeedsPlugin.new
 
 plugin.map 'rss show :handle :limit',
   :action => 'show_rss',
-  :requirements => {:limit => /^\d+$/},
+  :requirements => {:limit => /^\d+(?:\.\.\d+)?$/},
   :defaults => {:limit => 5}
 plugin.map 'rss list :handle',
   :action => 'list_rss',
@@ -535,3 +555,4 @@ plugin.map 'rss rmwatch :handle',
   :action => 'unwatch_rss'
 plugin.map 'rss rewatch :handle',
   :action => 'rewatch_rss'
+
