@@ -297,7 +297,6 @@ class IrcBot
     end
 
     # Set the new logfile and loglevel. This must be done after the daemonizing
-    $logger.close
     $logger = Logger.new(@logfile, @config['log.keep'], @config['log.max_size']*1024*1024)
     $logger.datetime_format= $dateformat
     $logger.level = @config['log.level']
