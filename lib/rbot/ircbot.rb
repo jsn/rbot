@@ -1003,11 +1003,11 @@ class IrcBot
           say m.replyto, "pong"
         when (/^rescan$/i)
           if(@auth.allow?("config", m.source, m.replyto))
-            m.reply "Saving ..."
+            m.reply "saving ..."
             save
-            m.reply "Rescanning ..."
+            m.reply "rescanning ..."
             rescan
-            m.okay
+            m.reply "done. #{@plugins.status(true)}"
           end
         when (/^quiet$/i)
           if(auth.allow?("talk", m.source, m.replyto))

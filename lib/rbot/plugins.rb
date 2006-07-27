@@ -299,22 +299,37 @@ module Plugins
       cleanup
       @@plugins = Hash.new
       scan
+
+    end
+
+    def status(short=false)
+      # Active plugins first
+      if(@@plugins.length > 0)
+        list = "#{length} plugin#{'s' if length > 1}"
+        if short
+          list << " loaded"
+        else
+          list << ": " + @@plugins.values.uniq.collect{|p| p.name}.sort.join(", ")
+        end
+      else
+        list = "no plugins active"
+      end
+      # Ignored plugins next
+      unless @ignored.empty?
+        list << "; #{Underline}#{@ignored.length} plugin#{'s' if @ignored.length > 1} ignored#{Underline}"
+        list << ": use #{Bold}help ignored plugins#{Bold} to see why" unless short
+      end
+      # Failed plugins next
+      unless @failed.empty?
+        list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}"
+        list << ": use #{Bold}help failed plugins#{Bold} to see why" unless short
+      end
+      list
     end
 
     # return list of help topics (plugin names)
     def helptopics
-      # Active plugins first
-      if(@@plugins.length > 0)
-        list = " [#{length} plugin#{'s' if length > 1}: " + @@plugins.values.uniq.collect{|p| p.name}.sort.join(", ")
-      else
-        list = " [no plugins active"
-      end
-      # Ignored plugins next
-      list << "; #{Underline}#{@ignored.length} plugin#{'s' if @ignored.length > 1} ignored#{Underline}: use #{Bold}help ignored plugins#{Bold} to see why" unless @ignored.empty?
-      # Failed plugins next
-      list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}: use #{Bold}help failed plugins#{Bold} to see why" unless @failed.empty?
-      list << "]"
-      return list
+      return " [#{status}]"
     end
 
     def length
