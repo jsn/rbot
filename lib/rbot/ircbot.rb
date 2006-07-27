@@ -258,7 +258,7 @@ class IrcBot
 
     @logfile = @config['log.file']
     if @logfile.class!=String || @logfile.empty?
-      @logfile = File.basename(botclass)+".log"
+      @logfile = "#{botclass}/#{File.basename(botclass).gsub(/^\.+/,'')}.log"
     end
 
     # See http://blog.humlab.umu.se/samuel/archives/000107.html
