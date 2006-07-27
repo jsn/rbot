@@ -53,6 +53,9 @@ module Irc
           end
         end
       end
+      if @levels.length < 1
+        raise RuntimeError, "No valid levels.rbot found! If you really want a free-for-all bot and this isn't the result of a previous error, write a proper levels.rbot"
+      end
     end
 
     # save current users and levels to files.

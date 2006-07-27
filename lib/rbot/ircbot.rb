@@ -314,7 +314,14 @@ class IrcBot
     @httputil = Utils::HttpUtil.new(self)
     @lang = Language::Language.new(@config['core.language'])
     @keywords = Keywords.new(self)
-    @auth = IrcAuth.new(self)
+    begin
+      @auth = IrcAuth.new(self)
+    rescue => e
+      fatal e.inspect
+      fatal e.backtrace.join("\n")
+      log_session_end
+      exit 2
+    end
 
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::Plugins.new(self, ["#{botclass}/plugins"])
@@ -546,16 +553,19 @@ class IrcBot
         error "network exception: #{e.class}: #{e}"
         debug e.backtrace.join("\n")
       rescue BDB::Fatal => e
-        error "fatal bdb error: #{e.class}: #{e}"
-        error e.backtrace.join("\n")
+        fatal "fatal bdb error: #{e.class}: #{e}"
+        fatal e.backtrace.join("\n")
         DBTree.stats
-        restart("Oops, we seem to have registry problems ...")
+        # Why restart? DB problems are serious stuff ...
+        # restart("Oops, we seem to have registry problems ...")
+        log_session_end
+        exit 2
       rescue Exception => e
         error "non-net exception: #{e.class}: #{e}"
         error e.backtrace.join("\n")
       rescue => e
-        error "unexpected exception: #{e.class}: #{e}"
-        error e.backtrace.join("\n")
+        fatal "unexpected exception: #{e.class}: #{e}"
+        fatal e.backtrace.join("\n")
         log_session_end
         exit 2
       end
