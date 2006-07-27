@@ -203,16 +203,15 @@ module Plugins
 
     # load plugins from pre-assigned list of directories
     def scan
-      @blacklist = Array.new
-      @@bot.config['plugins.blacklist'].each { |p|
-        @blacklist << p+".rb"
-      }
       @failed = Array.new
       @ignored = Array.new
       processed = Hash.new
-      @blacklist.each { |p|
-        processed[p.intern] = :blacklisted
+
+      @@bot.config['plugins.blacklist'].each { |p|
+        pn = p + ".rb"
+        processed[pn.intern] = :blacklisted
       }
+
       dirs = Array.new
       dirs << Config::datadir + "/plugins"
       dirs += @dirs
@@ -220,11 +219,14 @@ module Plugins
         if(FileTest.directory?(dir))
           d = Dir.new(dir)
           d.sort.each {|file|
+
             next if(file =~ /^\./)
+
             if processed.has_key?(file.intern)
               @ignored << {:name => file, :dir => dir, :reason => processed[file.intern]}
               next
             end
+
             if(file =~ /^(.+\.rb)\.disabled$/)
               # GB: Do we want to do this? This means that a disabled plugin in a directory
               #     will disable in all subsequent directories. This was probably meant
@@ -234,7 +236,9 @@ module Plugins
               @ignored << {:name => $1, :dir => dir, :reason => processed[$1.intern]}
               next
             end
+
             next unless(file =~ /\.rb$/)
+
             tmpfilename = "#{dir}/#{file}"
 
             # create a new, anonymous module to "house" the plugin
@@ -245,7 +249,7 @@ module Plugins
             begin
               plugin_string = IO.readlines(tmpfilename).join("")
               debug "loading plugin #{tmpfilename}"
-              plugin_module.module_eval(plugin_string)
+              plugin_module.module_eval(plugin_string,tmpfilename)
               processed[file.intern] = :loaded
             rescue Exception => err
               # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
