@@ -5,92 +5,95 @@ module Irc
 module Plugins
   require 'rbot/messagemapper'
 
-  # base class for all rbot plugins
-  # certain methods will be called if they are provided, if you define one of
-  # the following methods, it will be called as appropriate:
-  #
-  # map(template, options)::
-  # map!(template, options)::
-  #    map is the new, cleaner way to respond to specific message formats
-  #    without littering your plugin code with regexps. The difference
-  #    between map and map! is that map! will not register the new command
-  #    as an alternative name for the plugin.
-  #
-  #    Examples:
-  #
-  #      plugin.map 'karmastats', :action => 'karma_stats'
-  #
-  #      # while in the plugin...
-  #      def karma_stats(m, params)
-  #        m.reply "..."
-  #      end
-  #
-  #      # the default action is the first component
-  #      plugin.map 'karma'
-  #
-  #      # attributes can be pulled out of the match string
-  #      plugin.map 'karma for :key'
-  #      plugin.map 'karma :key'
-  #
-  #      # while in the plugin...
-  #      def karma(m, params)
-  #        item = params[:key]
-  #        m.reply 'karma for #{item}'
-  #      end
-  #
-  #      # you can setup defaults, to make parameters optional
-  #      plugin.map 'karma :key', :defaults => {:key => 'defaultvalue'}
-  #
-  #      # the default auth check is also against the first component
-  #      # but that can be changed
-  #      plugin.map 'karmastats', :auth => 'karma'
-  #
-  #      # maps can be restricted to public or private message:
-  #      plugin.map 'karmastats', :private false,
-  #      plugin.map 'karmastats', :public false,
-  #    end
-  #
-  # listen(UserMessage)::
-  #                        Called for all messages of any type. To
-  #                        differentiate them, use message.kind_of? It'll be
-  #                        either a PrivMessage, NoticeMessage, KickMessage,
-  #                        QuitMessage, PartMessage, JoinMessage, NickMessage,
-  #                        etc.
-  #
-  # privmsg(PrivMessage)::
-  #                        called for a PRIVMSG if the first word matches one
-  #                        the plugin register()d for. Use m.plugin to get
-  #                        that word and m.params for the rest of the message,
-  #                        if applicable.
-  #
-  # kick(KickMessage)::
-  #                        Called when a user (or the bot) is kicked from a
-  #                        channel the bot is in.
-  #
-  # join(JoinMessage)::
-  #                        Called when a user (or the bot) joins a channel
-  #
-  # part(PartMessage)::
-  #                        Called when a user (or the bot) parts a channel
-  #
-  # quit(QuitMessage)::
-  #                        Called when a user (or the bot) quits IRC
-  #
-  # nick(NickMessage)::
-  #                        Called when a user (or the bot) changes Nick
-  # topic(TopicMessage)::
-  #                        Called when a user (or the bot) changes a channel
-  #                        topic
-  #
-  # connect()::            Called when a server is joined successfully, but
-  #                        before autojoin channels are joined (no params)
-  #
-  # save::                 Called when you are required to save your plugin's
-  #                        state, if you maintain data between sessions
-  #
-  # cleanup::              called before your plugin is "unloaded", prior to a
-  #                        plugin reload or bot quit - close any open
-  #                        files/connections or flush caches here
+=begin
+  base class for all rbot plugins
+  certain methods will be called if they are provided, if you define one of
+  the following methods, it will be called as appropriate:
+
+  map(template, options)::
+  map!(template, options)::
+     map is the new, cleaner way to respond to specific message formats
+     without littering your plugin code with regexps. The difference
+     between map and map! is that map! will not register the new command
+     as an alternative name for the plugin.
+
+     Examples:
+
+       plugin.map 'karmastats', :action => 'karma_stats'
+
+       # while in the plugin...
+       def karma_stats(m, params)
+         m.reply "..."
+       end
+
+       # the default action is the first component
+       plugin.map 'karma'
+
+       # attributes can be pulled out of the match string
+       plugin.map 'karma for :key'
+       plugin.map 'karma :key'
+
+       # while in the plugin...
+       def karma(m, params)
+         item = params[:key]
+         m.reply 'karma for #{item}'
+       end
+
+       # you can setup defaults, to make parameters optional
+       plugin.map 'karma :key', :defaults => {:key => 'defaultvalue'}
+
+       # the default auth check is also against the first component
+       # but that can be changed
+       plugin.map 'karmastats', :auth => 'karma'
+
+       # maps can be restricted to public or private message:
+       plugin.map 'karmastats', :private false,
+       plugin.map 'karmastats', :public false,
+     end
+
+  listen(UserMessage)::
+                         Called for all messages of any type. To
+                         differentiate them, use message.kind_of? It'll be
+                         either a PrivMessage, NoticeMessage, KickMessage,
+                         QuitMessage, PartMessage, JoinMessage, NickMessage,
+                         etc.
+
+  privmsg(PrivMessage)::
+                         called for a PRIVMSG if the first word matches one
+                         the plugin register()d for. Use m.plugin to get
+                         that word and m.params for the rest of the message,
+                         if applicable.
+
+  kick(KickMessage)::
+                         Called when a user (or the bot) is kicked from a
+                         channel the bot is in.
+
+  join(JoinMessage)::
+                         Called when a user (or the bot) joins a channel
+
+  part(PartMessage)::
+                         Called when a user (or the bot) parts a channel
+
+  quit(QuitMessage)::
+                         Called when a user (or the bot) quits IRC
+
+  nick(NickMessage)::
+                         Called when a user (or the bot) changes Nick
+  topic(TopicMessage)::
+                         Called when a user (or the bot) changes a channel
+                         topic
+
+  connect()::            Called when a server is joined successfully, but
+                         before autojoin channels are joined (no params)
+
+  save::                 Called when you are required to save your plugin's
+                         state, if you maintain data between sessions
+
+  cleanup::              called before your plugin is "unloaded", prior to a
+                         plugin reload or bot quit - close any open
+                         files/connections or flush caches here
+=end
+
   class Plugin
     attr_reader :bot   # the associated bot
     # initialise your plugin. Always call super if you override this method,
@@ -249,7 +252,7 @@ module Plugins
             begin
               plugin_string = IO.readlines(tmpfilename).join("")
               debug "loading plugin #{tmpfilename}"
-              plugin_module.module_eval(plugin_string,tmpfilename)
+              plugin_module.module_eval(plugin_string, tmpfilename)
               processed[file.intern] = :loaded
             rescue Exception => err
               # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
