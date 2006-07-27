@@ -1,59 +1,64 @@
 require 'thread'
+
 require 'etc'
 require 'fileutils'
+require 'logger'
 
 $debug = false unless $debug
 $daemonize = false unless $daemonize
 
-# TODO we should use the actual Logger class
-def rawlog(code="", message=nil)
-  if !code || code.empty?
-    c = "  "
-  else
-    c = code.to_s[0,1].upcase + ":"
-  end
+$dateformat = "%Y/%m/%d %H:%M:%S"
+$logger = Logger.new($stderr)
+$logger.datetime_format = $dateformat
+$logger.level = $cl_loglevel if $cl_loglevel
+$logger.level = 0 if $debug
+
+def rawlog(level, message=nil, who_pos=1)
   call_stack = caller
-  case call_stack.length
-  when 0
-    $stderr.puts "ERROR IN THE LOGGING SYSTEM, THIS CAN'T HAPPEN"
-    who = "WTF1??  "
-  when 1
-    $stderr.puts "ERROR IN THE LOGGING SYSTEM, THIS CAN'T HAPPEN"
-    who = "WTF2??  "
+  if call_stack.length > who_pos
+    who = call_stack[who_pos].sub(%r{(?:.+)/([^/]+):(\d+)(:in .*)?}) { "#{$1}:#{$2}#{$3}" }
   else
-    who = call_stack[1].sub(%r{(?:.+)/([^/]+):(\d+)(:in .*)?}) { "#{$1}:#{$2}#{$3}" }
+    who = "(unknown)"
   end
-  stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
   message.to_s.each_line { |l|
-    $stdout.puts "#{c} [#{stamp}] #{who} -- #{l}"
+    $logger.add(level, l.chomp, who)
+    who.gsub!(/./," ")
   }
-  $stdout.flush
 end
 
-def log(message=nil)
-  rawlog("", message)
+def log_session_start
+  $logger << "\n\n=== #{botclass} session started on #{Time.now.strftime($dateformat)} ===\n\n"
 end
 
 def log_session_end
-   rawlog("", "\n=== #{botclass} session ended ===") if $daemonize
+  $logger << "\n\n=== #{botclass} session ended on #{Time.now.strftime($dateformat)} ===\n\n"
 end
 
-def debug(message=nil)
-  rawlog("D", message) if $debug
+def debug(message=nil, who_pos=1)
+  rawlog(Logger::Severity::DEBUG, message)
 end
 
-def warning(message=nil)
-  rawlog("W", message)
+def log(message=nil, who_pos=1)
+  rawlog(Logger::Severity::INFO, message)
 end
 
-def error(message=nil)
-  rawlog("E", message)
+def warning(message=nil, who_pos=1)
+  rawlog(Logger::Severity::WARN, message)
+end
+
+def error(message=nil, who_pos=1)
+  rawlog(Logger::Severity::ERROR, message)
+end
+
+def fatal(message=nil, who_pos=1)
+  rawlog(Logger::Severity::FATAL, message)
 end
 
 debug "debug test"
 log "log test"
 warning "warning test"
 error "error test"
+fatal "fatal test"
 
 # The following global is used for the improved signal handling.
 $interrupted = 0
@@ -178,20 +183,29 @@ class IrcBot
       :default => 60, :validate => Proc.new{|v| v >= 0},
       # TODO change timer via on_change proc
       :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example)")
-      # BotConfig.register BotConfigBooleanValue.new('core.debug',
-      #   :default => false, :requires_restart => true,
-      #   :on_change => Proc.new { |v|
-      #     debug ((v ? "Enabling" : "Disabling") + " debug output.")
-      #     $debug = v
-      #     debug (($debug ? "Enabled" : "Disabled") + " debug output.")
-      #   },
-      #   :desc => "Should the bot produce debug output?")
+
     BotConfig.register BotConfigBooleanValue.new('core.run_as_daemon',
       :default => false, :requires_restart => true,
       :desc => "Should the bot run as a daemon?")
-    BotConfig.register BotConfigStringValue.new('core.logfile',
+
+    BotConfig.register BotConfigStringValue.new('log.file',
       :default => false, :requires_restart => true,
       :desc => "Name of the logfile to which console messages will be redirected when the bot is run as a daemon")
+    BotConfig.register BotConfigIntegerValue.new('log.level',
+      :default => 1, :requires_restart => false,
+      :validate => Proc.new { |v| (0..5).include?(v) },
+      :on_change => Proc.new { |bot, v|
+        $logger.level = v
+      },
+      :desc => "The minimum logging level (0=DEBUG,1=INFO,2=WARN,3=ERROR,4=FATAL) for console messages")
+    BotConfig.register BotConfigIntegerValue.new('log.keep',
+      :default => 1, :requires_restart => true,
+      :validate => Proc.new { |v| v >= 0 },
+      :desc => "How many old console messages logfiles to keep")
+    BotConfig.register BotConfigIntegerValue.new('log.max_size',
+      :default => 10, :requires_restart => true,
+      :validate => Proc.new { |v| v > 0 },
+      :desc => "Maximum console messages logfile size (in megabytes)")
 
     @argv = params[:argv]
 
@@ -237,14 +251,16 @@ class IrcBot
     @last_ping = nil
     @startup_time = Time.new
     @config = BotConfig.new(self)
-    # background self after botconfig has a chance to run wizard
-    @logfile = @config['core.logfile']
-    if @logfile.class!=String || @logfile.empty?
-      @logfile = File.basename(botclass)+".log"
-    end
+
     if @config['core.run_as_daemon']
       $daemonize = true
     end
+
+    @logfile = @config['log.file']
+    if @logfile.class!=String || @logfile.empty?
+      @logfile = File.basename(botclass)+".log"
+    end
+
     # See http://blog.humlab.umu.se/samuel/archives/000107.html
     # for the backgrounding code 
     if $daemonize
@@ -267,9 +283,18 @@ class IrcBot
         STDIN.reopen "NUL"
       end
       STDOUT.reopen @logfile, "a"
-      STDERR.reopen STDOUT
-      log "\n=== #{botclass} session started ==="
+      STDERR.reopen @logfile, "a"
     end
+
+    # Set the new logfile and loglevel. This must be done after the daemonizing
+    $logger.close
+    $logger = Logger.new(@logfile, @config['log.keep'], @config['log.max_size']*1024*1024)
+    $logger.datetime_format= $dateformat
+    $logger.level = @config['log.level']
+    $logger.level = $cl_loglevel if $cl_loglevel
+    $logger.level = 0 if $debug
+
+    log_session_start
 
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
@@ -719,7 +744,6 @@ class IrcBot
     begin
       shutdown(message)
     ensure
-      log_session_end
       exit 0
     end
   end

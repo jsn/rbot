@@ -35,11 +35,12 @@ $opts = Hash.new
 orig_opts = ARGV.dup
 
 opts = GetoptLong.new(
+  ["--background", "-b", GetoptLong::NO_ARGUMENT],
   ["--debug", "-d", GetoptLong::NO_ARGUMENT],
   ["--help",  "-h", GetoptLong::NO_ARGUMENT],
+  ["--loglevel",  "-l", GetoptLong::REQUIRED_ARGUMENT],
   ["--trace",  "-t", GetoptLong::REQUIRED_ARGUMENT],
-  ["--version", "-v", GetoptLong::NO_ARGUMENT],
-  ["--background", "-b", GetoptLong::NO_ARGUMENT]
+  ["--version", "-v", GetoptLong::NO_ARGUMENT]
 )
 
 $debug = false
@@ -50,6 +51,8 @@ opts.each {|opt, arg|
   $daemonize = true if(opt == "--background")
   $opts[opt.sub(/^-+/, "")] = arg
 }
+
+$cl_loglevel = $opts["loglevel"]
 
 if ($opts["trace"])
   set_trace_func proc { |event, file, line, id, binding, classname|
