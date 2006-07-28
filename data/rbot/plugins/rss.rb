@@ -210,9 +210,17 @@ class RSSFeedsPlugin < Plugin
     end
   end
 
+  def itemDate(item,ex=nil)
+    return item.pubDate if item.respond_to?(:pubDate)
+    return item.date if item.respond_to?(:date)
+    return ex
+  end
+
   def freshness_sort(items)
     notime = Time.at(0)
-    items.sort { |a, b| (b.pubDate || notime) <=> (a.pubDate || notime) }
+    items.sort { |a, b|
+      itemDate(b, notime) <=> itemDate(a, notime)
+    }
   end
 
   def list_rss(m, params)
@@ -430,7 +438,24 @@ class RSSFeedsPlugin < Plugin
     if opts
       places = opts[:places] if opts.key?(:places)
       handle = opts[:handle].to_s if opts.key?(:handle)
-      date = item.pubDate.strftime("%Y/%m/%d %H.%M.%S") + " :: " if (opts.key?(:date) && opts[:date] && item.pubDate)
+      if opts.key?(:date) && opts[:date]
+        if item.respond_to?(:pubDate) 
+          if item.pubDate.class <= Time
+            date = item.pubDate.strftime("%Y/%m/%d %H.%M.%S")
+          else
+            date = item.pubDate.to_s
+          end
+        elsif  item.respond_to?(:date)
+          if item.date.class <= Time
+            date = item.date.strftime("%Y/%m/%d %H.%M.%S")
+          else
+            date = item.date.to_s
+          end
+        else
+          date = "(no date)"
+        end
+        date += " :: "
+      end
     end
     title = "#{Bold}#{item.title.chomp.riphtml}#{Bold}" if item.title
     desc = item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max']) if item.description
