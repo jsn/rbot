@@ -216,6 +216,9 @@ class InsultPlugin < Plugin
       return "insult module topics: msginsult, insult"
     end
   end
+  def name
+    "insult"
+  end
   def privmsg(m)
     suffix=""
     unless(m.params)

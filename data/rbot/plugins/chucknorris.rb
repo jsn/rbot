@@ -25,6 +25,10 @@ class ChuckNorrisPlugin < Plugin
     
     super
   end
+
+  def name
+    "chucknorris"
+  end
   
   # Just a little helper for the initialize method...
   def find_facts_file(name)

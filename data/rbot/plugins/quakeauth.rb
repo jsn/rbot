@@ -48,4 +48,4 @@ class QPlugin < Plugin
 end
 plugin = QPlugin.new
 plugin.map 'qauth set :nick :passwd', :action => "set"
-plugin.map 'quath identify', :action => "identify"
+plugin.map 'qauth identify', :action => "identify"
