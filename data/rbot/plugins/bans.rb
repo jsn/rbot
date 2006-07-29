@@ -17,19 +17,35 @@ class BansPlugin < Plugin
      else
        @bansregexps = Hash.new
      end
+
+     if @registry.has_key?(:bansmasks)
+	     @whitelist = @registry[:bansmasks]
+     else
+	     @whitelist = Hash.new
+     end
     end
 
 
     def save
-#      @bot.action("#rck.train", @bansregexps.inspect)
       @registry[:bans] = @bansregexps
+      @registry[:bansmasks] = @whitelist
     end
 
 
 
 
   def help(plugin, topic="")
-    return "Channel administration plugin. bans ban nick [channel] [timer]: bans a nick from the channel for a specified time; bans unban nick [channel]: removes the ban on <nick>; bans quiet nick [channel] [timer] and bans unquiet nick [channel]: same as ban and unban, but uses quiet ban instead. Timer is specified as 6s, 10m, 2h. If channel is not specified will use current channel.\nbans listregexps|addregexp type timeout regexp|delregexp: regexp banning management. Type can be quietban or kickban"
+	  case topic
+	  when "kickbans"
+		return "bans ban|quietban nick [channel] [timer]: bans|quietbans a nick from the channel for a specified time. bans kick nick [channel] [message]: kicks <nick> from <channel> with kick <message>. bans kickban nick [channel] [timer] [message]: kick+ban, same parameters as before. timer is always specified as <number><unit>, like 3m, 10s, 1h."
+	  when "whitelist"
+		  return "bans addwhitelist <mask>: adds <mask> to whitelist (NEVER regexp ban this). bans whitelist: shows current whitelist. bans delwhitelist <key>: delete whitelist entry <key>."
+	  when "regexpbans"
+		  return "bans addregexp type [timer] regexp: listens for <regexp>, then do actions depending on <type> (\"quietban\" or \"kickban\", currently). If timer if specified, it removes the ban after timer expires. timer is always specified as <number><unit>, like 3m, 10s, 1h. bans delregexp <key>: remove watching for regexp <key>. bans listregexps: show current regexp watching list."
+	  else
+		  return "Topics: \"kickbans\", \"whitelist\", \"regexpbans\""
+	  end
+#    return "Channel administration plugin. bans ban nick [channel] [timer]: bans a nick from the channel for a specified time; bans unban nick [channel]: removes the ban on <nick>; bans quiet nick [channel] [timer] and bans unquiet nick [channel]: same as ban and unban, but uses quiet ban instead. Timer is specified as 6s, 10m, 2h. If channel is not specified will use current channel.\nbans listregexps|addregexp type timeout regexp|delregexp: regexp banning management. Type can be quietban or kickban"
   end
 
 
@@ -78,6 +94,13 @@ class BansPlugin < Plugin
 
   def listen(m)
     if @bansregexps.length <= 0 then return end
+    @whitelist.each_key do |key|
+	    if Irc.netmaskmatch(@whitelist[key], m.source) then
+		    return
+	    end
+	    next
+    end
+
     @bansregexps.each_key do |key|
       match=@bansregexps[key][2]
       if m.message =~ /^.*#{match}.*$/i then
@@ -127,17 +150,42 @@ class BansPlugin < Plugin
 	    end
 	    next
 end
-m.reply("Key #{index} not found")
-#    unless @bansregexps.has_key?(index)
-#      m.reply("Regexp \"#{index}\" doesn't exist"); return
-#    end
-#    m.reply("Done.")
+m.reply("Key #{index} not found.")
+  end
+  def cmd_whitelistadd(m, params)
+    regsize=@whitelist.length+1
+    @whitelist[regsize]=params[:netmask]
+    m.reply("Done.")
+  end
+  def cmd_whitelist(m, params)
+      if @whitelist.length == 0
+	      m.reply("Whitelist is empty."); return
+      end
+      @whitelist.each_key do |key|
+	      m.reply("Key: #{key}, netmask: #{@whitelist[key]}")
+	      sleep 1
+	      next
+      end
+  end
+  def cmd_whitelistdel(m, params)
+    index=params[:index]
+    @whitelist.each_key do |key|
+	    if ( "#{key}" == "#{index}" ) then
+		    @whitelist.delete(key)
+		    m.reply("Done.")
+		    return
+	    end
+	    next
+    end
+    m.reply("Key #{index} not found.")
   end
 end
 plugin = BansPlugin.new
 plugin.register("bans")
 
-
+plugin.map 'bans whitelist', :action => 'cmd_whitelist', :auth => 'bans'
+plugin.map 'bans delwhitelist :index', :action => 'cmd_whitelistdel', :auth => 'bans', :requirements => { :index => /^\d+$/ }
+plugin.map 'bans addwhitelist :netmask', :action => 'cmd_whitelistadd', :auth => 'bans'
 plugin.map 'bans delregexp :index', :action => 'cmd_delregexp', :auth => 'bans', :requirements => { :index => /^\d+$/ }
 plugin.map 'bans addregexp :type :timeout *regexp', :action => 'cmd_addregexp', :auth => 'bans', :requirements => {:timeout => /^\d+[smh]$/, :type => /(quietban)|(kickban)/ }, :defaults => { :timeout => "0s" }
 plugin.map 'bans listregexps', :action => 'cmd_listregexp', :auth => 'bans'
