@@ -401,6 +401,10 @@ module Plugins
           @@bot.auth.allow?(m.plugin, m.source, m.replyto))
         begin
           @@plugins[m.plugin].privmsg(m)
+        rescue BDB::Fatal => err
+          error "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"
+          error err.backtrace.join("\n")
+          raise
         rescue Exception => err
           #rescue TimeoutError, StandardError, NameError, SyntaxError => err
           error "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"

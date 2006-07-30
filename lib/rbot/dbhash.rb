@@ -69,7 +69,7 @@ module Irc
     @@env=nil
     # TODO: make this customizable
     # Note that it must be at least four times lg_bsize
-    @@lg_max = 2*1024*1024
+    @@lg_max = 8*1024*1024
     # absfilename:: use +key+ as an actual filename, don't prepend the bot's
     #               config path and don't append ".db"
     def initialize(bot, key, absfilename=false)
