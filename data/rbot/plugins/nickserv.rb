@@ -7,8 +7,8 @@
 class NickServPlugin < Plugin
   
   BotConfig.register BotConfigStringValue.new('nickserv.name',
-    :default => "NickServ", :requires_restart => false,
-    :desc => "Name of the nick server")
+    :default => "nickserv", :requires_restart => false,
+    :desc => "Name of the nick server (all lowercase)")
   BotConfig.register BotConfigStringValue.new('nickserv.ident_request',
     :default => "IDENTIFY", :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },

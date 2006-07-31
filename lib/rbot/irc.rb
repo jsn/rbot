@@ -1,9 +1,9 @@
 #-- vim:sw=2:et
 # General TODO list
-# * when Users are deleted, we have to delete them from the appropriate
-#   channel lists too
 # * do we want to handle a Channel list for each User telling which
 #   Channels is the User on (of those the client is on too)?
+#   We may want this so that when a User leaves all Channels and he hasn't
+#   sent us privmsgs, we know remove him from the Server @users list
 #++
 # :title: IRC module
 #
@@ -274,7 +274,13 @@ module Irc
         @user = str[:user].to_s
         @host = str[:host].to_s
       when String
-        if str.match(/(\S+)(?:!(\S+)@(?:(\S+))?)?/)
+        case str
+        when ""
+          @casemap = casemap || 'rfc1459'
+          @nick = nil
+          @user = nil
+          @host = nil
+        when /(\S+)(?:!(\S+)@(?:(\S+))?)?/
           @casemap = casemap || 'rfc1459'
           @nick = $1.irc_downcase(@casemap)
           @user = $2
@@ -325,9 +331,10 @@ module Irc
 
     # A Netmask is easily converted to a String for the usual representation
     # 
-    def to_s
+    def fullform
       return "#{nick}@#{user}!#{host}"
     end
+    alias :to_s :fullform
 
     # This method is used to match the current Netmask against another one
     #
@@ -382,23 +389,73 @@ module Irc
 
   # An IRC User is identified by his/her Netmask (which must not have
   # globs). In fact, User is just a subclass of Netmask. However,
-  # a User will not allow one's host or user data to be changed: only the
-  # nick can be dynamic
+  # a User will not allow one's host or user data to be changed.
+  #
+  # Due to the idiosincrasies of the IRC protocol, we allow
+  # the creation of a user with an unknown mask represented by the
+  # glob pattern *@*. Only in this case they may be set.
   #
   # TODO list:
   # * see if it's worth to add the other USER data
-  # * see if it's worth to add AWAY status
   # * see if it's worth to add NICKSERV status
   #
   class User < Netmask
-    private :host=, :user=
+    alias :to_s :nick
 
     # Create a new IRC User from a given Netmask (or anything that can be converted
     # into a Netmask) provided that the given Netmask does not have globs.
     #
-    def initialize(str, casemap=nil)
+    def initialize(str="", casemap=nil)
       super
-      raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if has_irc_glob?
+      raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if nick.has_irc_glob? && nick != "*"
+      raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if user.has_irc_glob? && user != "*"
+      raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if host.has_irc_glob? && host != "*"
+      @away = false
+    end
+
+    # We only allow the user to be changed if it was "*". Otherwise,
+    # we raise an exception if the new host is different from the old one
+    #
+    def user=(newuser)
+      if user == "*"
+        super
+      else
+        raise "Can't change the username of user #{self}" if user != newuser
+      end
+    end
+
+    # We only allow the host to be changed if it was "*". Otherwise,
+    # we raise an exception if the new host is different from the old one
+    #
+    def host=(newhost)
+      if host == "*"
+        super
+      else
+        raise "Can't change the hostname of user #{self}" if host != newhost 
+      end
+    end
+
+    # Checks if a User is well-known or not by looking at the hostname and user
+    #
+    def known?
+      return user!="*" && host!="*"
+    end
+
+    # Is the user away?
+    #
+    def away?
+      return @away
+    end
+
+    # Set the away status of the user. Use away=(nil) or away=(false)
+    # to unset away
+    #
+    def away=(msg="")
+      if msg
+        @away = msg
+      else
+        @away = false
+      end
     end
   end
 
@@ -415,67 +472,131 @@ module Irc
   end
 
 
+  # A ChannelTopic represents the topic of a channel. It consists of
+  # the topic itself, who set it and when
+  class ChannelTopic
+    attr_accessor :text, :set_by, :set_on
+    alias :to_s :text
+
+    # Create a new ChannelTopic setting the text, the creator and
+    # the creation time
+    def initialize(text="", set_by="", set_on=Time.new)
+      @text = text
+      @set_by = set_by
+      @set_on = Time.new
+    end
+  end
+
+
+  # Mode on a channel
+  class ChannelMode
+  end
+
+
+  # Channel modes of type A manipulate lists
+  #
+  class ChannelModeTypeA < ChannelMode
+    def initialize
+      @list = NetmaskList.new
+    end
+
+    def set(val)
+      @list << val unless @list.include?(val)
+    end
+
+    def reset(val)
+      @list.delete_if(val) if @list.include?(val)
+    end
+  end
+
+  # Channel modes of type B need an argument
+  #
+  class ChannelModeTypeB < ChannelMode
+    def initialize
+      @arg = nil
+    end
+
+    def set(val)
+      @arg = val
+    end
+
+    def reset(val)
+      @arg = nil if @arg == val
+    end
+  end
+
+  # Channel modes that change the User prefixes are like
+  # Channel modes of type B, except that they manipulate
+  # lists of Users, so they are somewhat similar to channel
+  # modes of type A
+  #
+  class ChannelUserMode < ChannelModeTypeB
+    def initialize
+      @list = UserList.new
+    end
+
+    def set(val)
+      @list << val unless @list.include?(val)
+    end
+
+    def reset(val)
+      @list.delete_if { |x| x == val }
+    end
+  end
+
+  # Channel modes of type C need an argument when set,
+  # but not when they get reset
+  #
+  class ChannelModeTypeC < ChannelMode
+    def initialize
+      @arg = false
+    end
+
+    def set(val)
+      @arg = val
+    end
+
+    def reset
+      @arg = false
+    end
+  end
+
+  # Channel modes of type D are basically booleans
+  class ChannelModeTypeD
+    def initialize
+      @set = false
+    end
+
+    def set?
+      return @set
+    end
+
+    def set
+      @set = true
+    end
+
+    def reset
+      @set = false
+    end
+  end
+
+
   # An IRC Channel is identified by its name, and it has a set of properties:
   # * a topic
   # * a UserList
   # * a set of modes
   #
   class Channel
-    attr_reader :name, :type, :casemap
+    attr_reader :name, :topic, :casemap, :mode, :users
+    alias :to_s :name
 
-    # Create a new method. Auxiliary function for the following
-    # auxiliary functions ...
+    # A String describing the Channel and (some of its) internals
     #
-    def create_method(name, &block)
-      self.class.send(:define_method, name, &block)
-    end
-    private :create_method
-
-    # Create a new channel boolean flag
-    #
-    def new_bool_flag(sym, acc=nil, default=false)
-      @flags[sym.to_sym] = default
-      racc = (acc||sym).to_s << "?"
-      wacc = (acc||sym).to_s << "="
-      create_method(racc.to_sym) { @flags[sym.to_sym] }
-      create_method(wacc.to_sym) { |val|
-        @flags[sym.to_sym] = val
-      }
-    end
-
-    # Create a new channel flag with data
-    #
-    def new_data_flag(sym, acc=nil, default=false)
-      @flags[sym.to_sym] = default
-      racc = (acc||sym).to_s
-      wacc = (acc||sym).to_s << "="
-      create_method(racc.to_sym) { @flags[sym.to_sym] }
-      create_method(wacc.to_sym) { |val|
-        @flags[sym.to_sym] = val
-      }
-    end
-
-    # Create a new variable with accessors
-    #
-    def new_variable(name, default=nil)
-      v = "@#{name}".to_sym
-      instance_variable_set(v, default)
-      create_method(name.to_sym) { instance_variable_get(v) }
-      create_method("#{name}=".to_sym) { |val|
-        instance_variable_set(v, val)
-      }
-    end
-
-    # Create a new UserList
-    #
-    def new_userlist(name, default=UserList.new)
-      new_variable(name, default)
-    end
-
-    # Create a new NetmaskList
-    #
-    def new_netmasklist(name, default=NetmaskList.new)
-      new_variable(name, default)
+    def inspect
+      str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
+      str << " @users=<#{@users.join(', ')}>"
+      str
     end
 
     # Creates a new channel with the given name, optionally setting the topic
@@ -486,7 +607,7 @@ module Irc
     #
     # FIXME doesn't check if users have the same casemap as the channel yet
     #
-    def initialize(name, topic="", users=[], casemap=nil)
+    def initialize(name, topic=nil, users=[], casemap=nil)
       @casemap = casemap || 'rfc1459'
 
       raise ArgumentError, "Channel name cannot be empty" if name.to_s.empty?
@@ -495,45 +616,34 @@ module Irc
 
       @name = name.irc_downcase(@casemap)
 
-      new_variable(:topic, topic)
+      @topic = topic || ChannelTopic.new
 
-      new_userlist(:users)
       case users
       when UserList
-        @users = users.dup
+        @users = users
       when Array
         @users = UserList.new(users)
       else
         raise ArgumentError, "Invalid user list #{users.inspect}"
       end
 
-      # new_variable(:creator)
+      # Flags
+      @mode = {}
+    end
 
-      # # Special users
-      # new_userlist(:super_ops)
-      # new_userlist(:ops)
-      # new_userlist(:half_ops)
-      # new_userlist(:voices)
+    # Removes a user from the channel
+    #
+    def delete_user(user)
+      @users.delete_if { |x| x == user }
+      @mode.each { |sym, mode|
+        mode.reset(user) if mode.class <= ChannelUserMode
+      }
+    end
 
-      # # Ban and invite lists
-      # new_netmasklist(:banlist)
-      # new_netmasklist(:exceptlist)
-      # new_netmasklist(:invitelist)
-
-      # # Flags
-      @flags = {}
-      # new_bool_flag(:a, :anonymous)
-      # new_bool_flag(:i, :invite_only)
-      # new_bool_flag(:m, :moderated)
-      # new_bool_flag(:n, :no_externals)
-      # new_bool_flag(:q, :quiet)
-      # new_bool_flag(:p, :private)
-      # new_bool_flag(:s, :secret)
-      # new_bool_flag(:r, :will_reop)
-      # new_bool_flag(:t, :free_topic)
-
-      # new_data_flag(:k, :key)
-      # new_data_flag(:l, :limit)
+    # The channel prefix
+    #
+    def prefix
+      name[0].chr
     end
 
     # A channel is local to a server if it has the '&' prefix
@@ -559,6 +669,12 @@ module Irc
     def normal?
       name[0] = 0x23
     end
+
+    # Create a new mode
+    #
+    def create_mode(sym, kl)
+      @mode[sym.to_sym] = kl.new
+    end
   end
 
 
@@ -579,7 +695,8 @@ module Irc
   class Server
 
     attr_reader :hostname, :version, :usermodes, :chanmodes
-    attr_reader :supports, :capab
+    alias :to_s :hostname
+    attr_reader :supports, :capabilities
 
     attr_reader :channels, :users
 
@@ -590,14 +707,27 @@ module Irc
     #
     def initialize
       @hostname = @version = @usermodes = @chanmodes = nil
+
+      @channels = ChannelList.new
+      @channel_names = Array.new
+
+      @users = UserList.new
+      @user_nicks = Array.new
+
+      reset_capabilities
+    end
+
+    # Resets the server capabilities
+    #
+    def reset_capabilities
       @supports = {
         :casemapping => 'rfc1459',
         :chanlimit => {},
         :chanmodes => {
-          :addr_list => nil, # Type A
-          :has_param => nil, # Type B
-          :set_param => nil, # Type C
-          :no_params => nil  # Type D
+          :typea => nil, # Type A: address lists
+          :typeb => nil, # Type B: needs a parameter
+          :typec => nil, # Type C: needs a parameter when set
+          :typed => nil  # Type D: must not have a parameter
         },
         :channellen => 200,
         :chantypes => "#&",
@@ -619,13 +749,25 @@ module Irc
         :targmax => {},
         :topiclen => nil
       }
-      @capab = {}
+      @capabilities = {}
+    end
 
-      @channels = ChannelList.new
-      @channel_names = Array.new
+    # Resets the Channel and User list
+    #
+    def reset_lists
+      @users.each { |u|
+        delete_user(u)
+      }
+      @channels.each { |u|
+        delete_channel(u)
+      }
+    end
 
-      @users = UserList.new
-      @user_nicks = Array.new
+    # Clears the server
+    #
+    def clear
+      reset_lists
+      reset_capabilities
     end
 
     # This method is used to parse a 004 RPL_MY_INFO line
@@ -658,10 +800,6 @@ module Irc
     # This method is used to parse a 005 RPL_ISUPPORT line
     #
     # See the RPL_ISUPPORT draft[http://www.irc.org/tech_docs/draft-brocklesby-irc-isupport-03.txt]
-    #
-    # TODO this is just an initial draft that does nothing special.
-    # We want to properly parse most of the supported capabilities
-    # for later reuse.
     #
     def parse_isupport(line)
       ar = line.split(' ')
@@ -699,10 +837,10 @@ module Irc
         when :chanmodes
           noval_warn(key, val) {
             groups = val.split(',')
-            @supports[key][:addr_list] = groups[0].scan(/./)
-            @supports[key][:has_param] = groups[1].scan(/./)
-            @supports[key][:set_param] = groups[2].scan(/./)
-            @supports[key][:no_params] = groups[3].scan(/./)
+            @supports[key][:typea] = groups[0].scan(/./)
+            @supports[key][:typeb] = groups[1].scan(/./)
+            @supports[key][:typec] = groups[2].scan(/./)
+            @supports[key][:typed] = groups[3].scan(/./)
           }
         when :channellen, :kicklen, :modes, :topiclen
           if val
@@ -758,17 +896,38 @@ module Irc
       @supports[:casemapping] || 'rfc1459'
     end
 
+    # Returns User or Channel depending on what _name_ can be
+    # a name of
+    #
+    def user_or_channel?(name)
+      if supports[:chantypes].include?(name[0].chr)
+        return Channel
+      else
+        return User
+      end
+    end
+
+    # Returns the actual User or Channel object matching _name_
+    #
+    def user_or_channel(name)
+      if supports[:chantypes].include?(name[0].chr)
+        return channel(name)
+      else
+        return user(name)
+      end
+    end
+
     # Checks if the receiver already has a channel with the given _name_
     #
     def has_channel?(name)
-      @channel_names.index(name)
+      @channel_names.index(name.to_s)
     end
     alias :has_chan? :has_channel?
 
     # Returns the channel with name _name_, if available
     #
     def get_channel(name)
-      idx = @channel_names.index(name)
+      idx = @channel_names.index(name.to_s)
       @channels[idx] if idx
     end
     alias :get_chan :get_channel
@@ -780,7 +939,7 @@ module Irc
     #
     # The Channel is automatically created with the appropriate casemap
     #
-    def new_channel(name, topic="", users=[], fails=true)
+    def new_channel(name, topic=nil, users=[], fails=true)
       if !has_chan?(name)
 
         prefix = name[0].chr
@@ -789,19 +948,19 @@ module Irc
         #
         # FIXME might need to raise an exception
         #
-        warn "#{self} doesn't support channel prefix #{prefix}" unless @supports[:chantypes].includes?(prefix)
+        warn "#{self} doesn't support channel prefix #{prefix}" unless @supports[:chantypes].include?(prefix)
         warn "#{self} doesn't support channel names this long (#{name.length} > #{@support[:channellen]}" unless name.length <= @supports[:channellen]
 
         # Next, we check if we hit the limit for channels of type +prefix+
         # if the server supports +chanlimit+
         #
         @supports[:chanlimit].keys.each { |k|
-          next unless k.includes?(prefix)
+          next unless k.include?(prefix)
           count = 0
           @channel_names.each { |n|
-            count += 1 if k.includes?(n[0].chr)
+            count += 1 if k.include?(n[0].chr)
           }
-          raise IndexError, "Already joined #{count} channels with prefix #{k}" if count == @supports[:chanlimits][k]
+          raise IndexError, "Already joined #{count} channels with prefix #{k}" if count == @supports[:chanlimit][k]
         }
 
         # So far, everything is fine. Now create the actual Channel
@@ -812,39 +971,49 @@ module Irc
         # lists and flags for this channel
 
         @supports[:prefix][:modes].each { |mode|
-          chan.new_userlist(mode)
+          chan.create_mode(mode, ChannelUserMode)
         } if @supports[:prefix][:modes]
 
         @supports[:chanmodes].each { |k, val|
           if val
             case k
-            when :addr_list
+            when :typea
               val.each { |mode|
-                chan.new_netmasklist(mode)
+                chan.create_mode(mode, ChannelModeTypeA)
               }
-            when :has_param, :set_param
+            when :typeb
               val.each { |mode|
-                chan.new_data_flag(mode)
+                chan.create_mode(mode, ChannelModeTypeB)
               }
-            when :no_params
+            when :typec
               val.each { |mode|
-                chan.new_bool_flag(mode)
+                chan.create_mode(mode, ChannelModeTypeC)
+              }
+            when :typed
+              val.each { |mode|
+                chan.create_mode(mode, ChannelModeTypeD)
               }
             end
           end
         }
 
-        # * appropriate @flags
-        # * a UserList for each @supports[:prefix]
-        # * a NetmaskList for each @supports[:chanmodes] of type A
-
-        @channels << newchan
+        @channels << chan
         @channel_names << name
-        return newchan
+        debug "Created channel #{chan.inspect}"
+        debug "Managing channels #{@channel_names.join(', ')}"
+        return chan
       end
 
       raise "Channel #{name} already exists on server #{self}" if fails
       return get_channel(name)
+    end
+
+    # Returns the Channel with the given _name_ on the server,
+    # creating it if necessary. This is a short form for
+    # new_channel(_str_, nil, [], +false+)
+    #
+    def channel(str)
+      new_channel(str,nil,[],false)
     end
 
     # Remove Channel _name_ from the list of <code>Channel</code>s
@@ -859,13 +1028,13 @@ module Irc
     # Checks if the receiver already has a user with the given _nick_
     #
     def has_user?(nick)
-      @user_nicks.index(nick)
+      @user_nicks.index(nick.to_s)
     end
 
     # Returns the user with nick _nick_, if available
     #
     def get_user(nick)
-      idx = @user_nicks.index(name)
+      idx = @user_nicks.index(nick.to_s)
       @users[idx] if idx
     end
 
@@ -877,7 +1046,12 @@ module Irc
     # The User is automatically created with the appropriate casemap
     #
     def new_user(str, fails=true)
-      tmp = User.new(str, self.casemap)
+      case str
+      when User
+        tmp = str
+      else
+        tmp = User.new(str, self.casemap)
+      end
       if !has_user?(tmp.nick)
         warn "#{self} doesn't support nicknames this long (#{tmp.nick.length} > #{@support[:nicklen]}" unless tmp.nick.length <= @supports[:nicklen]
         @users << tmp
@@ -885,9 +1059,14 @@ module Irc
         return @users.last
       end
       old = get_user(tmp.nick)
-      raise "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old} but access was tried with #{tmp}" if old != tmp
-      raise "User #{tmp} already exists on server #{self}" if fails
-      return get_user(tmp)
+      if old.known?
+        raise "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old} but access was tried with #{tmp}" if old != tmp
+        raise "User #{tmp} already exists on server #{self}" if fails
+      else
+        old.user = tmp.user
+        old.host = tmp.host
+      end
+      return old
     end
 
     # Returns the User with the given Netmask on the server,
@@ -902,10 +1081,13 @@ module Irc
     # _someuser_ must be specified with the full Netmask.
     #
     def delete_user(someuser)
-      idx = has_user?(user.nick)
+      idx = has_user?(someuser.nick)
       raise "Tried to remove unmanaged user #{user}" unless idx
-      have = self.user(user)
-      raise "User #{someuser.nick} has inconsistent Netmasks! #{self} knows #{have} but access was tried with #{someuser}" if have != someuser
+      have = self.user(someuser)
+      raise "User #{someuser.nick} has inconsistent Netmasks! #{self} knows #{have} but access was tried with #{someuser}" if have != someuser && have.user != "*" && have.host != "*"
+      @channels.each { |ch|
+        delete_user_from_channel(have, ch)
+      }
       @user_nicks.delete_at(idx)
       @users.delete_at(idx)
     end
@@ -926,10 +1108,21 @@ module Irc
       nm = new_netmask(mask)
       @users.inject(UserList.new) {
         |list, user|
-        list << user if user.matches?(nm)
+        if user.user == "*" or user.host == "*"
+          list << user if user.nick =~ nm.nick.to_irc_regexp
+        else
+          list << user if user.matches?(nm)
+        end
         list
       }
     end
+
+    # Deletes User from Channel
+    #
+    def delete_user_from_channel(user, channel)
+      channel.delete_user(user)
+    end
+
   end
 end
 

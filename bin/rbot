@@ -29,7 +29,7 @@ require 'etc'
 require 'getoptlong'
 require 'fileutils'
 
-$version="0.9.10-svn"
+$version="0.9.11-svn"
 $opts = Hash.new
 
 orig_opts = ARGV.dup

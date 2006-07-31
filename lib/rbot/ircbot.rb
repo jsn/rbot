@@ -71,13 +71,14 @@ require 'rbot/rbotconfig'
 require 'rbot/config'
 require 'rbot/utils'
 
+require 'rbot/irc'
 require 'rbot/rfc2812'
 require 'rbot/keywords'
 require 'rbot/ircsocket'
 require 'rbot/auth'
 require 'rbot/timer'
 require 'rbot/plugins'
-require 'rbot/channel'
+# require 'rbot/channel'
 require 'rbot/message'
 require 'rbot/language'
 require 'rbot/dbhash'
@@ -89,9 +90,6 @@ module Irc
 # Main bot class, which manages the various components, receives messages,
 # handles them or passes them to plugins, and contains core functionality.
 class IrcBot
-  # the bot's current nickname
-  attr_reader :nick
-
   # the bot's IrcAuth data
   attr_reader :auth
 
@@ -108,13 +106,12 @@ class IrcBot
   # bot's Language data
   attr_reader :lang
 
-  # capabilities info for the server
-  attr_reader :capabilities
-
-  # channel info for channels the bot is in
-  attr_reader :channels
+  # server the bot is connected to
+  # TODO multiserver
+  attr_reader :server
 
   # bot's irc socket
+  # TODO multiserver
   attr_reader :socket
 
   # bot's object registry, plugins get an interface to this for persistant
@@ -128,6 +125,14 @@ class IrcBot
   # bot's httputil help object, for fetching resources via http. Sets up
   # proxies etc as defined by the bot configuration/environment
   attr_reader :httputil
+
+  # bot User in the client/server connection
+  attr_reader :myself
+
+  # bot User in the client/server connection
+  def nick
+    myself.nick
+  end
 
   # create a new IrcBot with botclass +botclass+
   def initialize(botclass, params = {})
@@ -308,14 +313,19 @@ class IrcBot
 
     log_session_start
 
-    @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
+
+    @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
-    @channels = Hash.new
+
     @logs = Hash.new
+
     @httputil = Utils::HttpUtil.new(self)
+
     @lang = Language::Language.new(@config['core.language'])
+
     @keywords = Keywords.new(self)
+
     begin
       @auth = IrcAuth.new(self)
     rescue => e
@@ -329,28 +339,51 @@ class IrcBot
     @plugins = Plugins::Plugins.new(self, ["#{botclass}/plugins"])
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
-    @nick = @config['irc.nick']
-
     @client = IrcClient.new
+    @server = @client.server
+    @myself = @client.client
+    @myself.nick = @config['irc.nick']
+
+    # Channels where we are quiet
+    # It's nil when we are not quiet, an empty list when we are quiet
+    # in all channels, a list of channels otherwise
+    @quiet = nil
+
+
+    @client[:welcome] = proc {|data|
+      irclog "joined server #{@client.server} as #{myself}", "server"
+
+      @plugins.delegate("connect")
+
+      @config['irc.join_channels'].each { |c|
+        debug "autojoining channel #{c}"
+        if(c =~ /^(\S+)\s+(\S+)$/i)
+          join $1, $2
+        else
+          join c if(c)
+        end
+      }
+    }
     @client[:isupport] = proc { |data|
-      if data[:capab]
-        sendq "CAPAB IDENTIFY-MSG"
-      end
+      # TODO this needs to go into rfc2812.rb
+      # Since capabs are two-steps processes, server.supports[:capab]
+      # should be a three-state: nil, [], [....]
+      sendq "CAPAB IDENTIFY-MSG" if @server.supports[:capab]
     }
     @client[:datastr] = proc { |data|
-      debug data.inspect
+      # TODO this needs to go into rfc2812.rb
       if data[:text] == "IDENTIFY-MSG"
-        @capabilities["identify-msg".to_sym] = true
+        @server.capabilities["identify-msg".to_sym] = true
       else
         debug "Not handling RPL_DATASTR #{data[:servermessage]}"
       end
     }
     @client[:privmsg] = proc { |data|
-      message = PrivMessage.new(self, data[:source], data[:target], data[:message])
+      message = PrivMessage.new(self, @server, data[:source], data[:target], data[:message])
       onprivmsg(message)
     }
     @client[:notice] = proc { |data|
-      message = NoticeMessage.new(self, data[:source], data[:target], data[:message])
+      message = NoticeMessage.new(self, @server, data[:source], data[:target], data[:message])
       # pass it off to plugins that want to hear everything
       @plugins.delegate "listen", message
     }
@@ -373,125 +406,99 @@ class IrcBot
       @last_ping = nil
     }
     @client[:nick] = proc {|data|
-      sourcenick = data[:sourcenick]
-      nick = data[:nick]
-      m = NickMessage.new(self, data[:source], data[:sourcenick], data[:nick])
-      if(sourcenick == @nick)
-        debug "my nick is now #{nick}"
-        @nick = nick
+      source = data[:source]
+      old = data[:oldnick]
+      new = data[:newnick]
+      m = NickMessage.new(self, @server, source, old, new)
+      if source == myself
+        debug "my nick is now #{new}"
       end
-      @channels.each {|k,v|
-        if(v.users.has_key?(sourcenick))
-          irclog "@ #{sourcenick} is now known as #{nick}", k
-          v.users[nick] = v.users[sourcenick]
-          v.users.delete(sourcenick)
-        end
+      data[:is_on].each { |ch|
+          irclog "@ #{data[:old]} is now known as #{data[:new]}", ch
       }
       @plugins.delegate("listen", m)
       @plugins.delegate("nick", m)
     }
     @client[:quit] = proc {|data|
-      source = data[:source]
-      sourcenick = data[:sourcenick]
-      sourceurl = data[:sourceaddress]
-      message = data[:message]
-      m = QuitMessage.new(self, data[:source], data[:sourcenick], data[:message])
-      if(data[:sourcenick] =~ /#{Regexp.escape(@nick)}/i)
-      else
-        @channels.each {|k,v|
-          if(v.users.has_key?(sourcenick))
-            irclog "@ Quit: #{sourcenick}: #{message}", k
-            v.users.delete(sourcenick)
-          end
-        }
-      end
+      m = QuitMessage.new(self, @server, data[:source], data[:source], data[:message])
+      data[:was_on].each { |ch|
+        irclog "@ Quit: #{sourcenick}: #{message}", ch
+      }
       @plugins.delegate("listen", m)
       @plugins.delegate("quit", m)
     }
     @client[:mode] = proc {|data|
-      source = data[:source]
-      sourcenick = data[:sourcenick]
-      sourceurl = data[:sourceaddress]
-      channel = data[:channel]
-      targets = data[:targets]
-      modestring = data[:modestring]
-      irclog "@ Mode #{modestring} #{targets} by #{sourcenick}", channel
-    }
-    @client[:welcome] = proc {|data|
-      irclog "joined server #{data[:source]} as #{data[:nick]}", "server"
-      debug "I think my nick is #{@nick}, server thinks #{data[:nick]}"
-      if data[:nick] && data[:nick].length > 0
-        @nick = data[:nick]
-      end
-
-      @plugins.delegate("connect")
-
-      @config['irc.join_channels'].each {|c|
-        debug "autojoining channel #{c}"
-        if(c =~ /^(\S+)\s+(\S+)$/i)
-          join $1, $2
-        else
-          join c if(c)
-        end
-      }
+      irclog "@ Mode #{data[:modestring]} by #{data[:sourcenick]}", data[:channel]
     }
     @client[:join] = proc {|data|
-      m = JoinMessage.new(self, data[:source], data[:channel], data[:message])
+      m = JoinMessage.new(self, @server, data[:source], data[:channel], data[:message])
       onjoin(m)
     }
     @client[:part] = proc {|data|
-      m = PartMessage.new(self, data[:source], data[:channel], data[:message])
+      m = PartMessage.new(self, @server, data[:source], data[:channel], data[:message])
       onpart(m)
     }
     @client[:kick] = proc {|data|
-      m = KickMessage.new(self, data[:source], data[:target],data[:channel],data[:message])
+      m = KickMessage.new(self, @server, data[:source], data[:target], data[:channel],data[:message])
       onkick(m)
     }
     @client[:invite] = proc {|data|
-      if(data[:target] =~ /^#{Regexp.escape(@nick)}$/i)
-        join data[:channel] if (@auth.allow?("join", data[:source], data[:sourcenick]))
+      if data[:target] == myself
+        join data[:channel] if @auth.allow?("join", data[:source], data[:source].nick)
       end
     }
     @client[:changetopic] = proc {|data|
       channel = data[:channel]
-      sourcenick = data[:sourcenick]
+      source = data[:source]
       topic = data[:topic]
-      timestamp = data[:unixtime] || Time.now.to_i
-      if(sourcenick == @nick)
+      if source == myself
         irclog "@ I set topic \"#{topic}\"", channel
       else
-        irclog "@ #{sourcenick} set topic \"#{topic}\"", channel
+        irclog "@ #{source} set topic \"#{topic}\"", channel
       end
-      m = TopicMessage.new(self, data[:source], data[:channel], timestamp, data[:topic])
+      m = TopicMessage.new(self, @server, data[:source], data[:channel], data[:topic])
 
       ontopic(m)
       @plugins.delegate("listen", m)
       @plugins.delegate("topic", m)
     }
-    @client[:topic] = @client[:topicinfo] = proc {|data|
-      channel = data[:channel]
-      m = TopicMessage.new(self, data[:source], data[:channel], data[:unixtime], data[:topic])
-        ontopic(m)
+    @client[:topic] = @client[:topicinfo] = proc { |data|
+      m = TopicMessage.new(self, @server, data[:source], data[:channel], data[:channel].topic)
+      ontopic(m)
     }
-    @client[:names] = proc {|data|
-      channel = data[:channel]
-      users = data[:users]
-      unless(@channels[channel])
-        warning "got names for channel '#{channel}' I didn't think I was in\n"
-        # exit 2
-      end
-      @channels[channel].users.clear
-      users.each {|u|
-        @channels[channel].users[u[0].sub(/^[@&~+]/, '')] = ["mode", u[1]]
-      }
+    @client[:names] = proc { |data|
       @plugins.delegate "names", data[:channel], data[:users]
     }
-    @client[:unknown] = proc {|data|
+    @client[:unknown] = proc { |data|
       #debug "UNKNOWN: #{data[:serverstring]}"
       irclog data[:serverstring], ".unknown"
     }
   end
 
+  # checks if we should be quiet on a channel
+  def quiet_on?(channel)
+    return false unless @quiet
+    return true if @quiet.empty?
+    return @quiet.include?(channel.to_s)
+  end
+
+  def set_quiet(channel=nil)
+    if channel
+      @quiet << channel.to_s unless @quiet.include?(channel.to_s)
+    else
+      @quiet = []
+    end
+  end
+
+  def reset_quiet(channel=nil)
+    if channel
+      @quiet.delete_if { |x| x == channel.to_s }
+    else
+      @quiet = nil
+    end
+  end
+
+  # things to do when we receive a signal
   def got_sig(sig)
     debug "received #{sig}, queueing quit"
     $interrupted += 1
@@ -524,8 +531,7 @@ class IrcBot
       raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
-    @socket.emergency_puts "NICK #{@nick}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
-    @capabilities = Hash.new
+    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
     start_server_pings
   end
 
@@ -573,7 +579,7 @@ class IrcBot
       end
 
       stop_server_pings
-      @channels.clear
+      @server.clear
       if @socket.connected?
         @socket.clearq
         @socket.shutdown
@@ -601,7 +607,7 @@ class IrcBot
     # and all the extra stuff
     # TODO allow something to do for commands that produce too many messages
     # TODO example: math 10**10000
-    left = @socket.bytes_per - type.length - where.length - 4
+    left = @socket.bytes_per - type.length - where.to_s.length - 4
     begin
       if(left >= message.length)
         sendq "#{type} #{where} :#{message}", chan, ring
@@ -626,17 +632,18 @@ class IrcBot
   end
 
   # send a notice message to channel/nick +where+
-  def notice(where, message, mchan=nil, mring=-1)
+  def notice(where, message, mchan="", mring=-1)
     if mchan == ""
       chan = where
     else
       chan = mchan
     end
     if mring < 0
-      if where =~ /^#/
-        ring = 2
-      else
+      case where
+      when User
         ring = 1
+      else
+        ring = 2
       end
     else
       ring = mring
@@ -656,10 +663,11 @@ class IrcBot
       chan = mchan
     end
     if mring < 0
-      if where =~ /^#/
-        ring = 2
-      else
+      case where
+      when User
         ring = 1
+      else
+        ring = 2
       end
     else
       ring = mring
@@ -667,7 +675,7 @@ class IrcBot
     message.to_s.gsub(/[\r\n]+/, "\n").each_line { |line|
       line.chomp!
       next unless(line.length > 0)
-      unless((where =~ /^#/) && (@channels.has_key?(where) && @channels[where].quiet))
+      unless quiet_on?(where)
         sendmsg "PRIVMSG", where, line, chan, ring 
       end
     }
@@ -681,7 +689,8 @@ class IrcBot
       chan = mchan
     end
     if mring < 0
-      if where =~ /^#/
+      case where
+      when Channel
         ring = 2
       else
         ring = 1
@@ -690,12 +699,13 @@ class IrcBot
       ring = mring
     end
     sendq "PRIVMSG #{where} :\001ACTION #{message}\001", chan, ring
-    if(where =~ /^#/)
-      irclog "* #{@nick} #{message}", where
-    elsif (where =~ /^(\S*)!.*$/)
-      irclog "* #{@nick}[#{where}] #{message}", $1
+    case where
+    when Channel
+      irclog "* #{myself} #{message}", where
+    when User
+      irclog "* #{myself}[#{where}] #{message}", $1
     else
-      irclog "* #{@nick}[#{where}] #{message}", where
+      irclog "* #{myself}[#{where}] #{message}", where
     end
   end
 
@@ -709,7 +719,7 @@ class IrcBot
   def irclog(message, where="server")
     message = message.chomp
     stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    where = where.gsub(/[:!?$*()\/\\<>|"']/, "_")
+    where = where.to_s.gsub(/[:!?$*()\/\\<>|"']/, "_")
     unless(@logs.has_key?(where))
       @logs[where] = File.new("#{@botclass}/logs/#{where}", "a")
       @logs[where].sync = true
@@ -746,8 +756,8 @@ class IrcBot
       @socket.shutdown
     end
     debug "Logging quits"
-    @channels.each_value {|v|
-      irclog "@ quit (#{message})", v.name
+    @server.channels.each { |ch|
+      irclog "@ quit (#{message})", ch
     }
     debug "Saving"
     save
@@ -910,7 +920,7 @@ class IrcBot
       when "restart"
         return "restart => completely stop and restart the bot (including reconnect)"
       when "join"
-        return "join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{@nick} also responds to invites if you have the required access level"
+        return "join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{myself} also responds to invites if you have the required access level"
       when "part"
         return "part <channel> => part channel <channel>"
       when "hide"
@@ -934,9 +944,9 @@ class IrcBot
       when "version"
         return "version => describes software version"
       when "botsnack"
-        return "botsnack => reward #{@nick} for being good"
+        return "botsnack => reward #{myself} for being good"
       when "hello"
-        return "hello|hi|hey|yo [#{@nick}] => greet the bot"
+        return "hello|hi|hey|yo [#{myself}] => greet the bot"
       else
         return "Core help topics: quit, restart, config, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version, botsnack, hello"
     end
@@ -1015,25 +1025,25 @@ class IrcBot
         when (/^quiet$/i)
           if(auth.allow?("talk", m.source, m.replyto))
             m.okay
-            @channels.each_value {|c| c.quiet = true }
+            set_quiet
           end
         when (/^quiet in (\S+)$/i)
           where = $1
           if(auth.allow?("talk", m.source, m.replyto))
             m.okay
             where.gsub!(/^here$/, m.target) if m.public?
-            @channels[where].quiet = true if(@channels.has_key?(where))
+            set_quiet(where)
           end
         when (/^talk$/i)
           if(auth.allow?("talk", m.source, m.replyto))
-            @channels.each_value {|c| c.quiet = false }
+            reset_quiet
             m.okay
           end
         when (/^talk in (\S+)$/i)
           where = $1
           if(auth.allow?("talk", m.source, m.replyto))
             where.gsub!(/^here$/, m.target) if m.public?
-            @channels[where].quiet = false if(@channels.has_key?(where))
+            reset_quiet(where)
             m.okay
           end
         when (/^status\??$/i)
@@ -1059,9 +1069,9 @@ class IrcBot
     else
       # stuff to handle when not addressed
       case m.message
-        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{Regexp.escape(@nick)}$/i)
+        when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{Regexp.escape(self.nick)}$/i)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
-        when (/^#{Regexp.escape(@nick)}!*$/)
+        when (/^#{Regexp.escape(self.nick)}!*$/)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
         else
           @keywords.privmsg(m)
@@ -1073,17 +1083,19 @@ class IrcBot
   def log_sent(type, where, message)
     case type
       when "NOTICE"
-        if(where =~ /^#/)
-          irclog "-=#{@nick}=- #{message}", where
-        elsif (where =~ /(\S*)!.*/)
+        case where
+        when Channel
+          irclog "-=#{myself}=- #{message}", where
+        when User
              irclog "[-=#{where}=-] #{message}", $1
         else
-             irclog "[-=#{where}=-] #{message}"
+             irclog "[-=#{where}=-] #{message}", where
         end
       when "PRIVMSG"
-        if(where =~ /^#/)
-          irclog "<#{@nick}> #{message}", where
-        elsif (where =~ /^(\S*)!.*$/)
+        case where
+        when Channel
+          irclog "<#{myself}> #{message}", where
+        when User
           irclog "[msg(#{where})] #{message}", $1
         else
           irclog "[msg(#{where})] #{message}", where
@@ -1092,14 +1104,11 @@ class IrcBot
   end
 
   def onjoin(m)
-    @channels[m.channel] = IRCChannel.new(m.channel) unless(@channels.has_key?(m.channel))
-    if(m.address?)
+    if m.address?
       debug "joined channel #{m.channel}"
       irclog "@ Joined channel #{m.channel}", m.channel
     else
       irclog "@ #{m.sourcenick} joined channel #{m.channel}", m.channel
-      @channels[m.channel].users[m.sourcenick] = Hash.new
-      @channels[m.channel].users[m.sourcenick]["mode"] = ""
     end
 
     @plugins.delegate("listen", m)
@@ -1110,15 +1119,8 @@ class IrcBot
     if(m.address?)
       debug "left channel #{m.channel}"
       irclog "@ Left channel #{m.channel} (#{m.message})", m.channel
-      @channels.delete(m.channel)
     else
       irclog "@ #{m.sourcenick} left channel #{m.channel} (#{m.message})", m.channel
-      if @channels.has_key?(m.channel)
-        @channels[m.channel].users.delete(m.sourcenick)
-      else
-        warning "got part for channel '#{channel}' I didn't think I was in\n"
-        # exit 2
-      end
     end
 
     # delegate to plugins
@@ -1130,10 +1132,8 @@ class IrcBot
   def onkick(m)
     if(m.address?)
       debug "kicked from channel #{m.channel}"
-      @channels.delete(m.channel)
       irclog "@ You have been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
     else
-      @channels[m.channel].users.delete(m.sourcenick)
       irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
     end
 
@@ -1142,12 +1142,7 @@ class IrcBot
   end
 
   def ontopic(m)
-    @channels[m.channel] = IRCChannel.new(m.channel) unless(@channels.has_key?(m.channel))
-    @channels[m.channel].topic = m.topic if !m.topic.nil?
-    @channels[m.channel].topic.timestamp = m.timestamp if !m.timestamp.nil?
-    @channels[m.channel].topic.by = m.source if !m.source.nil?
-
-    debug "topic of channel #{m.channel} is now #{@channels[m.channel].topic}"
+    debug "topic of channel #{m.channel} is now #{m.topic}"
   end
 
   # delegate a privmsg to auth, keyword or plugin handlers

@@ -815,10 +815,19 @@ module Irc
   # clients register handler proc{}s for different server events and IrcClient
   # handles dispatch
   class IrcClient
+
+    attr_reader :server, :client
+
     # create a new IrcClient instance
     def initialize
+      @server = Server.new      # The Server
+      @client = User.new        # The User representing the client on this Server
+
       @handlers = Hash.new
-      @users = Array.new
+
+      # This is used by some messages to build lists of users that
+      # will be delegated when the ENDOF... message is received
+      @tmpusers = []
     end
 
     # key::   server event to handle
@@ -827,8 +836,10 @@ module Irc
     #
     # ==server events currently supported:
     #
-    # created::     when the server was started
+    # welcome::     server welcome message on connect
     # yourhost::    your host details (on connection)
+    # created::     when the server was started
+    # isupport::    information about what this server supports
     # ping::        server pings you (default handler returns a pong)
     # nicktaken::   you tried to change nick to one that's in use
     # badnick::     you tried to change nick to one that's invalid
@@ -836,7 +847,6 @@ module Irc
     # topicinfo::   on joining a channel or asking for the topic, tells you
     #               who set it and when
     # names::       server sends list of channel members when you join
-    # welcome::     server welcome message on connect
     # motd::        server message of the day
     # privmsg::     privmsg, the core of IRC, a message to you from someone
     # public::      optionally instead of getting privmsg you can hook to only
@@ -878,8 +888,14 @@ module Irc
       if prefix != nil
         data[:source] = prefix
         if prefix =~ /^(\S+)!(\S+)$/
-          data[:sourcenick] = $1
-          data[:sourceaddress] = $2
+          data[:source] = @server.user($1)
+        else
+          if @server.hostname && @server.hostname != data[:source]
+            warning "Unknown origin #{data[:source]} for message\n#{serverstring.inspect}"
+          else
+            @server.instance_variable_set(:@hostname, data[:source])
+          end
+          data[:source] = @server
         end
       end
 
@@ -894,13 +910,29 @@ module Irc
       when 'PONG'
         data[:pingid] = argv[0]
         handle(:pong, data)
-      when /^(\d+)$/		# numeric server message
+      when /^(\d+)$/            # numerical server message
         num=command.to_i
         case num
+        when RPL_WELCOME
+          # "Welcome to the Internet Relay Network
+          # <nick>!<user>@<host>"
+          case argv[1]
+          when /((\S+)!(\S+))/
+            data[:netmask] = $1
+            data[:nick] = $2
+            data[:address] = $3
+            @client = @server.user(data[:netmask])
+          when /Welcome to the Internet Relay Network\s(\S+)/
+            data[:nick] = $1
+          when /Welcome.*\s+(\S+)$/
+            data[:nick] = $1
+          when /^(\S+)$/
+            data[:nick] = $1
+          end
+          @user ||= @server.user(data[:nick])
+          handle(:welcome, data)
         when RPL_YOURHOST
           # "Your host is <servername>, running version <ver>"
-          # TODO how standard is this "version <ver>? should i parse it?
-          data[:message] = argv[1]
           handle(:yourhost, data)
         when RPL_CREATED
           # "This server was created <date>"
@@ -909,10 +941,21 @@ module Irc
         when RPL_MYINFO
           # "<servername> <version> <available user modes>
           # <available channel modes>"
-          data[:servername] = argv[1]
-          data[:version] = argv[2]
-          data[:usermodes] = argv[3]
-          data[:chanmodes] = argv[4]
+          @server.parse_my_info(params.split(' ', 2).last)
+          data[:servername] = @server.hostname
+          data[:version] = @server.version
+          data[:usermodes] = @server.usermodes
+          data[:chanmodes] = @server.chanmodes
+          handle(:myinfo, data)
+        when RPL_ISUPPORT
+          # "PREFIX=(ov)@+ CHANTYPES=#& :are supported by this server"
+          # "MODES=4 CHANLIMIT=#:20 NICKLEN=16 USERLEN=10 HOSTLEN=63
+          # TOPICLEN=450 KICKLEN=450 CHANNELLEN=30 KEYLEN=23 CHANTYPES=#
+          # PREFIX=(ov)@+ CASEMAPPING=ascii CAPAB IRCD=dancer :are available
+          # on this server"
+          #
+          @server.parse_isupport(params.split(' ', 2).last)
+          handle(:isupport, data)
         when ERR_NICKNAMEINUSE
           # "* <nick> :Nickname is already in use"
           data[:nick] = argv[1]
@@ -924,49 +967,68 @@ module Irc
           data[:message] = argv[2]
           handle(:badnick, data)
         when RPL_TOPIC
-          data[:channel] = argv[1]
+          data[:channel] = @server.get_channel(argv[1])
           data[:topic] = argv[2]
+
+          if data[:channel]
+            data[:channel].topic.text = data[:topic]
+          else
+            warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
+          end
+
           handle(:topic, data)
         when RPL_TOPIC_INFO
-          data[:nick] = argv[0]
-          data[:channel] = argv[1]
-          data[:source] = argv[2]
-          data[:unixtime] = argv[3]
+          data[:nick] = @server.user(argv[0])
+          data[:channel] = @server.get_channel(argv[1])
+          data[:source] = @server.user(argv[2])
+          data[:time] = Time.at(argv[3].to_i)
+
+          if data[:channel]
+            data[:channel].topic.set_by = data[:nick]
+            data[:channel].topic.set_on = data[:time]
+          else
+            warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
+          end
+
           handle(:topicinfo, data)
         when RPL_NAMREPLY
           # "( "=" / "*" / "@" ) <channel>
           # :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
           # - "@" is used for secret channels, "*" for private
           # channels, and "=" for others (public channels).
+          data[:channeltype] = argv[1]
+          data[:channel] = argv[2]
+
+          chan = @server.get_channel(data[:channel])
+          unless chan
+            warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
+            return
+          end
+
+          users = []
           argv[3].scan(/\S+/).each { |u|
-            if(u =~ /^([@+])?(.*)$/)
-              umode = $1 || ""
+            if(u =~ /^(#{@server.supports[:prefix][:prefixes].join})?(.*)$/)
+              umode = $1
               user = $2
-              @users << [user, umode]
+              users << [user, umode]
             end
           }
+
+          users.each { |ar|
+            u = @server.user(ar[0])
+            chan.users << u
+            if ar[1]
+              m = @server.supports[:prefix][:prefixes].index(ar[1])
+              m = @server.supports[:prefix][:modes][m]
+              chan.mode[m.to_sym].set(u)
+            end
+          }
+          @tmpusers += users
         when RPL_ENDOFNAMES
           data[:channel] = argv[1]
-          data[:users] = @users
+          data[:users] = @tmpusers
           handle(:names, data)
-          @users = Array.new
-        when RPL_ISUPPORT
-          # "PREFIX=(ov)@+ CHANTYPES=#& :are supported by this server"
-          # "MODES=4 CHANLIMIT=#:20 NICKLEN=16 USERLEN=10 HOSTLEN=63
-          # TOPICLEN=450 KICKLEN=450 CHANNELLEN=30 KEYLEN=23 CHANTYPES=#
-          # PREFIX=(ov)@+ CASEMAPPING=ascii CAPAB IRCD=dancer :are available
-          # on this server"
-          #
-          argv[0,argv.length-1].each {|a|
-            if a =~ /^(.*)=(.*)$/
-              data[$1.downcase.to_sym] = $2
-              debug "server's #{$1.downcase.to_sym} is #{$2}"
-            else
-              data[a.downcase.to_sym] = true
-              debug "server supports #{a.downcase.to_sym}"
-            end
-          }
-          handle(:isupport, data)
+          @tmpusers = Array.new
         when RPL_LUSERCLIENT
           # ":There are <integer> users and <integer>
           # services on <integer> servers"
@@ -1005,22 +1067,6 @@ module Irc
           # (re)started)"
           data[:message] = argv[1]
           handle(:statsconn, data)
-        when RPL_WELCOME
-          # "Welcome to the Internet Relay Network
-          # <nick>!<user>@<host>"
-          case argv[1]
-          when /((\S+)!(\S+))/
-            data[:netmask] = $1
-            data[:nick] = $2
-            data[:address] = $3
-          when /Welcome to the Internet Relay Network\s(\S+)/
-            data[:nick] = $1
-          when /Welcome.*\s+(\S+)$/
-            data[:nick] = $1
-          when /^(\S+)$/
-            data[:nick] = $1
-          end
-          handle(:welcome, data)
         when RPL_MOTDSTART
           # "<nick> :- <server> Message of the Day -"
           if argv[1] =~ /^-\s+(\S+)\s/
@@ -1046,56 +1092,158 @@ module Irc
         # you can either bind to 'PRIVMSG', to get every one and
         # parse it yourself, or you can bind to 'MSG', 'PUBLIC',
         # etc and get it all nicely split up for you.
-        data[:target] = argv[0]
+
+        data[:target] = @server.user_or_channel(argv[0])
         data[:message] = argv[1]
         handle(:privmsg, data)
 
         # Now we split it
-        if(data[:target] =~ /^[#&!+].*/)
+        if(data[:target].class <= Channel)
           handle(:public, data)
         else
           handle(:msg, data)
         end
-      when 'KICK'
-        data[:channel] = argv[0]
-        data[:target] = argv[1]
-        data[:message] = argv[2]
-        handle(:kick, data)
-      when 'PART'
-        data[:channel] = argv[0]
-        data[:message] = argv[1]
-        handle(:part, data)
-      when 'QUIT'
-        data[:message] = argv[0]
-        handle(:quit, data)
-      when 'JOIN'
-        data[:channel] = argv[0]
-        handle(:join, data)
-      when 'TOPIC'
-        data[:channel] = argv[0]
-        data[:topic] = argv[1]
-        handle(:changetopic, data)
-      when 'INVITE'
-        data[:target] = argv[0]
-        data[:channel] = argv[1]
-        handle(:invite, data)
-      when 'NICK'
-        data[:nick] = argv[0]
-        handle(:nick, data)
-      when 'MODE'
-        data[:channel] = argv[0]
-        data[:modestring] = argv[1]
-        data[:targets] = argv[2]
-        handle(:mode, data)
       when 'NOTICE'
-        data[:target] = argv[0]
+        data[:target] = @server.user_or_channel(argv[0])
         data[:message] = argv[1]
-        if data[:sourcenick]
+        case data[:source]
+        when User
           handle(:notice, data)
         else
           # "server notice" (not from user, noone to reply to
           handle(:snotice, data)
         end
+      when 'KICK'
+        data[:channel] = @server.channel(argv[0])
+        data[:target] = @server.user(argv[1])
+        data[:message] = argv[2]
+
+        @server.delete_user_from_channel(data[:target], data[:channel])
+        if data[:target] == @client
+          @server.delete_channel(data[:channel])
+        end
+
+        handle(:kick, data)
+      when 'PART'
+        data[:channel] = @server.channel(argv[0])
+        data[:message] = argv[1]
+
+        @server.delete_user_from_channel(data[:source], data[:channel])
+        if data[:source] == @client
+          @server.delete_channel(data[:channel])
+        end
+
+        handle(:part, data)
+      when 'QUIT'
+        data[:message] = argv[0]
+        data[:was_on] = @server.channels.inject(ChannelList.new) { |list, ch|
+          list << ch if ch.users.include?(data[:source])
+        }
+
+        @server.delete_user(data[:source])
+
+        handle(:quit, data)
+      when 'JOIN'
+        data[:channel] = @server.channel(argv[0])
+        data[:channel].users << data[:source]
+
+        handle(:join, data)
+      when 'TOPIC'
+        data[:channel] = @server.channel(argv[0])
+        data[:topic] = ChannelTopic.new(argv[1], data[:source], Time.new)
+        data[:channel].topic = data[:topic]
+
+        handle(:changetopic, data)
+      when 'INVITE'
+        data[:target] = @server.user(argv[0])
+        data[:channel] = @server.channel(argv[1])
+
+        handle(:invite, data)
+      when 'NICK'
+        data[:is_on] = @server.channels.inject(ChannelList.new) { |list, ch|
+          list << ch if ch.users.include?(data[:source])
+        }
+
+        data[:newnick] = argv[0]
+        data[:oldnick] = data[:source].nick.dup
+        data[:source].nick = data[:nick]
+
+        handle(:nick, data)
+      when 'MODE'
+        # MODE ([+-]<modes> (<params>)*)*
+        # When a MODE message is received by a server,
+        # Type C will have parameters too, so we must
+        # be able to consume parameters for all
+        # but Type D modes
+
+        data[:channel] = @server.user_or_channel(argv[0])
+        data[:modestring] = argv[1..-1].join(" ")
+        case data[:channel]
+        when User
+          # TODO
+        else
+          # data[:modes] is an array where each element
+          # is either a flag which doesn't need parameters
+          # or an array with a flag which needs parameters
+          # and the corresponding parameter
+          data[:modes] = []
+          # array of indices in data[:modes] where parameters
+          # are needed
+          who_want_params = []
+
+          argv[1..-1].each { |arg|
+            setting = arg[0].chr
+            if "+-".include?(setting)
+              arg[1..-1].each_byte { |m|
+                case m.to_sym
+                when *@server.supports[:chanmodes][:typea]
+                  data[:modes] << [setting + m]
+                  who_wants_params << data[:modes].length - 1
+                when *@server.supports[:chanmodes][:typeb]
+                  data[:modes] << [setting + m]
+                  who_wants_params << data[:modes].length - 1
+                when *@server.supports[:chanmodes][:typec]
+                  if setting == "+"
+                    data[:modes] << [setting + m]
+                    who_wants_params << data[:modes].length - 1
+                  else
+                    data[:modes] << setting + m
+                  end
+                when *@server.supports[:chanmodes][:typed]
+                  data[:modes] << setting + m
+                when *@server.supports[:prefix][:modes]
+                  data[:modes] << [setting + m]
+                  who_wants_params << data[:modes].length - 1
+                else
+                  warn "Unknown mode #{m} in #{serverstring}"
+                end
+              }
+            else
+              idx = who_wants_params.shift
+              if idx.nil?
+                warn "Oops, problems parsing #{serverstring}"
+                break
+              end
+              data[:modes][idx] << arg
+            end
+          }
+        end
+
+        data[:modes].each { |mode|
+          case mode
+          when Array
+            set = mode[0][0].chr == "+" ? :set : :reset
+            key = mode[0][1].chr.to_sym
+            val = mode[1]
+            data[:channel].mode[key].send(set, val)
+          else
+            set = mode[0].chr == "+" ? :set : :reset
+            key = mode[1].chr.to_sym
+            data[:channel].mode[key].send(set)
+          end
+        } if data[:modes]
+
+        handle(:mode, data)
       else
         handle(:unknown, data)
       end

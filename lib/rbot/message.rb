@@ -17,19 +17,16 @@ module Irc
     # associated bot
     attr_reader :bot
 
+    # associated server
+    attr_reader :server
+
     # when the message was received
     attr_reader :time
 
-    # hostmask of message source
+    # User that originated the message
     attr_reader :source
 
-    # nick of message source
-    attr_reader :sourcenick
-
-    # url part of message source
-    attr_reader :sourceaddress
-
-    # nick/channel message was sent to
+    # User/Channel message was sent to
     attr_reader :target
 
     # contents of the message
@@ -40,10 +37,11 @@ module Irc
 
     # instantiate a new Message
     # bot::      associated bot class
-    # source::   hostmask of the message source
-    # target::   nick/channel message is destined for
-    # message::  message part
-    def initialize(bot, source, target, message)
+    # server::   Server where the message took place
+    # source::   User that sent the message
+    # target::   User/Channel is destined for
+    # message::  actual message
+    def initialize(bot, server, source, target, message)
       @msg_wants_id = false unless defined? @msg_wants_id
 
       @time = Time.now
@@ -53,9 +51,10 @@ module Irc
       @target = target
       @message = BasicUserMessage.stripcolour message
       @replied = false
+      @server = server
 
       @identified = false
-      if @msg_wants_id && @bot.capabilities["identify-msg".to_sym]
+      if @msg_wants_id && @server.capabilities["identify-msg".to_sym]
         if @message =~ /([-+])(.*)/
           @identified = ($1=="+")
           @message = $2
@@ -64,18 +63,25 @@ module Irc
         end
       end
 
-      # split source into consituent parts
-      if source =~ /^((\S+)!(\S+))$/
-        @sourcenick = $2
-        @sourceaddress = $3
-      end
-
-      if target && target.downcase == @bot.nick.downcase
+      if target && target == @bot.myself
         @address = true
       end
 
     end
 
+    # Access the nick of the source
+    #
+    def sourcenick
+      @source.nick
+    end
+
+    # Access the user@host of the source
+    #
+    def sourceaddress
+      "#{@source.user}@#{@source.host}"
+    end
+
+    # Was the message from an identified user?
     def identified?
       return @identified
     end
@@ -133,18 +139,18 @@ module Irc
     # source::   hostmask of the message source
     # target::   nick/channel message is destined for
     # message::  message part
-    def initialize(bot, source, target, message)
-      super(bot, source, target, message)
+    def initialize(bot, server, source, target, message)
+      super(bot, server, source, target, message)
       @target = target
       @private = false
       @plugin = nil
       @action = false
 
-      if target.downcase == @bot.nick.downcase
+      if target == @bot.myself
         @private = true
         @address = true
         @channel = nil
-        @replyto = @sourcenick
+        @replyto = source
       else
         @replyto = @target
         @channel = @target
@@ -223,7 +229,7 @@ module Irc
 
   # class to manage IRC PRIVMSGs
   class PrivMessage < UserMessage
-    def initialize(bot, source, target, message)
+    def initialize(bot, server, source, target, message)
       @msg_wants_id = true
       super
     end
@@ -231,7 +237,7 @@ module Irc
 
   # class to manage IRC NOTICEs
   class NoticeMessage < UserMessage
-    def initialize(bot, source, target, message)
+    def initialize(bot, server, source, target, message)
       @msg_wants_id = true
       super
     end
@@ -244,8 +250,8 @@ module Irc
     # channel user was kicked from
     attr_reader :channel
 
-    def initialize(bot, source, target, channel, message="")
-      super(bot, source, target, message)
+    def initialize(bot, server, source, target, channel, message="")
+      super(bot, server, source, target, message)
       @channel = channel
     end
   end
@@ -253,14 +259,22 @@ module Irc
   # class to pass IRC Nick changes in. @message contains the old nickame,
   # @sourcenick contains the new one.
   class NickMessage < BasicUserMessage
-    def initialize(bot, source, oldnick, newnick)
-      super(bot, source, oldnick, newnick)
+    def initialize(bot, server, source, oldnick, newnick)
+      super(bot, server, source, oldnick, newnick)
+    end
+
+    def oldnick
+      return @target
+    end
+
+    def newnick
+      return @message
     end
   end
 
   class QuitMessage < BasicUserMessage
-    def initialize(bot, source, target, message="")
-      super(bot, source, target, message)
+    def initialize(bot, server, source, target, message="")
+      super(bot, server, source, target, message)
     end
   end
 
@@ -272,10 +286,10 @@ module Irc
     # topic set on channel
     attr_reader :channel
 
-    def initialize(bot, source, channel, timestamp, topic="")
-      super(bot, source, channel, topic)
+    def initialize(bot, server, source, channel, topic=ChannelTopic.new)
+      super(bot, server, source, channel, topic.text)
       @topic = topic
-      @timestamp = timestamp
+      @timestamp = topic.set_on
       @channel = channel
     end
   end
@@ -284,11 +298,11 @@ module Irc
   class JoinMessage < BasicUserMessage
     # channel joined
     attr_reader :channel
-    def initialize(bot, source, channel, message="")
-      super(bot, source, channel, message)
+    def initialize(bot, server, source, channel, message="")
+      super(bot, server, source, channel, message)
       @channel = channel
       # in this case sourcenick is the nick that could be the bot
-      @address = (sourcenick.downcase == @bot.nick.downcase)
+      @address = (source == @bot.myself)
     end
   end
 
