@@ -72,6 +72,9 @@ class KarmaPlugin < Plugin
         next if(key == m.sourcenick)
         if(change == "++")
           @registry[key] += 1
+          if key =~ /^#{@bot.nick}$/i
+            @bot.say m.replyto, @bot.lang.get("thanks")
+          end
         elsif(change == "--")
           @registry[key] -= 1
         end
