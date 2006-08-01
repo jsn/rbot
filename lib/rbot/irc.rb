@@ -505,7 +505,7 @@ module Irc
     end
 
     def reset(val)
-      @list.delete_if(val) if @list.include?(val)
+      @list.delete(val)
     end
   end
 
@@ -540,7 +540,7 @@ module Irc
     end
 
     def reset(val)
-      @list.delete_if { |x| x == val }
+      @list.delete(val)
     end
   end
 
@@ -634,10 +634,10 @@ module Irc
     # Removes a user from the channel
     #
     def delete_user(user)
-      @users.delete_if { |x| x == user }
       @mode.each { |sym, mode|
         mode.reset(user) if mode.class <= ChannelUserMode
       }
+      @users.delete(user)
     end
 
     # The channel prefix
