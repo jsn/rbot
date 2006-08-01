@@ -98,13 +98,21 @@ module Plugins
 
   class BotModule
     attr_reader :bot   # the associated bot
+    attr_reader :botmodule_class # the botmodule class (:coremodule or :plugin)
+
     # initialise your bot module. Always call super if you override this method,
     # as important variables are set up for you
-    def initialize
-      @bot = Plugins.pluginmanager.bot
+    def initialize(kl)
+      @manager = Plugins::pluginmanager
+      @bot = @manager.bot
+
+      @botmodule_class = kl.to_sym
       @botmodule_triggers = Array.new
+
       @handler = MessageMapper.new(self)
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
+
+      @manager.add_botmodule(kl, self)
     end
 
     def flush_registry
@@ -148,7 +156,12 @@ module Plugins
     # return an identifier for this plugin, defaults to a list of the message
     # prefixes handled (used for error messages etc)
     def name
-      self.class.downcase.sub(/(plugin)?$/,"")
+      self.class.to_s.downcase.sub(/^#<module:.*?>::/,"").sub(/(plugin)?$/,"")
+    end
+
+    # just calls name
+    def to_s
+      name
     end
 
     # return a help string for your module. for complex modules, you may wish
@@ -163,10 +176,10 @@ module Plugins
     # register the plugin as a handler for messages prefixed +name+
     # this can be called multiple times for a plugin to handle multiple
     # message prefixes
-    def register(name, kl, opts={})
-      raise ArgumentError, "Third argument must be a hash!" unless opts.kind_of?(Hash)
-      return if Plugins.pluginmanager.botmodules[kl].has_key?(name)
-      Plugins.pluginmanager.botmodules[kl][name] = self
+    def register(name, opts={})
+      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
+      return if @manager.knows?(name, @botmodule_class)
+      @manager.register(name, @botmodule_class, self)
       @botmodule_triggers << name unless opts.fetch(:hidden, false)
     end
 
@@ -179,20 +192,18 @@ module Plugins
   end
 
   class CoreBotModule < BotModule
-    def register(name, opts={})
-      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
-      super(name, :core, opts)
+    def initialize
+      super(:coremodule)
     end
   end
 
   class Plugin < BotModule
-    def register(name, opts={})
-      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
-      super(name, :plugin, opts)
+    def initialize
+      super(:plugin)
     end
   end
 
-  # class to manage multiple plugins and delegate messages to them for
+  # Singleton to manage multiple plugins and delegate messages to them for
   # handling
   class PluginManagerClass
     include Singleton
@@ -201,29 +212,67 @@ module Plugins
 
     def initialize
       bot_associate(nil)
+
+      @dirs = []
+    end
+
+    # Reset lists of botmodules
+    def reset_botmodule_lists
+      @botmodules = {
+        :coremodule => [],
+        :plugin => []
+      }
+
+      @commandmappers = {
+        :coremodule => {},
+        :plugin => {}
+      }
+
     end
 
     # Associate with bot _bot_
     def bot_associate(bot)
-      @botmodules = {
-        :core => Hash.new,
-        :plugin => Hash.new
-      }
-
-      # associated IrcBot class
+      reset_botmodule_lists
       @bot = bot
     end
 
-    # Returns a hash of the registered message prefixes and associated
-    # plugins
+    # Returns +true+ if _name_ is a known botmodule of class kl
+    def knows?(name, kl)
+      return @commandmappers[kl.to_sym].has_key?(name.to_sym)
+    end
+
+    # Returns +true+ if _name_ is a known botmodule of class kl
+    def register(name, kl, botmodule)
+      raise TypeError, "Third argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+      @commandmappers[kl.to_sym][name.to_sym] = botmodule
+    end
+
+    def add_botmodule(kl, botmodule)
+      raise TypeError, "Second argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+      raise "#{kl.to_s} #{botmodule.name} already registered!" if @botmodules[kl.to_sym].include?(botmodule)
+      @botmodules[kl.to_sym] << botmodule
+    end
+
+    # Returns an array of the loaded plugins
+    def core_modules
+      @botmodules[:coremodule]
+    end
+
+    # Returns an array of the loaded plugins
     def plugins
       @botmodules[:plugin]
     end
 
     # Returns a hash of the registered message prefixes and associated
+    # plugins
+    def plugin_commands
+      @commandmappers[:plugin]
+    end
+
+    # Returns a hash of the registered message prefixes and associated
     # core modules
-    def core_modules
-      @botmodules[:core]
+    def core_commands
+      @commandmappers[:coremodule]
     end
 
     # Makes a string of error _err_ by adding text _str_
@@ -246,6 +295,7 @@ module Plugins
       plugin_module = Module.new
 
       desc = desc.to_s + " " if desc
+
       begin
         plugin_string = IO.readlines(fname).join("")
         debug "loading #{desc}#{fname}"
@@ -272,31 +322,12 @@ module Plugins
     end
     private :load_botmodule_file
 
-    # Load core botmodules
-    def load_core(dir)
-      # TODO FIXME should this be hardcoded?
-      if(FileTest.directory?(dir))
-        d = Dir.new(dir)
-        d.sort.each { |file|
-          next unless(file =~ /[^.]\.rb$/)
-
-          did_it = load_botmodule_file("#{dir}/#{file}", "core module")
-          case did_it
-          when Symbol
-            # debug "loaded core botmodule #{dir}/#{file}"
-          when Exception
-            raise "failed to load core botmodule #{dir}/#{file}!"
-          end
-        }
-      end
-    end
-
-    # dirlist:: array of directories to scan (in order) for plugins
+    # add one or more directories to the list of directories to
+    # load botmodules from
     #
-    # create a new plugin handler, scanning for plugins in +dirlist+
-    def load_plugins(dirlist)
-      @dirs = dirlist
-      scan
+    def add_botmodule_dir(*dirlist)
+      @dirs += dirlist
+      debug "Botmodule loading path: #{@dirs.join(', ')}"
     end
 
     # load plugins from pre-assigned list of directories
@@ -310,11 +341,8 @@ module Plugins
         processed[pn.intern] = :blacklisted
       }
 
-      dirs = Array.new
-      # TODO FIXME should this be hardcoded?
-      dirs << Config::datadir + "/plugins"
-      dirs += @dirs
-      dirs.reverse.each {|dir|
+      dirs = @dirs
+      dirs.each {|dir|
         if(FileTest.directory?(dir))
           d = Dir.new(dir)
           d.sort.each {|file|
@@ -349,6 +377,7 @@ module Plugins
           }
         end
       }
+      debug "finished loading plugins: #{status(true)}"
     end
 
     # call the save method for each active plugin
@@ -360,6 +389,7 @@ module Plugins
     # call the cleanup method for each active plugin
     def cleanup
       delegate 'cleanup'
+      reset_botmodule_lists
     end
 
     # drop all plugins and rescan plugins on disk
@@ -367,21 +397,31 @@ module Plugins
     def rescan
       save
       cleanup
-      plugins.clear
       scan
     end
 
     def status(short=false)
-      # Active plugins first
-      if(self.length > 0)
-        list = "#{self.length} plugin#{'s' if length > 1}"
+      list = ""
+      if self.core_length > 0
+        list << "#{self.core_length} core module#{'s' if core_length > 1}"
         if short
           list << " loaded"
         else
-          list << ": " + @@plugins.values.uniq.collect{|p| p.name}.sort.join(", ")
+          list << ": " + core_modules.collect{ |p| p.name}.sort.join(", ")
         end
       else
-        list = "no plugins active"
+        list << "no core botmodules loaded"
+      end
+      # Active plugins first
+      if(self.length > 0)
+        list << "; #{self.length} plugin#{'s' if length > 1}"
+        if short
+          list << " loaded"
+        else
+          list << ": " + plugins.collect{ |p| p.name}.sort.join(", ")
+        end
+      else
+        list << "no plugins active"
       end
       # Ignored plugins next
       unless @ignored.empty?
@@ -402,7 +442,11 @@ module Plugins
     end
 
     def length
-      plugins.values.uniq.length
+      plugins.length
+    end
+
+    def core_length
+      core_modules.length
     end
 
     # return help for +topic+ (call associated plugin's help method)
@@ -431,57 +475,87 @@ module Plugins
       when /^(\S+)\s*(.*)$/
         key = $1
         params = $2
-        if(@@plugins.has_key?(key))
-          begin
-            return @@plugins[key].help(key, params)
-          rescue Exception => err
-            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            error report_error("plugin #{@@plugins[key].name} help() failed:", err)
+        [core_commands, plugin_commands].each { |pl|
+          if(pl.has_key?(key))
+            begin
+              return pl[key].help(key, params)
+            rescue Exception => err
+              #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+              error report_error("#{p.botmodule_class} #{plugins[key].name} help() failed:", err)
+            end
+          else
+            return false
           end
-        else
-          return false
-        end
+        }
       end
     end
 
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter
     def delegate(method, *args)
+      debug "Delegating #{method.inspect}"
       [core_modules, plugins].each { |pl|
-        pl.values.uniq.each {|p|
+        pl.each {|p|
           if(p.respond_to? method)
             begin
+              debug "#{p.botmodule_class} #{p.name} responds"
               p.send method, *args
             rescue Exception => err
-              #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-              error report_error("plugin #{p.name} #{method}() failed:", err)
+              error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
+              raise if err.class <= BDB::Fatal
             end
           end
         }
       }
+      debug "Finished delegating #{method.inspect}"
     end
 
     # see if we have a plugin that wants to handle this message, if so, pass
     # it to the plugin and return true, otherwise false
     def privmsg(m)
-      [core_modules, plugins].each { |pl|
-        return unless(m.plugin)
-        if (pl.has_key?(m.plugin) &&
-          pl[m.plugin].respond_to?("privmsg") &&
-          @bot.auth.allow?(m.plugin, m.source, m.replyto))
-          begin
-            pl[m.plugin].privmsg(m)
-          rescue BDB::Fatal => err
-            error error_report("plugin #{pl[m.plugin].name} privmsg() failed:", err)
-            raise
-          rescue Exception => err
-            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            error "plugin #{pl[m.plugin].name} privmsg() failed: #{err.class}: #{err}\n#{error err.backtrace.join("\n")}"
+      debug "Delegating privmsg with key #{m.plugin}"
+      return unless m.plugin
+      begin
+        [core_commands, plugin_commands].each { |pl|
+          # We do it this way to skip creating spurious keys
+          # FIXME use fetch?
+          k = m.plugin.to_sym
+          if pl.has_key?(k)
+            p = pl[k]
+          else
+            p = nil
           end
-          return true
-        end
+          if p
+            # TODO This should probably be checked elsewhere
+            debug "Checking auth ..."
+            if @bot.auth.allow?(m.plugin, m.source, m.replyto)
+              debug "Checking response ..."
+              if p.respond_to?("privmsg")
+                begin
+                  debug "#{p.botmodule_class} #{p.name} responds"
+                  p.privmsg(m)
+                rescue Exception => err
+                  error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
+                  raise if err.class <= BDB::Fatal
+                end
+                debug "Successfully delegated privmsg with key #{m.plugin}"
+                return true
+              else
+                debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsgs"
+              end
+            else
+              debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to use #{m.plugin} on #{m.replyto}"
+            end
+          else
+            debug "No #{pl.values.first.botmodule_class} registered #{m.plugin}" unless pl.empty?
+          end
+          debug "Finished delegating privmsg with key #{m.plugin}" + ( pl.empty? ? "" : " to #{pl.values.first.botmodule_class}s" )
+        }
         return false
-      }
+      rescue Exception => e
+        error report_error("couldn't delegate #{m}", e)
+      end
+      debug "Finished delegating privmsg with key #{m.plugin}"
     end
   end
 

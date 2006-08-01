@@ -171,13 +171,13 @@ module Irc
 
   # This method raises a TypeError if _user_ is not of class User
   #
-  def error_if_not_user(user)
+  def Irc.error_if_not_user(user)
     raise TypeError, "#{user.inspect} must be of type Irc::User and not #{user.class}" unless user.class <= User
   end
 
   # This method raises a TypeError if _chan_ is not of class Chan
   #
-  def error_if_not_channel(chan)
+  def Irc.error_if_not_channel(chan)
     raise TypeError, "#{chan.inspect} must be of type Irc::User and not #{chan.class}" unless chan.class <= Channel
   end
 
@@ -219,25 +219,26 @@ module Irc
       # the command as a symbol with the :command method and the whole
       # path as :path
       #
-      #   Command.new("core::auth::save").path => [:"", :core, :"core::auth", :"core::auth::save"]
+      #   Command.new("core::auth::save").path => [:"*", :"core", :"core::auth", :"core::auth::save"]
       #
       #   Command.new("core::auth::save").command => :"core::auth::save"
       #
       def initialize(cmd)
         cmdpath = sanitize_command_path(cmd).split('::')
-        seq = cmdpath.inject([""]) { |list, cmd|
-          list << (list.last ? list.last + "::" : "") + cmd
+        seq = cmdpath.inject(["*"]) { |list, cmd|
+          list << (list.length > 1 ? list.last + "::" : "") + cmd
         }
         @path = seq.map { |k|
           k.to_sym
         }
         @command = path.last
+        debug "Created command #{@command.inspect} with path #{@path.join(', ')}"
       end
     end
 
     # This method raises a TypeError if _user_ is not of class User
     #
-    def error_if_not_command(cmd)
+    def Irc.error_if_not_command(cmd)
       raise TypeError, "#{cmd.inspect} must be of type Irc::Auth::Command and not #{cmd.class}" unless cmd.class <= Command
     end
 
@@ -256,7 +257,7 @@ module Irc
       #
       def set_permission(cmd, val)
         raise TypeError, "#{val.inspect} must be true or false" unless [true,false].include?(val)
-        error_if_not_command(cmd)
+        Irc::error_if_not_command(cmd)
         cmd.path.each { |k|
           set_permission(k.to_s, true) unless @perm.has_key?(k)
         }
@@ -266,8 +267,8 @@ module Irc
       # Tells if command _cmd_ is permitted. We do this by returning
       # the value of the deepest Command#path that matches.
       #
-      def allow?(cmd)
-        error_if_not_command(cmd)
+      def permit?(cmd)
+        Irc::error_if_not_command(cmd)
         allow = nil
         cmd.path.reverse.each { |k|
           if @perm.has_key?(k)
@@ -313,7 +314,7 @@ module Irc
       # Checks if BotUser is allowed to do something on channel _chan_,
       # or on all channels if _chan_ is nil
       #
-      def allow?(cmd, chan=nil)
+      def permit?(cmd, chan=nil)
         if chan
           k = chan.to_s.to_sym
         else
@@ -321,7 +322,7 @@ module Irc
         end
         allow = nil
         if @perm.has_key?(k)
-          allow = @perm[k].allow?(cmd)
+          allow = @perm[k].permit?(cmd)
         end
         return allow
       end
@@ -356,7 +357,7 @@ module Irc
 
       # This method checks if BotUser has a Netmask that matches _user_
       def knows?(user)
-        error_if_not_user(user)
+        Irc::error_if_not_user(user)
         known = false
         @netmasks.each { |n|
           if user.matches?(n)
@@ -424,7 +425,7 @@ module Irc
 
       # Anon knows everybody
       def knows?(user)
-        error_if_not_user(user)
+        Irc::error_if_not_user(user)
         return true
       end
 
@@ -437,7 +438,7 @@ module Irc
 
     # Returns the only instance of AnonBotUserClass
     #
-    def Auth::anonbotuser
+    def Auth.anonbotuser
       return AnonBotUserClass.instance
     end
 
@@ -449,14 +450,14 @@ module Irc
         super("owner")
       end
 
-      def allow?(cmd, chan=nil)
+      def permit?(cmd, chan=nil)
         return true
       end
     end
 
     # Returns the only instance of BotOwnerClass
     #
-    def Auth::botowner
+    def Auth.botowner
       return BotOwnerClass.instance
     end
 
@@ -520,8 +521,8 @@ module Irc
 
       # Maps <code>Irc::User</code> to BotUser
       def irc_to_botuser(ircuser)
-        error_if_not_user(ircuser)
-        return @botusers[ircuser] || anonbotuser
+        Irc::error_if_not_user(ircuser)
+        return @botusers[ircuser] || Auth::anonbotuser
       end
 
       # creates a new BotUser
@@ -541,7 +542,7 @@ module Irc
       # It is possible to autologin by Netmask, on request
       #
       def login(ircuser, botusername, pwd, bymask = false)
-        error_if_not_user(ircuser)
+        Irc::error_if_not_user(ircuser)
         n = BotUser.sanitize_username(name)
         k = n.to_sym
         raise "No such BotUser #{n}" unless include?(k)
@@ -569,11 +570,10 @@ module Irc
       # * anonbotuser on _chan_
       # * anonbotuser on all channels
       #
-      def allow?(user, cmdtxt, chan=nil)
-        error_if_not_user(user)
+      def permit?(user, cmdtxt, chan=nil)
+        botuser = irc_to_botuser(user)
         cmd = Command.new(cmdtxt)
-        allow = nil
-        botuser = @botusers[user]
+
         case chan
         when User
           chan = "?"
@@ -581,19 +581,26 @@ module Irc
           chan = chan.name
         end
 
-        allow = botuser.allow?(cmd, chan) if chan
+        allow = nil
+
+        allow = botuser.permit?(cmd, chan) if chan
         return allow unless allow.nil?
-        allow = botuser.allow?(cmd)
+        allow = botuser.permit?(cmd)
         return allow unless allow.nil?
 
-        unless botuser == anonbotuser
-          allow = anonbotuser.allow?(cmd, chan) if chan
+        unless botuser == Auth::anonbotuser
+          allow = Auth::anonbotuser.permit?(cmd, chan) if chan
           return allow unless allow.nil?
-          allow = anonbotuser.allow?(cmd)
+          allow = Auth::anonbotuser.permit?(cmd)
           return allow unless allow.nil?
         end
 
         raise "Could not check permission for user #{user.inspect} to run #{cmdtxt.inspect} on #{chan.inspect}"
+      end
+
+      # Checks if command _cmd_ is allowed to User _user_ on _chan_
+      def allow?(cmdtxt, user, chan=nil)
+        permit?(user, cmdtxt, chan)
       end
     end
 

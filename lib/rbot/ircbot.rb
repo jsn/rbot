@@ -350,8 +350,10 @@ class IrcBot
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::pluginmanager
     @plugins.bot_associate(self)
-    @plugins.load_core(Config::coredir)
-    @plugins.load_plugins(["#{botclass}/plugins"])
+    @plugins.add_botmodule_dir(Config::coredir)
+    @plugins.add_botmodule_dir("#{botclass}/plugins")
+    @plugins.add_botmodule_dir(Config::datadir + "/plugins")
+    @plugins.scan
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
     @client = IrcClient.new
@@ -363,7 +365,6 @@ class IrcBot
     # It's nil when we are not quiet, an empty list when we are quiet
     # in all channels, a list of channels otherwise
     @quiet = nil
-
 
     @client[:welcome] = proc {|data|
       irclog "joined server #{@client.server} as #{myself}", "server"
@@ -735,8 +736,6 @@ class IrcBot
     case where
     when Channel
       irclog "* #{myself} #{message}", where
-    when User
-      irclog "* #{myself}[#{where}] #{message}", $1
     else
       irclog "* #{myself}[#{where}] #{message}", where
     end
@@ -1003,7 +1002,6 @@ class IrcBot
     end
   end
 
-  # respond to being kicked from a channel
   def irclogkick(m)
     if(m.address?)
       debug "kicked from channel #{m.channel}"
