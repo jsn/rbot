@@ -2,7 +2,7 @@
 #
 # Create mini plugins on IRC.
 #
-# Commands are little Ruby programs that run in the context of the command plugin. You 
+# Scripts are little Ruby programs that run in the context of the script plugin. You 
 # can create them directly in an IRC channel, and invoke them just like normal rbot plugins. 
 #
 # (c) 2006 Mark Kretschmann <markey@web.de>
@@ -12,7 +12,7 @@
 Command = Struct.new( "Command", :code, :nick, :created, :channel )
 
 
-class CommandPlugin < Plugin
+class ScriptPlugin < Plugin
 
   def initialize
     super
@@ -38,9 +38,9 @@ class CommandPlugin < Plugin
 
   def help( plugin, topic="" )
     if topic == "add"
-      "Commands are little Ruby programs that run in the context of the command plugin. You can access @bot (class IrcBot), m (class PrivMessage), user (class String, either the first argument, or if missing the sourcenick), and args (class Array, an array of arguments). Example: 'command add greet m.reply( 'Hello ' + user )'. Invoke the command just like a plugin: '<botnick>: greet'."
+      "Scripts are little Ruby programs that run in the context of the script plugin. You can access @bot (class IrcBot), m (class PrivMessage), user (class String, either the first argument, or if missing the sourcenick), and args (class Array, an array of arguments). Example: 'script add greet m.reply( 'Hello ' + user )'. Invoke the script just like a plugin: '<botnick>: greet'."
     else  
-      "Create mini plugins on IRC. 'command add <name> <code>' => Create command named <name> with the code <source>. 'command list' => Show a list of all known commands. 'command show <name>' => Show the source code for <name>. 'command del <name>' => Delete command <name>."
+      "Create mini plugins on IRC. 'script add <name> <code>' => Create script named <name> with the code <source>. 'script list' => Show a list of all known scripts. 'script show <name>' => Show the source code for <name>. 'script del <name>' => Delete the script <name>."
     end
   end
 
@@ -51,7 +51,7 @@ class CommandPlugin < Plugin
     if m.address? and @commands.has_key?( name )
       code = @commands[name].code.dup.untaint
 
-      # Convenience variables, can be accessed by commands:
+      # Convenience variables, can be accessed by scripts:
       args = m.message.split
       args.delete_at( 0 ) 
       user = args.empty? ? m.sourcenick : args.first  
@@ -62,7 +62,7 @@ class CommandPlugin < Plugin
         begin
           eval( code )
         rescue => e
-          m.reply( "Command '#{name}' crapped out :(" )
+          m.reply( "Script '#{name}' crapped out :(" )
           m.reply( e.inspect )
         end
       }
@@ -97,7 +97,7 @@ class CommandPlugin < Plugin
   def handle_del( m, params )
     name = params[:name]
     unless @commands.has_key?( name )
-      m.reply( "Command does not exist." ); return
+      m.reply( "Script does not exist." ); return
     end
 
     @commands.delete( name )
@@ -107,7 +107,7 @@ class CommandPlugin < Plugin
 
   def handle_list( m, params )
     if @commands.length == 0
-      m.reply( "No commands available." ); return
+      m.reply( "No scripts available." ); return
     end
 
     cmds_per_page = 30
@@ -118,14 +118,14 @@ class CommandPlugin < Plugin
     page = [page, num_pages].min
     str = cmds[(page-1)*cmds_per_page, cmds_per_page].join(', ') 
 
-    m.reply "Available commands (page #{page}/#{num_pages}): #{str}" 
+    m.reply "Available scripts (page #{page}/#{num_pages}): #{str}" 
   end
 
 
   def handle_show( m, params )
     name = params[:name]
     unless @commands.has_key?( name )
-      m.reply( "Command does not exist." ); return
+      m.reply( "Script does not exist." ); return
     end
 
     cmd = @commands[name]
@@ -135,13 +135,13 @@ class CommandPlugin < Plugin
 end
 
 
-plugin = CommandPlugin.new
-plugin.register( "command" )
+plugin = ScriptPlugin.new
+plugin.register( "script" )
 
-plugin.map 'command add -f :name *code', :action => 'handle_add_force', :auth => 'commandedit'
-plugin.map 'command add :name *code',    :action => 'handle_add',       :auth => 'commandedit'
-plugin.map 'command del :name',          :action => 'handle_del',       :auth => 'commandedit'
-plugin.map 'command list :page',         :action => 'handle_list',      :defaults => { :page => '1' }
-plugin.map 'command show :name',         :action => 'handle_show'
+plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth => 'scriptedit'
+plugin.map 'script add :name *code',    :action => 'handle_add',       :auth => 'scriptedit'
+plugin.map 'script del :name',          :action => 'handle_del',       :auth => 'scriptedit'
+plugin.map 'script list :page',         :action => 'handle_list',      :defaults => { :page => '1' }
+plugin.map 'script show :name',         :action => 'handle_show'
 
 
