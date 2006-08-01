@@ -165,6 +165,8 @@
 # <tango_>	permissions are in the form [ [channel, {command => bool, ...}] ...]
 #++
 
+require 'singleton'
+
 module Irc
 
   # This method raises a TypeError if _user_ is not of class User
@@ -264,7 +266,7 @@ module Irc
       # Tells if command _cmd_ is permitted. We do this by returning
       # the value of the deepest Command#path that matches.
       #
-      def permit?(cmd)
+      def allow?(cmd)
         error_if_not_command(cmd)
         allow = nil
         cmd.path.reverse.each { |k|
@@ -311,7 +313,7 @@ module Irc
       # Checks if BotUser is allowed to do something on channel _chan_,
       # or on all channels if _chan_ is nil
       #
-      def permit?(cmd, chan=nil)
+      def allow?(cmd, chan=nil)
         if chan
           k = chan.to_s.to_sym
         else
@@ -319,7 +321,7 @@ module Irc
         end
         allow = nil
         if @perm.has_key?(k)
-          allow = @perm[k].permit?(cmd)
+          allow = @perm[k].allow?(cmd)
         end
         return allow
       end
@@ -435,7 +437,7 @@ module Irc
 
     # Returns the only instance of AnonBotUserClass
     #
-    def anonbotuser
+    def Auth::anonbotuser
       return AnonBotUserClass.instance
     end
 
@@ -447,15 +449,15 @@ module Irc
         super("owner")
       end
 
-      def permit?(cmd, chan=nil)
+      def allow?(cmd, chan=nil)
         return true
       end
     end
 
     # Returns the only instance of BotOwnerClass
     #
-    def botowner
-      return BotOwneClass.instance
+    def Auth::botowner
+      return BotOwnerClass.instance
     end
 
 
@@ -469,7 +471,16 @@ module Irc
       # <code>Irc::User</code>s onto <code>BotUser</code>s, and the other that maps
       # usernames onto <code>BotUser</code>
       def initialize
+        bot_associate(nil)
+      end
+
+      def bot_associate(bot)
+        raise "Cannot associate with a new bot! Save first" if defined?(@has_changes) && @has_changes
+
         reset_hashes
+
+        # Associated bot
+        @bot = bot
 
         # This variable is set to true when there have been changes
         # to the botusers list, so that we know when to save
@@ -480,7 +491,7 @@ module Irc
       def reset_hashes
         @botusers = Hash.new
         @allbotusers = Hash.new
-        [anonbotuser, botowner].each { |x| @allbotusers[x.username.to_sym] = x }
+        [Auth::anonbotuser, Auth::botowner].each { |x| @allbotusers[x.username.to_sym] = x }
       end
 
       # load botlist from userfile
@@ -558,28 +569,37 @@ module Irc
       # * anonbotuser on _chan_
       # * anonbotuser on all channels
       #
-      def permit?(user, cmdtxt, chan=nil)
+      def allow?(user, cmdtxt, chan=nil)
         error_if_not_user(user)
         cmd = Command.new(cmdtxt)
         allow = nil
         botuser = @botusers[user]
-        allow = botuser.permit?(cmd, chan) if chan
+        case chan
+        when User
+          chan = "?"
+        when Channel
+          chan = chan.name
+        end
+
+        allow = botuser.allow?(cmd, chan) if chan
         return allow unless allow.nil?
-        allow = botuser.permit?(cmd)
+        allow = botuser.allow?(cmd)
         return allow unless allow.nil?
+
         unless botuser == anonbotuser
-          allow = anonbotuser.permit?(cmd, chan) if chan
+          allow = anonbotuser.allow?(cmd, chan) if chan
           return allow unless allow.nil?
-          allow = anonbotuser.permit?(cmd)
+          allow = anonbotuser.allow?(cmd)
           return allow unless allow.nil?
         end
+
         raise "Could not check permission for user #{user.inspect} to run #{cmdtxt.inspect} on #{chan.inspect}"
       end
     end
 
     # Returns the only instance of AuthManagerClass
     #
-    def authmanager
+    def Auth.authmanager
       return AuthManagerClass.instance
     end
   end

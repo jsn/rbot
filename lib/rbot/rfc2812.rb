@@ -1167,6 +1167,7 @@ module Irc
         data[:newnick] = argv[0]
         data[:oldnick] = data[:source].nick.dup
         data[:source].nick = data[:nick]
+        debug "#{data[:oldnick]} (now #{data[:newnick]}) was on #{data[:is_on].join(', ')}"
 
         handle(:nick, data)
       when 'MODE'
@@ -1189,7 +1190,7 @@ module Irc
           data[:modes] = []
           # array of indices in data[:modes] where parameters
           # are needed
-          who_want_params = []
+          who_wants_params = []
 
           argv[1..-1].each { |arg|
             setting = arg[0].chr

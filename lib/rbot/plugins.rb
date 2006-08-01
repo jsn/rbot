@@ -1,3 +1,5 @@
+require 'singleton'
+
 module Irc
     BotConfig.register BotConfigArrayValue.new('plugins.blacklist',
       :default => [], :wizard => false, :requires_restart => true,
@@ -94,13 +96,13 @@ module Plugins
                          files/connections or flush caches here
 =end
 
-  class Plugin
+  class BotModule
     attr_reader :bot   # the associated bot
-    # initialise your plugin. Always call super if you override this method,
+    # initialise your bot module. Always call super if you override this method,
     # as important variables are set up for you
     def initialize
-      @bot = Plugins.bot
-      @names = Array.new
+      @bot = Plugins.pluginmanager.bot
+      @botmodule_triggers = Array.new
       @handler = MessageMapper.new(self)
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
     end
@@ -146,7 +148,7 @@ module Plugins
     # return an identifier for this plugin, defaults to a list of the message
     # prefixes handled (used for error messages etc)
     def name
-      @names.join("|")
+      self.class.downcase.sub(/(plugin)?$/,"")
     end
 
     # return a help string for your module. for complex modules, you may wish
@@ -161,11 +163,11 @@ module Plugins
     # register the plugin as a handler for messages prefixed +name+
     # this can be called multiple times for a plugin to handle multiple
     # message prefixes
-    def register(name,opts={})
-      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
-      return if Plugins.plugins.has_key?(name)
-      Plugins.plugins[name] = self
-      @names << name unless opts.fetch(:hidden, false)
+    def register(name, kl, opts={})
+      raise ArgumentError, "Third argument must be a hash!" unless opts.kind_of?(Hash)
+      return if Plugins.pluginmanager.botmodules[kl].has_key?(name)
+      Plugins.pluginmanager.botmodules[kl][name] = self
+      @botmodule_triggers << name unless opts.fetch(:hidden, false)
     end
 
     # default usage method provided as a utility for simple plugins. The
@@ -176,32 +178,125 @@ module Plugins
 
   end
 
+  class CoreBotModule < BotModule
+    def register(name, opts={})
+      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
+      super(name, :core, opts)
+    end
+  end
+
+  class Plugin < BotModule
+    def register(name, opts={})
+      raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
+      super(name, :plugin, opts)
+    end
+  end
+
   # class to manage multiple plugins and delegate messages to them for
   # handling
-  class Plugins
-    # hash of registered message prefixes and associated plugins
-    @@plugins = Hash.new
-    # associated IrcBot class
-    @@bot = nil
+  class PluginManagerClass
+    include Singleton
+    attr_reader :bot
+    attr_reader :botmodules
 
-    # bot::     associated IrcBot class
+    def initialize
+      bot_associate(nil)
+    end
+
+    # Associate with bot _bot_
+    def bot_associate(bot)
+      @botmodules = {
+        :core => Hash.new,
+        :plugin => Hash.new
+      }
+
+      # associated IrcBot class
+      @bot = bot
+    end
+
+    # Returns a hash of the registered message prefixes and associated
+    # plugins
+    def plugins
+      @botmodules[:plugin]
+    end
+
+    # Returns a hash of the registered message prefixes and associated
+    # core modules
+    def core_modules
+      @botmodules[:core]
+    end
+
+    # Makes a string of error _err_ by adding text _str_
+    def report_error(str, err)
+      ([str, err.inspect] + err.backtrace).join("\n")
+    end
+
+    # This method is the one that actually loads a module from the
+    # file _fname_
+    #
+    # _desc_ is a simple description of what we are loading (plugin/botmodule/whatever)
+    #
+    # It returns the Symbol :loaded on success, and an Exception
+    # on failure
+    #
+    def load_botmodule_file(fname, desc=nil)
+      # create a new, anonymous module to "house" the plugin
+      # the idea here is to prevent namespace pollution. perhaps there
+      # is another way?
+      plugin_module = Module.new
+
+      desc = desc.to_s + " " if desc
+      begin
+        plugin_string = IO.readlines(fname).join("")
+        debug "loading #{desc}#{fname}"
+        plugin_module.module_eval(plugin_string, fname)
+        return :loaded
+      rescue Exception => err
+        # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
+        warning report_error("#{desc}#{fname} load failed", err)
+        bt = err.backtrace.select { |line|
+          line.match(/^(\(eval\)|#{fname}):\d+/)
+        }
+        bt.map! { |el|
+          el.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
+            "#{fname}#{$1}#{$3}"
+          }
+        }
+        msg = err.to_str.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
+          "#{fname}#{$1}#{$3}"
+        }
+        newerr = err.class.new(msg)
+        newerr.set_backtrace(bt)
+        return newerr
+      end
+    end
+    private :load_botmodule_file
+
+    # Load core botmodules
+    def load_core(dir)
+      # TODO FIXME should this be hardcoded?
+      if(FileTest.directory?(dir))
+        d = Dir.new(dir)
+        d.sort.each { |file|
+          next unless(file =~ /[^.]\.rb$/)
+
+          did_it = load_botmodule_file("#{dir}/#{file}", "core module")
+          case did_it
+          when Symbol
+            # debug "loaded core botmodule #{dir}/#{file}"
+          when Exception
+            raise "failed to load core botmodule #{dir}/#{file}!"
+          end
+        }
+      end
+    end
+
     # dirlist:: array of directories to scan (in order) for plugins
     #
     # create a new plugin handler, scanning for plugins in +dirlist+
-    def initialize(bot, dirlist)
-      @@bot = bot
+    def load_plugins(dirlist)
       @dirs = dirlist
       scan
-    end
-
-    # access to associated bot
-    def Plugins.bot
-      @@bot
-    end
-
-    # access to list of plugins
-    def Plugins.plugins
-      @@plugins
     end
 
     # load plugins from pre-assigned list of directories
@@ -210,12 +305,13 @@ module Plugins
       @ignored = Array.new
       processed = Hash.new
 
-      @@bot.config['plugins.blacklist'].each { |p|
+      @bot.config['plugins.blacklist'].each { |p|
         pn = p + ".rb"
         processed[pn.intern] = :blacklisted
       }
 
       dirs = Array.new
+      # TODO FIXME should this be hardcoded?
       dirs << Config::datadir + "/plugins"
       dirs += @dirs
       dirs.reverse.each {|dir|
@@ -242,40 +338,14 @@ module Plugins
 
             next unless(file =~ /\.rb$/)
 
-            tmpfilename = "#{dir}/#{file}"
-
-            # create a new, anonymous module to "house" the plugin
-            # the idea here is to prevent namespace pollution. perhaps there
-            # is another way?
-            plugin_module = Module.new
-
-            begin
-              plugin_string = IO.readlines(tmpfilename).join("")
-              debug "loading plugin #{tmpfilename}"
-              plugin_module.module_eval(plugin_string, tmpfilename)
-              processed[file.intern] = :loaded
-            rescue Exception => err
-              # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
-              warning "plugin #{tmpfilename} load failed\n" + err.inspect
-              debug err.backtrace.join("\n")
-              bt = err.backtrace.select { |line|
-                line.match(/^(\(eval\)|#{tmpfilename}):\d+/)
-              }
-              bt.map! { |el|
-                el.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
-                  "#{tmpfilename}#{$1}#{$3}"
-                }
-              }
-              msg = err.to_str.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
-                "#{tmpfilename}#{$1}#{$3}"
-              }
-              newerr = err.class.new(msg)
-              newerr.set_backtrace(bt)
-              # debug "Simplified error: " << newerr.inspect
-              # debug newerr.backtrace.join("\n")
-              @failed << { :name => file, :dir => dir, :reason => newerr }
-              # debug "Failures: #{@failed.inspect}"
+            did_it = load_botmodule_file("#{dir}/#{file}", "plugin")
+            case did_it
+            when Symbol
+              processed[file.intern] = did_it
+            when Exception
+              @failed <<  { :name => file, :dir => dir, :reason => did_it }
             end
+
           }
         end
       }
@@ -297,15 +367,14 @@ module Plugins
     def rescan
       save
       cleanup
-      @@plugins = Hash.new
+      plugins.clear
       scan
-
     end
 
     def status(short=false)
       # Active plugins first
-      if(@@plugins.length > 0)
-        list = "#{length} plugin#{'s' if length > 1}"
+      if(self.length > 0)
+        list = "#{self.length} plugin#{'s' if length > 1}"
         if short
           list << " loaded"
         else
@@ -333,7 +402,7 @@ module Plugins
     end
 
     def length
-      @@plugins.values.uniq.length
+      plugins.values.uniq.length
     end
 
     # return help for +topic+ (call associated plugin's help method)
@@ -367,8 +436,7 @@ module Plugins
             return @@plugins[key].help(key, params)
           rescue Exception => err
             #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            error "plugin #{@@plugins[key].name} help() failed: #{err.class}: #{err}"
-            error err.backtrace.join("\n")
+            error report_error("plugin #{@@plugins[key].name} help() failed:", err)
           end
         else
           return false
@@ -379,41 +447,47 @@ module Plugins
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter
     def delegate(method, *args)
-      @@plugins.values.uniq.each {|p|
-        if(p.respond_to? method)
-          begin
-            p.send method, *args
-          rescue Exception => err
-            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            error "plugin #{p.name} #{method}() failed: #{err.class}: #{err}"
-            error err.backtrace.join("\n")
+      [core_modules, plugins].each { |pl|
+        pl.values.uniq.each {|p|
+          if(p.respond_to? method)
+            begin
+              p.send method, *args
+            rescue Exception => err
+              #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+              error report_error("plugin #{p.name} #{method}() failed:", err)
+            end
           end
-        end
+        }
       }
     end
 
     # see if we have a plugin that wants to handle this message, if so, pass
     # it to the plugin and return true, otherwise false
     def privmsg(m)
-      return unless(m.plugin)
-      if (@@plugins.has_key?(m.plugin) &&
-          @@plugins[m.plugin].respond_to?("privmsg") &&
-          @@bot.auth.allow?(m.plugin, m.source, m.replyto))
-        begin
-          @@plugins[m.plugin].privmsg(m)
-        rescue BDB::Fatal => err
-          error "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"
-          error err.backtrace.join("\n")
-          raise
-        rescue Exception => err
-          #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-          error "plugin #{@@plugins[m.plugin].name} privmsg() failed: #{err.class}: #{err}"
-          error err.backtrace.join("\n")
+      [core_modules, plugins].each { |pl|
+        return unless(m.plugin)
+        if (pl.has_key?(m.plugin) &&
+          pl[m.plugin].respond_to?("privmsg") &&
+          @bot.auth.allow?(m.plugin, m.source, m.replyto))
+          begin
+            pl[m.plugin].privmsg(m)
+          rescue BDB::Fatal => err
+            error error_report("plugin #{pl[m.plugin].name} privmsg() failed:", err)
+            raise
+          rescue Exception => err
+            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+            error "plugin #{pl[m.plugin].name} privmsg() failed: #{err.class}: #{err}\n#{error err.backtrace.join("\n")}"
+          end
+          return true
         end
-        return true
-      end
-      return false
+        return false
+      }
     end
+  end
+
+  # Returns the only PluginManagerClass instance
+  def Plugins.pluginmanager
+    return PluginManagerClass.instance
   end
 
 end
