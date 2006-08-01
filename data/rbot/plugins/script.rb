@@ -112,7 +112,7 @@ class ScriptPlugin < Plugin
 
     cmds_per_page = 30
     cmds = @commands.keys.sort
-    num_pages = cmds.length / cmds_per_page
+    num_pages = cmds.length / cmds_per_page + 1
     page = params[:page].to_i
     page = [page, 1].max
     page = [page, num_pages].min
