@@ -72,7 +72,6 @@ require 'rbot/config'
 require 'rbot/utils'
 
 require 'rbot/rfc2812'
-require 'rbot/keywords'
 require 'rbot/ircsocket'
 require 'rbot/auth'
 require 'rbot/timer'
@@ -315,7 +314,6 @@ class IrcBot
     @logs = Hash.new
     @httputil = Utils::HttpUtil.new(self)
     @lang = Language::Language.new(@config['core.language'])
-    @keywords = Keywords.new(self)
     begin
       @auth = IrcAuth.new(self)
     rescue => e
@@ -780,20 +778,18 @@ class IrcBot
     exec($0, *@argv)
   end
 
-  # call the save method for bot's config, keywords, auth and all plugins
+  # call the save method for bot's config, auth and all plugins
   def save
     @config.save
-    @keywords.save
     @auth.save
     @plugins.save
     DBTree.cleanup_logs
   end
 
-  # call the rescan method for the bot's lang, keywords and all plugins
+  # call the rescan method for the bot's lang and all plugins
   def rescan
     @lang.rescan
     @plugins.rescan
-    @keywords.rescan
   end
 
   # channel:: channel to join
@@ -829,7 +825,7 @@ class IrcBot
     topic = nil if topic == ""
     case topic
     when nil
-      helpstr = "help topics: core, auth, keywords"
+      helpstr = "help topics: core, auth"
       helpstr += @plugins.helptopics
       helpstr += " (help <topic> for more info)"
     when /^core$/i
@@ -840,10 +836,6 @@ class IrcBot
       helpstr = @auth.help
     when /^auth\s+(.+)$/i
       helpstr = @auth.help $1
-    when /^keywords$/i
-      helpstr = @keywords.help
-    when /^keywords\s+(.+)$/i
-      helpstr = @keywords.help $1
     else
       unless(helpstr = @plugins.help(topic))
         helpstr = "no help for topic #{topic}"
@@ -1063,8 +1055,6 @@ class IrcBot
           say m.replyto, @lang.get("hello_X") % m.sourcenick
         when (/^#{Regexp.escape(@nick)}!*$/)
           say m.replyto, @lang.get("hello_X") % m.sourcenick
-        else
-          @keywords.privmsg(m)
       end
     end
   end
@@ -1150,9 +1140,9 @@ class IrcBot
     debug "topic of channel #{m.channel} is now #{@channels[m.channel].topic}"
   end
 
-  # delegate a privmsg to auth, keyword or plugin handlers
+  # delegate a privmsg to auth or plugin handlers
   def delegate_privmsg(message)
-    [@auth, @plugins, @keywords].each {|m|
+    [@auth, @plugins].each {|m|
       break if m.privmsg(message)
     }
   end
