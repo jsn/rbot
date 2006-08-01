@@ -170,7 +170,7 @@ class ArrayOf < Array
   def internal_will_accept?(raising, *els)
     els.each { |el|
       unless el.class <= @element_class
-        raise TypeError if raising
+        raise TypeError, "#{el.inspect} is not of class #{@element_class}" if raising
         return false
       end
     }
@@ -485,34 +485,49 @@ module Irc
       @set_by = set_by
       @set_on = Time.new
     end
+
+    # Replace a ChannelTopic with another one
+    def replace(topic)
+      raise TypeError, "#{topic.inspect} is not an Irc::ChannelTopic" unless topic.class <= ChannelTopic
+      @text = topic.text.dup
+      @set_by = topic.set_by.dup
+      @set_on = topic.set_on.dup
+    end
   end
 
 
   # Mode on a channel
   class ChannelMode
+    def initialize(ch)
+      @channel = ch
+    end
   end
 
 
   # Channel modes of type A manipulate lists
   #
   class ChannelModeTypeA < ChannelMode
-    def initialize
+    def initialize(ch)
+      super
       @list = NetmaskList.new
     end
 
     def set(val)
-      @list << val unless @list.include?(val)
+      nm = @channel.server.new_netmask(val)
+      @list << nm unless @list.include?(nm)
     end
 
     def reset(val)
-      @list.delete(val)
+      nm = @channel.server.new_netmask(val)
+      @list.delete(nm)
     end
   end
 
   # Channel modes of type B need an argument
   #
   class ChannelModeTypeB < ChannelMode
-    def initialize
+    def initialize(ch)
+      super
       @arg = nil
     end
 
@@ -531,16 +546,19 @@ module Irc
   # modes of type A
   #
   class ChannelUserMode < ChannelModeTypeB
-    def initialize
+    def initialize(ch)
+      super
       @list = UserList.new
     end
 
     def set(val)
-      @list << val unless @list.include?(val)
+      u = @channel.server.user(val)
+      @list << u unless @list.include?(u)
     end
 
     def reset(val)
-      @list.delete(val)
+      u = @channel.server.user(val)
+      @list.delete(u)
     end
   end
 
@@ -548,7 +566,8 @@ module Irc
   # but not when they get reset
   #
   class ChannelModeTypeC < ChannelMode
-    def initialize
+    def initialize(ch)
+      super
       @arg = false
     end
 
@@ -562,8 +581,9 @@ module Irc
   end
 
   # Channel modes of type D are basically booleans
-  class ChannelModeTypeD
-    def initialize
+  class ChannelModeTypeD < ChannelMode
+    def initialize(ch)
+      super
       @set = false
     end
 
@@ -587,13 +607,14 @@ module Irc
   # * a set of modes
   #
   class Channel
-    attr_reader :name, :topic, :casemap, :mode, :users
+    attr_reader :name, :topic, :mode, :users, :server
     alias :to_s :name
 
     # A String describing the Channel and (some of its) internals
     #
     def inspect
       str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str << " on server #{server}"
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
       str << " @users=<#{@users.join(', ')}>"
       str
@@ -607,14 +628,15 @@ module Irc
     #
     # FIXME doesn't check if users have the same casemap as the channel yet
     #
-    def initialize(name, topic=nil, users=[], casemap=nil)
-      @casemap = casemap || 'rfc1459'
-
+    def initialize(server, name, topic=nil, users=[])
+      raise TypeError, "First parameter must be an Irc::Server" unless server.class <= Server
       raise ArgumentError, "Channel name cannot be empty" if name.to_s.empty?
       raise ArgumentError, "Unknown channel prefix #{name[0].chr}" if name !~ /^[&#+!]/
       raise ArgumentError, "Invalid character in #{name.inspect}" if name =~ /[ \x07,]/
 
-      @name = name.irc_downcase(@casemap)
+      @server = server
+
+      @name = name.irc_downcase(casemap)
 
       @topic = topic || ChannelTopic.new
 
@@ -629,6 +651,11 @@ module Irc
 
       # Flags
       @mode = {}
+    end
+
+    # Returns the casemap of the originating server
+    def casemap
+      return @server.casemap
     end
 
     # Removes a user from the channel
@@ -673,7 +700,7 @@ module Irc
     # Create a new mode
     #
     def create_mode(sym, kl)
-      @mode[sym.to_sym] = kl.new
+      @mode[sym.to_sym] = kl.new(self)
     end
   end
 
@@ -802,6 +829,7 @@ module Irc
     # See the RPL_ISUPPORT draft[http://www.irc.org/tech_docs/draft-brocklesby-irc-isupport-03.txt]
     #
     def parse_isupport(line)
+      debug "Parsing ISUPPORT #{line.inspect}"
       ar = line.split(' ')
       reparse = ""
       ar.each { |en|
@@ -837,10 +865,10 @@ module Irc
         when :chanmodes
           noval_warn(key, val) {
             groups = val.split(',')
-            @supports[key][:typea] = groups[0].scan(/./)
-            @supports[key][:typeb] = groups[1].scan(/./)
-            @supports[key][:typec] = groups[2].scan(/./)
-            @supports[key][:typed] = groups[3].scan(/./)
+            @supports[key][:typea] = groups[0].scan(/./).map { |x| x.to_sym}
+            @supports[key][:typeb] = groups[1].scan(/./).map { |x| x.to_sym}
+            @supports[key][:typec] = groups[2].scan(/./).map { |x| x.to_sym}
+            @supports[key][:typed] = groups[3].scan(/./).map { |x| x.to_sym}
           }
         when :channellen, :kicklen, :modes, :topiclen
           if val
@@ -863,8 +891,8 @@ module Irc
         when :prefix
           if val
             val.scan(/\((.*)\)(.*)/) { |m, p|
-              @supports[key][:modes] = m.scan(/./)
-              @supports[key][:prefixes] = p.scan(/./)
+              @supports[key][:modes] = m.scan(/./).map { |x| x.to_sym}
+              @supports[key][:prefixes] = p.scan(/./).map { |x| x.to_sym}
             }
           else
             @supports[key][:modes] = nil
@@ -965,7 +993,7 @@ module Irc
 
         # So far, everything is fine. Now create the actual Channel
         #
-        chan = Channel.new(name, topic, users, self.casemap)
+        chan = Channel.new(self, name, topic, users)
 
         # We wade through +prefix+ and +chanmodes+ to create appropriate
         # lists and flags for this channel
@@ -1126,41 +1154,3 @@ module Irc
   end
 end
 
-# TODO test cases
-
-if __FILE__ == $0
-
-include Irc
-
-  # puts " -- irc_regexp tests"
-  # ["*", "a?b", "a*b", "a\\*b", "a\\?b", "a?\\*b", "*a*\\**b?"].each { |s|
-  #   puts " --"
-  #   puts s.inspect
-  #   puts s.to_irc_regexp.inspect
-  #   puts "aUb".match(s.to_irc_regexp)[0] if "aUb" =~ s.to_irc_regexp
-  # }
-
-  # puts " -- Netmasks"
-  # masks = []
-  # masks << Netmask.new("start")
-  # masks << masks[0].dup
-  # masks << Netmask.new(masks[0])
-  # puts masks.join("\n")
- 
-  # puts " -- Changing 1"
-  # masks[1].nick = "me"
-  # puts masks.join("\n")
-
-  # puts " -- Changing 2"
-  # masks[2].nick = "you"
-  # puts masks.join("\n")
-
-  # puts " -- Channel example"
-  # ch = Channel.new("#prova")
-  # p ch
-  # puts " -- Methods"
-  # puts ch.methods.sort.join("\n")
-  # puts " -- Instance variables"
-  # puts ch.instance_variables.join("\n")
-
-end

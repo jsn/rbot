@@ -442,9 +442,11 @@ class IrcBot
       @plugins.delegate("nick", m)
     }
     @client[:quit] = proc {|data|
-      m = QuitMessage.new(self, @server, data[:source], data[:source], data[:message])
+      source = data[:source]
+      message = data[:message]
+      m = QuitMessage.new(self, @server, source, source, message)
       data[:was_on].each { |ch|
-        irclog "@ Quit: #{data[:source].nick}: #{message}", ch
+        irclog "@ Quit: #{source}: #{message}", ch
       }
       @plugins.delegate("listen", m)
       @plugins.delegate("quit", m)
@@ -1012,10 +1014,10 @@ class IrcBot
   end
 
   def irclogtopic(m)
-    if source == myself
-      irclog "@ I set topic \"#{topic}\"", channel
+    if m.source == myself
+      irclog "@ I set topic \"#{m.topic}\"", m.channel
     else
-      irclog "@ #{source} set topic \"#{topic}\"", channel
+      irclog "@ #{m.source} set topic \"#{m.topic}\"", m.channel
     end
   end
 

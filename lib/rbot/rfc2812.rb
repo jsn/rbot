@@ -954,7 +954,7 @@ module Irc
           # PREFIX=(ov)@+ CASEMAPPING=ascii CAPAB IRCD=dancer :are available
           # on this server"
           #
-          @server.parse_isupport(params.split(' ', 2).last)
+          @server.parse_isupport(argv[1..-2].join(' '))
           handle(:isupport, data)
         when ERR_NICKNAMEINUSE
           # "* <nick> :Nickname is already in use"
@@ -1018,7 +1018,7 @@ module Irc
             u = @server.user(ar[0])
             chan.users << u
             if ar[1]
-              m = @server.supports[:prefix][:prefixes].index(ar[1])
+              m = @server.supports[:prefix][:prefixes].index(ar[1].to_sym)
               m = @server.supports[:prefix][:modes][m]
               chan.mode[m.to_sym].set(u)
             end
@@ -1151,7 +1151,7 @@ module Irc
       when 'TOPIC'
         data[:channel] = @server.channel(argv[0])
         data[:topic] = ChannelTopic.new(argv[1], data[:source], Time.new)
-        data[:channel].topic = data[:topic]
+        data[:channel].topic.replace(data[:topic])
 
         handle(:changetopic, data)
       when 'INVITE'
@@ -1195,7 +1195,8 @@ module Irc
           argv[1..-1].each { |arg|
             setting = arg[0].chr
             if "+-".include?(setting)
-              arg[1..-1].each_byte { |m|
+              arg[1..-1].each_byte { |b|
+                m = b.chr
                 case m.to_sym
                 when *@server.supports[:chanmodes][:typea]
                   data[:modes] << [setting + m]
