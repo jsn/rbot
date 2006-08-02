@@ -2,7 +2,7 @@
 #++
 
 
-class Core < CoreBotModule
+class CoreModule < CoreBotModule
 
   def listen(m)
     return unless m.class <= PrivMessage
@@ -41,15 +41,6 @@ class Core < CoreBotModule
     @bot.join 0
   end
 
-  def bot_save(m, param)
-    @bot.save
-    m.okay
-  end
-
-  def bot_nick(m, param)
-    @bot.nickchg(param[:nick])
-  end
-
   def bot_say(m, param)
     @bot.say param[:where], param[:what].join(" ")
   end
@@ -66,14 +57,6 @@ class Core < CoreBotModule
     m.reply "pong"
   end
 
-  def bot_rescan(m, param)
-    m.reply "saving ..."
-    @bot.save
-    m.reply "rescanning ..."
-    @bot.rescan
-    m.reply "done. #{@plugins.status(true)}"
-  end
-
   def bot_quiet(m, param)
     if param.has_key?(:where)
       @bot.set_quiet param[:where].sub(/^here$/, m.target)
@@ -88,21 +71,6 @@ class Core < CoreBotModule
     else
       @bot.reset_quiet
     end
-  end
-
-  def bot_status(m, param)
-    m.reply @bot.status
-  end
-
-  # TODO is this one of the methods that disappeared when the bot was moved
-  # from the single-file to the multi-file registry?
-  #
-  #  def bot_reg_stat(m, param)
-  #    m.reply @registry.stat.inspect
-  #  end
-
-  def bot_version(m, param)
-    m.reply  "I'm a v. #{$version} rubybot, (c) Tom Gilbert - http://linuxbrit.co.uk/rbot/"
   end
 
   def bot_help(m, param)
@@ -160,7 +128,7 @@ class Core < CoreBotModule
   end
 end
 
-core = Core.new
+core = CoreModule.new
 
 core.map "quit *msg",
   :action => 'bot_quit',
@@ -170,27 +138,6 @@ core.map "restart *msg",
   :action => 'bot_restart',
   :defaults => { :msg => nil },
   :auth_path => 'quit'
-
-core.map "save",
-  :action => 'bot_save',
-  :auth_path => 'config'
-core.map "rescan",
-  :action => 'bot_rescan',
-  :auth_path => 'config'
-core.map "nick :nick",
-  :action => 'bot_nick',
-  :auth_path => 'config'
-core.map "status",
-  :action => 'bot_status',
-  :auth_path => 'config::show'
-  # TODO see above
-  #
-  # core.map "registry stats",
-  #   :action => 'bot_reg_stat',
-  #   :auth_path => 'config::show'
-core.map "version",
-  :action => 'bot_version',
-  :auth_path => 'config::show'
 
 core.map "quiet",
   :action => 'bot_quiet',
@@ -235,8 +182,5 @@ core.map "help *topic",
   :default => { :topic => [""] },
   :auth_path => '!help!'
 
-# TODO the first line should probably go to the auth module?
-#
 core.default_auth('*', false)
-core.default_auth('config::show', true)
 

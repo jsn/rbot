@@ -268,7 +268,16 @@ class IrcBot
     @pong_timer = nil
     @last_ping = nil
     @startup_time = Time.new
-    @config = BotConfig.new(self)
+
+    begin
+      @config = BotConfig.configmanager
+      @config.bot_associate(self)
+    rescue => e
+      fatal e.inspect
+      fatal e.backtrace.join("\n")
+      log_session_end
+      exit 2
+    end
 
     if @config['core.run_as_daemon']
       $daemonize = true

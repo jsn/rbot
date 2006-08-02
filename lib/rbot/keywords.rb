@@ -11,10 +11,10 @@ module Irc
 
     # type of keyword (e.g. "is" or "are")
     attr_reader :type
-    
+
     # type::   type of keyword (e.g "is" or "are")
     # values:: array of values
-    # 
+    #
     # create a keyword of type +type+ with values +values+
     def initialize(type, values)
       @type = type.downcase
@@ -73,7 +73,7 @@ module Irc
     end
   end
 
-  # keywords class. 
+  # keywords class.
   #
   # Handles all that stuff like "bot: foo is bar", "bot: foo?"
   #
@@ -87,7 +87,7 @@ module Irc
     BotConfig.register BotConfigBooleanValue.new('keyword.address',
       :default => true,
       :desc => "Should the bot require that keyword lookups are addressed to it? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
-    
+
     # create a new Keywords instance, associated to bot +bot+
     def initialize(bot)
       @bot = bot
@@ -96,7 +96,7 @@ module Irc
       @keywords = DBTree.new bot, "keyword"
 
       scan
-      
+
       # import old format keywords into DBHash
       if(File.exist?("#{@bot.botclass}/keywords.rbot"))
         log "auto importing old keywords.rbot"

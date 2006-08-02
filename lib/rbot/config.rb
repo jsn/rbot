@@ -1,7 +1,8 @@
+require 'singleton'
+
 module Irc
 
   require 'yaml'
-  require 'rbot/messagemapper'
 
   unless YAML.respond_to?(:load_file)
       def YAML.load_file( filepath )
@@ -21,8 +22,11 @@ module Irc
     attr_reader :key
     attr_reader :wizard
     attr_reader :requires_restart
+    attr_reader :requires_rescan
     attr_reader :order
+    attr_reader :manager
     def initialize(key, params)
+      @manager = BotConfig::configmanager
       # Keys must be in the form 'module.name'.
       # They will be internally passed around as symbols,
       # but we accept them both in string and symbol form.
@@ -31,7 +35,7 @@ module Irc
       end
       @order = @@order
       @@order += 1
-      @key = key.intern
+      @key = key.to_sym
       if params.has_key? :default
         @default = params[:default]
       else
@@ -43,6 +47,7 @@ module Irc
       @validate = params[:validate]
       @wizard = params[:wizard]
       @requires_restart = params[:requires_restart]
+      @requires_rescan = params[:requires_rescan]
     end
     def default
       if @default.instance_of?(Proc)
@@ -52,16 +57,16 @@ module Irc
       end
     end
     def get
-      return BotConfig.config[@key] if BotConfig.config.has_key?(@key)
+      return @manager.config[@key] if @manager.config.has_key?(@key)
       return @default
     end
     alias :value :get
     def set(value, on_change = true)
-      BotConfig.config[@key] = value
-      @on_change.call(BotConfig.bot, value) if on_change && @on_change
+      @manager.config[@key] = value
+      @on_change.call(@manager.bot, value) if on_change && @on_change
     end
     def unset
-      BotConfig.config.delete(@key)
+      @manager.config.delete(@key)
     end
 
     # set string will raise ArgumentErrors on failed parse/validate
@@ -73,7 +78,7 @@ module Irc
         raise ArgumentError, "invalid value: #{string}"
       end
     end
-    
+
     # override this. the default will work for strings only
     def parse(string)
       string
@@ -99,6 +104,7 @@ module Irc
 
   class BotConfigStringValue < BotConfigValue
   end
+
   class BotConfigBooleanValue < BotConfigValue
     def parse(string)
       return true if string == "true"
@@ -106,18 +112,21 @@ module Irc
       raise ArgumentError, "#{string} does not match either 'true' or 'false'"
     end
   end
+
   class BotConfigIntegerValue < BotConfigValue
     def parse(string)
       raise ArgumentError, "not an integer: #{string}" unless string =~ /^-?\d+$/
       string.to_i
     end
   end
+
   class BotConfigFloatValue < BotConfigValue
     def parse(string)
       raise ArgumentError, "not a float #{string}" unless string =~ /^-?[\d.]+$/
       string.to_f
     end
   end
+
   class BotConfigArrayValue < BotConfigValue
     def parse(string)
       string.split(/,\s+/)
@@ -135,6 +144,7 @@ module Irc
       set(curval - [val])
     end
   end
+
   class BotConfigEnumValue < BotConfigValue
     def initialize(key, params)
       super
@@ -142,7 +152,7 @@ module Irc
     end
     def values
       if @values.instance_of?(Proc)
-        return @values.call(BotConfig.bot)
+        return @values.call(@manager.bot)
       else
         return @values
       end
@@ -159,238 +169,34 @@ module Irc
   end
 
   # container for bot configuration
-  class BotConfig
-    # Array of registered BotConfigValues for defaults, types and help
-    @@items = Hash.new
-    def BotConfig.items
-      @@items
-    end
-    # Hash containing key => value pairs for lookup and serialisation
-    @@config = Hash.new(false)
-    def BotConfig.config
-      @@config
-    end
-    def BotConfig.bot
-      @@bot
-    end
-    
-    def BotConfig.register(item)
-      unless item.kind_of?(BotConfigValue)
-        raise ArgumentError,"item must be a BotConfigValue"
-      end
-      @@items[item.key] = item
+  class BotConfigManagerClass
+
+    include Singleton
+
+    attr_reader :bot
+    attr_reader :items
+    attr_reader :config
+
+    def initialize
+      bot_associate(nil,true)
     end
 
-    # currently we store values in a hash but this could be changed in the
-    # future. We use hash semantics, however.
-    # components that register their config keys and setup defaults are
-    # supported via []
-    def [](key)
-      return @@items[key].value if @@items.has_key?(key)
-      return @@items[key.intern].value if @@items.has_key?(key.intern)
-      # try to still support unregistered lookups
-      # but warn about them
-      if @@config.has_key?(key)
-        warning "Unregistered lookup #{key.inspect}"
-        return @@config[key]
-      end
-      if @@config.has_key?(key.intern)
-        warning "Unregistered lookup #{key.intern.inspect}"
-        return @@config[key.intern]
-      end
-      return false
+    def reset_config
+      @items = Hash.new
+      @config = Hash.new(false)
     end
 
-    # TODO should I implement this via BotConfigValue or leave it direct?
-    #    def []=(key, value)
-    #    end
-    
-    # pass everything else through to the hash
-    def method_missing(method, *args, &block)
-      return @@config.send(method, *args, &block)
-    end
+    # Associate with bot _bot_
+    def bot_associate(bot, reset=false)
+      reset_config if reset
+      @bot = bot
+      return unless @bot
 
-    def handle_list(m, params)
-      modules = []
-      if params[:module]
-        @@items.each_key do |key|
-          mod, name = key.to_s.split('.')
-          next unless mod == params[:module]
-          modules.push key unless modules.include?(name)
-        end
-        if modules.empty?
-          m.reply "no such module #{params[:module]}"
-        else
-          m.reply modules.join(", ")
-        end
-      else
-        @@items.each_key do |key|
-          name = key.to_s.split('.').first
-          modules.push name unless modules.include?(name)
-        end
-        m.reply "modules: " + modules.join(", ")
-      end
-    end
-
-    def handle_get(m, params)
-      key = params[:key].to_s.intern
-      unless @@items.has_key?(key)
-        m.reply "no such config key #{key}"
-        return
-      end
-      value = @@items[key].to_s
-      m.reply "#{key}: #{value}"
-    end
-
-    def handle_desc(m, params)
-      key = params[:key].to_s.intern
-      unless @@items.has_key?(key)
-        m.reply "no such config key #{key}"
-      end
-      puts @@items[key].inspect
-      m.reply "#{key}: #{@@items[key].desc}"
-    end
-
-    def handle_unset(m, params)
-      key = params[:key].to_s.intern
-      unless @@items.has_key?(key)
-        m.reply "no such config key #{key}"
-      end
-      @@items[key].unset
-      handle_get(m, params)
-      m.reply "this config change will take effect on the next restart" if @@items[key].requires_restart
-    end
-
-    def handle_set(m, params)
-      key = params[:key].to_s.intern
-      value = params[:value].join(" ")
-      unless @@items.has_key?(key)
-        m.reply "no such config key #{key}"
-        return
-      end
-      begin
-        @@items[key].set_string(value)
-      rescue ArgumentError => e
-        m.reply "failed to set #{key}: #{e.message}"
-        return
-      end
-      if @@items[key].requires_restart
-        m.reply "this config change will take effect on the next restart"
-      else
-        m.okay
-      end
-    end
-
-    def handle_add(m, params)
-      key = params[:key].to_s.intern
-      value = params[:value]
-      unless @@items.has_key?(key)
-        m.reply "no such config key #{key}"
-        return
-      end
-      unless @@items[key].class <= BotConfigArrayValue
-        m.reply "config key #{key} is not an array"
-        return
-      end
-      begin
-        @@items[key].add(value)
-      rescue ArgumentError => e
-        m.reply "failed to add #{value} to #{key}: #{e.message}"
-        return
-      end
-      handle_get(m,{:key => key})
-      m.reply "this config change will take effect on the next restart" if @@items[key].requires_restart
-    end
-
-    def handle_rm(m, params)
-      key = params[:key].to_s.intern
-      value = params[:value]
-      unless @@items.has_key?(key)
-        m.reply "no such config key #{key}"
-        return
-      end
-      unless @@items[key].class <= BotConfigArrayValue
-        m.reply "config key #{key} is not an array"
-        return
-      end
-      begin
-        @@items[key].rm(value)
-      rescue ArgumentError => e
-        m.reply "failed to remove #{value} from #{key}: #{e.message}"
-        return
-      end
-      handle_get(m,{:key => key})
-      m.reply "this config change will take effect on the next restart" if @@items[key].requires_restart
-    end
-
-    def handle_help(m, params)
-      topic = params[:topic]
-      case topic
-      when false
-        m.reply "config module - bot configuration. usage: list, desc, get, set, unset, add, rm"
-      when "list"
-        m.reply "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
-      when "get"
-        m.reply "config get <key> => get configuration value for key <key>"
-      when "unset"
-        m.reply "reset key <key> to the default"
-      when "set"
-        m.reply "config set <key> <value> => set configuration value for key <key> to <value>"
-      when "desc"
-        m.reply "config desc <key> => describe what key <key> configures"
-      when "add"
-        m.reply "config add <value> to <key> => add value <value> to key <key> if <key> is an array"
-      when "rm"
-        m.reply "config rm <value> from <key> => remove value <value> from key <key> if <key> is an array"
-      else
-        m.reply "no help for config #{topic}"
-      end
-    end
-    def usage(m,params)
-      m.reply "incorrect usage, try '#{@@bot.nick}: help config'"
-    end
-
-    # bot:: parent bot class
-    # create a new config hash from #{botclass}/conf.rbot
-    # TODO make this into a core module to guide a BotCOnfigManagerClass
-    # singleton instance from IRC
-    #
-    def initialize(bot)
-      @@bot = bot
-
-      # respond to config messages, to provide runtime configuration
-      # management
-      # messages will be:
-      #  get
-      #  set
-      #  unset
-      #  desc
-      #  and for arrays:
-      #    add
-      #    remove
-      @handler = MessageMapper.new(self)
-      @handler.map 'config', 'config list :module', :action => 'handle_list',
-                   :defaults => {:module => false}
-      @handler.map 'config', 'config get :key', :action => 'handle_get'
-      @handler.map 'config', 'config desc :key', :action => 'handle_desc'
-      @handler.map 'config', 'config describe :key', :action => 'handle_desc'
-      @handler.map 'config', 'config set :key *value', :action => 'handle_set'
-      @handler.map 'config', 'config add :value to :key', :action => 'handle_add'
-      @handler.map 'config', 'config rm :value from :key', :action => 'handle_rm'
-      @handler.map 'config', 'config del :value from :key', :action => 'handle_rm'
-      @handler.map 'config', 'config delete :value from :key', :action => 'handle_rm'
-      @handler.map 'config', 'config unset :key', :action => 'handle_unset'
-      @handler.map 'config', 'config reset :key', :action => 'handle_unset'
-      @handler.map 'config', 'config help :topic', :action => 'handle_help',
-                   :defaults => {:topic => false}
-      @handler.map 'config', 'help config :topic', :action => 'handle_help',
-                   :defaults => {:topic => false}
-      
-      if(File.exist?("#{@@bot.botclass}/conf.yaml"))
+      if(File.exist?("#{@bot.botclass}/conf.yaml"))
         begin
-          newconfig = YAML::load_file("#{@@bot.botclass}/conf.yaml")
+          newconfig = YAML::load_file("#{@bot.botclass}/conf.yaml")
           newconfig.each { |key, val|
-            @@config[key.intern] = val
+            @config[key.to_sym] = val
           }
           return
         rescue
@@ -398,43 +204,89 @@ module Irc
         end
       end
       # if we got here, we need to run the first-run wizard
-      BotConfigWizard.new(@@bot).run
+      BotConfigWizard.new(@bot).run
       # save newly created config
       save
+    end
+
+    def register(item)
+      unless item.kind_of?(BotConfigValue)
+        raise ArgumentError,"item must be a BotConfigValue"
+      end
+      @items[item.key] = item
+    end
+
+    # currently we store values in a hash but this could be changed in the
+    # future. We use hash semantics, however.
+    # components that register their config keys and setup defaults are
+    # supported via []
+    def [](key)
+      # return @items[key].value if @items.has_key?(key)
+      return @items[key.to_sym].value if @items.has_key?(key.to_sym)
+      # try to still support unregistered lookups
+      # but warn about them
+      #      if @config.has_key?(key)
+      #        warning "Unregistered lookup #{key.inspect}"
+      #        return @config[key]
+      #      end
+      if @config.has_key?(key.to_sym)
+        warning "Unregistered lookup #{key.to_sym.inspect}"
+        return @config[key.to_sym]
+      end
+      return false
+    end
+
+    # TODO should I implement this via BotConfigValue or leave it direct?
+    #    def []=(key, value)
+    #    end
+
+    # pass everything else through to the hash
+    def method_missing(method, *args, &block)
+      return @config.send(method, *args, &block)
     end
 
     # write current configuration to #{botclass}/conf.yaml
     def save
       begin
         debug "Writing new conf.yaml ..."
-        File.open("#{@@bot.botclass}/conf.yaml.new", "w") do |file|
+        File.open("#{@bot.botclass}/conf.yaml.new", "w") do |file|
           savehash = {}
-          @@config.each { |key, val|
+          @config.each { |key, val|
             savehash[key.to_s] = val
           }
           file.puts savehash.to_yaml
         end
         debug "Officializing conf.yaml ..."
-        File.rename("#{@@bot.botclass}/conf.yaml.new",
-                    "#{@@bot.botclass}/conf.yaml")
+        File.rename("#{@bot.botclass}/conf.yaml.new",
+                    "#{@bot.botclass}/conf.yaml")
       rescue => e
         error "failed to write configuration file conf.yaml! #{$!}"
         error "#{e.class}: #{e}"
         error e.backtrace.join("\n")
       end
     end
+  end
 
-    def privmsg(m)
-      @handler.handle(m)
+  module BotConfig
+    # Returns the only BotConfigManagerClass
+    #
+    def BotConfig.configmanager
+      return BotConfigManagerClass.instance
+    end
+
+    # Register a config value
+    def BotConfig.register(item)
+      BotConfig.configmanager.register(item)
     end
   end
 
   class BotConfigWizard
     def initialize(bot)
       @bot = bot
-      @questions = BotConfig.items.values.find_all {|i| i.wizard }
+      @manager = BotConfig::configmanager
+      @questions = @manager.items.values.find_all {|i| i.wizard }
     end
-    
+
     def run()
       puts "First time rbot configuration wizard"
       puts "===================================="
@@ -464,4 +316,5 @@ module Irc
       end
     end
   end
+
 end

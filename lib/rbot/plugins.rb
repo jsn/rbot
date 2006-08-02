@@ -176,7 +176,7 @@ module Plugins
     # return an identifier for this plugin, defaults to a list of the message
     # prefixes handled (used for error messages etc)
     def name
-      self.class.to_s.downcase.sub(/^#<module:.*?>::/,"").sub(/(plugin)?$/,"")
+      self.class.to_s.downcase.sub(/^#<module:.*?>::/,"").sub(/(plugin|module)?$/,"")
     end
 
     # just calls name
