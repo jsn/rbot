@@ -864,35 +864,23 @@ class IrcBot
       sendq "MODE #{channel} #{mode} #{target}", channel, 2
   end
 
-  # # m::     message asking for help
-  # # topic:: optional topic help is requested for
-  # # respond to online help requests
-  # def help(topic=nil)
-  #   topic = nil if topic == ""
-  #   case topic
-  #   when nil
-  #     helpstr = "help topics: core, auth, keywords"
-  #     helpstr += @plugins.helptopics
-  #     helpstr += " (help <topic> for more info)"
-  #   when /^core$/i
-  #     helpstr = corehelp
-  #   when /^core\s+(.+)$/i
-  #     helpstr = corehelp $1
-  #   when /^auth$/i
-  #     helpstr = @auth.help
-  #   when /^auth\s+(.+)$/i
-  #     helpstr = @auth.help $1
-  #   when /^keywords$/i
-  #     helpstr = @keywords.help
-  #   when /^keywords\s+(.+)$/i
-  #     helpstr = @keywords.help $1
-  #   else
-  #     unless(helpstr = @plugins.help(topic))
-  #       helpstr = "no help for topic #{topic}"
-  #     end
-  #   end
-  #   return helpstr
-  # end
+  # m::     message asking for help
+  # topic:: optional topic help is requested for
+  # respond to online help requests
+  def help(topic=nil)
+    topic = nil if topic == ""
+    case topic
+    when nil
+      helpstr = "help topics: "
+      helpstr += @plugins.helptopics
+      helpstr += " (help <topic> for more info)"
+    else
+      unless(helpstr = @plugins.help(topic))
+        helpstr = "no help for topic #{topic}"
+      end
+    end
+    return helpstr
+  end
 
   # returns a string describing the current status of the bot (uptime etc)
   def status

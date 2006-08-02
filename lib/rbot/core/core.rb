@@ -4,8 +4,6 @@
 
 class Core < CoreBotModule
 
-  # TODO cleanup
-  # handle incoming IRC PRIVMSG +m+
   def listen(m)
     return unless m.class <= PrivMessage
     if(m.private? && m.message =~ /^\001PING\s+(.+)\001/)
@@ -13,104 +11,115 @@ class Core < CoreBotModule
       @bot.irclog "@ #{m.sourcenick} pinged me"
       return
     end
+  end
 
-    if(m.address?)
-      case m.message
-      when (/^join\s+(\S+)\s+(\S+)$/i)
-        @bot.join $1, $2 if(@bot.auth.allow?("join", m.source, m.replyto))
-      when (/^join\s+(\S+)$/i)
-        @bot.join $1 if(@bot.auth.allow?("join", m.source, m.replyto))
-      when (/^part$/i)
-        @bot.part m.target if(m.public? && @bot.auth.allow?("join", m.source, m.replyto))
-      when (/^part\s+(\S+)$/i)
-        @bot.part $1 if(@bot.auth.allow?("join", m.source, m.replyto))
-      when (/^quit(?:\s+(.*))?$/i)
-        @bot.quit $1 if(@bot.auth.allow?("quit", m.source, m.replyto))
-      when (/^restart(?:\s+(.*))?$/i)
-        @bot.restart $1 if(@bot.auth.allow?("quit", m.source, m.replyto))
-      when (/^hide$/i)
-        @bot.join 0 if(@bot.auth.allow?("join", m.source, m.replyto))
-      when (/^save$/i)
-        if(@bot.auth.allow?("config", m.source, m.replyto))
-          @bot.save
-          m.okay
-        end
-      when (/^nick\s+(\S+)$/i)
-        @bot.nickchg($1) if(@bot.auth.allow?("nick", m.source, m.replyto))
-      when (/^say\s+(\S+)\s+(.*)$/i)
-        @bot.say $1, $2 if(@bot.auth.allow?("say", m.source, m.replyto))
-      when (/^action\s+(\S+)\s+(.*)$/i)
-        @bot.action $1, $2 if(@bot.auth.allow?("say", m.source, m.replyto))
-        # when (/^topic\s+(\S+)\s+(.*)$/i)
-        #   topic $1, $2 if(@bot.auth.allow?("topic", m.source, m.replyto))
-      when (/^mode\s+(\S+)\s+(\S+)\s+(.*)$/i)
-        @bot.mode $1, $2, $3 if(@bot.auth.allow?("mode", m.source, m.replyto))
-      when (/^ping$/i)
-        @bot.say m.replyto, "pong"
-      when (/^rescan$/i)
-        if(@bot.auth.allow?("config", m.source, m.replyto))
-          m.reply "saving ..."
-          @bot.save
-          m.reply "rescanning ..."
-          @bot.rescan
-          m.reply "done. #{@plugins.status(true)}"
-        end
-      when (/^quiet$/i)
-        if(@bot.auth.allow?("talk", m.source, m.replyto))
-          m.okay
-          @bot.set_quiet
-        end
-      when (/^quiet in (\S+)$/i)
-        where = $1
-        if(@bot.auth.allow?("talk", m.source, m.replyto))
-          m.okay
-          where.gsub!(/^here$/, m.target) if m.public?
-          @bot.set_quiet(where)
-        end
-      when (/^talk$/i)
-        if(@bot.auth.allow?("talk", m.source, m.replyto))
-          @bot.reset_quiet
-          m.okay
-        end
-      when (/^talk in (\S+)$/i)
-        where = $1
-        if(@bot.auth.allow?("talk", m.source, m.replyto))
-          where.gsub!(/^here$/, m.target) if m.public?
-          @bot.reset_quiet(where)
-          m.okay
-        end
-      when (/^status\??$/i)
-        m.reply status if @bot.auth.allow?("status", m.source, m.replyto)
-      when (/^registry stats$/i)
-        if @bot.auth.allow?("config", m.source, m.replyto)
-          m.reply @registry.stat.inspect
-        end
-      when (/^(help\s+)?config(\s+|$)/)
-        @config.privmsg(m)
-      when (/^(version)|(introduce yourself)$/i)
-        @bot.say m.replyto, "I'm a v. #{$version} rubybot, (c) Tom Gilbert - http://linuxbrit.co.uk/rbot/"
-      when (/^help(?:\s+(.*))?$/i)
-        @bot.say m.replyto, help($1)
-        #TODO move these to a "chatback" plugin
-      when (/^(botsnack|ciggie)$/i)
-        @bot.say m.replyto, @lang.get("thanks_X") % m.sourcenick if(m.public?)
-        @bot.say m.replyto, @lang.get("thanks") if(m.private?)
-      when (/^(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$)).*/i)
-        @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick if(m.public?)
-        @bot.say m.replyto, @lang.get("hello") if(m.private?)
-      end
+  def bot_join(m, param)
+    if param[:pass]
+      @bot.join param[:chan], param[:pass]
     else
-      # stuff to handle when not addressed
-      case m.message
-      when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{Regexp.escape(@bot.nick)}$/i)
-        @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
-      when (/^#{Regexp.escape(@bot.nick)}!*$/)
-        @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
-      else
-        # @keywords.privmsg(m)
-      end
+      @bot.join param[:chan]
     end
   end
+
+  def bot_part(m, param)
+    if param[:chan]
+      @bot.part param[:chan]
+    else
+      @bot.part m.target if m.public?
+    end
+  end
+
+  def bot_quit(m, param)
+    @bot.quit(param[:msg] ? param[:msg].join(" ") : nil)
+  end
+
+  def bot_restart(m, param)
+    @bot.restart(param[:msg] ? param[:msg].join(" ") : nil)
+  end
+
+  def bot_hide(m, param)
+    @bot.join 0
+  end
+
+  def bot_save(m, param)
+    @bot.save
+    m.okay
+  end
+
+  def bot_nick(m, param)
+    @bot.nickchg(param[:nick])
+  end
+
+  def bot_say(m, param)
+    @bot.say param[:where], param[:what].join(" ")
+  end
+
+  def bot_action(m, param)
+    @bot.action param[:where], param[:what].join(" ")
+  end
+
+  def bot_mode(m, param)
+    @bot.mode param[:where], param[:what], param[:who].join(" ")
+  end
+
+  def bot_ping(m, param)
+    m.reply "pong"
+  end
+
+  def bot_rescan(m, param)
+    m.reply "saving ..."
+    @bot.save
+    m.reply "rescanning ..."
+    @bot.rescan
+    m.reply "done. #{@plugins.status(true)}"
+  end
+
+  def bot_quiet(m, param)
+    if param.has_key?(:where)
+      @bot.set_quiet param[:where].sub(/^here$/, m.target)
+    else
+      @bot.set_quiet
+    end
+  end
+
+  def bot_talk(m, param)
+    if param.has_key?(:where)
+      @bot.reset_quiet param[:where].sub(/^here$/, m.target)
+    else
+      @bot.reset_quiet
+    end
+  end
+
+  def bot_status(m, param)
+    m.reply @bot.status
+  end
+
+  # TODO is this one of the methods that disappeared when the bot was moved
+  # from the single-file to the multi-file registry?
+  #
+  #  def bot_reg_stat(m, param)
+  #    m.reply @registry.stat.inspect
+  #  end
+
+  def bot_version(m, param)
+    m.reply  "I'm a v. #{$version} rubybot, (c) Tom Gilbert - http://linuxbrit.co.uk/rbot/"
+  end
+
+  def bot_help(m, param)
+    m.reply @bot.help(param[:topic].join(" "))
+  end
+
+  #TODO move these to a "chatback" plugin
+  # when (/^(botsnack|ciggie)$/i)
+  #   @bot.say m.replyto, @lang.get("thanks_X") % m.sourcenick if(m.public?)
+  #   @bot.say m.replyto, @lang.get("thanks") if(m.private?)
+  # when (/^(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$)).*/i)
+  #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick if(m.public?)
+  #   @bot.say m.replyto, @lang.get("hello") if(m.private?)
+  # when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{Regexp.escape(@bot.nick)}$/i)
+  #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
+  # when (/^#{Regexp.escape(@bot.nick)}!*$/)
+  #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
 
   # handle help requests for "core" topics
   def help(topic="")
@@ -141,10 +150,10 @@ class Core < CoreBotModule
       return "talk [in here|<channel>] => with no arguments, resume speaking in all channels, if \"in here\", resume speaking in this channel, or resume speaking in <channel>"
     when "version"
       return "version => describes software version"
-    when "botsnack"
-      return "botsnack => reward #{myself} for being good"
-    when "hello"
-      return "hello|hi|hey|yo [#{myself}] => greet the bot"
+      #     when "botsnack"
+      #       return "botsnack => reward #{myself} for being good"
+      #     when "hello"
+      #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
     else
       return "Core help topics: quit, restart, config, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version, botsnack, hello"
     end
@@ -152,4 +161,81 @@ class Core < CoreBotModule
 end
 
 core = Core.new
+
+core.map "quit *msg",
+  :action => 'bot_quit',
+  :defaults => { :msg => nil },
+  :auth => 'core::quit::quit'
+core.map "restart *msg",
+  :action => 'bot_restart',
+  :defaults => { :msg => nil },
+  :auth => 'core::quit::restart'
+
+core.map "save",
+  :action => 'bot_save',
+  :auth => 'core::config::save'
+core.map "rescan",
+  :action => 'bot_rescan',
+  :auth => 'core::config::rescan'
+core.map "nick :nick",
+  :action => 'bot_nick',
+  :auth => 'core::config::nick'
+core.map "status",
+  :action => 'bot_status',
+  :auth => 'core::config::show::status'
+  # TODO see above
+  #
+  # core.map "registry stats",
+  #   :action => 'bot_reg_stat',
+  #   :auth => 'core::config::show::registry'
+core.map "version",
+  :action => 'bot_version',
+  :auth => 'core::config::show::version'
+
+core.map "quiet",
+  :action => 'bot_quiet',
+  :auth => 'core::talk::quiet'
+core.map "quiet in :chan",
+  :action => 'bot_quiet',
+  :auth => 'core::talk::quiet'
+core.map "talk",
+  :action => 'bot_talk',
+  :auth => 'core::talk::talk'
+core.map "quiet in :chan",
+  :action => 'bot_quiet',
+  :auth => 'core::talk::talk'
+
+core.map "join :chan :pass", 
+  :action => 'bot_join',
+  :defaults => {:pass => nil},
+  :auth => 'core::movearound::join'
+core.map "part :chan",
+  :action => 'bot_part',
+  :defaults => {:chan => nil},
+  :auth => 'core::movearound::part'
+core.map "hide",
+  :action => 'bot_hide',
+  :auth => 'core::movearound::hide'
+
+core.map "say :where *what",
+  :action => 'bot_say',
+  :auth => 'core::talk::say'
+core.map "action :where *what",
+  :action => 'bot_action',
+  :auth => 'core::talk::act'
+core.map "mode :where :what *who",
+  :action => 'bot_mode',
+  :auth => 'core::talk::mode'
+
+core.map "ping",
+  :action => 'bot_ping'
+core.map "help *topic",
+  :action => 'bot_help',
+  :default => { :topic => [""] }
+
+# TODO the first line should probably go to the auth module?
+#
+core.default_auth('*', true)
+core.default_auth('core', false)
+core.default_auth('core::config::show', true)
 

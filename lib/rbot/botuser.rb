@@ -258,10 +258,7 @@ module Irc
       def set_permission(cmd, val)
         raise TypeError, "#{val.inspect} must be true or false" unless [true,false].include?(val)
         Irc::error_if_not_command(cmd)
-        cmd.path.each { |k|
-          set_permission(k.to_s, true) unless @perm.has_key?(k)
-        }
-        @perm[path.last] = val
+        @perm[cmd.command] = val
       end
 
       # Tells if command _cmd_ is permitted. We do this by returning
@@ -308,7 +305,12 @@ module Irc
       def set_permission(cmd, val, chan="*")
         k = chan.to_s.to_sym
         @perm[k] = PermissionSet.new unless @perm.has_key?(k)
-        @perm[k].set_permission(cmd, val)
+        case cmd
+        when String
+          @perm[k].set_permission(Command.new(cmd), val)
+        else
+          @perm[k].set_permission(cmd, val)
+        end
       end
 
       # Checks if BotUser is allowed to do something on channel _chan_,

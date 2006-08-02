@@ -153,6 +153,14 @@ module Plugins
       end
     end
 
+    # Sets the default auth for command _cmd_ to _val_ on channel _chan_:
+    # usually _chan_ is either "*" for everywhere, public and private (in
+    # which case it can be omitted) or "?" for private communications
+    #
+    def default_auth(cmd, val, chan="*")
+      Auth::anonbotuser.set_permission(cmd, val)
+    end
+
     # return an identifier for this plugin, defaults to a list of the message
     # prefixes handled (used for error messages etc)
     def name
@@ -325,6 +333,8 @@ module Plugins
     # add one or more directories to the list of directories to
     # load botmodules from
     #
+    # TODO find a way to specify necessary plugins which _must_ be loaded
+    #
     def add_botmodule_dir(*dirlist)
       @dirs += dirlist
       debug "Botmodule loading path: #{@dirs.join(', ')}"
@@ -438,7 +448,7 @@ module Plugins
 
     # return list of help topics (plugin names)
     def helptopics
-      return " [#{status}]"
+      return status
     end
 
     def length
@@ -475,6 +485,7 @@ module Plugins
       when /^(\S+)\s*(.*)$/
         key = $1
         params = $2
+        # TODO should also check core_module and plugins
         [core_commands, plugin_commands].each { |pl|
           if(pl.has_key?(key))
             begin
