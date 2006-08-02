@@ -133,8 +133,7 @@ module Plugins
       @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
-      auth = @handler.last.options[:full_auth_path]
-      self.register name, :auth => auth
+      self.register name, :auth => nil
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
           handle(m)
@@ -146,7 +145,7 @@ module Plugins
       @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
-      self.register name, :auth => auth, :hidden => true
+      self.register name, :auth => nil, :hidden => true
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
           handle(m)
@@ -270,6 +269,8 @@ module Plugins
       raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
       kl = botmodule.botmodule_class
       @commandmappers[kl.to_sym][cmd.to_sym] = {:botmodule => botmodule, :auth => auth_path}
+      h = @commandmappers[kl.to_sym][cmd.to_sym]
+      # debug "Registered command mapper for #{cmd.to_sym} (#{kl.to_sym}): #{h[:botmodule].name} with command path #{h[:auth]}"
     end
 
     def add_botmodule(botmodule)
@@ -483,15 +484,15 @@ module Plugins
       when /fail(?:ed)?\s*plugins?.*(trace(?:back)?s?)?/
         # debug "Failures: #{@failed.inspect}"
         return "no plugins failed to load" if @failed.empty?
-        return (@failed.inject(Array.new) { |list, p|
+        return @failed.inject(Array.new) { |list, p|
           list << "#{Bold}#{p[:name]}#{Bold} in #{p[:dir]} failed"
           list << "with error #{p[:reason].class}: #{p[:reason]}"
           list << "at #{p[:reason].backtrace.join(', ')}" if $1 and not p[:reason].backtrace.empty?
           list
-        }).join("\n")
+        }.join("\n")
       when /ignored?\s*plugins?/
         return "no plugins were ignored" if @ignored.empty?
-        return (@ignored.inject(Array.new) { |list, p|
+        return @ignored.inject(Array.new) { |list, p|
           case p[:reason]
           when :loaded
             list << "#{p[:name]} in #{p[:dir]} (overruled by previous)"
@@ -499,13 +500,22 @@ module Plugins
             list << "#{p[:name]} in #{p[:dir]} (#{p[:reason].to_s})"
           end
           list
-        }).join(", ")
+        }.join(", ")
       when /^(\S+)\s*(.*)$/
         key = $1
         params = $2
-        # TODO should also check core_module and plugins
+        (core_modules + plugins).each { |p|
+          # debug "checking #{p.name.inspect} against #{key.inspect}"
+          begin
+            return p.help(params)
+          rescue Exception => err
+            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+            error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
+          end if p.name == key
+        }
         [core_commands, plugin_commands].each { |pl|
-          if(pl.has_key?(key))
+          # debug "looking for #{key.inspect} in #{pl.keys.sort.inspect}"
+          if pl.has_key?(key)
             p = pl[key][:botmodule] 
             begin
               return p.help(key, params)
@@ -513,22 +523,21 @@ module Plugins
               #rescue TimeoutError, StandardError, NameError, SyntaxError => err
               error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
             end
-          else
-            return false
           end
         }
       end
+      return false
     end
 
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter
     def delegate(method, *args)
-      debug "Delegating #{method.inspect}"
+      # debug "Delegating #{method.inspect}"
       [core_modules, plugins].each { |pl|
         pl.each {|p|
           if(p.respond_to? method)
             begin
-              debug "#{p.botmodule_class} #{p.name} responds"
+              # debug "#{p.botmodule_class} #{p.name} responds"
               p.send method, *args
             rescue Exception => err
               error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
@@ -537,13 +546,13 @@ module Plugins
           end
         }
       }
-      debug "Finished delegating #{method.inspect}"
+      # debug "Finished delegating #{method.inspect}"
     end
 
     # see if we have a plugin that wants to handle this message, if so, pass
     # it to the plugin and return true, otherwise false
     def privmsg(m)
-      debug "Delegating privmsg with key #{m.plugin}"
+      # debug "Delegating privmsg #{m.message.inspect} from #{m.source} to #{m.replyto} with pluginkey #{m.plugin.inspect}"
       return unless m.plugin
       begin
         [core_commands, plugin_commands].each { |pl|
@@ -558,36 +567,37 @@ module Plugins
             a = nil
           end
           if p
-            # TODO This should probably be checked elsewhere
-            debug "Checking auth ..."
-            if @bot.auth.allow?(a, m.source, m.replyto)
-              debug "Checking response ..."
+            # We check here for things that don't check themselves
+            # (e.g. mapped things)
+            # debug "Checking auth ..."
+            if a.nil? || @bot.auth.allow?(a, m.source, m.replyto)
+              # debug "Checking response ..."
               if p.respond_to?("privmsg")
                 begin
-                  debug "#{p.botmodule_class} #{p.name} responds"
+                  # debug "#{p.botmodule_class} #{p.name} responds"
                   p.privmsg(m)
                 rescue Exception => err
                   error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
                   raise if err.class <= BDB::Fatal
                 end
-                debug "Successfully delegated privmsg with key #{m.plugin}"
+                # debug "Successfully delegated #{m.message}"
                 return true
               else
-                debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsgs"
+                # debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
               end
             else
-              debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to use #{m.plugin} on #{m.replyto}"
+              # debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
             end
           else
-            debug "No #{pl.values.first[:botmodule].botmodule_class} registered #{m.plugin}" unless pl.empty?
+            # debug "No #{pl.values.first[:botmodule].botmodule_class} registered #{m.plugin.inspect}" unless pl.empty?
           end
-          debug "Finished delegating privmsg with key #{m.plugin}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
+          # debug "Finished delegating privmsg with key #{m.plugin.inspect}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
         }
         return false
       rescue Exception => e
-        error report_error("couldn't delegate #{m}", e)
+        error report_error("couldn't delegate #{m.message.inspect}", e)
       end
-      debug "Finished delegating privmsg with key #{m.plugin}"
+      # debug "Finished delegating privmsg with key #{m.plugin.inspect}"
     end
   end
 

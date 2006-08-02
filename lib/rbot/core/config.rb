@@ -160,8 +160,6 @@ class ConfigModule < CoreBotModule
 
   def help(topic="")
     case topic
-    when false
-      "config module - bot configuration. usage: list, desc, get, set, unset, add, rm"
     when "list"
       "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
     when "get"
@@ -177,7 +175,9 @@ class ConfigModule < CoreBotModule
     when "rm"
       "config rm <value> from <key> => remove value <value> from key <key> if <key> is an array"
     else
-      "no help for config #{topic}"
+      "config module - bot configuration. usage: list, desc, get, set, unset, add, rm"
+    # else
+    #   "no help for config #{topic}"
     end
   end
 

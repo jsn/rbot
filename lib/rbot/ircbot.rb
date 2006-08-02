@@ -413,7 +413,7 @@ class IrcBot
       irclogprivmsg(m)
 
       @plugins.delegate "listen", m
-      @plugins.privmsg(m)
+      @plugins.privmsg(m) if m.address?
     }
     @client[:notice] = proc { |data|
       message = NoticeMessage.new(self, @server, data[:source], data[:target], data[:message])

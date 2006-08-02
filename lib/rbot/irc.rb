@@ -1054,8 +1054,8 @@ module Irc
 
         @channels << chan
         @channel_names << name
-        debug "Created channel #{chan.inspect}"
-        debug "Managing channels #{@channel_names.join(', ')}"
+        # debug "Created channel #{chan.inspect}"
+        # debug "Managing channels #{@channel_names.join(', ')}"
         return chan
       end
     end
@@ -1104,10 +1104,10 @@ module Irc
       else
         tmp = User.new(str, self.casemap)
       end
-      debug "Creating or selecting user #{tmp.inspect} from #{str.inspect}"
+      # debug "Creating or selecting user #{tmp.inspect} from #{str.inspect}"
       old = get_user(tmp.nick)
       if old
-        debug "User already existed as #{old.inspect}"
+        # debug "User already existed as #{old.inspect}"
         if tmp.known?
           if old.known?
             raise "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old.inspect} but access was tried with #{tmp.inspect}" if old != tmp
@@ -1115,7 +1115,7 @@ module Irc
           else
             old.user = tmp.user
             old.host = tmp.host
-            debug "User improved to #{old.inspect}"
+            # debug "User improved to #{old.inspect}"
           end
         end
         return old

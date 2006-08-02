@@ -198,6 +198,7 @@ module Irc
       end
 
       @options = hash
+      # debug "Create template #{self.inspect}"
     end
 
     def items=(str)
