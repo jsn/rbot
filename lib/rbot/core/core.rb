@@ -165,77 +165,78 @@ core = Core.new
 core.map "quit *msg",
   :action => 'bot_quit',
   :defaults => { :msg => nil },
-  :auth => 'core::quit::quit'
+  :auth_path => 'quit'
 core.map "restart *msg",
   :action => 'bot_restart',
   :defaults => { :msg => nil },
-  :auth => 'core::quit::restart'
+  :auth_path => 'quit'
 
 core.map "save",
   :action => 'bot_save',
-  :auth => 'core::config::save'
+  :auth_path => 'config'
 core.map "rescan",
   :action => 'bot_rescan',
-  :auth => 'core::config::rescan'
+  :auth_path => 'config'
 core.map "nick :nick",
   :action => 'bot_nick',
-  :auth => 'core::config::nick'
+  :auth_path => 'config'
 core.map "status",
   :action => 'bot_status',
-  :auth => 'core::config::show::status'
+  :auth_path => 'config::show'
   # TODO see above
   #
   # core.map "registry stats",
   #   :action => 'bot_reg_stat',
-  #   :auth => 'core::config::show::registry'
+  #   :auth_path => 'config::show'
 core.map "version",
   :action => 'bot_version',
-  :auth => 'core::config::show::version'
+  :auth_path => 'config::show'
 
 core.map "quiet",
   :action => 'bot_quiet',
-  :auth => 'core::talk::quiet'
+  :auth_path => 'talk::set'
 core.map "quiet in :chan",
   :action => 'bot_quiet',
-  :auth => 'core::talk::quiet'
+  :auth_path => 'talk::set'
 core.map "talk",
   :action => 'bot_talk',
-  :auth => 'core::talk::talk'
+  :auth_path => 'talk::set'
 core.map "quiet in :chan",
   :action => 'bot_quiet',
-  :auth => 'core::talk::talk'
+  :auth_path => 'talk::set'
+
+core.map "say :where *what",
+  :action => 'bot_say',
+  :auth_path => 'talk::do'
+core.map "action :where *what",
+  :action => 'bot_action',
+  :auth_path => 'talk::do'
+core.map "mode :where :what *who",
+  :action => 'bot_mode',
+  :auth_path => 'talk::do'
 
 core.map "join :chan :pass", 
   :action => 'bot_join',
   :defaults => {:pass => nil},
-  :auth => 'core::movearound::join'
+  :auth_path => 'move'
 core.map "part :chan",
   :action => 'bot_part',
   :defaults => {:chan => nil},
-  :auth => 'core::movearound::part'
+  :auth_path => 'move'
 core.map "hide",
   :action => 'bot_hide',
-  :auth => 'core::movearound::hide'
-
-core.map "say :where *what",
-  :action => 'bot_say',
-  :auth => 'core::talk::say'
-core.map "action :where *what",
-  :action => 'bot_action',
-  :auth => 'core::talk::act'
-core.map "mode :where :what *who",
-  :action => 'bot_mode',
-  :auth => 'core::talk::mode'
+  :auth_path => 'move'
 
 core.map "ping",
-  :action => 'bot_ping'
+  :action => 'bot_ping',
+  :auth_path => '!ping!'
 core.map "help *topic",
   :action => 'bot_help',
-  :default => { :topic => [""] }
+  :default => { :topic => [""] },
+  :auth_path => '!help!'
 
 # TODO the first line should probably go to the auth module?
 #
-core.default_auth('*', true)
-core.default_auth('core', false)
-core.default_auth('core::config::show', true)
+core.default_auth('*', false)
+core.default_auth('config::show', true)
 

@@ -112,7 +112,7 @@ module Plugins
       @handler = MessageMapper.new(self)
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
 
-      @manager.add_botmodule(kl, self)
+      @manager.add_botmodule(self)
     end
 
     def flush_registry
@@ -130,10 +130,11 @@ module Plugins
     end
 
     def map(*args)
-      @handler.map(*args)
+      @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
-      self.register name
+      auth = @handler.last.options[:full_auth_path]
+      self.register name, :auth => auth
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
           handle(m)
@@ -142,10 +143,10 @@ module Plugins
     end
 
     def map!(*args)
-      @handler.map(*args)
+      @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
-      self.register name, {:hidden => true}
+      self.register name, :auth => auth, :hidden => true
       unless self.respond_to?('privmsg')
         def self.privmsg(m)
           handle(m)
@@ -153,12 +154,23 @@ module Plugins
       end
     end
 
-    # Sets the default auth for command _cmd_ to _val_ on channel _chan_:
-    # usually _chan_ is either "*" for everywhere, public and private (in
-    # which case it can be omitted) or "?" for private communications
+    # Sets the default auth for command path _cmd_ to _val_ on channel _chan_:
+    # usually _chan_ is either "*" for everywhere, public and private (in which
+    # case it can be omitted) or "?" for private communications
     #
     def default_auth(cmd, val, chan="*")
-      Auth::anonbotuser.set_permission(cmd, val)
+      case cmd
+      when "*", ""
+        c = nil
+      else
+        c = cmd
+      end
+      Auth::defaultbotuser.set_default_permission(propose_default_path(c), val)
+    end
+
+    # Gets the default command path which would be given to command _cmd_
+    def propose_default_path(cmd)
+      [name, cmd].compact.join("::")
     end
 
     # return an identifier for this plugin, defaults to a list of the message
@@ -184,11 +196,15 @@ module Plugins
     # register the plugin as a handler for messages prefixed +name+
     # this can be called multiple times for a plugin to handle multiple
     # message prefixes
-    def register(name, opts={})
+    def register(cmd, opts={})
       raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
-      return if @manager.knows?(name, @botmodule_class)
-      @manager.register(name, @botmodule_class, self)
-      @botmodule_triggers << name unless opts.fetch(:hidden, false)
+      return if @manager.knows?(cmd, @botmodule_class)
+      if opts.has_key?(:auth)
+        @manager.register(self, cmd, opts[:auth])
+      else
+        @manager.register(self, cmd, propose_default_path(cmd))
+      end
+      @botmodule_triggers << cmd unless opts.fetch(:hidden, false)
     end
 
     # default usage method provided as a utility for simple plugins. The
@@ -249,14 +265,16 @@ module Plugins
       return @commandmappers[kl.to_sym].has_key?(name.to_sym)
     end
 
-    # Returns +true+ if _name_ is a known botmodule of class kl
-    def register(name, kl, botmodule)
-      raise TypeError, "Third argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
-      @commandmappers[kl.to_sym][name.to_sym] = botmodule
+    # Registers botmodule _botmodule_ with command _cmd_ and command path _auth_path_
+    def register(botmodule, cmd, auth_path)
+      raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+      kl = botmodule.botmodule_class
+      @commandmappers[kl.to_sym][cmd.to_sym] = {:botmodule => botmodule, :auth => auth_path}
     end
 
-    def add_botmodule(kl, botmodule)
-      raise TypeError, "Second argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+    def add_botmodule(botmodule)
+      raise TypeError, "Argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+      kl = botmodule.botmodule_class
       raise "#{kl.to_s} #{botmodule.name} already registered!" if @botmodules[kl.to_sym].include?(botmodule)
       @botmodules[kl.to_sym] << botmodule
     end
@@ -488,11 +506,12 @@ module Plugins
         # TODO should also check core_module and plugins
         [core_commands, plugin_commands].each { |pl|
           if(pl.has_key?(key))
+            p = pl[key][:botmodule] 
             begin
-              return pl[key].help(key, params)
+              return p.help(key, params)
             rescue Exception => err
               #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-              error report_error("#{p.botmodule_class} #{plugins[key].name} help() failed:", err)
+              error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
             end
           else
             return false
@@ -532,14 +551,16 @@ module Plugins
           # FIXME use fetch?
           k = m.plugin.to_sym
           if pl.has_key?(k)
-            p = pl[k]
+            p = pl[k][:botmodule]
+            a = pl[k][:auth]
           else
             p = nil
+            a = nil
           end
           if p
             # TODO This should probably be checked elsewhere
             debug "Checking auth ..."
-            if @bot.auth.allow?(m.plugin, m.source, m.replyto)
+            if @bot.auth.allow?(a, m.source, m.replyto)
               debug "Checking response ..."
               if p.respond_to?("privmsg")
                 begin
@@ -558,9 +579,9 @@ module Plugins
               debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to use #{m.plugin} on #{m.replyto}"
             end
           else
-            debug "No #{pl.values.first.botmodule_class} registered #{m.plugin}" unless pl.empty?
+            debug "No #{pl.values.first[:botmodule].botmodule_class} registered #{m.plugin}" unless pl.empty?
           end
-          debug "Finished delegating privmsg with key #{m.plugin}" + ( pl.empty? ? "" : " to #{pl.values.first.botmodule_class}s" )
+          debug "Finished delegating privmsg with key #{m.plugin}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
         }
         return false
       rescue Exception => e

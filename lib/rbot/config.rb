@@ -352,6 +352,9 @@ module Irc
 
     # bot:: parent bot class
     # create a new config hash from #{botclass}/conf.rbot
+    # TODO make this into a core module to guide a BotCOnfigManagerClass
+    # singleton instance from IRC
+    #
     def initialize(bot)
       @@bot = bot
 
@@ -363,24 +366,24 @@ module Irc
       #  unset
       #  desc
       #  and for arrays:
-      #    add TODO
-      #    remove TODO
+      #    add
+      #    remove
       @handler = MessageMapper.new(self)
-      @handler.map 'config list :module', :action => 'handle_list',
+      @handler.map 'config', 'config list :module', :action => 'handle_list',
                    :defaults => {:module => false}
-      @handler.map 'config get :key', :action => 'handle_get'
-      @handler.map 'config desc :key', :action => 'handle_desc'
-      @handler.map 'config describe :key', :action => 'handle_desc'
-      @handler.map 'config set :key *value', :action => 'handle_set'
-      @handler.map 'config add :value to :key', :action => 'handle_add'
-      @handler.map 'config rm :value from :key', :action => 'handle_rm'
-      @handler.map 'config del :value from :key', :action => 'handle_rm'
-      @handler.map 'config delete :value from :key', :action => 'handle_rm'
-      @handler.map 'config unset :key', :action => 'handle_unset'
-      @handler.map 'config reset :key', :action => 'handle_unset'
-      @handler.map 'config help :topic', :action => 'handle_help',
+      @handler.map 'config', 'config get :key', :action => 'handle_get'
+      @handler.map 'config', 'config desc :key', :action => 'handle_desc'
+      @handler.map 'config', 'config describe :key', :action => 'handle_desc'
+      @handler.map 'config', 'config set :key *value', :action => 'handle_set'
+      @handler.map 'config', 'config add :value to :key', :action => 'handle_add'
+      @handler.map 'config', 'config rm :value from :key', :action => 'handle_rm'
+      @handler.map 'config', 'config del :value from :key', :action => 'handle_rm'
+      @handler.map 'config', 'config delete :value from :key', :action => 'handle_rm'
+      @handler.map 'config', 'config unset :key', :action => 'handle_unset'
+      @handler.map 'config', 'config reset :key', :action => 'handle_unset'
+      @handler.map 'config', 'config help :topic', :action => 'handle_help',
                    :defaults => {:topic => false}
-      @handler.map 'help config :topic', :action => 'handle_help',
+      @handler.map 'config', 'help config :topic', :action => 'handle_help',
                    :defaults => {:topic => false}
       
       if(File.exist?("#{@@bot.botclass}/conf.yaml"))

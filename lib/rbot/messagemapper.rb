@@ -93,13 +93,14 @@ module Irc
     #             :requirements => {:limit => /^\d+$/},
     #             :private => false
     #
-    def map(*args)
-      @templates << Template.new(*args)
+    def map(botmodule, *args)
+      @templates << Template.new(botmodule, *args)
     end
 
     def each
       @templates.each {|tmpl| yield tmpl}
     end
+
     def last
       @templates.last
     end
@@ -125,7 +126,7 @@ module Irc
             failures << [tmpl, "class does not respond to action #{action}"]
             next
           end
-          auth = tmpl.options[:auth] ? tmpl.options[:auth] : tmpl.items[0]
+          auth = tmpl.options[:full_auth_path]
           debug "checking auth for #{auth}"
           if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
@@ -157,13 +158,48 @@ module Irc
     attr_reader :defaults # The defaults hash
     attr_reader :options  # The options hash
     attr_reader :items
-    def initialize(template, hash={})
-      raise ArgumentError, "Second argument must be a hash!" unless hash.kind_of?(Hash)
+
+    def initialize(botmodule, template, hash={})
+      raise ArgumentError, "Third argument must be a hash!" unless hash.kind_of?(Hash)
       @defaults = hash[:defaults].kind_of?(Hash) ? hash.delete(:defaults) : {}
       @requirements = hash[:requirements].kind_of?(Hash) ? hash.delete(:requirements) : {}
       self.items = template
+      if hash.has_key?(:auth)
+        warning "Command #{template} in #{botmodule} uses old :auth syntax, please upgrade"
+      end
+      if hash.has_key?(:full_auth_path)
+        warning "Command #{template} in #{botmodule} sets :full_auth_path, please don't do this"
+      else
+        case botmodule
+        when String
+          pre = botmodule
+        when Plugins::BotModule
+          pre = botmodule.name
+        else
+          raise ArgumentError, "Can't find auth base in #{botmodule.inspect}"
+        end
+        post = items.reject{ |x|
+          x == pre || x.kind_of?(Symbol)
+        }
+        if post.empty?
+          post = nil
+        else
+          post = post.first
+        end
+        if hash.has_key?(:auth_path)
+          extra = hash[:auth_path]
+          pre = nil if extra.sub!(/^!/, "")
+          post = nil if extra.sub!(/!$/, "")
+        else
+          extra = nil
+        end
+        hash[:full_auth_path] = [pre,extra,post].compact.join("::")
+        # TODO check if the full_auth_path is sane
+      end
+
       @options = hash
     end
+
     def items=(str)
       items = str.split(/\s+/).collect {|c| (/^(:|\*)(\w+)$/ =~ c) ? (($1 == ':' ) ? $2.intern : "*#{$2}".intern) : c} if str.kind_of?(String) # split and convert ':xyz' to symbols
       items.shift if items.first == ""

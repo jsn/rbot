@@ -346,6 +346,7 @@ class IrcBot
       log_session_end
       exit 2
     end
+    @auth.everyone.set_default_permission("*", true)
 
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::pluginmanager

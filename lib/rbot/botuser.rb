@@ -252,13 +252,29 @@ module Irc
         @perm = {}
       end
 
+      # Inspection simply inspects the internal hash
+      def inspect
+        @perm.inspect
+      end
+
       # Sets the permission for command _cmd_ to _val_,
-      # creating intermediate permissions if needed.
       #
       def set_permission(cmd, val)
-        raise TypeError, "#{val.inspect} must be true or false" unless [true,false].include?(val)
         Irc::error_if_not_command(cmd)
-        @perm[cmd.command] = val
+        case val
+        when true, false
+          @perm[cmd.command] = val
+        when nil
+          @perm.delete(cmd.command)
+        else
+          raise TypeError, "#{val.inspect} must be true or false" unless [true,false].include?(val)
+        end
+      end
+
+      # Resets the permission for command _cmd_
+      #
+      def reset_permission(cmd)
+        set_permission(cmd, nil)
       end
 
       # Tells if command _cmd_ is permitted. We do this by returning
@@ -311,6 +327,12 @@ module Irc
         else
           @perm[k].set_permission(cmd, val)
         end
+      end
+
+      # Resets the permission for command _cmd_ on channel _chan_
+      #
+      def reset_permission(cmd, chan ="*")
+        set_permission(cmd, nil, chan)
       end
 
       # Checks if BotUser is allowed to do something on channel _chan_,
@@ -415,17 +437,27 @@ module Irc
     end
 
 
-    # This is the anonymous BotUser: it's used for all users which haven't
+    # This is the default BotUser: it's used for all users which haven't
     # identified with the bot
     #
-    class AnonBotUserClass < BotUser
+    class DefaultBotUserClass < BotUser
       include Singleton
       def initialize
-        super("anonymous")
+        super("everyone")
+        @default_perm = PermissionSet.new
       end
       private :login, :add_netmask, :delete_netmask
 
-      # Anon knows everybody
+      # Sets the default permission for the default user (i.e. the ones
+      # set by the BotModule writers) on all channels
+      #
+      def set_default_permission(cmd, val)
+        @default_perm.set_permission(Command.new(cmd), val)
+        debug "Default permissions now:\n#{@default_perm.inspect}"
+      end
+
+      # default knows everybody
+      #
       def knows?(user)
         Irc::error_if_not_user(user)
         return true
@@ -436,12 +468,24 @@ module Irc
         super
         add_netmask("*!*@*")
       end
+
+      # DefaultBotUser will check the default_perm after checking
+      # the global ones
+      # or on all channels if _chan_ is nil
+      #
+      def permit?(cmd, chan=nil)
+        allow = super(cmd, chan)
+        if allow.nil? && chan.nil?
+          allow = @default_perm.permit?(cmd)
+        end
+        return allow
+      end
     end
 
-    # Returns the only instance of AnonBotUserClass
+    # Returns the only instance of DefaultBotUserClass
     #
-    def Auth.anonbotuser
-      return AnonBotUserClass.instance
+    def Auth.defaultbotuser
+      return DefaultBotUserClass.instance
     end
 
     # This is the BotOwner: he can do everything
@@ -470,10 +514,15 @@ module Irc
     class AuthManagerClass
       include Singleton
 
+      attr_reader :everyone
+      attr_reader :botowner
+
       # The instance manages two <code>Hash</code>es: one that maps
       # <code>Irc::User</code>s onto <code>BotUser</code>s, and the other that maps
       # usernames onto <code>BotUser</code>
       def initialize
+        @everyone = Auth::defaultbotuser
+        @botowner = Auth::botowner
         bot_associate(nil)
       end
 
@@ -494,7 +543,9 @@ module Irc
       def reset_hashes
         @botusers = Hash.new
         @allbotusers = Hash.new
-        [Auth::anonbotuser, Auth::botowner].each { |x| @allbotusers[x.username.to_sym] = x }
+        [everyone, botowner].each { |x|
+          @allbotusers[x.username.to_sym] = x
+        }
       end
 
       # load botlist from userfile
@@ -524,7 +575,8 @@ module Irc
       # Maps <code>Irc::User</code> to BotUser
       def irc_to_botuser(ircuser)
         Irc::error_if_not_user(ircuser)
-        return @botusers[ircuser] || Auth::anonbotuser
+        # TODO check netmasks
+        return @botusers[ircuser] || everyone
       end
 
       # creates a new BotUser
@@ -569,8 +621,8 @@ module Irc
       # is returned:
       # * associated BotUser on _chan_
       # * associated BotUser on all channels
-      # * anonbotuser on _chan_
-      # * anonbotuser on all channels
+      # * everyone on _chan_
+      # * everyone on all channels
       #
       def permit?(user, cmdtxt, chan=nil)
         botuser = irc_to_botuser(user)
@@ -590,10 +642,10 @@ module Irc
         allow = botuser.permit?(cmd)
         return allow unless allow.nil?
 
-        unless botuser == Auth::anonbotuser
-          allow = Auth::anonbotuser.permit?(cmd, chan) if chan
+        unless botuser == everyone
+          allow = everyone.permit?(cmd, chan) if chan
           return allow unless allow.nil?
-          allow = Auth::anonbotuser.permit?(cmd)
+          allow = everyone.permit?(cmd)
           return allow unless allow.nil?
         end
 
