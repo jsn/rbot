@@ -888,7 +888,7 @@ module Irc
       if prefix != nil
         data[:source] = prefix
         if prefix =~ /^(\S+)!(\S+)$/
-          data[:source] = @server.user($1)
+          data[:source] = @server.user(prefix)
         else
           if @server.hostname && @server.hostname != data[:source]
             warning "Unknown origin #{data[:source]} for message\n#{serverstring.inspect}"

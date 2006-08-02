@@ -14,6 +14,11 @@
 # Author:: Giuseppe Bilotta (giuseppe.bilotta@gmail.com)
 # Copyright:: Copyright (c) 2006 Giuseppe Bilotta
 # License:: GPLv2
+#
+# TODO User should have associated Server too
+#
+# TODO rather than the complex init methods, we should provide a single one (having a String parameter)
+# and then provide to_irc_netmask(casemap), to_irc_user(server), to_irc_channel(server) etc
 
 
 # We start by extending the String class
@@ -280,7 +285,7 @@ module Irc
           @nick = nil
           @user = nil
           @host = nil
-        when /(\S+)(?:!(\S+)@(?:(\S+))?)?/
+        when /^(\S+?)(?:!(\S+)@(?:(\S+))?)?$/
           @casemap = casemap || 'rfc1459'
           @nick = $1.irc_downcase(@casemap)
           @user = $2
@@ -295,6 +300,12 @@ module Irc
       @nick = "*" if @nick.to_s.empty?
       @user = "*" if @user.to_s.empty?
       @host = "*" if @host.to_s.empty?
+    end
+
+    # Equality: two Netmasks are equal if they have the same @nick, @user, @host and @casemap
+    #
+    def ==(other)
+      self.class == other.class && @nick == other.nick && @user == other.user && @host == other.host && @casemap == other.casemap
     end
 
     # This method changes the nick of the Netmask, downcasing the argument
@@ -322,6 +333,14 @@ module Irc
       @host = "*" if @host.empty?
     end
 
+    # This method changes the casemap of a Netmask, which is needed in some
+    # extreme circumstances. Please use sparingly
+    #
+    def casemap=(newcmap)
+      @casemap = newcmap.to_s
+      @casemap = "rfc1459" if @casemap.empty?
+    end
+
     # This method checks if a Netmask is definite or not, by seeing if
     # any of its components are defined by globs
     #
@@ -332,7 +351,7 @@ module Irc
     # A Netmask is easily converted to a String for the usual representation
     # 
     def fullform
-      return "#{nick}@#{user}!#{host}"
+      return "#{nick}!#{user}@#{host}"
     end
     alias :to_s :fullform
 
@@ -844,6 +863,10 @@ module Irc
         when :casemapping, :network
           noval_warn(key, val) {
             @supports[key] = val
+            @users.each { |u|
+              debug "Resetting casemap of #{u} from #{u.casemap} to #{val}"
+              u.casemap = val
+            }
           }
         when :chanlimit, :idchan, :maxlist, :targmax
           noval_warn(key, val) {
@@ -968,7 +991,11 @@ module Irc
     # The Channel is automatically created with the appropriate casemap
     #
     def new_channel(name, topic=nil, users=[], fails=true)
-      if !has_chan?(name)
+      ex = get_chan(name)
+      if ex
+        raise "Channel #{name} already exists on server #{self}" if fails
+        return ex
+      else
 
         prefix = name[0].chr
 
@@ -977,7 +1004,7 @@ module Irc
         # FIXME might need to raise an exception
         #
         warn "#{self} doesn't support channel prefix #{prefix}" unless @supports[:chantypes].include?(prefix)
-        warn "#{self} doesn't support channel names this long (#{name.length} > #{@support[:channellen]}" unless name.length <= @supports[:channellen]
+        warn "#{self} doesn't support channel names this long (#{name.length} > #{@supports[:channellen]})" unless name.length <= @supports[:channellen]
 
         # Next, we check if we hit the limit for channels of type +prefix+
         # if the server supports +chanlimit+
@@ -1031,9 +1058,6 @@ module Irc
         debug "Managing channels #{@channel_names.join(', ')}"
         return chan
       end
-
-      raise "Channel #{name} already exists on server #{self}" if fails
-      return get_channel(name)
     end
 
     # Returns the Channel with the given _name_ on the server,
@@ -1080,21 +1104,27 @@ module Irc
       else
         tmp = User.new(str, self.casemap)
       end
-      if !has_user?(tmp.nick)
-        warn "#{self} doesn't support nicknames this long (#{tmp.nick.length} > #{@support[:nicklen]}" unless tmp.nick.length <= @supports[:nicklen]
+      debug "Creating or selecting user #{tmp.inspect} from #{str.inspect}"
+      old = get_user(tmp.nick)
+      if old
+        debug "User already existed as #{old.inspect}"
+        if tmp.known?
+          if old.known?
+            raise "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old.inspect} but access was tried with #{tmp.inspect}" if old != tmp
+            raise "User #{tmp} already exists on server #{self}" if fails
+          else
+            old.user = tmp.user
+            old.host = tmp.host
+            debug "User improved to #{old.inspect}"
+          end
+        end
+        return old
+      else
+        warn "#{self} doesn't support nicknames this long (#{tmp.nick.length} > #{@supports[:nicklen]})" unless tmp.nick.length <= @supports[:nicklen]
         @users << tmp
         @user_nicks << tmp.nick
         return @users.last
       end
-      old = get_user(tmp.nick)
-      if old.known?
-        raise "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old} but access was tried with #{tmp}" if old != tmp
-        raise "User #{tmp} already exists on server #{self}" if fails
-      else
-        old.user = tmp.user
-        old.host = tmp.host
-      end
-      return old
     end
 
     # Returns the User with the given Netmask on the server,
@@ -1102,7 +1132,15 @@ module Irc
     # new_user(_str_, +false+)
     #
     def user(str)
-      new_user(str, false)
+      # This method can get called before server has been initialized (e.g. on
+      # Freenode there is a NOTICE from AUTH on connect). In this case we just
+      # return the string
+      #
+      if defined?(@supports)
+        new_user(str, false)
+      else
+        str
+      end
     end
 
     # Remove User _someuser_ from the list of <code>User</code>s.
