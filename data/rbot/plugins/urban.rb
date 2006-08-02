@@ -12,7 +12,7 @@ require 'uri/common'
 class UrbanPlugin < Plugin
 
   def help( plugin, topic="")
-    "~urban [word] [n]. Give the [n]th definition of [word] from urbandictionary.com."
+    "urban [word] [n]. Give the [n]th definition of [word] from urbandictionary.com."
   end
 
   def privmsg( m )
