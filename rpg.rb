@@ -11,7 +11,7 @@ class Player
   attr_accessor :hp, :strength
 
   def initialize
-    @hp = 100
+    @hp = 20
     @strength = 10
   end
 
@@ -41,8 +41,34 @@ class RpgPlugin < Plugin
 #####################################################################
 
   def next_round
+    @players.each { |name, p|
+      if p.hp < 0
+        @msg.reply( "#{name} dies from his injuries :(" )
+        @players.delete( name )        
+      end  
+    }
   end
 
+
+  def spawned?( m, nick )
+    if @players.has_key?( nick )
+      return true
+    else
+      m.reply( "You have not joined the game. Use 'spawn player' to join." )
+      return false  
+    end
+  end
+
+
+  def target_spawned?( m, target )
+    if @players.has_key?( target )
+      return true
+    else  
+      m.reply( "#{m.sourcenick} seems confused: there is noone named #{target} near.." )
+      return false
+    end
+  end
+ 
 
   def punch( src_name, dst_name ) 
     src = @players[src_name]
@@ -66,6 +92,7 @@ class RpgPlugin < Plugin
     m.reply "Player #{name} enters the game."
   end
 
+
   def handle_spawn_monster( m, params )
     p = Monster.new  
     name = "grue"
@@ -73,12 +100,11 @@ class RpgPlugin < Plugin
     m.reply "Monster #{name} enters the game."
   end
 
+
   def handle_punch( m, params )
-    unless @players.has_key?( params[:target] )
-      m.reply( "#{m.sourcenick} seems confused: there is noone named #{params[:target]} near.." )
-      return
-    end
-  
+    return unless spawned?( m, m.sourcenick )
+    return unless target_spawned?( m, params[:target] )
+ 
     @msg = m  #temp hack
     punch( m.sourcenick, params[:target] )
     next_round
