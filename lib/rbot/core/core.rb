@@ -118,12 +118,12 @@ class CoreModule < CoreBotModule
       return "talk [in here|<channel>] => with no arguments, resume speaking in all channels, if \"in here\", resume speaking in this channel, or resume speaking in <channel>"
     when "version"
       return "version => describes software version"
-      #     when "botsnack"
-      #       return "botsnack => reward #{myself} for being good"
-      #     when "hello"
-      #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
+    #     when "botsnack"
+    #       return "botsnack => reward #{myself} for being good"
+    #     when "hello"
+    #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
     else
-      return "Core help topics: quit, restart, config, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version, botsnack, hello"
+      return "Core help topics: quit, restart, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version"#, botsnack, hello"
     end
   end
 end

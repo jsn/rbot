@@ -73,9 +73,7 @@ require 'rbot/utils'
 
 require 'rbot/irc'
 require 'rbot/rfc2812'
-require 'rbot/keywords'
 require 'rbot/ircsocket'
-# require 'rbot/auth'
 require 'rbot/botuser'
 require 'rbot/timer'
 require 'rbot/plugins'
@@ -348,8 +346,6 @@ class IrcBot
     @httputil = Utils::HttpUtil.new(self)
 
     @lang = Language::Language.new(@config['core.language'])
-
-    # @keywords = Keywords.new(self)
 
     begin
       @auth = Auth::authmanager
@@ -839,22 +835,18 @@ class IrcBot
     exec($0, *@argv)
   end
 
-  # call the save method for bot's config, keywords, auth and all plugins
+  # call the save method for all of the botmodules
   def save
     @save_mutex.synchronize do
-      # @config.save
-      # @keywords.save
-      # @auth.save
       @plugins.save
       DBTree.cleanup_logs
     end
   end
 
-  # call the rescan method for the bot's lang, keywords and all plugins
+  # call the rescan method for all of the botmodules
   def rescan
     @lang.rescan
     @plugins.rescan
-    # @keywords.rescan
   end
 
   # channel:: channel to join

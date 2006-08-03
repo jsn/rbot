@@ -27,14 +27,14 @@ module Irc
         }
         old.close
         new.close
-        File.delete("#{@bot.botclass}/registry.db")
+        File.rename("#{@bot.botclass}/registry.db", "#{@bot.botclass}/registry.db.old")
       end
     end
 
     def upgrade_data2
       if File.exist?("#{@bot.botclass}/plugin_registry.db")
         Dir.mkdir("#{@bot.botclass}/registry") unless File.exist?("#{@bot.botclass}/registry")
-        env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)
+        env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)# | BDB::TXN_NOSYNC)
         dbs = Hash.new
         log "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
         old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
