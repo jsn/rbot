@@ -110,7 +110,7 @@ class Keywords < Plugin
           @keywords[lhs] = Keyword.new(mhs, values).dump
         end
       end
-      File.delete("#{@bot.botclass}/keywords.rbot")
+      File.rename("#{@bot.botclass}/keywords.rbot", "#{@bot.botclass}/keywords.rbot.bak")
     end
   end
   
