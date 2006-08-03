@@ -8,10 +8,11 @@
 
 class Player
 
-  attr_accessor :name, :hp, :strength
+  attr_accessor :name, :player_type, :hp, :strength
 
   def initialize
     @name = ""
+    @player_type = "Human"
     @hp = 20
     @strength = 10
   end
@@ -46,6 +47,32 @@ class Monster < Player
 end    
 
 
+class Orc < Monster
+
+  def initialize
+    super
+
+    @name = "orc"
+    @player_type = "Orc"
+    @hp = 14
+  end
+
+end
+
+
+class Slime < Monster
+
+  def initialize
+    super
+
+    @name = "slime"
+    @player_type = "Slime"
+    @hp = 8
+  end  
+
+end
+
+
 class RpgPlugin < Plugin
 
   attr_accessor :players, :msg
@@ -54,6 +81,7 @@ class RpgPlugin < Plugin
     super
 
     @players = Hash.new
+    @monster_types = ["Orc", "Slime"]
   end
 
 #####################################################################
@@ -64,14 +92,14 @@ class RpgPlugin < Plugin
     # Check for death:
     @players.each_value do |p|
       if p.hp < 0
-        @msg.reply( "#{p.name} dies from his injuries :(" )
+        @msg.reply( "#{p.name} dies from his injuries." )
         @players.delete( p.name )        
       end  
     end
 
     # Let monsters act:
     @players.each_value do |p|
-      if p.instance_of?( Monster )
+      if p.is_a?( Monster )
         p.act( self )
       end
     end
@@ -108,15 +136,20 @@ class RpgPlugin < Plugin
     @players[p.name] = p
     m.reply "Player #{p.name} enters the game."
 
-    handle_spawn_monster m, params  # for testing
+    # handle_spawn_monster m, params  # for testing
   end
 
 
   def handle_spawn_monster( m, params )
-    p = Monster.new  
-    p.name = "grue"
+    p = eval( "#{@monster_types[rand(@monster_types.length)]}.new" )  
+
+    # Make sure we don't have multiple monsters with same name (FIXME)
+    a = [0]
+    @players.each_value { |x| a << x.name[-1,1].to_i if x.name.include? p.name }
+    p.name += ( a.sort.last + 1).to_s
+
     @players[p.name] = p
-    m.reply "Monster #{p.name} enters the game."
+    m.reply "A #{p.player_type} enters the game. ('#{p.name}')"
   end
 
 
