@@ -222,6 +222,7 @@ class ArrayOf < Array
   end
 end
 
+
 # The Irc module is used to keep all IRC-related classes
 # in the same namespace
 #
@@ -391,6 +392,16 @@ module Irc
     def ===(arg)
       Netmask.new(arg).matches?(self)
     end
+
+    def <=>(arg)
+      case arg
+      when Netmask
+        self.fullform <=> arg.fullform
+      else
+        self.to_s <=> arg.to_s
+      end
+    end
+
   end
 
 
@@ -635,7 +646,7 @@ module Irc
       str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
       str << " on server #{server}"
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
-      str << " @users=<#{@users.join(', ')}>"
+      str << " @users=<#{@users.sort.join(', ')}>"
       str
     end
 
@@ -746,6 +757,28 @@ module Irc
 
     attr_reader :channels, :users
 
+    def channel_names
+      @channels.map { |ch| ch.name }
+    end
+
+    def user_nicks
+      @users.map { |u| u.nick }
+    end
+
+    def inspect
+      chans = @channels.map { |ch|
+        ch.inspect
+      }
+      users = @users.map { |u|
+        u.inspect
+      }.sort
+
+      str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str << " @channels=#{chans}"
+      str << " @users=#{users}>"
+      str
+    end
+
     # Create a new Server, with all instance variables reset
     # to nil (for scalar variables), the channel and user lists
     # are empty, and @supports is initialized to the default values
@@ -755,10 +788,8 @@ module Irc
       @hostname = @version = @usermodes = @chanmodes = nil
 
       @channels = ChannelList.new
-      @channel_names = Array.new
 
       @users = UserList.new
-      @user_nicks = Array.new
 
       reset_capabilities
     end
@@ -971,15 +1002,15 @@ module Irc
     # Checks if the receiver already has a channel with the given _name_
     #
     def has_channel?(name)
-      @channel_names.index(name.to_s)
+      channel_names.index(name.to_s)
     end
     alias :has_chan? :has_channel?
 
     # Returns the channel with name _name_, if available
     #
     def get_channel(name)
-      idx = @channel_names.index(name.to_s)
-      @channels[idx] if idx
+      idx = channel_names.index(name.to_s)
+      channels[idx] if idx
     end
     alias :get_chan :get_channel
 
@@ -1012,8 +1043,8 @@ module Irc
         @supports[:chanlimit].keys.each { |k|
           next unless k.include?(prefix)
           count = 0
-          @channel_names.each { |n|
-            count += 1 if k.include?(n[0].chr)
+          channel_names.each { |n|
+            count += 1 if k.include?(n[0])
           }
           raise IndexError, "Already joined #{count} channels with prefix #{k}" if count == @supports[:chanlimit][k]
         }
@@ -1053,9 +1084,7 @@ module Irc
         }
 
         @channels << chan
-        @channel_names << name
         # debug "Created channel #{chan.inspect}"
-        # debug "Managing channels #{@channel_names.join(', ')}"
         return chan
       end
     end
@@ -1073,20 +1102,19 @@ module Irc
     def delete_channel(name)
       idx = has_channel?(name)
       raise "Tried to remove unmanaged channel #{name}" unless idx
-      @channel_names.delete_at(idx)
       @channels.delete_at(idx)
     end
 
     # Checks if the receiver already has a user with the given _nick_
     #
     def has_user?(nick)
-      @user_nicks.index(nick.to_s)
+      user_nicks.index(nick.to_s)
     end
 
     # Returns the user with nick _nick_, if available
     #
     def get_user(nick)
-      idx = @user_nicks.index(nick.to_s)
+      idx = user_nicks.index(nick.to_s)
       @users[idx] if idx
     end
 
@@ -1122,7 +1150,6 @@ module Irc
       else
         warn "#{self} doesn't support nicknames this long (#{tmp.nick.length} > #{@supports[:nicklen]})" unless tmp.nick.length <= @supports[:nicklen]
         @users << tmp
-        @user_nicks << tmp.nick
         return @users.last
       end
     end
@@ -1146,7 +1173,6 @@ module Irc
       @channels.each { |ch|
         delete_user_from_channel(have, ch)
       }
-      @user_nicks.delete_at(idx)
       @users.delete_at(idx)
     end
 

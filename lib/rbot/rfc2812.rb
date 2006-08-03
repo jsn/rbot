@@ -1167,7 +1167,8 @@ module Irc
 
         data[:newnick] = argv[0]
         data[:oldnick] = data[:source].nick.dup
-        data[:source].nick = data[:nick]
+        data[:source].nick = data[:newnick]
+
         debug "#{data[:oldnick]} (now #{data[:newnick]}) was on #{data[:is_on].join(', ')}"
 
         handle(:nick, data)
