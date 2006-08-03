@@ -309,6 +309,7 @@ class IrcBot
 
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @registry = BotRegistry.new self
+    @save_mutex = Mutex.new
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
     @channels = Hash.new
     @logs = Hash.new
@@ -780,10 +781,12 @@ class IrcBot
 
   # call the save method for bot's config, auth and all plugins
   def save
-    @config.save
-    @auth.save
-    @plugins.save
-    DBTree.cleanup_logs
+    @save_mutex.synchronize do
+      @config.save
+      @auth.save
+      @plugins.save
+      DBTree.cleanup_logs
+    end
   end
 
   # call the rescan method for the bot's lang and all plugins
