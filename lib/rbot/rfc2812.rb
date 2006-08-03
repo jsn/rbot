@@ -922,6 +922,7 @@ module Irc
             data[:nick] = $2
             data[:address] = $3
             @client = @server.user(data[:netmask])
+            set = true
           when /Welcome to the Internet Relay Network\s(\S+)/
             data[:nick] = $1
           when /Welcome.*\s+(\S+)$/
@@ -929,7 +930,7 @@ module Irc
           when /^(\S+)$/
             data[:nick] = $1
           end
-          @user ||= @server.user(data[:nick])
+          @client = @server.user(data[:nick]) unless set
           handle(:welcome, data)
         when RPL_YOURHOST
           # "Your host is <servername>, running version <ver>"
@@ -1016,7 +1017,7 @@ module Irc
 
           users.each { |ar|
             u = @server.user(ar[0])
-            chan.users << u
+            chan.users << u unless chan.users.include?(u)
             if ar[1]
               m = @server.supports[:prefix][:prefixes].index(ar[1].to_sym)
               m = @server.supports[:prefix][:modes][m]

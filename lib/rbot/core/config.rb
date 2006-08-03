@@ -4,6 +4,10 @@
 
 class ConfigModule < CoreBotModule
 
+  def save
+    @bot.config.save
+  end
+
   def handle_list(m, params)
     modules = []
     if params[:module]
@@ -18,7 +22,7 @@ class ConfigModule < CoreBotModule
         m.reply modules.join(", ")
       end
     else
-      @bot.configitems.each_key do |key|
+      @bot.config.items.each_key do |key|
         name = key.to_s.split('.').first
         modules.push name unless modules.include?(name)
       end
@@ -132,7 +136,7 @@ class ConfigModule < CoreBotModule
     @bot.save
     m.reply "rescanning ..."
     @bot.rescan
-    m.reply "done. #{@plugins.status(true)}"
+    m.reply "done. #{@bot.plugins.status(true)}"
   end
 
   def bot_nick(m, param)

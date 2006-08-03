@@ -7,164 +7,6 @@
 # Copyright:: Copyright (c) 2006 Giuseppe Bilotta
 # License:: GPLv2
 
-#--
-#####
-####
-### Discussion on IRC on how to implement it
-##
-#
-# <tango_>	a. do we want user groups together with users?
-# <markey>	hmm
-# <markey>	let me think about it
-# <markey>	generally I would say: as simple as possible while keeping it as flexible as need be
-# <tango_>	I think we can put user groups in place afterwards if we build the structure right
-# <markey>	prolly, yes
-# <tango_>	so
-# <tango_>	each plugin registers a name
-# <tango_>	so rather than auth level we have +name -name
-# <markey>	yes
-# <markey>	much better
-# <tango_>	the default is +name for every plugin, except when the plugin tells otherwise
-# <markey>	although.. 
-# <markey>	if I only want to allow you access to one plugin
-# <markey>	I have lots of typing to do
-# <tango_>	nope
-# <tango_>	we allow things like -*
-# <markey>	ok
-# <tango_>	and + has precedence
-# <tango_>	hm no, not good either
-# <tango_>	because we want bot -* +onething and +* -onething to work
-# <markey>	but then: one plugin currently can have several levels, no?
-# <tango_>	of course
-# <markey>	commandedit, commanddel, commandfoo
-# <tango_>	name.command ?
-# <markey>	yep
-# <tango_>	(then you can't have dots in commands
-# <tango_>	maybe name:command
-# <markey>	or name::comand
-# <markey>	like a namespace
-# <tango_>	ehehehe yeah I like it :)
-# <tango_>	tel
-# <tango_>	brb
-# <markey>	usermod setcaps eean -*
-# <markey>	usermod setcaps eean +quiz::edit
-# <markey>	great
-# <markey>	or even
-# <markey>	auth eean -*, +quiz::edit
-# <markey>	awesome
-# <markey>	auth eean -*, +quiz::edit, +command, -command::del
-# <tango_>	yes
-# <markey>	you know, the default should be -*
-# <markey>	because
-# <markey>	in the time between adding the user and changing auth
-# <markey>	it's insecure
-# <markey>	user could do havoc
-# <markey>	useradd eean, then eean does "~quit", before I change auth
-# <tango_>	nope
-# <markey>	perhaps we should allow combining useradd with auth
-# <tango_>	the default should be +* -important stuff
-# <markey>	ok
-# <tango_>	how to specify channel stuff?
-# <markey>	for one, when you issue the command on the channel itself
-# <markey>	then it's channel relative
-# <markey>	perhaps
-# <markey>	or
-# <tango_>	yes but I was thinking more about the syntax
-# <markey>	auth eean #rbot -quiz
-# <tango_>	hm
-# <markey>	or maybe: treat channels like users: auth #rbot -quiz
-# <markey>	would shut up quiz in #rbot
-# <markey>	hm
-# <markey>	heh
-# <tango_>	auth * #rbot -quiz
-# <markey>	not sure I'm making sense here ;)
-# <tango_>	I think syntax should be auth [usermask] [channelmask] [modes]
-# <markey>	yes
-# <markey>	modes separated by comma?
-# <tango_>	where channelmask is implied to be *
-# <tango_>	no we can have it spacesplit
-# <markey>	great
-# <markey>	ok
-# <tango_>	modes are detected by +-
-# <tango_>	so you can do something like auth markey #rbot -quiz #amarok -chuck
-# <markey>	also I like "auth" a lot more than "usermod foo"
-# <markey>	yep
-# <tango_>	I don't understand why the 'mod'
-# <tango_>	we could have all auth commands start with use
-# <tango_>	user
-# <tango_>	user add
-# <tango_>	user list
-# <tango_>	user del
-# <markey>	yes
-# <tango_>	user auth
-# <tango_>	hm
-# <tango_>	and maybe auth as a synonym for user auth
-# <markey>	this is also uncomfortable: usermod wants the full user mask
-# <markey>	you have to copy/paste it
-# <tango_>	no
-# <tango_>	can't you use *?
-# <markey>	sorry not sure
-# <markey>	but this shows, it's not inuitive
-# <markey>	I've read the docs
-# <markey>	but didn't know how to use it really
-# <tango_>	markey!*@*
-# <markey>	that's not very intuitive
-# <tango_>	we could use nick as a synonym for nick!*@* if it's too much for you :D
-# <markey>	usermod markey foo should suffice
-# <markey>	rememember: you're a hacker. when rbot gets many new users, they will often be noobs
-# <markey>	gotta make things simple to use
-# <tango_>	but the hostmask is only needed for the user creation
-# <markey>	really? then forget what I said, sorry
-# <tango_>	I think so
-# <tango_>	,help auth
-# <testbot>	Auth module (User authentication) topics: setlevel, useradd, userdel, usermod, auth, levels, users, whoami, identify
-# <tango_>	,help usermod
-# <testbot>	no help for topic usermod
-# <tango_>	,help auth usermod
-# <testbot>	usermod <username> <item> <value> => Modify <username>s settings. Valid <item>s are: hostmask, (+|-)hostmask, password, level (private addressing only)
-# <tango_>	see? it's username, not nick :D
-# <markey>	btw, help usermod should also work
-# <tango_>	,help auth useradd
-# <testbot>	useradd <username> => Add user <mask>, you still need to set him up correctly (private addressing only)
-# <markey>	instead of help auth usermode
-# <markey>	when it's not ambiguous
-# <tango_>	and the help for useradd is wrong
-# <markey>	for the website, we could make a logo contest :) the current logo looks like giblet made it in 5 minutes ;)
-# <markey>	ah well, for 1.0 maybe
-# <tango_>	so a user on rbot is given by
-# <tango_>	username, password, hostmasks, permissions
-# <markey>	yup
-# <tango_>	the default permission is +* -importantstuff
-# <markey>	how defines importantstuff?
-# <markey>	you mean like core and auth?
-# <tango_>	yes
-# <markey>	ok
-# <tango_>	but we can decide about this :)
-# <markey>	some plugins are dangerous by default
-# <markey>	like command plugin
-# <markey>	you can do all sorts of nasty shit with it
-# <tango_>	then command plugin will do something like: command.defaultperm("-command")
-# <markey>	yes, good point
-# <tango_>	this is then added to the default permissions (user * channel *)
-# <tango_>	when checking for auth, we go like this:
-# <tango_>	hm
-# <tango_>	check user * channel *
-# <tango_>	then user name channel *
-# <tango_>	then user * channel name
-# <tango_>	then user name channel name
-# <tango_>	for each of these combinations we match against * first, then against command, and then against command::subcommand
-# <markey>	yup
-# <tango_>	setting or resetting it depending on wether it's + or -
-# <tango_>	the final result gives us the permission
-# <tango_>	implementation detail
-# <tango_>	username and passwords are strings
-# <markey>	(I might rename the command plugin, the name is somewhat confusing)
-# <tango_>	yeah
-# <tango_>	hostmasks are hostmasks
-# <markey>	also I'm pondering to restrict it more: disallow access to @bot
-# <tango_>	permissions are in the form [ [channel, {command => bool, ...}] ...]
-#++
-
 require 'singleton'
 
 module Irc
@@ -185,6 +27,13 @@ module Irc
   # This module contains the actual Authentication stuff
   #
   module Auth
+
+    BotConfig.register BotConfigStringValue.new( 'auth.password',
+      :default => 'rbotauth', :wizard => true,
+      :desc => 'Password for the bot owner' )
+    # BotConfig.register BotConfigIntegerValue.new( 'auth.default_level',
+    #   :default => 10, :wizard => true,
+    #   :desc => 'The default level for new/unknown users' )
 
     # Generate a random password of length _l_
     #
@@ -234,6 +83,7 @@ module Irc
         @command = path.last
         debug "Created command #{@command.inspect} with path #{@path.join(', ')}"
       end
+
     end
 
     # This method raises a TypeError if _user_ is not of class User
@@ -291,6 +141,7 @@ module Irc
         }
         return allow
       end
+
     end
 
 
@@ -309,6 +160,51 @@ module Irc
         @password = nil
         @netmasks = NetmaskList.new
         @perm = {}
+      end
+
+      # Inspection
+      def inspect
+        str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+        str << " @username=#{@username.inspect}"
+        str << " @netmasks=#{@netmasks.inspect}"
+        str << " @perm=#{@perm.inspect}"
+        str
+      end
+
+      # Convert into a hash
+      def to_hash
+        {
+          :username => @username,
+          :password => @password,
+          :netmasks => @netmasks,
+          :perm => @perm
+        }
+      end
+
+      # Restore from hash
+      def from_hash(h)
+        @username = h[:username] if h.has_key?(:username)
+        @password = h[:password] if h.has_key?(:password)
+        @netmasks = h[:netmasks] if h.has_key?(:netmasks)
+        @perm = h[:perm] if h.has_key?(:perm)
+      end
+
+      # This method sets the password if the proposed new password
+      # is valid
+      def password=(pwd=nil)
+        if pwd
+          begin
+            raise InvalidPassword, "#{pwd} contains invalid characters" if pwd !~ /^[A-Za-z0-9]+$/
+            raise InvalidPassword, "#{pwd} too short" if pwd.length < 4
+            @password = pwd
+          rescue InvalidPassword => e
+            raise e
+          rescue => e
+            raise InvalidPassword, "Exception #{e.inspect} while checking #{pwd}"
+          end
+        else
+          reset_password
+        end
       end
 
       # Resets the password by creating a new onw
@@ -358,7 +254,7 @@ module Irc
         when Netmask
           @netmasks << mask
         else
-          @netmasks << Netmask(mask)
+          @netmasks << Netmask.new(mask)
         end
       end
 
@@ -369,7 +265,7 @@ module Irc
         when Netmask
           m = mask
         else
-          m << Netmask(mask)
+          m << Netmask.new(mask)
         end
         @netmasks.delete(m)
       end
@@ -399,6 +295,7 @@ module Irc
       def login(user, password)
         if password == @password
           add_netmask(user) unless knows?(user)
+          debug "#{user} logged in as #{self.inspect}"
           return true
         else
           return false
@@ -417,23 +314,6 @@ module Irc
         return name.to_s.chomp.downcase.gsub(/[^a-z0-9]/,"_")
       end
 
-      # This method sets the password if the proposed new password
-      # is valid
-      def password=(pwd=nil)
-        if pwd
-          begin
-            raise InvalidPassword, "#{pwd} contains invalid characters" if pwd !~ /^[A-Za-z0-9]+$/
-            raise InvalidPassword, "#{pwd} too short" if pwd.length < 4
-            @password = pwd
-          rescue InvalidPassword => e
-            raise e
-          rescue => e
-            raise InvalidPassword, "Exception #{e.inspect} while checking #{pwd}"
-          end
-        else
-          reset_password
-        end
-      end
     end
 
 
@@ -441,12 +321,15 @@ module Irc
     # identified with the bot
     #
     class DefaultBotUserClass < BotUser
+
+      private :login, :add_netmask, :delete_netmask
+
       include Singleton
+
       def initialize
         super("everyone")
         @default_perm = PermissionSet.new
       end
-      private :login, :add_netmask, :delete_netmask
 
       # Sets the default permission for the default user (i.e. the ones
       # set by the BotModule writers) on all channels
@@ -480,6 +363,7 @@ module Irc
         end
         return allow
       end
+
     end
 
     # Returns the only instance of DefaultBotUserClass
@@ -491,7 +375,9 @@ module Irc
     # This is the BotOwner: he can do everything
     #
     class BotOwnerClass < BotUser
+
       include Singleton
+
       def initialize
         super("owner")
       end
@@ -499,6 +385,7 @@ module Irc
       def permit?(cmd, chan=nil)
         return true
       end
+
     end
 
     # Returns the only instance of BotOwnerClass
@@ -512,6 +399,7 @@ module Irc
     # everything
     #
     class AuthManagerClass
+
       include Singleton
 
       attr_reader :everyone
@@ -539,6 +427,18 @@ module Irc
         @has_changes = false
       end
 
+      def set_changed
+        @has_changes = true
+      end
+
+      def reset_changed
+        @has_changes = false
+      end
+
+      def changed?
+        @has_changes
+      end
+
       # resets the hashes
       def reset_hashes
         @botusers = Hash.new
@@ -548,23 +448,24 @@ module Irc
         }
       end
 
-      # load botlist from userfile
-      def load_merge(filename=nil)
-        # TODO
-        raise NotImplementedError
-        @has_changes = true
-      end
-
-      def load(filename=nil)
+      def load_array(ary, forced)
+        raise "Won't load with unsaved changes" if @has_changes and not forced
         reset_hashes
-        load_merge(filename)
+        ary.each { |x|
+          raise TypeError, "#{x} should be a Hash" unless x.class <= Hash
+          u = x[:username]
+          unless include?(u)
+            create_botuser(u)
+          end
+          get_botuser(u).from_hash(x)
+        }
+        @has_changes=false
       end
 
-      # save botlist to userfile
-      def save(filename=nil)
-        return unless @has_changes
-        # TODO
-        raise NotImplementedError
+      def save_array
+        @allbotusers.values.map { |x|
+          x.to_hash
+        }
       end
 
       # checks if we know about a certain BotUser username
@@ -589,6 +490,11 @@ module Irc
         @allbotusers[k] = bu
       end
 
+      # returns the botuser with name _name_
+      def get_botuser(name)
+        @allbotusers.fetch(BotUser.sanitize_username(name).to_sym)
+      end
+
       # Logs Irc::User _ircuser_ in to BotUser _botusername_ with password _pwd_
       #
       # raises an error if _botusername_ is not a known BotUser username
@@ -597,7 +503,7 @@ module Irc
       #
       def login(ircuser, botusername, pwd, bymask = false)
         Irc::error_if_not_user(ircuser)
-        n = BotUser.sanitize_username(name)
+        n = BotUser.sanitize_username(botusername)
         k = n.to_sym
         raise "No such BotUser #{n}" unless include?(k)
         if @botusers.has_key?(ircuser)
@@ -605,7 +511,7 @@ module Irc
           # @botusers[ircuser].logout(ircuser)
         end
         bu = @allbotusers[k]
-        if bymask && bu.knows?(user)
+        if bymask && bu.knows?(ircuser)
           @botusers[ircuser] = bu
           return true
         elsif bu.login(ircuser, pwd)
@@ -656,6 +562,7 @@ module Irc
       def allow?(cmdtxt, user, chan=nil)
         permit?(user, cmdtxt, chan)
       end
+
     end
 
     # Returns the only instance of AuthManagerClass
@@ -663,5 +570,7 @@ module Irc
     def Auth.authmanager
       return AuthManagerClass.instance
     end
+
   end
+
 end

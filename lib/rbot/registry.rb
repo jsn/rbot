@@ -137,11 +137,13 @@ module Irc
     end
 
     def flush
+      # debug "fushing registry #{@registry}"
       @registry.flush
       @registry.sync
     end
 
     def close
+      # debug "closing registry #{@registry}"
       @registry.close
     end
 

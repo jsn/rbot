@@ -2,7 +2,7 @@ require 'singleton'
 
 module Irc
     BotConfig.register BotConfigArrayValue.new('plugins.blacklist',
-      :default => [], :wizard => false, :requires_restart => true,
+      :default => [], :wizard => false, :requires_rescan => true,
       :desc => "Plugins that should not be loaded")
 module Plugins
   require 'rbot/messagemapper'
@@ -417,7 +417,9 @@ module Plugins
 
     # call the cleanup method for each active plugin
     def cleanup
-      delegate 'cleanup'
+      @bot.save_mutex.synchronize do
+        delegate 'cleanup'
+      end
       reset_botmodule_lists
     end
 
@@ -540,6 +542,7 @@ module Plugins
               # debug "#{p.botmodule_class} #{p.name} responds"
               p.send method, *args
             rescue Exception => err
+              raise if err.class <= SystemExit
               error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
               raise if err.class <= BDB::Fatal
             end
@@ -554,49 +557,46 @@ module Plugins
     def privmsg(m)
       # debug "Delegating privmsg #{m.message.inspect} from #{m.source} to #{m.replyto} with pluginkey #{m.plugin.inspect}"
       return unless m.plugin
-      begin
-        [core_commands, plugin_commands].each { |pl|
-          # We do it this way to skip creating spurious keys
-          # FIXME use fetch?
-          k = m.plugin.to_sym
-          if pl.has_key?(k)
-            p = pl[k][:botmodule]
-            a = pl[k][:auth]
-          else
-            p = nil
-            a = nil
-          end
-          if p
-            # We check here for things that don't check themselves
-            # (e.g. mapped things)
-            # debug "Checking auth ..."
-            if a.nil? || @bot.auth.allow?(a, m.source, m.replyto)
-              # debug "Checking response ..."
-              if p.respond_to?("privmsg")
-                begin
-                  # debug "#{p.botmodule_class} #{p.name} responds"
-                  p.privmsg(m)
-                rescue Exception => err
-                  error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
-                  raise if err.class <= BDB::Fatal
-                end
-                # debug "Successfully delegated #{m.message}"
-                return true
-              else
-                # debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
+      [core_commands, plugin_commands].each { |pl|
+        # We do it this way to skip creating spurious keys
+        # FIXME use fetch?
+        k = m.plugin.to_sym
+        if pl.has_key?(k)
+          p = pl[k][:botmodule]
+          a = pl[k][:auth]
+        else
+          p = nil
+          a = nil
+        end
+        if p
+          # We check here for things that don't check themselves
+          # (e.g. mapped things)
+          # debug "Checking auth ..."
+          if a.nil? || @bot.auth.allow?(a, m.source, m.replyto)
+            # debug "Checking response ..."
+            if p.respond_to?("privmsg")
+              begin
+                # debug "#{p.botmodule_class} #{p.name} responds"
+                p.privmsg(m)
+              rescue Exception => err
+                raise if err.class <= SystemExit
+                error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
+                raise if err.class <= BDB::Fatal
               end
+              # debug "Successfully delegated #{m.message}"
+              return true
             else
-              # debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
+              # debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
             end
           else
-            # debug "No #{pl.values.first[:botmodule].botmodule_class} registered #{m.plugin.inspect}" unless pl.empty?
+            # debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
           end
-          # debug "Finished delegating privmsg with key #{m.plugin.inspect}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
-        }
-        return false
-      rescue Exception => e
-        error report_error("couldn't delegate #{m.message.inspect}", e)
-      end
+        else
+          # debug "No #{pl.values.first[:botmodule].botmodule_class} registered #{m.plugin.inspect}" unless pl.empty?
+        end
+        # debug "Finished delegating privmsg with key #{m.plugin.inspect}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
+      }
+      return false
       # debug "Finished delegating privmsg with key #{m.plugin.inspect}"
     end
   end

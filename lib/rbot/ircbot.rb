@@ -104,16 +104,12 @@ class IrcBot
   # by default)
   attr_reader :timer
 
+  # synchronize with this mutex while touching permanent data files:
+  # saving, flushing, cleaning up ...
+  attr_reader :save_mutex
+
   # bot's Language data
   attr_reader :lang
-
-  # server the bot is connected to
-  # TODO multiserver
-  attr_reader :server
-
-  # the client personality of the bot
-  # TODO multiserver
-  attr_reader :client
 
   # bot's irc socket
   # TODO multiserver
@@ -131,8 +127,17 @@ class IrcBot
   # proxies etc as defined by the bot configuration/environment
   attr_reader :httputil
 
+  # server we are connected to
+  # TODO multiserver
+  def server
+    @client.server
+  end
+
   # bot User in the client/server connection
-  attr_reader :myself
+  # TODO multiserver
+  def myself
+    @client.client
+  end
 
   # bot User in the client/server connection
   def nick
@@ -335,6 +340,7 @@ class IrcBot
     @registry = BotRegistry.new self
 
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
+    @save_mutex = Mutex.new
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
 
     @logs = Hash.new
@@ -356,6 +362,7 @@ class IrcBot
       exit 2
     end
     @auth.everyone.set_default_permission("*", true)
+    @auth.botowner.password= @config['auth.password']
 
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::pluginmanager
@@ -367,9 +374,7 @@ class IrcBot
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
     @client = IrcClient.new
-    @server = @client.server
-    @myself = @client.client
-    @myself.nick = @config['irc.nick']
+    myself.nick = @config['irc.nick']
 
     # Channels where we are quiet
     # It's nil when we are not quiet, an empty list when we are quiet
@@ -394,18 +399,20 @@ class IrcBot
       # TODO this needs to go into rfc2812.rb
       # Since capabs are two-steps processes, server.supports[:capab]
       # should be a three-state: nil, [], [....]
-      sendq "CAPAB IDENTIFY-MSG" if @server.supports[:capab]
+      sendq "CAPAB IDENTIFY-MSG" if server.supports[:capab]
     }
     @client[:datastr] = proc { |data|
       # TODO this needs to go into rfc2812.rb
       if data[:text] == "IDENTIFY-MSG"
-        @server.capabilities["identify-msg".to_sym] = true
+        server.capabilities["identify-msg".to_sym] = true
       else
         debug "Not handling RPL_DATASTR #{data[:servermessage]}"
       end
     }
     @client[:privmsg] = proc { |data|
-      m = PrivMessage.new(self, @server, data[:source], data[:target], data[:message])
+      m = PrivMessage.new(self, server, data[:source], data[:target], data[:message])
+      debug "Message target is #{data[:target].inspect}"
+      debug "Bot is #{myself.inspect}"
 
       # TODO use the new Netmask class
       # @config['irc.ignore_users'].each { |mask| return if Irc.netmaskmatch(mask,m.source) }
@@ -416,7 +423,7 @@ class IrcBot
       @plugins.privmsg(m) if m.address?
     }
     @client[:notice] = proc { |data|
-      message = NoticeMessage.new(self, @server, data[:source], data[:target], data[:message])
+      message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
       # pass it off to plugins that want to hear everything
       @plugins.delegate "listen", message
     }
@@ -442,7 +449,7 @@ class IrcBot
       source = data[:source]
       old = data[:oldnick]
       new = data[:newnick]
-      m = NickMessage.new(self, @server, source, old, new)
+      m = NickMessage.new(self, server, source, old, new)
       if source == myself
         debug "my nick is now #{new}"
       end
@@ -455,7 +462,7 @@ class IrcBot
     @client[:quit] = proc {|data|
       source = data[:source]
       message = data[:message]
-      m = QuitMessage.new(self, @server, source, source, message)
+      m = QuitMessage.new(self, server, source, source, message)
       data[:was_on].each { |ch|
         irclog "@ Quit: #{source}: #{message}", ch
       }
@@ -466,21 +473,21 @@ class IrcBot
       irclog "@ Mode #{data[:modestring]} by #{data[:source]}", data[:channel]
     }
     @client[:join] = proc {|data|
-      m = JoinMessage.new(self, @server, data[:source], data[:channel], data[:message])
+      m = JoinMessage.new(self, server, data[:source], data[:channel], data[:message])
       irclogjoin(m)
 
       @plugins.delegate("listen", m)
       @plugins.delegate("join", m)
     }
     @client[:part] = proc {|data|
-      m = PartMessage.new(self, @server, data[:source], data[:channel], data[:message])
+      m = PartMessage.new(self, server, data[:source], data[:channel], data[:message])
       irclogpart(m)
 
       @plugins.delegate("listen", m)
       @plugins.delegate("part", m)
     }
     @client[:kick] = proc {|data|
-      m = KickMessage.new(self, @server, data[:source], data[:target], data[:channel],data[:message])
+      m = KickMessage.new(self, server, data[:source], data[:target], data[:channel],data[:message])
       irclogkick(m)
 
       @plugins.delegate("listen", m)
@@ -492,7 +499,7 @@ class IrcBot
       end
     }
     @client[:changetopic] = proc {|data|
-      m = TopicMessage.new(self, @server, data[:source], data[:channel], data[:topic])
+      m = TopicMessage.new(self, server, data[:source], data[:channel], data[:topic])
       irclogtopic(m)
 
       @plugins.delegate("listen", m)
@@ -505,7 +512,7 @@ class IrcBot
       channel = data[:channel]
       topic = channel.topic
       irclog "@ Topic set by #{topic.set_by} on #{topic.set_on}", channel
-      m = TopicMessage.new(self, @server, data[:source], channel, topic)
+      m = TopicMessage.new(self, server, data[:source], channel, topic)
 
       @plugins.delegate("listen", m)
       @plugins.delegate("topic", m)
@@ -623,7 +630,7 @@ class IrcBot
       end
 
       stop_server_pings
-      @server.clear
+      server.clear
       if @socket.connected?
         @socket.clearq
         @socket.shutdown
@@ -798,7 +805,7 @@ class IrcBot
       @socket.shutdown
     end
     debug "Logging quits"
-    @server.channels.each { |ch|
+    server.channels.each { |ch|
       irclog "@ quit (#{message})", ch
     }
     debug "Saving"
@@ -834,11 +841,13 @@ class IrcBot
 
   # call the save method for bot's config, keywords, auth and all plugins
   def save
-    @config.save
-    # @keywords.save
-    @auth.save
-    @plugins.save
-    DBTree.cleanup_logs
+    @save_mutex.synchronize do
+      # @config.save
+      # @keywords.save
+      # @auth.save
+      @plugins.save
+      DBTree.cleanup_logs
+    end
   end
 
   # call the rescan method for the bot's lang, keywords and all plugins
@@ -965,8 +974,6 @@ class IrcBot
         case where
         when Channel
           irclog "-=#{myself}=- #{message}", where
-        when User
-             irclog "[-=#{where}=-] #{message}", $1
         else
              irclog "[-=#{where}=-] #{message}", where
         end
@@ -974,8 +981,6 @@ class IrcBot
         case where
         when Channel
           irclog "<#{myself}> #{message}", where
-        when User
-          irclog "[msg(#{where})] #{message}", $1
         else
           irclog "[msg(#{where})] #{message}", where
         end

@@ -373,12 +373,12 @@ module Irc
     # globs is not handled yet.
     # 
     def matches?(arg)
-      cmp = Netmask(arg)
+      cmp = Netmask.new(arg)
       raise TypeError, "#{arg} and #{self} have different casemaps" if @casemap != cmp.casemap
       raise TypeError, "#{arg} is not a valid Netmask" unless cmp.class <= Netmask
       [:nick, :user, :host].each { |component|
-        us = self.send(:component)
-        them = cmp.send(:component)
+        us = self.send(component)
+        them = cmp.send(component)
         raise NotImplementedError if us.has_irc_glob? && them.has_irc_glob?
         return false if us.has_irc_glob? && !them.has_irc_glob?
         return false unless us =~ them.to_irc_regexp
@@ -389,7 +389,7 @@ module Irc
     # Case equality. Checks if arg matches self
     #
     def ===(arg)
-      Netmask(arg).matches?(self)
+      Netmask.new(arg).matches?(self)
     end
   end
 
@@ -951,7 +951,7 @@ module Irc
     # a name of
     #
     def user_or_channel?(name)
-      if supports[:chantypes].include?(name[0].chr)
+      if supports[:chantypes].include?(name[0])
         return Channel
       else
         return User
@@ -961,7 +961,7 @@ module Irc
     # Returns the actual User or Channel object matching _name_
     #
     def user_or_channel(name)
-      if supports[:chantypes].include?(name[0].chr)
+      if supports[:chantypes].include?(name[0])
         return channel(name)
       else
         return user(name)
@@ -1132,15 +1132,7 @@ module Irc
     # new_user(_str_, +false+)
     #
     def user(str)
-      # This method can get called before server has been initialized (e.g. on
-      # Freenode there is a NOTICE from AUTH on connect). In this case we just
-      # return the string
-      #
-      if defined?(@supports)
-        new_user(str, false)
-      else
-        str
-      end
+      new_user(str, false)
     end
 
     # Remove User _someuser_ from the list of <code>User</code>s.

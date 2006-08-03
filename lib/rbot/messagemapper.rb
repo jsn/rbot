@@ -178,16 +178,23 @@ module Irc
         else
           raise ArgumentError, "Can't find auth base in #{botmodule.inspect}"
         end
-        post = items.reject{ |x|
+        words = items.reject{ |x|
           x == pre || x.kind_of?(Symbol)
         }
-        if post.empty?
+        if words.empty?
           post = nil
         else
-          post = post.first
+          post = words.first
         end
         if hash.has_key?(:auth_path)
           extra = hash[:auth_path]
+          if extra.sub!(/^:/, "")
+            pre += post
+            post = nil
+          end
+          if extra.sub!(/:$/, "")
+            post = [post,words[1]].compact.join("::") if words.length > 1
+          end
           pre = nil if extra.sub!(/^!/, "")
           post = nil if extra.sub!(/!$/, "")
         else
