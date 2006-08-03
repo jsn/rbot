@@ -110,7 +110,7 @@ class Keywords < Plugin
           @keywords[lhs] = Keyword.new(mhs, values).dump
         end
       end
-      File.rename("#{@bot.botclass}/keywords.rbot", "#{@bot.botclass}/keywords.rbot.bak")
+      File.rename("#{@bot.botclass}/keywords.rbot", "#{@bot.botclass}/keywords.rbot.old")
     end
   end
   
@@ -189,7 +189,7 @@ class Keywords < Plugin
       }
       old.close
       @keywords.flush
-      File.delete("#{@bot.botclass}/keywords.db")
+      File.rename("#{@bot.botclass}/keywords.db", "#{@bot.botclass}/keywords.db.old")
     end
   
     if File.exist?("#{@bot.botclass}/keyword.db")
@@ -201,7 +201,7 @@ class Keywords < Plugin
       }
       old.close
       @keywords.flush
-      File.delete("#{@bot.botclass}/keyword.db")
+      File.rename("#{@bot.botclass}/keyword.db", "#{@bot.botclass}/keyword.db.old")
     end
   end
 
