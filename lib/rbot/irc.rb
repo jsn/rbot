@@ -1159,7 +1159,8 @@ module Irc
     # new_user(_str_, +false+)
     #
     def user(str)
-      new_user(str, false)
+      u = new_user(str, false)
+      debug "Server user #{u.inspect} from #{str.inspect}"
     end
 
     # Remove User _someuser_ from the list of <code>User</code>s.

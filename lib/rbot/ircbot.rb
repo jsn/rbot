@@ -340,6 +340,7 @@ class IrcBot
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @save_mutex = Mutex.new
     @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
+    @quit_mutex = Mutex.new
 
     @logs = Hash.new
 
@@ -549,14 +550,12 @@ class IrcBot
   def got_sig(sig)
     debug "received #{sig}, queueing quit"
     $interrupted += 1
+    quit unless @quit_mutex.locked?
     debug "interrupted #{$interrupted} times"
-    if $interrupted >= 5
+    if $interrupted >= 3
       debug "drastic!"
       log_session_end
       exit 2
-    elsif $interrupted >= 3
-      debug "quitting"
-      quit
     end
   end
 
@@ -577,8 +576,10 @@ class IrcBot
     rescue => e
       raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
+    quit if $interrupted > 0
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
+    quit if $interrupted > 0
     start_server_pings
   end
 
@@ -591,11 +592,11 @@ class IrcBot
         @timer.start
 
         while @socket.connected?
+	  quit if $interrupted > 0
           if @socket.select
             break unless reply = @socket.gets
             @client.process reply
           end
-	  quit if $interrupted > 0
         end
 
       # I despair of this. Some of my users get "connection reset by peer"
@@ -780,39 +781,41 @@ class IrcBot
 
   # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
-    debug "Shutting down ..."
-    ## No we don't restore them ... let everything run through
-    # begin
-    #   trap("SIGINT", "DEFAULT")
-    #   trap("SIGTERM", "DEFAULT")
-    #   trap("SIGHUP", "DEFAULT")
-    # rescue => e
-    #   debug "failed to restore signals: #{e.inspect}\nProbably running on windows?"
-    # end
-    message = @lang.get("quit") if (message.nil? || message.empty?)
-    if @socket.connected?
-      debug "Clearing socket"
-      @socket.clearq
-      debug "Sending quit message"
-      @socket.emergency_puts "QUIT :#{message}"
-      debug "Flushing socket"
-      @socket.flush
-      debug "Shutting down socket"
-      @socket.shutdown
+    @quit_mutex.synchronize do
+      debug "Shutting down ..."
+      ## No we don't restore them ... let everything run through
+      # begin
+      #   trap("SIGINT", "DEFAULT")
+      #   trap("SIGTERM", "DEFAULT")
+      #   trap("SIGHUP", "DEFAULT")
+      # rescue => e
+      #   debug "failed to restore signals: #{e.inspect}\nProbably running on windows?"
+      # end
+      message = @lang.get("quit") if (message.nil? || message.empty?)
+      if @socket.connected?
+        debug "Clearing socket"
+        @socket.clearq
+        debug "Sending quit message"
+        @socket.emergency_puts "QUIT :#{message}"
+        debug "Flushing socket"
+        @socket.flush
+        debug "Shutting down socket"
+        @socket.shutdown
+      end
+      debug "Logging quits"
+      server.channels.each { |ch|
+        irclog "@ quit (#{message})", ch
+      }
+      debug "Saving"
+      save
+      debug "Cleaning up"
+      @plugins.cleanup
+      # debug "Closing registries"
+      # @registry.close
+      debug "Cleaning up the db environment"
+      DBTree.cleanup_env
+      log "rbot quit (#{message})"
     end
-    debug "Logging quits"
-    server.channels.each { |ch|
-      irclog "@ quit (#{message})", ch
-    }
-    debug "Saving"
-    save
-    debug "Cleaning up"
-    @plugins.cleanup
-    # debug "Closing registries"
-    # @registry.close
-    debug "Cleaning up the db environment"
-    DBTree.cleanup_env
-    log "rbot quit (#{message})"
   end
 
   # message:: optional IRC quit message
