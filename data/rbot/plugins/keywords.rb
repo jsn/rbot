@@ -71,14 +71,14 @@ class Keyword
   end
 end
 
-# keywords class. 
+# keyword plugin class. 
 #
 # Handles all that stuff like "bot: foo is bar", "bot: foo?"
 #
 # Fallback after core and auth have had a look at a message and refused to
 # handle it, checks for a keyword command or lookup, otherwise the message
 # is delegated to plugins
-class Keywords < Plugin
+class KeywordPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('keyword.listen',
     :default => false,
     :desc => "Should the bot listen to all chat and attempt to automatically detect keywords? (e.g. by spotting someone say 'foo is bar')")
@@ -86,7 +86,7 @@ class Keywords < Plugin
     :default => true,
     :desc => "Should the bot require that keyword lookups are addressed to it? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
   
-  # create a new Keywords instance, associated to bot +bot+
+  # create a new KeywordPlugin instance, associated to bot +bot+
   def initialize
     super
 
@@ -330,7 +330,7 @@ class Keywords < Plugin
       when "<topic>"
         return "<topic> => respond by setting the topic to the rest of the definition"
       when "search"
-        return "keywords search [--all] [--full] <regexp> => search keywords for <regexp>. If --all is set, search static keywords too, if --full is set, search definitions too."
+        return "keyword search [--all] [--full] <regexp> => search keywords for <regexp>. If --all is set, search static keywords too, if --full is set, search definitions too."
       else
         return "Keyword module (Fact learning and regurgitation) topics: overview, set, plurals, override, also, random, get, tell, forget, keywords, keywords search, <reply>, <action>, <who>, <topic>"
     end
@@ -455,7 +455,7 @@ class Keywords < Plugin
   end
 end
 
-plugin = Keywords.new
+plugin = KeywordPlugin.new
 
 plugin.map 'keyword stats', :action => 'keyword_stats'
 
