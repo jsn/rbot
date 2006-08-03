@@ -27,7 +27,7 @@ module Irc
         }
         old.close
         new.close
-        File.delete("#{@bot.botclass}/registry.db")
+        File.rename("#{@bot.botclass}/registry.db", "#{@bot.botclass}/registry.db.old")
       end
     end
 
