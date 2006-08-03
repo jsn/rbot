@@ -8,11 +8,21 @@
 
 class Player
 
-  attr_accessor :hp, :strength
+  attr_accessor :name, :hp, :strength
 
   def initialize
+    @name = ""
     @hp = 20
     @strength = 10
+  end
+
+
+  def punch( game, target ) 
+    damage = rand( @strength )
+    target.hp -= damage
+
+    game.msg.reply( "#{@name} punches #{target.name}." )
+    game.msg.reply( "#{target.name} loses #{damage} hit points." )
   end
 
 end
@@ -22,13 +32,23 @@ class Monster < Player
 
   def initialize
     super
+  end
 
+
+  def act( game )
+    game.players.each_value do |p| 
+      if p.instance_of?( Player )
+        punch( game, p )
+      end  
+    end
   end
 
 end    
 
 
 class RpgPlugin < Plugin
+
+  attr_accessor :players, :msg
 
   def initialize
     super
@@ -40,13 +60,21 @@ class RpgPlugin < Plugin
 # Core Methods
 #####################################################################
 
-  def next_round
-    @players.each { |name, p|
+  def schedule
+    # Check for death:
+    @players.each_value do |p|
       if p.hp < 0
-        @msg.reply( "#{name} dies from his injuries :(" )
-        @players.delete( name )        
+        @msg.reply( "#{p.name} dies from his injuries :(" )
+        @players.delete( p.name )        
       end  
-    }
+    end
+
+    # Let monsters act:
+    @players.each_value do |p|
+      if p.instance_of?( Monster )
+        p.act( self )
+      end
+    end
   end
 
 
@@ -70,34 +98,25 @@ class RpgPlugin < Plugin
   end
  
 
-  def punch( src_name, dst_name ) 
-    src = @players[src_name]
-    dst = @players[dst_name]
-
-    damage = rand( src.strength )
-    dst.hp -= damage
-
-    @msg.reply( "#{src_name} punches #{dst_name}." )
-    @msg.reply( "#{dst_name} loses #{damage} hit points." )
-  end
-
 #####################################################################
 # Command Handlers
 #####################################################################
 
   def handle_spawn_player( m, params )
     p = Player.new  
-    name = m.sourcenick
-    @players[name] = p
-    m.reply "Player #{name} enters the game."
+    p.name = m.sourcenick
+    @players[p.name] = p
+    m.reply "Player #{p.name} enters the game."
+
+    handle_spawn_monster m, params  # for testing
   end
 
 
   def handle_spawn_monster( m, params )
     p = Monster.new  
-    name = "grue"
-    @players[name] = p
-    m.reply "Monster #{name} enters the game."
+    p.name = "grue"
+    @players[p.name] = p
+    m.reply "Monster #{p.name} enters the game."
   end
 
 
@@ -106,8 +125,8 @@ class RpgPlugin < Plugin
     return unless target_spawned?( m, params[:target] )
  
     @msg = m  #temp hack
-    punch( m.sourcenick, params[:target] )
-    next_round
+    @players[m.sourcenick].punch( self, @players[params[:target]] )
+    schedule
   end
 
 end
@@ -119,6 +138,5 @@ plugin.register( "rpg" )
 plugin.map 'spawn player',  :action => 'handle_spawn_player'
 plugin.map 'spawn monster', :action => 'handle_spawn_monster' 
 plugin.map 'punch :target', :action => 'handle_punch' 
-
 
 
