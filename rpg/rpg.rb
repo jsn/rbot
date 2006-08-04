@@ -31,8 +31,21 @@ end
 
 class Monster < Player
 
+  @@monsters = [] 
+ 
   def initialize
     super
+
+  end
+
+
+  def Monster.monsters
+    @@monsters
+  end
+    
+
+  def Monster.register( monster )
+    @@monsters << monster.name.sub( /.*::/, '' )
   end
 
 
@@ -48,6 +61,8 @@ end
 
 
 class Orc < Monster
+  
+  Monster.register Orc
 
   def initialize
     super
@@ -61,6 +76,8 @@ end
 
 
 class Slime < Monster
+
+  Monster.register Slime
 
   def initialize
     super
@@ -81,7 +98,6 @@ class RpgPlugin < Plugin
     super
 
     @players = Hash.new
-    @monster_types = ["Orc", "Slime"]
   end
 
 #####################################################################
@@ -141,7 +157,7 @@ class RpgPlugin < Plugin
 
 
   def handle_spawn_monster( m, params )
-    p = eval( "#{@monster_types[rand(@monster_types.length)]}.new" )  
+    p = eval( "#{Monster.monsters[rand(Monster.monsters.length)]}.new" )  
 
     # Make sure we don't have multiple monsters with same name (FIXME)
     a = [0]
