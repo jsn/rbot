@@ -1145,9 +1145,11 @@ module Irc
         # debug "User already existed as #{old.inspect}"
         if tmp.known?
           if old.known?
-            raise "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old.inspect} but access was tried with #{tmp.inspect}" if old != tmp
+            # Do not raise an error: things like Freenode change the hostname after identification
+            warning "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old.inspect} but access was tried with #{tmp.inspect}" if old != tmp
             raise "User #{tmp} already exists on server #{self}" if fails
-          else
+          end
+          if old != tmp
             old.user = tmp.user
             old.host = tmp.host
             # debug "User improved to #{old.inspect}"
