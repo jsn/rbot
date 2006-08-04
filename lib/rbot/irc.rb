@@ -14,11 +14,90 @@
 # Author:: Giuseppe Bilotta (giuseppe.bilotta@gmail.com)
 # Copyright:: Copyright (c) 2006 Giuseppe Bilotta
 # License:: GPLv2
-#
-# TODO User should have associated Server too
-#
-# TODO rather than the complex init methods, we should provide a single one (having a String parameter)
-# and then provide to_irc_netmask(casemap), to_irc_user(server), to_irc_channel(server) etc
+
+require 'singleton'
+
+module Irc
+
+
+  # Due to its Scandinavian origins, IRC has strange case mappings, which
+  # consider the characters <tt>{}|^</tt> as the uppercase
+  # equivalents of # <tt>[]\~</tt>.
+  #
+  # This is however not the same on all IRC servers: some use standard ASCII
+  # casemapping, other do not consider <tt>^</tt> as the uppercase of
+  # <tt>~</tt>
+  # 
+  class Casemap
+    @@casemaps = {}
+
+    # Create a new casemap with name _name_, uppercase characters _upper_ and
+    # lowercase characters _lower_
+    #
+    def initialize(name, upper, lower)
+      @key = name.to_sym
+      raise "Casemap #{name.inspect} already exists!" if @@casemaps.has_key?(@key)
+      @@casemaps[@key][:upper] = upper
+      @@casemaps[@key][:lower] = lower
+      @@casemaps[@key][:casemap] = self
+    end
+
+    # Returns the Casemap with the given name
+    #
+    def Casemap.get(name)
+      @@casemaps[name.to_sym][:casemap]
+    end
+
+    # Retrieve the 'uppercase characters' of this Casemap
+    #
+    def upper
+      @@casemaps[@key][:upper]
+    end
+
+    # Retrieve the 'lowercase characters' of this Casemap
+    #
+    def lower
+      @@casemaps[@key][:lower]
+    end
+
+    # Return a Casemap based on the receiver
+    def to_irc_casemap
+      self
+    end
+
+  end
+
+  # The rfc1459 casemap
+  #
+  class RfcCasemap < Casemap
+    include Singleton
+
+    def initialize
+      super('rfc1459', "\x41-\x5e", "\x61-\x7e")
+    end
+  end
+
+  # The strict-rfc1459 Casemap
+  #
+  class StrictRfcCasemap < Casemap
+    include Singleton
+
+    def initialize
+      super('rfc1459', "\x41-\x5d", "\x61-\x7d")
+    end
+  end
+
+  # The ascii Casemap
+  #
+  class StrictRfcCasemap < Casemap
+    include Singleton
+
+    def initialize
+      super('ascii', "\x41-\x5a", "\x61-\x7a")
+    end
+  end
+
+end
 
 
 # We start by extending the String class
@@ -26,30 +105,19 @@
 #
 class String
 
+  # This method returns the Irc::Casemap whose name is the receiver
+  #
+  def to_irc_casemap
+    Casemap.get(self) rescue raise TypeError, "Unkown Irc::Casemap #{self.inspect}"
+  end
+
   # This method returns a string which is the downcased version of the
-  # receiver, according to IRC rules: due to the Scandinavian origin of IRC,
-  # the characters <tt>{}|^</tt> are considered the uppercase equivalent of
-  # <tt>[]\~</tt>.
+  # receiver, according to the given _casemap_
   #
-  # Since IRC is mostly case-insensitive (the Windows way: case is preserved,
-  # but it's actually ignored to check equality), this method is rather
-  # important when checking if two strings refer to the same entity
-  # (User/Channel)
-  #
-  # Modern server allow different casemaps, too, in which some or all
-  # of the extra characters are not converted
   #
   def irc_downcase(casemap='rfc1459')
-    case casemap
-    when 'rfc1459'
-      self.tr("\x41-\x5e", "\x61-\x7e")
-    when 'strict-rfc1459'
-      self.tr("\x41-\x5d", "\x61-\x7d")
-    when 'ascii'
-      self.tr("\x41-\x5a", "\x61-\x7a")
-    else
-      raise TypeError, "Unknown casemap #{casemap}"
-    end
+    cmap = casemap.to_irc_casemap
+    self.tr(cmap.upper, cmap.lower)
   end
 
   # This is the same as the above, except that the string is altered in place
@@ -57,16 +125,8 @@ class String
   # See also the discussion about irc_downcase
   #
   def irc_downcase!(casemap='rfc1459')
-    case casemap
-    when 'rfc1459'
-      self.tr!("\x41-\x5e", "\x61-\x7e")
-    when 'strict-rfc1459'
-      self.tr!("\x41-\x5d", "\x61-\x7d")
-    when 'ascii'
-      self.tr!("\x41-\x5a", "\x61-\x7a")
-    else
-      raise TypeError, "Unknown casemap #{casemap}"
-    end
+    cmap = casemap.to_irc_casemap
+    self.tr!(cmap.upper, cmap.lower)
   end
 
   # Upcasing functions are provided too
@@ -74,16 +134,8 @@ class String
   # See also the discussion about irc_downcase
   #
   def irc_upcase(casemap='rfc1459')
-    case casemap
-    when 'rfc1459'
-      self.tr("\x61-\x7e", "\x41-\x5e")
-    when 'strict-rfc1459'
-      self.tr("\x61-\x7d", "\x41-\x5d")
-    when 'ascii'
-      self.tr("\x61-\x7a", "\x41-\x5a")
-    else
-      raise TypeError, "Unknown casemap #{casemap}"
-    end
+    cmap = casemap.to_irc_casemap
+    self.tr(cmap.lower, cmap.upper)
   end
 
   # In-place upcasing
@@ -91,16 +143,8 @@ class String
   # See also the discussion about irc_downcase
   #
   def irc_upcase!(casemap='rfc1459')
-    case casemap
-    when 'rfc1459'
-      self.tr!("\x61-\x7e", "\x41-\x5e")
-    when 'strict-rfc1459'
-      self.tr!("\x61-\x7d", "\x41-\x5d")
-    when 'ascii'
-      self.tr!("\x61-\x7a", "\x41-\x5a")
-    else
-      raise TypeError, "Unknown casemap #{casemap}"
-    end
+    cmap = casemap.to_irc_casemap
+    self.tr!(cmap.lower, cmap.upper)
   end
 
   # This method checks if the receiver contains IRC glob characters
@@ -301,76 +345,88 @@ module Irc
   #
   class Netmask
     attr_reader :nick, :user, :host
-    attr_reader :casemap
 
-    # call-seq:
-    #   Netmask.new(netmask) => new_netmask
-    #   Netmask.new(hash={}, casemap=nil) => new_netmask
-    #   Netmask.new("nick!user@host", casemap=nil) => new_netmask
+    # Create a new Netmask from string _str_, which must be in the form
+    # _nick_!_user_@_host_
     #
-    # Create a new Netmask in any of these forms
-    # 1. from another Netmask (does a .dup)
-    # 2. from a Hash with any of the keys <tt>:nick</tt>, <tt>:user</tt> and
-    #    <tt>:host</tt>
-    # 3. from a String in the form <tt>nick!user@host</tt>
+    # It is possible to specify a server or a casemap in the optional Hash:
+    # these are used to associate the Netmask with the given server and to set
+    # its casemap: if a server is specified and a casemap is not, the server's
+    # casemap is used. If both a server and a casemap are specified, the
+    # casemap must match the server's casemap or an exception will be raised.
     #
-    # In all but the first forms a casemap may be speficied, the default
-    # being 'rfc1459'.
-    #
-    # The nick is downcased following IRC rules and according to the given casemap.
+    # The nick is downcased following IRC rules and according to the given casemap, which defaults to rfc1459.
     #
     # FIXME check if user and host need to be downcased too.
     #
     # Empty +nick+, +user+ or +host+ are converted to the generic glob pattern
     #
-    def initialize(str={}, casemap=nil)
-      case str
-      when Netmask
-        raise ArgumentError, "Can't set casemap when initializing from other Netmask" if casemap
-        @casemap = str.casemap.dup
-        @nick = str.nick.dup
-        @user = str.user.dup
-        @host = str.host.dup
-      when Hash
-        @casemap = casemap || str[:casemap] || 'rfc1459'
-        @nick = str[:nick].to_s.irc_downcase(@casemap)
-        @user = str[:user].to_s
-        @host = str[:host].to_s
-      when String
-        case str
-        when ""
-          @casemap = casemap || 'rfc1459'
-          @nick = nil
-          @user = nil
-          @host = nil
-        when /^(\S+?)(?:!(\S+)@(?:(\S+))?)?$/
-          @casemap = casemap || 'rfc1459'
-          @nick = $1.irc_downcase(@casemap)
-          @user = $2
-          @host = $3
-        else
-          raise ArgumentError, "#{str} is not a valid netmask"
+    def initialize(str, opts={})
+
+      # First of all, check for server/casemap option, since this is used to
+      # downcase the nick
+      #
+      @server = opts.fetch(:server, nil)
+      raise TypeError, "#{@server} is not a valid Irc::Server" if @server and not @server.kind_of?(Server)
+
+      @casemap = opts.fetch(:casemap, nil)
+      if @server
+        if @casemap
+          raise "Casemap mismatch (#{@server.casemap} != #{@casemap})" unless @server.casemap == @casemap
+          @casemap = nil
         end
       else
-        raise ArgumentError, "#{str} is not a valid netmask"
+        @casemap |= 'rfc1459'
       end
 
-      @nick = "*" if @nick.to_s.empty?
-      @user = "*" if @user.to_s.empty?
-      @host = "*" if @host.to_s.empty?
+      # Now we can see if the given string _str_ is an actual Netmask
+      if str.respond_to?(:to_str)
+        case str.to_str
+        when /^(?:(\S+?)(?:!(\S+)@(?:(\S+))?)?)?$/
+          # We do assignment using our internal methods
+          nick = $1
+          user = $2
+          host = $3
+        else
+          raise ArgumentError, "#{str.to_str.inspect} does not represent a valid #{self.class}"
+        end
+      else
+        raise TypeError, "#{str} cannot be converted to a #{self.class}"
+      end
+    end
+
+    # Converts the receiver into a Netmask with the given (optional) server/casemap association
+    #
+    def to_irc_netmask(opts={})
+      srv = opts.fetch(:server, nil)
+      cmap = opts.fetch(:casemap, nil)
+      return self if srv.nil? and cmap.nil?
+      return self if srv.nil? and cmap == casemap
+      raise 
+      if srv and @server
+        @server = srv
+      end
+    end
+
+    # Returns the casemap of the Netmask, by looking at the originating server (if possible)
+    # or at the @casemap otherwise
+    #
+    def casemap
+      @server.casemap rescue @casemap
     end
 
     def inspect
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
+      str << " @server=#{@server}" if @server
       str << " @nick=#{@nick.inspect} @user=#{@user.inspect}"
-      str << " @host=#{@host.inspect}>"
+      str << " @host=#{@host.inspect} casemap=#{casemap}>"
       str
     end
 
-    # Equality: two Netmasks are equal if they have the same @nick, @user, @host and @casemap
+    # Equality: two Netmasks are equal if they have the same @nick, @user, @host and casemap
     #
     def ==(other)
-      self.class == other.class && @nick == other.nick && @user == other.user && @host == other.host && @casemap == other.casemap
+      self.class == other.class && @nick == other.nick && @user == other.user && @host == other.host && casemap == other.casemap
     end
 
     # This method changes the nick of the Netmask, downcasing the argument
@@ -378,7 +434,7 @@ module Irc
     # the result is the null string.
     #
     def nick=(newnick)
-      @nick = newnick.to_s.irc_downcase(@casemap)
+      @nick = newnick.to_s.irc_downcase(casemap)
       @nick = "*" if @nick.empty?
     end
 
@@ -396,14 +452,6 @@ module Irc
     def host=(newhost)
       @host = newhost.to_s
       @host = "*" if @host.empty?
-    end
-
-    # This method changes the casemap of a Netmask, which is needed in some
-    # extreme circumstances. Please use sparingly
-    #
-    def casemap=(newcmap)
-      @casemap = newcmap.to_s
-      @casemap = "rfc1459" if @casemap.empty?
     end
 
     # This method checks if a Netmask is definite or not, by seeing if
@@ -438,9 +486,7 @@ module Irc
     # globs is not handled yet.
     # 
     def matches?(arg)
-      cmp = Netmask.new(arg)
-      raise TypeError, "#{arg} and #{self} have different casemaps" if @casemap != cmp.casemap
-      raise TypeError, "#{arg} is not a valid Netmask" unless cmp.kind_of?(Netmask)
+      cmp = arg.to_irc_netmask(:casemap => casemap)
       [:nick, :user, :host].each { |component|
         us = self.send(component)
         them = cmp.send(component)
@@ -1277,3 +1323,6 @@ module Irc
 
 end
 
+if $0 == __FILE__
+  puts Casemap.gets('rfc1459')
+end
