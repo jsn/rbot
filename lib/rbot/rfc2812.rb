@@ -820,8 +820,8 @@ module Irc
 
     # create a new IrcClient instance
     def initialize
-      @server = Server.new      # The Server
-      @client = User.new        # The User representing the client on this Server
+      @server = Server.new         # The Server
+      @client = @server.user("")   # The User representing the client on this Server
 
       @handlers = Hash.new
 
@@ -1002,12 +1002,13 @@ module Irc
 
           chan = @server.get_channel(data[:channel])
           unless chan
-            warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
+            warning "Received names #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
             return
           end
 
           users = []
           argv[3].scan(/\S+/).each { |u|
+            # FIXME beware of servers that allow multiple prefixes
             if(u =~ /^(#{@server.supports[:prefix][:prefixes].join})?(.*)$/)
               umode = $1
               user = $2
@@ -1111,7 +1112,7 @@ module Irc
         when User
           handle(:notice, data)
         else
-          # "server notice" (not from user, noone to reply to
+          # "server notice" (not from user, noone to reply to)
           handle(:snotice, data)
         end
       when 'KICK'
@@ -1163,6 +1164,7 @@ module Irc
       when 'NICK'
         data[:is_on] = @server.channels.inject(ChannelList.new) { |list, ch|
           list << ch if ch.users.include?(data[:source])
+          list
         }
 
         data[:newnick] = argv[0]
