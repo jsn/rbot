@@ -507,24 +507,23 @@ module Plugins
         key = $1
         params = $2
         (core_modules + plugins).each { |p|
-          # debug "checking #{p.name.inspect} against #{key.inspect}"
+	  next unless p.name == key
           begin
-            return p.help(params)
+            return p.help(key, params)
           rescue Exception => err
             #rescue TimeoutError, StandardError, NameError, SyntaxError => err
             error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
-          end if p.name == key
+          end
         }
+        k = key.to_sym
         [core_commands, plugin_commands].each { |pl|
-          # debug "looking for #{key.inspect} in #{pl.keys.sort.inspect}"
-          if pl.has_key?(key)
-            p = pl[key][:botmodule] 
-            begin
-              return p.help(key, params)
-            rescue Exception => err
-              #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-              error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
-            end
+          next unless pl.has_key?(k)
+          p = pl[k][:botmodule] 
+          begin
+            return p.help(p.name, topic)
+          rescue Exception => err
+            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+            error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
           end
         }
       end

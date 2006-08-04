@@ -90,7 +90,7 @@ class CoreModule < CoreBotModule
   #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
 
   # handle help requests for "core" topics
-  def help(topic="")
+  def help(plugin, topic="")
     case topic
     when "quit"
       return "quit [<message>] => quit IRC with message <message>"

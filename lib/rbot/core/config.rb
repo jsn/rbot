@@ -162,7 +162,7 @@ class ConfigModule < CoreBotModule
     m.reply help(params[:topic])
   end
 
-  def help(topic="")
+  def help(plugin, topic="")
     case topic
     when "list"
       "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
