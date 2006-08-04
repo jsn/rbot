@@ -45,7 +45,7 @@ class Monster < Player
     
 
   def Monster.register( monster )
-    @@monsters << monster.name.sub( /.*::/, '' )
+    @@monsters << monster
   end
 
 
@@ -157,7 +157,7 @@ class RpgPlugin < Plugin
 
 
   def handle_spawn_monster( m, params )
-    p = eval( "#{Monster.monsters[rand(Monster.monsters.length)]}.new" )  
+    p = Monster.monsters[rand( Monster.monsters.length )].new  
 
     # Make sure we don't have multiple monsters with same name (FIXME)
     a = [0]
