@@ -355,7 +355,6 @@ class ConfigTable_class   # open again
     'site-ruby-common' => 'siteruby',     # For backward compatibility
     'site-ruby'        => 'siterubyver',  # For backward compatibility
     'bin-dir'          => 'bindir',
-    'bin-dir'          => 'bindir',
     'rb-dir'           => 'rbdir',
     'so-dir'           => 'sodir',
     'data-dir'         => 'datadir',
@@ -1197,7 +1196,7 @@ class Installer
   def ruby_scripts
     collect_filenames_auto().select {|n| /\.rb\z/ =~ n }
   end
-  
+
   # picked up many entries from cvs-1.11.1/src/ignore.c
   reject_patterns = %w( 
     core RCSLOG tags TAGS .make.state
