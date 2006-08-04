@@ -24,8 +24,11 @@ class Player
     damage = rand( @strength )
     target.hp -= damage
 
-    g.say( "#{@name} attacks #{target.name}." )
-    g.say( "#{target.name} loses #{damage} hit points." )
+    if damage > 0 
+      g.say( "#{@name} attacks #{target.name}. Hit! (#{damage} HP damage)."  )
+    else
+      g.say( "#{name} misses." )
+    end
   end
 
 end
