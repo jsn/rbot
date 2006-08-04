@@ -14,13 +14,13 @@ module Irc
   # This method raises a TypeError if _user_ is not of class User
   #
   def Irc.error_if_not_user(user)
-    raise TypeError, "#{user.inspect} must be of type Irc::User and not #{user.class}" unless user.class <= User
+    raise TypeError, "#{user.inspect} must be of type Irc::User and not #{user.class}" unless user.kind_of?(User)
   end
 
   # This method raises a TypeError if _chan_ is not of class Chan
   #
   def Irc.error_if_not_channel(chan)
-    raise TypeError, "#{chan.inspect} must be of type Irc::User and not #{chan.class}" unless chan.class <= Channel
+    raise TypeError, "#{chan.inspect} must be of type Irc::User and not #{chan.class}" unless chan.kind_of?(Channel)
   end
 
 
@@ -89,7 +89,7 @@ module Irc
     # This method raises a TypeError if _user_ is not of class User
     #
     def Irc.error_if_not_command(cmd)
-      raise TypeError, "#{cmd.inspect} must be of type Irc::Auth::Command and not #{cmd.class}" unless cmd.class <= Command
+      raise TypeError, "#{cmd.inspect} must be of type Irc::Auth::Command and not #{cmd.class}" unless cmd.kind_of?(Command)
     end
 
 
@@ -452,7 +452,7 @@ module Irc
         raise "Won't load with unsaved changes" if @has_changes and not forced
         reset_hashes
         ary.each { |x|
-          raise TypeError, "#{x} should be a Hash" unless x.class <= Hash
+          raise TypeError, "#{x} should be a Hash" unless x.kind_of?(Hash)
           u = x[:username]
           unless include?(u)
             create_botuser(u)

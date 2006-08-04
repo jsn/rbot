@@ -266,7 +266,7 @@ module Plugins
 
     # Registers botmodule _botmodule_ with command _cmd_ and command path _auth_path_
     def register(botmodule, cmd, auth_path)
-      raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+      raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.kind_of?(BotModule)
       kl = botmodule.botmodule_class
       @commandmappers[kl.to_sym][cmd.to_sym] = {:botmodule => botmodule, :auth => auth_path}
       h = @commandmappers[kl.to_sym][cmd.to_sym]
@@ -274,7 +274,7 @@ module Plugins
     end
 
     def add_botmodule(botmodule)
-      raise TypeError, "Argument #{botmodule.inspect} is not of class BotModule" unless botmodule.class <= BotModule
+      raise TypeError, "Argument #{botmodule.inspect} is not of class BotModule" unless botmodule.kind_of?(BotModule)
       kl = botmodule.botmodule_class
       raise "#{kl.to_s} #{botmodule.name} already registered!" if @botmodules[kl.to_sym].include?(botmodule)
       @botmodules[kl.to_sym] << botmodule
@@ -542,9 +542,9 @@ module Plugins
               # debug "#{p.botmodule_class} #{p.name} responds"
               p.send method, *args
             rescue Exception => err
-              raise if err.class <= SystemExit
+              raise if err.kind_of?(SystemExit)
               error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
-              raise if err.class <= BDB::Fatal
+              raise if err.kind_of?(BDB::Fatal)
             end
           end
         }
@@ -579,9 +579,9 @@ module Plugins
                 # debug "#{p.botmodule_class} #{p.name} responds"
                 p.privmsg(m)
               rescue Exception => err
-                raise if err.class <= SystemExit
+                raise if err.kind_of?(SystemExit)
                 error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
-                raise if err.class <= BDB::Fatal
+                raise if err.kind_of?(BDB::Fatal)
               end
               # debug "Successfully delegated #{m.message}"
               return true

@@ -135,7 +135,7 @@ class HttpUtil
   # if a block is given, it yields the urls it gets redirected to
   # TODO we really need something to implement proper caching
   def get(uri_or_str, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"], cache=false)
-    if uri_or_str.class <= URI
+    if uri_or_str.kind_of?(URI)
       uri = uri_or_str
     else
       uri = URI.parse(uri_or_str.to_s)
@@ -189,7 +189,7 @@ class HttpUtil
 
   # just like the above, but only gets the head
   def head(uri_or_str, readtimeout=10, opentimeout=5, max_redir=@bot.config["http.max_redir"])
-    if uri_or_str.class <= URI
+    if uri_or_str.kind_of?(URI)
       uri = uri_or_str
     else
       uri = URI.parse(uri_or_str.to_s)
@@ -231,7 +231,7 @@ class HttpUtil
   def get_cached(uri_or_str, readtimeout=10, opentimeout=5,
                  max_redir=@bot.config['http.max_redir'],
                  noexpire=@bot.config['http.no_expire_cache'])
-    if uri_or_str.class <= URI
+    if uri_or_str.kind_of?(URI)
       uri = uri_or_str
     else
       uri = URI.parse(uri_or_str.to_s)

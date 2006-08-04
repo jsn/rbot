@@ -85,7 +85,7 @@ class AuthModule < CoreBotModule
 
   def auth_set(m, params)
     cmds, locs, warns = parse_args(params[:args])
-    errs = warns.select { |w| w.class <= Exception }
+    errs = warns.select { |w| w.kind_of?(Exception) }
     unless errs.empty?
       m.reply "couldn't satisfy your request: #{errs.join(',')}"
       return

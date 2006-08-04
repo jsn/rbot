@@ -1099,7 +1099,7 @@ module Irc
         handle(:privmsg, data)
 
         # Now we split it
-        if(data[:target].class <= Channel)
+        if data[:target].kind_of?(Channel)
           handle(:public, data)
         else
           handle(:msg, data)

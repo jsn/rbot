@@ -156,7 +156,7 @@ class ArrayOf < Array
   # optionally filling it with the elements from the Array argument.
   #
   def initialize(kl, ar=[])
-    raise TypeError, "#{kl.inspect} must be a class name" unless kl.class <= Class
+    raise TypeError, "#{kl.inspect} must be a class name" unless kl.kind_of?(Class)
     super()
     @element_class = kl
     case ar
@@ -174,7 +174,7 @@ class ArrayOf < Array
   #
   def internal_will_accept?(raising, *els)
     els.each { |el|
-      unless el.class <= @element_class
+      unless el.kind_of?(@element_class)
         raise TypeError, "#{el.inspect} is not of class #{@element_class}" if raising
         return false
       end
@@ -303,6 +303,13 @@ module Irc
       @host = "*" if @host.to_s.empty?
     end
 
+    def inspect
+      str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str << " @nick=#{@nick.inspect} @user=#{@user.inspect}"
+      str << " @host=<#{@host}>"
+      str
+    end
+
     # Equality: two Netmasks are equal if they have the same @nick, @user, @host and @casemap
     #
     def ==(other)
@@ -376,7 +383,7 @@ module Irc
     def matches?(arg)
       cmp = Netmask.new(arg)
       raise TypeError, "#{arg} and #{self} have different casemaps" if @casemap != cmp.casemap
-      raise TypeError, "#{arg} is not a valid Netmask" unless cmp.class <= Netmask
+      raise TypeError, "#{arg} is not a valid Netmask" unless cmp.kind_of?(Netmask)
       [:nick, :user, :host].each { |component|
         us = self.send(component)
         them = cmp.send(component)
@@ -518,7 +525,7 @@ module Irc
 
     # Replace a ChannelTopic with another one
     def replace(topic)
-      raise TypeError, "#{topic.inspect} is not an Irc::ChannelTopic" unless topic.class <= ChannelTopic
+      raise TypeError, "#{topic.inspect} is not an Irc::ChannelTopic" unless topic.kind_of?(ChannelTopic)
       @text = topic.text.dup
       @set_by = topic.set_by.dup
       @set_on = topic.set_on.dup
@@ -659,7 +666,7 @@ module Irc
     # FIXME doesn't check if users have the same casemap as the channel yet
     #
     def initialize(server, name, topic=nil, users=[])
-      raise TypeError, "First parameter must be an Irc::Server" unless server.class <= Server
+      raise TypeError, "First parameter must be an Irc::Server" unless server.kind_of?(Server)
       raise ArgumentError, "Channel name cannot be empty" if name.to_s.empty?
       raise ArgumentError, "Unknown channel prefix #{name[0].chr}" if name !~ /^[&#+!]/
       raise ArgumentError, "Invalid character in #{name.inspect}" if name =~ /[ \x07,]/
@@ -692,7 +699,7 @@ module Irc
     #
     def delete_user(user)
       @mode.each { |sym, mode|
-        mode.reset(user) if mode.class <= ChannelUserMode
+        mode.reset(user) if mode.kind_of?(ChannelUserMode)
       }
       @users.delete(user)
     end
@@ -1161,6 +1168,7 @@ module Irc
     def user(str)
       u = new_user(str, false)
       debug "Server user #{u.inspect} from #{str.inspect}"
+      u
     end
 
     # Remove User _someuser_ from the list of <code>User</code>s.
@@ -1180,7 +1188,7 @@ module Irc
     # Create a new Netmask object with the appropriate casemap
     #
     def new_netmask(str)
-      if str.class <= Netmask 
+      if str.kind_of?(Netmask )
         raise "Wrong casemap for Netmask #{str.inspect}" if str.casemap != self.casemap
         return str
       end

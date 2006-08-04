@@ -89,7 +89,7 @@ class ConfigModule < CoreBotModule
       m.reply "no such config key #{key}"
       return
     end
-    unless @bot.config.items[key].class <= BotConfigArrayValue
+    unless @bot.config.items[key].kind_of?(BotConfigArrayValue)
       m.reply "config key #{key} is not an array"
       return
     end
@@ -111,7 +111,7 @@ class ConfigModule < CoreBotModule
       m.reply "no such config key #{key}"
       return
     end
-    unless @bot.config.items[key].class <= BotConfigArrayValue
+    unless @bot.config.items[key].kind_of?(BotConfigArrayValue)
       m.reply "config key #{key} is not an array"
       return
     end

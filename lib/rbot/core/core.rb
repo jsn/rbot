@@ -5,7 +5,7 @@
 class CoreModule < CoreBotModule
 
   def listen(m)
-    return unless m.class <= PrivMessage
+    return unless m.kind_of?(PrivMessage)
     if(m.private? && m.message =~ /^\001PING\s+(.+)\001/)
       @bot.notice m.sourcenick, "\001PING #$1\001"
       @bot.irclog "@ #{m.sourcenick} pinged me"
