@@ -20,12 +20,12 @@ class Player
   end
 
 
-  def punch( game, target ) 
+  def punch( g, target ) 
     damage = rand( @strength )
     target.hp -= damage
 
-    game.msg.reply( "#{@name} punches #{target.name}." )
-    game.msg.reply( "#{target.name} loses #{damage} hit points." )
+    g.say( "#{@name} punches #{target.name}." )
+    g.say( "#{target.name} loses #{damage} hit points." )
   end
 
 end
@@ -51,10 +51,10 @@ class Monster < Player
   end
 
 
-  def act( game )
-    game.players.each_value do |p| 
+  def act( g )
+    g.players.each_value do |p| 
       if p.instance_of?( Player )
-        punch( game, p )
+        punch( g, p )
       end  
     end
   end
@@ -96,53 +96,82 @@ class Slime < Monster
 end
 
 
-class RpgPlugin < Plugin
+class Game
 
-  attr_accessor :players, :msg
+  attr_accessor :channel, :players
+
+  def initialize( channel, bot )
+    @channel = channel
+    @bot = bot
+    @players = Hash.new
+  end
+
+
+  def say( text )
+    @bot.say( @channel, text )
+  end  
+
+end
+
+
+class RpgPlugin < Plugin
 
   def initialize
     super
 
-    @players = Hash.new
+    @games = Hash.new
   end
 
 #####################################################################
 # Core Methods
 #####################################################################
 
-  def schedule
+  # Returns new Game instance for channel, or existing one
+  #
+  def get_game( m )
+      channel = (m.target == @bot.nick) ? m.sourcenick : m.target 
+
+      unless @games.has_key?( channel )
+          @games[channel] = Game.new( channel, @bot )
+      end
+
+      return @games[channel]
+  end
+
+
+  def schedule( g )
     # Check for death:
-    @players.each_value do |p|
+    g.players.each_value do |p|
       if p.hp < 0
-        @msg.reply( "#{p.name} dies from his injuries." )
-        @players.delete( p.name )        
+        g.say( "#{p.name} dies from his injuries." )
+        g.players.delete( p.name )        
       end  
     end
 
     # Let monsters act:
-    @players.each_value do |p|
+    g.players.each_value do |p|
       if p.is_a?( Monster )
-        p.act( self )
+        p.act( g )
       end
     end
   end
 
 
-  def spawned?( m, nick )
-    if @players.has_key?( nick )
+  def spawned?( g, nick )
+    if g.players.has_key?( nick )
       return true
     else
-      m.reply( "You have not joined the game. Use 'spawn player' to join." )
+      g.say( "You have not joined the game. Use 'spawn player' to join." )
       return false  
     end
   end
 
 
-  def target_spawned?( m, target )
-    if @players.has_key?( target )
+  def target_spawned?( g, target )
+    if g.players.has_key?( target )
       return true
     else  
-      m.reply( "#{m.sourcenick} seems confused: there is noone named #{target} near.." )
+      g.say( "There is noone named #{target} near.." )
       return false
     end
   end
@@ -153,52 +182,54 @@ class RpgPlugin < Plugin
 #####################################################################
 
   def handle_spawn_player( m, params )
+    g = get_game( m )
+
     p = Player.new  
     p.name = m.sourcenick
-    @players[p.name] = p
+    g.players[p.name] = p
     m.reply "Player #{p.name} enters the game."
-
-    # handle_spawn_monster m, params  # for testing
   end
 
 
   def handle_spawn_monster( m, params )
+    g = get_game( m )
     p = Monster.monsters[rand( Monster.monsters.length )].new  
 
     # Make sure we don't have multiple monsters with same name (FIXME)
     a = [0]
-    @players.each_value { |x| a << x.name[-1,1].to_i if x.name.include? p.name }
+    g.players.each_value { |x| a << x.name[-1,1].to_i if x.name.include? p.name }
     p.name += ( a.sort.last + 1).to_s
 
-    @players[p.name] = p
+    g.players[p.name] = p
     m.reply "A #{p.player_type} enters the game. ('#{p.name}')"
   end
 
 
   def handle_punch( m, params )
-    return unless spawned?( m, m.sourcenick )
-    return unless target_spawned?( m, params[:target] )
+    g = get_game( m )
+    return unless spawned?( g, m.sourcenick )
+    return unless target_spawned?( g, params[:target] )
  
-    @msg = m  #temp hack
-    @players[m.sourcenick].punch( self, @players[params[:target]] )
-    schedule
+    g.players[m.sourcenick].punch( g, g.players[params[:target]] )
+    schedule( g )
   end
 
 
   def handle_look( m, params )
-    return unless spawned?( m, m.sourcenick )
+    g = get_game( m )
+    return unless spawned?( g, m.sourcenick )
 
     if params[:object] == nil
-      if @players.length == 1
+      if g.players.length == 1
         m.reply( "#{m.sourcenick}: You are alone." )
         return
       end
       objects = []
-      @players.each_value { |x| objects << x.name unless x.name == m.sourcenick }
+      g.players.each_value { |x| objects << x.name unless x.name == m.sourcenick }
       m.reply( "#{m.sourcenick}: You see the following objects: #{objects.join( ', ' )}." )
     else
       p = nil
-      @players.each_value { |x| p = x if x.name == params[:object] }
+      g.players.each_value { |x| p = x if x.name == params[:object] }
       if p == nil
         m.reply( "#{m.sourcenick}: There is no #{params[:object]} here." )
       else
