@@ -20,11 +20,11 @@ class Player
   end
 
 
-  def punch( g, target ) 
+  def attack( g, target ) 
     damage = rand( @strength )
     target.hp -= damage
 
-    g.say( "#{@name} punches #{target.name}." )
+    g.say( "#{@name} attacks #{target.name}." )
     g.say( "#{target.name} loses #{damage} hit points." )
   end
 
@@ -54,7 +54,7 @@ class Monster < Player
   def act( g )
     g.players.each_value do |p| 
       if p.instance_of?( Player )
-        punch( g, p )
+        attack( g, p )
       end  
     end
   end
@@ -120,6 +120,11 @@ class RpgPlugin < Plugin
     super
 
     @games = Hash.new
+  end
+
+
+  def help( plugin, topic="" )
+    "IRC RPG. Commands: 'spawn player', 'spawn monster', 'attack <target>', 'look [object]'."
   end
 
 #####################################################################
@@ -205,12 +210,12 @@ class RpgPlugin < Plugin
   end
 
 
-  def handle_punch( m, params )
+  def handle_attack( m, params )
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
     return unless target_spawned?( g, params[:target] )
  
-    g.players[m.sourcenick].punch( g, g.players[params[:target]] )
+    g.players[m.sourcenick].attack( g, g.players[params[:target]] )
     schedule( g )
   end
 
@@ -244,9 +249,9 @@ end
 plugin = RpgPlugin.new
 plugin.register( "rpg" )
 
-plugin.map 'spawn player',  :action => 'handle_spawn_player'
-plugin.map 'spawn monster', :action => 'handle_spawn_monster' 
-plugin.map 'punch :target', :action => 'handle_punch' 
-plugin.map 'look :object',  :action => 'handle_look',         :defaults => { :object => nil }
+plugin.map 'spawn player',   :action => 'handle_spawn_player'
+plugin.map 'spawn monster',  :action => 'handle_spawn_monster' 
+plugin.map 'attack :target', :action => 'handle_attack' 
+plugin.map 'look :object',   :action => 'handle_look',         :defaults => { :object => nil }
 
 
