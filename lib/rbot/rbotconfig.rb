@@ -32,7 +32,7 @@ module Irc
         if gem && path = gem.full_gem_path
           debug "installed via rubygems to #{path}"
           @@datadir = "#{path}/data/rbot"
-          @@datadir = "#{path}/lib/rbot/core"
+          @@coredir = "#{path}/lib/rbot/core"
         else
           debug "not installed via rubygems"
         end
