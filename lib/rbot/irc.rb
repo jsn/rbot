@@ -161,10 +161,14 @@ class ArrayOf < Array
     @element_class = kl
     case ar
     when Array
-      send(:+, ar)
+      insert(0, *ar)
     else
       raise TypeError, "#{self.class} can only be initialized from an Array"
     end
+  end
+
+  def inspect
+    "#<#{self.class}[#{@element_class}]:#{'0x%x' % self.object_id}: #{super}>"
   end
 
   # Private method to check the validity of the elements passed to it
@@ -207,6 +211,60 @@ class ArrayOf < Array
     super(el) if internal_will_accept?(true, el)
   end
 
+  # Overloaded from Array#&, checks for appropriate class of argument elements
+  #
+  def &(ar)
+    r = super(ar)
+    ArrayOf.new(@element_class, r) if internal_will_accept?(true, *r)
+  end
+
+  # Overloaded from Array#+, checks for appropriate class of argument elements
+  #
+  def +(ar)
+    ArrayOf.new(@element_class, super(ar)) if internal_will_accept?(true, *ar)
+  end
+
+  # Overloaded from Array#-, so that an ArrayOf is returned. There is no need
+  # to check the validity of the elements in the argument
+  #
+  def -(ar)
+    ArrayOf.new(@element_class, super(ar)) # if internal_will_accept?(true, *ar)
+  end
+
+  # Overloaded from Array#|, checks for appropriate class of argument elements
+  #
+  def |(ar)
+    ArrayOf.new(@element_class, super(ar)) if internal_will_accept?(true, *ar)
+  end
+
+  # Overloaded from Array#concat, checks for appropriate class of argument
+  # elements
+  #
+  def concat(ar)
+    super(ar) if internal_will_accept?(true, *ar)
+  end
+
+  # Overloaded from Array#insert, checks for appropriate class of argument
+  # elements
+  #
+  def insert(idx, *ar)
+    super(idx, *ar) if internal_will_accept?(true, *ar)
+  end
+
+  # Overloaded from Array#replace, checks for appropriate class of argument
+  # elements
+  #
+  def replace(ar)
+    super(ar) if (ar.kind_of?(ArrayOf) && ar.element_class <= @element_class) or internal_will_accept?(true, *ar)
+  end
+
+  # Overloaded from Array#push, checks for appropriate class of argument
+  # elements
+  #
+  def push(*ar)
+    super(*ar) if internal_will_accept?(true, *ar)
+  end
+
   # Overloaded from Array#unshift, checks for appropriate class of argument(s)
   #
   def unshift(*els)
@@ -215,11 +273,10 @@ class ArrayOf < Array
     }
   end
 
-  # Overloaded from Array#+, checks for appropriate class of argument elements
+  # Modifying methods which we don't handle yet are made private
   #
-  def +(ar)
-    super(ar) if internal_will_accept?(true, *ar)
-  end
+  private :[]=, :collect!, :map!, :fill, :flatten!
+
 end
 
 
@@ -304,9 +361,9 @@ module Irc
     end
 
     def inspect
-      str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " @nick=#{@nick.inspect} @user=#{@user.inspect}"
-      str << " @host=<#{@host}>"
+      str << " @host=#{@host.inspect}>"
       str
     end
 
@@ -647,10 +704,8 @@ module Irc
     attr_reader :name, :topic, :mode, :users, :server
     alias :to_s :name
 
-    # A String describing the Channel and (some of its) internals
-    #
     def inspect
-      str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " on server #{server}"
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
       str << " @users=<#{@users.sort.join(', ')}>"
@@ -780,7 +835,7 @@ module Irc
         u.inspect
       }.sort
 
-      str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+      str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " @channels=#{chans}"
       str << " @users=#{users}>"
       str
@@ -1219,5 +1274,6 @@ module Irc
     end
 
   end
+
 end
 
