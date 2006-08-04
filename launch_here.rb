@@ -20,8 +20,4 @@ end
 
 add_to_path( File.join BASEDIR, 'lib' )
 
-p ARGV
-ARGV << "--debug"
-p ARGV
-
 load( File.join BASEDIR, 'bin/rbot' )
