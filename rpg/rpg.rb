@@ -8,13 +8,15 @@
 
 class Player
 
-  attr_accessor :name, :player_type, :hp, :strength
+  attr_accessor :name, :player_type, :hp, :strength, :description
 
   def initialize
     @name = ""
     @player_type = "Human"
     @hp = 20
     @strength = 10
+
+    @description = "A typical human geek."
   end
 
 
@@ -70,6 +72,8 @@ class Orc < Monster
     @name = "orc"
     @player_type = "Orc"
     @hp = 14
+
+    @description = "The Orc is a humanoid creature resembling a caveman. It has dangerous looking fangs and a snout. Somehow, it does not look very smart."
   end
 
 end
@@ -85,6 +89,8 @@ class Slime < Monster
     @name = "slime"
     @player_type = "Slime"
     @hp = 8
+
+    @description = "The Slime is a slimy jelly, oozing over the ground. You really don't feel like touching that." 
   end  
 
 end
@@ -178,8 +184,31 @@ class RpgPlugin < Plugin
     schedule
   end
 
-end
 
+  def handle_look( m, params )
+    return unless spawned?( m, m.sourcenick )
+
+    if params[:object] == nil
+      if @players.length == 1
+        m.reply( "#{m.sourcenick}: You are alone." )
+        return
+      end
+      objects = []
+      @players.each_value { |x| objects << x.name unless x.name == m.sourcenick }
+      m.reply( "#{m.sourcenick}: You see the following objects: #{objects.join( ', ' )}." )
+    else
+      p = nil
+      @players.each_value { |x| p = x if x.name == params[:object] }
+      if p == nil
+        m.reply( "#{m.sourcenick}: There is no #{params[:object]} here." )
+      else
+        m.reply( "#{m.sourcenick}: #{p.description}" )   
+      end
+    end  
+  end
+
+end
+  
 
 plugin = RpgPlugin.new
 plugin.register( "rpg" )
@@ -187,5 +216,6 @@ plugin.register( "rpg" )
 plugin.map 'spawn player',  :action => 'handle_spawn_player'
 plugin.map 'spawn monster', :action => 'handle_spawn_monster' 
 plugin.map 'punch :target', :action => 'handle_punch' 
+plugin.map 'look :object',  :action => 'handle_look',         :defaults => { :object => nil }
 
 
