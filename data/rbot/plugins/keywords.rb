@@ -250,103 +250,84 @@ class KeywordPlugin < Plugin
 
   # m::     PrivMessage containing message info
   # key::   key being queried
-  # dunno:: optional, if true, reply "dunno" if +key+ not found
+  # quiet:: optional, if false, complain if +key+ is not found
   # 
   # handle a message asking about a keyword
-  def keyword(m, key, dunno=true)
+  def keyword_lookup(m, key, quiet = false)
     return if key.nil?
-     unless(kw = self[key])
-       m.reply @bot.lang.get("dunno") if (dunno)
-       return
-     end
-     response = kw.to_s
-     response.gsub!(/<who>/, m.sourcenick)
-     if(response =~ /^<reply>\s*(.*)/)
-       m.reply "#$1"
-     elsif(response =~ /^<action>\s*(.*)/)
-       @bot.action m.replyto, "#$1"
-     elsif(m.public? && response =~ /^<topic>\s*(.*)/)
-       topic = $1
-       @bot.topic m.target, topic
-     else
-       m.reply "#{key} #{kw.type} #{response}"
-     end
+    unless(kw = self[key])
+      m.reply "sorry, I don't know about \"#{key}\"" unless quiet
+      return
+    end
+    
+    response = kw.to_s
+    response.gsub!(/<who>/, m.sourcenick)
+    
+    if(response =~ /^<reply>\s*(.*)/)
+      m.reply $1
+    elsif(response =~ /^<action>\s*(.*)/)
+      m.act $1
+    elsif(m.public? && response =~ /^<topic>\s*(.*)/)
+      @bot.topic m.target, $1
+    else
+      m.reply "#{key} #{kw.type} #{response}"
+    end
   end
 
   
   # handle a message which alters a keyword
-  # like "foo is bar", or "no, foo is baz", or "foo is also qux"
-  def keyword_command(sourcenick, target, lhs, mhs, rhs, quiet=false)
+  # like "foo is bar" or "foo is also qux"
+  def keyword_command(m, lhs, mhs, rhs, quiet = false)
     debug "got keyword command #{lhs}, #{mhs}, #{rhs}"
-    overwrite = false
-    overwrite = true if(lhs.gsub!(/^no,\s*/, ""))
+    
     also = true if(rhs.gsub!(/^also\s+/, ""))
+    
     values = rhs.split(/\s+\|\s+/)
     lhs = Keyword.unescape lhs
-    if(overwrite || also || !has_key?(lhs))
-      if(also && has_key?(lhs))
-        kw = self[lhs]
-        kw << values
-        @keywords[lhs] = kw.dump
-      else
-        @keywords[lhs] = Keyword.new(mhs, values).dump
-      end
-      @bot.okay target if !quiet
-    elsif(has_key?(lhs))
+    
+    if(also && has_key?(lhs))
       kw = self[lhs]
-      @bot.say target, "but #{lhs} #{kw.type} #{kw.desc}" if kw && !quiet
+      kw << values
+      @keywords[lhs] = kw.dump
+    else
+      @keywords[lhs] = Keyword.new(mhs, values).dump
     end
+    
+    @bot.okay m.target if !quiet
   end
 
   # return help string for Keywords with option topic +topic+
-  def help(plugin, topic="")
+  def help(plugin, topic = '')
     case topic
-      when "overview"
-        return "set: <keyword> is <definition>, overide: no, <keyword> is <definition>, add to definition: <keyword> is also <definition>, random responses: <keyword> is <definition> | <definition> [| ...], plurals: <keyword> are <definition>, escaping: \\is, \\are, \\|, specials: <reply>, <action>, <who>"
-      when "set"
-        return "set => <keyword> is <definition>"
-      when "plurals"
-        return "plurals => <keywords> are <definition>"
-      when "override"
-        return "overide => no, <keyword> is <definition>"
-      when "also"
-        return "also => <keyword> is also <definition>"
-      when "random"
-        return "random responses => <keyword> is <definition> | <definition> [| ...]"
-      when "get"
-        return "asking for keywords => (with addressing) \"<keyword>?\", (without addressing) \"'<keyword>\""
-      when "tell"
-        return "tell <nick> about <keyword> => if <keyword> is known, tell <nick>, via /msg, its definition"
-      when "forget"
-        return "forget <keyword> => forget fact <keyword>"
-      when "keywords"
-        return "keywords => show current keyword counts"
-      when "<reply>"
-        return "<reply> => normal response is \"<keyword> is <definition>\", but if <definition> begins with <reply>, the response will be \"<definition>\""
-      when "<action>"
-        return "<action> => makes keyword respnse \"/me <definition>\""
-      when "<who>"
-        return "<who> => replaced with questioner in reply"
-      when "<topic>"
-        return "<topic> => respond by setting the topic to the rest of the definition"
-      when "search"
-        return "keyword search [--all] [--full] <regexp> => search keywords for <regexp>. If --all is set, search static keywords too, if --full is set, search definitions too."
-      else
-        return "Keyword module (Fact learning and regurgitation) topics: overview, set, plurals, override, also, random, get, tell, forget, keywords, keywords search, <reply>, <action>, <who>, <topic>"
+    when 'lookup'
+      'keyword [lookup] <keyword> => look up the definition for a keyword; writing "lookup" is optional'
+    when 'set'
+      'keyword set <keyword> is/are <definition> => define a keyword, definition can contain "|" to separate multiple randomly chosen replies'
+    when 'forget'
+      'keyword forget <keyword> => forget a keyword'
+    when 'tell'
+      'keyword tell <nick> about <keyword> => tell somebody about a keyword'
+    when 'search'
+      'keyword search [--all] [--full] <pattern> => search keywords for <pattern>, which can be a regular expression. If --all is set, search static keywords too, if --full is set, search definitions too.'
+    when 'listen'
+      'when the config option "keyword.listen" is set to false, rbot will try to extract keyword definitions from regular channel messages'
+    when 'address'
+      'when the config option "keyword.address" is set to true, rbot will try to answer channel questions of the form "<keyword>?"'
+    when '<reply>'
+      '<reply> => normal response is "<keyword> is <definition>", but if <definition> begins with <reply>, the response will be "<definition>"'
+    when '<action>'
+      '<action> => makes keyword respond with "/me <definition>"'
+    when '<who>'
+      '<who> => replaced with questioner in reply'
+    when '<topic>'
+      '<topic> => respond by setting the topic to the rest of the definition'
+    else
+      'keyword module (fact learning and regurgitation) topics: lookup, set, forget, tell, search, listen, address, <reply>, <action>, <who>, <topic>'
     end
   end
 
   # handle a message asking the bot to tell someone about a keyword
-  def keyword_tell(m, param)
-    target = param[:target]
-    key = nil
-
-    # extract the keyword from the message, because unfortunately
-    # the message mapper doesn't preserve whtiespace
-    if m.message =~ /about\s+(.+)$/
-      key = $1
-    end
-
+  def keyword_tell(m, target, key)
     unless(kw = self[key])
       m.reply @bot.lang.get("dunno_about_X") % key
       return
@@ -367,7 +348,7 @@ class KeywordPlugin < Plugin
   end
 
   # return the number of known keywords
-  def keyword_stats(m, param)
+  def keyword_stats(m)
     length = 0
     @statickeywords.each {|k,v|
       length += v.length
@@ -376,56 +357,55 @@ class KeywordPlugin < Plugin
   end
 
   # search for keywords, optionally also the definition and the static keywords
-  def keyword_search(m, param)
-    str = param[:pattern]
-    all = (param[:all] == '--all')
-    full = (param[:full] == '--full')
-    
+  def keyword_search(m, key, full = false, all = false)    
     begin
-      re = Regexp.new(str, Regexp::IGNORECASE)
-      if(@bot.auth.allow?("keyword", m.source, m.replyto))
-        matches = Array.new
-        @keywords.each {|k,v|
-          kw = Keyword.restore(v)
-          if re.match(k) || (full && re.match(kw.desc))
-            matches << [k,kw]
-          end
+      if key =~ /^\/(.+)\/$/
+        re = Regexp.new($1, Regexp::IGNORECASE)
+      else
+        re = Regexp.new(Regexp.escape(key), Regexp::IGNORECASE)
+      end
+      
+      matches = Array.new
+      @keywords.each {|k,v|
+        kw = Keyword.restore(v)
+        if re.match(k) || (full && re.match(kw.desc))
+          matches << [k,kw]
+        end
+      }
+      if all
+        @statickeywords.each {|k,v|
+          v.each {|kk,vv|
+            kw = Keyword.restore(vv)
+            if re.match(kk) || (full && re.match(kw.desc))
+              matches << [kk,kw]
+            end
+          }
         }
-        if all
-          @statickeywords.each {|k,v|
-            v.each {|kk,vv|
-              kw = Keyword.restore(vv)
-              if re.match(kk) || (full && re.match(kw.desc))
-                matches << [kk,kw]
-              end
-            }
-          }
-        end
-        if matches.length == 1
-          rkw = matches[0]
-          m.reply "#{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
-        elsif matches.length > 0
-          i = 0
-          matches.each {|rkw|
-            m.reply "[#{i+1}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
-            i += 1
-            break if i == 3
-          }
-        else
-          m.reply "no keywords match #{str}"
-        end
+      end
+      
+      if matches.length == 1
+        rkw = matches[0]
+        m.reply "#{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+      elsif matches.length > 0
+        i = 0
+        matches.each {|rkw|
+          m.reply "[#{i+1}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+          i += 1
+          break if i == 4
+        }
+      else
+        m.reply "no keywords match #{key}"
       end
     rescue RegexpError => e
-      m.reply "no keywords match #{str}: #{e}"
+      m.reply "no keywords match #{key}: #{e}"
     rescue
       debug e.inspect
-      m.reply "no keywords match #{str}: an error occurred"
+      m.reply "no keywords match #{key}: an error occurred"
     end
   end
 
   # forget one of the dynamic keywords
-  def keyword_forget(m, param)
-    key = param[:key]
+  def keyword_forget(m, key)
     if(@keywords.has_key?(key))
       @keywords.delete(key)
       @bot.okay m.replyto
@@ -433,38 +413,41 @@ class KeywordPlugin < Plugin
   end
 
   # privmsg handler
-  def listen(m)
-    return if m.replied?
-    if(m.address?)
-      if(!(m.message =~ /\\\?\s*$/) && m.message =~ /^(.*\S)\s*\?\s*$/)
-        keyword m, $1 if(@bot.auth.allow?("keyword", m.source, m.replyto))
-      elsif(m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/)
-        keyword_command(m.sourcenick, m.replyto, $1, $2, $3) if(@bot.auth.allow?("keycmd", m.source, m.replyto))
-      end
+  def privmsg(m)
+    case m.params
+    when /^set\s+(.+?)\s+(is|are)\s+(.+)$/
+      keyword_command(m, $1, $2, $3) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+    when /^forget\s+(.+)$/
+      keyword_forget(m, $1) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+    when /^lookup\s+(.+)$/
+      keyword_lookup(m, $1) if @bot.auth.allow?('keyword', m.source, m.replyto)
+    when /^stats\s*$/
+      keyword_stats(m) if @bot.auth.allow?('keyword', m.source, m.replyto)
+    when /^search\s+(.+)$/
+      key = $1
+      full = key.sub!('--full ', '')
+      all = key.sub!('--all ', '')
+      keyword_search(m, key, full, all) if @bot.auth.allow?('keyword', m.source, m.replyto)
+    when /^tell\s+(\S+)\s+about\s+(.+)$/
+      keyword_tell(m, $1, $2) if @bot.auth.allow?('keyword', m.source, m.replyto)
     else
-      # in channel message, not to me
-      # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
-      # keyword lookup.
-      if(m.message =~ /^'(.*)$/ || (!@bot.config["keyword.address"] && m.message =~ /^(.*\S)\s*\?\s*$/))
-        keyword m, $1, false if(@bot.auth.allow?("keyword", m.source))
-      elsif(@bot.config["keyword.listen"] == true && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/))
-        # TODO MUCH more selective on what's allowed here
-        keyword_command(m.sourcenick, m.replyto, $1, $2, $3, true) if(@bot.auth.allow?("keycmd", m.source))
-      end
+      keyword_lookup(m, m.params) if @bot.auth.allow?('keyword', m.source, m.replyto)
+    end
+  end
+
+  def listen(m)
+    return if m.address?    
+    # in channel message, not to me
+    # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
+    # keyword lookup.
+    if !@bot.config["keyword.address"] && m.message =~ /^(.*\S)\s*\?\s*$/
+      keyword_lookup m, $1, true if @bot.auth.allow?("keyword", m.source)
+    elsif @bot.config["keyword.listen"] && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/)
+      # TODO MUCH more selective on what's allowed here
+      keyword_command m, $1, $2, $3, true if @bot.auth.allow?("keycmd", m.source)
     end
   end
 end
 
 plugin = KeywordPlugin.new
-
-plugin.map 'keyword stats', :action => 'keyword_stats'
-
-plugin.map 'keyword search :all :full :pattern', :action => 'keyword_search',
-           :defaults => {:all => '', :full => ''},
-           :requirements => {:all => '--all', :full => '--full'}
-           
-plugin.map 'keyword forget :key', :action => 'keyword_forget'
-plugin.map 'forget :key', :action => 'keyword_forget', :auth => 'keycmd'
-
-plugin.map 'keyword tell :target about *keyword', :action => 'keyword_tell'
-plugin.map 'tell :target about *keyword', :action => 'keyword_tell', :auth => 'keyword'
+plugin.register 'keyword'
