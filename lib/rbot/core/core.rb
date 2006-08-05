@@ -2,7 +2,7 @@
 #++
 
 
-class CoreModule < CoreBotModule
+class BasicsModule < CoreBotModule
 
   def listen(m)
     return unless m.kind_of?(PrivMessage)
@@ -123,64 +123,64 @@ class CoreModule < CoreBotModule
     #     when "hello"
     #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
     else
-      return "Core help topics: quit, restart, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version"#, botsnack, hello"
+      return "#{name}: quit, restart, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version"#, botsnack, hello"
     end
   end
 end
 
-core = CoreModule.new
+basics = BasicsModule.new
 
-core.map "quit *msg",
+basics.map "quit *msg",
   :action => 'bot_quit',
   :defaults => { :msg => nil },
   :auth_path => 'quit'
-core.map "restart *msg",
+basics.map "restart *msg",
   :action => 'bot_restart',
   :defaults => { :msg => nil },
   :auth_path => 'quit'
 
-core.map "quiet",
+basics.map "quiet",
   :action => 'bot_quiet',
   :auth_path => 'talk::set'
-core.map "quiet in :chan",
+basics.map "quiet in :chan",
   :action => 'bot_quiet',
   :auth_path => 'talk::set'
-core.map "talk",
+basics.map "talk",
   :action => 'bot_talk',
   :auth_path => 'talk::set'
-core.map "quiet in :chan",
+basics.map "quiet in :chan",
   :action => 'bot_quiet',
   :auth_path => 'talk::set'
 
-core.map "say :where *what",
+basics.map "say :where *what",
   :action => 'bot_say',
   :auth_path => 'talk::do'
-core.map "action :where *what",
+basics.map "action :where *what",
   :action => 'bot_action',
   :auth_path => 'talk::do'
-core.map "mode :where :what *who",
+basics.map "mode :where :what *who",
   :action => 'bot_mode',
   :auth_path => 'talk::do'
 
-core.map "join :chan :pass", 
+basics.map "join :chan :pass", 
   :action => 'bot_join',
   :defaults => {:pass => nil},
   :auth_path => 'move'
-core.map "part :chan",
+basics.map "part :chan",
   :action => 'bot_part',
   :defaults => {:chan => nil},
   :auth_path => 'move'
-core.map "hide",
+basics.map "hide",
   :action => 'bot_hide',
   :auth_path => 'move'
 
-core.map "ping",
+basics.map "ping",
   :action => 'bot_ping',
   :auth_path => '!ping!'
-core.map "help *topic",
+basics.map "help *topic",
   :action => 'bot_help',
   :default => { :topic => [""] },
   :auth_path => '!help!'
 
-core.default_auth('*', false)
+basics.default_auth('*', false)
 
