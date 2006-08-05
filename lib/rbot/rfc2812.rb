@@ -1152,7 +1152,7 @@ module Irc
         handle(:join, data)
       when 'TOPIC'
         data[:channel] = @server.channel(argv[0])
-        data[:topic] = ChannelTopic.new(argv[1], data[:source], Time.new)
+        data[:topic] = Channel::Topic.new(argv[1], data[:source], Time.new)
         data[:channel].topic.replace(data[:topic])
 
         handle(:changetopic, data)
