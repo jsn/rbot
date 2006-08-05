@@ -176,14 +176,18 @@ module Irc
     # @server (if possible) or at the @casemap otherwise
     #
     def casemap
-      @server.casemap rescue @casemap
+      return @server.casemap if defined?(@server) and @server
+      return @casemap
     end
 
     # Returns a hash with the current @server and @casemap as values of
     # :server and :casemap
     #
     def server_and_casemap
-      {:server => @server, :casemap => @casemap}
+      h = {}
+      h[:server] = @server if defined?(@server) and @server
+      h[:casemap] = @casemap if defined?(@casemap) and @casemap
+      return h
     end
 
     # We allow up/downcasing with a different casemap
@@ -531,7 +535,7 @@ module Irc
     #
     def inspect
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
-      str << " @server=#{@server}" if @server
+      str << " @server=#{@server}" if defined?(@server) and @server
       str << " @nick=#{@nick.inspect} @user=#{@user.inspect}"
       str << " @host=#{@host.inspect} casemap=#{casemap.inspect}"
       str << ">"
@@ -1176,7 +1180,7 @@ module Irc
     #
     def reset_capabilities
       @supports = {
-        :casemapping => 'rfc1459',
+        :casemapping => 'rfc1459'.to_irc_casemap,
         :chanlimit => {},
         :chanmodes => {
           :typea => nil, # Type A: address lists
@@ -1269,9 +1273,9 @@ module Irc
           key = prekey.downcase.to_sym
         end
         case key
-        when :casemapping, :network
+        when :casemapping
           noval_warn(key, val) {
-            @supports[key] = val
+            @supports[key] = val.to_irc_casemap
           }
         when :chanlimit, :idchan, :maxlist, :targmax
           noval_warn(key, val) {
@@ -1280,15 +1284,6 @@ module Irc
               k, v = g.split(':')
               @supports[key][k] = v.to_i
             }
-          }
-        when :maxchannels
-          noval_warn(key, val) {
-            reparse += "CHANLIMIT=(chantypes):#{val} "
-          }
-        when :maxtargets
-          noval_warn(key, val) {
-            @supports[key]['PRIVMSG'] = val.to_i
-            @supports[key]['NOTICE'] = val.to_i
           }
         when :chanmodes
           noval_warn(key, val) {
@@ -1312,6 +1307,19 @@ module Irc
         when :invex
           val ||= 'I'
           @supports[key] = val
+        when :maxchannels
+          noval_warn(key, val) {
+            reparse += "CHANLIMIT=(chantypes):#{val} "
+          }
+        when :maxtargets
+          noval_warn(key, val) {
+            @supports[key]['PRIVMSG'] = val.to_i
+            @supports[key]['NOTICE'] = val.to_i
+          }
+        when :network
+          noval_warn(key, val) {
+            @supports[key] = val
+          }
         when :nicklen
           noval_warn(key, val) {
             @supports[key] = val.to_i
