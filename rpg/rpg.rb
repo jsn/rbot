@@ -6,7 +6,7 @@
 # Licensed under GPL V2.
 
 
-require '/home/eean/.rbot/plugins/rpg_creatures.rb'
+load '/home/eean/.rbot/plugins/rpg_creatures.rb'
 
 class Game
 
@@ -36,7 +36,7 @@ class RpgPlugin < Plugin
 
 
   def help( plugin, topic="" )
-    "IRC RPG. Commands: 'spawn player', 'spawn monster', 'attack <target>', 'look [object]'."
+    "IRC RPG. Commands: 'spawn player', 'spawn monster', 'attack <target>', 'look [object]', 'stats'."
   end
 
 #####################################################################
@@ -92,7 +92,6 @@ class RpgPlugin < Plugin
       return false
     end
   end
- 
 
 #####################################################################
 # Command Handlers
@@ -155,6 +154,21 @@ class RpgPlugin < Plugin
     end  
   end
 
+
+  def handle_stats( m, params )
+    begin
+
+    g = get_game( m )
+    return unless spawned?( g, m.sourcenick )
+
+    p = g.players[m.sourcenick]
+    m.reply( "Stats for #{m.sourcenick}: HP:#{p.hp}  XP:#{p.xp}  THAC0:#{p.thac0}  AC:#{p.ac}  HD:#{p.hd}" )
+   
+    rescue => e
+    m.reply e.inspect
+    end
+  end
+
 end
   
 
@@ -165,5 +179,6 @@ plugin.map 'spawn player',   :action => 'handle_spawn_player'
 plugin.map 'spawn monster',  :action => 'handle_spawn_monster' 
 plugin.map 'attack :target', :action => 'handle_attack' 
 plugin.map 'look :object',   :action => 'handle_look',         :defaults => { :object => nil }
+plugin.map 'stats',          :action => 'handle_stats'
 
 
