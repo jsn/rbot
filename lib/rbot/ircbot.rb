@@ -408,8 +408,9 @@ class IrcBot
     }
     @client[:privmsg] = proc { |data|
       m = PrivMessage.new(self, server, data[:source], data[:target], data[:message])
-      debug "Message target is #{data[:target].inspect}"
-      debug "Bot is #{myself.inspect}"
+      # debug "Message source is #{data[:source].inspect}"
+      # debug "Message target is #{data[:target].inspect}"
+      # debug "Bot is #{myself.inspect}"
 
       # TODO use the new Netmask class
       # @config['irc.ignore_users'].each { |mask| return if Irc.netmaskmatch(mask,m.source) }

@@ -84,11 +84,18 @@ module Irc
       @key.to_s
     end
 
+    # Two Casemaps are equal if they have the same upper and lower ranges
+    #
+    def ==(arg)
+      other = arg.to_irc_casemap
+      return self.upper == other.upper && self.lower == other.lower
+    end
+
     # Raise an error if _arg_ and self are not the same Casemap
     #
     def must_be(arg)
       other = arg.to_irc_casemap
-      raise "Casemap mismatch (#{self} != #{other})" unless self == other
+      raise "Casemap mismatch (#{self.inspect} != #{other.inspect})" unless self == other
       return true
     end
 
@@ -616,10 +623,15 @@ module Irc
     #
     def matches?(arg)
       cmp = arg.to_irc_netmask(:casemap => casemap)
+      debug "Matching #{self.fullform} against #{arg.fullform}"
       [:nick, :user, :host].each { |component|
         us = self.send(component).irc_downcase(casemap)
         them = cmp.send(component).irc_downcase(casemap)
-        raise NotImplementedError if us.has_irc_glob? && them.has_irc_glob?
+        if us.has_irc_glob? && them.has_irc_glob?
+          next if us == them
+          warn NotImplementedError
+          return false
+        end
         return false if us.has_irc_glob? && !them.has_irc_glob?
         return false unless us =~ them.to_irc_regexp
       }
@@ -774,14 +786,14 @@ module Irc
     def replace(other)
       case other
       when User
-        nick = other.nick
-        user = other.user
-        host = other.host
+        self.nick = other.nick
+        self.user = other.user
+        self.host = other.host
         @server = other.server
         @casemap = other.casemap unless @server
-        @away = other.away
+        @away = other.away?
       else
-        replace(other.to_irc_user(server_and_casemap))
+        self.replace(other.to_irc_user(server_and_casemap))
       end
     end
 
@@ -1506,17 +1518,20 @@ module Irc
     def new_user(str, fails=true)
       tmp = str.to_irc_user(:server => self)
       old = get_user(tmp.nick)
+      # debug "Tmp: #{tmp.inspect}"
+      # debug "Old: #{old.inspect}"
       if old
         # debug "User already existed as #{old.inspect}"
         if tmp.known?
           if old.known?
+            # debug "Both were known"
             # Do not raise an error: things like Freenode change the hostname after identification
             warning "User #{tmp.nick} has inconsistent Netmasks! #{self} knows #{old.inspect} but access was tried with #{tmp.inspect}" if old != tmp
             raise "User #{tmp} already exists on server #{self}" if fails
           end
-          if old != tmp
+          if old.fullform.downcase != tmp.fullform.downcase
             old.replace(tmp)
-            # debug "User improved to #{old.inspect}"
+            # debug "Known user now #{old.inspect}"
           end
         end
         return old

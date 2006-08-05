@@ -316,7 +316,7 @@ module Irc
       # is right. If it is, the Netmask of the user is added to the
       # list of acceptable Netmask unless it's already matched.
       def login(user, password)
-        if password == @password or (@password.nil? and @login_by_mask and knows?(user))
+        if password == @password or (password.nil? and @login_by_mask and knows?(user))
           add_netmask(user) unless knows?(user)
           debug "#{user} logged in as #{self.inspect}"
           return true
