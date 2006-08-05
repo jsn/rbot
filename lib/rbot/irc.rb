@@ -533,8 +533,8 @@ module Irc
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " @server=#{@server}" if @server
       str << " @nick=#{@nick.inspect} @user=#{@user.inspect}"
-      str << " @host=#{@host.inspect} casemap=#{casemap.inspect}>"
-      str
+      str << " @host=#{@host.inspect} casemap=#{casemap.inspect}"
+      str << ">"
     end
 
     # Equality: two Netmasks are equal if they downcase to the same thing
@@ -1008,8 +1008,8 @@ module Irc
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " on server #{server}" if server
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
-      str << " @users=<#{@users.sort.join(', ')}>"
-      str
+      str << " @users=[#{@users.sort.join(', ')}]"
+      str << ">"
     end
 
     # Returns self
@@ -1154,8 +1154,8 @@ module Irc
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " @hostname=#{hostname}"
       str << " @channels=#{chans}"
-      str << " @users=#{users}>"
-      str
+      str << " @users=#{users}"
+      str << ">"
     end
 
     # Create a new Server, with all instance variables reset to nil (for
