@@ -23,7 +23,7 @@ module Irc
     BotConfig.register BotConfigBooleanValue.new( 'auth.login_by_mask',
       :default => 'false',
       :desc => 'Set true if new botusers should allow logging in without a password when the user netmask is known')
-    BotConfig.register BotConfigBooleanValue.new( 'auth.login_auto',
+    BotConfig.register BotConfigBooleanValue.new( 'auth.autologin',
       :default => 'false',
       :desc => 'Set true if new botusers should try to recognize IRC users without a need to manually login')
     # BotConfig.register BotConfigIntegerValue.new( 'auth.default_level',
@@ -177,7 +177,7 @@ module Irc
         @netmasks = NetmaskList.new
         @perm = {}
         @login_by_mask = Auth.manager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
-        @autologin = Auth.manager.bot.config['auth.login_auto'] unless defined?(@autologin)
+        @autologin = Auth.manager.bot.config['auth.autologin'] unless defined?(@autologin)
       end
 
       # Inspection
@@ -316,7 +316,7 @@ module Irc
       # is right. If it is, the Netmask of the user is added to the
       # list of acceptable Netmask unless it's already matched.
       def login(user, password)
-        if password == @password or (password.nil? and @login_by_mask and knows?(user))
+        if password == @password or (password.nil? and (@login_by_mask || @autologin) and knows?(user))
           add_netmask(user) unless knows?(user)
           debug "#{user} logged in as #{self.inspect}"
           return true
@@ -548,7 +548,7 @@ module Irc
       #
       # It is possible to autologin by Netmask, on request
       #
-      def login(user, botusername, pwd)
+      def login(user, botusername, pwd=nil)
         ircuser = user.to_irc_user
         n = BotUser.sanitize_username(botusername)
         k = n.to_sym
@@ -590,7 +590,11 @@ module Irc
       # * everyone on all channels
       #
       def permit?(user, cmdtxt, channel=nil)
-        botuser = irc_to_botuser(user)
+        if user.class <= BotUser
+          botuser = user
+        else
+          botuser = irc_to_botuser(user)
+        end
         cmd = cmdtxt.to_irc_auth_command
 
         chan = channel
