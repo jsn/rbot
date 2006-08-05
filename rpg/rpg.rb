@@ -6,7 +6,7 @@
 # Licensed under GPL V2.
 
 
-load '/home/eean/.rbot/plugins/rpg_creatures.rb'
+require '/home/eean/.rbot/plugins/rpg_creatures.rb'
 
 class Game
 

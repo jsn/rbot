@@ -1,16 +1,7 @@
-class Player
+
+class Creature
 
   attr_accessor :name, :player_type, :hp, :strength, :description
-
-  def initialize
-    @name = ""
-    @player_type = "Human"
-    @hp = 20
-    @strength = 10
-
-    @description = "A typical human geek."
-  end
-
 
   def attack( g, target ) 
     damage = rand( @strength )
@@ -24,9 +15,23 @@ class Player
   end
 
 end
+ 
+
+class Player < Creature
+
+  def initialize
+    @name = ""
+    @player_type = "Human"
+    @hp = 20
+    @strength = 10
+
+    @description = "A typical human geek."
+  end
+
+end
 
 
-class Monster < Player
+class Monster < Creature
 
   @@monsters = [] 
  
