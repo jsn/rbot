@@ -417,9 +417,7 @@ module Plugins
 
     # call the cleanup method for each active plugin
     def cleanup
-      @bot.save_mutex.synchronize do
-        delegate 'cleanup'
-      end
+      delegate 'cleanup'
       reset_botmodule_lists
     end
 

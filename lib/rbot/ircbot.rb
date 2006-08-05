@@ -809,7 +809,9 @@ class IrcBot
       debug "Saving"
       save
       debug "Cleaning up"
-      @plugins.cleanup
+      @save_mutex.synchronize do
+        @plugins.cleanup
+      end
       # debug "Closing registries"
       # @registry.close
       debug "Cleaning up the db environment"
@@ -848,8 +850,10 @@ class IrcBot
 
   # call the rescan method for all of the botmodules
   def rescan
-    @lang.rescan
-    @plugins.rescan
+    @save_mutex.synchronize do
+      @lang.rescan
+      @plugins.rescan
+    end
   end
 
   # channel:: channel to join
