@@ -18,7 +18,9 @@ class ScriptPlugin < Plugin
     super
     if @registry.has_key?(:commands)
       @commands = @registry[:commands]
-    else
+    end
+    
+    if @commands.nil?
       @commands = Hash.new
     end
 
