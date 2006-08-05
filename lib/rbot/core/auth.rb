@@ -125,12 +125,7 @@ class AuthModule < CoreBotModule
 
   def auth_login(m, params)
     begin
-      if params[:password]
-        li = @bot.auth.login(m.source, params[:botuser], params[:password])
-      else
-        li = @bot.auth.login(m.source, params[:botuser], params[:password], true)
-      end
-      case li
+      case @bot.auth.login(m.source, params[:botuser], params[:password])
       when true
         m.reply "welcome, #{@bot.auth.irc_to_botuser(m.source).username}"
         @bot.auth.set_changed
