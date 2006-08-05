@@ -478,8 +478,6 @@ module Irc
     # Empty +nick+, +user+ or +host+ are converted to the generic glob pattern
     #
     def initialize(str="", opts={})
-      debug "String: #{str.inspect}, options: #{opts.inspect}"
-
       # First of all, check for server/casemap option
       #
       init_server_or_casemap(opts)
@@ -517,7 +515,7 @@ module Irc
       if self.class == Netmask
         return self if fits_with_server_and_casemap?(opts)
       end
-      return self.fullform.to_irc_netmask(opts)
+      return self.fullform.to_irc_netmask(server_and_casemap.merge(opts))
     end
 
     # Converts the receiver into a User with the given (optional)
@@ -525,7 +523,7 @@ module Irc
     # is needed (different casemap/server)
     #
     def to_irc_user(opts={})
-      self.fullform.to_irc_user(opts)
+      self.fullform.to_irc_user(server_and_casemap.merge(opts))
     end
 
     # Inspection of a Netmask reveals the server it's bound to (if there is
@@ -659,6 +657,7 @@ module Irc
 
 end
 
+
 class String
 
   # We keep extending String, this time adding a method that converts a
@@ -701,7 +700,6 @@ module Irc
     # into a Netmask) provided that the given Netmask does not have globs.
     #
     def initialize(str="", opts={})
-      debug "String: #{str.inspect}, options: #{opts.inspect}"
       super
       raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if nick.has_irc_glob? && nick != "*"
       raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if user.has_irc_glob? && user != "*"
@@ -764,7 +762,7 @@ module Irc
     #
     def to_irc_user(opts={})
       return self if fits_with_server_and_casemap?(opts)
-      return self.fullform.to_irc_user(opts)
+      return self.fullform.to_irc_user(server_and_casemap(opts))
     end
 
     # We can replace everything at once with data from another User
@@ -807,7 +805,6 @@ class String
   # String into an Irc::User object
   #
   def to_irc_user(opts={})
-    debug "opts = #{opts.inspect}"
     Irc::User.new(self, opts)
   end
 

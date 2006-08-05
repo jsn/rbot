@@ -9,19 +9,8 @@
 
 require 'singleton'
 
+
 module Irc
-
-  # This method raises a TypeError if _user_ is not of class User
-  #
-  def Irc.error_if_not_user(user)
-    raise TypeError, "#{user.inspect} must be of type Irc::User and not #{user.class}" unless user.kind_of?(User)
-  end
-
-  # This method raises a TypeError if _chan_ is not of class Chan
-  #
-  def Irc.error_if_not_channel(chan)
-    raise TypeError, "#{chan.inspect} must be of type Irc::User and not #{chan.class}" unless chan.kind_of?(Channel)
-  end
 
 
   # This module contains the actual Authentication stuff
@@ -84,13 +73,32 @@ module Irc
         debug "Created command #{@command.inspect} with path #{@path.join(', ')}"
       end
 
+      # Returs self
+      def to_irc_auth_command
+        self
+      end
+
     end
 
-    # This method raises a TypeError if _user_ is not of class User
-    #
-    def Irc.error_if_not_command(cmd)
-      raise TypeError, "#{cmd.inspect} must be of type Irc::Auth::Command and not #{cmd.class}" unless cmd.kind_of?(Command)
-    end
+  end
+
+end
+
+
+class String
+
+  # Returns an Irc::Auth::Comand from the receiver
+  def to_irc_auth_command
+    Irc::Auth::Command.new(self)
+  end
+
+end
+
+
+module Irc
+
+
+  module Auth
 
 
     # This class describes a permission set
@@ -109,8 +117,8 @@ module Irc
 
       # Sets the permission for command _cmd_ to _val_,
       #
-      def set_permission(cmd, val)
-        Irc::error_if_not_command(cmd)
+      def set_permission(str, val)
+        cmd = str.to_irc_auth_command
         case val
         when true, false
           @perm[cmd.command] = val
@@ -130,8 +138,8 @@ module Irc
       # Tells if command _cmd_ is permitted. We do this by returning
       # the value of the deepest Command#path that matches.
       #
-      def permit?(cmd)
-        Irc::error_if_not_command(cmd)
+      def permit?(str)
+        cmd = str.to_irc_auth_command
         allow = nil
         cmd.path.reverse.each { |k|
           if @perm.has_key?(k)
@@ -217,12 +225,7 @@ module Irc
       def set_permission(cmd, val, chan="*")
         k = chan.to_s.to_sym
         @perm[k] = PermissionSet.new unless @perm.has_key?(k)
-        case cmd
-        when String
-          @perm[k].set_permission(Command.new(cmd), val)
-        else
-          @perm[k].set_permission(cmd, val)
-        end
+        @perm[k].set_permission(cmd, val)
       end
 
       # Resets the permission for command _cmd_ on channel _chan_
@@ -250,34 +253,26 @@ module Irc
       # Adds a Netmask
       #
       def add_netmask(mask)
-        case mask
-        when Netmask
-          @netmasks << mask
-        else
-          @netmasks << Netmask.new(mask)
-        end
+        @netmasks << mask.to_irc_netmask
       end
 
       # Removes a Netmask
       #
       def delete_netmask(mask)
-        case mask
-        when Netmask
-          m = mask
-        else
-          m << Netmask.new(mask)
-        end
+        m = mask.to_irc_netmask
         @netmasks.delete(m)
       end
 
       # Removes all <code>Netmask</code>s
+      #
       def reset_netmask_list
         @netmasks = NetmaskList.new
       end
 
       # This method checks if BotUser has a Netmask that matches _user_
-      def knows?(user)
-        Irc::error_if_not_user(user)
+      #
+      def knows?(usr)
+        user = usr.to_irc_user
         known = false
         @netmasks.each { |n|
           if user.matches?(n)
@@ -342,8 +337,7 @@ module Irc
       # default knows everybody
       #
       def knows?(user)
-        Irc::error_if_not_user(user)
-        return true
+        return true if user.to_irc_user
       end
 
       # Resets the NetmaskList
@@ -475,9 +469,8 @@ module Irc
 
       # Maps <code>Irc::User</code> to BotUser
       def irc_to_botuser(ircuser)
-        Irc::error_if_not_user(ircuser)
         # TODO check netmasks
-        return @botusers[ircuser] || everyone
+        @botusers[ircuser.to_irc_user] || everyone
       end
 
       # creates a new BotUser
@@ -501,8 +494,8 @@ module Irc
       #
       # It is possible to autologin by Netmask, on request
       #
-      def login(ircuser, botusername, pwd, bymask = false)
-        Irc::error_if_not_user(ircuser)
+      def login(user, botusername, pwd, bymask = false)
+        ircuser = user.to_irc_user
         n = BotUser.sanitize_username(botusername)
         k = n.to_sym
         raise "No such BotUser #{n}" unless include?(k)
@@ -530,10 +523,11 @@ module Irc
       # * everyone on _chan_
       # * everyone on all channels
       #
-      def permit?(user, cmdtxt, chan=nil)
+      def permit?(user, cmdtxt, channel=nil)
         botuser = irc_to_botuser(user)
-        cmd = Command.new(cmdtxt)
+        cmd = cmdtxt.to_irc_auth_command
 
+        chan = channel
         case chan
         when User
           chan = "?"
