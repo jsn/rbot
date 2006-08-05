@@ -8,14 +8,43 @@
 
 load '/home/eean/.rbot/plugins/rpg_creatures.rb'
 
+class Map
+  attr_accessor :map
+
+  # Maps are 16x16 fields
+  # X = player spawn, O = Orc, S = Slime 
+  str = ""
+  str += '----------------'
+  str += '| S |          |'
+  str += '|   |  |-----  |'
+  str += '|      |       |'
+  str += '|---|  |       |'
+  str += '|   |O |       |'
+  str += '|   |  --------|'
+  str += '|   |          |'
+  str += '|   | ----  |O |'
+  str += '|   |S|  |  |--|'
+  str += '|   | |  |     |'
+  str += '|---| |  |     |'
+  str += '|X    |  |     |'
+  str += '|------  |     |'
+  str += '|        |     |'
+  str += '----------------'
+
+  @map = str.scan( /.{16}/m )
+end
+
+
 class Game
 
   attr_accessor :channel, :players
+  Party_Pos = Struct.new( :x, :y )
 
   def initialize( channel, bot )
     @channel = channel
     @bot = bot
     @players = Hash.new
+    @party_pos = Party_Pos.new
   end
 
 
@@ -155,6 +184,10 @@ class RpgPlugin < Plugin
   end
 
 
+  def handle_go( m, params )
+  end
+
+
   def handle_stats( m, params )
     begin
 
@@ -179,6 +212,7 @@ plugin.map 'spawn player',   :action => 'handle_spawn_player'
 plugin.map 'spawn monster',  :action => 'handle_spawn_monster' 
 plugin.map 'attack :target', :action => 'handle_attack' 
 plugin.map 'look :object',   :action => 'handle_look',         :defaults => { :object => nil }
+plugin.map 'go :direction',  :action => 'handle_go' 
 plugin.map 'stats',          :action => 'handle_stats'
 
 
