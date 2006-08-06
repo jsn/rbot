@@ -189,7 +189,7 @@ module Irc
         if hash.has_key?(:auth_path)
           extra = hash[:auth_path]
           if extra.sub!(/^:/, "")
-            pre += post
+            pre += "::" + post
             post = nil
           end
           if extra.sub!(/:$/, "")

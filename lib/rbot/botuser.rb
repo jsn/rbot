@@ -167,6 +167,7 @@ module Irc
       attr_reader :username
       attr_reader :password
       attr_reader :netmasks
+      attr_reader :perm
       attr_writer :login_by_mask
       attr_writer :autologin
 
