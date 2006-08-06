@@ -1,5 +1,16 @@
 #-- vim:sw=2:et
 #++
+# TODO:
+# * user destroy: should work in two phases:
+#   * <code>user destroy _botuser_</code> would queue _botuser_ for
+#     destruction
+#   * <code>user destroy _botuser_ _password_</code> would actually destroy
+#     _botuser_ if it was queued and the _password_ is correct
+#   * user destruction can be done without changing botuser.rb by getting the
+#     save_array for @bot.auth, manipulating it, and reloading it with @bot.auth.load_array
+# * user copy
+# * user rename
+#
 
 
 class AuthModule < CoreBotModule
@@ -94,8 +105,7 @@ class AuthModule < CoreBotModule
     begin
       bu = @bot.auth.get_botuser(user)
     rescue
-      m.reply "couldn't find botuser #{user}"
-      return
+      return m.reply "couldn't find botuser #{user}"
     end
     if locs.empty?
       locs << "*"
@@ -184,7 +194,7 @@ class AuthModule < CoreBotModule
       return "A permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
     when /^permission/
       return "permissions (re)set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
-    when /^user (show|list)/
+    when /^user show/
       return "user show <what> : shows info about the user; <what> can be any of autologin, login-by-mask, netmasks"
     when /^user (en|dis)able/
       return "user enable|disable <what> : turns on or off <what> (autologin, login-by-mask)"
@@ -196,8 +206,12 @@ class AuthModule < CoreBotModule
       return "user reset <what> : resets <what> to the default values. <what> can be +netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will be reset to the default value) or +password+ (a new one will be generated and you'll be told in private)"
     when /^user tell/
       return "user tell <who> the password for <botuser> : contacts <who> in private to tell him/her the password for <botuser>"
+    when /^user create/
+      return "user create <name> <password> : create botuser named <name> with password <password>. The password can be omitted, in which case a random one will be generated. The <name> should only contain alphanumeric characters and the underscore (_)"
+    when /^user list/
+      return "user list : lists all the botusers"
     when /^user/
-      return "user show|list, enable|disable, add|rm netmask, set, reset, tell"
+      return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list"
     else
       return "#{name}: login, whoami, permission syntax, permissions, user"
     end
@@ -248,7 +262,7 @@ class AuthModule < CoreBotModule
 
     case cmd.to_sym
 
-    when :show, :list
+    when :show
       return "you can't see the properties of #{butarget.username}" if botuser != butarget and !botuser.permit?("auth::show::other")
 
       case splits[1]
@@ -384,11 +398,36 @@ class AuthModule < CoreBotModule
 
   def auth_tell_password(m, params)
     user = params[:user]
-    botuser = params[:botuser]
+    begin
+      botuser = @bot.auth.get_botuser(params[:botuser])
+    rescue
+      return m.reply "coudln't find botuser #{params[:botuser]})"
+    end
     m.reply "I'm not telling the master password to anyway, pal" if botuser == @bot.auth.botowner
-    msg = "the password for #{botuser.username} is #{botuser.password}"
+    msg = "the password for botuser #{botuser.username} is #{botuser.password}"
     @bot.say user, msg
     @bot.say m.source, "I told #{user} that " + msg
+  end
+
+  def auth_create_user(m, params)
+    name = params[:name]
+    password = params[:password]
+    return m.reply "are you nuts, creating a botuser with a publicly known password?" if m.public? and not password.nil?
+    begin
+      bu = @bot.auth.create_botuser(name, password)
+      @bot.auth.set_changed
+    rescue => e
+      return m.reply "Failed to create #{name}: #{e}"
+      debug e.inspect + "\n" + e.backtrace.join("\n")
+    end
+    m.reply "Created botuser #{bu.username}"
+  end
+
+  def auth_list_users(m, params)
+    # TODO name regexp to filter results
+    list = @bot.auth.save_array.inject([]) { |list, x| list << x[:username] } - ['everyone', 'owner']
+    return m.reply "I have no botusers other than the default ones" if list.empty?
+    return m.reply "Botuser#{'s' if list.length > 1}: #{list.join(', ')}"
   end
 
 end
@@ -398,6 +437,15 @@ auth = AuthModule.new
 auth.map "user tell :user the password for :botuser",
   :action => 'auth_tell_password',
   :auth_path => 'user::tell'
+
+auth.map "user create :name :password",
+  :action => 'auth_create_user',
+  :defaults => {:password => nil},
+  :auth_path => 'user::create!'
+
+auth.map "user list",
+  :action => 'auth_list_users',
+  :auth_path => 'user::list!'
 
 auth.map "user *data",
   :action => 'auth_manage_user'
