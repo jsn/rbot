@@ -883,6 +883,11 @@ class IrcBot
       sendq "MODE #{channel} #{mode} #{target}", channel, 2
   end
 
+  # kicking a user
+  def kick(channel, user, msg)
+      sendq "KICK #{channel} #{user} :#{msg}", channel, 2
+  end
+
   # m::     message asking for help
   # topic:: optional topic help is requested for
   # respond to online help requests
