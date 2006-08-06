@@ -1,3 +1,32 @@
+2006-08-07  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Add kick method to kernel: plugins can now use
+		@bot.kick channel, user, reason
+	to kick a user from a channel
+	* RSS plugin: fix rewatch_rss method
+
+2006-08-06 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Updating the ChangeLog again: describe the new stuff in trunk which
+	will be made available in the next release. Use Gnu style for new
+	changelog entries (yyyy-mm-dd name <email address>\n<tab> ...):
+	there's a macro for this since at least Vim 6.x and higher, called by
+	<Leader>o (default leader: slash (\))
+	* New IRC Framework: Server, Channels, User, Netmasks etc are all
+	proper Ruby objects. The better organization will allow multi-server
+	connections to be implemented more easily
+	* Modularize core: split the internal functionality from what can be
+	implemented as botmodules (which work just the same as plugins). Move
+	Configuration, Basics and Auth out of the 'kernel' into core
+	botmodules.
+	* New Auth Framework: BotUsers are now Ruby objects with attached
+	PermissionSets which define what the BotUser can do, by channel if
+	necessary. The new framework allows very fine-grained control while
+	still being very easy to manage for elementary usage. BotUser data can
+	be exported and imported, but no backwards compatibility has been
+	implemented yet. Most plugins still have to be updated to the new
+	command-path-based mechanism.
+
 Sun Aug 06 17:33:55 BST 2006  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * 0.9.10 released
