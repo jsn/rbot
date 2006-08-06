@@ -28,7 +28,7 @@ class Map
 |   |S|  |  |--|
 |   | |  |     |
 |---| |  |     |
-|X    |  |     |
+|X   O|  |     |
 |------  |     |
 |        |     |
 ----------------
@@ -87,7 +87,7 @@ class RpgPlugin < Plugin
 
 
   def help( plugin, topic="" )
-    "IRC RPG. Commands: 'spawn player', 'spawn monster', 'attack <target>', 'look [object]', 'stats'."
+    "IRC RPG. Commands: 'spawn player', 'spawn monster', 'attack <target>', 'look [object]', 'stats', 'go <north|n|east|e|south|s|west|w>'."
   end
 
 #####################################################################
@@ -198,9 +198,7 @@ class RpgPlugin < Plugin
       debug "MAP_LENGTH:  #{g.map.map.length}"
       debug "PARTY_POS:   x:#{g.party_pos.x}  y:#{g.party_pos.y}"
 
-      x = g.party_pos.x  
-      y = g.party_pos.y
-
+      x, y = g.party_pos.x, g.party_pos.y
 
       debug "MAP NORTH: #{g.map.at( x, y-1 )}"
 
@@ -223,6 +221,52 @@ class RpgPlugin < Plugin
 
 
   def handle_go( m, params )
+    g = get_game( m )
+    return unless spawned?( g, m.sourcenick )
+
+    wall = "Ouch! You bump into a wall."
+    x, y = g.party_pos.x, g.party_pos.y
+            
+    case params[:direction]
+      when 'north', 'n'
+        if g.map.wall?( x, y-1 )
+          m.reply wall 
+        else
+          g.party_pos.y -= 1
+          m.reply "You walk northward."
+        end
+      when 'east', 'e'
+        if g.map.wall?( x+1, y )
+          m.reply wall
+        else
+          g.party_pos.x += 1
+          m.reply "You walk eastward."
+       end     
+      when 'south', 's'
+        if g.map.wall?( x, y+1 )
+          m.reply wall
+        else
+          g.party_pos.y += 1  
+          m.reply "You walk southward."
+        end
+      when 'west', 'w'
+        if g.map.wall?( x-1, y )
+          m.reply wall
+        else
+          g.party_pos.x -= 1
+          m.reply "You walk westward."
+        end    
+     else
+        m.reply( "Go where? Directions: north, east, south, west." )
+        return
+    end    
+
+    case g.map.at( g.party_pos.x, g.party_pos.y )
+      when "O"
+        m.reply "You encounter an Orc!"
+      when "S"
+        m.reply "You encounter a Slime!"
+    end    
   end
 
 
