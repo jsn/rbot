@@ -21,18 +21,18 @@ module Irc
       :default => 'rbotauth', :wizard => true,
       :desc => 'Password for the bot owner' )
     BotConfig.register BotConfigBooleanValue.new( 'auth.login_by_mask',
-      :default => 'false',
-      :desc => 'Set true if new botusers should allow logging in without a password when the user netmask is known')
+      :default => 'true',
+      :desc => 'Set false to prevent new botusers from logging in without a password when the user netmask is known')
     BotConfig.register BotConfigBooleanValue.new( 'auth.autologin',
-      :default => 'false',
-      :desc => 'Set true if new botusers should try to recognize IRC users without a need to manually login')
+      :default => 'true',
+      :desc => 'Set false to prevent new botusers from recognizing IRC users without a need to manually login')
     # BotConfig.register BotConfigIntegerValue.new( 'auth.default_level',
     #   :default => 10, :wizard => true,
     #   :desc => 'The default level for new/unknown users' )
 
     # Generate a random password of length _l_
     #
-    def random_password(l=8)
+    def Auth.random_password(l=8)
       pwd = ""
       8.times do
         pwd += (rand(26) + (rand(2) == 0 ? 65 : 97) ).chr
@@ -176,8 +176,8 @@ module Irc
         @password = nil
         @netmasks = NetmaskList.new
         @perm = {}
-        @login_by_mask = Auth.manager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
-        @autologin = Auth.manager.bot.config['auth.autologin'] unless defined?(@autologin)
+        reset_login_by_mask
+        reset_autologin
       end
 
       # Inspection
@@ -207,6 +207,18 @@ module Irc
       #
       def login_by_mask?
         @login_by_mask
+      end
+
+      # Reset the login-by-mask option
+      #
+      def reset_login_by_mask
+        @login_by_mask = Auth.manager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
+      end
+
+      # Reset the autologin option
+      #
+      def reset_autologin
+        @autologin = Auth.manager.bot.config['auth.autologin'] unless defined?(@autologin)
       end
 
       # Do we allow automatic logging in?
@@ -245,7 +257,7 @@ module Irc
 
       # Resets the password by creating a new onw
       def reset_password
-        @password = random_password
+        @password = Auth.random_password
       end
 
       # Sets the permission for command _cmd_ to _val_ on channel _chan_
@@ -293,7 +305,7 @@ module Irc
 
       # Removes all <code>Netmask</code>s
       #
-      def reset_netmask_list
+      def reset_netmasks
         @netmasks = NetmaskList.new
       end
 
@@ -349,12 +361,11 @@ module Irc
 
       include Singleton
 
-      # The default BotUser is named 'everyone', it doesn't allow autologin
-      # (meaningless) and it allows login-by-mask
+      # The default BotUser is named 'everyone'
       #
       def initialize
-        @login_by_mask = true
-        @autologin = false
+        reset_login_by_mask
+        reset_autologin
         super("everyone")
         @default_perm = PermissionSet.new
       end
@@ -366,11 +377,23 @@ module Irc
         return @login_by_mask
       end
 
+      # The default botuser allows logins by mask
+      #
+      def reset_login_by_mask
+        @login_by_mask = true
+      end
+
       # This method returns without changing anything
       #
       def autologin=(val)
         debug "Tried to change the autologin for default bot user, ignoring"
         return
+      end
+
+      # The default botuser doesn't allow autologin (meaningless)
+      #
+      def reset_autologin
+        @autologin = false
       end
 
       # Sets the default permission for the default user (i.e. the ones
@@ -393,7 +416,7 @@ module Irc
       end
 
       # Resets the NetmaskList
-      def reset_netmask_list
+      def reset_netmasks
         super
         add_netmask("*!*@*")
       end
@@ -426,7 +449,7 @@ module Irc
 
       def initialize
         @login_by_mask = false
-        @autologin = false
+        @autologin = true
         super("owner")
       end
 
@@ -523,8 +546,9 @@ module Irc
 
       # Maps <code>Irc::User</code> to BotUser
       def irc_to_botuser(ircuser)
-        # TODO check netmasks
-        @botusers[ircuser.to_irc_user] || everyone
+        logged = @botusers[ircuser.to_irc_user]
+        return logged if logged
+        return autologin(ircuser)
       end
 
       # creates a new BotUser

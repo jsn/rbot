@@ -184,8 +184,22 @@ class AuthModule < CoreBotModule
       return "A permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
     when /^permission/
       return "permissions (re)set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
+    when /^user (show|list)/
+      return "user show <what> : shows info about the user; <what> can be any of autologin, login-by-mask, netmasks"
+    when /^user (en|dis)able/
+      return "user enable|disable <what> : turns on or off <what> (autologin, login-by-mask)"
+    when /^user set/
+      return "user set password <blah> : sets the user password to <blah>; passwords can only contain upper and lowercase letters and numbers, and must be at least 4 characters long"
+    when /^user (add|rm)/
+      return "user add|rm netmask <mask> : adds/removes netmask <mask> from the list of netmasks known to the botuser you're linked to"
+    when /^user reset/
+      return "user reset <what> : resets <what> to the default values. <what> can be +netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will be reset to the default value) or +password+ (a new one will be generated and you'll be told in private)"
+    when /^user tell/
+      return "user tell <who> the password for <botuser> : contacts <who> in private to tell him/her the password for <botuser>"
+    when /^user/
+      return "user show|list, enable|disable, add|rm netmask, set, reset, tell"
     else
-      return "#{name}: login, whoami, permission syntax, permissions"
+      return "#{name}: login, whoami, permission syntax, permissions, user"
     end
   end
 
@@ -197,14 +211,14 @@ class AuthModule < CoreBotModule
     "I can only #{cmd} these: #{stuff.join(', ')}"
   end
 
-  def set_bool_prop(botuser, prop, val)
+  def set_prop(botuser, prop, val)
     k = prop.to_s.gsub("-","_")
     botuser.send( (k + "=").to_sym, val)
   end
 
-  def reset_bool_prop(botuser, prop)
+  def reset_prop(botuser, prop)
     k = prop.to_s.gsub("-","_")
-    botuser.send( (k + "=").to_sym, @bot.config['auth.' + k])
+    botuser.send( ("reset_"+k).to_sym)
   end
 
   def ask_bool_prop(botuser, prop)
@@ -228,8 +242,9 @@ class AuthModule < CoreBotModule
     splits.slice!(-2,2) if has_for
 
     bools = [:autologin, :"login-by-mask"]
-    can_set = [:password] + bools
-    can_reset = can_set + [:netmasks]
+    can_set = [:password]
+    can_addrm = [:netmasks]
+    can_reset = bools + can_set + can_addrm
 
     case cmd.to_sym
 
@@ -240,7 +255,10 @@ class AuthModule < CoreBotModule
       when nil, "all"
         props = can_reset
       when "password"
-        return m.reply "you can't ask for someone else's password" if botuser != butarget and !botuser.permit?("auth::show::other::password")
+        if botuser != butarget
+          return m.reply "no way I'm telling you the master password!" if butarget == @bot.auth.botowner
+          return m.reply "you can't ask for someone else's password"
+        end
         return m.reply "c'mon, you can't be asking me seriously to tell you the password in public!" if m.public?
         return m.reply "the password for #{butarget.username} is #{butarget.password}"
       else
@@ -269,51 +287,123 @@ class AuthModule < CoreBotModule
       return m.reply "#{butarget.username} #{str.join('; ')}"
 
     when :enable, :disable
-      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
+      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::other::default")
       return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
 
       return m.reply need_args(cmd) unless splits[1]
       things = []
+      skipped = []
       splits[1..-1].each { |a|
         arg = a.to_sym
-        if  bools.include?(arg)
-          set_bool_prop(butarget, arg, cmd.to_sym == :enable)
+        if bools.include?(arg)
+          set_prop(butarget, arg, cmd.to_sym == :enable)
+          things << a
         else
-          m.reply not_args(cmd, *bools)
+          skipped << a
         end
-        things << a
       }
-      return auth_manage_user(m, {:data => ["show"] + things })
+
+      m.reply "I ignored #{skipped.join(', ')} because " + not_args(cmd, *bools) unless skipped.empty?
+      if things.empty?
+        m.reply "I haven't changed anything"
+      else
+        @bot.auth.set_changed
+        return auth_manage_user(m, {:data => ["show"] + things })
+      end
 
     when :set
       return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
       return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
 
-      return need_args(cmd) unless splits[1]
-      things = []
-      # TODO
-      #return not_args(cmd, *can_set) unless bools.include?(arg)
+      return m.reply need_args(cmd) unless splits[1]
+      arg = splits[1].to_sym
+      return m.reply not_args(cmd, *can_set) unless can_set.include?(arg)
+      argarg = splits[2]
+      return m.reply need_args([cmd, splits[1]].join(" ")) unless argarg
+      if arg == :password && m.public?
+        return m.reply "is that a joke? setting the password in public?"
+      end
+      set_prop(butarget, arg, argarg)
+      @bot.auth.set_changed
+      auth_manage_user(m, {:data => ["show", arg] })
 
     when :reset
       return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
       return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
 
-      return need_args(cmd) unless splits[1]
+      return m.reply need_args(cmd) unless splits[1]
       things = []
-      # TODO
+      skipped = []
+      splits[1..-1].each { |a|
+        arg = a.to_sym
+        if can_reset.include?(arg)
+          reset_prop(butarget, arg)
+          things << a
+        else
+          skipped << a
+        end
+      }
+
+      m.reply "I ignored #{skipped.join(', ')} because " + not_args(cmd, *can_reset) unless skipped.empty?
+      if things.empty?
+        m.reply "I haven't changed anything"
+      else
+        @bot.auth.set_changed
+        @bot.say m.source, "the password for #{butarget.username} is now #{butarget.password}" if things.include?("password")
+        return auth_manage_user(m, {:data => ["show"] + things - ["password"]})
+      end
+
+    when :add, :rm, :remove, :del, :delete
+      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
+      return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
+
+      arg = splits[1]
+      if arg.nil? or arg !~ /netmasks?/ or splits[2].nil?
+        return m.reply "I can only add/remove netmasks. See +help user add+ for more instructions"
+      end
+
+      method = cmd.to_sym == :add ? :add_netmask : :delete_netmask
+
+      failed = []
+
+      splits[2..-1].each { |mask|
+        begin
+          butarget.send(method, mask.to_irc_netmask(:server => @bot.server))
+        rescue
+          failed << mask
+        end
+      }
+      m.reply "I failed to #{cmd} #{failed.join(', ')}" unless failed.empty?
+      @bot.auth.set_changed
+      return auth_manage_user(m, {:data => ["show", "netmasks"] })
+
     else
       m.reply "sorry, I don't know how to #{m.message}"
     end
+  end
+
+  def auth_tell_password(m, params)
+    user = params[:user]
+    botuser = params[:botuser]
+    m.reply "I'm not telling the master password to anyway, pal" if botuser == @bot.auth.botowner
+    msg = "the password for #{botuser.username} is #{botuser.password}"
+    @bot.say user, msg
+    @bot.say m.source, "I told #{user} that " + msg
   end
 
 end
 
 auth = AuthModule.new
 
+auth.map "user tell :user the password for :botuser",
+  :action => 'auth_tell_password',
+  :auth_path => 'user::tell'
+
 auth.map "user *data",
   :action => 'auth_manage_user'
 
 auth.default_auth("user", true)
+auth.default_auth("edit::other", false)
 
 auth.map "whoami",
   :action => 'auth_whoami',
