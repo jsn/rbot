@@ -313,7 +313,7 @@ class AuthModule < CoreBotModule
         m.reply "I haven't changed anything"
       else
         @bot.auth.set_changed
-        return auth_manage_user(m, {:data => ["show"] + things })
+        return auth_manage_user(m, {:data => ["show"] + things + ["for", butarget.username] })
       end
 
     when :set
@@ -330,7 +330,7 @@ class AuthModule < CoreBotModule
       end
       set_prop(butarget, arg, argarg)
       @bot.auth.set_changed
-      auth_manage_user(m, {:data => ["show", arg] })
+      auth_manage_user(m, {:data => ["show", arg, "for", butarget.username] })
 
     when :reset
       return m.reply("you can't change the default user") if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
@@ -355,7 +355,7 @@ class AuthModule < CoreBotModule
       else
         @bot.auth.set_changed
         @bot.say m.source, "the password for #{butarget.username} is now #{butarget.password}" if things.include?("password")
-        return auth_manage_user(m, {:data => ["show"] + things - ["password"]})
+        return auth_manage_user(m, {:data => (["show"] + things - ["password"]) + ["for", butarget.username]})
       end
 
     when :add, :rm, :remove, :del, :delete
@@ -380,7 +380,7 @@ class AuthModule < CoreBotModule
       }
       m.reply "I failed to #{cmd} #{failed.join(', ')}" unless failed.empty?
       @bot.auth.set_changed
-      return auth_manage_user(m, {:data => ["show", "netmasks"] })
+      return auth_manage_user(m, {:data => ["show", "netmasks", "for", butarget.username] })
 
     else
       m.reply "sorry, I don't know how to #{m.message}"
