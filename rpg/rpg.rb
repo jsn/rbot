@@ -9,42 +9,64 @@
 load '/home/eean/.rbot/plugins/rpg_creatures.rb'
 
 class Map
+
   attr_accessor :map
 
-  # Maps are 16x16 fields
-  # X = player spawn, O = Orc, S = Slime 
-  str = ""
-  str += '----------------'
-  str += '| S |          |'
-  str += '|   |  |-----  |'
-  str += '|      |       |'
-  str += '|---|  |       |'
-  str += '|   |O |       |'
-  str += '|   |  --------|'
-  str += '|   |          |'
-  str += '|   | ----  |O |'
-  str += '|   |S|  |  |--|'
-  str += '|   | |  |     |'
-  str += '|---| |  |     |'
-  str += '|X    |  |     |'
-  str += '|------  |     |'
-  str += '|        |     |'
-  str += '----------------'
+  def initialize
+    # Maps are 16x16 
+    # X = player spawn, O = Orc, S = Slime 
+    str = <<-END
+----------------
+| S |          |
+|   |  |-----  |
+|      |       |
+|---|  |       |
+|   |O |       |
+|   |  --------|
+|   |          |
+|   | ----  |O |
+|   |S|  |  |--|
+|   | |  |     |
+|---| |  |     |
+|X    |  |     |
+|------  |     |
+|        |     |
+----------------
+    END
 
-  @map = str.scan( /.{16}/m )
+    @map = str.split( "\n")
+  end
+
+
+  def at( x, y )
+    @map[y][x].chr
+  end  
+
+
+  def wall?( x, y )
+    s = at( x, y)
+    s == '|' or s == '-'
+  end
+
 end
 
 
 class Game
 
-  attr_accessor :channel, :players
+  attr_accessor :channel, :players, :map, :party_pos
   Party_Pos = Struct.new( :x, :y )
 
   def initialize( channel, bot )
     @channel = channel
     @bot = bot
     @players = Hash.new
-    @party_pos = Party_Pos.new
+
+    @map = Map.new
+    x, y = 0, 0
+    m = @map.map
+    m.length.times { |y| x = m[y].index( 'X' ); break if x != nil } 
+    @party_pos = Party_Pos.new( x, y )
+
   end
 
 
@@ -167,11 +189,27 @@ class RpgPlugin < Plugin
     if params[:object] == nil
       if g.players.length == 1
         m.reply( "#{m.sourcenick}: You are alone." )
-        return
+      else
+        objects = []
+        g.players.each_value { |x| objects << x.name unless x.name == m.sourcenick }
+        m.reply( "#{m.sourcenick}: You see the following objects: #{objects.join( ', ' )}." )
       end
-      objects = []
-      g.players.each_value { |x| objects << x.name unless x.name == m.sourcenick }
-      m.reply( "#{m.sourcenick}: You see the following objects: #{objects.join( ', ' )}." )
+
+      debug "MAP_LENGTH:  #{g.map.map.length}"
+      debug "PARTY_POS:   x:#{g.party_pos.x}  y:#{g.party_pos.y}"
+
+      x = g.party_pos.x  
+      y = g.party_pos.y
+
+
+      debug "MAP NORTH: #{g.map.at( x, y-1 )}"
+
+      north = g.map.wall?( x, y-1 ) ? "a wall" : "open space"
+      east  = g.map.wall?( x+1, y ) ? "a wall" : "open space"
+      south = g.map.wall?( x, y+1 ) ? "a wall" : "open space"
+      west  = g.map.wall?( x-1, y ) ? "a wall" : "open space"
+
+      m.reply( "In the north is #{north}, east is #{east}, south is #{south}, and in the west you see #{west}." )
     else
       p = nil
       g.players.each_value { |x| p = x if x.name == params[:object] }
