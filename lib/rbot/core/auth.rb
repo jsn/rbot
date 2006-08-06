@@ -515,42 +515,122 @@ class AuthModule < CoreBotModule
 
   end
 
+  def auth_export(m, params)
+
+    exportfile = "#{@bot.botclass}/new-auth.users"
+
+    what = params[:things]
+
+    has_to = what[-2] == "to"
+    if has_to
+      exportfile = what[-1]
+      what.slice!(-2,2)
+    end
+
+    what.delete("all")
+
+    m.reply "selecting data to export ..."
+
+    buser_array = @bot.auth.save_array
+    buser_hash = buser_array.inject({}) { |h, u|
+      h[u[:username]] = u
+      h
+    }
+
+    if what.empty?
+      we_want = buser_hash
+    else
+      we_want = buser_hash.delete_if { |key, val|
+        not what.include?(key)
+      }
+    end
+
+    m.reply "preparing data for export ..."
+    begin
+      yaml_hash = {}
+      we_want.each { |k, val|
+        yaml_hash[k] = {}
+        val.each { |kk, v|
+          case kk
+          when :username
+            next
+          when :netmasks
+            yaml_hash[k][kk] = []
+            v.each { |nm|
+              yaml_hash[k][kk] << {
+                :fullform => nm.fullform,
+                :casemap => nm.casemap.to_s
+              }
+            }
+          else
+            yaml_hash[k][kk] = v
+          end
+        }
+      }
+    rescue => e
+      m.reply "failed to prepare data: #{e}"
+      debug e.backtrace.dup.unshift(e.inspect).join("\n")
+      return
+    end
+
+    m.reply "exporting to #{exportfile} ..."
+    begin
+      File.open(exportfile, "w") do |file|
+        file.puts YAML::dump(yaml_hash)
+      end
+    rescue => e
+      m.reply "failed to export users: #{e}"
+      debug e.backtrace.dup.unshift(e.inspect).join("\n")
+      return
+    end
+    m.reply "done"
+  end
+
 end
 
 auth = AuthModule.new
 
+auth.map "user export *things",
+  :action => 'auth_export',
+  :defaults => { :things => ['all'] },
+  :auth_path => ':manage:fedex:'
+
+# auth.map "user import",
+#  :action => 'auth_import',
+#  :auth_path => ':manage:fedex:'
+
 auth.map "user create :name :password",
   :action => 'auth_create_user',
   :defaults => {:password => nil},
-  :auth_path => 'user::manage::create!'
+  :auth_path => ':manage:'
 
 auth.map "user cancel destroy :name :password",
   :action => 'auth_destroy_user',
   :defaults => { :password => nil },
-  :auth_path => 'user::manage::destroy::cancel!'
+  :auth_path => ':manage::destroy:'
 
 auth.map "user destroy :name :password",
   :action => 'auth_destroy_user',
   :defaults => { :password => nil },
-  :auth_path => 'user::manage::destroy!'
+  :auth_path => ':manage:'
 
 auth.map "user copy :source :dest",
   :action => 'auth_copy_ren_user',
-  :auth_path => 'user::manage::copy!'
+  :auth_path => ':manage:'
 
 auth.map "user rename :source :dest",
   :action => 'auth_copy_ren_user',
-  :auth_path => 'user::manage::rename!'
+  :auth_path => ':manage:'
 
 auth.default_auth("user::manage", false)
 
 auth.map "user tell :user the password for :botuser",
   :action => 'auth_tell_password',
-  :auth_path => 'user::tell'
+  :auth_path => '::'
 
 auth.map "user list",
   :action => 'auth_list_users',
-  :auth_path => 'user::list!'
+  :auth_path => '::'
 
 auth.map "user *data",
   :action => 'auth_manage_user'
