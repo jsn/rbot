@@ -1,7 +1,12 @@
+#-- vim:sw=2:et
+#++
+#
 # RSS feed plugin for RubyBot
 # (c) 2004 Stanislav Karchebny <berkus@madfire.net>
 # (c) 2005 Ian Monroe <ian@monroe.nu>
 # (c) 2005 Mark Kretschmann <markey@web.de>
+# (c) 2006 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+#
 # Licensed under MIT License.
 
 require 'rss/parser'
@@ -54,19 +59,26 @@ class ::RssBlob
   end
 
   def watched_by?(who)
-    @watchers.include?(who)
+    # We need to check bot 'who' itself and the String form, because rss
+    # watches added before the new Irc framework represented watchers as
+    # Strings whereas they are now Channels.
+    #
+    @watchers.include?(who) || @watchers.include?(who.to_s) 
   end
 
   def add_watch(who)
     if watched_by?(who)
       return nil
     end
-    @watchers << who unless watched_by?(who)
+    @watchers << who
     return who
   end
 
   def rm_watch(who)
+    # See comment to watched_by?
+    #
     @watchers.delete(who)
+    @watchers.delete(who.to_s)
   end
 
   def to_a

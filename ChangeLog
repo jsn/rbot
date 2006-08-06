@@ -4,8 +4,13 @@
 		@bot.kick channel, user, reason
 	to kick a user from a channel
 	* RSS plugin: fix rewatch_rss method
+	* RSS plugin: the different ways to represent channels before and
+	after the New IRC Framework was causing strange problems such as
+	watched feed not being listed as such, undeletable watches, double
+	watches etc. Fix this by checking both for the Channel objects and
+	their to_s form when checking for watches or deleting them.
 
-2006-08-06 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+2006-08-06  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Updating the ChangeLog again: describe the new stuff in trunk which
 	will be made available in the next release. Use Gnu style for new
