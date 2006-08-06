@@ -110,6 +110,7 @@ module Irc
     # This class describes a permission set
     class PermissionSet
 
+      attr_reader :perm
       # Create a new (empty) PermissionSet
       #
       def initialize

@@ -72,7 +72,7 @@ class AuthModule < CoreBotModule
           warns << ArgumentError("#{x} doesn't look like a channel name") unless @bot.server.supports[:chantypes].include?(x[0])
           locs << x
         end
-        unless wants_more
+        unless want_more
           last_idx = i
           break
         end
@@ -94,7 +94,7 @@ class AuthModule < CoreBotModule
     begin
       user = @bot.auth.get_botuser(splits[-1].sub(/^all$/,"everyone"))
     rescue
-      return m.reply("couldn't find botuser #{user}")
+      return m.reply("couldn't find botuser #{splits[-1]}")
     end
     return m.reply("you can't change permissions for #{user.username}") if user == @bot.auth.botowner
     splits.slice!(-2,2) if has_for
@@ -139,6 +139,35 @@ class AuthModule < CoreBotModule
   end
 
   def auth_view_perm(m, params)
+    begin
+      user = @bot.auth.get_botuser(params[:user].sub(/^all$/,"everyone"))
+    rescue
+      return m.reply("couldn't find botuser #{params[:user]}")
+    end
+    perm = user.perm
+    str = []
+    perm.each { |k, val|
+      next if val.perm.empty?
+      case k
+      when :*
+        str << "on any channel: "
+      when :"?"
+        str << "in private: "
+      else
+        str << "on #{k}: "
+      end
+      sub = []
+      val.perm.each { |cmd, bool|
+        sub << (bool ? "+" : "-")
+        sub.last << cmd.to_s
+      }
+      str.last << sub.join(', ')
+    }
+    if str.empty?
+      m.reply "no permissions set for #{user.username}"
+    else
+      m.reply "permissions for #{user.username}:: #{str.join('; ')}"
+    end
   end
 
   def get_botuser_for(user)
@@ -683,6 +712,10 @@ auth.map "permissions set *args",
 auth.map "permissions reset *args",
   :action => 'auth_edit_perm',
   :auth_path => ':edit::reset:'
+
+auth.map "permissions view for :user",
+  :action => 'auth_view_perm',
+  :auth_path => '::'
 
 auth.default_auth('*', false)
 
