@@ -1,3 +1,15 @@
+Sun Aug 06 17:33:55 BST 2006  Tom Gilbert <tom@linuxbrit.co.uk>
+
+  * 0.9.10 released
+	* Changes: Lots of new and updated plugins, including one to poll RSS feeds.
+	A first step towards a better auth system (total revamp due in 0.9.11).
+	Improvements to network and server code which should provide greater
+	stability. A new message queueing mechanism with bitrate throttling. A new
+	logging framework for debugging and tracing the activities of the bot. A
+	new split-db registry system for better performance and transactional
+	usage of bdb for resilience. More integration with Nickserv where
+	available including optional automatic ghost-killing.
+
 Wed Sep 07 20:16:46 BST 2005  Tom Gilbert <tom@linuxbrit.co.uk>
 
   * Fixed quit, broke it last commit
