@@ -363,7 +363,7 @@ class RSSFeedsPlugin < Plugin
     return feed
   end
 
-  def rewatch_rss(m=nil)
+  def rewatch_rss(m=nil, params=nil)
     kill_threads
 
     # Read watches from list.
@@ -580,6 +580,6 @@ plugin.map 'rss unwatch :handle',
   :action => 'unwatch_rss'
 plugin.map 'rss rmwatch :handle',
   :action => 'unwatch_rss'
-plugin.map 'rss rewatch :handle',
+plugin.map 'rss rewatch',
   :action => 'rewatch_rss'
 
