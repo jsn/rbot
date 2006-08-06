@@ -495,7 +495,10 @@ class AuthModule < CoreBotModule
     copying = m.message.split[1] == "copy"
     begin
       if copying
-        h = buser_hash[source].dup 
+        h = {}
+        buser_hash[source].each { |k, val|
+          h[k] = val.dup
+        }
       else
         h = buser_hash[source]
       end
