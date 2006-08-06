@@ -6,10 +6,12 @@
 #     destruction
 #   * <code>user destroy _botuser_ _password_</code> would actually destroy
 #     _botuser_ if it was queued and the _password_ is correct
-#   * user destruction can be done without changing botuser.rb by getting the
-#     save_array for @bot.auth, manipulating it, and reloading it with @bot.auth.load_array
 # * user copy
 # * user rename
+#
+# It should be fairly easy to implement all of this stuff by using
+# @bot.auth.load_array and @bot.auth.save_array: this means it can be tested
+# live and without any need to touch the rbot kernel file +botuser.rb+
 #
 
 
@@ -210,8 +212,10 @@ class AuthModule < CoreBotModule
       return "user create <name> <password> : create botuser named <name> with password <password>. The password can be omitted, in which case a random one will be generated. The <name> should only contain alphanumeric characters and the underscore (_)"
     when /^user list/
       return "user list : lists all the botusers"
+    when /^user destroy/
+      return "user destroy <botuser> <password> : destroys <botuser>; this function #{Bold}must#{Bold} be called in two steps. On the first call, no password must be specified: <botuser> is then queued for destruction. On the second call, you must specify the correct password for <botuser>, and it will be destroyed. If you want to cancel the destruction, issue the command +user cancel destroy <botuser>+"
     when /^user/
-      return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list"
+      return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy"
     else
       return "#{name}: login, whoami, permission syntax, permissions, user"
     end
@@ -426,22 +430,88 @@ class AuthModule < CoreBotModule
   def auth_list_users(m, params)
     # TODO name regexp to filter results
     list = @bot.auth.save_array.inject([]) { |list, x| list << x[:username] } - ['everyone', 'owner']
+    if defined?(@destroy_q)
+      list.map! { |x|
+        @destroy_q.include?(x) ? x + " (queued for destruction)" : x
+      }
+    end
     return m.reply "I have no botusers other than the default ones" if list.empty?
     return m.reply "Botuser#{'s' if list.length > 1}: #{list.join(', ')}"
+  end
+
+  def auth_destroy_user(m, params)
+    @destroy_q = [] unless defined?(@destroy_q)
+    buname = params[:name]
+    returm m.reply "You can't destroy #{buname}" if ["everyone", "owner"].include?(buname)
+    cancel = m.message.split[1] == 'cancel'
+    password = params[:password]
+    buser_array = @bot.auth.save_array
+    buser_hash = buser_array.inject({}) { |h, u|
+      h[u[:username]] = u
+      h
+    }
+
+    return m.reply "No such botuser #{buname}" unless buser_hash.keys.include?(buname)
+
+    if cancel
+      if @destroy_q.include?(buname)
+        @destroy_q.delete(buname)
+        m.reply "#{buname} removed from the destruction queue"
+      else
+        m.reply "#{buname} was not queued for destruction"
+      end
+      return
+    end
+
+    if password.nil?
+      if @destroy_q.include?(buname)
+        rep = "#{buname} already queued for destruction"
+      else
+        @destroy_q << buname
+        rep = "#{buname} queued for destruction"
+      end
+      return m.reply rep + ", use #{Bold}user destroy #{buname} <password>#{Bold} to destroy it"
+    else
+      begin
+        return m.reply "#{buname} is not queued for destruction yet" unless @destroy_q.include?(buname)
+        return m.reply "wrong password for #{buname}" unless buser_hash[buname][:password] == password
+        buser_array.delete_if { |u|
+          u[:username] == buname
+        }
+        @destroy_q.delete(buname)
+        @bot.auth.load_array(buser_array, true)
+      rescue => e
+        return m.reply "failed: #{e}"
+      end
+      return m.reply "user #{buname} destroyed"
+    end
+
   end
 
 end
 
 auth = AuthModule.new
 
-auth.map "user tell :user the password for :botuser",
-  :action => 'auth_tell_password',
-  :auth_path => 'user::tell'
-
 auth.map "user create :name :password",
   :action => 'auth_create_user',
   :defaults => {:password => nil},
-  :auth_path => 'user::create!'
+  :auth_path => 'user::manage::create!'
+
+auth.map "user cancel destroy :name :password",
+  :action => 'auth_destroy_user',
+  :defaults => { :password => nil },
+  :auth_path => 'user::manage::destroy::cancel!'
+
+auth.map "user destroy :name :password",
+  :action => 'auth_destroy_user',
+  :defaults => { :password => nil },
+  :auth_path => 'user::manage::destroy!'
+
+auth.default_auth("user::manage", false)
+
+auth.map "user tell :user the password for :botuser",
+  :action => 'auth_tell_password',
+  :auth_path => 'user::tell'
 
 auth.map "user list",
   :action => 'auth_list_users',
