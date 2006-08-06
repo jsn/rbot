@@ -212,13 +212,13 @@ module Irc
       # Reset the login-by-mask option
       #
       def reset_login_by_mask
-        @login_by_mask = Auth.manager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
+        @login_by_mask = Auth.authmanager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
       end
 
       # Reset the autologin option
       #
       def reset_autologin
-        @autologin = Auth.manager.bot.config['auth.autologin'] unless defined?(@autologin)
+        @autologin = Auth.authmanager.bot.config['auth.autologin'] unless defined?(@autologin)
       end
 
       # Do we allow automatic logging in?
@@ -346,7 +346,9 @@ module Irc
       # and replacing any nonalphanumeric character with _
       #
       def BotUser.sanitize_username(name)
-        return name.to_s.chomp.downcase.gsub(/[^a-z0-9]/,"_")
+        candidate = name.to_s.chomp.downcase.gsub(/[^a-z0-9]/,"_")
+        raise "sanitized botusername #{candidate} too short" if candidate.length < 3
+        return candidate
       end
 
     end
@@ -357,7 +359,7 @@ module Irc
     #
     class DefaultBotUserClass < BotUser
 
-      private :login, :add_netmask, :delete_netmask
+      private :add_netmask, :delete_netmask
 
       include Singleton
 
@@ -475,6 +477,7 @@ module Irc
 
       attr_reader :everyone
       attr_reader :botowner
+      attr_reader :bot
 
       # The instance manages two <code>Hash</code>es: one that maps
       # <code>Irc::User</code>s onto <code>BotUser</code>s, and the other that maps
@@ -555,10 +558,11 @@ module Irc
       def create_botuser(name, password=nil)
         n = BotUser.sanitize_username(name)
         k = n.to_sym
-        raise "BotUser #{n} exists" if include?(k)
+        raise "botuser #{n} exists" if include?(k)
         bu = BotUser.new(n)
         bu.password = password
         @allbotusers[k] = bu
+        return bu
       end
 
       # returns the botuser with name _name_
