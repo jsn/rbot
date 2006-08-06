@@ -572,7 +572,7 @@ class AuthModule < CoreBotModule
 
     has_to = what[-2] == "to"
     if has_to
-      exportfile = what[-1]
+      exportfile = "#{@bot.botclass}/#{what[-1]}"
       what.slice!(-2,2)
     end
 
@@ -624,6 +624,7 @@ class AuthModule < CoreBotModule
 
     m.reply "exporting to #{exportfile} ..."
     begin
+      # m.reply yaml_hash.inspect
       File.open(exportfile, "w") do |file|
         file.puts YAML::dump(yaml_hash)
       end
@@ -632,6 +633,84 @@ class AuthModule < CoreBotModule
       debug e.backtrace.dup.unshift(e.inspect).join("\n")
       return
     end
+    m.reply "done"
+  end
+
+  def auth_import(m, params)
+
+    importfile = "#{@bot.botclass}/new-auth.users"
+
+    what = params[:things]
+
+    has_from = what[-2] == "from"
+    if has_from
+      importfile = "#{@bot.botclass}/#{what[-1]}"
+      what.slice!(-2,2)
+    end
+
+    what.delete("all")
+
+    m.reply "reading #{importfile} ..."
+    begin
+      yaml_hash = YAML::load_file(importfile)
+    rescue => e
+      m.reply "failed to import from: #{e}"
+      debug e.backtrace.dup.unshift(e.inspect).join("\n")
+      return
+    end
+
+    # m.reply yaml_hash.inspect
+
+    m.reply "selecting data to import ..."
+
+    if what.empty?
+      we_want = yaml_hash
+    else
+      we_want = yaml_hash.delete_if { |key, val|
+        not what.include?(key)
+      }
+    end
+
+    m.reply "parsing data from import ..."
+
+    buser_hash = {}
+
+    begin
+      yaml_hash.each { |k, val|
+        buser_hash[k] = { :username => k }
+        val.each { |kk, v|
+          case kk
+          when :netmasks
+            buser_hash[k][kk] = []
+            v.each { |nm|
+              buser_hash[k][kk] << nm[:fullform].to_irc_netmask(:casemap => nm[:casemap].to_irc_casemap).to_irc_netmask(:server => @bot.server)
+            }
+          else
+            buser_hash[k][kk] = v
+          end
+        }
+      }
+    rescue => e
+      m.reply "failed to parse data: #{e}"
+      debug e.backtrace.dup.unshift(e.inspect).join("\n")
+      return
+    end
+
+    # m.reply buser_hash.inspect
+
+    org_buser_array = @bot.auth.save_array
+    org_buser_hash = org_buser_array.inject({}) { |h, u|
+      h[u[:username]] = u
+      h
+    }
+
+    # TODO we may want to do a(n optional) key-by-key merge
+    #
+    org_buser_hash.merge!(buser_hash)
+    new_buser_array = org_buser_hash.values
+    @bot.auth.load_array(new_buser_array, true)
+    @bot.auth.set_changed
+
     m.reply "done"
   end
 
@@ -644,9 +723,9 @@ auth.map "user export *things",
   :defaults => { :things => ['all'] },
   :auth_path => ':manage:fedex:'
 
-# auth.map "user import",
-#  :action => 'auth_import',
-#  :auth_path => ':manage:fedex:'
+auth.map "user import *things",
+ :action => 'auth_import',
+ :auth_path => ':manage:fedex:'
 
 auth.map "user create :name :password",
   :action => 'auth_create_user',
