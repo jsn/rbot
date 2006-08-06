@@ -54,9 +54,9 @@ class AuthModule < CoreBotModule
           next
         end
         if "+-".include?(x[0])
-          warns << ArgumentError("please do not use + or - in front of command #{x} when resetting") unless setting
+          warns << ArgumentError.new("please do not use + or - in front of command #{x} when resetting") unless setting
         else
-          warns << ArgumentError("+ or - expected in front of #{x}") if setting
+          warns << ArgumentError.new("+ or - expected in front of #{x}") if setting
         end
         cmds << x
       else # parse locations
@@ -78,24 +78,35 @@ class AuthModule < CoreBotModule
         end
       end
     }
-    warns << "trailing comma" if wants_more
+    warns << "trailing comma" if want_more
     warns << "you probably forgot a comma" unless last_idx == ar.length - 1
     return cmds, locs, warns
   end
 
-  def auth_set(m, params)
-    cmds, locs, warns = parse_args(params[:args])
+  def auth_edit_perm(m, params)
+
+    setting = m.message.split[1] == "set"
+    splits = params[:args]
+
+    has_for = splits[-2] == "for"
+    return usage unless has_for
+
+    begin
+      user = @bot.auth.get_botuser(splits[-1].sub(/^all$/,"everyone"))
+    rescue
+      return m.reply("couldn't find botuser #{user}")
+    end
+    return m.reply("you can't change permissions for #{user.username}") if user == @bot.auth.botowner
+    splits.slice!(-2,2) if has_for
+
+    cmds, locs, warns = parse_args(splits, setting)
     errs = warns.select { |w| w.kind_of?(Exception) }
+
     unless errs.empty?
       m.reply "couldn't satisfy your request: #{errs.join(',')}"
       return
     end
-    user = params[:user].sub(/^all$/,"everyone")
-    begin
-      bu = @bot.auth.get_botuser(user)
-    rescue
-      return m.reply("couldn't find botuser #{user}")
-    end
+
     if locs.empty?
       locs << "*"
     end
@@ -108,9 +119,14 @@ class AuthModule < CoreBotModule
           ch = m.target.to_s if loc == "_"
         end
         cmds.each { |setval|
-          val = setval[0].chr == '+'
-          cmd = setval[1..-1]
-          bu.set_permission(cmd, val, ch)
+          if setting
+            val = setval[0].chr == '+'
+            cmd = setval[1..-1]
+            user.set_permission(cmd, val, ch)
+          else
+            cmd = setval
+            user.reset_permission(cmd, ch)
+          end
         }
       }
     rescue => e
@@ -119,7 +135,10 @@ class AuthModule < CoreBotModule
     end
     @bot.auth.set_changed
     debug "user #{user} permissions changed"
-    m.reply "ok, #{user} now also has permissions #{params[:args].join(' ')}"
+    m.okay
+  end
+
+  def auth_view_perm(m, params)
   end
 
   def get_botuser_for(user)
@@ -250,6 +269,7 @@ class AuthModule < CoreBotModule
     can_set = [:password]
     can_addrm = [:netmasks]
     can_reset = bools + can_set + can_addrm
+    can_show = can_reset + ["perms"]
 
     case cmd.to_sym
 
@@ -656,12 +676,12 @@ auth.map "login",
   :action => 'auth_autologin',
   :auth_path => '!login!'
 
-auth.map "permissions set *args for :user",
-  :action => 'auth_set',
+auth.map "permissions set *args",
+  :action => 'auth_edit_perm',
   :auth_path => ':edit::set:'
 
-auth.map "permissions reset *args for :user",
-  :action => 'auth_reset',
+auth.map "permissions reset *args",
+  :action => 'auth_edit_perm',
   :auth_path => ':edit::reset:'
 
 auth.default_auth('*', false)
