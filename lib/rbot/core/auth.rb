@@ -1,18 +1,5 @@
 #-- vim:sw=2:et
 #++
-# TODO:
-# * user destroy: should work in two phases:
-#   * <code>user destroy _botuser_</code> would queue _botuser_ for
-#     destruction
-#   * <code>user destroy _botuser_ _password_</code> would actually destroy
-#     _botuser_ if it was queued and the _password_ is correct
-# * user copy
-# * user rename
-#
-# It should be fairly easy to implement all of this stuff by using
-# @bot.auth.load_array and @bot.auth.save_array: this means it can be tested
-# live and without any need to touch the rbot kernel file +botuser.rb+
-#
 
 
 class AuthModule < CoreBotModule
@@ -20,7 +7,7 @@ class AuthModule < CoreBotModule
   def initialize
     super
     load_array(:default, true)
-    debug "Initialized auth. Botusers: #{@bot.auth.save_array.inspect}"
+    debug "initialized auth. Botusers: #{@bot.auth.save_array.inspect}"
   end
 
   def save
@@ -107,7 +94,7 @@ class AuthModule < CoreBotModule
     begin
       bu = @bot.auth.get_botuser(user)
     rescue
-      return m.reply "couldn't find botuser #{user}"
+      return m.reply("couldn't find botuser #{user}")
     end
     if locs.empty?
       locs << "*"
@@ -127,12 +114,12 @@ class AuthModule < CoreBotModule
         }
       }
     rescue => e
-      m.reply "Something went wrong while trying to set the permissions"
+      m.reply "something went wrong while trying to set the permissions"
       raise
     end
     @bot.auth.set_changed
-    debug "User #{user} permissions changed"
-    m.reply "Ok, #{user} now also has permissions #{params[:args].join(' ')}"
+    debug "user #{user} permissions changed"
+    m.reply "ok, #{user} now also has permissions #{params[:args].join(' ')}"
   end
 
   def get_botuser_for(user)
@@ -189,11 +176,11 @@ class AuthModule < CoreBotModule
   def help(plugin, topic="")
     case topic
     when /^login/
-      return "login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with password <pass>. <pass> can be omitted if <botuser> allows login-by-mask and your netmask is among the known ones. if <botuser> is omitted too autologin will be attempted"
+      return "login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with password <pass>. When using the full form, you must contact the bot in private. <pass> can be omitted if <botuser> allows login-by-mask and your netmask is among the known ones. if <botuser> is omitted too autologin will be attempted"
     when /^whoami/
       return "whoami: names the botuser you're linked to"
     when /^permission syntax/
-      return "A permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
+      return "a permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
     when /^permission/
       return "permissions (re)set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
     when /^user show/
@@ -256,7 +243,7 @@ class AuthModule < CoreBotModule
 
     has_for = splits[-2] == "for"
     butarget = @bot.auth.get_botuser(splits[-1]) if has_for
-    return m.reply "you can't mess with #{butarget.username}" if butarget == @bot.auth.botowner && botuser != butarget
+    return m.reply("you can't mess with #{butarget.username}") if butarget == @bot.auth.botowner && botuser != butarget
     splits.slice!(-2,2) if has_for
 
     bools = [:autologin, :"login-by-mask"]
@@ -274,11 +261,11 @@ class AuthModule < CoreBotModule
         props = can_reset
       when "password"
         if botuser != butarget
-          return m.reply "no way I'm telling you the master password!" if butarget == @bot.auth.botowner
-          return m.reply "you can't ask for someone else's password"
+          return m.reply("no way I'm telling you the master password!") if butarget == @bot.auth.botowner
+          return m.reply("you can't ask for someone else's password")
         end
-        return m.reply "c'mon, you can't be asking me seriously to tell you the password in public!" if m.public?
-        return m.reply "the password for #{butarget.username} is #{butarget.password}"
+        return m.reply("c'mon, you can't be asking me seriously to tell you the password in public!") if m.public?
+        return m.reply("the password for #{butarget.username} is #{butarget.password}")
       else
         props = splits[1..-1]
       end
@@ -302,13 +289,13 @@ class AuthModule < CoreBotModule
           end
         end
       }
-      return m.reply "#{butarget.username} #{str.join('; ')}"
+      return m.reply("#{butarget.username} #{str.join('; ')}")
 
     when :enable, :disable
-      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::other::default")
-      return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
+      return m.reply("you can't change the default user") if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::other::default")
+      return m.reply("you can't edit #{butarget.username}") if butarget != botuser and !botuser.permit?("auth::edit::other")
 
-      return m.reply need_args(cmd) unless splits[1]
+      return m.reply(need_args(cmd)) unless splits[1]
       things = []
       skipped = []
       splits[1..-1].each { |a|
@@ -330,26 +317,26 @@ class AuthModule < CoreBotModule
       end
 
     when :set
-      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
-      return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
+      return m.reply("you can't change the default user") if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
+      return m.reply("you can't edit #{butarget.username}") if butarget != botuser and !botuser.permit?("auth::edit::other")
 
-      return m.reply need_args(cmd) unless splits[1]
+      return m.reply(need_args(cmd)) unless splits[1]
       arg = splits[1].to_sym
-      return m.reply not_args(cmd, *can_set) unless can_set.include?(arg)
+      return m.reply(not_args(cmd, *can_set)) unless can_set.include?(arg)
       argarg = splits[2]
-      return m.reply need_args([cmd, splits[1]].join(" ")) unless argarg
+      return m.reply(need_args([cmd, splits[1]].join(" "))) unless argarg
       if arg == :password && m.public?
-        return m.reply "is that a joke? setting the password in public?"
+        return m.reply("is that a joke? setting the password in public?")
       end
       set_prop(butarget, arg, argarg)
       @bot.auth.set_changed
       auth_manage_user(m, {:data => ["show", arg] })
 
     when :reset
-      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
-      return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
+      return m.reply("you can't change the default user") if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
+      return m.reply("you can't edit #{butarget.username}") if butarget != botuser and !botuser.permit?("auth::edit::other")
 
-      return m.reply need_args(cmd) unless splits[1]
+      return m.reply(need_args(cmd)) unless splits[1]
       things = []
       skipped = []
       splits[1..-1].each { |a|
@@ -372,12 +359,12 @@ class AuthModule < CoreBotModule
       end
 
     when :add, :rm, :remove, :del, :delete
-      return m.reply "you can't change the default user" if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
-      return m.reply "you can't edit #{butarget.username}" if butarget != botuser and !botuser.permit?("auth::edit::other")
+      return m.reply("you can't change the default user") if butarget == @bot.auth.everyone and !botuser.permit?("auth::edit::default")
+      return m.reply("you can't edit #{butarget.username}") if butarget != botuser and !botuser.permit?("auth::edit::other")
 
       arg = splits[1]
       if arg.nil? or arg !~ /netmasks?/ or splits[2].nil?
-        return m.reply "I can only add/remove netmasks. See +help user add+ for more instructions"
+        return m.reply("I can only add/remove netmasks. See +help user add+ for more instructions")
       end
 
       method = cmd.to_sym == :add ? :add_netmask : :delete_netmask
@@ -405,7 +392,7 @@ class AuthModule < CoreBotModule
     begin
       botuser = @bot.auth.get_botuser(params[:botuser])
     rescue
-      return m.reply "coudln't find botuser #{params[:botuser]})"
+      return m.reply("coudln't find botuser #{params[:botuser]})")
     end
     m.reply "I'm not telling the master password to anyway, pal" if botuser == @bot.auth.botowner
     msg = "the password for botuser #{botuser.username} is #{botuser.password}"
@@ -416,15 +403,16 @@ class AuthModule < CoreBotModule
   def auth_create_user(m, params)
     name = params[:name]
     password = params[:password]
-    return m.reply "are you nuts, creating a botuser with a publicly known password?" if m.public? and not password.nil?
+    return m.reply("are you nuts, creating a botuser with a publicly known password?") if m.public? and not password.nil?
     begin
       bu = @bot.auth.create_botuser(name, password)
       @bot.auth.set_changed
     rescue => e
-      return m.reply "Failed to create #{name}: #{e}"
+      m.reply "failed to create #{name}: #{e}"
       debug e.inspect + "\n" + e.backtrace.join("\n")
+      return
     end
-    m.reply "Created botuser #{bu.username}"
+    m.reply "created botuser #{bu.username}"
   end
 
   def auth_list_users(m, params)
@@ -435,23 +423,24 @@ class AuthModule < CoreBotModule
         @destroy_q.include?(x) ? x + " (queued for destruction)" : x
       }
     end
-    return m.reply "I have no botusers other than the default ones" if list.empty?
-    return m.reply "Botuser#{'s' if list.length > 1}: #{list.join(', ')}"
+    return m.reply("I have no botusers other than the default ones") if list.empty?
+    return m.reply("botuser#{'s' if list.length > 1}: #{list.join(', ')}")
   end
 
   def auth_destroy_user(m, params)
     @destroy_q = [] unless defined?(@destroy_q)
     buname = params[:name]
-    returm m.reply "You can't destroy #{buname}" if ["everyone", "owner"].include?(buname)
+    return m.reply("You can't destroy #{buname}") if ["everyone", "owner"].include?(buname)
     cancel = m.message.split[1] == 'cancel'
     password = params[:password]
+
     buser_array = @bot.auth.save_array
     buser_hash = buser_array.inject({}) { |h, u|
       h[u[:username]] = u
       h
     }
 
-    return m.reply "No such botuser #{buname}" unless buser_hash.keys.include?(buname)
+    return m.reply("no such botuser #{buname}") unless buser_hash.keys.include?(buname)
 
     if cancel
       if @destroy_q.include?(buname)
@@ -470,21 +459,56 @@ class AuthModule < CoreBotModule
         @destroy_q << buname
         rep = "#{buname} queued for destruction"
       end
-      return m.reply rep + ", use #{Bold}user destroy #{buname} <password>#{Bold} to destroy it"
+      return m.reply(rep + ", use #{Bold}user destroy #{buname} <password>#{Bold} to destroy it")
     else
       begin
-        return m.reply "#{buname} is not queued for destruction yet" unless @destroy_q.include?(buname)
-        return m.reply "wrong password for #{buname}" unless buser_hash[buname][:password] == password
+        return m.reply("#{buname} is not queued for destruction yet") unless @destroy_q.include?(buname)
+        return m.reply("wrong password for #{buname}") unless buser_hash[buname][:password] == password
         buser_array.delete_if { |u|
           u[:username] == buname
         }
         @destroy_q.delete(buname)
         @bot.auth.load_array(buser_array, true)
+        @bot.auth.set_changed
       rescue => e
-        return m.reply "failed: #{e}"
+        return m.reply("failed: #{e}")
       end
-      return m.reply "user #{buname} destroyed"
+      return m.reply("botuser #{buname} destroyed")
     end
+
+  end
+
+  def auth_copy_ren_user(m, params)
+    source = Auth::BotUser.sanitize_username(params[:source])
+    dest = Auth::BotUser.sanitize_username(params[:dest])
+    return m.reply("please don't touch the default users") if (["everyone", "owner"] | [source, dest]).length < 4
+
+    buser_array = @bot.auth.save_array
+    buser_hash = buser_array.inject({}) { |h, u|
+      h[u[:username]] = u
+      h
+    }
+
+    return m.reply("no such botuser #{source}") unless buser_hash.keys.include?(source)
+    return m.reply("botuser #{dest} exists already") if buser_hash.keys.include?(dest)
+
+    copying = m.message.split[1] == "copy"
+    begin
+      if copying
+        h = buser_hash[source].dup 
+      else
+        h = buser_hash[source]
+      end
+      h[:username] = dest
+      buser_array << h if copying
+
+      @bot.auth.load_array(buser_array, true)
+      @bot.auth.set_changed
+    rescue => e
+      return m.reply("failed: #{e}")
+    end
+    return m.reply("botuser #{source} copied to #{dest}") if copying
+    return m.reply("botuser #{source} renamed to #{dest}")
 
   end
 
@@ -506,6 +530,14 @@ auth.map "user destroy :name :password",
   :action => 'auth_destroy_user',
   :defaults => { :password => nil },
   :auth_path => 'user::manage::destroy!'
+
+auth.map "user copy :source :dest",
+  :action => 'auth_copy_ren_user',
+  :auth_path => 'user::manage::copy!'
+
+auth.map "user rename :source :dest",
+  :action => 'auth_copy_ren_user',
+  :auth_path => 'user::manage::rename!'
 
 auth.default_auth("user::manage", false)
 
