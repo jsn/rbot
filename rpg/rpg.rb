@@ -10,11 +10,13 @@ load '/home/eean/.rbot/plugins/rpg_creatures.rb'
 
 class Map
 
-  attr_accessor :map
+  attr_accessor :map, :legend
 
   def initialize
+    @legend = { 'O' => Orc, 'S' => Slime }
+
     # Maps are 16x16 
-    # X = player spawn, O = Orc, S = Slime 
+    # X = player spawn 
     str = <<-END
 ----------------
 | S |          |
@@ -53,20 +55,56 @@ end
 
 class Game
 
-  attr_accessor :channel, :players, :map, :party_pos
-  Party_Pos = Struct.new( :x, :y )
+  attr_accessor :channel, :objects, :map, :party_pos
 
   def initialize( channel, bot )
     @channel = channel
     @bot = bot
-    @players = Hash.new
+    @objects = Hash.new
+    @party_pos = Position.new
 
     @map = Map.new
     x, y = 0, 0
     m = @map.map
-    m.length.times { |y| x = m[y].index( 'X' ); break if x != nil } 
-    @party_pos = Party_Pos.new( x, y )
 
+    # Read the map and spawn objects
+    m.length.times { |y|
+      m[y].length.times { |x| 
+        c = @map.at( x, y )
+        case c
+        when ' ', '-', '|'
+          next
+        when 'X'
+          @party_pos.x, @party_pos.y = x, y
+          next
+        else
+          o = spawn( @map.legend[c] )
+          o.pos.x, o.pos.y = x, y
+        end  
+      }
+    }
+
+  end
+
+
+  def set_players_pos( x, y )
+    @objects.each { |c| c.pos.x, c.pos.y = x, y if c.instance_of?( Player ) }
+  end
+     
+
+  def spawn( klass, name = nil )
+    o = klass.new
+    if name
+      o.name = name
+    else
+      # Make sure we have unique names for all objects: orc1, orc2.. 
+      a = [0]
+      objects.each_value { |x| a << x.name[-1,1].to_i if x.name.include? o.name }
+      o.name += ( a.sort.last + 1).to_s
+    end
+
+    objects[o.name] = o
+    o
   end
 
 
@@ -109,15 +147,15 @@ class RpgPlugin < Plugin
 
   def schedule( g )
     # Check for death:
-    g.players.each_value do |p|
+    g.objects.each_value do |p|
       if p.hp < 0
         g.say( "#{p.name} dies from his injuries." )
-        g.players.delete( p.name )        
+        g.objects.delete( p.name )        
       end  
     end
 
     # Let monsters act:
-    g.players.each_value do |p|
+    g.objects.each_value do |p|
       if p.is_a?( Monster )
         p.act( g )
       end
@@ -126,7 +164,7 @@ class RpgPlugin < Plugin
 
 
   def spawned?( g, nick )
-    if g.players.has_key?( nick )
+    if g.objects.has_key?( nick )
       return true
     else
       g.say( "You have not joined the game. Use 'spawn player' to join." )
@@ -136,13 +174,14 @@ class RpgPlugin < Plugin
 
 
   def target_spawned?( g, target )
-    if g.players.has_key?( target )
+    if g.objects.has_key?( target )
       return true
     else  
       g.say( "There is noone named #{target} near.." )
       return false
     end
   end
+
 
 #####################################################################
 # Command Handlers
@@ -151,24 +190,18 @@ class RpgPlugin < Plugin
   def handle_spawn_player( m, params )
     g = get_game( m )
 
-    p = Player.new  
-    p.name = m.sourcenick
-    g.players[p.name] = p
-    m.reply "Player #{p.name} enters the game."
+    o = g.spawn( Player, m.sourcenick )
+    o.pos = g.party_pos.dup
+    m.reply "Player #{o.name} enters the game."
   end
 
 
   def handle_spawn_monster( m, params )
     g = get_game( m )
-    p = Monster.monsters[rand( Monster.monsters.length )].new  
 
-    # Make sure we don't have multiple monsters with same name (FIXME)
-    a = [0]
-    g.players.each_value { |x| a << x.name[-1,1].to_i if x.name.include? p.name }
-    p.name += ( a.sort.last + 1).to_s
-
-    g.players[p.name] = p
-    m.reply "A #{p.player_type} enters the game. ('#{p.name}')"
+    o = g.spawn( Monster.monsters[rand( Monster.monsters.length )] ) 
+    o.pos = g.party_pos.dup
+    m.reply "A #{o.object_type} enters the game. ('#{o.name}')"
   end
 
 
@@ -177,7 +210,7 @@ class RpgPlugin < Plugin
     return unless spawned?( g, m.sourcenick )
     return unless target_spawned?( g, params[:target] )
  
-    g.players[m.sourcenick].attack( g, g.players[params[:target]] )
+    g.objects[m.sourcenick].attack( g, g.objects[params[:target]] )
     schedule( g )
   end
 
@@ -186,20 +219,22 @@ class RpgPlugin < Plugin
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
 
+    p = g.objects[m.sourcenick]
+    x, y = p.pos.x, p.pos.y
+    objects_near = []
+    g.objects.each_value { |o| debug( o.pos ); objects_near << o if o.pos == p.pos and o != p }
+
     if params[:object] == nil
-      if g.players.length == 1
+      if objects_near.empty?
         m.reply( "#{m.sourcenick}: You are alone." )
       else
-        objects = []
-        g.players.each_value { |x| objects << x.name unless x.name == m.sourcenick }
-        m.reply( "#{m.sourcenick}: You see the following objects: #{objects.join( ', ' )}." )
+        names = []
+        objects_near.each { |o| names << o.name }
+        m.reply( "#{m.sourcenick}: You see the following objects: #{names.join( ', ' )}." )
       end
 
       debug "MAP_LENGTH:  #{g.map.map.length}"
       debug "PARTY_POS:   x:#{g.party_pos.x}  y:#{g.party_pos.y}"
-
-      x, y = g.party_pos.x, g.party_pos.y
-
       debug "MAP NORTH: #{g.map.at( x, y-1 )}"
 
       north = g.map.wall?( x, y-1 ) ? "a wall" : "open space"
@@ -210,7 +245,7 @@ class RpgPlugin < Plugin
       m.reply( "In the north is #{north}, east is #{east}, south is #{south}, and in the west you see #{west}." )
     else
       p = nil
-      g.players.each_value { |x| p = x if x.name == params[:object] }
+      g.objects.each_value { |o| p = o if o.name == params[:object] }
       if p == nil
         m.reply( "#{m.sourcenick}: There is no #{params[:object]} here." )
       else
@@ -261,12 +296,16 @@ class RpgPlugin < Plugin
         return
     end    
 
-    case g.map.at( g.party_pos.x, g.party_pos.y )
-      when "O"
-        m.reply "You encounter an Orc!"
-      when "S"
-        m.reply "You encounter a Slime!"
-    end    
+    x, y = g.party_pos.x, g.party_pos.y
+    g.set_players_pos( x, y )
+
+    p = g.objects[m.sourcenick]
+    objects_near = []
+    g.objects.each_value { |o| objects_near << o if o.pos == p.pos and o != p }
+
+    unless objects_near.empty?
+      m.reply "You encounter a #{o.object_type}!"
+    end
   end
 
 
@@ -276,7 +315,7 @@ class RpgPlugin < Plugin
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
 
-    p = g.players[m.sourcenick]
+    p = g.objects[m.sourcenick]
     m.reply( "Stats for #{m.sourcenick}: HP:#{p.hp}  XP:#{p.xp}  THAC0:#{p.thac0}  AC:#{p.ac}  HD:#{p.hd}" )
    
     rescue => e

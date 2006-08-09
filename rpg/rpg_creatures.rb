@@ -1,7 +1,19 @@
 
-class Creature
+Position = Struct.new( :x, :y )
 
-  attr_accessor :name, :player_type, :hp, :thac0, :hd, :ac, :description
+class GameObject
+  
+  attr_accessor :pos
+
+  def initialize
+    @pos = Position.new( nil, nil )
+  end
+end
+
+
+class Creature < GameObject
+
+  attr_accessor :name, :object_type, :hp, :thac0, :hd, :ac, :description
 
   def d4( num = 1 )
     result = 0
@@ -42,8 +54,10 @@ class Player < Creature
   attr_accessor :xp
 
   def initialize
+    super
+
     @name = ""
-    @player_type = "Human"
+    @object_type = "Human"
     @hp = 20
     @xp = 0
     @thac0 = 19 
@@ -60,12 +74,6 @@ class Monster < Creature
 
   attr_accessor :xp_value
   @@monsters = [] 
- 
-  def initialize
-    super
-
-  end
-
 
   def Monster.monsters
     @@monsters
@@ -96,7 +104,7 @@ class Orc < Monster
     super
 
     @name = "orc"
-    @player_type = "Orc"
+    @object_type = "Orc"
     @hp = 14
     @thac0 = 19
     @ac = 6
@@ -117,7 +125,7 @@ class Slime < Monster
     super
 
     @name = "slime"
-    @player_type = "Slime"
+    @object_type = "Slime"
     @hp = 8
     @thac0 = 19
     @ac = 5
