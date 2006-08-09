@@ -88,7 +88,8 @@ class Game
 
 
   def set_players_pos( x, y )
-    @objects.each { |c| c.pos.x, c.pos.y = x, y if c.instance_of?( Player ) }
+    debug( "set_players_pos(): #{x}  #{y}" )
+    @objects.each_value { |c| c.pos.x, c.pos.y = x, y if c.instance_of?( Player ) }
   end
      
 
@@ -235,6 +236,7 @@ class RpgPlugin < Plugin
 
       debug "MAP_LENGTH:  #{g.map.map.length}"
       debug "PARTY_POS:   x:#{g.party_pos.x}  y:#{g.party_pos.y}"
+      debug "PLAYER_POS:  x:#{x}  y:#{y}"
       debug "MAP NORTH: #{g.map.at( x, y-1 )}"
 
       north = g.map.wall?( x, y-1 ) ? "a wall" : "open space"
@@ -304,7 +306,7 @@ class RpgPlugin < Plugin
     g.objects.each_value { |o| objects_near << o if o.pos == p.pos and o != p }
 
     unless objects_near.empty?
-      m.reply "You encounter a #{o.object_type}!"
+      m.reply "You encounter a #{o.first.object_type}!"
     end
   end
 
