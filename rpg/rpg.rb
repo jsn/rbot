@@ -192,7 +192,7 @@ class RpgPlugin < Plugin
     g = get_game( m )
 
     o = g.spawn( Player, m.sourcenick )
-    o.pos = g.party_pos.dup
+    o.pos.x, o.pos.y = g.party_pos.x, g.party_pos.y
     m.reply "Player #{o.name} enters the game."
   end
 
@@ -201,7 +201,7 @@ class RpgPlugin < Plugin
     g = get_game( m )
 
     o = g.spawn( Monster.monsters[rand( Monster.monsters.length )] ) 
-    o.pos = g.party_pos.dup
+    o.pos.x, o.pos.y = g.party_pos.x, g.party_pos.y
     m.reply "A #{o.object_type} enters the game. ('#{o.name}')"
   end
 
@@ -223,7 +223,7 @@ class RpgPlugin < Plugin
     p = g.objects[m.sourcenick]
     x, y = p.pos.x, p.pos.y
     objects_near = []
-    g.objects.each_value { |o| debug( o.pos ); objects_near << o if o.pos == p.pos and o != p }
+    g.objects.each_value { |o| debug( o.pos ); objects_near << o if (o.pos == p.pos and o != p) }
 
     if params[:object] == nil
       if objects_near.empty?
@@ -306,7 +306,7 @@ class RpgPlugin < Plugin
     g.objects.each_value { |o| objects_near << o if o.pos == p.pos and o != p }
 
     unless objects_near.empty?
-      m.reply "You encounter a #{o.first.object_type}!"
+      m.reply "You encounter a #{objects_near.first.object_type}!"
     end
   end
 
