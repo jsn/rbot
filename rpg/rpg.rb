@@ -350,6 +350,7 @@ class RpgPlugin < Plugin
 
     t.pos.x, t.pos.y = nil, nil
     p.inventory << t
+    m.reply "#{m.sourcenick} picks up a #{t.object_type}."
   end
 
 
