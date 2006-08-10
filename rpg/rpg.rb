@@ -168,7 +168,7 @@ class RpgPlugin < Plugin
     if g.objects.has_key?( nick )
       return true
     else
-      g.say( "You have not joined the game. Use 'spawn player' to join." )
+      g.say( "You have not joined the game. Use 'rpg' to join." )
       return false  
     end
   end
