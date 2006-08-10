@@ -13,7 +13,13 @@ end
 
 class Creature < GameObject
 
-  attr_accessor :name, :object_type, :hp, :thac0, :hd, :ac, :description
+  attr_accessor :name, :object_type, :state, :hp, :thac0, :hd, :ac, :xp_value, :description
+
+  def initialize
+    super
+
+    @state = "idle"
+  end
 
   def d4( num = 1 )
     result = 0
@@ -30,7 +36,8 @@ class Creature < GameObject
 
  
   def attack( g, target ) 
-    begin
+    @state = "fighting"
+    target.state = "fighting"
 
     if d20 < @thac0 - target.ac
       g.say( "#{name} misses." )
@@ -39,11 +46,8 @@ class Creature < GameObject
 
     damage = d4( @hd )
     target.hp -= damage
-    g.say( "#{@name} attacks #{target.name}. Hit! (#{damage} damage)."  )
 
-    rescue => e
-    g.say e.inspect
-    end
+    g.say( "#{@name} attacks #{target.name}. Hit! (#{damage} damage)."  )
   end
 
 end
@@ -60,11 +64,21 @@ class Player < Creature
     @object_type = "Human"
     @hp = 20
     @xp = 0
-    @thac0 = 19 
+    @thac0 = 15 
     @hd = 2 
     @ac = 4
 
     @description = "A typical human geek."
+  end
+
+
+  def attack( g, target )
+    super
+
+    if target.hp < 0
+      @xp += target.xp_value
+      g.say( "#{@name} gains #{target.xp_value} experience points!" ) 
+    end
   end
 
 end
@@ -72,7 +86,6 @@ end
 
 class Monster < Creature
 
-  attr_accessor :xp_value
   @@monsters = [] 
 
   def Monster.monsters
@@ -86,10 +99,15 @@ class Monster < Creature
 
 
   def act( g )
-    g.players.each_value do |p| 
-      if p.instance_of?( Player )
-        attack( g, p )
-      end  
+    case @state
+    when "idle"
+      return
+    when "fighting"
+      g.objects.each_value do |o| 
+        if o.instance_of?( Player ) and o.pos = @pos
+          attack( g, o )
+        end  
+      end
     end
   end
 
