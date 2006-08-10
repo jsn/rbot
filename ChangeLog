@@ -1,3 +1,7 @@
+2006-08-11  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* AutoOp plugin: adapted to the new IRC framework.
+
 2006-08-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Fix a bug in new IRC Framework: the list of channels a quitting user was

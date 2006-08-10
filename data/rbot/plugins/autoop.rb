@@ -6,9 +6,9 @@ class AutoOP < Plugin
     def join(m)
       return if m.address?
       @registry.each { |mask,channels|
-        if(Irc.netmaskmatch(mask, m.source) &&
-            (channels.empty? || channels.include?(m.channel)))
-          @bot.mode(m.channel, "+o", m.sourcenick)
+        if m.source.matches?(mask.to_irc_netmask(:server => m.server)) &&
+            (channels.empty? || channels.include?(m.channel.to_s))
+          @bot.mode(m.channel, "+o", m.source.nick)
           return
         end
       }
