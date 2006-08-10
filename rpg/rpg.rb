@@ -13,7 +13,7 @@ class Map
   attr_accessor :map, :legend
 
   def initialize
-    @legend = { 'O' => Orc, 'S' => Slime }
+    @legend = { 'O' => Orc, 'S' => Slime, 's' => Sword }
 
     # Maps are 16x16 
     # X = player spawn 
@@ -30,7 +30,7 @@ class Map
 |   |S|  |  |--|
 |   | |  |     |
 |---| |  |     |
-|X   O|  |     |
+|X s O|  |     |
 |------  |     |
 |        |     |
 ----------------
@@ -126,7 +126,7 @@ class RpgPlugin < Plugin
 
 
   def help( plugin, topic="" )
-    "IRC RPG. Commands: 'spawn player', 'spawn monster', 'attack <target>', 'look [object]', 'stats', 'go <north|n|east|e|south|s|west|w>'."
+    "IRC RPG. Commands: 'rpg', 'attack <target>', 'look [object]', 'take <object>', 'inventory', 'stats', 'go <north|n|east|e|south|s|west|w>'."
   end
 
 #####################################################################
@@ -188,7 +188,7 @@ class RpgPlugin < Plugin
 # Command Handlers
 #####################################################################
 
-  def handle_spawn_player( m, params )
+  def handle_rpg( m, params )
     g = get_game( m )
 
     o = g.spawn( Player, m.sourcenick )
@@ -314,23 +314,58 @@ class RpgPlugin < Plugin
     g.objects.each_value { |o| objects_near << o if o.pos == p.pos and o != p }
 
     unless objects_near.empty?
-      m.reply "You encounter a #{objects_near.first.object_type}!"
+      objects_near.each do |o|
+        m.reply "You encounter a #{o.object_type}! ('#{o.name}')"
+      end
     end
   end
 
 
   def handle_stats( m, params )
-    begin
-
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
 
     p = g.objects[m.sourcenick]
     m.reply( "Stats for #{m.sourcenick}: HP:#{p.hp}  XP:#{p.xp}  THAC0:#{p.thac0}  AC:#{p.ac}  HD:#{p.hd}" )
-   
-    rescue => e
-    m.reply e.inspect
+  end
+
+
+  def handle_take( m, params )
+    g = get_game( m )
+    return unless spawned?( g, m.sourcenick )
+    
+    p = g.objects[m.sourcenick]
+    t = nil
+    g.objects.each_value { |o| t = o if o.name == params[:object] and o.pos == p.pos }
+
+    if t == nil
+      m.reply "#{m.sourcenick}: There is no #{params[:object]} here."
+      return
     end
+
+    if t.kind_of?( Creature )
+      m.reply "#{m.sourcenick}: Feeling lonely, eh? You can't take persons."
+      return
+    end
+
+    t.pos.x, t.pos.y = nil, nil
+    p.inventory << t
+  end
+
+
+  def handle_inventory( m, params )
+    g = get_game( m )
+    return unless spawned?( g, m.sourcenick )
+    p = g.objects[m.sourcenick]
+
+    if p.inventory.empty?
+      m.reply "#{m.sourcenick}: You don't carry any objects."
+      return
+    end
+
+    names = []
+    p.inventory.each { |i| names << i.name } 
+    m.reply "#{m.sourcenick}: You carry: #{names.join(' ')}"
   end
 
 end
@@ -339,11 +374,12 @@ end
 plugin = RpgPlugin.new
 plugin.register( "rpg" )
 
-plugin.map 'spawn player',   :action => 'handle_spawn_player'
+plugin.map 'rpg',            :action => 'handle_rpg'
 plugin.map 'spawn monster',  :action => 'handle_spawn_monster' 
 plugin.map 'attack :target', :action => 'handle_attack' 
 plugin.map 'look :object',   :action => 'handle_look',         :defaults => { :object => nil }
 plugin.map 'go :direction',  :action => 'handle_go' 
+plugin.map 'take :object',   :action => 'handle_take'
 plugin.map 'stats',          :action => 'handle_stats'
-
+plugin.map 'inventory',      :action => 'handle_inventory'
 

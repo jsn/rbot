@@ -3,22 +3,26 @@ Position = Struct.new( :x, :y )
 
 class GameObject
   
-  attr_accessor :pos
+  attr_accessor :pos, :name, :object_type
 
   def initialize
     @pos = Position.new( nil, nil )
+    @name = ""
+    @object_type = ""
   end
 end
 
 
 class Creature < GameObject
 
-  attr_accessor :name, :object_type, :state, :hp, :thac0, :hd, :ac, :xp_value, :description
+  attr_accessor :state, :hp, :thac0, :hd, :ac, :xp_value, :inventory,
+                :description
 
   def initialize
     super
 
     @state = "idle"
+    @inventory = []
   end
 
   def d4( num = 1 )
@@ -60,7 +64,6 @@ class Player < Creature
   def initialize
     super
 
-    @name = ""
     @object_type = "Human"
     @hp = 20
     @xp = 0
@@ -155,4 +158,20 @@ class Slime < Monster
 
 end
 
+
+class Weapon < GameObject
+end
+
+
+class Sword < Weapon
+
+  def initialize
+    super
+
+    @name = "sword"
+    @object_type = "Sword"
+    @description = "A metal sword"
+  end
+
+end
 
