@@ -1140,6 +1140,7 @@ module Irc
         data[:message] = argv[0]
         data[:was_on] = @server.channels.inject(ChannelList.new) { |list, ch|
           list << ch if ch.users.include?(data[:source])
+	  list
         }
 
         @server.delete_user(data[:source])
