@@ -1,8 +1,10 @@
 2006-08-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
-	* Bug in new IRC framework: the list of channels a quitting user was
+	* Fix a bug in new IRC Framework: the list of channels a quitting user was
 	on was not built correctly, causing an exception when the user was not
 	in the first channel in the list of channels.
+	* Fix a bug in new Auth Framework: BotUser's name is changed via
+	username=, not name=
 
 2006-08-07  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
