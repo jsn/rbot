@@ -14,6 +14,24 @@ class AutoOP < Plugin
       }
     end
 
+    def nick(m)
+      return if m.address?
+      is_on = m.server.channels.inject(ChannelList.new) { |list, ch|
+        list << ch if ch.users.include?(m.source)
+        list
+      }
+      is_on.each { |channel|
+        ch = channel.to_s
+        @registry.each { |mask,channels|
+          if m.source.matches?(mask.to_irc_netmask(:server => m.server)) &&
+            (channels.empty? || channels.include?(ch))
+            @bot.mode(ch, "+o", m.source.nick)
+            return
+          end
+        }
+      }
+    end
+
     def add(m, params)
       @registry[params[:mask]] = params[:channels].dup
       m.okay

@@ -1,6 +1,7 @@
 2006-08-11  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* AutoOp plugin: adapted to the new IRC framework.
+	* AutoOp plugin: trigger autoop on nick change too.
 
 2006-08-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
