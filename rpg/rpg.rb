@@ -270,28 +270,28 @@ class RpgPlugin < Plugin
           m.reply wall 
         else
           g.party_pos.y -= 1
-          m.reply "You walk northward."
+          str = "You walk northward."
         end
       when 'east', 'e'
         if g.map.wall?( x+1, y )
           m.reply wall
         else
           g.party_pos.x += 1
-          m.reply "You walk eastward."
+          str = "You walk eastward."
        end     
       when 'south', 's'
         if g.map.wall?( x, y+1 )
           m.reply wall
         else
           g.party_pos.y += 1  
-          m.reply "You walk southward."
+          str = "You walk southward."
         end
       when 'west', 'w'
         if g.map.wall?( x-1, y )
           m.reply wall
         else
           g.party_pos.x -= 1
-          m.reply "You walk westward."
+          str = "You walk westward."
         end    
      else
         m.reply( "Go where? Directions: north, east, south, west." )
@@ -300,6 +300,14 @@ class RpgPlugin < Plugin
 
     x, y = g.party_pos.x, g.party_pos.y
     g.set_players_pos( x, y )
+
+    exits = []
+    exits << "north" unless g.map.wall?( x, y-1 )
+    exits << "east"  unless g.map.wall?( x+1, y )
+    exits << "south" unless g.map.wall?( x, y+1 )
+    exits << "west"  unless g.map.wall?( x-1, y )
+    str += " (Exits: #{exits.join(', ')})"
+    m.reply( str )
 
     p = g.objects[m.sourcenick]
     objects_near = []
