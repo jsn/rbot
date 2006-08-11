@@ -2,6 +2,8 @@
 
 	* AutoOp plugin: adapted to the new IRC framework.
 	* AutoOp plugin: trigger autoop on nick change too.
+	* New Auth Framework: allow? method now informs a user when they don't
+	have permission to do what they asked for.
 
 2006-08-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

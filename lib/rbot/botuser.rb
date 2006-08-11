@@ -193,6 +193,11 @@ module Irc
         str << ">"
       end
 
+      # In strings
+      def to_s
+        @username
+      end
+
       # Convert into a hash
       def to_hash
         {
@@ -652,9 +657,18 @@ module Irc
         raise "Could not check permission for user #{user.inspect} to run #{cmdtxt.inspect} on #{chan.inspect}"
       end
 
-      # Checks if command _cmd_ is allowed to User _user_ on _chan_
+      # Checks if command _cmd_ is allowed to User _user_ on _chan_, optionally
+      # telling if the user is authorized
+      #
       def allow?(cmdtxt, user, chan=nil)
-        permit?(user, cmdtxt, chan)
+        if permit?(user, cmdtxt, chan)
+          return true
+        else
+          # cmds = cmdtxt.split('::')
+          # @bot.say chan, "you don't have #{cmds.last} (#{cmds.first}) permissions here" if chan
+          @bot.say chan, "#{user}, you don't have '#{cmdtxt}' permissions here" if chan
+          return false
+        end
       end
 
     end
