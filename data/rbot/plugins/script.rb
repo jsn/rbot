@@ -141,9 +141,9 @@ plugin = ScriptPlugin.new
 plugin.register( "script" )
 plugin.default_auth( 'edit', false )
 
-plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth_path => 'edit!'
-plugin.map 'script add :name *code',    :action => 'handle_add',       :auth_path => 'edit!'
-plugin.map 'script del :name',          :action => 'handle_del',       :auth_path => 'edit!'
+plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth_path => 'edit'
+plugin.map 'script add :name *code',    :action => 'handle_add',       :auth_path => 'edit'
+plugin.map 'script del :name',          :action => 'handle_del',       :auth_path => 'edit'
 plugin.map 'script list :page',         :action => 'handle_list',      :defaults => { :page => '1' }
 plugin.map 'script show :name',         :action => 'handle_show'
 
