@@ -3,20 +3,20 @@ Position = Struct.new( :x, :y )
 
 class GameObject
   
-  attr_accessor :pos, :name, :object_type
+  attr_accessor :pos, :name, :object_type, :description
 
   def initialize
     @pos = Position.new( nil, nil )
     @name = ""
     @object_type = ""
+    @description = ""
   end
 end
 
 
 class Creature < GameObject
 
-  attr_accessor :state, :hp, :thac0, :hd, :ac, :xp_value, :inventory,
-                :description
+  attr_accessor :state, :hp, :thac0, :hd, :ac, :xp_value, :inventory
 
   def initialize
     super
