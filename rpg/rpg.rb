@@ -136,7 +136,7 @@ class RpgPlugin < Plugin
   # Returns new Game instance for channel, or existing one
   #
   def get_game( m )
-      channel = (m.target == @bot.nick) ? m.sourcenick : m.target 
+      channel = m.replyto
 
       unless @games.has_key?( channel )
           @games[channel] = Game.new( channel, @bot )
@@ -149,6 +149,7 @@ class RpgPlugin < Plugin
   def schedule( g )
     # Check for death:
     g.objects.each_value do |p|
+      next unless p.kind_of?( Creature )
       if p.hp < 0
         g.say( "#{p.name} dies from his injuries." )
         g.objects.delete( p.name )        
