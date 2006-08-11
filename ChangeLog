@@ -4,6 +4,10 @@
 	* AutoOp plugin: trigger autoop on nick change too.
 	* New Auth Framework: allow? method now informs a user when they don't
 	have permission to do what they asked for.
+	* New nickreply and nickokay methods: they act like the old reply
+	method, but include the nick of the user the bot is replying to when
+	talking in public. The usual reply method can be configured to act
+	like this as default.
 
 2006-08-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

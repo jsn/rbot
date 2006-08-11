@@ -4,6 +4,16 @@ module Irc
     :desc => "what non nick-matching prefixes should the bot respond to as if addressed (e.g !, so that '!foo' is treated like 'rbot: foo')"
   )
 
+  BotConfig.register BotConfigBooleanValue.new('core.reply_with_nick',
+    :default => false, :wizard => true,
+    :desc => "if true, the bot will prepend the nick to what he has to say when replying (e.g. 'markey: you can't do that!')"
+  )
+
+  BotConfig.register BotConfigStringValue.new('core.nick_postfix',
+    :default => ':', :wizard => true,
+    :desc => "when replying with nick put this character after the nick of the user the bot is replying to"
+  )
+
   Color = "\003"
   Bold = "\002"
   Underline = "\037"
@@ -204,9 +214,27 @@ module Irc
     # <tt>@bot.say m.replyto, string</tt>
     # So if the message is private, it will reply to the user. If it was
     # in a channel, it will reply in the channel.
-    def reply(string)
+    def plainreply(string)
       @bot.say @replyto, string
       @replied = true
+    end
+
+    # Same as reply, but when replying in public it adds the nick of the user
+    # the bot is replying to
+    def nickreply(string)
+      extra = self.public? ? "#{@source}#{@bot.config['core.nick_postfix']} " : ""
+      @bot.say @replyto, extra + string
+      @replied = true
+    end
+
+    # the default reply style is to nickreply unless the reply already contains
+    # the nick or core.reply_with_nick is set to false
+    #
+    def reply(string)
+      if @bot.config['core.reply_with_nick'] and not string =~ /\b#{@source}\b/
+        return nickreply(string)
+      end
+      plainreply(string)
     end
 
     # convenience method to reply to a message with an action. It's the
@@ -221,8 +249,25 @@ module Irc
 
     # convenience method to reply "okay" in the current language to the
     # message
+    def plainokay
+      self.plainreply @bot.lang.get("okay")
+    end
+
+    # Like the above, but append the username
+    def nickokay
+      str = @bot.lang.get("okay").dup
+      if self.public?
+        # remove final punctuation
+        str.gsub!(/[!,.]$/,"")
+        str += ", #{@source}"
+      end
+      self.plainreply str
+    end
+
+    # the default okay style is the same as the default reply style
+    #
     def okay
-      @bot.say @replyto, @bot.lang.get("okay")
+      self.reply @bot.lang.get("okay")
     end
 
   end
