@@ -267,7 +267,10 @@ module Irc
     # the default okay style is the same as the default reply style
     #
     def okay
-      self.reply @bot.lang.get("okay")
+      if @bot.config['core.reply_with_nick']
+        return nickokay
+      end
+      plainokay
     end
 
   end
