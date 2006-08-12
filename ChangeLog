@@ -1,3 +1,7 @@
+2006-08-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Subregistry: force prefix to be a String with to_s
+
 2006-08-11  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* AutoOp plugin: adapted to the new IRC framework.
