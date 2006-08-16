@@ -1,3 +1,8 @@
+2006-08-17  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Fix help: It got broken while rearranging the plugin stuff, now it's
+	properly fixed.
+
 2006-08-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Subregistry: force prefix to be a String with to_s

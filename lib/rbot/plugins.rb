@@ -518,7 +518,7 @@ module Plugins
           next unless pl.has_key?(k)
           p = pl[k][:botmodule] 
           begin
-            return p.help(p.name, topic)
+            return p.help(p.name, params)
           rescue Exception => err
             #rescue TimeoutError, StandardError, NameError, SyntaxError => err
             error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
