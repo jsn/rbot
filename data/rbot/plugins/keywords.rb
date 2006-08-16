@@ -71,14 +71,14 @@ class Keyword
   end
 end
 
-# keyword plugin class. 
+# keywords class. 
 #
 # Handles all that stuff like "bot: foo is bar", "bot: foo?"
 #
 # Fallback after core and auth have had a look at a message and refused to
 # handle it, checks for a keyword command or lookup, otherwise the message
 # is delegated to plugins
-class KeywordPlugin < Plugin
+class Keywords < Plugin
   BotConfig.register BotConfigBooleanValue.new('keyword.listen',
     :default => false,
     :desc => "Should the bot listen to all chat and attempt to automatically detect keywords? (e.g. by spotting someone say 'foo is bar')")
@@ -449,5 +449,5 @@ class KeywordPlugin < Plugin
   end
 end
 
-plugin = KeywordPlugin.new
+plugin = Keywords.new
 plugin.register 'keyword'
