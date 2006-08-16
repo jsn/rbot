@@ -606,7 +606,7 @@ class IrcBot
       rescue SystemExit
         log_session_end
         exit 0
-      rescue Errno::ETIMEDOUT, TimeoutError, SocketError => e
+      rescue Errno::ETIMEDOUT, Errno::ECONNABORTED, TimeoutError, SocketError => e
         error "network exception: #{e.class}: #{e}"
         debug e.backtrace.join("\n")
       rescue BDB::Fatal => e

@@ -403,8 +403,8 @@ module Irc
           error "Spooling failed: #{e.inspect}"
           error e.backtrace.join("\n")
         end
-        end
       end
+    end
 
     def clearq
       if @sock
@@ -453,6 +453,7 @@ module Irc
         end
       rescue => e
         error "SEND failed: #{e.inspect}"
+	raise
       end
     end
 
