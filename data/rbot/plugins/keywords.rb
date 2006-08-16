@@ -209,6 +209,7 @@ class Keywords < Plugin
   def save
     @keywords.flush
   end
+
   def oldsave
     File.open("#{@bot.botclass}/keywords.rbot", "w") do |file|
       @keywords.each do |key, value|
