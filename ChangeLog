@@ -8,6 +8,8 @@
 	* New IRC Framework: topic plugin now works correctly.
 	* New Auth Framework: nickserv plugin now defaults to false for its
 	auth, so that only owner can do stuff with it
+	* New Auth Framework: fix horrible typo, assignment instead of
+	equality test when checking for the username during login.
 
 2006-08-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

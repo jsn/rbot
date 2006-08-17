@@ -595,7 +595,7 @@ module Irc
         k = n.to_sym
         raise "No such BotUser #{n}" unless include?(k)
         if @botusers.has_key?(ircuser)
-          return true if @botusers[ircuser].username = n
+          return true if @botusers[ircuser].username == n
           # TODO
           # @botusers[ircuser].logout(ircuser)
         end
