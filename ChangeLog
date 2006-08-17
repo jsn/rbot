@@ -10,6 +10,8 @@
 	auth, so that only owner can do stuff with it
 	* New Auth Framework: fix horrible typo, assignment instead of
 	equality test when checking for the username during login.
+	* Keywords plugin: tell and forget work again without 'keyword' before
+	them.
 
 2006-08-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

@@ -9,7 +9,7 @@ class Keyword
 
   # type of keyword (e.g. "is" or "are")
   attr_reader :type
-  
+
   # type::   type of keyword (e.g "is" or "are")
   # values:: array of values
   # 
@@ -299,29 +299,38 @@ class Keywords < Plugin
 
   # return help string for Keywords with option topic +topic+
   def help(plugin, topic = '')
-    case topic
-    when 'lookup'
-      'keyword [lookup] <keyword> => look up the definition for a keyword; writing "lookup" is optional'
-    when 'set'
-      'keyword set <keyword> is/are <definition> => define a keyword, definition can contain "|" to separate multiple randomly chosen replies'
-    when 'forget'
-      'keyword forget <keyword> => forget a keyword'
-    when 'tell'
-      'keyword tell <nick> about <keyword> => tell somebody about a keyword'
-    when 'search'
-      'keyword search [--all] [--full] <pattern> => search keywords for <pattern>, which can be a regular expression. If --all is set, search static keywords too, if --full is set, search definitions too.'
-    when 'listen'
-      'when the config option "keyword.listen" is set to false, rbot will try to extract keyword definitions from regular channel messages'
-    when 'address'
-      'when the config option "keyword.address" is set to true, rbot will try to answer channel questions of the form "<keyword>?"'
-    when '<reply>'
-      '<reply> => normal response is "<keyword> is <definition>", but if <definition> begins with <reply>, the response will be "<definition>"'
-    when '<action>'
-      '<action> => makes keyword respond with "/me <definition>"'
-    when '<who>'
-      '<who> => replaced with questioner in reply'
-    when '<topic>'
-      '<topic> => respond by setting the topic to the rest of the definition'
+    case plugin
+    when /keyword/
+      case topic
+      when 'lookup'
+        'keyword [lookup] <keyword> => look up the definition for a keyword; writing "lookup" is optional'
+      when 'set'
+        'keyword set <keyword> is/are <definition> => define a keyword, definition can contain "|" to separate multiple randomly chosen replies'
+      when 'forget'
+        'keyword forget <keyword> => forget a keyword'
+      when 'tell'
+        'keyword tell <nick> about <keyword> => tell somebody about a keyword'
+      when 'search'
+        'keyword search [--all] [--full] <pattern> => search keywords for <pattern>, which can be a regular expression. If --all is set, search static keywords too, if --full is set, search definitions too.'
+      when 'listen'
+        'when the config option "keyword.listen" is set to false, rbot will try to extract keyword definitions from regular channel messages'
+      when 'address'
+        'when the config option "keyword.address" is set to true, rbot will try to answer channel questions of the form "<keyword>?"'
+      when '<reply>'
+        '<reply> => normal response is "<keyword> is <definition>", but if <definition> begins with <reply>, the response will be "<definition>"'
+      when '<action>'
+        '<action> => makes keyword respond with "/me <definition>"'
+      when '<who>'
+        '<who> => replaced with questioner in reply'
+      when '<topic>'
+        '<topic> => respond by setting the topic to the rest of the definition'
+      else
+        'keyword module (fact learning and regurgitation) topics: lookup, set, forget, tell, search, listen, address, <reply>, <action>, <who>, <topic>'
+      end
+    when "forget"
+      'forget <keyword> => forget a keyword'
+    when "tell"
+      'tell <nick> about <keyword> => tell somebody about a keyword'
     else
       'keyword module (fact learning and regurgitation) topics: lookup, set, forget, tell, search, listen, address, <reply>, <action>, <who>, <topic>'
     end
@@ -333,7 +342,7 @@ class Keywords < Plugin
       m.reply @bot.lang.get("dunno_about_X") % key
       return
     end
-    
+
     response = kw.to_s
     response.gsub!(/<who>/, m.sourcenick)
     if(response =~ /^<reply>\s*(.*)/)
@@ -415,24 +424,35 @@ class Keywords < Plugin
 
   # privmsg handler
   def privmsg(m)
-    case m.params
-    when /^set\s+(.+?)\s+(is|are)\s+(.+)$/
-      keyword_command(m, $1, $2, $3) if @bot.auth.allow?('keycmd', m.source, m.replyto)
-    when /^forget\s+(.+)$/
-      keyword_forget(m, $1) if @bot.auth.allow?('keycmd', m.source, m.replyto)
-    when /^lookup\s+(.+)$/
-      keyword_lookup(m, $1) if @bot.auth.allow?('keyword', m.source, m.replyto)
-    when /^stats\s*$/
-      keyword_stats(m) if @bot.auth.allow?('keyword', m.source, m.replyto)
-    when /^search\s+(.+)$/
-      key = $1
-      full = key.sub!('--full ', '')
-      all = key.sub!('--all ', '')
-      keyword_search(m, key, full, all) if @bot.auth.allow?('keyword', m.source, m.replyto)
-    when /^tell\s+(\S+)\s+about\s+(.+)$/
-      keyword_tell(m, $1, $2) if @bot.auth.allow?('keyword', m.source, m.replyto)
-    else
-      keyword_lookup(m, m.params) if @bot.auth.allow?('keyword', m.source, m.replyto)
+    case m.plugin
+    when "keyword"
+      case m.params
+      when /^set\s+(.+?)\s+(is|are)\s+(.+)$/
+        keyword_command(m, $1, $2, $3) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+      when /^forget\s+(.+)$/
+        keyword_forget(m, $1) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+      when /^lookup\s+(.+)$/
+        keyword_lookup(m, $1) if @bot.auth.allow?('keyword', m.source, m.replyto)
+      when /^stats\s*$/
+        keyword_stats(m) if @bot.auth.allow?('keyword', m.source, m.replyto)
+      when /^search\s+(.+)$/
+        key = $1
+        full = key.sub!('--full ', '')
+        all = key.sub!('--all ', '')
+        keyword_search(m, key, full, all) if @bot.auth.allow?('keyword', m.source, m.replyto)
+      when /^tell\s+(\S+)\s+about\s+(.+)$/
+        keyword_tell(m, $1, $2) if @bot.auth.allow?('keyword', m.source, m.replyto)
+      else
+        keyword_lookup(m, m.params) if @bot.auth.allow?('keyword', m.source, m.replyto)
+      end
+    when "forget"
+      keyword_forget(m, params) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+    when "tell"
+      if m.params =~ /(\S+)\s+about\s+(.+)$/
+        keyword_tell(m, $1, $2) if @bot.auth.allow?('keyword', m.source, m.replyto)
+      else
+        m.reply "wrong 'tell' syntax"
+      end
     end
   end
 
@@ -452,3 +472,6 @@ end
 
 plugin = Keywords.new
 plugin.register 'keyword'
+plugin.register 'forget'
+plugin.register 'tell'
+
