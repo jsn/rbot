@@ -221,36 +221,42 @@ class AuthModule < CoreBotModule
     m.reply rep
   end
 
-  def help(plugin, topic="")
-    case topic
-    when /^login/
+  def help(cmd, topic="")
+    case cmd
+    when "login"
       return "login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with password <pass>. When using the full form, you must contact the bot in private. <pass> can be omitted if <botuser> allows login-by-mask and your netmask is among the known ones. if <botuser> is omitted too autologin will be attempted"
-    when /^whoami/
+    when "whoami"
       return "whoami: names the botuser you're linked to"
-    when /^permission syntax/
-      return "a permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
     when /^permission/
-      return "permissions (re)set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
-    when /^user show/
-      return "user show <what> : shows info about the user; <what> can be any of autologin, login-by-mask, netmasks"
-    when /^user (en|dis)able/
-      return "user enable|disable <what> : turns on or off <what> (autologin, login-by-mask)"
-    when /^user set/
-      return "user set password <blah> : sets the user password to <blah>; passwords can only contain upper and lowercase letters and numbers, and must be at least 4 characters long"
-    when /^user (add|rm)/
-      return "user add|rm netmask <mask> : adds/removes netmask <mask> from the list of netmasks known to the botuser you're linked to"
-    when /^user reset/
-      return "user reset <what> : resets <what> to the default values. <what> can be +netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will be reset to the default value) or +password+ (a new one will be generated and you'll be told in private)"
-    when /^user tell/
-      return "user tell <who> the password for <botuser> : contacts <who> in private to tell him/her the password for <botuser>"
-    when /^user create/
-      return "user create <name> <password> : create botuser named <name> with password <password>. The password can be omitted, in which case a random one will be generated. The <name> should only contain alphanumeric characters and the underscore (_)"
-    when /^user list/
-      return "user list : lists all the botusers"
-    when /^user destroy/
-      return "user destroy <botuser> <password> : destroys <botuser>; this function #{Bold}must#{Bold} be called in two steps. On the first call, no password must be specified: <botuser> is then queued for destruction. On the second call, you must specify the correct password for <botuser>, and it will be destroyed. If you want to cancel the destruction, issue the command +user cancel destroy <botuser>+"
-    when /^user/
-      return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy"
+      case topic
+      when "syntax"
+        return "a permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
+      else
+        return "permissions (re)set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
+      end
+    when "user"
+      case topic
+      when "show"
+        return "user show <what> : shows info about the user; <what> can be any of autologin, login-by-mask, netmasks"
+      when /^(en|dis)able/
+        return "user enable|disable <what> : turns on or off <what> (autologin, login-by-mask)"
+      when "set"
+        return "user set password <blah> : sets the user password to <blah>; passwords can only contain upper and lowercase letters and numbers, and must be at least 4 characters long"
+      when "add", "rm"
+        return "user add|rm netmask <mask> : adds/removes netmask <mask> from the list of netmasks known to the botuser you're linked to"
+      when "reset"
+        return "user reset <what> : resets <what> to the default values. <what> can be +netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will be reset to the default value) or +password+ (a new one will be generated and you'll be told in private)"
+      when "tell"
+        return "user tell <who> the password for <botuser> : contacts <who> in private to tell him/her the password for <botuser>"
+      when "create"
+        return "user create <name> <password> : create botuser named <name> with password <password>. The password can be omitted, in which case a random one will be generated. The <name> should only contain alphanumeric characters and the underscore (_)"
+      when "list"
+        return "user list : lists all the botusers"
+      when "destroy"
+        return "user destroy <botuser> <password> : destroys <botuser>; this function #{Bold}must#{Bold} be called in two steps. On the first call, no password must be specified: <botuser> is then queued for destruction. On the second call, you must specify the correct password for <botuser>, and it will be destroyed. If you want to cancel the destruction, issue the command +user cancel destroy <botuser>+"
+      else
+        return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy"
+      end
     else
       return "#{name}: login, whoami, permission syntax, permissions, user"
     end
