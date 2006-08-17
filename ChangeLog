@@ -5,6 +5,7 @@
 	* New Auth Framework: forgot to create the InvalidPassword exception.
 	It's a RuntimeError now.
 	* Fix help: this time for real (or so I hope).
+	* New IRC Framework: topic plugin now works correctly.
 
 2006-08-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

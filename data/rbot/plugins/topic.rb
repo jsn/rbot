@@ -42,17 +42,13 @@ class TopicPlugin < Plugin
   def handletopic(m, param)
     return unless m.kind_of?(PrivMessage)
     if m.public?
-      ch = m.channel.downcase
+      ch = m.channel
     else
-      ch = param[:channel].downcase
+      ch = m.server.get_channel(param[:channel])
+      return m.reply "I am not in channel #{ch}" unless ch
     end
     cmd = param[:command]
     txt = param[:text].join(" ")
-
-    unless @bot.channels.has_key?(ch)
-      m.reply "I am not in channel #{ch}"
-      return
-    end
 
     case cmd
     when /^a(dd|ppend)$/
@@ -105,14 +101,18 @@ class TopicPlugin < Plugin
   end
 
   def setsep(ch, sep)
-    if @registry.has_key?(ch)
-      data = @registry[ch]
+    raise unless ch.class <= Irc::Channel
+    # TODO multiserver
+    k = ch.downcase
+
+    if @registry.has_key?(k)
+      data = @registry[k]
     else
       data = Hash.new
     end
 
     oldsep = getsep(ch)
-    topic = @bot.channels[ch].topic.to_s
+    topic = ch.topic.text
     topicarray = topic.split(/\s+#{Regexp.escape(oldsep)}\s*/)
 
     if sep != oldsep and topicarray.length > 0
@@ -121,13 +121,17 @@ class TopicPlugin < Plugin
     end
 
     data[:separator] = sep
-    @registry[ch] = data
+    @registry[k] = data
   end
 
   def getsep(ch)
-    if @registry.has_key?(ch)
-      if @registry[ch].has_key?(:separator)
-        return @registry[ch][:separator]
+    raise unless ch.class <= Irc::Channel
+    # TODO multiserver
+    k = ch.downcase
+
+    if @registry.has_key?(k)
+      if @registry[k].has_key?(:separator)
+        return @registry[k][:separator]
       end
     end
     return @separator
@@ -135,7 +139,7 @@ class TopicPlugin < Plugin
 
   def topicaddat(m, channel, num, txt)
     sep = getsep(channel)
-    topic = @bot.channels[channel].topic.to_s
+    topic = channel.topic.to_s
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray.insert(num, txt)
     newtopic = topicarray.join(" #{sep} ")
@@ -152,7 +156,7 @@ class TopicPlugin < Plugin
 
   def topicdel(m, channel, num)
     sep = getsep(channel)
-    topic = @bot.channels[channel].topic.to_s
+    topic = channel.topic.to_s
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray.delete_at(num)
     newtopic = topicarray.join(" #{sep} ")
@@ -161,14 +165,15 @@ class TopicPlugin < Plugin
 
   def learntopic(m, channel)
     return if !@bot.auth.allow?("learntopic", m.source, m.replyto)
-    topic = @bot.channels[channel].topic.to_s
-    if @registry.has_key?(channel)
-      data = @registry[channel]
+    topic = channel.topic.to_s
+    k = channel.downcase
+    if @registry.has_key?(k)
+      data = @registry[k]
     else
       data = Hash.new
     end
     data[:topic] = topic
-    @registry[channel] = data
+    @registry[k] = data
     m.okay
   end
 
@@ -181,11 +186,12 @@ class TopicPlugin < Plugin
     newtopic = topicarray.join(" #{sep} ")
     @bot.topic channel, newtopic
   end
-  
+
   def restoretopic(m, channel)
     return if !@bot.auth.allow?("restoretopic", m.source, m.replyto)
-    if @registry.has_key?(channel) && @registry[channel].has_key?(:topic)
-      topic = @registry[channel][:topic]
+    k = channel.downcase
+    if @registry.has_key?(k) && @registry[k].has_key?(:topic)
+      topic = @registry[k][:topic]
       @bot.topic channel, topic
     else
       m.reply "I don't remember any topic for this channel"
