@@ -147,3 +147,6 @@ plugin.map 'nickserv register :passwd :email', :action => 'nick_register',
            :defaults => {:passwd => false, :email => false}
 plugin.map 'nickserv listnicks', :action => "listnicks"
 plugin.map 'nickserv identify', :action => "identify"
+
+plugin.default_auth('*', false)
+

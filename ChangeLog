@@ -6,6 +6,8 @@
 	It's a RuntimeError now.
 	* Fix help: this time for real (or so I hope).
 	* New IRC Framework: topic plugin now works correctly.
+	* New Auth Framework: nickserv plugin now defaults to false for its
+	auth, so that only owner can do stuff with it
 
 2006-08-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
