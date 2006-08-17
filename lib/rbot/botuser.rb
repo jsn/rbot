@@ -160,6 +160,12 @@ module Irc
     end
 
 
+    # This is the error that gets raised when an invalid password is met
+    #
+    class InvalidPassword < RuntimeError
+    end
+
+
     # This is the basic class for bot users: they have a username, a password,
     # a list of netmasks to match against, and a list of permissions.
     #
