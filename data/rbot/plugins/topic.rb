@@ -45,7 +45,10 @@ class TopicPlugin < Plugin
       ch = m.channel
     else
       ch = m.server.get_channel(param[:channel])
-      return m.reply "I am not in channel #{ch}" unless ch
+      unless ch
+        m.reply("I am not in channel #{param[:channel]}")
+        return
+      end
     end
     cmd = param[:command]
     txt = param[:text].join(" ")
