@@ -2,6 +2,10 @@
 
 	* Topic plugin: fix a bug that prevented it from loading
 	correctly.
+	* New IRC Framework: make sure that NOTICEs and PRIVMSGs do not
+	raise an exception when the target is in one of the special forms
+	#<mask> or $<mask>. Needs some work, though, since this case should be
+	handled specifically.
 
 2006-08-17  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

@@ -1095,7 +1095,15 @@ module Irc
         # parse it yourself, or you can bind to 'MSG', 'PUBLIC',
         # etc and get it all nicely split up for you.
 
-        data[:target] = @server.user_or_channel(argv[0])
+        begin
+          data[:target] = @server.user_or_channel(argv[0])
+        rescue
+          # The previous may fail e.g. when the target is a server or something
+          # like that (e.g. $<mask>). In any of these cases, we just use the
+          # String as a target
+          # FIXME we probably want to explicitly check for the #<mask> $<mask>
+          data[:target] = argv[0]
+        end
         data[:message] = argv[1]
         handle(:privmsg, data)
 
@@ -1106,7 +1114,15 @@ module Irc
           handle(:msg, data)
         end
       when 'NOTICE'
-        data[:target] = @server.user_or_channel(argv[0])
+        begin
+          data[:target] = @server.user_or_channel(argv[0])
+        rescue
+          # The previous may fail e.g. when the target is a server or something
+          # like that (e.g. $<mask>). In any of these cases, we just use the
+          # String as a target
+          # FIXME we probably want to explicitly check for the #<mask> $<mask>
+          data[:target] = argv[0]
+        end
         data[:message] = argv[1]
         case data[:source]
         when User
