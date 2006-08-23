@@ -16,18 +16,11 @@ class UrbanPlugin < Plugin
   end
 
   def privmsg( m )
-
-    unless(m.params && m.params.length > 0)
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
-    end
-
-    paramArray = m.params.split(' ')
     definitionN = 0
-    if m.params == 'random' then
-      uri = URI.parse( "http://www.urbandictionary.com/random.php" )
-    else 
-      if( paramArray.last.to_i != 0 ) then
+
+    if m.params
+      paramArray = m.params.split(' ')
+      if paramArray.last.to_i != 0 
         definitionN = paramArray.last.to_i - 1
         query = m.params.chomp( paramArray.last )
         query.rstrip!
@@ -35,6 +28,8 @@ class UrbanPlugin < Plugin
         query = m.params
       end
       uri = URI.parse( "http://www.urbandictionary.com/define.php?term=#{ URI.escape query}" )
+    else 
+      uri = URI.parse( "http://www.urbandictionary.com/random.php" )
     end
 
     soup = BeautifulSoup.new( @bot.httputil.get_cached( uri ) )
@@ -45,14 +40,13 @@ class UrbanPlugin < Plugin
       output = Array.new
       if results[definitionN] then
         results[definitionN].p.contents.each { |s| output.push( strip_tags( s.to_s ) ) }
-        m.reply "\002#{title}\002 - #{output}"
+        m.reply "\002#{title}\002 - #{output} (#{definitionN+1}/#{results.length})"
       else
         m.reply "#{query} does not have #{definitionN + 1} definitions."
       end
     else
       m.reply "#{m.params} not found."
     end
-
   end
 
   def strip_tags(html)
