@@ -70,6 +70,8 @@ class ::RssBlob
     if watched_by?(who)
       return nil
     end
+    # TODO FIXME? should we just store watchers as Strings instead?
+    # This should then be @watchers << who.downcase
     @watchers << who
     return who
   end
@@ -106,7 +108,7 @@ class RSSFeedsPlugin < Plugin
 
   BotConfig.register BotConfigIntegerValue.new('rss.thread_sleep',
     :default => 300, :validate => Proc.new{|v| v > 30},
-    :desc => "How many characters to use of a RSS item text")
+    :desc => "How many seconds to sleep before checking RSS feeds again")
 
   @@watchThreads = Hash.new
   @@mutex = Mutex.new
@@ -418,7 +420,8 @@ class RSSFeedsPlugin < Plugin
               }
               if dispItems.length > 0
                 debug "Found #{dispItems.length} new items in #{feed}"
-                dispItems.each { |item|
+                # When displaying watched feeds, publish them from older to newer
+                dispItems.reverse.each { |item|
                   @@mutex.synchronize {
                     printFormattedRss(feed, item)
                   }
