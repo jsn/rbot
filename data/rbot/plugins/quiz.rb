@@ -56,15 +56,6 @@ class Quiz
     # and always synced with the registry player stats hash. This way we can do fast
     # rank lookups, without extra sorting.
     @rank_table = @registry.to_a.sort { |a,b| b[1].score<=>a[1].score }
-
-    # # Convert old PlayerStats to new. Can be removed later on
-    # @registry.each_key do |player|
-    #     begin
-    #         j = @registry[player].joker
-    #     rescue
-    #         @registry[player] = PlayerStats.new( @registry[player].score, 0, 0 )
-    #     end
-    # end
   end
 end
 
@@ -328,13 +319,7 @@ class QuizPlugin < Plugin
   # Command handling
   #######################################################################
   def cmd_quiz( m, params )
-    # if m.target.to_s == "#amarok"
-    #     m.reply "Please join #amarok.gaming for quizzing! :)"
-    #     return
-    # end
-
     fetch_data( m ) if @questions.empty?
-
     q = create_quiz( m.target.to_s )
 
     if q.question
