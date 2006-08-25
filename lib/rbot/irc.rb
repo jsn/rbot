@@ -1020,10 +1020,6 @@ module Irc
     attr_reader :name, :topic, :mode, :users
     alias :to_s :name
 
-    def downcase
-      self.to_s.irc_downcase(self.casemap)
-    end
-
     def inspect
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " on server #{server}" if server
