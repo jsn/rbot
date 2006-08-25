@@ -179,7 +179,7 @@ basics.map "ping",
   :auth_path => '!ping!'
 basics.map "help *topic",
   :action => 'bot_help',
-  :default => { :topic => [""] },
+  :defaults => { :topic => [""] },
   :auth_path => '!help!'
 
 basics.default_auth('*', false)
