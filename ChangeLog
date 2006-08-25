@@ -1,3 +1,7 @@
+2006-08-25 Mark Kretschmann <markey@web.de>
+
+	* Added quiz plugin, a multiplayer trivia quiz game.
+
 2006-08-20  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Topic plugin: fix a bug that prevented it from loading
