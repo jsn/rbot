@@ -79,7 +79,7 @@ class ScriptPlugin < Plugin
       return
     end
 
-    code    = params[:code].join( " " )
+    code    = params[:code].to_s
     nick    = m.sourcenick
     created = Time.new.strftime '%Y/%m/%d %H:%m'
     channel = m.target
