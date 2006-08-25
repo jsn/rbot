@@ -738,21 +738,16 @@ auth.map "user create :name :password",
   :defaults => {:password => nil},
   :auth_path => ':manage:'
 
-auth.map "user cancel destroy :name :password",
+auth.map "user [cancel] destroy :name :password",
   :action => 'auth_destroy_user',
   :defaults => { :password => nil },
   :auth_path => ':manage::destroy:'
 
-auth.map "user destroy :name :password",
-  :action => 'auth_destroy_user',
-  :defaults => { :password => nil },
-  :auth_path => ':manage:'
-
-auth.map "user copy :source :dest",
+auth.map "user copy :source [to] :dest",
   :action => 'auth_copy_ren_user',
   :auth_path => ':manage:'
 
-auth.map "user rename :source :dest",
+auth.map "user rename :source [to] :dest",
   :action => 'auth_copy_ren_user',
   :auth_path => ':manage:'
 
