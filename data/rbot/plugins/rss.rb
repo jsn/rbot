@@ -124,6 +124,10 @@ class RSSFeedsPlugin < Plugin
     rewatch_rss
   end
 
+  def name
+    "rss"
+  end
+
   def watchlist
     @feeds.select { |h, f| f.watched? }
   end
