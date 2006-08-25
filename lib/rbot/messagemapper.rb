@@ -329,19 +329,15 @@ module Irc
             case default
             when String
               value.instance_variable_set(:@string_value, default)
-              def value.to_s
-                @string_value
-              end
             else
-              def value.to_s
-                value.join(' ')
-              end
+              value.instance_variable_set(:@string_value, value.join(' '))
             end
           else
             value = matching[i].split
-            def value.to_s
-              matching[i]
-            end
+            value.instance_variable_set(:@string_value, matching[i])
+          end
+          def value.to_s
+            @string_value
           end
           options[item] = value
           debug "set #{item} to #{value.inspect}"
