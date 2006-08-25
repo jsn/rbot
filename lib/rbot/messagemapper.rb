@@ -158,17 +158,22 @@ module Irc
     attr_reader :defaults # The defaults hash
     attr_reader :options  # The options hash
     attr_reader :items
+    attr_reader :regexp
 
     def initialize(botmodule, template, hash={})
       raise ArgumentError, "Third argument must be a hash!" unless hash.kind_of?(Hash)
       @defaults = hash[:defaults].kind_of?(Hash) ? hash.delete(:defaults) : {}
       @requirements = hash[:requirements].kind_of?(Hash) ? hash.delete(:requirements) : {}
+      # The old way matching was done, this prepared the match items.
+      # Now we use for some preliminary syntax checking and to get the words used in the auth_path
       self.items = template
+      self.regexp = template
+      debug "Command #{template.inspect} in #{botmodule} will match using #{@regexp}"
       if hash.has_key?(:auth)
-        warning "Command #{template} in #{botmodule} uses old :auth syntax, please upgrade"
+        warning "Command #{template.inspect} in #{botmodule} uses old :auth syntax, please upgrade"
       end
       if hash.has_key?(:full_auth_path)
-        warning "Command #{template} in #{botmodule} sets :full_auth_path, please don't do this"
+        warning "Command #{template.inspect} in #{botmodule} sets :full_auth_path, please don't do this"
       else
         case botmodule
         when String
@@ -179,7 +184,7 @@ module Irc
           raise ArgumentError, "Can't find auth base in #{botmodule.inspect}"
         end
         words = items.reject{ |x|
-          x == pre || x.kind_of?(Symbol)
+          x == pre || x.kind_of?(Symbol) || x =~ /\[|\]/
         }
         if words.empty?
           post = nil
@@ -193,7 +198,9 @@ module Irc
             post = nil
           end
           if extra.sub!(/:$/, "")
-            post = [post,words[1]].compact.join("::") if words.length > 1
+            if words.length > 1
+              post = [post,words[1]].compact.join("::")
+            end
           end
           pre = nil if extra.sub!(/^!/, "")
           post = nil if extra.sub!(/!$/, "")
@@ -201,22 +208,56 @@ module Irc
           extra = nil
         end
         hash[:full_auth_path] = [pre,extra,post].compact.join("::")
+        debug "Command #{template} in #{botmodule} will use authPath #{hash[:full_auth_path]}"
         # TODO check if the full_auth_path is sane
       end
 
       @options = hash
+
+      # @dyn_items is an array of arrays whose first entry is the Symbol
+      # (without the *, if any) of a dynamic item, and whose second entry is
+      # false if the Symbol refers to a single-word item, or true if it's
+      # multiword. @dyn_items.first will be the template.
+      @dyn_items = @items.collect { |it|
+        if it.kind_of?(Symbol)
+          i = it.to_s
+          if i.sub!(/^\*/,"")
+            [i.intern, true]
+          else
+            [i.intern, false]
+          end
+        else
+          nil
+        end
+      }
+      @dyn_items.unshift(template).compact!
+      debug "Items: #{@items.inspect}; dyn items: #{@dyn_items.inspect}"
+
       # debug "Create template #{self.inspect}"
     end
 
     def items=(str)
-      items = str.split(/\s+/).collect {|c| (/^(:|\*)(\w+)$/ =~ c) ? (($1 == ':' ) ? $2.intern : "*#{$2}".intern) : c} if str.kind_of?(String) # split and convert ':xyz' to symbols
-      items.shift if items.first == ""
-      items.pop if items.last == ""
+      raise ArgumentError, "template #{str.inspect} should be a String" unless str.kind_of?(String)
+
+      # split and convert ':xyz' to symbols
+      items = str.strip.split(/\s+/).collect { |c|
+        if /^(:|\*)(\w+)(.*)/ =~ c
+          # there might be extra (non-alphanumeric) stuff (e.g. punctuation) after the symbol name
+          sym = ($1 == ':' ) ? $2.intern : "*#{$2}".intern
+          if $3.nil?
+            sym
+          else
+            [sym, $3]
+          end
+        else
+          c
+        end
+      }.flatten
       @items = items
 
-      if @items.first.kind_of? Symbol
-        raise ArgumentError, "Illegal template -- first component cannot be dynamic\n   #{str.inspect}"
-      end
+      raise ArgumentError, "Illegal template -- first component cannot be dynamic: #{str.inspect}" if @items.first.kind_of? Symbol
+
+      raise ArgumentError, "Illegal template -- first component cannot be optional: #{str.inspect}" if @items.first =~ /\[|\]/
 
       # Verify uniqueness of each component.
       @items.inject({}) do |seen, item|
@@ -231,46 +272,97 @@ module Irc
       end
     end
 
+    def regexp=(str)
+      # debug "Original string: #{str.inspect}"
+      rx = Regexp.escape(str)
+      # debug "Escaped: #{rx.inspect}"
+      rx.gsub!(/((?:\\ )*)(:|\\\*)(\w+)/) { |m|
+        not_needed = @defaults.has_key?($3.intern)
+        s = "#{not_needed ? "(?:" : ""}#{$1}(#{$2 == ":" ? "\\S+" : ".*"})#{ not_needed ? ")?" : ""}"
+      }
+      # debug "Replaced dyns: #{rx.inspect}"
+      rx.gsub!(/((?:\\ )*)\\\[/, "(?:\\1")
+      rx.gsub!(/\\\]/, ")?")
+      # debug "Delimited optionals: #{rx.inspect}"
+      rx.gsub!(/(?:\\ )+/, "\\s+")
+      # debug "Corrected spaces: #{rx.inspect}"
+      @regexp = Regexp.new(rx)
+    end
+
     # Recognize the provided string components, returning a hash of
     # recognized values, or [nil, reason] if the string isn't recognized.
     def recognize(m)
-      components = m.message.split(/\s+/)
+
+      debug "Testing #{m.message.inspect} against #{self.inspect}"
+
+      # Early out
+      return nil, "template #{@dyn_items.first.inspect} is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
+      return nil, "template #{@dyn_items.first.inspect} is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
+
       options = {}
 
-      @items.each do |item|
-        if /^\*/ =~ item.to_s
-          if components.empty?
-            value = @defaults.has_key?(item) ? @defaults[item].clone : []
-          else
-            value = components.clone
-          end
-          components = []
-          def value.to_s() self.join(' ') end
-          options[item.to_s.sub(/^\*/,"").intern] = value
-        elsif item.kind_of? Symbol
-          value = components.shift || @defaults[item]
-          if passes_requirements?(item, value)
-            options[item] = value
-          else
-            if @defaults.has_key?(item)
-              options[item] = @defaults[item]
-              # push the test-failed component back on the stack
-              components.unshift value
+      matching = @regexp.match(m.message)
+      return nil, "#{m.message.inspect} doesn't match #{@dyn_items.first.inspect} (#{@regexp})" unless matching
+      return nil, "#{m.message.inspect} only matches #{@dyn_items.first.inspect} (#{@regexp}) partially" unless matching[0] == m.message
+
+      debug "#{m.message.inspect} matched #{@regexp} with #{matching[1..-1].join(', ')}"
+      debug "Associating #{matching[1..-1].join(', ')} with dyn items #{@dyn_items[1..-1].join(', ')}"
+
+      (@dyn_items.length - 1).downto 1 do |i|
+        it = @dyn_items[i]
+        item = it[0]
+        debug "dyn item #{item} (multi-word: #{it[1].inspect})"
+        if it[1]
+          if matching[i].nil?
+            default = @defaults[item]
+            case default
+            when Array
+              value = default.clone
+            when String
+              value = default.strip.split
+            when nil, false, []
+              value = []
             else
-              return nil, requirements_for(item)
+              value = []
+              warning "Unmanageable default #{default} detected for :*#{item.to_s}, using []"
+            end
+            case default
+            when String
+              value.instance_variable_set(:@string_value, default)
+              def value.to_s
+                @string_value
+              end
+            else
+              def value.to_s
+                value.join(' ')
+              end
+            end
+          else
+            value = matching[i].split
+            def value.to_s
+              matching[i]
             end
           end
+          options[item] = value
+          debug "set #{item} to #{value.inspect}"
         else
-          return nil, "No value available for component #{item.inspect}" if components.empty?
-          component = components.shift
-          return nil, "Value for component #{item.inspect} doesn't match #{component}" if component != item
+          if matching[i]
+            value = matching[i]
+            unless passes_requirements?(item, value)
+              if @defaults.has_key?(item)
+                value == @defaults[item]
+              else
+                return nil, requirements_for(item)
+              end
+            end
+          else
+            value = @defaults[item]
+            warning "No default value for optiona #{item.inspect} specified" unless @defaults.has_key?(item)
+          end
+          options[item] = value
+          debug "set #{item} to #{options[item].inspect}"
         end
       end
-
-      return nil, "Unused components were left: #{components.join '/'}" unless components.empty?
-
-      return nil, "template is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
-      return nil, "template is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
 
       options.delete_if {|k, v| v.nil?} # Remove nil values.
       return options, nil
@@ -279,7 +371,7 @@ module Irc
     def inspect
       when_str = @requirements.empty? ? "" : " when #{@requirements.inspect}"
       default_str = @defaults.empty? ? "" : " || #{@defaults.inspect}"
-      "<#{self.class.to_s} #{@items.collect{|c| c.kind_of?(String) ? c : c.inspect}.join(' ').inspect}#{default_str}#{when_str}>"
+      "<#{self.class.to_s} #{@items.map { |c| c.inspect }.join(' ').inspect}#{default_str}#{when_str}>"
     end
 
     # Verify that the given value passes this template's requirements

@@ -1,3 +1,19 @@
+2006-08-26  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Plugin message mapper: new implementation. Multi-word parameters now
+	need not be the last, and it is possible to retrieve the entire
+	substring with preserved whitespace by using to_s. Also, parts of the
+	map string can be bracketed to make them optional. Examples:
+		remind :user [about] *stuff
+	will respond to
+		remind me about washing my teeth
+	and also to
+		remind me washing my teeth
+	It is possible to have parameters in brackets, in which case they will
+	be optional too, and default to nil or [] (resp. single- and
+	multi-word parameters) unless an alternative is provided in the
+	:defaults hash for the message map options.
+
 2006-08-25 Mark Kretschmann <markey@web.de>
 
 	* Added quiz plugin, a multiplayer trivia quiz game.
