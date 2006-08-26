@@ -92,6 +92,14 @@ class QuizPlugin < Plugin
   #
   def fetch_data( m )
     # TODO: Make this configurable, and add support for more than one file (there's a size limit in linux too ;) )
+    # Read the winning messages file 
+    @win_messages = Array.new
+    if File.exists? "#{@bot.botclass}/quiz/win_messages"
+      IO.foreach("#{@bot.botclass}/quiz/win_messages") { |line| @win_messages << line.chomp }
+    else
+      warning( "win_messages file not found!" )
+    end
+
     path = "#{@bot.botclass}/quiz/quiz.rbot"
     debug "Fetching from #{path}"
 
@@ -245,33 +253,23 @@ class QuizPlugin < Plugin
     message = m.message.downcase.strip
 
     if message == q.answer.downcase or message == q.answer_core.downcase
-      replies = []
-
       points = 1
       if q.first_try
         points += 1
-        replies << "WHOPEEE! #{m.sourcenick.to_s} got it on the first try! That's worth an extra point. Answer was: #{q.answer}"
+        reply = "WHOPEEE! #{m.sourcenick.to_s} got it on the first try! That's worth an extra point. Answer was: #{q.answer}"
       elsif q.rank_table.length >= 1 and m.sourcenick.to_s == q.rank_table[0][0]
-        replies << "THE QUIZ CHAMPION defends his throne! Seems like #{m.sourcenick.to_s} is invicible! Answer was: #{q.answer}"
+        reply = "THE QUIZ CHAMPION defends his throne! Seems like #{m.sourcenick.to_s} is invicible! Answer was: #{q.answer}"
       elsif q.rank_table.length >= 2 and m.sourcenick.to_s == q.rank_table[1][0]
-        replies << "THE SECOND CHAMPION is on the way up! Hurry up #{m.sourcenick.to_s}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{q.answer}"
+        reply = "THE SECOND CHAMPION is on the way up! Hurry up #{m.sourcenick.to_s}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{q.answer}"
       elsif    q.rank_table.length >= 3 and m.sourcenick.to_s == q.rank_table[2][0]
-        replies << "THE THIRD CHAMPION strikes again! Give it all #{m.sourcenick.to_s}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
+        reply = "THE THIRD CHAMPION strikes again! Give it all #{m.sourcenick.to_s}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
       else
-        replies << "BINGO!! #{m.sourcenick.to_s} got it right. The answer was: #{q.answer}"
-        replies << "OMG!! PONIES!! #{m.sourcenick.to_s} is the cutest. The answer was: #{q.answer}"
-        replies << "HUZZAAAH! #{m.sourcenick.to_s} did it again. The answer was: #{q.answer}"
-        replies << "YEEEHA! Cowboy #{m.sourcenick.to_s} scored again. The answer was: #{q.answer}"
-        replies << "STRIKE! #{m.sourcenick.to_s} pwned you all. The answer was: #{q.answer}"
-        replies << "YAY :)) #{m.sourcenick.to_s} is totally invited to my next sleepover. The answer was: #{q.answer}"
-        replies << "And the crowd GOES WILD for #{m.sourcenick.to_s}. The answer was: #{q.answer}"
-        replies << "GOOOAAALLLL! That was one fine strike by #{m.sourcenick.to_s}. The answer was: #{q.answer}"
-        replies << "HOO-RAY, #{m.sourcenick.to_s} deserves a medal! Only #{m.sourcenick.to_s} could have known the answer: #{q.answer}"
-        replies << "OKAY, #{m.sourcenick.to_s} is officially a spermatologist! Answer was: #{q.answer}"
-        replies << "WOOO, I bet that #{m.sourcenick.to_s} knows where the word 'trivia' comes from too! Answer was: #{q.answer}"
+        reply = @win_messages[rand( @win_messages.length )]
+        reply.gsub!( "<who>", m.sourcenick )
+        reply.gsub!( "<answer>", q.answer )
       end
 
-      m.reply replies[rand( replies.length )]
+      m.reply reply
 
       player = nil
       if q.registry.has_key?( m.sourcenick.to_s )
