@@ -59,6 +59,7 @@ class ScriptPlugin < Plugin
       user = args.empty? ? m.sourcenick : args.first  
 
       Thread.start {
+        # TODO allow different safe levels for different botusers
         $SAFE = 3
 
         begin
@@ -69,6 +70,20 @@ class ScriptPlugin < Plugin
         end
       }
     end
+  end
+
+
+  def handle_eval( m, params )
+    code = params[:code].to_s.dup.untaint
+      Thread.start {
+        # TODO allow different safe levels for different botusers
+        begin
+          eval( code )
+        rescue => e
+          m.reply( "Script '#{name}' crapped out :(" )
+          m.reply( e.inspect )
+        end
+      }
   end
 
 
@@ -140,10 +155,12 @@ end
 plugin = ScriptPlugin.new
 plugin.register( "script" )
 plugin.default_auth( 'edit', false )
+plugin.default_auth( 'eval', false )
 
 plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth_path => 'edit'
 plugin.map 'script add :name *code',    :action => 'handle_add',       :auth_path => 'edit'
 plugin.map 'script del :name',          :action => 'handle_del',       :auth_path => 'edit'
+plugin.map 'script eval *code',         :action => 'handle_eval'
 plugin.map 'script list :page',         :action => 'handle_list',      :defaults => { :page => '1' }
 plugin.map 'script show :name',         :action => 'handle_show'
 

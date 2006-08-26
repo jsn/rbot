@@ -13,6 +13,8 @@
 	be optional too, and default to nil or [] (resp. single- and
 	multi-word parameters) unless an alternative is provided in the
 	:defaults hash for the message map options.
+	* Script plugin: new (UNSAFE!) eval function. Not documented in help.
+	Not permitted by default.
 
 2006-08-25 Mark Kretschmann <markey@web.de>
 
