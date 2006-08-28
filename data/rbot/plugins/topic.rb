@@ -51,7 +51,7 @@ class TopicPlugin < Plugin
       end
     end
     cmd = param[:command]
-    txt = param[:text].join(" ")
+    txt = param[:text].to_s
 
     case cmd
     when /^a(dd|ppend)$/
@@ -208,6 +208,10 @@ class TopicPlugin < Plugin
 
 end
 plugin = TopicPlugin.new
+
 plugin.map 'topic :command *text', :action => 'handletopic', :public => true, :private => false
 plugin.map 'topic :channel :command *text', :action => 'handletopic', :public => false, :private => true
+
+plugin.default_auth('*', false)
+
 
