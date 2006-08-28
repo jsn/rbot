@@ -94,6 +94,7 @@ class TopicPlugin < Plugin
   end
 
   def topicsep(m, ch, txt)
+    return if !@bot.auth.allow?("topic::edit::separator", m.source, m.replyto)
     if txt
       sep = txt.strip
       if sep != ""
@@ -141,6 +142,7 @@ class TopicPlugin < Plugin
   end
 
   def topicaddat(m, channel, num, txt)
+    return if !@bot.auth.allow?("topic::edit::add", m.source, m.replyto)
     sep = getsep(channel)
     topic = channel.topic.to_s
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
@@ -158,6 +160,7 @@ class TopicPlugin < Plugin
   end
 
   def topicdel(m, channel, num)
+    return if !@bot.auth.allow?("topic::edit::del", m.source, m.replyto)
     sep = getsep(channel)
     topic = channel.topic.to_s
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
@@ -167,7 +170,7 @@ class TopicPlugin < Plugin
   end
 
   def learntopic(m, channel)
-    return if !@bot.auth.allow?("learntopic", m.source, m.replyto)
+    return if !@bot.auth.allow?("topic::store::store", m.source, m.replyto)
     topic = channel.topic.to_s
     k = channel.downcase
     if @registry.has_key?(k)
@@ -181,9 +184,9 @@ class TopicPlugin < Plugin
   end
 
   def replacetopic(m, channel, num, txt)
-    return if !@bot.auth.allow?("topic", m.source, m.replyto)
+    return if !@bot.auth.allow?("topic::edit::replace", m.source, m.replyto)
     sep = getsep(channel)
-    topic = @bot.channels[channel].topic.to_s
+    topic = channel.topic.to_s
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray[num] = txt
     newtopic = topicarray.join(" #{sep} ")
@@ -191,18 +194,19 @@ class TopicPlugin < Plugin
   end
 
   def restoretopic(m, channel)
+    return if !@bot.auth.allow?("topic::store::restore", m.source, m.replyto)
     return if !@bot.auth.allow?("restoretopic", m.source, m.replyto)
     k = channel.downcase
     if @registry.has_key?(k) && @registry[k].has_key?(:topic)
       topic = @registry[k][:topic]
-      @bot.topic channel, topic
+      topicset(m, channel, topicl
     else
       m.reply "I don't remember any topic for this channel"
     end
   end
 
   def topicset(m, channel, text)
-    return if !@bot.auth.allow?("topic", m.source, m.replyto)
+    return if !@bot.auth.allow?("topic::edit::replace", m.source, m.replyto)
     @bot.topic channel, text
   end
 
