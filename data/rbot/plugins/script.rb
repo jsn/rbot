@@ -18,17 +18,8 @@ class ScriptPlugin < Plugin
     super
     if @registry.has_key?(:commands)
       @commands = @registry[:commands]
-    end
-    
-    if @commands.nil?
+    else
       @commands = Hash.new
-    end
-
-    # Migrate old Hash to new:
-    @commands.each_pair do |name, cmd|
-      unless cmd.instance_of?( Command )
-        @commands[name] = Command.new( cmd, 'unknown hacker', 'somedate', '#somechan' )
-      end
     end
   end
 
