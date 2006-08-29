@@ -170,6 +170,7 @@ plugin = ScriptPlugin.new
 plugin.register( "script" )
 plugin.default_auth( 'edit', false )
 plugin.default_auth( 'eval', false )
+plugin.default_auth( 'echo', false )
 
 plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth_path => 'edit'
 plugin.map 'script add :name *code',    :action => 'handle_add',       :auth_path => 'edit'
