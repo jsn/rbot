@@ -87,6 +87,20 @@ class ScriptPlugin < Plugin
   end
 
 
+  def handle_echo( m, params )
+    code = params[:code].to_s.dup.untaint
+      Thread.start {
+        # TODO allow different safe levels for different botusers
+        begin
+          m.reply eval( code )
+        rescue => e
+          m.reply( "Script '#{name}' crapped out :(" )
+          m.reply( e.inspect )
+        end
+      }
+  end
+
+
   def handle_add( m, params, force = false )
     name    = params[:name]
     if !force and @commands.has_key?( name )
@@ -161,6 +175,7 @@ plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth_pat
 plugin.map 'script add :name *code',    :action => 'handle_add',       :auth_path => 'edit'
 plugin.map 'script del :name',          :action => 'handle_del',       :auth_path => 'edit'
 plugin.map 'script eval *code',         :action => 'handle_eval'
+plugin.map 'script echo *code',         :action => 'handle_echo'
 plugin.map 'script list :page',         :action => 'handle_list',      :defaults => { :page => '1' }
 plugin.map 'script show :name',         :action => 'handle_show'
 

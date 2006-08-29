@@ -1,3 +1,8 @@
+2006-08-29  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Script plugin: new (UNSAFE!) echo functions. Just like eval, but
+	m.replies the result of the evaluation.
+
 2006-08-26  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Plugin message mapper: new implementation. Multi-word parameters now
