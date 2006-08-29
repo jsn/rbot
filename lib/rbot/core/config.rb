@@ -36,6 +36,7 @@ class ConfigModule < CoreBotModule
       m.reply "no such config key #{key}"
       return
     end
+    return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     value = @bot.config.items[key].to_s
     m.reply "#{key}: #{value}"
   end
@@ -54,6 +55,7 @@ class ConfigModule < CoreBotModule
     unless @bot.config.items.has_key?(key)
       m.reply "no such config key #{key}"
     end
+    return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     @bot.config.items[key].unset
     handle_get(m, params)
     m.reply "this config change will take effect on the next restart" if @bot.config.items[key].requires_restart
@@ -67,6 +69,7 @@ class ConfigModule < CoreBotModule
       m.reply "no such config key #{key}"
       return
     end
+    return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].set_string(value)
     rescue ArgumentError => e
@@ -93,6 +96,7 @@ class ConfigModule < CoreBotModule
       m.reply "config key #{key} is not an array"
       return
     end
+    return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].add(value)
     rescue ArgumentError => e
@@ -115,6 +119,7 @@ class ConfigModule < CoreBotModule
       m.reply "config key #{key} is not an array"
       return
     end
+    return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].rm(value)
     rescue ArgumentError => e
@@ -253,4 +258,8 @@ conf.map 'config help :topic',
 
 conf.default_auth('*', false)
 conf.default_auth('show::status', true)
+# TODO these shouldn't be set here, we need a way to let the default
+# permission be specified together with the BotConfigValue
+conf.default_auth('key', true)
+conf.default_auth('key::auth::password', false)
 

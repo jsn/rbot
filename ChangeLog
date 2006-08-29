@@ -2,6 +2,9 @@
 
 	* Script plugin: new (UNSAFE!) echo functions. Just like eval, but
 	m.replies the result of the evaluation.
+	* New Auth Framework: config keys now have their own permissions. So
+	you can allow people to view or edit only some of the config values.
+	auth.password defaults to false. Still needs some work.
 
 2006-08-26  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

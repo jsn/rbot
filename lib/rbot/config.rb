@@ -25,6 +25,7 @@ module Irc
     attr_reader :requires_rescan
     attr_reader :order
     attr_reader :manager
+    attr_reader :auth_path
     def initialize(key, params)
       @manager = BotConfig::configmanager
       # Keys must be in the form 'module.name'.
@@ -48,6 +49,7 @@ module Irc
       @wizard = params[:wizard]
       @requires_restart = params[:requires_restart]
       @requires_rescan = params[:requires_rescan]
+      @auth_path = "config::key::#{key.sub('.','::')}"
     end
     def default
       if @default.instance_of?(Proc)
