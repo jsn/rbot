@@ -92,7 +92,7 @@ class ScriptPlugin < Plugin
       Thread.start {
         # TODO allow different safe levels for different botusers
         begin
-          m.reply eval( code )
+          m.reply eval( code ).to_s
         rescue => e
           m.reply( "Script '#{name}' crapped out :(" )
           m.reply( e.inspect )
