@@ -199,7 +199,7 @@ class TopicPlugin < Plugin
     k = channel.downcase
     if @registry.has_key?(k) && @registry[k].has_key?(:topic)
       topic = @registry[k][:topic]
-      topicset(m, channel, topicl
+      topicset(m, channel, topic)
     else
       m.reply "I don't remember any topic for this channel"
     end
