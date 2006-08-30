@@ -53,6 +53,23 @@ class Map
 end
 
 
+class Objects < Array
+
+  def find_by_name( name )
+    object = nil
+    each do |o|
+      if o.name == name
+        object = o
+        break
+      end
+    end
+
+    return object
+  end
+
+end
+
+
 class Game
 
   attr_accessor :channel, :objects, :map, :party_pos
@@ -60,7 +77,7 @@ class Game
   def initialize( channel, bot )
     @channel = channel
     @bot = bot
-    @objects = Hash.new
+    @objects = Objects.new
     @party_pos = Position.new
 
     @map = Map.new
@@ -89,7 +106,7 @@ class Game
 
   def set_players_pos( x, y )
     debug( "set_players_pos(): #{x}  #{y}" )
-    @objects.each_value { |c| c.pos.x, c.pos.y = x, y if c.instance_of?( Player ) }
+    @objects.each { |c| c.pos.x, c.pos.y = x, y if c.instance_of?( Player ) }
   end
      
 
@@ -97,15 +114,10 @@ class Game
     o = klass.new
     if name
       o.name = name
-    else
-      # Make sure we have unique names for all objects: orc1, orc2.. 
-      a = [0]
-      objects.each_value { |x| a << x.name[-1,1].to_i if x.name.include? o.name }
-      o.name += ( a.sort.last + 1).to_s
     end
 
-    objects[o.name] = o
-    o
+    objects << o
+    return o
   end
 
 
@@ -148,16 +160,16 @@ class RpgPlugin < Plugin
 
   def schedule( g )
     # Check for death:
-    g.objects.each_value do |p|
+    g.objects.each do |p|
       next unless p.kind_of?( Creature )
       if p.hp < 0
         g.say( "#{p.name} dies from his injuries." )
-        g.objects.delete( p.name )        
+        g.objects.delete( p )        
       end  
     end
 
     # Let monsters act:
-    g.objects.each_value do |p|
+    g.objects.each do |p|
       if p.is_a?( Monster )
         p.act( g )
       end
@@ -166,7 +178,8 @@ class RpgPlugin < Plugin
 
 
   def spawned?( g, nick )
-    if g.objects.has_key?( nick )
+    object = g.objects.find_by_name( nick )
+    if object
       return true
     else
       g.say( "You have not joined the game. Use 'rpg' to join." )
@@ -176,7 +189,8 @@ class RpgPlugin < Plugin
 
 
   def target_spawned?( g, target )
-    if g.objects.has_key?( target )
+    object = g.objects.find_by_name( target )
+    if object
       return true
     else  
       g.say( "There is noone named #{target} near.." )
@@ -184,6 +198,13 @@ class RpgPlugin < Plugin
     end
   end
 
+
+  # Returns an array of objects at the same coordinates as p
+  def objects_near( g, p )
+    objects = []
+    g.objects.each { |o| objects << o if (o.pos == p.pos and o != p) }
+    return objects
+  end
 
 #####################################################################
 # Command Handlers
@@ -221,17 +242,16 @@ class RpgPlugin < Plugin
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
 
-    p = g.objects[m.sourcenick]
+    p = g.objects.find_by_name( m.sourcenick )
     x, y = p.pos.x, p.pos.y
-    objects_near = []
-    g.objects.each_value { |o| debug( o.pos ); objects_near << o if (o.pos == p.pos and o != p) }
+    near = objects_near( g, p )
 
     if params[:object] == nil
-      if objects_near.empty?
+      if near.empty?
         m.reply( "#{m.sourcenick}: You are alone." )
       else
         names = []
-        objects_near.each { |o| names << o.name }
+        near.each { |o| names << o.name }
         m.reply( "#{m.sourcenick}: You see the following objects: #{names.join( ', ' )}." )
       end
 
@@ -247,8 +267,7 @@ class RpgPlugin < Plugin
 
       m.reply( "In the north is #{north}, east is #{east}, south is #{south}, and in the west you see #{west}." )
     else
-      p = nil
-      g.objects.each_value { |o| p = o if o.name == params[:object] }
+      p = g.objects.find_by_name( params[:object] )
       if p == nil
         m.reply( "#{m.sourcenick}: There is no #{params[:object]} here." )
       else
@@ -310,13 +329,12 @@ class RpgPlugin < Plugin
     str += " (Exits: #{exits.join(', ')})"
     m.reply( str )
 
-    p = g.objects[m.sourcenick]
-    objects_near = []
-    g.objects.each_value { |o| objects_near << o if o.pos == p.pos and o != p }
+    p = g.objects.find_by_name m.sourcenick
+    near = objects_near( g, p )
 
-    unless objects_near.empty?
-      objects_near.each do |o|
-        m.reply "You encounter a #{o.object_type}! ('#{o.name}')"
+    unless near.empty?
+      near.each do |o|
+        m.reply "You encounter a #{o.object_type}!"
       end
     end
   end
