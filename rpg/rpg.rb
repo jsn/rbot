@@ -178,8 +178,7 @@ class RpgPlugin < Plugin
 
 
   def spawned?( g, nick )
-    object = g.objects.find_by_name( nick )
-    if object
+    if g.objects.find_by_name( nick )
       return true
     else
       g.say( "You have not joined the game. Use 'rpg' to join." )
@@ -189,8 +188,7 @@ class RpgPlugin < Plugin
 
 
   def target_spawned?( g, target )
-    object = g.objects.find_by_name( target )
-    if object
+    if g.objects.find_by_name( target )
       return true
     else  
       g.say( "There is noone named #{target} near.." )
@@ -251,7 +249,7 @@ class RpgPlugin < Plugin
         m.reply( "#{m.sourcenick}: You are alone." )
       else
         names = []
-        near.each { |o| names << o.name }
+        near.each { |o| names << o.object_type }
         m.reply( "#{m.sourcenick}: You see the following objects: #{names.join( ', ' )}." )
       end
 
@@ -267,11 +265,17 @@ class RpgPlugin < Plugin
 
       m.reply( "In the north is #{north}, east is #{east}, south is #{south}, and in the west you see #{west}." )
     else
-      p = g.objects.find_by_name( params[:object] )
-      if p == nil
-        m.reply( "#{m.sourcenick}: There is no #{params[:object]} here." )
-      else
+      p = nil
+      near.each do |foo|
+        if foo.object_type.downcase == params[:object].downcase
+          p = foo
+          break
+        end        
+      end
+      if p
         m.reply( "#{m.sourcenick}: #{p.description}" )   
+      else
+        m.reply( "#{m.sourcenick}: There is no #{params[:object]} here." )
       end
     end  
   end
@@ -353,9 +357,16 @@ class RpgPlugin < Plugin
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
     
-    p = g.objects[m.sourcenick]
+    p = g.objects.find_by_name m.sourcenick
+    near = objects_near( g, p )
+
     t = nil
-    g.objects.each_value { |o| t = o if o.name == params[:object] and o.pos == p.pos }
+    near.each do |foo|
+      if foo.object_type.downcase == params[:object].downcase
+        t = foo
+        break
+      end        
+    end
 
     if t == nil
       m.reply "#{m.sourcenick}: There is no #{params[:object]} here."
@@ -376,16 +387,15 @@ class RpgPlugin < Plugin
   def handle_inventory( m, params )
     g = get_game( m )
     return unless spawned?( g, m.sourcenick )
-    p = g.objects[m.sourcenick]
+    p = g.objects.find_by_name m.sourcenick
 
     if p.inventory.empty?
       m.reply "#{m.sourcenick}: You don't carry any objects."
-      return
+    else
+      stuff = []
+      p.inventory.each { |i| stuff << i.object_type } 
+      m.reply "#{m.sourcenick}: You carry: #{stuff.join(' ')}"
     end
-
-    names = []
-    p.inventory.each { |i| names << i.name } 
-    m.reply "#{m.sourcenick}: You carry: #{names.join(' ')}"
   end
 
 end

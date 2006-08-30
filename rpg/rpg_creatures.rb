@@ -124,7 +124,6 @@ class Orc < Monster
   def initialize
     super
 
-    @name = "orc"
     @object_type = "Orc"
     @hp = 14
     @thac0 = 19
@@ -145,7 +144,6 @@ class Slime < Monster
   def initialize
     super
 
-    @name = "slime"
     @object_type = "Slime"
     @hp = 8
     @thac0 = 19
@@ -168,7 +166,6 @@ class Sword < Weapon
   def initialize
     super
 
-    @name = "sword"
     @object_type = "Sword"
     @description = "A metal sword"
   end
