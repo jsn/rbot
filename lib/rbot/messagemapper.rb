@@ -305,7 +305,7 @@ module Irc
       return nil, "#{m.message.inspect} doesn't match #{@dyn_items.first.inspect} (#{@regexp})" unless matching
       return nil, "#{m.message.inspect} only matches #{@dyn_items.first.inspect} (#{@regexp}) partially" unless matching[0] == m.message
 
-      debug_match = matching[1..-1].collect{ |m| m.inspect}.join(', ')
+      debug_match = matching[1..-1].collect{ |d| d.inspect}.join(', ')
       debug "#{m.message.inspect} matched #{@regexp} with #{debug_match}"
       debug "Associating #{debug_match} with dyn items #{@dyn_items[1..-1].join(', ')}"
 
