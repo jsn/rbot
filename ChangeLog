@@ -1,3 +1,10 @@
+2006-08-31  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Nickserv plugin: bot will now try to inform nickserv when password
+	is changed. Moreover it's not necessary to specify the nick anymore if
+	you want to change the password for the current bot nick. Also do some
+	internal cleanups while we're at it.
+
 2006-08-29  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Script plugin: new (UNSAFE!) echo functions. Just like eval, but

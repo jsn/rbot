@@ -62,13 +62,23 @@ class NickServPlugin < Plugin
     set_ident_request(@bot.config['nickserv.ident_request'])
   end
 
+  # Returns the nickserv name
+  def ns_nick
+    @bot.config['nickserv.name']
+  end
+
+  # say something to nickserv
+  def ns_say(msg)
+    @bot.say ns_nick, msg
+  end
+
   def password(m, params)
     nick = params[:nick] || @bot.nick
     passwd = params[:passwd]
     if nick == @bot.nick
-      @bot.say @bot.config['nickserv.name'], "SET PASSWORD #{passwd}"
+      ns_say "SET PASSWORD #{passwd}"
     else
-      m.reply "I'm only changing this in my database, I won't inform #{@bot.config['nickserv.name']} of the change"
+      m.reply "I'm only changing this in my database, I won't inform #{ns_nick} of the change"
     end
     @registry[nick] = passwd
     m.okay
@@ -78,7 +88,7 @@ class NickServPlugin < Plugin
     passwd = params[:passwd] ? params[:passwd] : genpasswd
     message = "REGISTER #{passwd}"
     message += " #{params[:email]}" if params[:email]
-    @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], message
+    ns_say message
     @registry[@bot.nick] = passwd
     m.okay
   end
@@ -96,10 +106,10 @@ class NickServPlugin < Plugin
   def do_identify(nick=@bot.nick)
     if @registry.has_key?(nick)
       if @bot.config['nickserv.wants_nick']
-        @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{nick} #{@registry[nick]}"
+        ns_say "IDENTIFY #{nick} #{@registry[nick]}"
       else
         if nick == @bot.nick
-          @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "IDENTIFY #{@registry[nick]}"
+          ns_say "IDENTIFY #{@registry[nick]}"
         else
           # We cannot identify for different nicks if we can't use the nickname ...
           return false
@@ -107,14 +117,20 @@ class NickServPlugin < Plugin
       end
       return true
     end
-    return false
+    return nil
   end
 
   def identify(m, params)
-    if do_identify
+    ided = do_identify
+    case ided
+    when true
       m.okay
-    else
+    when false
+      m.reply "I cannot identify for a this nick"
+    when nil
       m.reply "I dunno the nickserv password for the nickname #{@bot.nick} :("
+    else
+      m.reply "uh ... something went wrong ..."
     end
   end
   
@@ -124,7 +140,7 @@ class NickServPlugin < Plugin
   
   def nicktaken(nick)
     if @registry.has_key?(nick)
-      @bot.sendmsg "PRIVMSG", @bot.config['nickserv.name'], "GHOST #{nick} #{@registry[nick]}"
+      ns_say "GHOST #{nick} #{@registry[nick]}"
       if do_identify nick
         sleep @bot.config['nickserv.wait']
         @bot.nickchg nick
@@ -141,7 +157,7 @@ class NickServPlugin < Plugin
   def listen(m)
     return unless(m.kind_of? NoticeMessage)
 
-    if (m.sourcenick == @bot.config['nickserv.name'] && m.message =~ @ident_request)
+    if (m.sourcenick == ns_nick && m.message =~ @ident_request)
       debug "nickserv asked us to identify for nick #{@bot.nick}"
       do_identify
     end
