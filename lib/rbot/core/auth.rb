@@ -140,7 +140,13 @@ class AuthModule < CoreBotModule
 
   def auth_view_perm(m, params)
     begin
-      user = @bot.auth.get_botuser(params[:user].sub(/^all$/,"everyone"))
+      if params[:user].nil?
+        user = get_botusername_for(m.source)
+        return m.reply("you are owner, you can do anything") if user == @bot.auth.botwoner
+      else
+        user = @bot.auth.get_botuser(params[:user].sub(/^all$/,"everyone"))
+        return m.reply("owner can do anything") if user.username == "owner" 
+      end
     rescue
       return m.reply("couldn't find botuser #{params[:user]}")
     end
@@ -231,8 +237,10 @@ class AuthModule < CoreBotModule
       case topic
       when "syntax"
         return "a permission is specified as module::path::to::cmd; when you want to enable it, prefix it with +; when you want to disable it, prefix it with -; when using the +reset+ command, do not use any prefix"
-      else
-        return "permissions (re)set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
+      when "set", "reset", "[re]set", "(re)set"
+        return "permissions [re]set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
+      when "view"
+        return "permissions view [for <user>]: display the permissions for user <user>"
       end
     when "user"
       case topic
@@ -258,7 +266,7 @@ class AuthModule < CoreBotModule
         return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy"
       end
     else
-      return "#{name}: login, whoami, permission syntax, permissions, user"
+      return "#{name}: login, whoami, permission syntax, permissions [re]set, permissions view, user"
     end
   end
 
@@ -793,7 +801,7 @@ auth.map "permissions reset *args",
   :action => 'auth_edit_perm',
   :auth_path => ':edit::reset:'
 
-auth.map "permissions view for :user",
+auth.map "permissions view [for :user]",
   :action => 'auth_view_perm',
   :auth_path => '::'
 

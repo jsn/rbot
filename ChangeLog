@@ -1,3 +1,8 @@
+2006-09-01  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* New Auth Framework: document and fine tune permissions view the auth
+	core botmodule.
+
 2006-08-31  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Nickserv plugin: bot will now try to inform nickserv when password
