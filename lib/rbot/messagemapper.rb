@@ -240,11 +240,11 @@ module Irc
       raise ArgumentError, "template #{str.inspect} should be a String" unless str.kind_of?(String)
 
       # split and convert ':xyz' to symbols
-      items = str.strip.split(/\s+/).collect { |c|
+      items = str.strip.split(/\]?\s+\[?/).collect { |c|
+        # there might be extra (non-alphanumeric) stuff (e.g. punctuation) after the symbol name
         if /^(:|\*)(\w+)(.*)/ =~ c
-          # there might be extra (non-alphanumeric) stuff (e.g. punctuation) after the symbol name
           sym = ($1 == ':' ) ? $2.intern : "*#{$2}".intern
-          if $3.nil?
+          if $3.empty?
             sym
           else
             [sym, $3]
@@ -353,7 +353,7 @@ module Irc
             end
           else
             value = @defaults[item]
-            warning "No default value for optiona #{item.inspect} specified" unless @defaults.has_key?(item)
+            warning "No default value for option #{item.inspect} specified" unless @defaults.has_key?(item)
           end
           options[item] = value
           debug "set #{item} to #{options[item].inspect}"
