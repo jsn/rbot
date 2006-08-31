@@ -25,7 +25,7 @@ class NickServPlugin < Plugin
     when ""
       return "nickserv plugin: handles nickserv protected IRC nicks. topics password, register, identify, listnicks"
     when "password"
-      return "nickserv password <nick> <passwd>: remember the password for nick <nick> and use it to identify in future"
+      return "nickserv password [<nick>] <passwd>: remember the password for nick <nick> and use it to identify in future"
     when "register"
       return "nickserv register [<password> [<email>]]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work. Also specify email if required by your services"
     when "identify"
