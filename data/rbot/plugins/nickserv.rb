@@ -63,7 +63,14 @@ class NickServPlugin < Plugin
   end
 
   def password(m, params)
-    @registry[params[:nick]] = params[:passwd]
+    nick = params[:nick] || @bot.nick
+    passwd = params[:passwd]
+    if nick == @bot.nick
+      @bot.say @bot.config['nickserv.name'], "SET PASSWORD #{passwd}"
+    else
+      m.reply "I'm only changing this in my database, I won't inform #{@bot.config['nickserv.name']} of the change"
+    end
+    @registry[nick] = passwd
     m.okay
   end
 
@@ -142,7 +149,7 @@ class NickServPlugin < Plugin
 
 end
 plugin = NickServPlugin.new
-plugin.map 'nickserv password :nick :passwd', :action => "password"
+plugin.map 'nickserv password [:nick] :passwd', :action => "password"
 plugin.map 'nickserv register :passwd :email', :action => 'nick_register',
            :defaults => {:passwd => false, :email => false}
 plugin.map 'nickserv listnicks', :action => "listnicks"
