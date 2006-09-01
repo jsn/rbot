@@ -2,6 +2,8 @@
 
 	* New Auth Framework: document and fine tune permissions view the auth
 	core botmodule.
+	* Version: when run from a svn checkout, the bot now tries to report
+	which svn revision it's at, and if there are local changes
 
 2006-08-31  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

@@ -32,6 +32,25 @@ require 'fileutils'
 $version="0.9.11-svn"
 $opts = Hash.new
 
+if $version =~ /svn/
+  up = File.dirname(__FILE__) + "/.."
+  rev = " (unknown revision)"
+  begin
+    svn_out = `svn info #{up}`
+    if svn_out =~ /Last Changed Rev: (\d+)/
+      rev = " (revision #{$1}"
+    end
+    svn_st = `svn st #{up}`
+    if svn_st =~ /^M /
+      rev << ", local changes"
+    end
+    rev << ")"
+  rescue => e
+    puts e.inspect
+  end
+  $version += rev
+end
+
 orig_opts = ARGV.dup
 
 opts = GetoptLong.new(
