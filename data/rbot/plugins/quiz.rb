@@ -264,7 +264,7 @@ class QuizPlugin < Plugin
       elsif    q.rank_table.length >= 3 and m.sourcenick.to_s == q.rank_table[2][0]
         reply = "THE THIRD CHAMPION strikes again! Give it all #{m.sourcenick.to_s}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
       else
-        reply = @win_messages[rand( @win_messages.length )]
+        reply = @win_messages[rand( @win_messages.length )].dup
         reply.gsub!( "<who>", m.sourcenick )
         reply.gsub!( "<answer>", q.answer )
       end
