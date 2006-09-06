@@ -213,8 +213,8 @@ class TopicPlugin < Plugin
 end
 plugin = TopicPlugin.new
 
-plugin.map 'topic :command *text', :action => 'handletopic', :public => true, :private => false
-plugin.map 'topic :channel :command *text', :action => 'handletopic', :public => false, :private => true
+plugin.map 'topic :command [*text]', :action => 'handletopic', :public => true, :private => false
+plugin.map 'topic :channel :command [*text]', :action => 'handletopic', :public => false, :private => true
 
 plugin.default_auth('*', false)
 
