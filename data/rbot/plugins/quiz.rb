@@ -482,8 +482,10 @@ class QuizPlugin < Plugin
 
   def cmd_top5( m, params )
     q = create_quiz( m.target.to_s )
-
-    debug q.rank_table.inspect
+    if q.rank_table.empty?
+      m.reply "There are no scores known yet!"
+      return
+    end
 
     m.reply "* Top 5 Players for #{m.target.to_s}:"
 
@@ -500,8 +502,10 @@ class QuizPlugin < Plugin
     num = params[:number].to_i
     return unless 1..50 === num
     q = create_quiz( m.target.to_s )
-
-    debug q.rank_table.inspect
+    if q.rank_table.empty?
+      m.reply "There are no scores known yet!"
+      return
+    end
 
     ar = []
     m.reply "* Top #{num} Players for #{m.target.to_s}:"
@@ -512,13 +516,7 @@ class QuizPlugin < Plugin
       score = player[1].score
       ar << "#{i + 1}. #{unhilight_nick( nick )} (#{score})"
     end
-    str = ar.join(" | ")
-
-    if str.empty?
-      m.reply "Noone in #{m.target.to_s} has a score!"
-    else
-      m.reply str
-    end
+    m.reply ar.join(" | ")
   end
 
 
