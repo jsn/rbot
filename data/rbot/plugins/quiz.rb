@@ -199,46 +199,58 @@ class QuizPlugin < Plugin
   end
 
 
-  # Updates the per-channel rank table, which is kept for performance reasons
+  # Updates the per-channel rank table, which is kept for performance reasons.
+  # This table contains all players sorted by rank.
   #
   def calculate_ranks( m, q, nick )
     if q.registry.has_key?( nick )
       stats = q.registry[nick]
 
       # Find player in table
+      found_player = false
       i = 0
       q.rank_table.each_index do |i|
-        break if nick == q.rank_table[i][0]
+        if nick == q.rank_table[i][0]
+          found_player = true
+          break
+        end
       end
 
-      old_rank = i
-      q.rank_table.delete_at( i )
+      # Remove player from old position
+      if found_player
+        old_rank = i
+        q.rank_table.delete_at( i )
+      else
+        old_rank = nil
+      end
 
       # Insert player at new position
       inserted = false
       q.rank_table.each_index do |i|
-        if stats.score >= q.rank_table[i][1].score
+        if stats.score > q.rank_table[i][1].score
           q.rank_table[i,0] = [[nick, stats]]
           inserted = true
           break
         end
       end
 
-      # If less than all other players' scores, append at the end
+      # If less than all other players' scores, append to table 
       unless inserted
+        i += 1 unless q.rank_table.empty?
         q.rank_table << [nick, stats]
-        i += 1
       end
 
-      if i < old_rank
-        m.reply "#{nick} ascends to rank #{i + 1}. Congratulations :)"
-      elsif i > old_rank
-        m.reply "#{nick} slides down to rank #{i + 1}. So Sorry! NOT. :p"
+      # Print congratulations/condolences if the player's rank has changed
+      unless old_rank.nil?
+        if i < old_rank
+          m.reply "#{nick} ascends to rank #{i + 1}. Congratulations :)"
+        elsif i > old_rank
+          m.reply "#{nick} slides down to rank #{i + 1}. So Sorry! NOT. :p"
+        end
       end
     else
       q.rank_table << [[nick, PlayerStats.new( 1 )]]
     end
-    debug q.rank_table.inspect
   end
 
 
