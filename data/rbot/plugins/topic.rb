@@ -31,8 +31,10 @@ class TopicPlugin < Plugin
         return "topic clear => clears the topic"
       when "set"
         return "topic set <text> => sets the topic to <text>"
+      when "undo"
+        return "topic undo => undoes the latest change to the topic"
       else
-        return "topic add(at)|prepend|del(ete)|replace|sep(arator)|learn|restore|clear|set: " + \
+        return "topic add(at)|prepend|del(ete)|replace|sep(arator)|learn|restore|clear|set|undo: " + \
                "manipulate the topic of the current channel; use topic <#channel> <command> " + \
                "for private addressing"
       end
@@ -88,6 +90,8 @@ class TopicPlugin < Plugin
       end
     when 'restore'
       restoretopic(m, ch)
+    when 'undo'
+      undotopic(m, ch)
     else
       m.reply 'unknown command'
     end
@@ -141,14 +145,14 @@ class TopicPlugin < Plugin
     return @separator
   end
 
-  def topicaddat(m, channel, num, txt)
+  def topicaddat(m, ch, num, txt)
     return if !@bot.auth.allow?("topic::edit::add", m.source, m.replyto)
-    sep = getsep(channel)
-    topic = channel.topic.to_s
+    sep = getsep(ch)
+    topic = ch.topic.text
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray.insert(num, txt)
     newtopic = topicarray.join(" #{sep} ")
-    @bot.topic channel, newtopic
+    changetopic(m, ch, newtopic)
   end
 
   def topicappend(m, ch, txt)
@@ -159,20 +163,20 @@ class TopicPlugin < Plugin
     topicaddat(m, ch, 0, txt)
   end
 
-  def topicdel(m, channel, num)
+  def topicdel(m, ch, num)
     return if !@bot.auth.allow?("topic::edit::del", m.source, m.replyto)
-    sep = getsep(channel)
-    topic = channel.topic.to_s
+    sep = getsep(ch)
+    topic = ch.topic.text
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray.delete_at(num)
     newtopic = topicarray.join(" #{sep} ")
-    @bot.topic channel, newtopic
+    changetopic(m, ch, newtopic)
   end
 
-  def learntopic(m, channel)
+  def learntopic(m, ch)
     return if !@bot.auth.allow?("topic::store::store", m.source, m.replyto)
-    topic = channel.topic.to_s
-    k = channel.downcase
+    topic = ch.topic.text
+    k = ch.downcase
     if @registry.has_key?(k)
       data = @registry[k]
     else
@@ -183,30 +187,59 @@ class TopicPlugin < Plugin
     m.okay
   end
 
-  def replacetopic(m, channel, num, txt)
+  def replacetopic(m, ch, num, txt)
     return if !@bot.auth.allow?("topic::edit::replace", m.source, m.replyto)
-    sep = getsep(channel)
-    topic = channel.topic.to_s
+    sep = getsep(ch)
+    topic = ch.topic.text
     topicarray = topic.split(/\s+#{Regexp.escape(sep)}\s*/)
     topicarray[num] = txt
     newtopic = topicarray.join(" #{sep} ")
-    @bot.topic channel, newtopic
+    changetopic(m, ch, newtopic)
   end
 
-  def restoretopic(m, channel)
+  def restoretopic(m, ch)
     return if !@bot.auth.allow?("topic::store::restore", m.source, m.replyto)
-    k = channel.downcase
+    k = ch.downcase
     if @registry.has_key?(k) && @registry[k].has_key?(:topic)
       topic = @registry[k][:topic]
-      topicset(m, channel, topic)
+      topicset(m, ch, topic)
     else
-      m.reply "I don't remember any topic for this channel"
+      m.reply "I don't remember any topic for #{ch}"
     end
   end
 
-  def topicset(m, channel, text)
+  def topicset(m, ch, text)
     return if !@bot.auth.allow?("topic::edit::replace", m.source, m.replyto)
-    @bot.topic channel, text
+    changetopic(m, ch, text)
+  end
+
+  # This method changes the topic on channel +ch+ to +text+, storing
+  # the previous topic for undo
+  def changetopic(m, ch, text)
+    k = ch.downcase
+    if @registry.has_key?(k)
+      data = @registry[k]
+    else
+      data = Hash.new
+    end
+
+    data[:oldtopic] = ch.topic.text
+    @registry[k] = data
+
+    @bot.topic ch, text
+  end
+
+  def undotopic(m, ch)
+    k = ch.downcase
+    if @registry.has_key?(k)
+      data = @registry[k]
+      if data.has_key?(:oldtopic)
+        changetopic(m, ch, data[:oldtopic].dup)
+        return
+      end
+    end
+
+    m.reply "No recent changes were recorded for #{ch}"
   end
 
 end
