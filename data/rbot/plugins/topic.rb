@@ -121,7 +121,7 @@ class TopicPlugin < Plugin
 
     if sep != oldsep and topicarray.length > 0
       newtopic = topicarray.join(" #{sep} ")
-      @bot.topic ch, newtopic
+      @bot.topic ch, newtopic if newtopic != topic
     end
 
     data[:separator] = sep
@@ -195,7 +195,6 @@ class TopicPlugin < Plugin
 
   def restoretopic(m, channel)
     return if !@bot.auth.allow?("topic::store::restore", m.source, m.replyto)
-    return if !@bot.auth.allow?("restoretopic", m.source, m.replyto)
     k = channel.downcase
     if @registry.has_key?(k) && @registry[k].has_key?(:topic)
       topic = @registry[k][:topic]
