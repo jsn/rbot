@@ -1,3 +1,10 @@
+2006-09-21  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* New Auth Framework: restore backwards compatibility: 'auth
+	<masterpassword>' and 'login owner <masterpassword>' both work.
+	* Topic plugin: cleanups. Implement 'topic undo'. 'topic undo' after a
+	'topic undo' undoes the last undo.
+
 2006-09-09  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* New Auth Framework: rbot was opping anyone who asked for it (opme
