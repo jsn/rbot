@@ -188,6 +188,11 @@ class AuthModule < CoreBotModule
     "welcome, #{get_botusername_for(user)}"
   end
 
+  def auth_auth(m, params)
+    params[:botuser] = 'owner'
+    auth_login(m,params)
+  end
+
   def auth_login(m, params)
     begin
       case @bot.auth.login(m.source, params[:botuser], params[:password])
@@ -778,6 +783,11 @@ auth.default_auth("edit::other", false)
 auth.map "whoami",
   :action => 'auth_whoami',
   :auth_path => '!*!'
+
+auth.map "auth :password",
+  :action => 'auth_auth',
+  :public => false,
+  :auth_path => '!login!'
 
 auth.map "login :botuser :password",
   :action => 'auth_login',
