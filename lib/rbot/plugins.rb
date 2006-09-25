@@ -98,21 +98,23 @@ module Plugins
 
   class BotModule
     attr_reader :bot   # the associated bot
-    attr_reader :botmodule_class # the botmodule class (:coremodule or :plugin)
 
     # initialise your bot module. Always call super if you override this method,
     # as important variables are set up for you
-    def initialize(kl)
+    def initialize
       @manager = Plugins::pluginmanager
       @bot = @manager.bot
 
-      @botmodule_class = kl.to_sym
       @botmodule_triggers = Array.new
 
       @handler = MessageMapper.new(self)
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
 
       @manager.add_botmodule(self)
+    end
+
+    def botmodule_class
+      :BotModule
     end
 
     def flush_registry
@@ -183,6 +185,11 @@ module Plugins
       name
     end
 
+    # intern the name
+    def to_sym
+      self.name.to_sym
+    end
+
     # return a help string for your module. for complex modules, you may wish
     # to break your help into topics, and return a list of available topics if
     # +topic+ is nil. +plugin+ is passed containing the matching prefix for
@@ -197,7 +204,11 @@ module Plugins
     # message prefixes
     def register(cmd, opts={})
       raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
-      return if @manager.knows?(cmd, @botmodule_class)
+      who = @manager.who_handles?(cmd)
+      if who
+        raise "Command #{cmd} is already handled by #{who.botmodule_class} #{who}" if who != self
+        return
+      end
       if opts.has_key?(:auth)
         @manager.register(self, cmd, opts[:auth])
       else
@@ -215,14 +226,14 @@ module Plugins
   end
 
   class CoreBotModule < BotModule
-    def initialize
-      super(:coremodule)
+    def botmodule_class
+      :CoreBotModule
     end
   end
 
   class Plugin < BotModule
-    def initialize
-      super(:plugin)
+    def botmodule_class
+      :Plugin
     end
   end
 
@@ -242,15 +253,11 @@ module Plugins
     # Reset lists of botmodules
     def reset_botmodule_lists
       @botmodules = {
-        :coremodule => [],
-        :plugin => []
+        :CoreBotModule => [],
+        :Plugin => []
       }
-
-      @commandmappers = {
-        :coremodule => {},
-        :plugin => {}
-      }
-
+      @names_hash = Hash.new
+      @commandmappers = Hash.new
     end
 
     # Associate with bot _bot_
@@ -259,47 +266,52 @@ module Plugins
       @bot = bot
     end
 
-    # Returns +true+ if _name_ is a known botmodule of class kl
-    def knows?(name, kl)
-      return @commandmappers[kl.to_sym].has_key?(name.to_sym)
+    # Returns the botmodule with the given _name_
+    def [](name)
+      @names_hash[name.to_sym]
+    end
+
+    # Returns +true+ if _cmd_ has already been registered as a command
+    def who_handles?(cmd)
+      return nil unless @commandmappers.has_key?(cmd.to_sym)
+      return @commandmappers[cmd.to_sym][:botmodule]
     end
 
     # Registers botmodule _botmodule_ with command _cmd_ and command path _auth_path_
     def register(botmodule, cmd, auth_path)
       raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.kind_of?(BotModule)
-      kl = botmodule.botmodule_class
-      @commandmappers[kl.to_sym][cmd.to_sym] = {:botmodule => botmodule, :auth => auth_path}
-      h = @commandmappers[kl.to_sym][cmd.to_sym]
-      # debug "Registered command mapper for #{cmd.to_sym} (#{kl.to_sym}): #{h[:botmodule].name} with command path #{h[:auth]}"
+      @commandmappers[cmd.to_sym] = {:botmodule => botmodule, :auth => auth_path}
     end
 
     def add_botmodule(botmodule)
       raise TypeError, "Argument #{botmodule.inspect} is not of class BotModule" unless botmodule.kind_of?(BotModule)
       kl = botmodule.botmodule_class
-      raise "#{kl.to_s} #{botmodule.name} already registered!" if @botmodules[kl.to_sym].include?(botmodule)
-      @botmodules[kl.to_sym] << botmodule
+      if @names_hash.has_key?(botmodule.to_sym)
+        case self[botmodule].botmodule_class
+        when kl
+          raise "#{kl} #{botmodule} already registered!"
+        else
+          raise "#{self[botmodule].botmodule_class} #{botmodule} already registered, cannot re-register as #{kl}"
+        end
+      end
+      @botmodules[kl] << botmodule
+      @names_hash[botmodule.to_sym] = botmodule
     end
 
     # Returns an array of the loaded plugins
     def core_modules
-      @botmodules[:coremodule]
+      @botmodules[:CoreBotModule]
     end
 
     # Returns an array of the loaded plugins
     def plugins
-      @botmodules[:plugin]
+      @botmodules[:Plugin]
     end
 
     # Returns a hash of the registered message prefixes and associated
     # plugins
-    def plugin_commands
-      @commandmappers[:plugin]
-    end
-
-    # Returns a hash of the registered message prefixes and associated
-    # core modules
-    def core_commands
-      @commandmappers[:coremodule]
+    def commands
+      @commandmappers
     end
 
     # Makes a string of error _err_ by adding text _str_
@@ -505,20 +517,7 @@ module Plugins
         key = $1
         params = $2
 
-	# We test for the mapped commands first
-        k = key.to_sym
-        [core_commands, plugin_commands].each { |pl|
-          next unless pl.has_key?(k)
-          p = pl[k][:botmodule] 
-          begin
-            return p.help(key, params)
-          rescue Exception => err
-            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
-            error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
-          end
-        }
-
-	# If no such commmand was found, we look for a botmodule with that name
+	# Let's see if we can match a plugin by the given name
         (core_modules + plugins).each { |p|
 	  next unless p.name == key
           begin
@@ -528,6 +527,18 @@ module Plugins
             error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
           end
         }
+
+	# Nope, let's see if it's a command, and ask for help at the corresponding botmodule
+        k = key.to_sym
+        if commands.has_key?(k)
+          p = commands[k][:botmodule] 
+          begin
+            return p.help(p.name, topic)
+          rescue Exception => err
+            #rescue TimeoutError, StandardError, NameError, SyntaxError => err
+            error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
+          end
+        end
       end
       return false
     end
@@ -558,45 +569,34 @@ module Plugins
     def privmsg(m)
       # debug "Delegating privmsg #{m.message.inspect} from #{m.source} to #{m.replyto} with pluginkey #{m.plugin.inspect}"
       return unless m.plugin
-      [core_commands, plugin_commands].each { |pl|
-        # We do it this way to skip creating spurious keys
-        # FIXME use fetch?
-        k = m.plugin.to_sym
-        if pl.has_key?(k)
-          p = pl[k][:botmodule]
-          a = pl[k][:auth]
-        else
-          p = nil
-          a = nil
-        end
-        if p
-          # We check here for things that don't check themselves
-          # (e.g. mapped things)
-          # debug "Checking auth ..."
-          if a.nil? || @bot.auth.allow?(a, m.source, m.replyto)
-            # debug "Checking response ..."
-            if p.respond_to?("privmsg")
-              begin
-                # debug "#{p.botmodule_class} #{p.name} responds"
-                p.privmsg(m)
-              rescue Exception => err
-                raise if err.kind_of?(SystemExit)
-                error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
-                raise if err.kind_of?(BDB::Fatal)
-              end
-              # debug "Successfully delegated #{m.message}"
-              return true
-            else
-              # debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
+      k = m.plugin.to_sym
+      if commands.has_key?(k)
+        p = commands[k][:botmodule]
+        a = commands[k][:auth]
+        # We check here for things that don't check themselves
+        # (e.g. mapped things)
+        # debug "Checking auth ..."
+        if a.nil? || @bot.auth.allow?(a, m.source, m.replyto)
+          # debug "Checking response ..."
+          if p.respond_to?("privmsg")
+            begin
+              # debug "#{p.botmodule_class} #{p.name} responds"
+              p.privmsg(m)
+            rescue Exception => err
+              raise if err.kind_of?(SystemExit)
+              error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
+              raise if err.kind_of?(BDB::Fatal)
             end
+            # debug "Successfully delegated #{m.message}"
+            return true
           else
-            # debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
+            # debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
           end
         else
-          # debug "No #{pl.values.first[:botmodule].botmodule_class} registered #{m.plugin.inspect}" unless pl.empty?
+          # debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
         end
-        # debug "Finished delegating privmsg with key #{m.plugin.inspect}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
-      }
+      end
+      # debug "Finished delegating privmsg with key #{m.plugin.inspect}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
       return false
       # debug "Finished delegating privmsg with key #{m.plugin.inspect}"
     end
