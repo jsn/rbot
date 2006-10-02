@@ -533,7 +533,7 @@ module Plugins
         if commands.has_key?(k)
           p = commands[k][:botmodule] 
           begin
-            return p.help(p.name, topic)
+            return p.help(key, params)
           rescue Exception => err
             #rescue TimeoutError, StandardError, NameError, SyntaxError => err
             error report_error("#{p.botmodule_class} #{p.name} help() failed:", err)
