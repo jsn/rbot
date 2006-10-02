@@ -89,7 +89,7 @@ class AuthModule < CoreBotModule
     splits = params[:args]
 
     has_for = splits[-2] == "for"
-    return usage unless has_for
+    return usage(m) unless has_for
 
     begin
       user = @bot.auth.get_botuser(splits[-1].sub(/^all$/,"everyone"))
