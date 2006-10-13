@@ -45,7 +45,9 @@ class HttpUtil
     @headers = {
       'User-Agent' => "rbot http util #{$version} (http://linuxbrit.co.uk/rbot/)",
     }
+    @last_response = nil
   end
+  attr_reader :last_response
 
   # if http_proxy_include or http_proxy_exclude are set, then examine the
   # uri to see if this is a proxied uri
@@ -178,12 +180,14 @@ class HttpUtil
         else
           debug "HttpUtil.get return code #{resp.code} #{resp.body}"
         end
+        @last_response = resp
         return nil
       }
     rescue StandardError, Timeout::Error => e
       error "HttpUtil.get exception: #{e.inspect}, while trying to get #{uri}"
       debug e.backtrace.join("\n")
     end
+    @last_response = nil
     return nil
   end
 
@@ -202,7 +206,7 @@ class HttpUtil
     begin
       proxy.start() {|http|
         yield uri.request_uri() if block_given?
-        resp = http.head(uri.request_uri(), @headers)
+        resp = http.request_head(uri.request_uri(), @headers)
         case resp
         when Net::HTTPSuccess
           return resp
@@ -217,12 +221,14 @@ class HttpUtil
         else
           debug "HttpUtil.head return code #{resp.code}"
         end
+        @last_response = resp
         return nil
       }
     rescue StandardError, Timeout::Error => e
       error "HttpUtil.head exception: #{e.inspect}, while trying to get #{uri}"
       debug e.backtrace.join("\n")
     end
+    @last_response = nil
     return nil
   end
 
