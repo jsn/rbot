@@ -338,7 +338,7 @@ class UrlPlugin < Plugin
   end
 
 
-  def get_title_for_url(uri_str, depth=10)
+  def get_title_for_url(uri_str, depth=@bot.config['http.max_redir'])
     # This god-awful mess is what the ruby http library has reduced me to.
     # Python's HTTP lib is so much nicer. :~(
     
@@ -346,8 +346,8 @@ class UrlPlugin < Plugin
         raise "Error: Maximum redirects hit."
     end
     
-    debug "+ Getting #{uri_str}"
-    url = URI.parse(uri_str)
+    debug "+ Getting #{uri_str.to_s}"
+    url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
 
     title = nil
@@ -355,37 +355,34 @@ class UrlPlugin < Plugin
     debug "+ connecting to #{url.host}:#{url.port}"
     http = @bot.httputil.get_proxy(url)
     http.start { |http|
-      url.path = '/' if url.path == ''
 
-      http.request_get(url.path, "User-Agent" => "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)") { |response|
+      http.request_get(url.request_uri(), @bot.httputil.headers) { |response|
         
         case response
-          when Net::HTTPRedirection, Net::HTTPMovedPermanently then
+          when Net::HTTPRedirection
             # call self recursively if this is a redirect
-            redirect_to = response['location']  || './'
+            redirect_to = response['location']  || '/'
             debug "+ redirect location: #{redirect_to.inspect}"
-            url = URI.join url.to_s, redirect_to
+            url = URI.join(url.to_s, redirect_to)
             debug "+ whee, redirecting to #{url.to_s}!"
-            return get_title_for_url(url.to_s, depth-1)
-          when Net::HTTPSuccess then
+            return get_title_for_url(url, depth-1)
+          when Net::HTTPSuccess
             if response['content-type'] =~ /^text\//
               # since the content is 'text/*' and is small enough to
               # be a webpage, retrieve the title from the page
               debug "+ getting #{url.request_uri}"
-              data = read_data_from_response(response, 50000)
+              # was 5*10^4 ... seems to much to me ... 4k should be enough for everybody ;)
+              data = read_data_from_response(response, 4096)
               return get_title_from_html(data)
             else
               # content doesn't have title, just display info.
               size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
-              return "[Link Info] type: #{response['content-type']}#{size ? ", size: #{size} bytes" : ""}"
+              size = size ? ", size: #{size} bytes" : ""
+              return "[Link Info] type: #{response['content-type']}#{size}"
             end
-          when Net::HTTPClientError then
-            return "[Link Info] Error getting link (#{response.code} - #{response.message})"
-          when Net::HTTPServerError then
-            return "[Link Info] Error getting link (#{response.code} - #{response.message})"
           else
-            return nil
-        end # end of "case response"
+            return "[Link Info] Error getting link (#{response.code} - #{response.message})"
+          end # end of "case response"
           
       } # end of request block
     } # end of http start block

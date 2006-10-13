@@ -48,6 +48,7 @@ class HttpUtil
     @last_response = nil
   end
   attr_reader :last_response
+  attr_reader :headers
 
   # if http_proxy_include or http_proxy_exclude are set, then examine the
   # uri to see if this is a proxied uri
