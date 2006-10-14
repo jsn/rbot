@@ -4,7 +4,7 @@ Net::HTTP.version_1_2
 
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 
-class GooglePlugin < Plugin
+class SearchPlugin < Plugin
   def help(plugin, topic="")
     "google <string> => search google for <string>"
   end
@@ -35,7 +35,7 @@ class GooglePlugin < Plugin
   end
 end
 
-plugin = GooglePlugin.new
+plugin = SearchPlugin.new
 
 plugin.map "search *words", :action => 'google'
 plugin.map "google *words", :action => 'google'
