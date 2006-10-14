@@ -1,4 +1,4 @@
-require 'erb'
+require 'uri'
 
 DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/anchor>/
 class DeMauroPlugin < Plugin
@@ -15,7 +15,7 @@ class DeMauroPlugin < Plugin
 
   def demauro(m, params)
     parola = params[:parola].downcase
-    url = @wapurl + "index.php?lemma=#{ERB::Util.url_encode(parola)}"
+    url = @wapurl + "index.php?lemma=#{URI.escape(parola)}"
     xml = @bot.httputil.get(url)
     if xml.nil?
       info = @bot.httputil.last_response
@@ -33,7 +33,7 @@ class DeMauroPlugin < Plugin
       text += " not found. Similar words"
     end
     text += ": "
-    text += entries[0..5].map { |ar|
+    text += entries[0...5].map { |ar|
       "#{ar[0]} - #{ar[1].gsub(/<\/?em>/,'')}: #{@dmurl}#{ar[2]}"
     }.join(" | ")
     m.reply text
