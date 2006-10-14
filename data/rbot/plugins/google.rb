@@ -1,53 +1,42 @@
-require 'net/http'
-require 'uri/common'
+require 'uri'
 
 Net::HTTP.version_1_2
 
+GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
+
 class GooglePlugin < Plugin
   def help(plugin, topic="")
-    "search <string> => search google for <string>"
+    "google <string> => search google for <string>"
   end
-  def privmsg(m)
-    unless(m.params && m.params.length > 0)
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
-    end
-    searchfor = URI.escape m.params
 
-    query = "/search?q=#{searchfor}&btnI=I%27m%20feeling%20lucky"
-    result = "not found!"
+  def google(m, params)
+    what = params[:words].to_s
+    searchfor = URI.escape what
 
-    proxy_host = nil
-    proxy_port = nil
+    url = "http://www.google.com/wml/search?q=#{searchfor}"
 
-    if(ENV['http_proxy'])
-      if(ENV['http_proxy'] =~ /^http:\/\/(.+):(\d+)$/)
-        proxy_host = $1
-        proxy_port = $2
-      end
-    end
-
-    http = @bot.httputil.get_proxy(URI.parse("http://www.google.com"))
 
     begin
-      http.start {|http|
-        resp = http.get(query)
-        if resp.code == "302"
-          result = resp['location']
-        end
-      }
+      wml = @bot.httputil.get(url)
     rescue => e
-      p e
-      if e.response && e.response['location']
-        result = e.response['location']
-      else
-        result = "error!"
-      end
+      m.reply "error googling for #{what}"
+      return
     end
-    m.reply "#{m.params}: #{result}"
+    results = wml.scan(GOOGLE_WAP_LINK)
+    if results.length == 0
+      m.reply "no results found for #{what}"
+      return
+    end
+    results = results[0...3].map { |res|
+      "#{res[0]}. #{Bold}#{Utils.decode_html_entities res[2].strip}#{Bold}: #{URI.unescape res[1].strip}"
+    }.join(" | ")
+
+    m.reply "Results for #{what}: #{results}"
   end
 end
+
 plugin = GooglePlugin.new
-plugin.register("search")
-plugin.register("google")
+
+plugin.map "search *words", :action => 'google'
+plugin.map "google *words", :action => 'google'
 
