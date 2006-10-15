@@ -20,14 +20,19 @@ insult:
   %s: vacagher
   %s, facci un favore e muori
   odioso, %s
+  %s, rompicoglioni di professione?
+  %s, hai rotto
+  tua mamma, %s
 hello:
   ola' :)
   ciao
+  salve
   saluti
   yo
 hello_X:
   ola', %s
   yo %s
+  save, %s
   %s, yo
   %s, ola'
   ciao %s
