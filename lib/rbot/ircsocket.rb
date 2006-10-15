@@ -225,7 +225,7 @@ module Irc
       @bytes_per = 400
       @seconds_per = 2
       @throttle_bytes = 0
-      @throttle_div = 1
+      @hit_limit = 0 # how many times did we reach the limit?
       setbyterate(brt)
     end
 
@@ -289,7 +289,7 @@ module Irc
     end
 
     def byterate
-      return "#{@bytes_per}/#{@seconds_per}"
+      return "#{@bytes_per}/#{@seconds_per} (limit hit #{@hit_limit} times)"
     end
 
     def byterate=(newrate)
@@ -300,20 +300,22 @@ module Irc
 
     def run_throttle(more=0)
       now = Time.new
+      # Each time we reach the limit, we reduce the bitrate. We reset the bitrate only if the throttle
+      # manages to reset twice. This way we have better flood control, although the really perfect way
+      # would be to calculate our penalty the way it's done serverside.
       if @throttle_bytes > 0
-        # If we ever reach the limit, we halve the actual allowed byterate
-        # until we manage to reset the throttle.
         if @throttle_bytes >= @bytes_per
-          @throttle_div = 0.5
+          @hit_limit += 1
+          @hit_limit = 3 if @hit_limit > 3
         end
-        delta = ((now - @last_throttle)*@throttle_div*@bytes_per/@seconds_per).floor
+        delta = ((now - @last_throttle)*(0.5**@hit_limit.ceil)*@bytes_per/@seconds_per).floor
         if delta > 0
           @throttle_bytes -= delta
           @throttle_bytes = 0 if @throttle_bytes < 0
           @last_throttle = now
         end
       else
-        @throttle_div = 1
+        @hit_limit -= 0.5 if @hit_limit > 0
       end
       @throttle_bytes += more
     end
@@ -372,9 +374,10 @@ module Irc
           end
           now = Time.new
           if (now >= (@last_send + @sendq_delay))
-            # reset burst counter after @sendq_delay has passed
-            debug "resetting @burst"
-            @burst = 0
+            # after @sendq_delay has passed, we allow more @burst
+            # instead of resetting it to 0, we reduce it by 1
+            debug "decreasing @burst"
+            @burst -= 1 if @burst > 0
           elsif (@burst >= @sendq_burst)
             # nope. can't send anything, come back to us next tick...
             debug "can't send yet"
