@@ -4,10 +4,16 @@ class AutoRejoinPlugin < Plugin
   end
   def kick(m)
     if m.address?
-      @bot.timer.add_once(10, m) {|m|
-        @bot.join m.channel
-        @bot.say m.channel, @bot.lang.get("insult") % m.sourcenick
-      }
+      r = rand(10)
+      if r > 0
+	@bot.timer.add_once(r, m) {|m|
+	  @bot.join m.channel
+	  @bot.say m.channel, @bot.lang.get("insult") % m.sourcenick
+	}
+      else
+	@bot.join m.channel
+	@bot.say m.channel, @bot.lang.get("insult") % m.sourcenick
+      end
     end
   end
 end
