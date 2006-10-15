@@ -1,0 +1,48 @@
+okay:
+  okay
+  ok
+  fatto
+  come vuoi
+  detto, fatto
+dunno:
+  non saprei
+  non ne ho idea
+  boh
+  e chi lo sa
+  chiedi a qualcun altro
+  non so
+dunno_about_X:
+  non so niente di %s
+  %s? mai sentito 
+insult:
+  fanculo, %s
+  ciuccia, %s
+  %s: vacagher
+  %s, facci un favore e muori
+  odioso, %s
+hello:
+  ola' :)
+  ciao
+  saluti
+  yo
+hello_X:
+  ola', %s
+  yo %s
+  %s, yo
+  %s, ola'
+  ciao %s
+  %s, ciao
+welcome:
+  quando vuoi
+  de nada
+  no problema
+thanks:
+  grazie :)
+  grassssie
+thanks_X:
+  grazie %s
+quit:
+  adios
+  se vedemio
+  a dopo
+  ciao ciao a tutti
