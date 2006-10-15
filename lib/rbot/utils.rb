@@ -1,10 +1,14 @@
 require 'net/http'
 require 'uri'
+require 'tempfile'
+
 begin
   $we_have_html_entities_decoder = require 'htmlentities'
 rescue LoadError
   $we_have_html_entities_decoder = false
-  UNESCAPE_TABLE = {
+  module Irc
+    module Utils
+      UNESCAPE_TABLE = {
     'raquo' => '>>',
     'quot' => '"',
     'apos' => '\'',
@@ -268,8 +272,11 @@ rescue LoadError
     'sigma' => '&#963;',
     'oacute' => '\xf3',
 =end
-  }
+      }
+    end
+  end
 end
+
 
 module Irc
 
@@ -311,6 +318,17 @@ module Irc
         end
       }
     end
+
+
+    def Utils.safe_save(file)
+      basename = File.basename(file)
+      temp = Tempfile.new(basename)
+      temp.binmode
+      yield temp if block_given?
+      temp.close
+      File.rename(temp.path, file)
+    end
+
 
     # returns a string containing the result of an HTTP GET on the uri
     def Utils.http_get(uristr, readtimeout=8, opentimeout=4)
