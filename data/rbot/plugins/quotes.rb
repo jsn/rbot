@@ -20,18 +20,14 @@ class QuotePlugin < Plugin
   end
   def save
     Dir.mkdir("#{@bot.botclass}/quotes") if(!FileTest.directory?("#{@bot.botclass}/quotes"))
-    Dir.mkdir("#{@bot.botclass}/quotes/new") if(!FileTest.directory?("#{@bot.botclass}/quotes/new"))
     @lists.each {|channel, quotes|
       begin
         debug "Writing new quotefile for channel #{channel} ..."
-        File.open("#{@bot.botclass}/quotes/new/#{channel}", "w") {|file|
+        Utils.safe_save("#{@bot.botclass}/quotes/#{channel}") {|file|
           quotes.compact.each {|q| 
             file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
           }
         }
-        debug "Officializing quotefile for channel #{channel} ..."
-        File.rename("#{@bot.botclass}/quotes/new/#{channel}",
-                    "#{@bot.botclass}/quotes/#{channel}")
       rescue => e
         error "failed to write quotefile for channel #{channel}!\n#{$!}"
         error "#{e.class}: #{e}"
@@ -238,12 +234,12 @@ class QuotePlugin < Plugin
       case command
         when (/^addquote\s+(.+)/)
           if(@bot.auth.allow?("addquote", m.source, m.replyto))
-            num = addquote(m.source, m.target, $1)
+            num = addquote(m.source, m.target.to_s, $1)
             m.reply "added the quote (##{num})"
           end
         when (/^getquote$/)
           if(@bot.auth.allow?("getquote", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target)
+            quote, total = getquote(m.source, m.target.to_s)
             if(quote)
               m.reply "[#{quote.num}] #{quote.quote}"
             else
@@ -253,7 +249,7 @@ class QuotePlugin < Plugin
         when (/^getquote\s+(\d+)$/)
           num = $1.to_i
           if(@bot.auth.allow?("getquote", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target, num)
+            quote, total = getquote(m.source, m.target.to_s, num)
             if(quote)
               m.reply "[#{quote.num}] #{quote.quote}"
             else
@@ -263,7 +259,7 @@ class QuotePlugin < Plugin
         when (/^whenquote\s+(\d+)$/)
           num = $1.to_i
           if(@bot.auth.allow?("getquote", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target, num)
+            quote, total = getquote(m.source, m.target.to_s, num)
             if(quote)
               m.reply "quote #{quote.num} added on #{quote.date}"
             else
@@ -273,7 +269,7 @@ class QuotePlugin < Plugin
         when (/^whoquote\s+(\d+)$/)
           num = $1.to_i
           if(@bot.auth.allow?("getquote", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target, num)
+            quote, total = getquote(m.source, m.target.to_s, num)
             if(quote)
               m.reply "quote #{quote.num} added by #{quote.source}"
             else
@@ -282,7 +278,7 @@ class QuotePlugin < Plugin
           end
         when (/^topicquote$/)
           if(@bot.auth.allow?("topicquote", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target)
+            quote, total = getquote(m.source, m.target.to_s)
             if(quote)
               @bot.topic m.target, "[#{quote.num}] #{quote.quote}"
             else
@@ -292,7 +288,7 @@ class QuotePlugin < Plugin
         when (/^topicquote\s+(\d+)$/)
           num = $1.to_i
           if(@bot.auth.allow?("topicquote", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target, num)
+            quote, total = getquote(m.source, m.target.to_s, num)
             if(quote)
               @bot.topic m.target, "[#{quote.num}] #{quote.quote}"
             else
@@ -302,7 +298,7 @@ class QuotePlugin < Plugin
         when (/^delquote\s+(\d+)$/)
           num = $1.to_i
           if(@bot.auth.allow?("delquote", m.source, m.replyto))
-            if(delquote(m.target, num))
+            if(delquote(m.target.to_s, num))
               m.okay
             else
               m.reply "quote not found!"
@@ -311,7 +307,7 @@ class QuotePlugin < Plugin
         when (/^searchquote\s+(.*)$/)
           reg = $1
           if(@bot.auth.allow?("getquote", m.source, m.replyto))
-            quote, total = searchquote(m.source, m.target, reg)
+            quote, total = searchquote(m.source, m.target.to_s, reg)
             if(quote)
               m.reply "[#{quote.num}] #{quote.quote}"
             else
@@ -321,7 +317,7 @@ class QuotePlugin < Plugin
         when (/^countquote(?:\s+(.*))?$/)
           reg = $1
           if(@bot.auth.allow?("getquote", m.source, m.replyto))
-            total = countquote(m.source, m.target, reg)
+            total = countquote(m.source, m.target.to_s, reg)
             if(reg && reg.length > 0)
               m.reply "#{total} quotes match: #{reg}"
             else

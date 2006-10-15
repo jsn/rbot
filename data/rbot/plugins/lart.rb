@@ -69,10 +69,10 @@ class LartPlugin < Plugin
     return if @lartfile.nil? and @praisefile.nil?
     Dir.mkdir("#{@bot.botclass}/lart") if not FileTest.directory? "#{@bot.botclass}/lart"
     # TODO implement safe saving here too
-    File.open(@lartfile, "w") { |file|
+    Utils.safe_save(@lartfile) { |file|
       file.puts @larts
     }
-    File.open(@praisefile, "w") { |file|
+    Utils.safe_save(@praisefile) { |file|
       file.puts @praises
     }
   end
