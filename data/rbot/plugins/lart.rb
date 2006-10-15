@@ -1,9 +1,13 @@
-#  Author:     Michael Brailsford  <brailsmt@yahoo.com>
-#              aka brailsmt
-#  Purpose:	   Provide for humorous larts and praises
-#  Copyright:  2002 Michael Brailsford.  All rights reserved.
-#  License:    This plugin is licensed under the BSD license.  The terms of
-#              which follow.
+#  Original Author:
+#               Michael Brailsford  <brailsmt@yahoo.com>
+#               aka brailsmt
+#  Author:      Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#  Purpose:     Provide for humorous larts and praises
+#  Original Copyright:
+#               2002 Michael Brailsford.  All rights reserved.
+#  Copyright:   2006 Giuseppe Bilotta.  All rights reserved.
+#  License:     This plugin is licensed under the BSD license.  The terms of
+#               which follow.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -33,17 +37,26 @@ class LartPlugin < Plugin
   end
 
   def initialize
-    super
     @larts = Array.new
     @praises = Array.new
-    #read in the lart and praise files
-    if File.exists? "#{@bot.botclass}/lart/larts"
-      IO.foreach("#{@bot.botclass}/lart/larts") { |line|
+    @lartfile = nil
+    @praisefile = nil
+    super
+  end
+
+  def set_language(lang)
+    save
+    @lartfile = "#{@bot.botclass}/lart/larts-#{lang}"
+    @praisefile = "#{@bot.botclass}/lart/praises-#{lang}"
+    @larts.clear
+    @praises.clear
+    if File.exists? @lartfile
+      IO.foreach(@lartfile) { |line|
         @larts << line.chomp
       }
     end
-    if File.exists? "#{@bot.botclass}/lart/praises"
-      IO.foreach("#{@bot.botclass}/lart/praises") { |line|
+    if File.exists? @praisefile
+      IO.foreach(@praisefile) { |line|
         @praises << line.chomp
       }
     end
@@ -53,12 +66,13 @@ class LartPlugin < Plugin
   end
 
   def save
+    return if @lartfile.nil? and @praisefile.nil?
     Dir.mkdir("#{@bot.botclass}/lart") if not FileTest.directory? "#{@bot.botclass}/lart"
     # TODO implement safe saving here too
-    File.open("#{@bot.botclass}/lart/larts", "w") { |file|
+    File.open(@lartfile, "w") { |file|
       file.puts @larts
     }
-    File.open("#{@bot.botclass}/lart/praises", "w") { |file|
+    File.open(@praisefile, "w") { |file|
       file.puts @praises
     }
   end
