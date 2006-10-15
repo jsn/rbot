@@ -88,6 +88,10 @@ module Plugins
   connect()::            Called when a server is joined successfully, but
                          before autojoin channels are joined (no params)
 
+  set_language(String)::
+                         Called when the user sets a new language
+                         whose name is the given String
+
   save::                 Called when you are required to save your plugin's
                          state, if you maintain data between sessions
 
@@ -111,6 +115,9 @@ module Plugins
       @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
 
       @manager.add_botmodule(self)
+      if self.respond_to?('set_language')
+        self.set_language(@bot.lang.language)
+      end
     end
 
     def botmodule_class

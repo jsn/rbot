@@ -12,9 +12,11 @@ module Language
       :on_change => Proc.new {|bot, v| bot.lang.set_language v},
       :desc => "Which language file the bot should use")
     
-    def initialize(language)
+    def initialize(bot, language)
+      @bot = bot
       set_language language
     end
+    attr_reader :language
 
     def set_language(language)
       file = Config::datadir + "/languages/#{language}.lang"
@@ -24,6 +26,17 @@ module Language
       @language = language
       @file = file
       scan
+      return if @bot.plugins.nil?
+      @bot.plugins.core_modules.each { |p|
+        if p.respond_to?('set_language')
+          p.set_language(@language)
+        end
+      }
+      @bot.plugins.plugins.each { |p|
+        if p.respond_to?('set_language')
+          p.set_language(@language)
+        end
+      }
     end
 
     def scan

@@ -346,7 +346,8 @@ class IrcBot
 
     @httputil = Utils::HttpUtil.new(self)
 
-    @lang = Language::Language.new(@config['core.language'])
+    @plugins = nil
+    @lang = Language::Language.new(self, @config['core.language'])
 
     begin
       @auth = Auth::authmanager
