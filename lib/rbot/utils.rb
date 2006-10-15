@@ -320,9 +320,15 @@ module Irc
     end
 
 
+    @@safe_save_dir = nil
+    def Utils.set_safe_save_dir(str)
+      @@safe_save_dir = str.dup
+    end
+
     def Utils.safe_save(file)
+      raise 'No safe save directory defined!' if @@safe_save_dir.nil?
       basename = File.basename(file)
-      temp = Tempfile.new(basename)
+      temp = Tempfile.new(basename,@@safe_save_dir)
       temp.binmode
       yield temp if block_given?
       temp.close

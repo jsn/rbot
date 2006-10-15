@@ -266,6 +266,8 @@ class IrcBot
 
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
     Dir.mkdir("#{botclass}/registry") unless File.exist?("#{botclass}/registry")
+    Dir.mkdir("#{botclass}/safe_save") unless File.exist?("#{botclass}/safe_save")
+    Utils.set_safe_save_dir("#{botclass}/safe_save")
 
     @ping_timer = nil
     @pong_timer = nil
