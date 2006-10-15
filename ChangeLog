@@ -1,3 +1,11 @@
+2006-10-15  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Language stuff: plugins can now handle language changes in a natural
+	fashion. lart is the first plugin to make use of this. NOTE: this
+	is not (yet) backwards compatible: the old larts/praises files from
+	previous rbot setups have to be renamed manually
+	* Language stuff: italian translations
+
 2006-09-21  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* New Auth Framework: restore backwards compatibility: 'auth
