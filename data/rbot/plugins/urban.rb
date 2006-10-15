@@ -59,7 +59,21 @@ class UrbanPlugin < Plugin
   end
 
   def get_def(text)
-    Utils.decode_html_entities text.gsub(/(?:<a href.*?>prev<\/a> )?<a href.*?>home<\/a>(?: <a href.*?>next<\/a>)?/,'').gsub(/<\/?p>/, ' ').gsub(/<.*?>/, '').gsub("\n", ' ').strip
+    # Start by removing the prev/home/next links
+    t = text.gsub(/(?:<a href.*?>prev<\/a> )?<a href.*?>home<\/a>(?: <a href.*?>next<\/a>)?/,'')
+    # Close up paragraphs
+    t.gsub!(/<\/?p>/, ' ')
+    t.gsub!("\n", ' ')
+    # Reverse headings
+    t.gsub!(/<\/?b>/,"#{Reverse}")
+    # Enbolden links
+    t.gsub!(/<\/?a(?: .*?)?>/,"#{Bold}")
+    # Reverse examples
+    t.gsub!(/<\/?(?:i|em)>/,"#{Underline}")
+    # Clear anything else
+    t.gsub!(/<.*?>/, '')
+
+    Utils.decode_html_entities t.strip
   end
 
   def uotd(m, params)
