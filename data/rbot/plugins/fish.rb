@@ -36,16 +36,22 @@ class BabelPlugin < Plugin
       "application/x-www-form-urlencoded"})
   
   if (resp.code == "200")
+    lines = Array.new
     resp.body.each_line do |l|
-      if(l =~ /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div>/)
-        answer = $1
-        # cache the answer
-        if(answer.length > 0)
-          @registry["#{trans_pair}/#{data_text}"] = answer
-        end
-        m.reply answer
-        return
+      lines.push l
+    end
+
+    l = lines.join(" ")
+    debug "babelfish response: #{l}"
+
+    if(l =~ /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div>/)
+      answer = $1
+      # cache the answer
+      if(answer.length > 0)
+        @registry["#{trans_pair}/#{data_text}"] = answer
       end
+      m.reply answer
+      return
     end
     m.reply "couldn't parse babelfish response html :("
   else
