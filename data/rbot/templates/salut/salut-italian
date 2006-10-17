@@ -1,0 +1,19 @@
+--- 
+:"generic-in": 
+- salve
+- ehila'
+- ola'
+- yo
+:"morning-in": 
+- buongiorno
+:"afternoon-in": 
+- buonasera
+:"generic-out": 
+- a dopo
+- ci vediamo
+- adios
+- se vedemio
+:"evening-in": 
+- buonasera
+:"generic":
+- ciao

@@ -1,0 +1,33 @@
+--- 
+:"generic-in": 
+- hello
+- howdy
+- hola
+- salut
+- sup
+- re
+- hey
+- hi
+- yo
+:"morning-in": 
+- good morning
+- goodmorning
+- morning
+- "'morgning"
+:"afternoon-in": 
+- good afternoon
+- goodafternoon
+- "'afternoon"
+:"generic-out": 
+- bye
+- cya
+- see you
+- see ya
+- g'bye
+- goodbye
+- later
+:"evening-in": 
+- good evening
+- goodevening
+- "'evening"
+- evening

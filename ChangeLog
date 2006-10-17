@@ -1,3 +1,7 @@
+2006-10-17  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Salut plugin: handles (multilingual) salutations (hello/goodbye)
+
 2006-10-15  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Language stuff: plugins can now handle language changes in a natural
@@ -5,6 +9,10 @@
 	is not (yet) backwards compatible: the old larts/praises files from
 	previous rbot setups have to be renamed manually
 	* Language stuff: italian translations
+	* Utils.safe_save(filename): allows 'safe' saving of a file: it needs a
+	block, to which it will yield a temporary file on which operations can
+	be carried out. When the block returns, the tempfile will be renamed to
+	the given filename
 
 2006-09-21  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
