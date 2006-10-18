@@ -93,7 +93,7 @@ class ::RssBlob
     else
       a = self.to_a[0,3]
     end
-    a.join(" | ")
+    a.compact.join(" | ")
   end
 end
 
