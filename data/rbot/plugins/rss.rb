@@ -229,15 +229,15 @@ class RSSFeedsPlugin < Plugin
   end
 
   def itemDate(item,ex=nil)
-    return item.pubDate if item.respond_to?(:pubDate)
-    return item.date if item.respond_to?(:date)
+    return item.pubDate if item.respond_to?(:pubDate) and item.pubDate
+    return item.date if item.respond_to?(:date) and item.date
     return ex
   end
 
   def freshness_sort(items)
     notime = Time.at(0)
     items.sort { |a, b|
-      itemDate(b, notime) || 0 <=> itemDate(a, notime) || 0
+      itemDate(b, notime) <=> itemDate(a, notime)
     }
   end
 
