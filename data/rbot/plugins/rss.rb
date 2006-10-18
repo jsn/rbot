@@ -200,7 +200,7 @@ class RSSFeedsPlugin < Plugin
       rev = lims[1].to_i > lims[2].to_i
     else
       ll = 0
-      ul = [[lims[1].to_i-1, 1].max, 14].min
+      ul = [[lims[1].to_i-1, 0].max, 14].min
       rev = false
     end
 
