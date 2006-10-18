@@ -237,7 +237,7 @@ class RSSFeedsPlugin < Plugin
   def freshness_sort(items)
     notime = Time.at(0)
     items.sort { |a, b|
-      itemDate(b, notime) <=> itemDate(a, notime)
+      itemDate(b, notime) || 0 <=> itemDate(a, notime) || 0
     }
   end
 
