@@ -16,36 +16,39 @@ class ThreatPlugin < Plugin
   end
 
   def privmsg(m)
-	color = ""
+    color = ""
     red = "\x0304" # severe
-	orange = "\x0307" # high
-	yellow = "\x0308" # elevated
-	blue = "\x0312" # guarded
-	green = "\x0303" # low
-	black = "\x0301" # default
+    orange = "\x0307" # high
+    yellow = "\x0308" # elevated
+    blue = "\x0312" # guarded
+    green = "\x0303" # low
+    black = "\x0301" # default
 
-	page = @bot.httputil.get URI.parse("http://www.dhs.gov/dhspublic/")
-	if page =~ / <img.*dhs\/images\/dhs-advisory-(.*).gif.*/
+    page = @bot.httputil.get URI.parse("http://www.dhs.gov/")
+
+    if page =~ /\"Current National Threat Level is (.*?)\"/
       state = $1
-    end
-    case state
+      case state
       when "severe"
-		color = red
+        color = red
       when "high"
-		color = orange
+        color = orange
       when "elevated"
-		color = yellow
+        color = yellow
       when "guarded"
-		color = blue
+        color = blue
       when "low"
-		color = green
-	else
-	  color = black
-	end
+        color = green
+      else
+        color = black
+      end
 
-	m.reply color + "Today " + m.sourcenick + " the threat level is " + state.capitalize
+      m.reply color + "Today " + m.sourcenick + " the threat level is " + state.capitalize
+    else
+      m.reply "I was unable to retrieve the threat level"
+    end
 
-	return
+    return
   end
 
 end
