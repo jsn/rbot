@@ -1,18 +1,23 @@
 module Irc
   module Config
-    @@datadir = nil
-    @@coredir = nil
+    unless defined?(@@datadir)
+      @@datadir = nil
 
-    # first try for the default path to the data dir
-    defaultdatadir = File.expand_path(File.dirname($0) + '/../data/rbot')
-    defaultcoredir = File.expand_path(File.dirname($0) + '/../lib/rbot/core')
+      defaultdatadir = File.expand_path(File.dirname($0) + '/../data/rbot')
 
-    if File.directory? defaultdatadir
-      @@datadir = defaultdatadir
+      if File.directory? defaultdatadir
+        @@datadir = defaultdatadir
+      end
     end
 
-    if File.directory? defaultcoredir
-      @@coredir = defaultcoredir
+    unless defined?(@@coredir)
+      @@coredir = nil
+
+      defaultcoredir = File.expand_path(File.dirname($0) + '/../lib/rbot/core')
+
+      if File.directory? defaultcoredir
+        @@coredir = defaultcoredir
+      end
     end
 
     # setup pkg-based configuration - i.e. where were we installed to, where

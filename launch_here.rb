@@ -3,21 +3,16 @@
 # Load rbot from this directory. (No need to install it with setup.rb)
 #
 
-BASEDIR = Dir.pwd
+SVN_DIR = File.expand_path(File.dirname('__FILE__'))
+puts "Running from #{SVN_DIR}"
 
-#puts "Load path: #{$LOAD_PATH.inspect}"
-
-def add_to_path(dir)
-  $LOAD_PATH.unshift dir
-end
+$:.unshift File.join(SVN_DIR, 'lib')
 
 module Irc
-  module PKGConfig
-    DATADIR = File.join BASEDIR, 'data/rbot'
-    COREDIR = File.join BASEDIR, 'lib/rbot/core'
+  module Config
+    @@datadir = File.join SVN_DIR, 'data/rbot'
+    @@coredir = File.join SVN_DIR, 'lib/rbot/core'
   end
 end
 
-add_to_path( File.join BASEDIR, 'lib' )
-
-load( File.join BASEDIR, 'bin/rbot' )
+load File.join(SVN_DIR, 'bin/rbot')
