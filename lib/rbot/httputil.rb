@@ -143,6 +143,7 @@ class HttpUtil
     else
       uri = URI.parse(uri_or_str.to_s)
     end
+    debug "Getting #{uri}"
 
     proxy = get_proxy(uri)
     proxy.open_timeout = opentimeout
@@ -174,7 +175,7 @@ class HttpUtil
           debug "Redirecting #{uri} to #{resp['location']}"
           yield resp['location'] if block_given?
           if max_redir > 0
-            return get( URI.parse(resp['location']), readtimeout, opentimeout, max_redir-1, cache)
+            return get( URI.join(uri.to_s, resp['location']), readtimeout, opentimeout, max_redir-1, cache)
           else
             warning "Max redirection reached, not going to #{resp['location']}"
           end
