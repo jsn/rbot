@@ -61,7 +61,7 @@ class DicePlugin < Plugin
 
   def privmsg(m)
     unless(m.params && m.params =~ /^[0-9]*d[0-9]+([+-]([0-9]+|[0-9]*d[0-9])+)*$/)
-      m.reply "incorrect usage: " + help(m.plugin)
+      m.nickreply "incorrect usage: " + help(m.plugin)
       return
     end
     a = m.params.scan(/^[0-9]*d[0-9]+|[+-][0-9]*d[0-9]+|[+-][0-9]+/)
@@ -72,10 +72,11 @@ class DicePlugin < Plugin
       r = r + tmp.total.to_i
       t = t + tmp.view.to_s
     end
-    m.reply r.to_s + " | " + t
+    m.nickreply r.to_s + " | " + t
   end
 end
 plugin = DicePlugin.new
 plugin.register("dice")
+plugin.register("roll")
 ##############################################
 #fin
