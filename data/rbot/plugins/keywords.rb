@@ -12,7 +12,7 @@ class Keyword
 
   # type::   type of keyword (e.g "is" or "are")
   # values:: array of values
-  # 
+  #
   # create a keyword of type +type+ with values +values+
   def initialize(type, values)
     @type = type.downcase
@@ -71,7 +71,7 @@ class Keyword
   end
 end
 
-# keywords class. 
+# keywords class.
 #
 # Handles all that stuff like "bot: foo is bar", "bot: foo?"
 #
@@ -85,7 +85,10 @@ class Keywords < Plugin
   BotConfig.register BotConfigBooleanValue.new('keyword.address',
     :default => true,
     :desc => "Should the bot require that keyword lookups are addressed to it? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
-  
+  BotConfig.register BotConfigIntegerValue.new('keyword.search_results',
+    :default => 3,
+    :desc => "How many search results to display at a time")
+
   # create a new KeywordPlugin instance, associated to bot +bot+
   def initialize
     super
@@ -95,7 +98,7 @@ class Keywords < Plugin
     upgrade_data
 
     scan
-    
+
     # import old format keywords into DBHash
     if(File.exist?("#{@bot.botclass}/keywords.rbot"))
       log "auto importing old keywords.rbot"
@@ -113,7 +116,7 @@ class Keywords < Plugin
       File.rename("#{@bot.botclass}/keywords.rbot", "#{@bot.botclass}/keywords.rbot.old")
     end
   end
-  
+
   # drop static keywords and reload them from files, picking up any new
   # keyword files that have been added
   def rescan
@@ -129,9 +132,9 @@ class Keywords < Plugin
       next unless f =~ /\.db$/
       log "upgrading keyword db #{f} (rbot 0.9.5 or prior) database format"
       newname = f.gsub(/\.db$/, ".kdb")
-      old = BDB::Hash.open f, nil, 
+      old = BDB::Hash.open f, nil,
                            "r+", 0600
-      new = BDB::CIBtree.open(newname, nil, 
+      new = BDB::CIBtree.open(newname, nil,
                               BDB::CREATE | BDB::EXCL,
                               0600)
       old.each {|k,v|
@@ -141,7 +144,7 @@ class Keywords < Plugin
       new.close
       File.delete(f)
     }
-    
+
     # then scan for current DBTree files, and load them
     Dir["#{@bot.botclass}/keywords/*"].each {|f|
       next unless f =~ /\.kdb$/
@@ -150,7 +153,7 @@ class Keywords < Plugin
       debug "keywords module: loading DBTree file #{f}, key #{key}"
       @statickeywords[key] = hsh
     }
-    
+
     # then scan for non DB files, and convert/import them and delete
     Dir["#{@bot.botclass}/keywords/*"].each {|f|
       next if f =~ /\.kdb$/
@@ -182,7 +185,7 @@ class Keywords < Plugin
   def upgrade_data
     if File.exist?("#{@bot.botclass}/keywords.db")
       log "upgrading old keywords (rbot 0.9.5 or prior) database format"
-      old = BDB::Hash.open "#{@bot.botclass}/keywords.db", nil, 
+      old = BDB::Hash.open "#{@bot.botclass}/keywords.db", nil,
                            "r+", 0600
       old.each {|k,v|
         @keywords[k] = v
@@ -191,10 +194,10 @@ class Keywords < Plugin
       @keywords.flush
       File.rename("#{@bot.botclass}/keywords.db", "#{@bot.botclass}/keywords.db.old")
     end
-  
+
     if File.exist?("#{@bot.botclass}/keyword.db")
       log "upgrading old keywords (rbot 0.9.9 or prior) database format"
-      old = BDB::CIBtree.open "#{@bot.botclass}/keyword.db", nil, 
+      old = BDB::CIBtree.open "#{@bot.botclass}/keyword.db", nil,
                            "r+", 0600
       old.each {|k,v|
         @keywords[k] = v
@@ -217,7 +220,7 @@ class Keywords < Plugin
       end
     end
   end
-  
+
   # lookup keyword +key+, return it or nil
   def [](key)
     return nil if key.nil?
@@ -252,7 +255,7 @@ class Keywords < Plugin
   # m::     PrivMessage containing message info
   # key::   key being queried
   # quiet:: optional, if false, complain if +key+ is not found
-  # 
+  #
   # handle a message asking about a keyword
   def keyword_lookup(m, key, quiet = false)
     return if key.nil?
@@ -260,10 +263,10 @@ class Keywords < Plugin
       m.reply "sorry, I don't know about \"#{key}\"" unless quiet
       return
     end
-    
+
     response = kw.to_s
     response.gsub!(/<who>/, m.sourcenick)
-    
+
     if(response =~ /^<reply>\s*(.*)/)
       m.reply $1
     elsif(response =~ /^<action>\s*(.*)/)
@@ -275,17 +278,17 @@ class Keywords < Plugin
     end
   end
 
-  
+
   # handle a message which alters a keyword
   # like "foo is bar" or "foo is also qux"
   def keyword_command(m, lhs, mhs, rhs, quiet = false)
     debug "got keyword command #{lhs}, #{mhs}, #{rhs}"
-    
+
     also = true if(rhs.gsub!(/^also\s+/, ""))
-    
+
     values = rhs.split(/\s+\|\s+/)
     lhs = Keyword.unescape lhs
-    
+
     if(also && has_key?(lhs))
       kw = self[lhs]
       kw << values
@@ -293,7 +296,7 @@ class Keywords < Plugin
     else
       @keywords[lhs] = Keyword.new(mhs, values).dump
     end
-    
+
     @bot.okay m.target if !quiet
   end
 
@@ -371,14 +374,14 @@ class Keywords < Plugin
   end
 
   # search for keywords, optionally also the definition and the static keywords
-  def keyword_search(m, key, full = false, all = false)    
+  def keyword_search(m, key, full = false, all = false, from = 1)
     begin
       if key =~ /^\/(.+)\/$/
         re = Regexp.new($1, Regexp::IGNORECASE)
       else
         re = Regexp.new(Regexp.escape(key), Regexp::IGNORECASE)
       end
-      
+
       matches = Array.new
       @keywords.each {|k,v|
         kw = Keyword.restore(v)
@@ -396,16 +399,20 @@ class Keywords < Plugin
           }
         }
       end
-      
+
       if matches.length == 1
         rkw = matches[0]
         m.reply "#{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
       elsif matches.length > 0
-        i = 0
+        if from > matches.length
+          m.reply "#{matches.length} found, can't tell you about #{from}"
+          return
+        end
+        i = 1
         matches.each {|rkw|
-          m.reply "[#{i+1}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}"
+          m.reply "[#{i}/#{matches.length}] #{rkw[0]} #{rkw[1].type} #{rkw[1].desc}" if i >= from
           i += 1
-          break if i == 4
+          break if i == from+@bot.config['keyword.search_results']
         }
       else
         m.reply "no keywords match #{key}"
@@ -443,7 +450,13 @@ class Keywords < Plugin
         key = $1
         full = key.sub!('--full ', '')
         all = key.sub!('--all ', '')
-        keyword_search(m, key, full, all) if @bot.auth.allow?('keyword', m.source, m.replyto)
+        if key.sub!(/--from (\d+) /, '')
+          from = $1.to_i
+        else
+          from = 1
+        end
+        from = 1 unless from > 0
+        keyword_search(m, key, full, all, from) if @bot.auth.allow?('keyword', m.source, m.replyto)
       when /^tell\s+(\S+)\s+about\s+(.+)$/
         keyword_tell(m, $1, $2) if @bot.auth.allow?('keyword', m.source, m.replyto)
       else
@@ -461,7 +474,7 @@ class Keywords < Plugin
   end
 
   def listen(m)
-    return if m.address?    
+    return if m.address?
     # in channel message, not to me
     # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
     # keyword lookup.
