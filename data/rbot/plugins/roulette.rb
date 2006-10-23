@@ -1,14 +1,23 @@
 RouletteHistory = Struct.new("RouletteHistory", :games, :shots, :deaths, :misses, :wins)
 
 class RoulettePlugin < Plugin
+  BotConfig.register BotConfigBooleanValue.new('roulette.autospin',
+    :default => true, 
+    :desc => "Automatically spins the roulette at the butlast shot")
+  BotConfig.register BotConfigBooleanValue.new('roulette.kick',
+    :default => false, 
+    :desc => "Kicks shot players from the channel")
+
   def initialize
     super
     reset_chambers
     @players = Array.new
   end
+
   def help(plugin, topic="")
-    "roulette => play russian roulette - starts a new game if one isn't already running. One round in a six chambered gun. Take turns to say roulette to the bot, until somebody dies. roulette reload => force the gun to reload, roulette stats => show stats from all games, roulette stats <player> => show stats for <player>, roulette clearstats => clear stats (config level auth required)"
+    "roulette => play russian roulette - starts a new game if one isn't already running. One round in a six chambered gun. Take turns to say roulette to the bot, until somebody dies. roulette reload => force the gun to reload, roulette stats => show stats from all games, roulette stats <player> => show stats for <player>, roulette clearstats => clear stats (config level auth required), roulette spin => spins the cylinder"
   end
+
   def clearstats(m, params)
     @registry.clear
     m.okay
@@ -55,6 +64,7 @@ class RoulettePlugin < Plugin
         @registry["player " + plyr] = pdata
       }
       @players = Array.new
+      @bot.kick(m.replyto, m.sourcenick, "*BANG*") if @bot.config['roulette.kick']
     else
       m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => +click+"
       playerdata.misses += 1
@@ -66,10 +76,18 @@ class RoulettePlugin < Plugin
     
     if shot || @chambers.empty?
       reload(m)
+    elsif @chambers.length == 1 and @bot.config['roulette.autospin']
+      spin(m)
     end
   end
+
   def reload(m, params = {})
-    @bot.action m.replyto, "reloads"
+    if m.private?
+      m.reply "you gotta play roulette in channel dude"
+      return
+    end
+
+    m.act "reloads"
     reset_chambers
     # all players win on a reload
     # (allows you to play 3-shot matches etc)
@@ -93,10 +111,23 @@ class RoulettePlugin < Plugin
 
     @players = Array.new
   end
+
+  def spin(m, params={})
+    # Spinning is just like resetting, except that nobody wins
+    if m.private?
+      m.reply "you gotta play roulette in channel dude"
+      return
+    end
+
+    m.act "spins the cylinder"
+    reset_chambers
+  end
+
   def reset_chambers
     @chambers = [false, false, false, false, false, false]
     @chambers[rand(@chambers.length)] = true
   end
+
   def playerstats(m, params)
     player = params[:player]
     pstats = @registry["player " + player]
@@ -106,6 +137,7 @@ class RoulettePlugin < Plugin
       m.reply "#{player} has played #{pstats.games} games, won #{pstats.wins} and lost #{pstats.deaths}. #{player} pulled the trigger #{pstats.shots} times and found the chamber empty on #{pstats.misses} occasions."
     end
   end
+
   def stats(m, params)
     if @registry.has_key?("totals")
       totals = @registry["totals"]
@@ -173,9 +205,12 @@ class RoulettePlugin < Plugin
     end
   end
 end
+
 plugin = RoulettePlugin.new
 plugin.map 'roulette reload', :action => 'reload'
+plugin.map 'roulette spin', :action => 'spin'
 plugin.map 'roulette stats :player', :action => 'playerstats'
 plugin.map 'roulette stats', :action => 'stats'
 plugin.map 'roulette clearstats', :action => 'clearstats', :auth => 'config'
 plugin.map 'roulette'
+
