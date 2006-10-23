@@ -5,21 +5,23 @@ Core requirements
       bdb (berkley db) http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb
                        (which requires libdb2 or better, from
                        www.sleepycat.com)
-      net/http 1.1+
+      net/http 1.2+
+      net/https        (for debian, this will also need libopenssl-ruby)
       socket
       uri
-
-      (for debian, you'll also need libopenssl-ruby)
 
 Plugin requirements
 (these are all optional, if you don't have them, the plugins just won't
 function)
 
-babelfish, wserver:
-      net/http 1.2+
-
-slashdot, freshmeat, rss:
+bash, digg, slashdot, freshmeat, forecast:
       REXML
+rss:
+      rss
+rubyurl:
+      shorturl
+time:
+      tzinfo
 
 External programs needed for rbot
 =================================
