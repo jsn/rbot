@@ -1,4 +1,3 @@
-require "rubygems"
 require "shorturl"
 
 class RubyURL < Plugin
