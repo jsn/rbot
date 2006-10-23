@@ -342,6 +342,10 @@ class Keywords < Plugin
       m.reply @bot.lang.get("dunno_about_X") % key
       return
     end
+    if target == @bot.nick
+      m.reply "very funny, trying to make me tell something to myself"
+      return
+    end
 
     response = kw.to_s
     response.gsub!(/<who>/, m.sourcenick)
