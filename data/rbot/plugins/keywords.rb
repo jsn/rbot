@@ -446,7 +446,7 @@ class Keywords < Plugin
         keyword_lookup(m, m.params) if @bot.auth.allow?('keyword', m.source, m.replyto)
       end
     when "forget"
-      keyword_forget(m, params) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+      keyword_forget(m, m.params) if @bot.auth.allow?('keycmd', m.source, m.replyto)
     when "tell"
       if m.params =~ /(\S+)\s+about\s+(.+)$/
         keyword_tell(m, $1, $2) if @bot.auth.allow?('keyword', m.source, m.replyto)
