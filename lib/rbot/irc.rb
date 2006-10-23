@@ -1294,7 +1294,7 @@ module Irc
             groups = val.split(',')
             groups.each { |g|
               k, v = g.split(':')
-              @supports[key][k] = v.to_i
+              @supports[key][k] = v.to_i || 0
             }
           }
         when :chanmodes
@@ -1325,8 +1325,8 @@ module Irc
           }
         when :maxtargets
           noval_warn(key, val) {
-            @supports[key]['PRIVMSG'] = val.to_i
-            @supports[key]['NOTICE'] = val.to_i
+            @supports[:targmax]['PRIVMSG'] = val.to_i
+            @supports[:targmax]['NOTICE'] = val.to_i
           }
         when :network
           noval_warn(key, val) {
