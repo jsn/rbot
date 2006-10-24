@@ -118,6 +118,7 @@ class UrlPlugin < Plugin
 
         if @bot.config['url.display_link_info']
           debug "Getting title for #{urlstr}..."
+	  begin
           title = get_title_for_url urlstr
           if title
             m.reply title
@@ -125,6 +126,9 @@ class UrlPlugin < Plugin
           else
             debug "Title not found!"
           end        
+	  rescue => e
+            debug "Failed: #{e}"
+	  end
         end
     
         # check to see if this url is already listed
