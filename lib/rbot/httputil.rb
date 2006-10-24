@@ -152,7 +152,11 @@ class HttpUtil
     begin
       proxy.start() {|http|
         yield uri.request_uri() if block_given?
-        resp = http.get(uri.request_uri(), @headers)
+	req = Net::HTTP::Get.new(uri.request_uri(), @headers)
+	if uri.user and uri.password
+          req.basic_auth(uri.user, uri.password)
+	end
+	resp = http.request(req)
         case resp
         when Net::HTTPSuccess
           if cache && !(resp.key?('cache-control') && resp['cache-control']=='must-revalidate')
@@ -208,7 +212,11 @@ class HttpUtil
     begin
       proxy.start() {|http|
         yield uri.request_uri() if block_given?
-        resp = http.request_head(uri.request_uri(), @headers)
+	req = Net::HTTP::Head.new(uri.request_uri(), @headers)
+	if uri.user and uri.password
+          req.basic_auth(uri.user, uri.password)
+	end
+	resp = http.request(req)
         case resp
         when Net::HTTPSuccess
           return resp
