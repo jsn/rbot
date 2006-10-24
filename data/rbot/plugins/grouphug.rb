@@ -14,7 +14,7 @@ class GrouphugPlugin < Plugin
         path = "/random"
         path = "/confessions/#{m.params()}" if m.params()
         begin
-          data = bot.httputil.get(URI.parse("http://grouphug.us/#{path}"))
+          data = bot.httputil.get_cached(URI.parse("http://grouphug.us/#{path}"))
 
           reg = Regexp.new( '(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)', Regexp::MULTILINE )
           confession = reg.match( data )[4]

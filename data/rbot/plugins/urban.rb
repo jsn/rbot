@@ -18,7 +18,7 @@ class UrbanPlugin < Plugin
     end
     # we give a very high 'skip' because this will allow us to get the number of definitions by retrieving the previous definition
     uri = URI.parse("http://www.urbanwap.com/search.php?term=#{URI.escape words}&skip=65536")
-    page = @bot.httputil.get(uri)
+    page = @bot.httputil.get_cached(uri)
     if page.nil?
       m.reply "Couldn't retrieve an urban dictionary definition of #{words}"
       return
@@ -39,7 +39,7 @@ class UrbanPlugin < Plugin
     end
     if n < numdefs
       uri = URI.parse("http://www.urbanwap.com/search.php?term=#{URI.escape words}&skip=#{n-1}")
-      page = @bot.httputil.get(uri)
+      page = @bot.httputil.get_cached(uri)
       if page.nil?
         case n % 10
         when 1
@@ -77,7 +77,7 @@ class UrbanPlugin < Plugin
   end
 
   def uotd(m, params)
-    home = @bot.httputil.get("http://www.urbanwap.com/")
+    home = @bot.httputil.get_cached("http://www.urbanwap.com/")
     if home.nil?
       m.reply "Couldn't get the urban dictionary word of the day"
       return
@@ -85,7 +85,7 @@ class UrbanPlugin < Plugin
     home.match(/Word of the Day: <a href="(.*?)">.*?<\/a>/)
     wotd = $1
     debug "Urban word of the day: #{wotd}"
-    page = @bot.httputil.get(wotd)
+    page = @bot.httputil.get_cached(wotd)
     if page.nil?
       m.reply "Couldn't get the urban dictionary word of the day"
     else

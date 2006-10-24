@@ -16,7 +16,7 @@ class DeMauroPlugin < Plugin
   def demauro(m, params)
     parola = params[:parola].downcase
     url = @wapurl + "index.php?lemma=#{URI.escape(parola)}"
-    xml = @bot.httputil.get(url)
+    xml = @bot.httputil.get_cached(url)
     if xml.nil?
       info = @bot.httputil.last_response
       info = info ? "(#{info.code} - #{info.message})" : ""

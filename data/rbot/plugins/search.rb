@@ -35,7 +35,7 @@ class SearchPlugin < Plugin
 
 
     begin
-      wml = @bot.httputil.get(url)
+      wml = @bot.httputil.get_cached(url)
     rescue => e
       m.reply "error googling for #{what}"
       return

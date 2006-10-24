@@ -159,27 +159,26 @@ class HttpUtil
 	resp = http.request(req)
         case resp
         when Net::HTTPSuccess
-          if cache && !(resp.key?('cache-control') && resp['cache-control']=='must-revalidate')
-            k = uri.to_s
-            @cache[k] = Hash.new
-            @cache[k][:body] = resp.body
-            @cache[k][:last_mod] = Time.httpdate(resp['last-modified']) if resp.key?('last-modified')
-            if resp.key?('date')
-              @cache[k][:first_use] = Time.httpdate(resp['date'])
-              @cache[k][:last_use] = Time.httpdate(resp['date'])
-            else
-              now = Time.new
-              @cache[k][:first_use] = now
-              @cache[k][:last_use] = now
-            end
-            @cache[k][:count] = 1
+          if cache
+	    debug "Caching #{uri.to_s}"
+	    cache_response(uri.to_s, resp)
           end
           return resp.body
         when Net::HTTPRedirection
           debug "Redirecting #{uri} to #{resp['location']}"
           yield resp['location'] if block_given?
           if max_redir > 0
-            return get( URI.join(uri.to_s, resp['location']), readtimeout, opentimeout, max_redir-1, cache)
+	    # If cache is an Array, we assume get was called by get_cached
+	    # because of a cache miss and that the first value of the Array
+	    # was the noexpire value. Since the cache miss might have been
+	    # caused by a redirection, we want to try get_cached again
+	    # TODO FIXME look at Python's httplib2 for a most likely
+	    # better way to handle all this mess
+	    if cache.kind_of?(Array)
+	      return get_cached( URI.join(uri.to_s, resp['location']), readtimeout, opentimeout, max_redir-1, cache[0])
+	    else
+	      return get( URI.join(uri.to_s, resp['location']), readtimeout, opentimeout, max_redir-1, cache)
+	    end
           else
             warning "Max redirection reached, not going to #{resp['location']}"
           end
@@ -242,6 +241,92 @@ class HttpUtil
     return nil
   end
 
+  def cache_response(k, resp)
+    begin
+      if resp.key?('pragma') and resp['pragma'] == 'no-cache'
+	debug "Not caching #{k}, it has Pragma: no-cache"
+	return
+      end
+      # TODO should we skip caching if neither last-modified nor etag are present?
+      now = Time.new
+      u = Hash.new
+      u = Hash.new
+      u[:body] = resp.body
+      u[:last_modified] = nil
+      u[:last_modified] = Time.httpdate(resp['date']) if resp.key?('date')
+      u[:last_modified] = Time.httpdate(resp['last-modified']) if resp.key?('last-modified')
+      u[:expires] = Time.now
+      u[:expires] = Time.httpdate(resp['expires']) if resp.key?('expires')
+      u[:revalidate] = false
+      if resp.key?('cache-control')
+	# TODO max-age
+	case resp['cache-control']
+	when /no-cache|must-revalidate/
+	  u[:revalidate] = true
+	end
+      end
+      u[:etag] = ""
+      u[:etag] = resp['etag'] if resp.key?('etag')
+      u[:count] = 1
+      u[:first_use] = now
+      u[:last_use] = now
+    rescue => e
+      error "Failed to cache #{k}/#{resp.to_hash.inspect}: #{e.inspect}"
+      return
+    end
+    # @cache[k] = u
+    # For debugging purposes
+    @cache[k] = u.dup
+    u.delete(:body)
+    debug "Cached #{k}/#{resp.to_hash.inspect}: #{u.inspect}"
+    debug "#{@cache.size} pages (#{@cache.keys.join(', ')}) cached up to now"
+  end
+
+  def expired?(uri, readtimeout, opentimeout)
+    k = uri.to_s
+    debug "Checking cache validity for #{k}"
+    begin
+      return true unless @cache.key?(k)
+      u = @cache[k]
+
+      # TODO we always revalidate for the time being
+
+      if u[:etag].empty? and u[:last_modified].nil?
+	# TODO max-age
+	return true
+      end
+
+      proxy = get_proxy(uri)
+      proxy.open_timeout = opentimeout
+      proxy.read_timeout = readtimeout
+
+      proxy.start() {|http|
+	yield uri.request_uri() if block_given?
+	headers = @headers
+	headers['If-None-Match'] = u[:etag] unless u[:etag].empty?
+	headers['If-Modified-Since'] = u[:last_modified].rfc2822 if u[:last_modified]
+	# FIXME TODO We might want to use a Get here
+	# because if a 200 OK is returned we would get the new body
+	# with one connection less ...
+	req = Net::HTTP::Head.new(uri.request_uri(), headers)
+	if uri.user and uri.password
+	  req.basic_auth(uri.user, uri.password)
+	end
+	resp = http.request(req)
+	debug "Checking cache validity of #{u.inspect} against #{resp.to_hash.inspect}"
+	case resp
+	when Net::HTTPNotModified
+	  return false
+	else
+	  return true
+	end
+      }
+    rescue => e
+      error "Failed to check cache validity for #{uri}: #{e.inspect}"
+      return true
+    end
+  end
+
   # gets a page from the cache if it's still (assumed to be) valid
   # TODO remove stale cached pages, except when called with noexpire=true
   def get_cached(uri_or_str, readtimeout=10, opentimeout=5,
@@ -252,74 +337,48 @@ class HttpUtil
     else
       uri = URI.parse(uri_or_str.to_s)
     end
+    debug "Getting cached #{uri}"
 
-    k = uri.to_s
-    if !@cache.key?(k)
-      remove_stale_cache unless noexpire
-      return get(uri, readtimeout, opentimeout, max_redir, true)
-    end
-    now = Time.new
-    begin
-      # See if the last-modified header can be used
-      # Assumption: the page was not modified if both the header
-      # and the cached copy have the last-modified value, and it's the same time
-      # If only one of the cached copy and the header have the value, or if the
-      # value is different, we assume that the cached copyis invalid and therefore
-      # get a new one.
-      # On our first try, we tested for last-modified in the webpage first,
-      # and then on the local cache. however, this is stupid (in general),
-      # so we only test for the remote page if the local copy had the header
-      # in the first place.
-      if @cache[k].key?(:last_mod)
-        h = head(uri, readtimeout, opentimeout, max_redir)
-        if h.key?('last-modified')
-          if Time.httpdate(h['last-modified']) == @cache[k][:last_mod]
-            if h.key?('date')
-              @cache[k][:last_use] = Time.httpdate(h['date'])
-            else
-              @cache[k][:last_use] = now
-            end
-            @cache[k][:count] += 1
-            return @cache[k][:body]
-          end
-          remove_stale_cache unless noexpire
-          return get(uri, readtimeout, opentimeout, max_redir, true)
-        end
-        remove_stale_cache unless noexpire
-        return get(uri, readtimeout, opentimeout, max_redir, true)
-      end
-    rescue => e
-      warning "Error #{e.inspect} getting the page #{uri}, using cache"
-      debug e.backtrace.join("\n")
-      return @cache[k][:body]
-    end
-    # If we still haven't returned, we are dealing with a non-redirected document
-    # that doesn't have the last-modified attribute
-    debug "Could not use last-modified attribute for URL #{uri}, guessing cache validity"
-    if noexpire or !expired?(@cache[k], now)
+    if expired?(uri, readtimeout, opentimeout)
+      debug "Cache expired"
+      bod = get(uri, readtimeout, opentimeout, max_redir, [noexpire])
+    else
+      debug "Using cache"
       @cache[k][:count] += 1
       @cache[k][:last_use] = now
-      debug "Using cache"
-      return @cache[k][:body]
+      bod = @cache[k][:body]
     end
-    debug "Cache expired, getting anew"
-    @cache.delete(k)
-    remove_stale_cache unless noexpire
-    return get(uri, readtimeout, opentimeout, max_redir, true)
+    unless noexpire
+      remove_stale_cache
+    end
+    return bod
   end
 
-  def expired?(hash, time)
-    (time - hash[:last_use] > @bot.config['http.expire_time']*60) or
-    (time - hash[:first_use] > @bot.config['http.max_cache_time']*60)
+  # We consider a page to be manually expired if it has no
+  # etag and no last-modified and if any of the expiration
+  # conditions are met (expire_time, max_cache_time, Expires)
+  def manually_expired?(hash, time)
+    auto = hash[:etag].empty? and hash[:last_modified].nil?
+    # TODO max-age
+    manual = (time - hash[:last_use] > @bot.config['http.expire_time']*60) or
+             (time - hash[:first_use] > @bot.config['http.max_cache_time']*60) or
+	     (hash[:expires] < time)
+    return (auto and manual)
   end
 
   def remove_stale_cache
+    debug "Removing stale cache"
+    debug "#{@cache.size} pages before"
+    begin
     now = Time.new
     @cache.reject! { |k, val|
-      !val.key?(:last_modified) && expired?(val, now)
+       manually_expired?(val, now)
     }
+    rescue => e
+      error "Failed to remove stale cache: #{e.inspect}"
+    end
+    debug "#{@cache.size} pages after"
   end
-
 end
 end
 end

@@ -12,7 +12,7 @@ class FreshmeatPlugin < Plugin
     search = params[:search].to_s
     max = 8 if max > 8
     begin
-      xml = @bot.httputil.get(URI.parse("http://freshmeat.net/search-xml/?orderby=locate_projectname_full_DESC&q=#{URI.escape(search)}"))
+      xml = @bot.httputil.get_cached(URI.parse("http://freshmeat.net/search-xml/?orderby=locate_projectname_full_DESC&q=#{URI.escape(search)}"))
     rescue URI::InvalidURIError, URI::BadURIError => e
       m.reply "illegal search string #{search}"
       return

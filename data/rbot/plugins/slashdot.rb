@@ -12,7 +12,7 @@ class SlashdotPlugin < Plugin
    search = params[:search].to_s
 
     begin
-      xml = @bot.httputil.get(URI.parse("http://slashdot.org/search.pl?content_type=rss&query=#{URI.escape(search)}"))
+      xml = @bot.httputil.get_cached(URI.parse("http://slashdot.org/search.pl?content_type=rss&query=#{URI.escape(search)}"))
     rescue URI::InvalidURIError, URI::BadURIError => e
       m.reply "illegal search string #{search}"
       return
@@ -53,7 +53,7 @@ class SlashdotPlugin < Plugin
     debug params.inspect
     max = params[:limit].to_i
     debug "max is #{max}"
-    xml = @bot.httputil.get(URI.parse("http://slashdot.org/slashdot.xml"))
+    xml = @bot.httputil.get_cached(URI.parse("http://slashdot.org/slashdot.xml"))
     unless xml
       m.reply "slashdot news parse failed"
       return

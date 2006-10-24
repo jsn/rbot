@@ -13,7 +13,7 @@ class TubePlugin < Plugin
   def tube(m, params)
     line = params[:line]
   begin
-    tube_page = @bot.httputil.get(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"), 1, 1)
+    tube_page = @bot.httputil.get_cached(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"), 1, 1)
   rescue URI::InvalidURIError, URI::BadURIError => e
     m.reply "Cannot contact Tube Service Status page"
     return
@@ -42,7 +42,7 @@ class TubePlugin < Plugin
 
   def check_stations(m, params)
     begin
-      tube_page = @bot.httputil.get(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"))
+      tube_page = @bot.httputil.get_cached(URI.parse("http://www.tfl.gov.uk/tfl/service_rt_tube.shtml"))
     rescue URI::InvalidURIError, URI::BadURIError => e
       m.reply "Cannot contact Tube Service Status page"
       return
