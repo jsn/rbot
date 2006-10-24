@@ -165,22 +165,27 @@ class HttpUtil
           end
           return resp.body
         when Net::HTTPRedirection
-          debug "Redirecting #{uri} to #{resp['location']}"
-          yield resp['location'] if block_given?
-          if max_redir > 0
-	    # If cache is an Array, we assume get was called by get_cached
-	    # because of a cache miss and that the first value of the Array
-	    # was the noexpire value. Since the cache miss might have been
-	    # caused by a redirection, we want to try get_cached again
-	    # TODO FIXME look at Python's httplib2 for a most likely
-	    # better way to handle all this mess
-	    if cache.kind_of?(Array)
-	      return get_cached( URI.join(uri.to_s, resp['location']), readtimeout, opentimeout, max_redir-1, cache[0])
-	    else
-	      return get( URI.join(uri.to_s, resp['location']), readtimeout, opentimeout, max_redir-1, cache)
-	    end
+          if resp.key?('location')
+            new_loc = URI.join(uri, resp['location'])
+            debug "Redirecting #{uri} to #{new_loc}"
+            yield new_loc if block_given?
+            if max_redir > 0
+              # If cache is an Array, we assume get was called by get_cached
+              # because of a cache miss and that the first value of the Array
+              # was the noexpire value. Since the cache miss might have been
+              # caused by a redirection, we want to try get_cached again
+              # TODO FIXME look at Python's httplib2 for a most likely
+              # better way to handle all this mess
+              if cache.kind_of?(Array)
+                return get_cached(new_loc, readtimeout, opentimeout, max_redir-1, cache[0])
+              else
+                return get(new_loc, readtimeout, opentimeout, max_redir-1, cache)
+              end
+            else
+              warning "Max redirection reached, not going to #{new_loc}"
+            end
           else
-            warning "Max redirection reached, not going to #{resp['location']}"
+            warning "Unknown HTTP redirection #{resp.inspect}"
           end
         else
           debug "HttpUtil.get return code #{resp.code} #{resp.body}"
@@ -255,7 +260,7 @@ class HttpUtil
       u[:last_modified] = nil
       u[:last_modified] = Time.httpdate(resp['date']) if resp.key?('date')
       u[:last_modified] = Time.httpdate(resp['last-modified']) if resp.key?('last-modified')
-      u[:expires] = Time.now
+      u[:expires] = now
       u[:expires] = Time.httpdate(resp['expires']) if resp.key?('expires')
       u[:revalidate] = false
       if resp.key?('cache-control')
@@ -274,12 +279,18 @@ class HttpUtil
       error "Failed to cache #{k}/#{resp.to_hash.inspect}: #{e.inspect}"
       return
     end
-    # @cache[k] = u
-    # For debugging purposes
-    @cache[k] = u.dup
-    u.delete(:body)
-    debug "Cached #{k}/#{resp.to_hash.inspect}: #{u.inspect}"
+    @cache[k] = u
+    debug "Cached #{k}/#{resp.to_hash.inspect}: #{u.inspect_no_body}"
     debug "#{@cache.size} pages (#{@cache.keys.join(', ')}) cached up to now"
+  end
+
+  # For debugging purposes
+  class ::Hash
+    def inspect_no_body
+      temp = self.dup
+      temp.delete(:body)
+      temp.inspect
+    end
   end
 
   def expired?(uri, readtimeout, opentimeout)
@@ -302,9 +313,10 @@ class HttpUtil
 
       proxy.start() {|http|
 	yield uri.request_uri() if block_given?
-	headers = @headers
+	headers = @headers.dup
 	headers['If-None-Match'] = u[:etag] unless u[:etag].empty?
 	headers['If-Modified-Since'] = u[:last_modified].rfc2822 if u[:last_modified]
+        debug "Cache HEAD request headers: #{headers.inspect}"
 	# FIXME TODO We might want to use a Get here
 	# because if a 200 OK is returned we would get the new body
 	# with one connection less ...
@@ -313,7 +325,7 @@ class HttpUtil
 	  req.basic_auth(uri.user, uri.password)
 	end
 	resp = http.request(req)
-	debug "Checking cache validity of #{u.inspect} against #{resp.to_hash.inspect}"
+	debug "Checking cache validity of #{u.inspect_no_body} against #{resp.inspect}/#{resp.to_hash.inspect}"
 	case resp
 	when Net::HTTPNotModified
 	  return false
@@ -343,9 +355,10 @@ class HttpUtil
       debug "Cache expired"
       bod = get(uri, readtimeout, opentimeout, max_redir, [noexpire])
     else
+      k = uri.to_s
       debug "Using cache"
       @cache[k][:count] += 1
-      @cache[k][:last_use] = now
+      @cache[k][:last_use] = Time.now
       bod = @cache[k][:body]
     end
     unless noexpire
