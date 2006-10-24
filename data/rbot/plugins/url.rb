@@ -8,9 +8,9 @@ class UrlPlugin < Plugin
     :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
   BotConfig.register BotConfigBooleanValue.new('url.display_link_info',
-    :default => false, 
+    :default => false,
     :desc => "Get the title of any links pasted to the channel and display it (also tells if the link is broken or the site is down)")
-  
+
   def initialize
     super
     @registry.set_default(Array.new)
@@ -29,49 +29,49 @@ class UrlPlugin < Plugin
   end
 
   def read_data_from_response(response, amount)
-    
+
     amount_read = 0
     chunks = []
-    
+
     response.read_body do |chunk|   # read body now
-      
+
       amount_read += chunk.length
-      
+
       if amount_read > amount
         amount_of_overflow = amount_read - amount
         chunk = chunk[0...-amount_of_overflow]
       end
-      
+
       chunks << chunk
 
       break if amount_read >= amount
-      
+
     end
-    
+
     chunks.join('')
-    
+
   end
 
   def get_title_for_url(uri_str, depth=@bot.config['http.max_redir'])
     # This god-awful mess is what the ruby http library has reduced me to.
     # Python's HTTP lib is so much nicer. :~(
-    
+
     if depth == 0
         raise "Error: Maximum redirects hit."
     end
-    
+
     debug "+ Getting #{uri_str.to_s}"
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
 
     title = nil
-    
+
     debug "+ connecting to #{url.host}:#{url.port}"
     http = @bot.httputil.get_proxy(url)
     http.start { |http|
 
       http.request_get(url.request_uri(), @bot.httputil.headers) { |response|
-        
+
         case response
           when Net::HTTPRedirection
             # call self recursively if this is a redirect
@@ -97,12 +97,12 @@ class UrlPlugin < Plugin
           else
             return "[Link Info] Error getting link (#{response.code} - #{response.message})"
           end # end of "case response"
-          
+
       } # end of request block
     } # end of http start block
 
     return title
-    
+
   rescue SocketError => e
     return "[Link Info] Error connecting to site (#{e.message})"
   end
@@ -118,22 +118,22 @@ class UrlPlugin < Plugin
 
         if @bot.config['url.display_link_info']
           debug "Getting title for #{urlstr}..."
-	  begin
+          begin
           title = get_title_for_url urlstr
           if title
             m.reply title
             debug "Title found!"
           else
             debug "Title not found!"
-          end        
-	  rescue => e
+          end
+          rescue => e
             debug "Failed: #{e}"
-	  end
+          end
         end
-    
+
         # check to see if this url is already listed
         return if list.find {|u| u.url == urlstr }
-        
+
         url = Url.new(m.target, m.sourcenick, Time.new, urlstr)
         debug "#{list.length} urls so far"
         if list.length > @bot.config['url.max_urls']
