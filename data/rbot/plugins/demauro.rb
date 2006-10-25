@@ -1,3 +1,15 @@
+# vim: set sw=2 et:
+# demauro plugin: provides a link to the definition of a word
+# from the Italian dictionary De Mauro/Paravia available online
+# can also be used by other plugins to check if a given word exists
+# or not (is_italian? method)
+#
+# This should be extended as a general dictionary lookup plugin, for multiple languages
+#
+# Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#
+# TODO: cache results and reuse them if get_cached returns a cache copy
+
 require 'uri'
 
 DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/anchor>/
