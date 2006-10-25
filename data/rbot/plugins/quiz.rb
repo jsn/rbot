@@ -91,7 +91,6 @@ class QuizPlugin < Plugin
   # and transforms the questions and fills the global question table.
   #
   def fetch_data( m )
-    # TODO: Make this configurable, and add support for more than one file (there's a size limit in linux too ;) )
     # Read the winning messages file 
     @win_messages = Array.new
     if File.exists? "#{@bot.botclass}/quiz/win_messages"
@@ -100,6 +99,7 @@ class QuizPlugin < Plugin
       warning( "win_messages file not found!" )
     end
 
+    # TODO: Make this configurable, and add support for more than one file (there's a size limit in linux too ;) )
     path = "#{@bot.botclass}/quiz/quiz.rbot"
     debug "Fetching from #{path}"
 
@@ -131,7 +131,7 @@ class QuizPlugin < Plugin
     @questions = []
 
     # Fuse together and remove comments, then split
-    data = "#{localdata}\n\n#{serverdata}".gsub( /^#.*$/, "" )
+    data = "\n\n#{localdata}\n\n#{serverdata}".gsub( /^#.*$/, "" )
     entries = data.split( "\nQuestion: " )
     #First entry will be empty.
     entries.delete_at(0)
@@ -434,7 +434,7 @@ class QuizPlugin < Plugin
           stats = PlayerStats.new( 0, 0, 0 )
         end
 
-        stats["score"] = stats.score -    1
+        stats["score"] = stats.score - 1
         q.registry[m.sourcenick.to_s] = stats
 
         calculate_ranks( m, q, m.sourcenick.to_s )
