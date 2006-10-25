@@ -354,12 +354,14 @@ class HttpUtil
     if expired?(uri, readtimeout, opentimeout)
       debug "Cache expired"
       bod = get(uri, readtimeout, opentimeout, max_redir, [noexpire])
+      def bod.cached?; false; end
     else
       k = uri.to_s
       debug "Using cache"
       @cache[k][:count] += 1
       @cache[k][:last_use] = Time.now
       bod = @cache[k][:body]
+      def bod.cached?; true; end
     end
     unless noexpire
       remove_stale_cache
