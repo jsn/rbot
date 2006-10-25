@@ -32,7 +32,11 @@ class Quiz
   :first_try, :hint, :hintrange, :rank_table, :hinted
 
   def initialize( channel, registry )
-    @registry = registry.sub_registry( channel )
+    if channel.empty?
+      @registry = registry.sub_registry( 'private' )
+    else
+      @registry = registry.sub_registry( channel )
+    end
     @registry_conf = @registry.sub_registry( "config" )
 
     # Per-channel copy of the global questions table. Acts like a shuffled queue
@@ -173,7 +177,7 @@ class QuizPlugin < Plugin
 
 
   def say_score( m, nick )
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
 
     if q.registry.has_key?( nick )
       score = q.registry[nick].score
@@ -257,8 +261,8 @@ class QuizPlugin < Plugin
   # Reimplemented from Plugin
   #
   def listen( m )
-    return unless @quizzes.has_key?( m.target.to_s )
-    q = @quizzes[m.target.to_s]
+    return unless @quizzes.has_key?( m.channel.to_s )
+    q = @quizzes[m.channel.to_s]
 
     return if q.question == nil
 
@@ -330,7 +334,7 @@ class QuizPlugin < Plugin
   #######################################################################
   def cmd_quiz( m, params )
     fetch_data( m ) if @questions.empty?
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
 
     if q.question
       m.reply "#{Bold}#{Color}03Current question: #{Color}#{Bold}#{q.question}"
@@ -386,8 +390,8 @@ class QuizPlugin < Plugin
 
 
   def cmd_solve( m, params )
-    return unless @quizzes.has_key?( m.target.to_s )
-    q = @quizzes[m.target.to_s]
+    return unless @quizzes.has_key?( m.channel.to_s )
+    q = @quizzes[m.channel.to_s]
 
     m.reply "The correct answer was: #{q.answer}"
 
@@ -398,8 +402,8 @@ class QuizPlugin < Plugin
 
 
   def cmd_hint( m, params )
-    return unless @quizzes.has_key?( m.target.to_s )
-    q = @quizzes[m.target.to_s]
+    return unless @quizzes.has_key?( m.channel.to_s )
+    q = @quizzes[m.channel.to_s]
 
     if q.question == nil
       m.reply "#{m.sourcenick.to_s}: Get a question first!"
@@ -447,8 +451,8 @@ class QuizPlugin < Plugin
 
 
   def cmd_skip( m, params )
-    return unless @quizzes.has_key?( m.target.to_s )
-    q = @quizzes[m.target.to_s]
+    return unless @quizzes.has_key?( m.channel.to_s )
+    q = @quizzes[m.channel.to_s]
 
     q.question = nil
     cmd_quiz( m, params )
@@ -456,7 +460,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_joker( m, params )
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
 
     if q.question == nil
       m.reply "#{m.sourcenick.to_s}: There is no open question."
@@ -493,13 +497,13 @@ class QuizPlugin < Plugin
 
 
   def cmd_top5( m, params )
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
     if q.rank_table.empty?
       m.reply "There are no scores known yet!"
       return
     end
 
-    m.reply "* Top 5 Players for #{m.target.to_s}:"
+    m.reply "* Top 5 Players for #{m.channel.to_s}:"
 
     [5, q.rank_table.length].min.times do |i|
       player = q.rank_table[i]
@@ -513,14 +517,14 @@ class QuizPlugin < Plugin
   def cmd_top_number( m, params )
     num = params[:number].to_i
     return unless 1..50 === num
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
     if q.rank_table.empty?
       m.reply "There are no scores known yet!"
       return
     end
 
     ar = []
-    m.reply "* Top #{num} Players for #{m.target.to_s}:"
+    m.reply "* Top #{num} Players for #{m.channel.to_s}:"
     n = [ num, q.rank_table.length ].min
     n.times do |i|
       player = q.rank_table[i]
@@ -551,7 +555,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_autoask( m, params )
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
 
     if params[:enable].downcase == "on"
       q.registry_conf["autoask"] = true
@@ -567,7 +571,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_transfer( m, params )
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
 
     debug q.rank_table.inspect
 
@@ -620,7 +624,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_del_player( m, params )
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
     debug q.rank_table.inspect
 
     nick = params[:nick]
@@ -655,7 +659,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_set_score(m, params)
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
     debug q.rank_table.inspect
 
     nick = params[:nick]
@@ -673,7 +677,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_set_jokers(m, params)
-    q = create_quiz( m.target.to_s )
+    q = create_quiz( m.channel.to_s )
 
     nick = params[:nick]
     val = [params[:jokers].to_i, Max_Jokers].min
