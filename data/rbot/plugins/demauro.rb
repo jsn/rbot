@@ -1,10 +1,12 @@
 # vim: set sw=2 et:
-# demauro plugin: provides a link to the definition of a word
-# from the Italian dictionary De Mauro/Paravia available online
-# can also be used by other plugins to check if a given word exists
-# or not (is_italian? method)
 #
-# This should be extended as a general dictionary lookup plugin, for multiple languages
+# dict plugin: provides a link to the definition of a word in one of the supported
+# dictionaries. Currently available are
+#   * the Oxford dictionary for (British) English
+#   * the De Mauro/Paravia dictionary for Italian
+#
+# other plugins can use this one to check if a given word is valid in italian
+# or british english by using the is_italian?/is_british? methods
 #
 # Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 #
@@ -13,11 +15,13 @@
 require 'uri'
 
 DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/anchor>/
-class DeMauroPlugin < Plugin
+
+class DictPlugin < Plugin
   def initialize
     super
     @dmurl = "http://www.demauroparavia.it/"
-    @wapurl = "http://wap.demauroparavia.it/"
+    @dmwapurl = "http://wap.demauroparavia.it/"
+    @oxurl = "http://www.askoxford.com/concise_oed/"
   end
 
 
@@ -28,24 +32,24 @@ class DeMauroPlugin < Plugin
   def demauro(m, params)
     justcheck = params[:justcheck]
 
-    parola = params[:parola].downcase
-    url = @wapurl + "index.php?lemma=#{URI.escape(parola)}"
+    word = params[:word].downcase
+    url = @dmwapurl + "index.php?lemma=#{URI.escape(word)}"
     xml = @bot.httputil.get_cached(url)
     if xml.nil?
       info = @bot.httputil.last_response
       info = info ? "(#{info.code} - #{info.message})" : ""
       return false if justcheck
-      m.reply "An error occurred while looking for #{parola}#{info}"
+      m.reply "An error occurred while looking for #{word}#{info}"
       return
     end
     if xml=~ /Non ho trovato occorrenze per/
       return false if justcheck
-      m.reply "Nothing found for #{parola}"
+      m.reply "Nothing found for #{word}"
       return
     end
     entries = xml.scan(DEMAURO_LEMMA)
-    text = parola
-    if !entries.assoc(parola) and !entries.assoc(parola.upcase)
+    text = word
+    if !entries.assoc(word) and !entries.assoc(word.upcase)
       return false if justcheck
       text += " not found. Similar words"
     end
@@ -58,11 +62,33 @@ class DeMauroPlugin < Plugin
   end
 
   def is_italian?(word)
-    return demauro(nil, :parola => word, :justcheck => true)
+    return demauro(nil, :word => word, :justcheck => true)
+  end
+
+
+  def oxford(m, params)
+    justcheck = params[:justcheck]
+
+    word = params[:word].downcase.gsub(/\s+/,'')
+    [word, word + "_1"].each { |check|
+      url = @oxurl + "#{URI.escape(check)}"
+      h = @bot.httputil.head(url)
+      if h
+        m.reply("#{word} found: #{url}") unless justcheck
+        return true
+      end
+    }
+    return false if justcheck
+    m.reply "#{word} not found"
+  end
+
+  def is_british?(word)
+    return oxford(nil, :word => word, :justcheck => true)
   end
 
 end
 
-plugin = DeMauroPlugin.new
-plugin.map 'demauro :parola', :action => 'demauro'
+plugin = DictPlugin.new
+plugin.map 'demauro :word', :action => 'demauro'
+plugin.map 'oxford :word', :action => 'oxford'
 
