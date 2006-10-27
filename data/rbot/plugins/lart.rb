@@ -42,21 +42,33 @@ class LartPlugin < Plugin
     @lartfile = nil
     @praisefile = nil
     super
+
   end
 
   def set_language(lang)
     save
     @lartfile = "#{@bot.botclass}/lart/larts-#{lang}"
     @praisefile = "#{@bot.botclass}/lart/praises-#{lang}"
+    # We may be on an old installation, so on the first run read non-language-specific larts
+    @bulart = "#{@bot.botclass}/lart/larts"
+    @bupraise = "#{@bot.botclass}/lart/praise"
     @larts.clear
     @praises.clear
     if File.exists? @lartfile
       IO.foreach(@lartfile) { |line|
         @larts << line.chomp
       }
+    elsif File.exists? @bulart
+      IO.foreach(@bulart) { |line|
+        @larts << line.chomp
+      }
     end
     if File.exists? @praisefile
       IO.foreach(@praisefile) { |line|
+        @praises << line.chomp
+      }
+    elsif File.exists? @bupraise
+      IO.foreach(@bupraise) { |line|
         @praises << line.chomp
       }
     end

@@ -137,6 +137,10 @@ class SalutPlugin < Plugin
   end
 
   def load_lang(lang)
+    dir = "#{@bot.botclass}/salut"
+    if not File.exist?(dir)
+      Dir.mkdir(dir)
+    end
     file = "#{@bot.botclass}/salut/salut-#{lang}"
     if File.exist?(file)
       begin
