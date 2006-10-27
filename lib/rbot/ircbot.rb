@@ -173,10 +173,6 @@ class IrcBot
       :default => 4, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
-    BotConfig.register BotConfigStringValue.new('server.byterate',
-      :default => "400/2", :validate => Proc.new{|v| v.match(/\d+\/\d/)},
-      :desc => "(flood prevention) max bytes/seconds rate to send the server. Most ircd's have limits of 512 bytes/2 seconds",
-      :on_change => Proc.new {|bot, v| bot.socket.byterate = v })
     BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
       :default => 30, :validate => Proc.new{|v| v >= 0},
       :on_change => Proc.new {|bot, v| bot.start_server_pings},
@@ -654,12 +650,10 @@ class IrcBot
   # relevant say() or notice() methods. This one should be used for IRCd
   # extensions you want to use in modules.
   def sendmsg(type, where, message, chan=nil, ring=0)
-    # limit it according to the byterate, splitting the message
-    # taking into consideration the actual message length
-    # and all the extra stuff
+    # Split the message so that each line sent is not longher than 510 bytes
     # TODO allow something to do for commands that produce too many messages
     # TODO example: math 10**10000
-    left = @socket.bytes_per - type.length - where.to_s.length - 4
+    left = 510 - type.length - where.to_s.length - 3
     begin
       if(left >= message.length)
         sendq "#{type} #{where} :#{message}", chan, ring

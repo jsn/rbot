@@ -168,6 +168,9 @@ module Irc
   # wrapped TCPSocket for communication with the server.
   # emulates a subset of TCPSocket functionality
   class IrcSocket
+
+    MAX_IRC_SEND_PENALTY = 10
+
     # total number of lines sent to the irc server
     attr_reader :lines_sent
 
@@ -183,10 +186,6 @@ module Irc
     # accumulator for the throttle
     attr_reader :throttle_bytes
 
-    # byterate components
-    attr_reader :bytes_per
-    attr_reader :seconds_per
-
     # delay between lines sent
     attr_reader :sendq_delay
 
@@ -197,7 +196,7 @@ module Irc
     # port::   IRCd port
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
-    def initialize(server, port, host, sendq_delay=2, sendq_burst=4, brt="400/2")
+    def initialize(server, port, host, sendq_delay=2, sendq_burst=4)
       @timer = Timer::Timer.new
       @timer.add(0.2) do
         spool
@@ -221,23 +220,6 @@ module Irc
         @sendq_burst = sendq_burst.to_i
       else
         @sendq_burst = 4
-      end
-      @bytes_per = 400
-      @seconds_per = 2
-      @throttle_bytes = 0
-      @hit_limit = 0 # how many times did we reach the limit?
-      setbyterate(brt)
-    end
-
-    def setbyterate(brt)
-      if brt.match(/(\d+)\/(\d)/)
-        @bytes_per = $1.to_i
-        @seconds_per = $2.to_i
-        debug "Byterate now #{byterate}"
-        return true
-      else
-        debug "Couldn't set byterate #{brt}"
-        return false
       end
     end
 
@@ -286,38 +268,6 @@ module Irc
       @qmutex.synchronize do
         @sendq_burst = newburst
       end
-    end
-
-    def byterate
-      return "#{@bytes_per}/#{@seconds_per} (limit hit #{@hit_limit} times)"
-    end
-
-    def byterate=(newrate)
-      @qmutex.synchronize do
-        setbyterate(newrate)
-      end
-    end
-
-    def run_throttle(more=0)
-      now = Time.new
-      # Each time we reach the limit, we reduce the bitrate. We reset the bitrate only if the throttle
-      # manages to reset twice. This way we have better flood control, although the really perfect way
-      # would be to calculate our penalty the way it's done serverside.
-      if @throttle_bytes > 0
-        if @throttle_bytes >= @bytes_per
-          @hit_limit += 1
-          @hit_limit = 3 if @hit_limit > 3
-        end
-        delta = ((now - @last_throttle)*(0.5**@hit_limit.ceil)*@bytes_per/@seconds_per).floor
-        if delta > 0
-          @throttle_bytes -= delta
-          @throttle_bytes = 0 if @throttle_bytes < 0
-          @last_throttle = now
-        end
-      else
-        @hit_limit -= 0.5 if @hit_limit > 0
-      end
-      @throttle_bytes += more
     end
 
     # used to send lines to the remote IRCd by skipping the queue
@@ -385,19 +335,10 @@ module Irc
             return
           end
           debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send"
-          (@sendq_burst - @burst).times do
-            break if @sendq.empty?
+	  while !@sendq.empty? and @burst < @sendq_burst and now > @last_send - MAX_IRC_SEND_PENALTY
             mess = @sendq.next
-            if @throttle_bytes == 0 or mess.length+@throttle_bytes < @bytes_per
-              debug "flood protection: sending message of length #{mess.length}"
-              debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
-              puts_critical(@sendq.shift)
-            else
-              debug "flood protection: throttling message of length #{mess.length}"
-              debug "(byterate: #{byterate}, throttle bytes: #{@throttle_bytes})"
-              run_throttle
-              break
-            end
+            puts_critical(@sendq.shift)
+            @last_send += mess.irc_send_penalty
           end
           if @sendq.empty?
             @timer.stop
@@ -452,7 +393,6 @@ module Irc
           @last_send = Time.new
           @lines_sent += 1
           @burst += 1
-          run_throttle(message.length + 1)
         end
       rescue => e
         error "SEND failed: #{e.inspect}"
