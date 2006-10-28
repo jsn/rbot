@@ -1,3 +1,67 @@
+class ::String
+  # Calculate the penalty which will be assigned to this message
+  # by the IRCd
+  def irc_send_penalty
+    # According to eggrdop, the initial penalty is
+    penalty = 1 + self.length/100
+    # on everything but UnderNET where it's
+    # penalty = 2 + self.length/120
+
+    cmd, pars = self.split($;,2)
+    debug "cmd: #{cmd}, pars: #{pars.inspect}"
+    case cmd.to_sym
+    when :KICK
+      chan, nick, msg = pars.split
+      chan = chan.split(',')
+      nick = nick.split(',')
+      penalty += nick.length
+      penalty *= chan.length
+    when :MODE
+      chan, modes, argument = pars.split
+      extra = 0
+      if modes
+        extra = 1
+        if argument
+          extra += modes.split(/\+|-/).length
+        else
+          extra += 3 * modes.split(/\+|-/).length
+        end
+      end
+      if argument
+        extra += 2 * argument.split.length
+      end
+      penalty += extra * chan.split.length
+    when :TOPIC
+      penalty += 1
+      penalty += 2 unless pars.split.length < 2
+    when :PRIVMSG, :NOTICE
+      dests = pars.split($;,2).first
+      penalty += dests.split(',').length
+    when :WHO
+      # I'm too lazy to implement this one correctly
+      penalty += 5
+    when :AWAY, :JOIN, :VERSION, :TIME, :TRACE, :WHOIS, :DNS
+      penalty += 2
+    when :INVITE, :NICK
+      penalty += 3
+    when :ISON
+      penalty += 1
+    else # Unknown messages
+      penalty += 1
+    end
+    if penalty > 99
+      debug "Wow, more than 99 secs of penalty!"
+      penalty = 99
+    end
+    if penalty < 2
+      debug "Wow, less than 2 secs of penalty!"
+      penalty = 2
+    end
+    debug "penalty: #{penalty}"
+    return penalty
+  end
+end
+
 module Irc
 
   require 'socket'
@@ -214,6 +278,7 @@ module Irc
         @sendq_delay = 2
       end
       @last_send = Time.new - @sendq_delay
+      @flood_send = Time.new
       @last_throttle = Time.new
       @burst = 0
       if sendq_burst
@@ -324,21 +389,19 @@ module Irc
           end
           now = Time.new
           if (now >= (@last_send + @sendq_delay))
-            # after @sendq_delay has passed, we allow more @burst
-            # instead of resetting it to 0, we reduce it by 1
-            debug "decreasing @burst"
-            @burst -= 1 if @burst > 0
-          elsif (@burst >= @sendq_burst)
+            debug "resetting @burst"
+            @burst = 0
+          elsif (@burst > @sendq_burst)
             # nope. can't send anything, come back to us next tick...
             debug "can't send yet"
             @timer.start
             return
           end
+          @flood_send = now if @flood_send < now
           debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send"
-	  while !@sendq.empty? and @burst < @sendq_burst and now > @last_send - MAX_IRC_SEND_PENALTY
-            mess = @sendq.next
-            puts_critical(@sendq.shift)
-            @last_send += mess.irc_send_penalty
+	  while !@sendq.empty? and @burst < @sendq_burst and @flood_send - now < MAX_IRC_SEND_PENALTY
+            debug "sending message (#{@flood_send - now} < #{MAX_IRC_SEND_PENALTY})"
+            puts_critical(@sendq.shift, true)
           end
           if @sendq.empty?
             @timer.stop
@@ -382,7 +445,7 @@ module Irc
     private
 
     # same as puts, but expects to be called with a mutex held on @qmutex
-    def puts_critical(message)
+    def puts_critical(message, penalty=false)
       # debug "in puts_critical"
       begin
         debug "SEND: #{message.inspect}"
@@ -391,6 +454,7 @@ module Irc
         else
           @sock.send(message + "\n",0)
           @last_send = Time.new
+          @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1
           @burst += 1
         end
