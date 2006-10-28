@@ -1,3 +1,9 @@
+2006-10-28  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* A-Z game: try to guess the word the bot is thinking of: every miss
+	helps by reducing the range of allowed words, until it's so small
+	around the correct one that you can't miss it.
+
 2006-10-27  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Flood protection: first attempt at penalty-based flood protection.
