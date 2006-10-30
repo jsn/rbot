@@ -118,6 +118,10 @@ class RSSFeedsPlugin < Plugin
     kill_threads
     if @registry.has_key?(:feeds)
       @feeds = @registry[:feeds]
+      @feeds.keys.grep(/[A-Z]/) { |k|
+        @feeds[k.downcase] = @feeds[k]
+        @feeds.delete(k)
+      }
     else
       @feeds = Hash.new
     end
@@ -204,7 +208,7 @@ class RSSFeedsPlugin < Plugin
       rev = false
     end
 
-    feed = @feeds.fetch(handle, nil)
+    feed = @feeds.fetch(handle.downcase, nil)
     unless feed
       m.reply "I don't know any feeds named #{handle}"
       return
@@ -246,7 +250,7 @@ class RSSFeedsPlugin < Plugin
     reply = String.new
     @@mutex.synchronize {
       @feeds.each { |handle, feed|
-        next if wanted and !handle.match(wanted)
+        next if wanted and !handle.match(/#{wanted}/i)
         reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
         (reply << " (watched)") if feed.watched_by?(m.replyto)
         reply << "\n"
@@ -264,7 +268,7 @@ class RSSFeedsPlugin < Plugin
     reply = String.new
     @@mutex.synchronize {
       watchlist.each { |handle, feed|
-        next if wanted and !handle.match(wanted)
+        next if wanted and !handle.match(/#{wanted}/i)
         next unless feed.watched_by?(m.replyto)
         reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})\n"
       }
@@ -284,8 +288,8 @@ class RSSFeedsPlugin < Plugin
       return
     end
     type = params[:type]
-    if @feeds.fetch(handle, nil) && !force
-      m.reply "There is already a feed named #{handle} (URL: #{@feeds[handle].url})"
+    if @feeds.fetch(handle.downcase, nil) && !force
+      m.reply "There is already a feed named #{handle} (URL: #{@feeds[handle.downcase].url})"
       return
     end
     unless url
@@ -293,7 +297,7 @@ class RSSFeedsPlugin < Plugin
       return
     end
     @@mutex.synchronize {
-      @feeds[handle] = RssBlob.new(url,handle,type)
+      @feeds[handle.downcase] = RssBlob.new(url,handle,type)
     }
     reply = "Added RSS #{url} named #{handle}"
     if type
@@ -310,7 +314,7 @@ class RSSFeedsPlugin < Plugin
       return
     end
     @@mutex.synchronize {
-      @feeds.delete(feed.handle)
+      @feeds.delete(feed.handle.downcase)
     }
     m.okay unless pass
     return
@@ -318,10 +322,10 @@ class RSSFeedsPlugin < Plugin
 
   def replace_rss(m, params)
     handle = params[:handle]
-    if @feeds.key?(handle)
+    if @feeds.key?(handle.downcase)
       del_rss(m, {:handle => handle}, true)
     end
-    if @feeds.key?(handle)
+    if @feeds.key?(handle.downcase)
       m.reply "can't replace #{feed.handle}"
     else
       add_rss(m, params, true)
@@ -341,7 +345,7 @@ class RSSFeedsPlugin < Plugin
     end
     feed = nil
     @@mutex.synchronize {
-      feed = @feeds.fetch(handle, nil)
+      feed = @feeds.fetch(handle.downcase, nil)
     }
     if feed
       @@mutex.synchronize {
@@ -358,7 +362,7 @@ class RSSFeedsPlugin < Plugin
   end
 
   def unwatch_rss(m, params, pass=false)
-    handle = params[:handle]
+    handle = params[:handle].downcase
     unless @feeds.has_key?(handle)
       m.reply("dunno that feed")
       return

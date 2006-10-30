@@ -31,7 +31,7 @@ class AzGame
     @plugin = plugin
     @lang = lang.to_sym
     @word = word.downcase
-    @range = [AZ_RULES[lang][:first], AZ_RULES[lang][:last]]
+    @range = [AZ_RULES[lang][:first].dup, AZ_RULES[lang][:last].dup]
     def @range.to_s
       return "%s -- %s" % self
     end
@@ -380,16 +380,11 @@ class AzGamePlugin < Plugin
         debug "getting random word from dictionary, matching #{random}"
         p = @bot.httputil.get_cached(rules[:url] % URI.escape(random))
         debug p
-        debug "here 1"
         lemmi = Array.new
-        debug "here 2"
         good = rules[:good]
-        debug "here 3"
         # We look for a lemma composed by a single word and of length at least two
         p.scan(/<span class="hwd">(.*?)<\/span>([^\n]+?)<span class="psa">#{rules[:good]}<\/span>/i) { |prelemma, discard|
-          debug "here 4"
           lemma = prelemma.downcase
-          debug "here 5"
           debug "checking lemma #{lemma} (#{prelemma}) and discarding #{discard}"
           next if wc.key?(lemma.to_sym)
           if lemma =~ /^[a-z]+$/
@@ -400,11 +395,8 @@ class AzGamePlugin < Plugin
             debug "funky characters, not good"
           end
         }
-        debug "here 6"
         next if lemmi.empty?
-        debug "here 7"
         word = lemmi[rand(lemmi.length)]
-        debug "here 8"
       end
     rescue => e
       error "error #{e.inspect} while looking up a word"
