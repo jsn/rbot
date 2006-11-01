@@ -154,6 +154,9 @@ class IrcBot
       :default => 6667, :type => :integer, :requires_restart => true,
       :desc => "What port should the bot connect to?",
       :validate => Proc.new {|v| v > 0}, :wizard => true)
+    BotConfig.register BotConfigBooleanValue.new('server.ssl',
+      :default => false, :requires_restart => true, :wizard => true,
+      :desc => "Use SSL to connect to this server?")
     BotConfig.register BotConfigStringValue.new('server.password',
       :default => false, :requires_restart => true,
       :desc => "Password for connecting to this server (if required)",
@@ -368,7 +371,7 @@ class IrcBot
     @plugins.add_botmodule_dir(Config::datadir + "/plugins")
     @plugins.scan
 
-    @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'])
+    @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
     @client = IrcClient.new
     myself.nick = @config['irc.nick']
 

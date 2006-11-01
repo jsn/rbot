@@ -260,7 +260,7 @@ module Irc
     # port::   IRCd port
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
-    def initialize(server, port, host, sendq_delay=2, sendq_burst=4)
+    def initialize(server, port, host, sendq_delay=2, sendq_burst=4, opts={})
       @timer = Timer::Timer.new
       @timer.add(0.2) do
         spool
@@ -272,6 +272,12 @@ module Irc
       @spooler = false
       @lines_sent = 0
       @lines_received = 0
+      if opts.kind_of?(Hash) and opts.key?(:ssl)
+        @ssl = opts[:ssl]
+      else
+        @ssl = false
+      end
+
       if sendq_delay
         @sendq_delay = sendq_delay.to_f
       else
@@ -310,6 +316,15 @@ module Irc
         end
       else
         @sock=TCPSocket.new(@server, @port)
+      end
+      if(@ssl)
+	require 'openssl'
+	ssl_context = OpenSSL::SSL::SSLContext.new()
+	ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+	@rawsock = @sock
+	@sock = OpenSSL::SSL::SSLSocket.new(@sock, ssl_context)
+	@sock.sync_close = true
+	@sock.connect
       end
       @qthread = false
       @qmutex = Mutex.new
@@ -437,8 +452,13 @@ module Irc
 
     # shutdown the connection to the server
     def shutdown(how=2)
-      @sock.shutdown(how) unless @sock.nil?
-      @sock = nil
+      if(@ssl)
+	@rawsock.shutdown(how) unless @rawsock.nil?
+	@rawsock = nil
+      else
+	@sock.shutdown(how) unless @sock.nil?
+	@sock = nil
+      end
       @burst = 0
     end
 
@@ -452,7 +472,7 @@ module Irc
         if @sock.nil?
           error "SEND attempted on closed socket"
         else
-          @sock.send(message + "\n",0)
+          @sock.puts(message + "\n",0)
           @last_send = Time.new
           @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1

@@ -1,3 +1,7 @@
+2006-11-01  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* SSL support: patch from Robin H. Johnson <robbat2@gentoo.org>
+
 2006-10-28  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* A-Z game: try to guess the word the bot is thinking of: every miss
