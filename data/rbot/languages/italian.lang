@@ -32,7 +32,7 @@ hello:
 hello_X:
   ola', %s
   yo %s
-  save, %s
+  salve, %s
   %s, yo
   %s, ola'
   ciao %s
