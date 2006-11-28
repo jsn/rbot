@@ -51,7 +51,17 @@ class ::RssBlob
       @handle = url
     end
     @type = type
-    @watchers = watchers
+    @watchers=[]
+    sanitize_watchers(watchers)
+  end
+
+  # Downcase all watchers, possibly turning them into Strings if they weren't
+  def sanitize_watchers(list=@watchers)
+    ls = list.dup
+    @watchers.clear
+    ls.each { |w|
+      add_watch(w)
+    }
   end
 
   def watched?
@@ -59,28 +69,19 @@ class ::RssBlob
   end
 
   def watched_by?(who)
-    # We need to check bot 'who' itself and the String form, because rss
-    # watches added before the new Irc framework represented watchers as
-    # Strings whereas they are now Channels.
-    #
-    @watchers.include?(who) || @watchers.include?(who.to_s) 
+    @watchers.include?(who.downcase)
   end
 
   def add_watch(who)
     if watched_by?(who)
       return nil
     end
-    # TODO FIXME? should we just store watchers as Strings instead?
-    # This should then be @watchers << who.downcase
-    @watchers << who
+    @watchers << who.downcase
     return who
   end
 
   def rm_watch(who)
-    # See comment to watched_by?
-    #
-    @watchers.delete(who)
-    @watchers.delete(who.to_s)
+    @watchers.delete(who.downcase)
   end
 
   def to_a
@@ -121,6 +122,9 @@ class RSSFeedsPlugin < Plugin
       @feeds.keys.grep(/[A-Z]/) { |k|
         @feeds[k.downcase] = @feeds[k]
         @feeds.delete(k)
+      }
+      @feeds.each { |k, f|
+        f.sanitize_watchers
       }
     else
       @feeds = Hash.new
