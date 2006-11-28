@@ -283,6 +283,7 @@ class Keywords < Plugin
   # like "foo is bar" or "foo is also qux"
   def keyword_command(m, lhs, mhs, rhs, quiet = false)
     debug "got keyword command #{lhs}, #{mhs}, #{rhs}"
+    return if lhs.strip.empty?
 
     also = true if(rhs.gsub!(/^also\s+/, ""))
 
