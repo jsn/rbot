@@ -6,6 +6,9 @@
 # (C) 2006 Giuseppe Bilotta
 #
 # TODO allow manual addition of words
+# TODO scoring: base score is t = ceil(100*exp(-(n-1)^2/50^))+p for n attempts
+#               done by p players; players that didn't win but contributed
+#               with a attempts will get t*a/n points
 
 AZ_RULES = {
   :italian => {
@@ -80,7 +83,7 @@ class AzGamePlugin < Plugin
   def listen(m)
     return unless m.kind_of?(PrivMessage)
     return if m.channel.nil? or m.address?
-    k = m.channel.to_s # to_sym?
+    k = m.channel.downcase.to_s # to_sym?
     return unless @games.key?(k)
     return if m.params
     word = m.plugin.downcase
@@ -108,7 +111,7 @@ class AzGamePlugin < Plugin
   end
 
   def manual_word_check(m, params)
-    k = m.channel.to_s
+    k = m.channel.downcase.to_s
     word = params[:word].downcase
     if not @games.key?(k)
       m.reply "no A-Z game running here, can't check for #{word}, can I?"
@@ -123,7 +126,7 @@ class AzGamePlugin < Plugin
 
   def stop_game(m, params)
     return if m.channel.nil? # Shouldn't happen, but you never know
-    k = m.channel.to_s # to_sym?
+    k = m.channel.downcase.to_s # to_sym?
     if @games.key?(k)
       m.reply "the word in #{Bold}#{@games[k].range}#{Bold} was:   #{Bold}#{@games[k].word}"
       @games.delete(k)
@@ -134,7 +137,7 @@ class AzGamePlugin < Plugin
 
   def start_game(m, params)
     return if m.channel.nil? # Shouldn't happen, but you never know
-    k = m.channel.to_s # to_sym?
+    k = m.channel.downcase.to_s # to_sym?
     unless @games.key?(k)
       lang = (params[:lang] || @bot.config['core.language']).to_sym
       method = 'random_pick_'+lang.to_s
@@ -333,7 +336,7 @@ class AzGamePlugin < Plugin
       return false
     end
     debug p
-    if p =~ /<span class="hwd">#{word}<\/span>([^\n]+?)<span class="psa">#{rules[:good]}<\/span>/i
+    if p =~ /<span class="(?:hwd|srch)">#{word}<\/span>([^\n]+?)<span class="psa">#{rules[:good]}<\/span>/i
       debug "new word #{word}"
         wc[word.to_sym] = {:who => :dict}
         return true
@@ -383,7 +386,7 @@ class AzGamePlugin < Plugin
         lemmi = Array.new
         good = rules[:good]
         # We look for a lemma composed by a single word and of length at least two
-        p.scan(/<span class="hwd">(.*?)<\/span>([^\n]+?)<span class="psa">#{rules[:good]}<\/span>/i) { |prelemma, discard|
+        p.scan(/<span class="(?:hwd|srch)">(.*?)<\/span>([^\n]+?)<span class="psa">#{rules[:good]}<\/span>/i) { |prelemma, discard|
           lemma = prelemma.downcase
           debug "checking lemma #{lemma} (#{prelemma}) and discarding #{discard}"
           next if wc.key?(lemma.to_sym)

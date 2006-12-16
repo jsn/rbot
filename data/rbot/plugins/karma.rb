@@ -69,7 +69,7 @@ class KarmaPlugin < Plugin
         key.sub!(/^\((.*)\)$/, "\1")
         key.gsub!(/\s+/, " ")
         next unless(key.length > 0)
-        next if(key == m.sourcenick)
+        next if(key.downcase == m.sourcenick.downcase)
         if(change == "++")
           @registry[key] += 1
           if key =~ /^#{@bot.nick}$/i
