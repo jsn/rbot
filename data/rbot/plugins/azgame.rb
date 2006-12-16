@@ -114,7 +114,7 @@ class AzGamePlugin < Plugin
     k = m.channel.downcase.to_s
     word = params[:word].downcase
     if not @games.key?(k)
-      m.reply "no A-Z game running here, can't check for #{word}, can I?"
+      m.reply "no A-Z game running here, can't check if #{word} is valid, can I?"
       return
     end
     if word !~ /^[a-z]+$/
