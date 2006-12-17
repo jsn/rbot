@@ -14,7 +14,7 @@ class NickServPlugin < Plugin
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
     :desc => "String to look for to see if the nick server is asking us to identify")
   BotConfig.register BotConfigBooleanValue.new('nickserv.wants_nick',
-    :default => true, :requires_restart => false,
+    :default => false, :requires_restart => false,
     :desc => "Set to false if the nick server doesn't expect the nick as a parameter in the identify command")
   BotConfig.register BotConfigIntegerValue.new('nickserv.wait',
     :default => 30, :validate => Proc.new { |v| v > 0 }, :requires_restart => false,
