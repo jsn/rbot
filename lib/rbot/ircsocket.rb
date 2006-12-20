@@ -472,7 +472,7 @@ module Irc
         if @sock.nil?
           error "SEND attempted on closed socket"
         else
-          @sock.puts(message + "\n",0)
+          @sock.puts message
           @last_send = Time.new
           @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1

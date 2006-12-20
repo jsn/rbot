@@ -924,7 +924,7 @@ class IrcBot
     # we want to respond to a hung server within 30 secs or so
     @ping_timer = @timer.add(30) {
       @last_ping = Time.now
-      @socket.queue "PING :rbot"
+      sendq "PING :rbot"
     }
     @pong_timer = @timer.add(10) {
       unless @last_ping.nil?
