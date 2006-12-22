@@ -262,6 +262,7 @@ class QuizPlugin < Plugin
   #
   def listen( m )
     return unless @quizzes.has_key?( m.channel.to_s )
+    return unless m.kind_of?(PrivMessage)
     q = @quizzes[m.channel.to_s]
 
     return if q.question == nil
