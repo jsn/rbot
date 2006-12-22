@@ -175,8 +175,8 @@ class SalutPlugin < Plugin
   end
 
   def save_lang(lang, val)
-    file = "#{@bot.botclass}/salut/salut-#{lang}"
-    Utils.safe_save(file) { |file|
+    fn = "#{@bot.botclass}/salut/salut-#{lang}"
+    Utils.safe_save(fn) { |file|
       file.puts val.to_yaml
     }
   end
