@@ -13,10 +13,11 @@
 - good morning
 - goodmorning
 - morning
-- "'morgning"
+- "'morning"
 :"afternoon-in": 
 - good afternoon
 - goodafternoon
+- afternoon
 - "'afternoon"
 :"generic-out": 
 - bye
@@ -29,5 +30,5 @@
 :"evening-in": 
 - good evening
 - goodevening
-- "'evening"
 - evening
+- "'evening"
