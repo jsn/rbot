@@ -318,13 +318,13 @@ module Irc
         @sock=TCPSocket.new(@server, @port)
       end
       if(@ssl)
-	require 'openssl'
-	ssl_context = OpenSSL::SSL::SSLContext.new()
-	ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
-	@rawsock = @sock
-	@sock = OpenSSL::SSL::SSLSocket.new(@sock, ssl_context)
-	@sock.sync_close = true
-	@sock.connect
+        require 'openssl'
+        ssl_context = OpenSSL::SSL::SSLContext.new()
+        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        @rawsock = @sock
+        @sock = OpenSSL::SSL::SSLSocket.new(@rawsock, ssl_context)
+        @sock.sync_close = true
+        @sock.connect
       end
       @qthread = false
       @qmutex = Mutex.new
@@ -362,6 +362,15 @@ module Irc
       end
     end
 
+    def handle_socket_error(string, err)
+      error "#{string} failed: #{err.inspect}"
+      debug err.backtrace.join("\n")
+      # We assume that an error means that there are connection
+      # problems and that we should reconnect, so we
+      shutdown
+      raise SocketError.new(err.inspect)
+    end
+
     # get the next line from the server (blocks)
     def gets
       if @sock.nil?
@@ -375,9 +384,7 @@ module Irc
         debug "RECV: #{reply.inspect}"
         return reply
       rescue => e
-        warning "socket get failed: #{e.inspect}"
-        debug e.backtrace.join("\n")
-        return nil
+        handle_socket_error(:RECV, e)
       end
     end
 
@@ -414,7 +421,7 @@ module Irc
           end
           @flood_send = now if @flood_send < now
           debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send"
-	  while !@sendq.empty? and @burst < @sendq_burst and @flood_send - now < MAX_IRC_SEND_PENALTY
+          while !@sendq.empty? and @burst < @sendq_burst and @flood_send - now < MAX_IRC_SEND_PENALTY
             debug "sending message (#{@flood_send - now} < #{MAX_IRC_SEND_PENALTY})"
             puts_critical(@sendq.shift, true)
           end
@@ -452,13 +459,15 @@ module Irc
 
     # shutdown the connection to the server
     def shutdown(how=2)
-      if(@ssl)
-	@rawsock.shutdown(how) unless @rawsock.nil?
-	@rawsock = nil
-      else
-	@sock.shutdown(how) unless @sock.nil?
-	@sock = nil
+      return unless connected?
+      begin
+        @sock.close
+      rescue => err
+        error "error while shutting down: #{err.inspect}"
+        debug err.backtrace.join("\n")
       end
+      @rawsock = nil if @ssl
+      @sock = nil
       @burst = 0
     end
 
@@ -479,8 +488,7 @@ module Irc
           @burst += 1
         end
       rescue => e
-        error "SEND failed: #{e.inspect}"
-	raise
+        handle_socket_error(:SEND, e)
       end
     end
 
