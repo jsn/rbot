@@ -5,8 +5,16 @@
 - ola'
 - yo
 :"morning-in": 
+- "'giorno"
+- giorno
+- buon giorno
+- buon di'
+- buon dì
+- buondì
 - buongiorno
 :"afternoon-in": 
+- "'sera"
+- buona sera
 - buonasera
 :"generic-out": 
 - a dopo
@@ -14,6 +22,8 @@
 - adios
 - se vedemio
 :"evening-in": 
+- "'sera"
+- buona sera
 - buonasera
 :"generic":
 - ciao
