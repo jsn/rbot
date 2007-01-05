@@ -285,20 +285,27 @@ class Keywords < Plugin
     debug "got keyword command #{lhs}, #{mhs}, #{rhs}"
     return if lhs.strip.empty?
 
+    overwrite = false
+    overwrite = true if(lhs.gsub!(/^no,\s*/, ""))
+    also = false
     also = true if(rhs.gsub!(/^also\s+/, ""))
 
     values = rhs.split(/\s+\|\s+/)
     lhs = Keyword.unescape lhs
 
-    if(also && has_key?(lhs))
+    if(overwrite || also || !has_key?(lhs))
+      if(also && has_key?(lhs))
+        kw = self[lhs]
+        kw << values
+        @keywords[lhs] = kw.dump
+      else
+        @keywords[lhs] = Keyword.new(mhs, values).dump
+      end
+      m.okay if !quiet
+    elsif(has_key?(lhs))
       kw = self[lhs]
-      kw << values
-      @keywords[lhs] = kw.dump
-    else
-      @keywords[lhs] = Keyword.new(mhs, values).dump
+      m.reply "but #{lhs} #{kw.type} #{kw.desc}" if kw && !quiet
     end
-
-    @bot.okay m.target if !quiet
   end
 
   # return help string for Keywords with option topic +topic+
@@ -335,6 +342,8 @@ class Keywords < Plugin
       'forget <keyword> => forget a keyword'
     when "tell"
       'tell <nick> about <keyword> => tell somebody about a keyword'
+    when "learn"
+      'learn that <keyword> is/are <definition> => define a keyword, definition can contain "|" to separate multiple randomly chosen replies'
     else
       'keyword module (fact learning and regurgitation) topics: lookup, set, forget, tell, search, listen, address, <reply>, <action>, <who>, <topic>'
     end
@@ -471,6 +480,12 @@ class Keywords < Plugin
       else
         m.reply "wrong 'tell' syntax"
       end
+    when "learn"
+      if m.params =~ /^that\s+(.+?)\s+(is|are)\s+(.+)$/
+        keyword_command(m, $1, $2, $3) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+      else
+        m.reply "wrong 'learn' syntax"
+      end
     end
   end
 
@@ -492,4 +507,5 @@ plugin = Keywords.new
 plugin.register 'keyword'
 plugin.register 'forget'
 plugin.register 'tell'
+plugin.register 'learn'
 
