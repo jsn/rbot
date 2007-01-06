@@ -4,6 +4,8 @@
 #   Channels is the User on (of those the client is on too)?
 #   We may want this so that when a User leaves all Channels and he hasn't
 #   sent us privmsgs, we know remove him from the Server @users list
+# * Maybe ChannelList and UserList should be HashesOf instead of ArrayOf?
+#   See items marked as TODO Ho
 #++
 # :title: IRC module
 #
@@ -851,6 +853,8 @@ module Irc
 
     # Channel modes of type A manipulate lists
     #
+    # Example: b (banlist)
+    #
     class ModeTypeA < Mode
       def initialize(ch)
         super
@@ -871,6 +875,8 @@ module Irc
 
 
     # Channel modes of type B need an argument
+    #
+    # Example: k (key)
     #
     class ModeTypeB < Mode
       def initialize(ch)
@@ -916,6 +922,8 @@ module Irc
     # Channel modes of type C need an argument when set,
     # but not when they get reset
     #
+    # Example: l (limit)
+    #
     class ModeTypeC < Mode
       def initialize(ch)
         super
@@ -938,6 +946,8 @@ module Irc
 
 
     # Channel modes of type D are basically booleans
+    #
+    # Example: m (moderate)
     #
     class ModeTypeD < Mode
       def initialize(ch)
@@ -1024,7 +1034,7 @@ module Irc
       str = "<#{self.class}:#{'0x%x' % self.object_id}:"
       str << " on server #{server}" if server
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
-      str << " @users=[#{@users.sort.join(', ')}]"
+      str << " @users=[#{user_nicks.sort.join(', ')}]"
       str << ">"
     end
 
@@ -1032,6 +1042,35 @@ module Irc
     #
     def to_irc_channel
       self
+    end
+
+    # TODO Ho
+    def user_nicks
+      @users.map { |u| u.downcase }
+    end
+
+    # Checks if the receiver already has a user with the given _nick_
+    #
+    def has_user?(nick)
+      user_nicks.index(nick.irc_downcase(casemap))
+    end
+
+    # Returns the user with nick _nick_, if available
+    #
+    def get_user(nick)
+      idx = has_user?(nick)
+      @users[idx] if idx
+    end
+
+    # Adds a user to the channel
+    #
+    def add_user(user, opts={})
+      silent = opts.fetch(:silent, false) 
+      if has_user?(user) && !silent
+        warn "Trying to add user #{user} to channel #{self} again"
+      else
+        @users << user.to_irc_user(server_and_casemap)
+      end
     end
 
     # Creates a new channel with the given name, optionally setting the topic
@@ -1054,7 +1093,7 @@ module Irc
       @users = UserList.new
 
       users.each { |u|
-        @users << u.to_irc_user(server_and_casemap)
+        add_user(u)
       }
 
       # Flags
@@ -1079,25 +1118,25 @@ module Irc
     # A channel is local to a server if it has the '&' prefix
     #
     def local?
-      name[0] = 0x26
+      name[0] == 0x26
     end
 
     # A channel is modeless if it has the '+' prefix
     #
     def modeless?
-      name[0] = 0x2b
+      name[0] == 0x2b
     end
 
     # A channel is safe if it has the '!' prefix
     #
     def safe?
-      name[0] = 0x21
+      name[0] == 0x21
     end
 
     # A channel is normal if it has the '#' prefix
     #
     def normal?
-      name[0] = 0x23
+      name[0] == 0x23
     end
 
     # Create a new mode
@@ -1150,10 +1189,12 @@ module Irc
 
     attr_reader :channels, :users
 
+    # TODO Ho
     def channel_names
       @channels.map { |ch| ch.downcase }
     end
 
+    # TODO Ho
     def user_nicks
       @users.map { |u| u.downcase }
     end
@@ -1396,7 +1437,7 @@ module Irc
     # Checks if the receiver already has a channel with the given _name_
     #
     def has_channel?(name)
-      channel_names.index(name.downcase)
+      channel_names.index(name.irc_downcase(casemap))
     end
     alias :has_chan? :has_channel?
 
@@ -1500,7 +1541,7 @@ module Irc
     # Checks if the receiver already has a user with the given _nick_
     #
     def has_user?(nick)
-      user_nicks.index(nick.downcase)
+      user_nicks.index(nick.irc_downcase(casemap))
     end
 
     # Returns the user with nick _nick_, if available
@@ -1582,7 +1623,7 @@ module Irc
       @users.inject(UserList.new) {
         |list, user|
         if user.user == "*" or user.host == "*"
-          list << user if user.nick.downcase =~ nm.nick.downcase.to_irc_regexp
+          list << user if user.nick.irc_downcase(casemap) =~ nm.nick.irc_downcase(casemap).to_irc_regexp
         else
           list << user if user.matches?(nm)
         end

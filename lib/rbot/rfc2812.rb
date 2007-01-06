@@ -1009,7 +1009,7 @@ module Irc
           users = []
           argv[3].scan(/\S+/).each { |u|
             # FIXME beware of servers that allow multiple prefixes
-            if(u =~ /^(#{@server.supports[:prefix][:prefixes].join})?(.*)$/)
+            if(u =~ /^([#{@server.supports[:prefix][:prefixes].join}])?(.*)$/)
               umode = $1
               user = $2
               users << [user, umode]
@@ -1018,11 +1018,13 @@ module Irc
 
           users.each { |ar|
             u = @server.user(ar[0])
-            chan.users << u unless chan.users.include?(u)
+            chan.add_user(u, :silent => true)
+            debug "Adding user #{u}"
             if ar[1]
               m = @server.supports[:prefix][:prefixes].index(ar[1].to_sym)
-              m = @server.supports[:prefix][:modes][m]
-              chan.mode[m.to_sym].set(u)
+              ms = @server.supports[:prefix][:modes][m]
+              debug "\twith mode #{ar[1]} (#{ms})"
+              chan.mode[ms].set(u)
             end
           }
           @tmpusers += users
@@ -1155,8 +1157,8 @@ module Irc
       when 'QUIT'
         data[:message] = argv[0]
         data[:was_on] = @server.channels.inject(ChannelList.new) { |list, ch|
-          list << ch if ch.users.include?(data[:source])
-	  list
+          list << ch if ch.has_user?(data[:source])
+          list
         }
 
         @server.delete_user(data[:source])
@@ -1164,7 +1166,7 @@ module Irc
         handle(:quit, data)
       when 'JOIN'
         data[:channel] = @server.channel(argv[0])
-        data[:channel].users << data[:source]
+        data[:channel].add_user(data[:source])
 
         handle(:join, data)
       when 'TOPIC'
@@ -1180,7 +1182,7 @@ module Irc
         handle(:invite, data)
       when 'NICK'
         data[:is_on] = @server.channels.inject(ChannelList.new) { |list, ch|
-          list << ch if ch.users.include?(data[:source])
+          list << ch if ch.has_user?(data[:source])
           list
         }
 
@@ -1203,6 +1205,7 @@ module Irc
         case data[:channel]
         when User
           # TODO
+          warn "Unhandled user mode message '#{serverstring}'"
         else
           # data[:modes] is an array where each element
           # is either a flag which doesn't need parameters
@@ -1238,13 +1241,13 @@ module Irc
                   data[:modes] << [setting + m]
                   who_wants_params << data[:modes].length - 1
                 else
-                  warn "Unknown mode #{m} in #{serverstring}"
+                  warn "Unknown mode #{m} in #{serverstring.inspect}"
                 end
               }
             else
               idx = who_wants_params.shift
               if idx.nil?
-                warn "Oops, problems parsing #{serverstring}"
+                warn "Oops, problems parsing #{serverstring.inspect}"
                 break
               end
               data[:modes][idx] << arg
@@ -1268,6 +1271,7 @@ module Irc
 
         handle(:mode, data)
       else
+        warn "Unknown message #{serverstring.inspect}"
         handle(:unknown, data)
       end
     end
