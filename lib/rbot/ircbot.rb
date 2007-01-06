@@ -919,41 +919,38 @@ class IrcBot
   # we'll ping the server every 30 seconds or so, and expect a response
   # before the next one come around..
   def start_server_pings
+    debug "Starting server pings with a timeout of #{@config['server.ping_timeout']}"
+    if @config['server.ping_timeout'] <= 0
+      debug "NOT starting server pings"
+      return
+    end
     stop_server_pings
-    return unless @config['server.ping_timeout'] > 0
     # we want to respond to a hung server within 30 secs or so
-    @ping_timer = @timer.add(30) {
-      @last_ping = Time.now
-      sendq "PING :rbot"
-    }
-    @pong_timer = @timer.add(10) {
-      unless @last_ping.nil?
-        diff = Time.now - @last_ping
-        unless diff < @config['server.ping_timeout']
-          debug "no PONG from server for #{diff} seconds, reconnecting"
-          begin
-            @socket.shutdown
-          rescue
-            debug "couldn't shutdown connection (already shutdown?)"
-          end
-          @last_ping = nil
-          raise TimeoutError, "no PONG from server in #{diff} seconds"
-        end
+    # so we ping it every server.ping_timeout seconds
+    # if the timer kicks in before the appropriate pong
+    # was received, we're in ping timeout and act accordingly
+    @ping_timer = @timer.add(@config['server.ping_timeout']) {
+      if @last_ping.nil?
+        @last_ping = Time.now
+        sendq "PING :rbot"
+      else
+        # @last_ping was not reset by a pong, so we are
+        # in ping timeout: reconnect
+        diff = Time.now - @last.ping
+        debug "no PONG from server in #{diff} seconds, reconnecting"
+        # the actual reconnect is handled in the main loop:
+        raise TimeoutError, "no PONG from server in #{diff} seconds"
       end
     }
   end
 
   def stop_server_pings
-    @last_ping = nil
     # stop existing timers if running
     unless @ping_timer.nil?
       @timer.remove @ping_timer
       @ping_timer = nil
     end
-    unless @pong_timer.nil?
-      @timer.remove @pong_timer
-      @pong_timer = nil
-    end
+    @last_ping = nil
   end
 
   private
