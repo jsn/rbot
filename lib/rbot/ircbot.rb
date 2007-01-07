@@ -936,7 +936,7 @@ class IrcBot
       else
         # @last_ping was not reset by a pong, so we are
         # in ping timeout: reconnect
-        diff = Time.now - @last.ping
+        diff = Time.now - @last_ping
         debug "no PONG from server in #{diff} seconds, reconnecting"
         # the actual reconnect is handled in the main loop:
         raise TimeoutError, "no PONG from server in #{diff} seconds"
