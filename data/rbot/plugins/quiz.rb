@@ -101,6 +101,8 @@ class QuizPlugin < Plugin
       IO.foreach("#{@bot.botclass}/quiz/win_messages") { |line| @win_messages << line.chomp }
     else
       warning( "win_messages file not found!" )
+      # Fill the array with a least one message or code accessing it would fail
+      @win_messages << "<who> guessed right! The answer was <answer>"
     end
 
     # TODO: Make this configurable, and add support for more than one file (there's a size limit in linux too ;) )
