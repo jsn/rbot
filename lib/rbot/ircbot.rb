@@ -768,7 +768,7 @@ class IrcBot
   def irclog(message, where="server")
     message = message.chomp
     stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    where = where.to_s.gsub(/[:!?$*()\/\\<>|"']/, "_")
+    where = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
     unless(@logs.has_key?(where))
       @logs[where] = File.new("#{@botclass}/logs/#{where}", "a")
       @logs[where].sync = true
