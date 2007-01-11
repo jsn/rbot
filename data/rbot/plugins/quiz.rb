@@ -29,7 +29,7 @@ Bold = "\002"
 #######################################################################
 class Quiz
   attr_accessor :registry, :registry_conf, :questions, :question, :answer, :answer_core,
-  :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors?
+  :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
 
   def initialize( channel, registry )
     if channel.empty?
