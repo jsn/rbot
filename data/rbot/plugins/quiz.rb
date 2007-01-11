@@ -7,6 +7,12 @@
 # (c) 2006 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 # Licensed under GPL V2.
 
+# FIXME interesting fact: n the Quiz class, @registry.has_key? seems to be case
+# insensitive! Although this is all right for us, this leads to rank vs
+# registry mismatches! So we have to make the @rank_table comparisons case
+# insensitive as well. For the moment, redefine everything to downcase before
+# matching the nick. TODO define a class for the rank table. We might also need it
+# for scoring in other games.
 
 # Class for storing question/answer pairs
 QuizBundle = Struct.new( "QuizBundle", :question, :answer )
@@ -206,7 +212,7 @@ class QuizPlugin < Plugin
       jokers = q.registry[nick].jokers
 
       rank = 0
-      q.rank_table.each_index { |rank| break if nick == q.rank_table[rank][0] }
+      q.rank_table.each_index { |rank| break if nick.downcase == q.rank_table[rank][0].downcase }
       rank += 1
 
       m.reply "#{nick}'s score is: #{score}    Rank: #{rank}    Jokers: #{jokers}"
@@ -236,7 +242,7 @@ class QuizPlugin < Plugin
       found_player = false
       i = 0
       q.rank_table.each_index do |i|
-        if nick == q.rank_table[i][0]
+        if nick.downcase == q.rank_table[i][0].downcase
           found_player = true
           break
         end
@@ -300,11 +306,11 @@ class QuizPlugin < Plugin
       if q.first_try
         points += 1
         reply = "WHOPEEE! #{nick} got it on the first try! That's worth an extra point. Answer was: #{q.answer}"
-      elsif q.rank_table.length >= 1 and nick == q.rank_table[0][0]
+      elsif q.rank_table.length >= 1 and nick.downcase == q.rank_table[0][0].downcase
         reply = "THE QUIZ CHAMPION defends his throne! Seems like #{nick} is invicible! Answer was: #{q.answer}"
-      elsif q.rank_table.length >= 2 and nick == q.rank_table[1][0]
+      elsif q.rank_table.length >= 2 and nick.downcase == q.rank_table[1][0].downcase
         reply = "THE SECOND CHAMPION is on the way up! Hurry up #{nick}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{q.answer}"
-      elsif    q.rank_table.length >= 3 and nick == q.rank_table[2][0]
+      elsif    q.rank_table.length >= 3 and nick.downcase == q.rank_table[2][0].downcase
         reply = "THE THIRD CHAMPION strikes again! Give it all #{nick}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
       else
         reply = @win_messages[rand( @win_messages.length )].dup
@@ -671,6 +677,11 @@ class QuizPlugin < Plugin
         destplayer = PlayerStats.new(0,0,0)
       end
 
+      if sourceplayer == destplayer
+        m.reply "Source and destination are the same, I'm not going to touch them"
+        return
+      end
+
       sourceplayer.score -= transscore
       destplayer.score += transscore
       sourceplayer.jokers -= transjokers
@@ -716,7 +727,7 @@ class QuizPlugin < Plugin
 
       player_rank = nil
       q.rank_table.each_index { |rank|
-        if nick == q.rank_table[rank][0]
+        if nick.downcase == q.rank_table[rank][0].downcase
           player_rank = rank
           break
         end
