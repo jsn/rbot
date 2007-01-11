@@ -29,7 +29,7 @@ Bold = "\002"
 #######################################################################
 class Quiz
   attr_accessor :registry, :registry_conf, :questions, :question, :answer, :answer_core,
-  :first_try, :hint, :hintrange, :rank_table, :hinted
+  :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors?
 
   def initialize( channel, registry )
     if channel.empty?
@@ -37,6 +37,17 @@ class Quiz
     else
       @registry = registry.sub_registry( channel )
     end
+    @has_errors = false
+    @registry.each_key { |k|
+      unless @registry.has_key?(k)
+        @has_errors = true
+        error "Data for #{k} is NOT ACCESSIBLE! Database corrupt?"
+      end
+    }
+    if @has_errors
+      debug @registry.to_a.map { |a| a.join(", ")}.join("\n")
+    end
+
     @registry_conf = @registry.sub_registry( "config" )
 
     # Per-channel copy of the global questions table. Acts like a shuffled queue
@@ -174,12 +185,21 @@ class QuizPlugin < Plugin
       @quizzes[channel] = Quiz.new( channel, @registry )
     end
 
-    return @quizzes[channel]
+    if @quizzes[channel].has_errors
+      return nil
+    else
+      return @quizzes[channel]
+    end
   end
 
 
   def say_score( m, nick )
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
 
     if q.registry.has_key?( nick )
       score = q.registry[nick].score
@@ -264,35 +284,39 @@ class QuizPlugin < Plugin
   #
   def listen( m )
     return unless m.kind_of?(PrivMessage)
-    return unless @quizzes.has_key?( m.channel.to_s )
-    q = @quizzes[m.channel.to_s]
+
+    chan = m.channel.downcase
+    return unless @quizzes.has_key?( chan )
+    q = @quizzes[chan]
 
     return if q.question == nil
 
     message = m.message.downcase.strip
 
+    nick = m.sourcenick.to_s 
+
     if message == q.answer.downcase or message == q.answer_core.downcase
       points = 1
       if q.first_try
         points += 1
-        reply = "WHOPEEE! #{m.sourcenick.to_s} got it on the first try! That's worth an extra point. Answer was: #{q.answer}"
-      elsif q.rank_table.length >= 1 and m.sourcenick.to_s == q.rank_table[0][0]
-        reply = "THE QUIZ CHAMPION defends his throne! Seems like #{m.sourcenick.to_s} is invicible! Answer was: #{q.answer}"
-      elsif q.rank_table.length >= 2 and m.sourcenick.to_s == q.rank_table[1][0]
-        reply = "THE SECOND CHAMPION is on the way up! Hurry up #{m.sourcenick.to_s}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{q.answer}"
-      elsif    q.rank_table.length >= 3 and m.sourcenick.to_s == q.rank_table[2][0]
-        reply = "THE THIRD CHAMPION strikes again! Give it all #{m.sourcenick.to_s}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
+        reply = "WHOPEEE! #{nick} got it on the first try! That's worth an extra point. Answer was: #{q.answer}"
+      elsif q.rank_table.length >= 1 and nick == q.rank_table[0][0]
+        reply = "THE QUIZ CHAMPION defends his throne! Seems like #{nick} is invicible! Answer was: #{q.answer}"
+      elsif q.rank_table.length >= 2 and nick == q.rank_table[1][0]
+        reply = "THE SECOND CHAMPION is on the way up! Hurry up #{nick}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{q.answer}"
+      elsif    q.rank_table.length >= 3 and nick == q.rank_table[2][0]
+        reply = "THE THIRD CHAMPION strikes again! Give it all #{nick}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
       else
         reply = @win_messages[rand( @win_messages.length )].dup
-        reply.gsub!( "<who>", m.sourcenick )
+        reply.gsub!( "<who>", nick )
         reply.gsub!( "<answer>", q.answer )
       end
 
       m.reply reply
 
       player = nil
-      if q.registry.has_key?( m.sourcenick.to_s )
-        player = q.registry[m.sourcenick.to_s]
+      if q.registry.has_key?(nick)
+        player = q.registry[nick]
       else
         player = PlayerStats.new( 0, 0, 0 )
       end
@@ -305,8 +329,8 @@ class QuizPlugin < Plugin
         m.reply "#{m.sourcenick.to_s} gains a new joker. Rejoice :)"
       end
 
-      q.registry[m.sourcenick.to_s] = player
-      calculate_ranks( m, q, m.sourcenick.to_s )
+      q.registry[nick] = player
+      calculate_ranks( m, q, nick)
 
       q.question = nil
       cmd_quiz( m, nil ) if q.registry_conf["autoask"]
@@ -338,6 +362,10 @@ class QuizPlugin < Plugin
   def cmd_quiz( m, params )
     fetch_data( m ) if @questions.empty?
     q = create_quiz( m.channel.to_s )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
 
     if q.question
       m.reply "#{Bold}#{Color}03Current question: #{Color}#{Bold}#{q.question}"
@@ -393,8 +421,10 @@ class QuizPlugin < Plugin
 
 
   def cmd_solve( m, params )
-    return unless @quizzes.has_key?( m.channel.to_s )
-    q = @quizzes[m.channel.to_s]
+    chan = m.channel.to_s
+
+    return unless @quizzes.has_key?( chan )
+    q = @quizzes[chan]
 
     m.reply "The correct answer was: #{q.answer}"
 
@@ -405,11 +435,14 @@ class QuizPlugin < Plugin
 
 
   def cmd_hint( m, params )
-    return unless @quizzes.has_key?( m.channel.to_s )
-    q = @quizzes[m.channel.to_s]
+    chan = m.channel.downcase
+    nick = m.sourcenick.to_s
+
+    return unless @quizzes.has_key?(chan)
+    q = @quizzes[chan]
 
     if q.question == nil
-      m.reply "#{m.sourcenick.to_s}: Get a question first!"
+      m.reply "#{nick}: Get a question first!"
     else
       num_chars = case q.hintrange.length    # Number of characters to reveal
       when 25..1000 then 7
@@ -432,19 +465,19 @@ class QuizPlugin < Plugin
       q.hinted = true
 
       if q.hint == q.answer_core
-        m.reply "#{Bold}#{Color}04BUST!#{Color}#{Bold} This round is over. #{Color}04Minus one point for #{m.sourcenick.to_s}#{Color}."
+        m.reply "#{Bold}#{Color}04BUST!#{Color}#{Bold} This round is over. #{Color}04Minus one point for #{nick}#{Color}."
 
         stats = nil
-        if q.registry.has_key?( m.sourcenick.to_s )
-          stats = q.registry[m.sourcenick.to_s]
+        if q.registry.has_key?( nick )
+          stats = q.registry[nick]
         else
           stats = PlayerStats.new( 0, 0, 0 )
         end
 
         stats["score"] = stats.score - 1
-        q.registry[m.sourcenick.to_s] = stats
+        q.registry[nick] = stats
 
-        calculate_ranks( m, q, m.sourcenick.to_s )
+        calculate_ranks( m, q, nick)
 
         q.question = nil
         cmd_quiz( m, nil ) if q.registry_conf["autoask"]
@@ -454,8 +487,9 @@ class QuizPlugin < Plugin
 
 
   def cmd_skip( m, params )
-    return unless @quizzes.has_key?( m.channel.to_s )
-    q = @quizzes[m.channel.to_s]
+    chan = m.channel.downcase
+    return unless @quizzes.has_key?(chan)
+    q = @quizzes[chan]
 
     q.question = nil
     cmd_quiz( m, params )
@@ -463,33 +497,39 @@ class QuizPlugin < Plugin
 
 
   def cmd_joker( m, params )
-    q = create_quiz( m.channel.to_s )
-
-    if q.question == nil
-      m.reply "#{m.sourcenick.to_s}: There is no open question."
+    chan = m.channel.downcase
+    nick = m.sourcenick.to_s
+    q = create_quiz(chan)
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
       return
     end
 
-    if q.registry[m.sourcenick.to_s].jokers > 0
-      player = q.registry[m.sourcenick.to_s]
+    if q.question == nil
+      m.reply "#{nick}: There is no open question."
+      return
+    end
+
+    if q.registry[nick].jokers > 0
+      player = q.registry[nick]
       player.jokers -= 1
       player.score += 1
-      q.registry[m.sourcenick.to_s] = player
+      q.registry[nick] = player
 
-      calculate_ranks( m, q, m.sourcenick.to_s )
+      calculate_ranks( m, q, nick )
 
       if player.jokers != 1
         jokers = "jokers"
       else
         jokers = "joker"
       end
-      m.reply "#{Bold}#{Color}12JOKER!#{Color}#{Bold} #{m.sourcenick.to_s} draws a joker and wins this round. You have #{player.jokers} #{jokers} left."
+      m.reply "#{Bold}#{Color}12JOKER!#{Color}#{Bold} #{nick} draws a joker and wins this round. You have #{player.jokers} #{jokers} left."
       m.reply "The answer was: #{q.answer}."
 
       q.question = nil
       cmd_quiz( m, nil ) if q.registry_conf["autoask"]
     else
-      m.reply "#{m.sourcenick.to_s}: You don't have any jokers left ;("
+      m.reply "#{nick}: You don't have any jokers left ;("
     end
   end
 
@@ -500,13 +540,19 @@ class QuizPlugin < Plugin
 
 
   def cmd_top5( m, params )
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
+
     if q.rank_table.empty?
       m.reply "There are no scores known yet!"
       return
     end
 
-    m.reply "* Top 5 Players for #{m.channel.to_s}:"
+    m.reply "* Top 5 Players for #{chan}:"
 
     [5, q.rank_table.length].min.times do |i|
       player = q.rank_table[i]
@@ -520,14 +566,20 @@ class QuizPlugin < Plugin
   def cmd_top_number( m, params )
     num = params[:number].to_i
     return unless 1..50 === num
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
+
     if q.rank_table.empty?
       m.reply "There are no scores known yet!"
       return
     end
 
     ar = []
-    m.reply "* Top #{num} Players for #{m.channel.to_s}:"
+    m.reply "* Top #{num} Players for #{chan}:"
     n = [ num, q.rank_table.length ].min
     n.times do |i|
       player = q.rank_table[i]
@@ -548,7 +600,8 @@ class QuizPlugin < Plugin
 
 
   def cmd_score( m, params )
-    say_score( m, m.sourcenick.to_s )
+    nick = m.sourcenick.to_s
+    say_score( m, nick )
   end
 
 
@@ -558,7 +611,12 @@ class QuizPlugin < Plugin
 
 
   def cmd_autoask( m, params )
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
 
     if params[:enable].downcase == "on"
       q.registry_conf["autoask"] = true
@@ -574,7 +632,12 @@ class QuizPlugin < Plugin
 
 
   def cmd_transfer( m, params )
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
 
     debug q.rank_table.inspect
 
@@ -627,7 +690,13 @@ class QuizPlugin < Plugin
 
 
   def cmd_del_player( m, params )
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
+
     debug q.rank_table.inspect
 
     nick = params[:nick]
@@ -662,7 +731,12 @@ class QuizPlugin < Plugin
 
 
   def cmd_set_score(m, params)
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
     debug q.rank_table.inspect
 
     nick = params[:nick]
@@ -680,7 +754,13 @@ class QuizPlugin < Plugin
 
 
   def cmd_set_jokers(m, params)
-    q = create_quiz( m.channel.to_s )
+    chan = m.channel.downcase
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
+    debug q.rank_table.inspect
 
     nick = params[:nick]
     val = [params[:jokers].to_i, Max_Jokers].min
