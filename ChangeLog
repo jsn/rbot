@@ -1,3 +1,12 @@
+2007-01-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Server timeout: rework the server timeout code. Instead of PINGing
+	the server unconditionally every server.ping_timeout seconds, we only
+	PING it if we don't receive anything in the user-chosen timeout (lazy
+	PING). The code rewrite also seems to have fixed the "bot stalling
+	doing nothing" problem, which seemed to have been a consequence of
+	@socket.select not having a timeout.
+
 2006-11-01  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* SSL support: patch from Robin H. Johnson <robbat2@gentoo.org>

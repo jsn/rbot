@@ -178,7 +178,6 @@ class IrcBot
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
     BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
       :default => 30, :validate => Proc.new{|v| v >= 0},
-      :on_change => Proc.new {|bot, v| bot.start_server_pings},
       :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
 
     BotConfig.register BotConfigStringValue.new('irc.nick', :default => "rbot",
@@ -268,9 +267,11 @@ class IrcBot
     Dir.mkdir("#{botclass}/safe_save") unless File.exist?("#{botclass}/safe_save")
     Utils.set_safe_save_dir("#{botclass}/safe_save")
 
-    @ping_timer = nil
-    @pong_timer = nil
+    # Time at which the last PING was sent
     @last_ping = nil
+    # Time at which the last line was RECV'd from the server
+    @last_rec = nil
+
     @startup_time = Time.new
 
     begin
@@ -583,22 +584,29 @@ class IrcBot
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
     quit if $interrupted > 0
-    start_server_pings
   end
 
   # begin event handling loop
   def mainloop
     while true
       begin
-	quit if $interrupted > 0
+        quit if $interrupted > 0
         connect
         @timer.start
 
         while @socket.connected?
-	  quit if $interrupted > 0
-          if @socket.select
+          quit if $interrupted > 0
+
+          # Wait for messages and process them as they arrive. If nothing is
+          # received, we call the ping_server() method that will PING the
+          # server if appropriate, or raise a TimeoutError if no PONG has been
+          # received in the user-chosen timeout since the last PING sent.
+          if @socket.select(1)
             break unless reply = @socket.gets
+            @last_rec = Time.now
             @client.process reply
+          else
+            ping_server
           end
         end
 
@@ -916,41 +924,34 @@ class IrcBot
     return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
   end
 
-  # we'll ping the server every 30 seconds or so, and expect a response
-  # before the next one come around..
-  def start_server_pings
-    debug "Starting server pings with a timeout of #{@config['server.ping_timeout']}"
-    if @config['server.ping_timeout'] <= 0
-      debug "NOT starting server pings"
-      return
-    end
-    stop_server_pings
-    # we want to respond to a hung server within 30 secs or so
-    # so we ping it every server.ping_timeout seconds
-    # if the timer kicks in before the appropriate pong
-    # was received, we're in ping timeout and act accordingly
-    @ping_timer = @timer.add(@config['server.ping_timeout']) {
+  # We want to respond to a hung server in a timely manner. If nothing was received
+  # in the user-selected timeout and we haven't PINGed the server yet, we PING
+  # the server. If the PONG is not received within the user-defined timeout, we
+  # assume we're in ping timeout and act accordingly.
+  def ping_server
+    act_timeout = @config['server.ping_timeout']
+    return if act_timeout <= 0
+    now = Time.now
+    if @last_rec && now > @last_rec + act_timeout
       if @last_ping.nil?
-        @last_ping = Time.now
+        # No previous PING pending, send a new one
         sendq "PING :rbot"
+        @last_ping = Time.now
       else
-        # @last_ping was not reset by a pong, so we are
-        # in ping timeout: reconnect
-        diff = Time.now - @last_ping
-        debug "no PONG from server in #{diff} seconds, reconnecting"
-        # the actual reconnect is handled in the main loop:
-        raise TimeoutError, "no PONG from server in #{diff} seconds"
+        diff = now - @last_ping
+        if diff > act_timeout
+          debug "no PONG from server in #{diff} seconds, reconnecting"
+          # the actual reconnect is handled in the main loop:
+          raise TimeoutError, "no PONG from server in #{diff} seconds"
+        end
       end
-    }
+    end
   end
 
   def stop_server_pings
-    # stop existing timers if running
-    unless @ping_timer.nil?
-      @timer.remove @ping_timer
-      @ping_timer = nil
-    end
+    # cancel previous PINGs and reset time of last RECV
     @last_ping = nil
+    @last_rec = nil
   end
 
   private
