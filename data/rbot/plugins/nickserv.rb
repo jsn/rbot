@@ -157,7 +157,7 @@ class NickServPlugin < Plugin
   def listen(m)
     return unless(m.kind_of? NoticeMessage)
 
-    if (m.sourcenick == ns_nick && m.message =~ @ident_request)
+    if (m.sourcenick.downcase == ns_nick.downcase && m.message =~ @ident_request)
       debug "nickserv asked us to identify for nick #{@bot.nick}"
       do_identify
     end

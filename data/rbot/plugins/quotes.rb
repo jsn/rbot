@@ -6,6 +6,7 @@ class QuotePlugin < Plugin
   def initialize
     super
     @lists = Hash.new
+    @changed = Hash.new
     Dir["#{@bot.botclass}/quotes/*"].each {|f|
       next if File.directory?(f)
       channel = File.basename(f)
@@ -16,18 +17,24 @@ class QuotePlugin < Plugin
           @lists[channel][num] = Quote.new(num, $2, $3, $4)
         end
       }
+      @changed[channel] = false
     }
   end
   def save
     Dir.mkdir("#{@bot.botclass}/quotes") if(!FileTest.directory?("#{@bot.botclass}/quotes"))
     @lists.each {|channel, quotes|
       begin
-        debug "Writing new quotefile for channel #{channel} ..."
-        Utils.safe_save("#{@bot.botclass}/quotes/#{channel}") {|file|
-          quotes.compact.each {|q| 
-            file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
+        if @changed[channel]
+          debug "Writing new quotefile for channel #{channel} ..."
+          Utils.safe_save("#{@bot.botclass}/quotes/#{channel}") {|file|
+            quotes.compact.each {|q| 
+              file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
+            }
           }
-        }
+          @changed[channel] = false
+        else
+          debug "Not writing quotefile for channel #{channel} (unchanged)"
+        end
       rescue => e
         error "failed to write quotefile for channel #{channel}!\n#{$!}"
         error "#{e.class}: #{e}"
@@ -35,10 +42,15 @@ class QuotePlugin < Plugin
       end
     }
   end
+  def cleanup
+    @lists.clear
+    @changed.clear
+  end
   def addquote(source, channel, quote)
     @lists[channel] = Array.new if(!@lists.has_key?(channel))
     num = @lists[channel].length 
     @lists[channel][num] = Quote.new(num, Time.new, source, quote)
+    @changed[channel] = true
     return num
   end
   def getquote(source, channel, num=nil)
@@ -60,6 +72,7 @@ class QuotePlugin < Plugin
     if(@lists[channel][num])
       @lists[channel][num] = nil
       @lists[channel].pop if num == @lists[channel].length - 1
+      @changed[channel] = true
       return true
     end
     return false
