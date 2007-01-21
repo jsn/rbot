@@ -415,13 +415,20 @@ class IrcBot
       # debug "Message target is #{data[:target].inspect}"
       # debug "Bot is #{myself.inspect}"
 
-      # TODO use the new Netmask class
-      # @config['irc.ignore_users'].each { |mask| return if Irc.netmaskmatch(mask,m.source) }
+      ignored = false
+      @config['irc.ignore_users'].each { |mask|
+        if m.source.matches?(server.new_netmask(mask))
+          ignored = true
+          break
+        end
+      }
 
-      irclogprivmsg(m)
+      unless ignored
+        irclogprivmsg(m)
 
-      @plugins.delegate "listen", m
-      @plugins.privmsg(m) if m.address?
+        @plugins.delegate "listen", m
+        @plugins.privmsg(m) if m.address?
+      end
     }
     @client[:notice] = proc { |data|
       message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
@@ -455,7 +462,7 @@ class IrcBot
         debug "my nick is now #{new}"
       end
       data[:is_on].each { |ch|
-          irclog "@ #{old} is now known as #{new}", ch
+        irclog "@ #{old} is now known as #{new}", ch
       }
       @plugins.delegate("listen", m)
       @plugins.delegate("nick", m)
