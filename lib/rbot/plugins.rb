@@ -252,19 +252,28 @@ module Plugins
     attr_reader :botmodules
 
     def initialize
-      bot_associate(nil)
-
-      @dirs = []
-    end
-
-    # Reset lists of botmodules
-    def reset_botmodule_lists
       @botmodules = {
         :CoreBotModule => [],
         :Plugin => []
       }
+
       @names_hash = Hash.new
       @commandmappers = Hash.new
+
+      @dirs = []
+
+      @failed = Array.new
+      @ignored = Array.new
+
+      bot_associate(nil)
+    end
+
+    # Reset lists of botmodules
+    def reset_botmodule_lists
+      @botmodules[:CoreBotModule].clear
+      @botmodules[:Plugin].clear
+      @names_hash.clear
+      @commandmappers.clear
     end
 
     # Associate with bot _bot_
@@ -380,8 +389,8 @@ module Plugins
 
     # load plugins from pre-assigned list of directories
     def scan
-      @failed = Array.new
-      @ignored = Array.new
+      @failed.clear
+      @ignored.clear
       processed = Hash.new
 
       @bot.config['plugins.blacklist'].each { |p|
