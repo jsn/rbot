@@ -1,5 +1,8 @@
 # vim: set sw=2 et:
 # Salutations plugin: respond to salutations
+# TODO allow online editing of salutations
+# TODO *REMEMBER* to set @changed to true after edit
+# TODO or changes won't be saved
 
 unless Array.respond_to?(:pick_one)
   debug "Defining the pick_one method for Array"
@@ -31,6 +34,7 @@ class SalutPlugin < Plugin
     @main_lang_str = nil
     @main_lang = nil
     @all_langs = true
+    @changed = false
     super
     reload
   end
@@ -144,6 +148,7 @@ class SalutPlugin < Plugin
       @salutations[@main_lang] = load_lang(@main_lang_str)
     end
     create_match
+    @changed = false
   end
 
   def load_lang(lang)
@@ -169,6 +174,7 @@ class SalutPlugin < Plugin
 
   def save
     return if @salutations.empty?
+    return unless @changed
     @salutations.each { |lang, val|
       l = lang.to_s
       save_lang(lang, val)
