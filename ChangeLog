@@ -1,3 +1,13 @@
+2007-01-23  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Reduced saving: the salut, lart, and quotes plugin now only save
+	their datafiles if anything changed since last time. This speeds up
+	operations such as saving and rescanning; it also allow hand-editing
+	of the data files while the bot is running, since a rescan will load
+	the changed data files without overwriting them with a useless save
+	before. Of course this only works if there are no pending changes in
+	the running bot.
+
 2007-01-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Server timeout: rework the server timeout code. Instead of PINGing
