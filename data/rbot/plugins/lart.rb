@@ -39,19 +39,19 @@ class LartPlugin < Plugin
   def initialize
     @larts = Array.new
     @praises = Array.new
-    @lartfile = nil
-    @praisefile = nil
+    @lartfile = ""
+    @praisefile = ""
+    @changed = false
     super
-
   end
 
   def set_language(lang)
     save
-    @lartfile = "#{@bot.botclass}/lart/larts-#{lang}"
-    @praisefile = "#{@bot.botclass}/lart/praises-#{lang}"
+    @lartfile.replace "#{@bot.botclass}/lart/larts-#{lang}"
+    @praisefile.replace "#{@bot.botclass}/lart/praises-#{lang}"
     # We may be on an old installation, so on the first run read non-language-specific larts
-    @bulart = "#{@bot.botclass}/lart/larts"
-    @bupraise = "#{@bot.botclass}/lart/praise"
+    @bulart.replace "#{@bot.botclass}/lart/larts"
+    @bupraise.replace "#{@bot.botclass}/lart/praise"
     @larts.clear
     @praises.clear
     if File.exists? @lartfile
@@ -72,13 +72,14 @@ class LartPlugin < Plugin
         @praises << line.chomp
       }
     end
+    @changed = false
   end
 
   def cleanup
   end
 
   def save
-    return if @lartfile.nil? and @praisefile.nil?
+    return unless @changed
     Dir.mkdir("#{@bot.botclass}/lart") if not FileTest.directory? "#{@bot.botclass}/lart"
     # TODO implement safe saving here too
     Utils.safe_save(@lartfile) { |file|
@@ -87,6 +88,7 @@ class LartPlugin < Plugin
     Utils.safe_save(@praisefile) { |file|
       file.puts @praises
     }
+    @changed = false
   end
 
   def privmsg(m)
@@ -154,21 +156,25 @@ class LartPlugin < Plugin
 
   def handle_addlart(m)
     @larts << m.params
+    @changed = true
     m.okay
   end
 
   def handle_rmlart(m)
     @larts.delete m.params
+    @changed = true
     m.okay
   end
 
   def handle_addpraise(m)
     @praises << m.params
+    @changed = true
     m.okay
   end
 
   def handle_rmpraise(m)
     @praises.delete m.params
+    @changed = true
     m.okay
   end
 

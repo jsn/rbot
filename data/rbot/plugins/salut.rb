@@ -179,6 +179,7 @@ class SalutPlugin < Plugin
       l = lang.to_s
       save_lang(lang, val)
     }
+    @changed = false
   end
 
   def save_lang(lang, val)
