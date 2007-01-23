@@ -47,19 +47,23 @@ class LartPlugin < Plugin
 
   def set_language(lang)
     save
+
+    # We may be on an old installation, so on the first run read non-language-specific larts
+    unless defined?(@oldlart)
+      @oldlart = "#{@bot.botclass}/lart/larts"
+      @oldpraise = "#{@bot.botclass}/lart/praise"
+    end
+
     @lartfile.replace "#{@bot.botclass}/lart/larts-#{lang}"
     @praisefile.replace "#{@bot.botclass}/lart/praises-#{lang}"
-    # We may be on an old installation, so on the first run read non-language-specific larts
-    @bulart.replace "#{@bot.botclass}/lart/larts"
-    @bupraise.replace "#{@bot.botclass}/lart/praise"
     @larts.clear
     @praises.clear
     if File.exists? @lartfile
       IO.foreach(@lartfile) { |line|
         @larts << line.chomp
       }
-    elsif File.exists? @bulart
-      IO.foreach(@bulart) { |line|
+    elsif File.exists? @oldlart
+      IO.foreach(@oldlart) { |line|
         @larts << line.chomp
       }
     end
@@ -67,8 +71,8 @@ class LartPlugin < Plugin
       IO.foreach(@praisefile) { |line|
         @praises << line.chomp
       }
-    elsif File.exists? @bupraise
-      IO.foreach(@bupraise) { |line|
+    elsif File.exists? @oldpraise
+      IO.foreach(@oldpraise) { |line|
         @praises << line.chomp
       }
     end
