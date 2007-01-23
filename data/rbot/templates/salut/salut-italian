@@ -16,14 +16,22 @@
 - "'sera"
 - buona sera
 - buonasera
+:"evening-in": 
+- "'sera"
+- buona sera
+- buonasera
 :"generic-out": 
 - a dopo
 - ci vediamo
 - adios
 - se vedemio
-:"evening-in": 
-- "'sera"
-- buona sera
-- buonasera
+- arrivederci
+- saluti
+:"morning-out":
+- buona giornata
+:"evening-out":
+- buona serata
+- buona notte
+- buonanotte
 :"generic":
 - ciao
