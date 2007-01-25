@@ -6,9 +6,6 @@
 # (C) 2006 Giuseppe Bilotta
 #
 # TODO allow manual addition of words
-# TODO scoring: base score is t = ceil(100*exp(-(n-1)^2/50^))+p for n attempts
-#               done by p players; players that didn't win but contributed
-#               with a attempts will get t*a/n points
 
 AZ_RULES = {
   :italian => {
@@ -30,11 +27,15 @@ AZ_RULES = {
 class AzGame
 
   attr_reader :range, :word
+  attr_accessor :tries, :total_tries, :winner
   def initialize(plugin, lang, word)
     @plugin = plugin
     @lang = lang.to_sym
     @word = word.downcase
     @range = [AZ_RULES[lang][:first].dup, AZ_RULES[lang][:last].dup]
+    @total_tries = 0
+    @tries = Hash.new(0)
+    @winner = nil
     def @range.to_s
       return "%s -- %s" % self
     end
@@ -54,6 +55,28 @@ class AzGame
       @range.last.replace(w)
     end
     return [:in, @range]
+  end
+
+# TODO scoring: base score is t = ceil(100*exp(-(n-1)^2/50))+p for n attempts
+#               done by p players; players that didn't win but contributed
+#               with a attempts will get t*a/n points
+
+  include Math
+
+  def score
+    n = @total_tries
+    p = @tries.keys.length
+    t = (100*exp(-(n-1)**2/50**2)).ceil + p
+    debug "Total score: #{t}"
+    ret = Hash.new
+    @tries.each { |k, a|
+      ret[k] = [t*a/n, "%d tries" % a]
+    }
+    if @winner
+      debug "replacing winner score of %d with %d" % [ret[@winner].first, t]
+      ret[@winner] = [t, "winner"]
+    end
+    return ret.sort_by { |h| h.last.first }
   end
 
 end
@@ -96,6 +119,13 @@ class AzGamePlugin < Plugin
     case isit.first
     when :bingo
       m.reply "#{Bold}BINGO!#{Bold}: the word was #{Underline}#{word}#{Underline}. Congrats, #{Bold}#{m.sourcenick}#{Bold}!"
+      @games[k].total_tries += 1
+      @games[k].tries[m.source] += 1
+      @games[k].winner = m.source
+      ar = @games[k].score.inject([]) { |res, kv|
+        res.push("%s: %d (%s)" % kv.flatten)
+      }
+      m.reply "The game was won after #{@games[k].total_tries} tries. Scores for this game:    #{ar.join('; ')}"
       @games.delete(k)
     when :out
       m.reply "#{word} is not in the range #{Bold}#{isit.last}#{Bold}" if m.address?
@@ -103,6 +133,8 @@ class AzGamePlugin < Plugin
       m.reply "#{word} doesn't exist or is not acceptable for the game"
     when :in
       m.reply "close, but no cigar. New range: #{Bold}#{isit.last}#{Bold}"
+      @games[k].total_tries += 1
+      @games[k].tries[m.source] += 1
     when :ignore
       m.reply "#{word} is already one of the range extrema: #{isit.last}" if m.address?
     else
@@ -129,6 +161,10 @@ class AzGamePlugin < Plugin
     k = m.channel.downcase.to_s # to_sym?
     if @games.key?(k)
       m.reply "the word in #{Bold}#{@games[k].range}#{Bold} was:   #{Bold}#{@games[k].word}"
+      ar = @games[k].score.inject([]) { |res, kv|
+        res.push("%s: %d (%s)" % kv.flatten)
+      }
+      m.reply "The game was cancelled after #{@games[k].total_tries} tries. Scores for this game would have been:    #{ar.join('; ')}"
       @games.delete(k)
     else
       m.reply "no A-Z game running in this channel ..."
@@ -155,7 +191,8 @@ class AzGamePlugin < Plugin
       m.reply "got it!"
       @games[k] = AzGame.new(self, lang, word)
     end
-    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}"
+    tr = @games[k].total_tries
+    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}" + (tr > 0 ? "(after #{tr} tries)" : "")
     return
   end
 
