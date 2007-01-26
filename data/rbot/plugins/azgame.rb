@@ -27,14 +27,16 @@ AZ_RULES = {
 class AzGame
 
   attr_reader :range, :word
-  attr_accessor :tries, :total_tries, :winner
+  attr_accessor :tries, :total_tries, :total_failed, :failed, :winner
   def initialize(plugin, lang, word)
     @plugin = plugin
     @lang = lang.to_sym
     @word = word.downcase
     @range = [AZ_RULES[lang][:first].dup, AZ_RULES[lang][:last].dup]
     @total_tries = 0
+    @total_failed = 0 # not used, reported, updated
     @tries = Hash.new(0)
+    @failed = Hash.new(0) # not used, not reported, updated
     @winner = nil
     def @range.to_s
       return "%s -- %s" % self
@@ -132,6 +134,8 @@ class AzGamePlugin < Plugin
       m.reply "#{word} is not in the range #{Bold}#{isit.last}#{Bold}" if m.address?
     when :noexist
       m.reply "#{word} doesn't exist or is not acceptable for the game"
+      @games[k].total_failed += 1
+      @games[k].failed[m.source] += 1
     when :in
       m.reply "close, but no cigar. New range: #{Bold}#{isit.last}#{Bold}"
       @games[k].total_tries += 1
@@ -193,7 +197,28 @@ class AzGamePlugin < Plugin
       @games[k] = AzGame.new(self, lang, word)
     end
     tr = @games[k].total_tries
-    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}" + (tr > 0 ? " (after #{tr} tries)" : "")
+    case tr
+    when 0
+      tr_msg = ""
+    when 1
+      tr_msg = " (after 1 try"
+    else
+      tr_msg = " (after #{tr} tries"
+    end
+
+    unless tr_msg.empty?
+      f_tr = @games[k].total_failed
+      case f_tr
+      when 0
+        tr_msg << ")"
+      when 1
+        tr_msg << " and 1 invalid try)"
+      else
+        tr_msg << " and #{f_tr} invalid tries)"
+      end
+    end
+
+    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}" + tr_msg
     return
   end
 
