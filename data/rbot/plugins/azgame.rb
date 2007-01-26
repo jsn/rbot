@@ -77,7 +77,7 @@ class AzGame
       tries = ret[@winner].last
       ret[@winner] = [t, "winner, #{tries}"]
     end
-    return ret.sort_by { |h| h.last.first }
+    return ret.sort_by { |h| h.last.first }.reverse
   end
 
 end
