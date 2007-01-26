@@ -193,7 +193,7 @@ class AzGamePlugin < Plugin
       @games[k] = AzGame.new(self, lang, word)
     end
     tr = @games[k].total_tries
-    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}" + (tr > 0 ? "(after #{tr} tries)" : "")
+    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}" + (tr > 0 ? " (after #{tr} tries)" : "")
     return
   end
 
