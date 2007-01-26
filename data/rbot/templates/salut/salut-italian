@@ -2,8 +2,12 @@
 :"generic-in": 
 - salve
 - ehila'
+- ehilà
 - ola'
+- olà
 - yo
+- ue'
+- uè
 :"morning-in": 
 - "'giorno"
 - giorno
@@ -35,3 +39,13 @@
 - buonanotte
 :"generic":
 - ciao
+:"generic-dest":
+- gente
+- tutti
+- raga
+- raga'
+- ragà
+- ragazzi
+- ragazze
+- bot
+- bots

@@ -45,12 +45,15 @@ class SalutPlugin < Plugin
 
   def create_match
     @match = Hash.new
+    ar_dest = Array.new
     ar_in = Array.new
     ar_out = Array.new
     ar_both = Array.new
     @salutations.each { |lang, hash|
       hash.each { |situation, array|
         case situation.to_s
+        when /^generic-dest$/
+          ar_dest += array
         when /in$/
           ar_in += array
         when /out$/
@@ -70,23 +73,31 @@ class SalutPlugin < Plugin
       Regexp.escape(txt)
     }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_both.empty?
     debug "Matches: #{@match.inspect}"
+    @match[:dest] = Regexp.new("\\b(?:" + ar_dest.uniq.map { |txt|
+      Regexp.escape(txt)
+    }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_dest.empty?
+    @punct = /\s*[.,:!;?]?\s*/ # Punctuation
   end
 
   def listen(m)
     return unless m.kind_of?(PrivMessage)
+    to_me = m.address? || m.message =~ /#{Regexp.escape(@bot.nick)}/i
     if @bot.config['salut.address_only']
-      return unless m.address? or m.message =~ /#{Regexp.escape(@bot.nick)}/
+      return unless to_me
     end
     salut = nil
     [:both, :in, :out].each { |k|
       next unless @match[k]
       debug "Checking salutations #{k} (#{@match[k].inspect})"
-      if m.message =~ /^#{@match[k]}/
+      if m.message =~ @match[k]
         salut = k
         break
       end
     }
     return unless salut
+    # If the bot wasn't addressed, we continue only the match was exact
+    # (apart from space and punctuation) or if @match[:dest] matches too
+    return unless to_me or m.message =~ @match[:dest] or m.message =~ /^#{@punct}#{@match[salut]}#{@punct}$/
     h = Time.new.hour
     case h
     when 4...12
@@ -114,7 +125,7 @@ class SalutPlugin < Plugin
     rep_ar += @salutations[@main_lang].fetch("generic".to_sym, []) unless sfx.empty?
     debug "Choosing reply in #{rep_ar.inspect} ..."
     if rep_ar.empty?
-      if m.public? and (m.address? or m =~ /#{Regexp.escape(@bot.nick)}/)
+      if m.public? # and (m.address? or m =~ /#{Regexp.escape(@bot.nick)}/)
         choice = @bot.lang.get("hello_X") % m.sourcenick
       else
         choice = @bot.lang.get("hello") % m.sourcenick
