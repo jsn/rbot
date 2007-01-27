@@ -49,7 +49,7 @@ class QuotePlugin < Plugin
   def addquote(source, channel, quote)
     @lists[channel] = Array.new if(!@lists.has_key?(channel))
     num = @lists[channel].length 
-    @lists[channel][num] = Quote.new(num, Time.new, source, quote)
+    @lists[channel][num] = Quote.new(num, Time.new, source.fullform, quote)
     @changed[channel] = true
     return num
   end
