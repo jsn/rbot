@@ -4,17 +4,52 @@ Net::HTTP.version_1_2
 
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 
+class ::String
+  def omissis_after(len)
+    if self.length > len
+      return self[0...len].sub(/\s+\S*$/,"...")
+    else
+      return self
+    end
+  end
+
+  def ircify_html
+    txt = self
+    txt.gsub!(/<\/?b\s*>/, "#{Bold}")
+    txt.gsub!(/<\/?i\s*>/, "#{Underline}")
+    ## This would be a nice addition, but the results are horrible
+    ## Maybe make it configurable?
+    # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
+    txt.gsub!(/<\/?(p|br)>/, ' ')
+    txt.gsub!("\n", ' ')
+    txt.gsub!(/<[^>]+>/, '')
+    txt.gsub!(/\s+/, ' ')
+    return Utils.decode_html_entities(txt).strip!
+  end
+end
+
 class SearchPlugin < Plugin
+  BotConfig.register BotConfigIntegerValue.new('google.hits',
+    :default => 3,
+    :desc => "Number of hits to return from Google searches")
+  BotConfig.register BotConfigIntegerValue.new('google.first_par',
+    :default => 0,
+    :desc => "When set to n > 0, the bot will return the first paragraph from the first n search hits")
+  BotConfig.register BotConfigIntegerValue.new('wikipedia.hits',
+    :default => 3,
+    :desc => "Number of hits to return from Wikipedia searches")
+  BotConfig.register BotConfigIntegerValue.new('wikipedia.first_par',
+    :default => 1,
+    :desc => "When set to n > 0, the bot will return the first paragraph from the first n wikipedia search hits")
+
   def help(plugin, topic="")
     case topic
-    when "search"
-    "search <string> => search google for <string>"
-    when "google"
-    "google <string> => search google for <string>"
+    when "search", "google"
+      "#{topic} <string> => search google for <string>"
     when "wp"
       "wp [<code>] <string> => search for <string> on Wikipedia. You can select a national <code> to only search the national Wikipedia"
     else
-    "search <string> (or: google <string>) => search google for <string> | wp <string> => search for <string> on Wikipedia"
+      "search <string> (or: google <string>) => search google for <string> | wp <string> => search for <string> on Wikipedia"
     end
   end
 
@@ -33,6 +68,7 @@ class SearchPlugin < Plugin
 
     url = "http://www.google.com/wml/search?q=#{site}#{searchfor}"
 
+    hits = params[:hits] || @bot.config['google.hits']
 
     begin
       wml = @bot.httputil.get_cached(url)
@@ -45,21 +81,57 @@ class SearchPlugin < Plugin
       m.reply "no results found for #{what}"
       return
     end
-    results = results[0...3].map { |res|
+    urls = Array.new
+    results = results[0...hits].map { |res|
       n = res[0]
       t = Utils.decode_html_entities res[2].gsub(filter, '').strip
       u = URI.unescape res[1]
+      urls.push(u)
       "#{n}. #{Bold}#{t}#{Bold}: #{u}"
     }.join(" | ")
 
     m.reply "Results for #{what}: #{results}"
+
+    first_pars = params[:firstpar] || @bot.config['google.first_par']
+
+    idx = 0
+    while first_pars > 0 and urls.length > 0
+      url.replace(urls.shift)
+      idx += 1
+      xml = @bot.httputil.get_cached(url)
+      if xml.nil?
+        debug "Unable to retrieve #{url}"
+        next
+      end
+      # We get the first par after the first main heading, if possible
+      header_found = xml.match(/<h1( [^>]*)?>.*?<\/h1>/im)
+      txt = nil
+      if header_found
+        txt = header_found.post_match[/<p( [^>]*)?>.*?<\/p>/im]
+      end
+      # If we haven't found a first par yet, try to get it from the whole
+      # document
+      unless txt
+        txt = xml[/<p( [^>]*)?>.*?<\/p>/im]
+      end
+      # Nothing yet, give up
+      unless txt
+        debug "No first par found\n#{xml}"
+        next
+      end
+      m.reply "[#{idx}] #{txt.ircify_html}".omissis_after(400)
+      first_pars -=1
+    end
   end
 
   def wikipedia(m, params)
     lang = params[:lang]
     site = "#{lang.nil? ? '' : lang + '.'}wikipedia.org"
+    debug "Looking up things on #{site}"
     params[:site] = site
     params[:filter] = / - Wikipedia.*$/
+    params[:hits] = @bot.config['wikipedia.hits']
+    params[:firstpar] = @bot.config['wikipedia.first_par']
     return google(m, params)
   end
 end
