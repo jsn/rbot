@@ -9,6 +9,7 @@ rescue LoadError
   module Irc
     module Utils
       UNESCAPE_TABLE = {
+    'laquo' => '<<',
     'raquo' => '>>',
     'quot' => '"',
     'apos' => '\'',
@@ -21,6 +22,11 @@ rescue LoadError
     '#8221' => '"',
     '#8212' => '--',
     '#39' => '\'',
+    'amp' => '&',
+    'lt' => '<',
+    'gt' => '>',
+    'hellip' => '...',
+    'nbsp' => ' ',
 =begin
     # extras codes, for future use...
     'zwnj' => '&#8204;',
@@ -48,7 +54,6 @@ rescue LoadError
     'Epsilon' => '&#917;',
     'Yuml' => '&#376;',
     'Eta' => '&#919;',
-    'lt' => '<',
     'Icirc' => '\xce',
     'Upsilon' => '&#933;',
     'ndash' => '&#8211;',
@@ -66,12 +71,10 @@ rescue LoadError
     'cedil' => '\xb8',
     'Ecirc' => '\xca',
     'not' => '\xac',
-    'amp' => '&',
     'AElig' => '\xc6',
     'oslash' => '\xf8',
     'acute' => '\xb4',
     'lceil' => '&#8968;',
-    'laquo' => '\xab',
     'shy' => '\xad',
     'rdquo' => '&#8221;',
     'ge' => '&#8805;',
