@@ -672,10 +672,23 @@ class IrcBot
     # than 512 characters, including the EOL terminators (CR+LF), so we
     # split the incoming message so that each line sent is not longher
     # than that.
-    left = 510 - type.to_s.length - where.to_s.length - 3
+
+    # Some server are stricter than that. To prevent 'lost characters',
+    # we use the TOPICLEN (if provided by the server) as upper limit.
+    # If TOPICLEN is not set by the server, we use KICKLEN; if that isn't
+    # set either, we use 510.
+    # FIXME please report lost message characters (can be easily tested with
+    # the search plugin)
+    max_len = server.supports[:topiclen] || server.supports[:kicklen] || 510
+
+    # This is the fixed raw string prefixed to any line we send
+    fixed = "#{type} #{where} :"
+
+    # And this is what's left
+    left = max_len - fixed.length
     begin
       if(left >= message.length)
-        sendq "#{type} #{where} :#{message}", chan, ring
+        sendq "#{fixed}#{message}", chan, ring
         log_sent(type, where, message)
         return
       end
@@ -685,7 +698,7 @@ class IrcBot
         message = line.slice!(lastspace, line.length) + message
         message.gsub!(/^\s+/, "")
       end
-      sendq "#{type} #{where} :#{line}", chan, ring
+      sendq "#{fixed}#{line}", chan, ring
       log_sent(type, where, line)
     end while(message.length > 0)
   end
