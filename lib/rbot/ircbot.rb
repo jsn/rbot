@@ -668,12 +668,11 @@ class IrcBot
   # relevant say() or notice() methods. This one should be used for IRCd
   # extensions you want to use in modules.
   def sendmsg(type, where, message, chan=nil, ring=0)
-    # Split the message so that each line sent is not longher than 400 bytes
-    # TODO allow something to do for commands that produce too many messages
-    # TODO example: math 10**10000
-    # TODO try to use the maximum line length allowed by the server, if there is
-    #      a way to know what it is
-    left = 400 - type.length - where.to_s.length - 3
+    # The IRC protocol requires that each raw message must be not longer
+    # than 512 characters, including the EOL terminators (CR+LF), so we
+    # split the incoming message so that each line sent is not longher
+    # than that.
+    left = 510 - type.to_s.length - where.to_s.length - 3
     begin
       if(left >= message.length)
         sendq "#{type} #{where} :#{message}", chan, ring
