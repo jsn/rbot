@@ -60,14 +60,14 @@ class UrbanPlugin < Plugin
 
   def get_def(text)
     # Start by removing the prev/home/next links
-    t = text.gsub(/(?:<a href.*?>prev<\/a> )?<a href.*?>home<\/a>(?: <a href.*?>next<\/a>)?/,'')
+    t = text.gsub(/(?:<a href[^>]*>prev<\/a> )?<a href[^>]*>home<\/a>(?: <a href[^>]*>next<\/a>)?/,'')
     # Close up paragraphs
     t.gsub!(/<\/?p>/, ' ')
     t.gsub!("\n", ' ')
     # Reverse headings
     t.gsub!(/<\/?b>/,"#{Reverse}")
     # Enbolden links
-    t.gsub!(/<\/?a(?: .*?)?>/,"#{Bold}")
+    t.gsub!(/<\/?a(?: [^>]*)?>/,"#{Bold}")
     # Reverse examples
     t.gsub!(/<\/?(?:i|em)>/,"#{Underline}")
     # Clear anything else
