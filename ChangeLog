@@ -1,3 +1,11 @@
+2007-01-29  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Timer rescheduling: it is now possible to reschedule the period
+	any particular Action is taken by issuing the command
+		@bot.timer.reschedule(handle, new_period)
+	where +handle+ is a timer handle returned by the @bot.timer.add() that
+	created the action, and new_period is the new period for the Action.
+
 2007-01-23  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Reduced saving: the salut, lart, and quotes plugin now only save
