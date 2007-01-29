@@ -423,9 +423,9 @@ class IrcBot
         end
       }
 
-      unless ignored
-        irclogprivmsg(m)
+      irclogprivmsg(m)
 
+      unless ignored
         @plugins.delegate "listen", m
         @plugins.privmsg(m) if m.address?
       end
