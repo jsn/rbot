@@ -66,22 +66,25 @@ class ConfigModule < CoreBotModule
     key = params[:key].to_s.intern
     value = params[:value].join(" ")
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}"
-      return
+      m.reply "no such config key #{key}" unless params[:silent]
+      return false
     end
-    return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
+    return false if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].set_string(value)
     rescue ArgumentError => e
-      m.reply "failed to set #{key}: #{e.message}"
-      return
+      m.reply "failed to set #{key}: #{e.message}" unless params[:silent]
+      return false
     end
     if @bot.config.items[key].requires_restart
-      m.reply "this config change will take effect on the next restart"
+      m.reply "this config change will take effect on the next restart" unless params[:silent]
+      return :restart
     elsif @bot.config.items[key].requires_rescan
-      m.reply "this config change will take effect on the next rescan"
+      m.reply "this config change will take effect on the next rescan" unless params[:silent]
+      return :rescan
     else
-      m.okay
+      m.okay unless params[:silent]
+      return true
     end
   end
 
