@@ -203,6 +203,7 @@ class BansPlugin < Plugin
 
       m.okay
     rescue
+      error $!
       m.reply $!
     end
   end
@@ -236,6 +237,7 @@ class BansPlugin < Plugin
           autos.delete rule if rule.host == host
         }
       rescue
+        error $!
         m.reply $!
       end
     end
@@ -301,6 +303,7 @@ class BansPlugin < Plugin
 
       m.okay
     rescue
+      error $!
       m.reply $!
     end
   end
@@ -334,6 +337,7 @@ class BansPlugin < Plugin
           wl.delete rule if rule.host == host
         }
       rescue
+        error $!
         m.reply $!
       end
     end
@@ -350,6 +354,7 @@ class BansPlugin < Plugin
 
       return channel
     rescue
+      error $!
       m.reply $!
     end
   end
