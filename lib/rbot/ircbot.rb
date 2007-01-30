@@ -904,17 +904,17 @@ class IrcBot
 
   # attempt to change bot's nick to +name+
   def nickchg(name)
-      sendq "NICK #{name}"
+    sendq "NICK #{name}"
   end
 
   # changing mode
   def mode(channel, mode, target)
-      sendq "MODE #{channel} #{mode} #{target}", channel, 2
+    sendq "MODE #{channel} #{mode} #{target}", channel, 2
   end
 
   # kicking a user
   def kick(channel, user, msg)
-      sendq "KICK #{channel} #{user} :#{msg}", channel, 2
+    sendq "KICK #{channel} #{user} :#{msg}", channel, 2
   end
 
   # m::     message asking for help
