@@ -63,7 +63,7 @@ class BansPlugin < Plugin
           next
         end
         bans.delete(ar)
-        chan = ar[1]
+        chan = ar[1].downcase
         regexp = make_badword_rx(ar[2])
         badwords << BadWordAction.new(regexp, action, chan, "0s", "")
       }
@@ -246,7 +246,7 @@ class BansPlugin < Plugin
   end
 
   def add_badword(m, params=nil)
-    regexp, channel = make_badword_rx(params[:regexp]), params[:channel].dup
+    regexp, channel = make_badword_rx(params[:regexp]), params[:channel].downcase.dup
     action, timer, reason = params[:action], params[:timer].dup, params[:reason].to_s
 
     badwords = @registry[:badwords]
