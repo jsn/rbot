@@ -19,6 +19,16 @@
 
 require 'singleton'
 
+class Object
+
+  # We extend the Object class with a method that
+  # checks if the receiver is nil or empty
+  def nil_or_empty?
+    return true unless self
+    return true if self.respond_to? :empty and self.empty?
+    return false
+  end
+end
 
 # The Irc module is used to keep all IRC-related classes
 # in the same namespace
@@ -1437,6 +1447,7 @@ module Irc
     # Checks if the receiver already has a channel with the given _name_
     #
     def has_channel?(name)
+      return false if name.nil_or_empty?
       channel_names.index(name.irc_downcase(casemap))
     end
     alias :has_chan? :has_channel?
@@ -1444,6 +1455,7 @@ module Irc
     # Returns the channel with name _name_, if available
     #
     def get_channel(name)
+      return nil if name.nil_or_empty?
       idx = has_channel?(name)
       channels[idx] if idx
     end
@@ -1452,9 +1464,15 @@ module Irc
     # Create a new Channel object bound to the receiver and add it to the
     # list of <code>Channel</code>s on the receiver, unless the channel was
     # present already. In this case, the default action is to raise an
-    # exception, unless _fails_ is set to false
+    # exception, unless _fails_ is set to false.  An exception can also be
+    # raised if _str_ is nil or empty, again only if _fails_ is set to true;
+    # otherwise, the method just returns nil
     #
     def new_channel(name, topic=nil, users=[], fails=true)
+      if name.nil_or_empty?
+        raise "Tried to look for empty or nil channel name #{name.inspect}" if fails
+        return nil
+      end
       ex = get_chan(name)
       if ex
         raise "Channel #{name} already exists on server #{self}" if fails
@@ -1541,6 +1559,7 @@ module Irc
     # Checks if the receiver already has a user with the given _nick_
     #
     def has_user?(nick)
+      return false if nick.nil_or_empty?
       user_nicks.index(nick.irc_downcase(casemap))
     end
 
@@ -1554,9 +1573,15 @@ module Irc
     # Create a new User object bound to the receiver and add it to the list
     # of <code>User</code>s on the receiver, unless the User was present
     # already. In this case, the default action is to raise an exception,
-    # unless _fails_ is set to false
+    # unless _fails_ is set to false. An exception can also be raised
+    # if _str_ is nil or empty, again only if _fails_ is set to true;
+    # otherwise, the method just returns nil
     #
     def new_user(str, fails=true)
+      if str.nil_or_empty?
+        raise "Tried to look for empty or nil user name #{str.inspect}" if fails
+        return nil
+      end
       tmp = str.to_irc_user(:server => self)
       old = get_user(tmp.nick)
       # debug "Tmp: #{tmp.inspect}"

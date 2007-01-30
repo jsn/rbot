@@ -1,3 +1,9 @@
+2007-01-30  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* New IRC Framework: Server methods to retrieve a Channel or User are
+	now more robust to empty or nil nicks and channel names passed as
+	parameters.
+
 2007-01-29  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Timer rescheduling: it is now possible to reschedule the period
