@@ -348,9 +348,9 @@ class BansPlugin < Plugin
   private
   def check_channel(m, strchannel)
     begin
-      raise "must specify channel if using privmsg" if strchannel.empty? and m.private?
-      channel = strchannel.empty? ? m.target : m.server.channel(strchannel)
-      raise "I am not in that channel" unless channel.has_user?(@bot)
+      raise "must specify channel if using privmsg" if m.private? and not strchannel
+      channel = m.server.channel(strchannel) || m.target
+      raise "I am not in that channel" unless channel.has_user?(@bot.nick)
 
       return channel
     rescue
@@ -359,14 +359,20 @@ class BansPlugin < Plugin
     end
   end
 
-  def do_cmd(action, nick, channel, timer="0s", reason="")
-    if timer.eql? "0s"
+  def do_cmd(action, nick, channel, timer_in=nil, reason=nil)
+    case timer_in
+    when nil
       timer = 0
+    when /^(\d+)s$/
+      timer = $1.to_i
+    when /^(\d+)m$/
+      timer = $1.to_i * 60
+    when /^(\d+)h$/
+      timer = $1.to_i * 60 * 60 
+    when /^(\d+)d$/
+      timer = $1.to_i * 60 * 60 * 24
     else
-      timer = $1.to_i if timer =~ /^(\d+)s$/
-      timer = $1.to_i * 60 if timer =~ /^(\d+)m$/
-      timer = $1.to_i * 60 * 60 if timer =~ /^(\d+)h$/
-      timer = $1.to_i * 60 * 60 * 24 if timer =~ /^(\d+)d$/
+      raise "Wrong time specifications"
     end
 
     case action
@@ -407,27 +413,27 @@ plugin.default_auth( 'list', true )
 
 plugin.map 'ban :nick :timer :channel', :action => 'ban_user',
   :requirements => {:timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelRe},
-  :defaults => {:timer => '0s', :channel => ''},
+  :defaults => {:timer => nil, :channel => nil},
   :auth_path => 'act'
 plugin.map 'unban :nick :channel', :action => 'unban_user',
   :requirements => {:channel => BansPlugin::ChannelRe},
-  :defaults => {:channel => ''},
+  :defaults => {:channel => nil},
   :auth_path => 'act'
 plugin.map 'kick :nick :channel *reason', :action => 'kick_user',
   :requirements => {:channel => BansPlugin::ChannelRe},
-  :defaults => {:channel => '', :reason => ''},
+  :defaults => {:channel => nil, :reason => 'requested'},
   :auth_path => 'act'
 plugin.map 'kickban :nick :timer :channel *reason', :action => 'kickban_user',
   :requirements => {:timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelRe},
-  :defaults => {:timer => '0s', :channel => '', :reason => ''},
+  :defaults => {:timer => nil, :channel => nil, :reason => 'requested'},
   :auth_path => 'act'
 plugin.map 'silence :nick :timer :channel', :action => 'silence_user',
   :requirements => {:timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelRe},
-  :defaults => {:timer => '0s', :channel => ''},
+  :defaults => {:timer => nil, :channel => nil},
   :auth_path => 'act'
 plugin.map 'unsilence :nick :channel', :action => 'unsilence_user',
   :requirements => {:channel => BansPlugin::ChannelRe},
-  :defaults => {:channel => ''},
+  :defaults => {:channel => nil},
   :auth_path => 'act'
 
 plugin.map 'bans add onjoin :host :action :channel *reason', :action => 'add_onjoin',
