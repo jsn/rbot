@@ -207,10 +207,13 @@ class RoulettePlugin < Plugin
 end
 
 plugin = RoulettePlugin.new
+
+plugin.default_auth('clearstats', false)
+
 plugin.map 'roulette reload', :action => 'reload'
 plugin.map 'roulette spin', :action => 'spin'
 plugin.map 'roulette stats :player', :action => 'playerstats'
 plugin.map 'roulette stats', :action => 'stats'
-plugin.map 'roulette clearstats', :action => 'clearstats', :auth => 'config'
+plugin.map 'roulette clearstats', :action => 'clearstats'
 plugin.map 'roulette'
 

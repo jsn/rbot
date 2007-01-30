@@ -215,10 +215,13 @@ class RemindPlugin < Plugin
   end
 end
 plugin = RemindPlugin.new
+
+plugin.default_auth('other', false)
+
 plugin.map 'remind me no more', :action => 'no_more'
 plugin.map 'remind me no more [about] *string', :action => 'no_more'
 plugin.map 'remind me [about] *string'
-plugin.map 'remind :who no more', :auth => 'remind_other', :action => 'no_more'
-plugin.map 'remind :who no more [about] *string', :auth => 'remind_other', :action => 'no_more'
-plugin.map 'remind :who [about] *string', :auth => 'remind_other'
+plugin.map 'remind :who no more', :auth_path => 'other', :action => 'no_more'
+plugin.map 'remind :who no more [about] *string', :auth_path => 'other', :action => 'no_more'
+plugin.map 'remind :who [about] *string', :auth_path => 'other'
 
