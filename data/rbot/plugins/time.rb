@@ -7,7 +7,7 @@ require 'tzinfo'
 class TimePlugin < Plugin
 
   def help(plugin, topic="")
-  "time <time zone> to get the local time of a certain location. <time zone> can be <Continent/City> or <two character country code>. time <nick> to see the local time of that person if their time zone is set. time admin set <nick> <time zone> to set the time zone for another user."
+  "time <time zone> to get the local time of a certain location. <time zone> can be <Continent/City> or <two character country code>. time <nick> to see the local time of that person if their time zone is set. time admin set <nick> <time zone> to set the time zone for another user. time [admin] reset [nick] to let the bot forget about the tzinfo about someone"
   end
 
   def initialize
@@ -81,11 +81,23 @@ class TimePlugin < Plugin
     end
   end
 
+  def resetUserZone( m, params )
+    s = resetZone( m, m.sourcenick)
+  end
+
   def setAdminZone( m, params )
     if params[:who] and params[:where].size > 0 then
       s = setZone( m, params[:who], params[:where].join('_') )
     else
-      m.reply 'Requires a nick and the Continent/City or country code.'
+      m.reply "Requires a nick and the Continent/City or country code"
+    end
+  end
+
+  def resetAdminZone( m, params )
+    if params[:who]
+      s = resetZone( m, params[:who])
+    else
+      m.reply "Requires a nick"
     end
   end
 
@@ -97,10 +109,21 @@ class TimePlugin < Plugin
       return
     end
     @registry[ user ] = zone
+    m.reply "Ok, I'll remember that #{user} is on the #{zone} timezone"
+  end
+
+  def resetZone( m, user )
+    @registry.delete(user)
+    m.reply "Ok, I've forgotten #{user}'s timezone"
   end
 end
 
 plugin = TimePlugin.new
-plugin.map 'time set *where', :action=> 'setUserZone',  :defaults => {:where => false}
-plugin.map 'time admin set :who *where', :action=> 'setAdminZone', :defaults => {:where => false, :who=>false}, :auth=> 'timeadmin'
+
+plugin.default_auth('admin', false)
+
+plugin.map 'time set [time][zone] [to] *where', :action=> 'setUserZone', :defaults => {:where => false}
+plugin.map 'time reset [time][zone]', :action=> 'resetUserZone'
+plugin.map 'time admin set [time][zone] [for] :who [to] *where', :action=> 'setAdminZone', :defaults => {:who => false, :where => false}
+plugin.map 'time admin reset [time][zone] [for] :who', :action=> 'resetAdminZone', :defaults => {:who => false}
 plugin.map 'time *where', :action => 'showTime', :defaults => {:where => false}
