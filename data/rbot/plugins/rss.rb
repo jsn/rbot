@@ -388,7 +388,7 @@ class RSSFeedsPlugin < Plugin
     status[:oldItems] = []
     status[:firstRun] = true
     status[:failures] = 0
-    @watch[feed.handle] = @bot.timer.add(@bot.config['rss.thread_sleep'], status) {
+    @watch[feed.handle] = @bot.timer.add(0, status) {
       debug "watcher for #{feed} started"
       oldItems = status[:oldItems]
       firstRun = status[:firstRun]
@@ -437,6 +437,7 @@ class RSSFeedsPlugin < Plugin
       debug "watcher for #{feed} going to sleep #{seconds} seconds.."
       @bot.timer.reschedule(@watch[feed.handle], seconds)
     }
+    debug "watcher for #{feed} added"
   end
 
   def printFormattedRss(feed, item, opts=nil)
