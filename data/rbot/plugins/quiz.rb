@@ -38,10 +38,10 @@ class Quiz
   :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
 
   def initialize( channel, registry )
-    if channel.empty?
+    if !channel
       @registry = registry.sub_registry( 'private' )
     else
-      @registry = registry.sub_registry( channel )
+      @registry = registry.sub_registry( channel.downcase )
     end
     @has_errors = false
     @registry.each_key { |k|
@@ -200,7 +200,7 @@ class QuizPlugin < Plugin
 
 
   def say_score( m, nick )
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -291,7 +291,7 @@ class QuizPlugin < Plugin
   def listen( m )
     return unless m.kind_of?(PrivMessage)
 
-    chan = m.channel.downcase
+    chan = m.channel
     return unless @quizzes.has_key?( chan )
     q = @quizzes[chan]
 
@@ -332,7 +332,7 @@ class QuizPlugin < Plugin
       # Reward player with a joker every X points
       if player.score % 15 == 0 and player.jokers < Max_Jokers
         player.jokers += 1
-        m.reply "#{m.sourcenick.to_s} gains a new joker. Rejoice :)"
+        m.reply "#{nick} gains a new joker. Rejoice :)"
       end
 
       q.registry[nick] = player
@@ -367,7 +367,7 @@ class QuizPlugin < Plugin
   #######################################################################
   def cmd_quiz( m, params )
     fetch_data( m ) if @questions.empty?
-    q = create_quiz( m.channel.to_s )
+    q = create_quiz( m.channel )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
       return
@@ -427,7 +427,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_solve( m, params )
-    chan = m.channel.to_s
+    chan = m.channel
 
     return unless @quizzes.has_key?( chan )
     q = @quizzes[chan]
@@ -441,7 +441,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_hint( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     nick = m.sourcenick.to_s
 
     return unless @quizzes.has_key?(chan)
@@ -493,7 +493,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_skip( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     return unless @quizzes.has_key?(chan)
     q = @quizzes[chan]
 
@@ -503,7 +503,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_joker( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     nick = m.sourcenick.to_s
     q = create_quiz(chan)
     if q.nil?
@@ -546,7 +546,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_top5( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -572,7 +572,7 @@ class QuizPlugin < Plugin
   def cmd_top_number( m, params )
     num = params[:number].to_i
     return unless 1..50 === num
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -617,7 +617,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_autoask( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -638,7 +638,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_transfer( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -701,7 +701,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_del_player( m, params )
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -742,7 +742,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_set_score(m, params)
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
@@ -765,7 +765,7 @@ class QuizPlugin < Plugin
 
 
   def cmd_set_jokers(m, params)
-    chan = m.channel.downcase
+    chan = m.channel
     q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
