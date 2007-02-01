@@ -80,6 +80,7 @@ class SalutPlugin < Plugin
   end
 
   def listen(m)
+    return unless @match
     return unless m.kind_of?(PrivMessage)
     to_me = m.address? || m.message =~ /#{Regexp.escape(@bot.nick)}/i
     if @bot.config['salut.address_only']

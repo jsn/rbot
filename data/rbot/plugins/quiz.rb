@@ -64,6 +64,9 @@ class Quiz
     # Autoask defaults to true
     @registry_conf["autoask"] = true unless @registry_conf.has_key?( "autoask" )
 
+    # Autoask delay defaults to 0 (instantly)
+    @registry_conf["autoask_delay"] = 0 unless @registry_conf.has_key?( "autoask_delay" )
+
     @questions = @registry_conf["questions"]
     @question = nil
     @answer = nil
@@ -90,6 +93,8 @@ class QuizPlugin < Plugin
 
     @questions = Array.new
     @quizzes = Hash.new
+    @waiting = Hash.new
+    @ask_mutex = Mutex.new
   end
 
   # Function that returns whether a char is a "separator", used for hints
@@ -224,7 +229,7 @@ class QuizPlugin < Plugin
 
   def help( plugin, topic="" )
     if topic == "admin"
-      "Quiz game aministration commands (requires authentication): 'quiz autoask <on/off>' => enable/disable autoask mode. 'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers). 'quiz setscore <player> <score>' => set <player>'s score to <score>. 'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to <jokers>. 'quiz deleteplayer <player>' => delete one player from the rank table (only works when score and jokers are set to 0)."
+      "Quiz game aministration commands (requires authentication): 'quiz autoask <on/off>' => enable/disable autoask mode. 'quiz autoask delay <secs>' => delay next quiz by <secs> seconds when in autoask mode. 'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers). 'quiz setscore <player> <score>' => set <player>'s score to <score>. 'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to <jokers>. 'quiz deleteplayer <player>' => delete one player from the rank table (only works when score and jokers are set to 0)."
     else
       "A multiplayer trivia quiz. 'quiz' => ask a question. 'quiz hint' => get a hint. 'quiz solve' => solve this question. 'quiz skip' => skip to next question. 'quiz joker' => draw a joker to win this round. 'quiz score [player]' => show score for [player] (default is yourself). 'quiz top5' => show top 5 players. 'quiz top <number>' => show top <number> players (max 50). 'quiz stats' => show some statistics. 'quiz fetch' => refetch questions from databases.\nYou can add new questions at http://amarok.kde.org/amarokwiki/index.php/Rbot_Quiz"
     end
@@ -339,7 +344,21 @@ class QuizPlugin < Plugin
       calculate_ranks( m, q, nick)
 
       q.question = nil
-      cmd_quiz( m, nil ) if q.registry_conf["autoask"]
+      if q.registry_conf["autoask"]
+        delay = q.registry_conf["autoask_delay"]
+        if delay > 0
+          m.reply "#{Bold}#{Color}03Next question in #{Bold}#{delay}#{Bold} seconds"
+          timer = @bot.timer.add_once(delay) {
+            @ask_mutex.synchronize do
+              @waiting.delete(chan)
+            end
+            cmd_quiz( m, nil)
+          }
+          @waiting[chan] = timer
+        else
+          cmd_quiz( m, nil )
+        end
+      end
     else
       # First try is used, and it wasn't the answer.
       q.first_try = false
@@ -367,7 +386,16 @@ class QuizPlugin < Plugin
   #######################################################################
   def cmd_quiz( m, params )
     fetch_data( m ) if @questions.empty?
-    q = create_quiz( m.channel )
+    chan = m.channel
+
+    @ask_mutex.synchronize do
+      if @waiting.has_key?(chan)
+        m.reply "Next quiz question will be automatically asked soon, have patience"
+        return
+      end
+    end
+
+    q = create_quiz( chan )
     if q.nil?
       m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
       return
@@ -392,7 +420,7 @@ class QuizPlugin < Plugin
 
     i = rand( q.questions.length )
     q.question = q.questions[i].question
-    q.answer     = q.questions[i].answer.gsub( "#", "" )
+    q.answer   = q.questions[i].answer.gsub( "#", "" )
 
     begin
       q.answer_core = /(#)(.*)(#)/.match( q.questions[i].answer )[2]
@@ -624,16 +652,30 @@ class QuizPlugin < Plugin
       return
     end
 
-    if params[:enable].downcase == "on"
+    case params[:enable].downcase
+    when "on", "true"
       q.registry_conf["autoask"] = true
       m.reply "Enabled autoask mode."
       cmd_quiz( m, nil ) if q.question == nil
-    elsif params[:enable].downcase == "off"
+    when "off", "false"
       q.registry_conf["autoask"] = false
       m.reply "Disabled autoask mode."
     else
       m.reply "Invalid autoask parameter. Use 'on' or 'off'."
     end
+  end
+
+  def cmd_autoask_delay( m, params )
+    chan = m.channel
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
+
+    delay = params[:time].to_i
+    q.registry_conf["autoask_delay"] = delay
+    m.reply "Autoask delay now #{q.registry_conf['autoask_delay']} seconds"
   end
 
 
@@ -806,6 +848,7 @@ plugin.map 'quiz stats',            :action => 'cmd_stats'
 
 # Admin commands
 plugin.map 'quiz autoask :enable',  :action => 'cmd_autoask', :auth_path => 'edit'
+plugin.map 'quiz autoask delay :time',  :action => 'cmd_autoask_delay', :auth_path => 'edit', :requirements => {:time => /\d+/}
 plugin.map 'quiz transfer :source :dest :score :jokers', :action => 'cmd_transfer', :auth_path => 'edit', :defaults => {:score => '-1', :jokers => '-1'}
 plugin.map 'quiz deleteplayer :nick', :action => 'cmd_del_player', :auth_path => 'edit'
 plugin.map 'quiz setscore :nick :score', :action => 'cmd_set_score', :auth_path => 'edit'
