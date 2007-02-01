@@ -7,12 +7,14 @@
 # (c) 2006 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 # Licensed under GPL V2.
 
-# FIXME interesting fact: n the Quiz class, @registry.has_key? seems to be case
-# insensitive! Although this is all right for us, this leads to rank vs
-# registry mismatches! So we have to make the @rank_table comparisons case
+# FIXME interesting fact: in the Quiz class, @registry.has_key? seems to be
+# case insensitive. Although this is all right for us, this leads to rank vs
+# registry mismatches. So we have to make the @rank_table comparisons case
 # insensitive as well. For the moment, redefine everything to downcase before
-# matching the nick. TODO define a class for the rank table. We might also need it
-# for scoring in other games.
+# matching the nick.
+#
+# TODO define a class for the rank table. We might also need it for scoring in
+# other games.
 
 # Class for storing question/answer pairs
 QuizBundle = Struct.new( "QuizBundle", :question, :answer )
