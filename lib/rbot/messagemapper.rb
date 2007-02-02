@@ -277,8 +277,29 @@ module Irc
       rx = Regexp.escape(str)
       # debug "Escaped: #{rx.inspect}"
       rx.gsub!(/((?:\\ )*)(:|\\\*)(\w+)/) { |m|
-        not_needed = @defaults.has_key?($3.intern)
-        s = "#{not_needed ? "(?:" : ""}#{$1}(#{$2 == ":" ? "\\S+" : ".*"})#{ not_needed ? ")?" : ""}"
+        whites = $1
+        is_single = $2 == ":"
+        name = $3.intern
+
+        not_needed = @defaults.has_key?(name)
+
+        has_req = @requirements[name]
+        debug "Requirements for #{name}: #{has_req.inspect}"
+        case has_req
+        when nil
+          sub = is_single ? "\\S+" : ".*"
+        when Regexp
+          # Remove the ^ and $ placed around requirement regexp at times
+          # They were unnecessary first, and are dangerous now
+          sub = has_req.source.sub(/^\^/,'').sub(/\$$/,'')
+        when String
+          sub = Regexp.escape(has_req)
+        else
+          warning "Odd requirement #{has_req.inspect} of class #{has_req.class} for parameter '#{name}'"
+          sub = Regexp.escape(has_req.to_s) rescue "\\S+"
+        end
+        debug "Regexp for #{name}: #{sub.inspect}"
+        s = "#{not_needed ? "(?:" : ""}#{whites}(#{sub})#{ not_needed ? ")?" : ""}"
       }
       # debug "Replaced dyns: #{rx.inspect}"
       rx.gsub!(/((?:\\ )*)\\\[/, "(?:\\1")
@@ -343,19 +364,8 @@ module Irc
           options[item] = value
           debug "set #{item} to #{value.inspect}"
         else
-          if matching[i]
-            value = matching[i]
-            unless passes_requirements?(item, value)
-              # if @defaults.has_key?(item)
-              #   value = @defaults[item]
-              # else
-                return nil, requirements_for(item)
-              # end
-            end
-          else
-            value = @defaults[item]
-            warning "No default value for option #{item.inspect} specified" unless @defaults.has_key?(item)
-          end
+          value = matching[i] || value = @defaults[item]
+          warning "No default value for option #{item.inspect} specified" unless @defaults.has_key?(item)
           options[item] = value
           debug "set #{item} to #{options[item].inspect}"
         end
@@ -369,21 +379,6 @@ module Irc
       when_str = @requirements.empty? ? "" : " when #{@requirements.inspect}"
       default_str = @defaults.empty? ? "" : " || #{@defaults.inspect}"
       "<#{self.class.to_s} #{@items.map { |c| c.inspect }.join(' ').inspect}#{default_str}#{when_str}>"
-    end
-
-    # Verify that the given value passes this template's requirements
-    def passes_requirements?(name, value)
-      return @defaults.key?(name) && @defaults[name].nil? if value.nil? # Make sure it's there if it should be
-
-      case @requirements[name]
-        when nil then true
-        when Regexp then
-          value = value.to_s
-          match = @requirements[name].match(value)
-          match && match[0].length == value.length
-        else
-          @requirements[name] == value.to_s
-      end
     end
 
     def requirements_for(name)

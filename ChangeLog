@@ -1,3 +1,9 @@
+2007-02-02  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Plugin message mapper: Requirements (as set by the :requirements
+	hash) are now embedded in the regular expression matcher rather than
+	being cheked separately afterwards.
+
 2007-01-30  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* New IRC Framework: Server methods to retrieve a Channel or User are
