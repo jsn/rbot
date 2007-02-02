@@ -1,3 +1,26 @@
+2007-02-03  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Plugin message mapper: Enhancements to the :requirements option.
+	When the requirement of a parameter is a regular expression with
+	capturing groups /(...)/, the corresponding map parameters will be
+	assigned (by default) the first non-nil capture instead of the whole
+	regular expression. If a specific capture group is desired instead,
+	the requirement should be in the form
+		[/some regexp/, integer_index_of_the_desired_group]
+	or in the form
+		{
+		:regexp => /some regexp/,
+		:index => integer_index_of_the_desired_group
+		}
+	and a nil index will still give the default behavior.
+	If you want the whole regular expression to be the matched parameter
+	value, there are three options: use an index of 0, wrap the whole
+	regular expression in a capturing group, or use non-capturing groups
+	/(?:...)/. The latter is preferred because it's much faster.
+	When exploiting the capturing groups feature, please try to remember
+	to use /\s+/ instead of plain spaces / /, unless it's absolutely
+	necessary to have single spaces.
+
 2007-02-02  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Plugin message mapper: Requirements (as set by the :requirements

@@ -1,3 +1,22 @@
+# First of all we add a method to the Regexp class
+class Regexp
+
+  # a Regexp has captures when its source has open parenthesis
+  # which are preceded by an even number of slashes and followed by
+  # a question mark
+  def has_captures?
+    self.source.match(/(?:^|[^\\])(?:\\\\)*\([^?]/)
+  end
+
+  # We may want to remove captures
+  def remove_captures
+    new = self.source.gsub(/(^|[^\\])((?:\\\\)*)\(([^?])/) {
+      "%s%s(?:%s" % [$1, $2, $3]
+    }
+    Regexp.new(new)
+  end
+end
+
 module Irc
 
   # +MessageMapper+ is a class designed to reduce the amount of regexps and
@@ -94,7 +113,7 @@ module Irc
     #             :private => false
     #
     def map(botmodule, *args)
-      @templates << Template.new(botmodule, *args)
+      @templates << MessageTemplate.new(botmodule, *args)
     end
 
     def each
@@ -121,7 +140,7 @@ module Irc
         if options.nil?
           failures << [tmpl, failure]
         else
-          action = tmpl.options[:action] ? tmpl.options[:action] : tmpl.items[0]
+          action = tmpl.options[:action]
           unless @parent.respond_to?(action)
             failures << [tmpl, "class does not respond to action #{action}"]
             next
@@ -154,9 +173,108 @@ module Irc
 
   end
 
-  class Template
+  # +MessageParameter+ is a class that collects all the necessary information
+  # about a message parameter (the :param or *param that can be found in a
+  # #map).
+  #
+  # It has a +name+ attribute, +multi+ and +optional+ booleans that tell if the
+  # parameter collects more than one word, and if it's optional (respectively).
+  # In the latter case, it can also have a default value.
+  #
+  # It is possible to assign a collector to a MessageParameter. This can be either
+  # a Regexp with captures or an Array or a Hash. The collector defines what the
+  # collect() method is supposed to return.
+  class MessageParameter
+    attr_reader :name
+    attr_writer :multi
+    attr_writer :optional
+    attr_accessor :default
+
+    def initialize(name)
+      self.name = name
+      @multi = false
+      @optional = false
+      @default = nil
+      @regexp = nil
+      @index = nil
+    end
+
+    def name=(val)
+      @name = val.to_sym
+    end
+
+    def multi?
+      @multi
+    end
+
+    def optional?
+      @optional
+    end
+
+    # This method is used to turn a matched item into the actual parameter value.
+    # It only does something when collector= set the @regexp to something. In
+    # this case, _val_ is matched against @regexp and then the match result
+    # specified in @index is selected. As a special case, when @index is nil
+    # the first non-nil captured group is returned.
+    def collect(val)
+      return val unless @regexp
+      mdata = @regexp.match(val)
+      if @index
+        return mdata[@index]
+      else
+        return mdata[1..-1].compact.first
+      end
+    end
+
+    # This method allow the plugin programmer to choose to only pick a subset of the
+    # string matched by a parameter. This is done by passing the collector=()
+    # method either a Regexp with captures or an Array or a Hash.
+    #
+    # When the method is passed a Regexp with captures, the collect() method will
+    # return the first non-nil captured group.
+    #
+    # When the method is passed an Array, it will grab a regexp from the first
+    # element, and possibly an index from the second element. The index can
+    # also be nil.
+    #
+    # When the method is passed a Hash, it will grab a regexp from the :regexp
+    # element, and possibly an index from the :index element. The index can
+    # also be nil.
+    def collector=(val)
+      return unless val
+      case val
+      when Regexp
+        return unless val.has_captures?
+        @regexp = val
+      when Array
+        warning "Collector #{val.inspect} is too long, ignoring extra entries" unless val.length <= 2
+        @regexp = val[0]
+        @index = val[1] rescue nil
+      when Hash
+        raise "Collector #{val.inspect} doesn't have a :regexp key" unless val.has_key?(:regexp)
+        @regexp = val[:regexp]
+        @index = val.fetch(:regexp, nil)
+      end
+      raise "The regexp of collector #{val.inspect} isn't a Regexp" unless @regexp.kind_of?(Regexp)
+      raise "The index of collector #{val.inspect} is present but not an integer " if @index and not @index.kind_of?(Fixnum)
+    end
+
+    def inspect
+      mul = multi? ? " multi" : " single"
+      opt = optional? ? " optional" : " needed"
+      if @regexp
+        reg = " regexp=%s index=%d" % [@regexp, @index]
+      else
+        reg = nil
+      end
+      "<#{self.class.to_s}%s%s%s%s>" % [name, mul, opt, reg]
+    end
+  end
+
+  class MessageTemplate
     attr_reader :defaults # The defaults hash
     attr_reader :options  # The options hash
+    attr_reader :template
     attr_reader :items
     attr_reader :regexp
 
@@ -164,16 +282,49 @@ module Irc
       raise ArgumentError, "Third argument must be a hash!" unless hash.kind_of?(Hash)
       @defaults = hash[:defaults].kind_of?(Hash) ? hash.delete(:defaults) : {}
       @requirements = hash[:requirements].kind_of?(Hash) ? hash.delete(:requirements) : {}
-      # The old way matching was done, this prepared the match items.
-      # Now we use for some preliminary syntax checking and to get the words used in the auth_path
+      @template = template
+
       self.items = template
+      # @dyn_items is an array of MessageParameters, except for the first entry
+      # which is the template
+      @dyn_items = @items.collect { |it|
+        if it.kind_of?(Symbol)
+          i = it.to_s
+          opt = MessageParameter.new(i)
+          if i.sub!(/^\*/,"")
+            opt.name = i
+            opt.multi = true
+          end
+          opt.default = @defaults[opt.name]
+          opt.collector = @requirements[opt.name]
+          opt
+        else
+          nil
+        end
+      }
+      @dyn_items.unshift(template).compact!
+      debug "Items: #{@items.inspect}; dyn items: #{@dyn_items.inspect}"
+
       self.regexp = template
       debug "Command #{template.inspect} in #{botmodule} will match using #{@regexp}"
+
+      set_auth_path(botmodule, hash)
+
+      unless hash.has_key?(:action)
+        hash[:action] = items[0]
+      end
+
+      @options = hash
+
+      # debug "Create template #{self.inspect}"
+    end
+
+    def set_auth_path(botmodule, hash)
       if hash.has_key?(:auth)
-        warning "Command #{template.inspect} in #{botmodule} uses old :auth syntax, please upgrade"
+        warning "Command #{@template.inspect} in #{botmodule} uses old :auth syntax, please upgrade"
       end
       if hash.has_key?(:full_auth_path)
-        warning "Command #{template.inspect} in #{botmodule} sets :full_auth_path, please don't do this"
+        warning "Command #{@template.inspect} in #{botmodule} sets :full_auth_path, please don't do this"
       else
         case botmodule
         when String
@@ -208,39 +359,16 @@ module Irc
           extra = nil
         end
         hash[:full_auth_path] = [pre,extra,post].compact.join("::")
-        debug "Command #{template} in #{botmodule} will use authPath #{hash[:full_auth_path]}"
+        debug "Command #{@template} in #{botmodule} will use authPath #{hash[:full_auth_path]}"
         # TODO check if the full_auth_path is sane
       end
-
-      @options = hash
-
-      # @dyn_items is an array of arrays whose first entry is the Symbol
-      # (without the *, if any) of a dynamic item, and whose second entry is
-      # false if the Symbol refers to a single-word item, or true if it's
-      # multiword. @dyn_items.first will be the template.
-      @dyn_items = @items.collect { |it|
-        if it.kind_of?(Symbol)
-          i = it.to_s
-          if i.sub!(/^\*/,"")
-            [i.intern, true]
-          else
-            [i.intern, false]
-          end
-        else
-          nil
-        end
-      }
-      @dyn_items.unshift(template).compact!
-      debug "Items: #{@items.inspect}; dyn items: #{@dyn_items.inspect}"
-
-      # debug "Create template #{self.inspect}"
     end
 
     def items=(str)
       raise ArgumentError, "template #{str.inspect} should be a String" unless str.kind_of?(String)
 
       # split and convert ':xyz' to symbols
-      items = str.strip.split(/\]?\s+\[?/).collect { |c|
+      items = str.strip.split(/\]?\s+\[?|\]?$/).collect { |c|
         # there might be extra (non-alphanumeric) stuff (e.g. punctuation) after the symbol name
         if /^(:|\*)(\w+)(.*)/ =~ c
           sym = ($1 == ':' ) ? $2.intern : "*#{$2}".intern
@@ -289,11 +417,14 @@ module Irc
         when nil
           sub = is_single ? "\\S+" : ".*"
         when Regexp
-          # Remove the ^ and $ placed around requirement regexp at times
-          # They were unnecessary first, and are dangerous now
-          sub = has_req.source.sub(/^\^/,'').sub(/\$$/,'')
+          # Remove captures and the ^ and $ that are sometimes placed in requirement regexps
+          sub = has_req.remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
         when String
           sub = Regexp.escape(has_req)
+        when Array
+          sub = has_req[0].remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
+        when Hash
+          sub = has_req[:regexp].remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
         else
           warning "Odd requirement #{has_req.inspect} of class #{has_req.class} for parameter '#{name}'"
           sub = Regexp.escape(has_req.to_s) rescue "\\S+"
@@ -317,26 +448,26 @@ module Irc
       debug "Testing #{m.message.inspect} against #{self.inspect}"
 
       # Early out
-      return nil, "template #{@dyn_items.first.inspect} is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
-      return nil, "template #{@dyn_items.first.inspect} is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
+      return nil, "template #{@template} is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
+      return nil, "template #{@template} is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
 
       options = {}
 
       matching = @regexp.match(m.message)
-      return nil, "#{m.message.inspect} doesn't match #{@dyn_items.first.inspect} (#{@regexp})" unless matching
-      return nil, "#{m.message.inspect} only matches #{@dyn_items.first.inspect} (#{@regexp}) partially" unless matching[0] == m.message
+      return nil, "#{m.message.inspect} doesn't match #{@template} (#{@regexp})" unless matching
+      return nil, "#{m.message.inspect} only matches #{@template} (#{@regexp}) partially" unless matching[0] == m.message
 
       debug_match = matching[1..-1].collect{ |d| d.inspect}.join(', ')
       debug "#{m.message.inspect} matched #{@regexp} with #{debug_match}"
-      debug "Associating #{debug_match} with dyn items #{@dyn_items[1..-1].join(', ')}"
+      debug "Associating #{debug_match} with dyn items #{@dyn_items.join(', ')}"
 
-      (@dyn_items.length - 1).downto 1 do |i|
-        it = @dyn_items[i]
-        item = it[0]
-        debug "dyn item #{item} (multi-word: #{it[1].inspect})"
-        if it[1]
+      @dyn_items.each_with_index { |it, i|
+        next if i == 0
+        item = it.name
+        debug "dyn item #{item} (multi-word: #{it.multi?.inspect})"
+        if it.multi?
           if matching[i].nil?
-            default = @defaults[item]
+            default = it.default
             case default
             when Array
               value = default.clone
@@ -345,8 +476,8 @@ module Irc
             when nil, false, []
               value = []
             else
-              value = []
               warning "Unmanageable default #{default} detected for :*#{item.to_s}, using []"
+              value = []
             end
             case default
             when String
@@ -361,15 +492,17 @@ module Irc
           def value.to_s
             @string_value
           end
-          options[item] = value
-          debug "set #{item} to #{value.inspect}"
         else
-          value = matching[i] || value = @defaults[item]
-          warning "No default value for option #{item.inspect} specified" unless @defaults.has_key?(item)
-          options[item] = value
-          debug "set #{item} to #{options[item].inspect}"
+          if matching[i].nil?
+            warning "No default value for option #{item.inspect} specified" unless @defaults.has_key?(item)
+            value = it.default
+          else
+            value = it.collect(matching[i])
+          end
         end
-      end
+        options[item] = value
+        debug "set #{item} to #{options[item].inspect}"
+      }
 
       options.delete_if {|k, v| v.nil?} # Remove nil values.
       return options, nil
