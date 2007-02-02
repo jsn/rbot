@@ -219,7 +219,8 @@ class BansPlugin < Plugin
     autos = @registry[:onjoin]
     count = autos.length
 
-    idx = params[:idx].to_i
+    idx = nil
+    idx = params[:idx].to_i if params[:idx]
 
     if idx
       if idx > count
@@ -242,7 +243,11 @@ class BansPlugin < Plugin
       end
     end
     @registry[:onjoin] = autos
-    m.okay if count > autos.length
+    if count > autos.length
+      m.okay
+    else
+      m.reply "No matching onjoin rule for #{host} found"
+    end
   end
 
   def add_badword(m, params=nil)
@@ -268,7 +273,8 @@ class BansPlugin < Plugin
     badwords = @registry[:badwords]
     count = badwords.length
 
-    idx = params[:idx].to_i
+    idx = nil
+    idx = params[:idx].to_i if params[:idx]
 
     if idx
       if idx > count
@@ -284,12 +290,17 @@ class BansPlugin < Plugin
 
       badwords.each { |badword|
         next unless ['all', badword.channel].include?(channel)
+	debug "Removing #{badword.inspect}" if badword == regexp
         badwords.delete(badword) if badword == regexp
       }
     end
 
     @registry[:badwords] = badwords
-    m.okay if count > badwords.length
+    if count > badwords.length
+      m.okay
+    else
+      m.reply "No matching badword #{regexp} found"
+    end
   end
 
   def add_whitelist(m, params=nil)
@@ -319,7 +330,8 @@ class BansPlugin < Plugin
     wl = @registry[:whitelist]
     count = wl.length
 
-    idx = params[:idx].to_i
+    idx = nil
+    idx = params[:idx].to_i if params[:idx]
 
     if idx
       if idx > count
@@ -342,7 +354,11 @@ class BansPlugin < Plugin
       end
     end
     @registry[:whitelist] = wl
-    m.okay if count > whitelist.length
+    if count > whitelist.length
+      m.okay
+    else
+      m.reply "No host matching #{host}"
+    end
   end
 
   private
