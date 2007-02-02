@@ -346,11 +346,11 @@ module Irc
           if matching[i]
             value = matching[i]
             unless passes_requirements?(item, value)
-              if @defaults.has_key?(item)
-                value == @defaults[item]
-              else
+              # if @defaults.has_key?(item)
+              #   value = @defaults[item]
+              # else
                 return nil, requirements_for(item)
-              end
+              # end
             end
           else
             value = @defaults[item]
