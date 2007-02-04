@@ -69,7 +69,7 @@ class WeatherPlugin < Plugin
     when "nws"
       "weather nws <station> => display the current conditions at the location specified by the NOAA National Weather Service station code <station> ( lookup your station code at http://www.nws.noaa.gov/data/current_obs/ )"
     when "station", "wu"
-      "weather <location> => display the current conditions at the location specified, looking it up on the Weather Underground site; you can use 'station <code>' to look up data by station code ( lookup your station code at http://www.weatherunderground.com/ )" 
+      "weather [<units>] <location> => display the current conditions at the location specified, looking it up on the Weather Underground site; you can use 'station <code>' to look up data by station code ( lookup your station code at http://www.weatherunderground.com/ ); you can optionally set <units>  to 'metric' or 'english' if you only want data with the units; use 'both' for units to go back to having both." 
     else
       "weather information lookup. Looks up weather information for the last location you specified. See topics 'nws' and 'wu' for more information"
     end
@@ -80,18 +80,19 @@ class WeatherPlugin < Plugin
 
     @nws_cache = Hash.new
 
-    @wu_url="http://mobile.wunderground.com/cgi-bin/findweather/getForecast?brand=mobile&query=%s"
-    @wu_station_url="http://mobile.wunderground.com/global/stations/%s.html"
+    @wu_url         = "http://mobile.wunderground.com/cgi-bin/findweather/getForecast?brand=mobile%s&query=%s"
+    @wu_station_url = "http://mobile.wunderground.com/auto/mobile%s/global/stations/%s.html"
   end
   
   def weather(m, params)
-    loc = nil
-    service = nil
     if params[:where].empty?
       if @registry.has_key?(m.sourcenick)
         where = @registry[m.sourcenick]
         debug "Loaded weather info #{where.inspect} for #{m.sourcenick}"
-        save = false
+
+        service = where.first.to_sym
+        loc = where[1].to_s
+        units = params[:units] || where[2] rescue nil
       else
         debug "No weather info for #{m.sourcenick}"
         m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
@@ -99,30 +100,44 @@ class WeatherPlugin < Plugin
       end
     else
       where = params[:where]
-      save = true
-      unless ['nws','station'].include?(where.first)
-        loc = where.to_s
+      if ['nws','station'].include?(where.first)
+        service = where.first.to_sym
+        loc = where[1].to_s
+      else
         service = :wu
+        loc = where.to_s
       end
+      units = params[:units]
     end
-    unless service
-      loc = where[1].to_s
-      service = where.first.to_sym
-    end
+
     if loc.empty?
       debug "No weather location found for #{m.sourcenick}"
       m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
       return
     end
+
+    wu_units = String.new
+    if units
+      case units.to_sym
+      when :english, :metric
+        wu_units = "_#{units}"
+      when :both
+      else
+        m.reply "Ignoring unknown units #{units}"
+        wu_units = String.new
+      end
+    end
+
     case service
     when :nws
       nws_describe(m, loc)
     when :station
-      wu_station(m, loc)
+      wu_station(m, loc, wu_units)
     when :wu
-      wu_weather(m, loc)
+      wu_weather(m, loc, wu_units)
     end
-    @registry[m.sourcenick] = [service, loc] if save
+
+    @registry[m.sourcenick] = [service, loc, units]
   end
 
   def nws_describe(m, where)
@@ -143,9 +158,9 @@ class WeatherPlugin < Plugin
     end
   end
 
-  def wu_station(m, where)
+  def wu_station(m, where, units)
     begin
-      xml = @bot.httputil.get_cached(@wu_station_url % URI.escape(where))
+      xml = @bot.httputil.get_cached(@wu_station_url % [units, URI.escape(where)])
       case xml
       when nil
         m.reply "couldn't retrieve weather information, sorry"
@@ -165,9 +180,9 @@ class WeatherPlugin < Plugin
     end
   end
 
-  def wu_weather(m, where)
+  def wu_weather(m, where, units)
     begin
-      xml = @bot.httputil.get_cached(@wu_url % URI.escape(where))
+      xml = @bot.httputil.get_cached(@wu_url % [units, URI.escape(where)])
       case xml
       when nil
         m.reply "couldn't retrieve weather information, sorry"
@@ -206,13 +221,14 @@ class WeatherPlugin < Plugin
       result << ("Weather info for %s (updated on %s)" % [$2, $1])
     end
     txt.scan(/<tr>\s*<td>\s*(.*?)\s*<\/td>\s*<td>\s*(.*?)\s*<\/td>\s*<\/tr>/) { |k, v|
-      unless v.empty? or v == "-" or k =="Raw METAR"
-        result << ("%s: %s" % [k, v])
-      end
+      next if v.empty?
+      next if ["-", "- approx.", "N/A", "N/A approx."].include?(v)
+      next if k == "Raw METAR"
+      result << ("%s: %s" % [k, v])
     }
     return result.join('; ')
   end
 end
 
 plugin = WeatherPlugin.new
-plugin.map 'weather *where', :defaults => {:where => false}
+plugin.map 'weather :units *where', :defaults => {:where => false, :units => false}, :requirements => {:units => /metric|english|both/}
