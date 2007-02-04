@@ -195,7 +195,21 @@ class IrcBot
 
     BotConfig.register BotConfigIntegerValue.new('core.save_every',
       :default => 60, :validate => Proc.new{|v| v >= 0},
-      # TODO change timer via on_change proc
+      :on_change => Proc.new { |bot, v|
+        if @save_timer
+          if v > 0
+            @timer.reschedule(@save_timer, v)
+            @timer.unblock(@save_timer)
+          else
+            @timer.block(@save_timer)
+          end
+        else
+          if v > 0
+            @save_timer = @timer.add(v) { bot.save }
+          end
+          # Nothing to do when v == 0
+        end
+      },
       :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example)")
 
     BotConfig.register BotConfigBooleanValue.new('core.run_as_daemon',
@@ -341,7 +355,11 @@ class IrcBot
 
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
     @save_mutex = Mutex.new
-    @timer.add(@config['core.save_every']) { save } if @config['core.save_every']
+    if @config['core.save_every'] > 0
+      @save_timer = @timer.add(@config['core.save_every']) { save }
+    else
+      @save_timer = nil
+    end
     @quit_mutex = Mutex.new
 
     @logs = Hash.new
@@ -1008,7 +1026,7 @@ class IrcBot
         when Channel
           irclog "-=#{myself}=- #{message}", where
         else
-             irclog "[-=#{where}=-] #{message}", where
+          irclog "[-=#{where}=-] #{message}", where
         end
       when "PRIVMSG"
         case where
