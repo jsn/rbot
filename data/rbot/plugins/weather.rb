@@ -112,6 +112,7 @@ class WeatherPlugin < Plugin
     if loc.empty?
       debug "No weather location found for #{m.sourcenick}"
       m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
+      return
     end
     case service
     when :nws
@@ -148,6 +149,9 @@ class WeatherPlugin < Plugin
       case xml
       when nil
         m.reply "couldn't retrieve weather information, sorry"
+        return
+      when /Search not found:/
+        m.reply "no such station found (#{where})"
         return
       when /<table border.*?>(.*?)<\/table>/m
         data = $1
