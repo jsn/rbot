@@ -1,11 +1,15 @@
-#
 # Weather plugin for rbot
-# by MrChucho (mrchucho@mrchucho.net)
+#
+# NOAA National Weather Service support by MrChucho (mrchucho@mrchucho.net)
 # Copyright (C) 2006 Ralph M. Churchill
 #
-require 'open-uri'
+# Weather Undeground support by Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright (C) 2006 Giuseppe Bilotta
+
+require 'uri'
 require 'rexml/document'
 
+# Wraps NOAA National Weather Service information
 class CurrentConditions
     def initialize(station)
         @station = station
@@ -58,36 +62,78 @@ private
     end
 end
 
-class MyWeatherPlugin < Plugin
+class WeatherPlugin < Plugin
   
   def help(plugin, topic="")
-    "weather <STATION> => display the current conditions at the location specified by the STATION code [Lookup your STATION code at http://www.nws.noaa.gov/data/current_obs/ - this will also store the STATION against your nick, so you can later just say \"weather\", weather => display the current weather at the location you last asked for" 
+    case topic
+    when "nws"
+      "weather nws <station> => display the current conditions at the location specified by the NOAA National Weather Service station code <station> ( lookup your station code at http://www.nws.noaa.gov/data/current_obs/ )"
+    when "station", "wu"
+      "weather <location> => display the current conditions at the location specified, looking it up on the Weather Underground site; you can use 'station <code>' to look up data by station code ( lookup your station code at http://www.weatherunderground.com/ )" 
+    else
+      "weather information lookup. Looks up weather information for the last location you specified. See topics 'nws' and 'wu' for more information"
+    end
   end
   
   def initialize
     super
-    # this plugin only wants to store strings
-    class << @registry
-      def store(val)
-        val
-      end
-      def restore(val)
-        val
-      end
-    end
-    @cc_cache = Hash.new
+
+    @nws_cache = Hash.new
+
+    @wu_url="http://mobile.wunderground.com/cgi-bin/findweather/getForecast?brand=mobile&query=%s"
+    @wu_station_url="http://mobile.wunderground.com/global/stations/%s.html"
   end
   
-  def describe(m, where)
-    if @cc_cache.has_key?(where) then
-        met = @cc_cache[where]
+  def weather(m, params)
+    loc = nil
+    service = nil
+    if params[:where].empty?
+      if @registry.has_key?(m.sourcenick)
+        where = @registry[m.sourcenick]
+        debug "Loaded weather info #{where.inspect} for #{m.sourcenick}"
+        save = false
+      else
+        debug "No weather info for #{m.sourcenick}"
+        m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
+        return
+      end
+    else
+      where = params[:where]
+      save = true
+      unless ['nws','station'].include?(where.first)
+        loc = where.to_s
+        service = :wu
+      end
+    end
+    unless service
+      loc = where[1].to_s
+      service = where.first.to_sym
+    end
+    if loc.empty?
+      debug "No weather location found for #{m.sourcenick}"
+      m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
+    end
+    case service
+    when :nws
+      nws_describe(m, loc)
+    when :station
+      wu_station(m, loc)
+    when :wu
+      wu_weather(m, loc)
+    end
+    @registry[m.sourcenick] = [service, loc] if save
+  end
+
+  def nws_describe(m, where)
+    if @nws_cache.has_key?(where) then
+        met = @nws_cache[where]
     else
         met = CurrentConditions.new(where)
     end
     if met
       begin
         m.reply met.update
-        @cc_cache[where] = met
+        @nws_cache[where] = met
       rescue => e
         m.reply e.message
       end
@@ -96,20 +142,73 @@ class MyWeatherPlugin < Plugin
     end
   end
 
-  def weather(m, params)
-    if params[:where]
-      @registry[m.sourcenick] = params[:where]
-      describe(m,params[:where])
-    else
-      if @registry.has_key?(m.sourcenick)
-        where = @registry[m.sourcenick]
-        describe(m,where)
+  def wu_station(m, where)
+    begin
+      xml = @bot.httputil.get_cached(@wu_station_url % URI.escape(where))
+      case xml
+      when nil
+        m.reply "couldn't retrieve weather information, sorry"
+        return
+      when /<table border.*?>(.*?)<\/table>/m
+        data = $1
+        m.reply wu_weather_filter(data)
       else
-        m.reply "I don't know where you are yet! Lookup your station at http://www.nws.noaa.gov/data/current_obs/ and tell me 'weather <station>', then I'll know."
+        debug xml
+        m.reply "something went wrong with the data for #{where}..."
       end
+    rescue => e
+      m.reply "retrieving info about '#{where}' failed (#{e})"
     end
+  end
+
+  def wu_weather(m, where)
+    begin
+      xml = @bot.httputil.get_cached(@wu_url % URI.escape(where))
+      case xml
+      when nil
+        m.reply "couldn't retrieve weather information, sorry"
+        return
+      when /City Not Found/
+        m.reply "no such location found (#{where})"
+        return
+      when /<table border.*?>(.*?)<\/table>/m
+        data = $1
+        m.reply wu_weather_filter(data)
+      when /<a href="\/global\/stations\//
+        stations = xml.scan(/<a href="\/global\/stations\/(.*?)\.html">/)
+        m.reply "multiple stations available, use 'weather station <code>' where code is one of " + stations.join(", ")
+      else
+        debug xml
+        m.reply "something went wrong with the data from #{where}..."
+      end
+    rescue => e
+      m.reply "retrieving info about '#{where}' failed (#{e})"
+    end
+  end
+
+  def wu_weather_filter(stuff)
+    txt = stuff
+    txt.gsub!(/[\n\s]+/,' ')
+    data = Hash.new
+    txt.gsub!(/&nbsp;/, ' ')
+    txt.gsub!(/&#176;/, ' ') # degree sign
+    txt.gsub!(/<\/?b>/,'')
+    txt.gsub!(/<\/?span[^<>]*?>/,'')
+    txt.gsub!(/<img\s*[^<>]*?>/,'')
+    txt.gsub!(/<br\s?\/?>/,'')
+
+    result = Array.new
+    if txt.match(/<\/a>\s*Updated:\s*(.*?)\s*Observed at\s*(.*?)\s*<\/td>/)
+      result << ("Weather info for %s (updated on %s)" % [$2, $1])
+    end
+    txt.scan(/<tr>\s*<td>\s*(.*?)\s*<\/td>\s*<td>\s*(.*?)\s*<\/td>\s*<\/tr>/) { |k, v|
+      unless v.empty? or v == "-" or k =="Raw METAR"
+        result << ("%s: %s" % [k, v])
+      end
+    }
+    return result.join('; ')
   end
 end
 
-plugin = MyWeatherPlugin.new
-plugin.map 'weather :where', :defaults => {:where => false}
+plugin = WeatherPlugin.new
+plugin.map 'weather *where', :defaults => {:where => false}
