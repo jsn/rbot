@@ -455,7 +455,7 @@ module Irc
 
       matching = @regexp.match(m.message)
       return nil, "#{m.message.inspect} doesn't match #{@template} (#{@regexp})" unless matching
-      return nil, "#{m.message.inspect} only matches #{@template} (#{@regexp}) partially" unless matching[0] == m.message
+      return nil, "#{m.message.inspect} only matches #{@template} (#{@regexp}) partially: #{matching[0].inspect}" unless matching[0] == m.message
 
       debug_match = matching[1..-1].collect{ |d| d.inspect}.join(', ')
       debug "#{m.message.inspect} matched #{@regexp} with #{debug_match}"
