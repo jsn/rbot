@@ -115,6 +115,9 @@ class SearchPlugin < Plugin
     while first_pars > 0 and urls.length > 0
       url.replace(urls.shift)
       idx += 1
+
+      # FIXME what happens if some big file is returned? We should share
+      # code with the url plugin to only retrieve partial file content!
       xml = @bot.httputil.get_cached(url)
       if xml.nil?
         debug "Unable to retrieve #{url}"
@@ -127,26 +130,28 @@ class SearchPlugin < Plugin
         debug "Found header: #{header_found[1].inspect}"
         while txt.empty? 
           header_found = $'
-          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im].ircify_html
+          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im]
           break unless candidate
-          txt.replace candidate
+          txt.replace candidate.ircify_html
         end
       end
       # If we haven't found a first par yet, try to get it from the whole
       # document
       if txt.empty?
-        txt = xml[/<p(?:\s+[^>]*)?>.*?<\/p>/im].ircify_html
+	header_found = xml
         while txt.empty? 
-          header_found = $'
-          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im].ircify_html
+          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im]
           break unless candidate
-          txt.replace candidate
+          txt.replace candidate.ircify_html
+          header_found = $'
         end
       end
-      # Nothing yet, give up
+      # Nothing yet, try title
       if txt.empty?
         debug "No first par found\n#{xml}"
-        next
+	# FIXME only do this if the 'url' plugin is loaded
+	txt.replace @bot.plugins['url'].get_title_from_html(xml)
+        next if txt.empty?
       end
       m.reply "[#{idx}] #{txt}".omissis_after(400)
       first_pars -=1
