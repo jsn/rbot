@@ -56,6 +56,7 @@ module Timer
     # reschedule the Action to change its period
     def reschedule(new_period)
       @period = new_period
+      @in = new_period
     end
   end
 
