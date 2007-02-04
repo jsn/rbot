@@ -395,20 +395,25 @@ class IrcBot
         end
       }
     }
+
+    # TODO the next two @client should go into rfc2812.rb, probably
+    # Since capabs are two-steps processes, server.supports[:capab]
+    # should be a three-state: nil, [], [....]
+    asked_for = { :"identify-msg" => false }
     @client[:isupport] = proc { |data|
-      # TODO this needs to go into rfc2812.rb
-      # Since capabs are two-steps processes, server.supports[:capab]
-      # should be a three-state: nil, [], [....]
-      sendq "CAPAB IDENTIFY-MSG" if server.supports[:capab]
+      if server.supports[:capab] and !asked_for[:"identify-msg"]
+        sendq "CAPAB IDENTIFY-MSG"
+        asked_for[:"identify-msg"] = true
+      end
     }
     @client[:datastr] = proc { |data|
-      # TODO this needs to go into rfc2812.rb
       if data[:text] == "IDENTIFY-MSG"
-        server.capabilities["identify-msg".to_sym] = true
+        server.capabilities[:"identify-msg"] = true
       else
         debug "Not handling RPL_DATASTR #{data[:servermessage]}"
       end
     }
+
     @client[:privmsg] = proc { |data|
       m = PrivMessage.new(self, server, data[:source], data[:target], data[:message])
       # debug "Message source is #{data[:source].inspect}"
@@ -669,19 +674,23 @@ class IrcBot
   # extensions you want to use in modules.
   def sendmsg(type, where, message, chan=nil, ring=0)
     # The IRC protocol requires that each raw message must be not longer
-    # than 512 characters, including the EOL terminators (CR+LF), so we
-    # split the incoming message so that each line sent is not longher
-    # than that.
+    # than 512 characters. From this length with have to subtract the EOL
+    # terminators (CR+LF) and the length of ":botnick!botuser@bothost "
+    # that will be prepended by the server to all of our messages.
 
-    # Some server are stricter than that. To prevent 'lost characters',
-    # we use the TOPICLEN (if provided by the server) as upper limit.
-    # If TOPICLEN is not set by the server, we use KICKLEN; if that isn't
-    # set either, we use 510.
-    # FIXME please report lost message characters (can be easily tested with
-    # the search plugin)
-    max_len = server.supports[:topiclen] || server.supports[:kicklen] || 510
+    # The maximum raw message length we can send is therefore 512 - 2 - 2
+    # minus the length of our hostmask.
 
-    # This is the fixed raw string prefixed to any line we send
+    max_len = 508 - myself.fullform.length
+
+    # On servers that support IDENTIFY-MSG, we have to subtract 1, because messages
+    # will have a + or - prepended
+    if server.capabilities[:"identify-msg"]
+      max_len -= 1
+    end
+
+    # When splitting the message, we'll be prefixing the following string:
+    # (e.g. "PRIVMSG #rbot :")
     fixed = "#{type} #{where} :"
 
     # And this is what's left
