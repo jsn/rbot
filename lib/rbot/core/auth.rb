@@ -246,6 +246,8 @@ class AuthModule < CoreBotModule
         return "permissions [re]set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)"
       when "view"
         return "permissions view [for <user>]: display the permissions for user <user>"
+      else
+        return "topics: syntax, (re)set, view"
       end
     when "user"
       case topic
