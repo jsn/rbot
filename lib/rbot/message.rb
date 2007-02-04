@@ -64,7 +64,7 @@ module Irc
       @server = server
 
       @identified = false
-      if @msg_wants_id && @server.capabilities["identify-msg".to_sym]
+      if @msg_wants_id && @server.capabilities[:"identify-msg"]
         if @message =~ /([-+])(.*)/
           @identified = ($1=="+")
           @message = $2
