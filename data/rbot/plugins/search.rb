@@ -15,15 +15,32 @@ class ::String
 
   def ircify_html
     txt = self
-    txt.gsub!(/<\/?b\s*>/, "#{Bold}")
-    txt.gsub!(/<\/?i\s*>/, "#{Underline}")
+
+    # bold and strong -> bold
+    txt.gsub!(/<\/?(?:b|strong)\s*>/, "#{Bold}")
+
+    # italic, emphasis and underline -> underline
+    txt.gsub!(/<\/?(?:i|em|u)\s*>/, "#{Underline}")
+
     ## This would be a nice addition, but the results are horrible
     ## Maybe make it configurable?
     # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
-    txt.gsub!(/<\/?(p|br)>/, ' ')
+
+    # Paragraph and br tags are converted to whitespace.
+    txt.gsub!(/<\/?(p|br)\s*\/?\s*>/, ' ')
     txt.gsub!("\n", ' ')
+
+    # All other tags are just removed
     txt.gsub!(/<[^>]+>/, '')
+
+    # Remove double formatting options, since they only waste bytes
+    txt.gsub!(/#{Bold}\s*#{Bold}/,"")
+    txt.gsub!(/#{Underline}\s*#{Underline}/,"")
+
+    # And finally whitespace is squeezed
     txt.gsub!(/\s+/, ' ')
+
+    # Decode entities and strip whitespace
     return Utils.decode_html_entities(txt).strip!
   end
 end
@@ -104,22 +121,34 @@ class SearchPlugin < Plugin
         next
       end
       # We get the first par after the first main heading, if possible
-      header_found = xml.match(/<h1( [^>]*)?>.*?<\/h1>/im)
-      txt = nil
+      header_found = xml.match(/<h1(?:\s+[^>]*)?>(.*?)<\/h1>/im)
+      txt = String.new
       if header_found
-        txt = header_found.post_match[/<p( [^>]*)?>.*?<\/p>/im]
+        debug "Found header: #{header_found[1].inspect}"
+        while txt.empty? 
+          header_found = $'
+          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im].ircify_html
+          break unless candidate
+          txt.replace candidate
+        end
       end
       # If we haven't found a first par yet, try to get it from the whole
       # document
-      unless txt
-        txt = xml[/<p( [^>]*)?>.*?<\/p>/im]
+      if txt.empty?
+        txt = xml[/<p(?:\s+[^>]*)?>.*?<\/p>/im].ircify_html
+        while txt.empty? 
+          header_found = $'
+          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im].ircify_html
+          break unless candidate
+          txt.replace candidate
+        end
       end
       # Nothing yet, give up
-      unless txt
+      if txt.empty?
         debug "No first par found\n#{xml}"
         next
       end
-      m.reply "[#{idx}] #{txt.ircify_html}".omissis_after(400)
+      m.reply "[#{idx}] #{txt}".omissis_after(400)
       first_pars -=1
     end
   end
