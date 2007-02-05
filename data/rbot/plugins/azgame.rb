@@ -12,6 +12,7 @@
 class AzGame
 
   attr_reader :range, :word
+  attr_reader :lang, :rules, :listener
   attr_accessor :tries, :total_tries, :total_failed, :failed, :winner
   def initialize(plugin, lang, rules, word)
     @plugin = plugin
@@ -19,6 +20,7 @@ class AzGame
     @word = word.downcase
     @rules = rules
     @range = [@rules[:first].dup, @rules[:last].dup]
+    @listener = @rules[:listener]
     @total_tries = 0
     @total_failed = 0 # not used, reported, updated
     @tries = Hash.new(0)
@@ -93,13 +95,15 @@ class AzGamePlugin < Plugin
       :first => 'abaco',
       :last => 'zuzzurellone',
       :url => "http://www.demauroparavia.it/%s",
-      :wapurl => "http://wap.demauroparavia.it/index.php?lemma=%s"
+      :wapurl => "http://wap.demauroparavia.it/index.php?lemma=%s",
+      :listener => /^[a-z]+$/
     },
     :english => {
       :good => /(?:singular )?noun|verb|adj/,
       :first => 'abacus',
       :last => 'zuni',
-      :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
+      :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st",
+      :listener => /^[a-z]+$/
     },
     }
     
@@ -112,7 +116,8 @@ class AzGamePlugin < Plugin
             :good => /^\S+$/,
             :list => words,
             :first => words[0],
-            :last => words[-1]
+            :last => words[-1],
+            :listener => /^\S+$/
         }
         debug "Japanese wordlist loaded, #{@rules[:japanese][:list].length} lines; first word: #{@rules[:japanese][:first]}, last word: #{@rules[:japanese][:last]}"
       end
@@ -131,8 +136,7 @@ class AzGamePlugin < Plugin
     return unless @games.key?(k)
     return if m.params
     word = m.plugin.downcase
-    # return unless word =~ /^[a-z]+$/
-    return unless word =~ /^\S+$/
+    return unless word =~ @games[k].listener
     word_check(m, k, word)
   end
 
