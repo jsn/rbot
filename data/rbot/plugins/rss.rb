@@ -30,6 +30,7 @@ class ::RssBlob
   attr_accessor :handle
   attr_accessor :type
   attr :watchers
+  attr_accessor :refresh_rate
   attr_accessor :xml
   attr_accessor :title
   attr_accessor :items
@@ -44,6 +45,7 @@ class ::RssBlob
     end
     @type = type
     @watchers=[]
+    @refresh_rate = nil
     @xml = xml
     @title = nil
     @items = nil
@@ -89,7 +91,7 @@ class ::RssBlob
   end
 
   def to_a
-    [@handle,@url,@type,@watchers]
+    [@handle,@url,@type,@refresh_rate,@watchers]
   end
 
   def to_s(watchers=false)
@@ -189,7 +191,7 @@ class RSSFeedsPlugin < Plugin
     when "add"
       "rss add #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : add a new rss called #{Bold}handle#{Bold} from url #{Bold}url#{Bold} (of type #{Bold}type#{Bold})"
     when "change"
-      "rss change #{Bold}what#{Bold} of #{Bold}handle#{Bold} to #{Bold}new#{Bold} : change the handle, url or type of rss called #{Bold}handle#{Bold} to value #{Bold}new#{Bold}"
+      "rss change #{Bold}what#{Bold} of #{Bold}handle#{Bold} to #{Bold}new#{Bold} : change the #{Underline}handle#{Underline}, #{Underline}url#{Underline}, #{Underline}type#{Underline} or #{Underline}refresh#{Underline} rate of rss called #{Bold}handle#{Bold} to value #{Bold}new#{Bold}"
     when /^(del(ete)?|rm)$/
       "rss del(ete)|rm #{Bold}handle#{Bold} : delete rss feed #{Bold}handle#{Bold}"
     when "replace"
@@ -283,6 +285,7 @@ class RSSFeedsPlugin < Plugin
     @feeds.each { |handle, feed|
       next if wanted and !handle.match(/#{wanted}/i)
       reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
+      (reply << " refreshing every #{Utils.secs_to_string(feed.refresh_rate)}") if feed.refresh_rate
       (reply << " (watched)") if feed.watched_by?(m.replyto)
       reply << "\n"
     }
@@ -299,7 +302,9 @@ class RSSFeedsPlugin < Plugin
     watchlist.each { |handle, feed|
       next if wanted and !handle.match(/#{wanted}/i)
       next unless feed.watched_by?(m.replyto)
-      reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})\n"
+      reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
+      (reply << " refreshing every #{Utils.secs_to_string(feed.refresh_rate)}") if feed.refresh_rate
+      reply << "\n"
     }
     if reply.empty?
       reply = "no watched feeds"
@@ -344,9 +349,11 @@ class RSSFeedsPlugin < Plugin
         m.reply "There already is a feed with handle #{new}"
         return
       else
-        @feeds[new] = feed
-        @feeds.delete(handle)
-        feed.handle = new
+        feed.mutex.synchronize do
+          @feeds[new] = feed
+          @feeds.delete(handle)
+          feed.handle = new
+        end
         handle = new
       end
     when :url
@@ -359,6 +366,12 @@ class RSSFeedsPlugin < Plugin
       new = nil if new == 'default'
       feed.mutex.synchronize do
         feed.type = new
+      end
+    when :refresh
+      new = params[:new].to_i
+      new = nil if new == 0
+      feed.mutex.synchronize do
+        feed.refresh_rate = new
       end
     else
       m.reply "Don't know how to change #{params[:what]} for feeds"
@@ -500,10 +513,12 @@ class RSSFeedsPlugin < Plugin
 
       status[:failures] = failures
 
-      seconds = @bot.config['rss.thread_sleep'] * (failures + 1)
-      seconds += seconds * (rand(100)-50)/100
-      debug "watcher for #{feed} going to sleep #{seconds} seconds.."
-      @bot.timer.reschedule(@watch[feed.handle], seconds)
+      feed.mutex.synchronize do
+        seconds = (feed.refresh_rate || @bot.config['rss.thread_sleep']) * (failures + 1)
+        seconds += seconds * (rand(100)-50)/100
+        debug "watcher for #{feed} going to sleep #{seconds} seconds.."
+        @bot.timer.reschedule(@watch[feed.handle], seconds)
+      end
     }
     debug "watcher for #{feed} added"
   end
@@ -655,10 +670,10 @@ plugin.map 'rss add :handle :url :type',
   :defaults => {:type => nil}
 plugin.map 'rss change :what of :handle to :new',
   :action => 'change_rss',
-  :requirements => { :what => /handle|url|format|type/ }
+  :requirements => { :what => /handle|url|format|type|refresh/ }
 plugin.map 'rss change :what for :handle to :new',
   :action => 'change_rss',
-  :requirements => { :what => /handle|url|format|type/ }
+  :requirements => { :what => /handle|url|format|type|refesh/ }
 plugin.map 'rss del :handle',
   :action => 'del_rss'
 plugin.map 'rss delete :handle',
