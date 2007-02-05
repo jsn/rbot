@@ -20,14 +20,6 @@ require 'rss/dublincore'
 # end
 
 class ::String
-  def shorten(limit)
-    if self.length > limit
-      self+". " =~ /^(.{#{limit}}[^.!;?]*[.!;?])/mi
-      return $1
-    end
-    self
-  end
-
   def riphtml
     self.gsub(/<[^>]+>/, '').gsub(/&amp;/,'&').gsub(/&quot;/,'"').gsub(/&lt;/,'<').gsub(/&gt;/,'>').gsub(/&ellip;/,'...').gsub(/&apos;/, "'").gsub("\n",'')
   end
@@ -467,27 +459,32 @@ class RSSFeedsPlugin < Plugin
       end
     end
     title = "#{Bold}#{item.title.chomp.riphtml}#{Bold}" if item.title
-    desc = item.description.gsub(/\s+/,' ').strip.riphtml.shorten(@bot.config['rss.text_max']) if item.description
+    desc = item.description.gsub(/\s+/,' ').strip.riphtml if item.description
     link = item.link.chomp if item.link
-    places.each { |loc|
-      case feed.type
-      when 'blog'
-        @bot.say loc, "#{handle}#{date}#{item.category.content} blogged at #{link}"
-        @bot.say loc, "#{handle}#{title} - #{desc}"
-      when 'forum'
-        @bot.say loc, "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
-      when 'wiki'
-        @bot.say loc, "#{handle}#{date}#{item.title} has been edited by #{item.dc_creator}. #{desc} #{link}"
-      when 'gmame'
-        @bot.say loc, "#{handle}#{date}Message #{title} sent by #{item.dc_creator}. #{desc}"
-      when 'trac'
-        @bot.say loc, "#{handle}#{date}#{title} @ #{link}"
-        unless item.title =~ /^Changeset \[(\d+)\]/
-          @bot.say loc, "#{handle}#{date}#{desc}"
-        end
-      else
-        @bot.say loc, "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
+    line1 = nil
+    line2 = nil
+    case feed.type
+    when 'blog'
+      line1 = "#{handle}#{date}#{item.category.content} blogged at #{link}"
+      line2 = "#{handle}#{title} - #{desc}"
+    when 'forum'
+      line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
+    when 'wiki'
+      line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link} has been edited by #{item.dc_creator}. #{desc}"
+    when 'gmame'
+      line1 = "#{handle}#{date}Message #{title} sent by #{item.dc_creator}. #{desc}"
+    when 'trac'
+      line1 = "#{handle}#{date}#{title} @ #{link}"
+      unless item.title =~ /^Changeset \[(\d+)\]/
+        line2 = "#{handle}#{date}#{desc}"
       end
+    else
+      line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
+    end
+    places.each { |loc|
+      @bot.say loc, line1, :overlong => :truncate
+      next unless line2
+      @bot.say loc, line2, :overlong => :truncate
     }
   end
 
