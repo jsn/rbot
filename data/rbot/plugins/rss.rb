@@ -30,8 +30,12 @@ class ::RssBlob
   attr :handle
   attr :type
   attr :watchers
+  attr_accessor :xml
+  attr_accessor :title
+  attr_accessor :items
+  attr_accessor :mutex
 
-  def initialize(url,handle=nil,type=nil,watchers=[])
+  def initialize(url,handle=nil,type=nil,watchers=[], xml=nil)
     @url = url
     if handle
       @handle = handle
@@ -40,7 +44,19 @@ class ::RssBlob
     end
     @type = type
     @watchers=[]
+    @xml = xml
+    @title = nil
+    @items = nil
+    @mutex = Mutex.new
     sanitize_watchers(watchers)
+  end
+
+  def dup
+    self.class.new(@url,
+                   @handle,
+                   @type ? @type.dup : nil,
+                   @watchers.dup,
+                   @xml ? @xml.dup : nil)
   end
 
   # Downcase all watchers, possibly turning them into Strings if they weren't
@@ -108,7 +124,9 @@ class RSSFeedsPlugin < Plugin
         @feeds.delete(k)
       }
       @feeds.each { |k, f|
+        f.mutex = Mutex.new unless f.mutex
         f.sanitize_watchers
+        parseRss(f) if f.xml
       }
     else
       @feeds = Hash.new
@@ -130,7 +148,16 @@ class RSSFeedsPlugin < Plugin
   end
 
   def save
-    @registry[:feeds] = @feeds
+    unparsed = Hash.new()
+    @feeds.each { |k, f|
+      f.mutex.synchronize do
+        unparsed[k] = f.dup
+      end
+    }
+    unparsed.each { |k, f|
+      debug f.inspect
+    }
+    @registry[:feeds] = unparsed
   end
 
   def stop_watch(handle)
@@ -212,8 +239,17 @@ class RSSFeedsPlugin < Plugin
 
     m.reply "lemme fetch it..."
     title = items = nil
-    title, items = fetchRss(feed, m)
-    return unless items
+    fetched = fetchRss(feed, m)
+    return unless fetched or feed.xml
+    if not fetched and feed.items
+      m.reply "using old data"
+    else
+      parsed = parseRss(feed, m)
+      m.reply "using old data" unless parsed
+    end
+    return unless feed.items
+    title = feed.title
+    items = feed.items
 
     # We sort the feeds in freshness order (newer ones first)
     items = freshness_sort(items)
@@ -377,42 +413,47 @@ class RSSFeedsPlugin < Plugin
       return
     end
     status = Hash.new
-    status[:oldItems] = []
-    status[:firstRun] = true
     status[:failures] = 0
     @watch[feed.handle] = @bot.timer.add(0, status) {
       debug "watcher for #{feed} started"
-      oldItems = status[:oldItems]
-      firstRun = status[:firstRun]
       failures = status[:failures]
       begin
         debug "fetching #{feed}"
-        title = newItems = nil
-        title, newItems = fetchRss(feed)
-        unless newItems
-          debug "no items in feed #{feed}"
-          failures +=1
+        oldxml = feed.xml ? feed.xml.dup : nil
+        unless fetchRss(feed)
+          failures += 1
         else
-          debug "Checking if new items are available for #{feed}"
-          if firstRun
-            debug "First run, we'll see next time"
-            firstRun = false
+          if oldxml and oldxml == feed.xml
+            debug "xml for #{feed} didn't change"
+            failures -= 1 if failures > 0
           else
-            otxt = oldItems.map { |item| item.to_s }
-            dispItems = newItems.reject { |item|
-              otxt.include?(item.to_s)
-            }
-            if dispItems.length > 0
-              debug "Found #{dispItems.length} new items in #{feed}"
-              # When displaying watched feeds, publish them from older to newer
-              dispItems.reverse.each { |item|
-                printFormattedRss(feed, item)
-              }
+            if not feed.items
+              debug "no previous items in feed #{feed}"
+              parseRss(feed)
+              failures -= 1 if failures > 0
             else
-              debug "No new items found in #{feed}"
+              otxt = feed.items.map { |item| item.to_s }
+              unless parseRss(feed)
+                debug "no items in feed #{feed}"
+                failures += 1
+              else
+                debug "Checking if new items are available for #{feed}"
+                failures -= 1 if failures > 0
+                dispItems = feed.items.reject { |item|
+                  otxt.include?(item.to_s)
+                }
+                if dispItems.length > 0
+                  debug "Found #{dispItems.length} new items in #{feed}"
+                  # When displaying watched feeds, publish them from older to newer
+                  dispItems.reverse.each { |item|
+                    printFormattedRss(feed, item)
+                  }
+                else
+                  debug "No new items found in #{feed}"
+                end
+              end
             end
           end
-          oldItems = newItems.dup
         end
       rescue Exception => e
         error "Error watching #{feed}: #{e.inspect}"
@@ -420,8 +461,6 @@ class RSSFeedsPlugin < Plugin
         failures += 1
       end
 
-      status[:oldItems] = oldItems
-      status[:firstRun] = firstRun
       status[:failures] = failures
 
       seconds = @bot.config['rss.thread_sleep'] * (failures + 1)
@@ -494,59 +533,71 @@ class RSSFeedsPlugin < Plugin
       xml = @bot.httputil.get_cached(feed.url, 60, 60)
     rescue URI::InvalidURIError, URI::BadURIError => e
       report_problem("invalid rss feed #{feed.url}", e, m)
-      return
+      return nil
     rescue => e
       report_problem("error getting #{feed.url}", e, m)
-      return
+      return nil
     end
     debug "fetched #{feed}"
     unless xml
       report_problem("reading feed #{feed} failed", nil, m)
-      return
+      return nil
     end
+    feed.mutex.synchronize do
+      feed.xml = xml
+    end
+    return true
+  end
 
-    begin
-      ## do validate parse
-      rss = RSS::Parser.parse(xml)
-      debug "parsed #{feed}"
-    rescue RSS::InvalidRSSError
-      ## do non validate parse for invalid RSS 1.0
+  def parseRss(feed, m=nil)
+    return nil unless feed.xml
+    feed.mutex.synchronize do
+      xml = feed.xml
       begin
-        rss = RSS::Parser.parse(xml, false)
+        ## do validate parse
+        rss = RSS::Parser.parse(xml)
+        debug "parsed #{feed}"
+      rescue RSS::InvalidRSSError
+        ## do non validate parse for invalid RSS 1.0
+        begin
+          rss = RSS::Parser.parse(xml, false)
+        rescue RSS::Error => e
+          report_problem("parsing rss stream failed, whoops =(", e, m)
+          return nil
+        end
       rescue RSS::Error => e
-        report_problem("parsing rss stream failed, whoops =(", e, m)
-        return
+        report_problem("parsing rss stream failed, oioi", e, m)
+        return nil
+      rescue => e
+        report_problem("processing error occured, sorry =(", e, m)
+        return nil
       end
-    rescue RSS::Error => e
-      report_problem("parsing rss stream failed, oioi", e, m)
-      return
-    rescue => e
-      report_problem("processing error occured, sorry =(", e, m)
-      return
-    end
-    items = []
-    if rss.nil?
-      report_problem("#{feed} does not include RSS 1.0 or 0.9x/2.0", nil, m)
-    else
-      begin
-        rss.output_encoding = 'UTF-8'
-      rescue RSS::UnknownConvertMethod => e
-        report_problem("bah! something went wrong =(", e, m)
-        return
+      items = []
+      if rss.nil?
+        report_problem("#{feed} does not include RSS 1.0 or 0.9x/2.0", nil, m)
+      else
+        begin
+          rss.output_encoding = 'UTF-8'
+        rescue RSS::UnknownConvertMethod => e
+          report_problem("bah! something went wrong =(", e, m)
+          return nil
+        end
+        rss.channel.title ||= "Unknown"
+        title = rss.channel.title
+        rss.items.each do |item|
+          item.title ||= "Unknown"
+          items << item
+        end
       end
-      rss.channel.title ||= "Unknown"
-      title = rss.channel.title
-      rss.items.each do |item|
-        item.title ||= "Unknown"
-        items << item
-      end
-    end
 
-    if items.empty?
-      report_problem("no items found in the feed, maybe try weed?", e, m)
-      return
+      if items.empty?
+        report_problem("no items found in the feed, maybe try weed?", e, m)
+        return nil
+      end
+      feed.title = title
+      feed.items = items
+      return true
     end
-    return [title, items]
   end
 end
 
