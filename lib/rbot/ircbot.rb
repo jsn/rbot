@@ -792,7 +792,7 @@ class IrcBot
         if(left >= msg.length)
           sendq "#{fixed}#{msg}", chan, ring
           log_sent(type, where, msg)
-          return
+          break
         end
         if opts[:max_lines] and cmd_lines == max_lines - 1
           debug "Max lines count reached for message #{original_message.inspect} while sending #{msg.inspect}, truncating"
@@ -816,8 +816,8 @@ class IrcBot
         end
         sendq "#{fixed}#{line}", chan, ring
         log_sent(type, where, line)
-	cmd_lines += 1
       end while(msg.length > 0)
+      cmd_lines += 1
     }
   end
 
