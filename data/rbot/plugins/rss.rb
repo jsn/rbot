@@ -471,7 +471,7 @@ class RSSFeedsPlugin < Plugin
       line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
     when 'wiki'
       line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link} has been edited by #{item.dc_creator}. #{desc}"
-    when 'gmame'
+    when 'gmane'
       line1 = "#{handle}#{date}Message #{title} sent by #{item.dc_creator}. #{desc}"
     when 'trac'
       line1 = "#{handle}#{date}#{title} @ #{link}"
