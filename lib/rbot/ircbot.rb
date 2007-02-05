@@ -555,6 +555,27 @@ class IrcBot
       #debug "UNKNOWN: #{data[:serverstring]}"
       irclog data[:serverstring], ".unknown"
     }
+
+    set_default_send_options
+  end
+
+  def set_default_send_options
+    # Default send options for NOTICE and PRIVMSG
+    # TODO document, for plugin writers
+    # TODO some of these options, like :truncate_text and :max_lines,
+    # should be made into config variables that trigger this routine on change
+    @default_send_options = {
+      :queue_channel => nil,      # use default queue channel
+      :queue_ring => nil,         # use default queue ring
+      :newlines => :split,        # or :join
+      :join_with => ' ',          # by default, use a single space
+      :max_lines => nil,          # maximum number of lines to send with a single command
+      :overlong => :split,        # or :truncate
+      # TODO an array of splitpoints would be preferrable for this option:
+      :split_at => /\s+/,         # by default, split overlong lines at whitespace
+      :purge_split => true,       # should the split string be removed?
+      :truncate_text => "#{Reverse}...#{Reverse}"  # text to be appened when truncating
+    }
   end
 
   # checks if we should be quiet on a channel
@@ -690,7 +711,43 @@ class IrcBot
   # Type can be PRIVMSG, NOTICE, etc, but those you should really use the
   # relevant say() or notice() methods. This one should be used for IRCd
   # extensions you want to use in modules.
-  def sendmsg(type, where, message, chan=nil, ring=0)
+  def sendmsg(type, where, original_message, options={})
+    opts = @default_send_options.merge(options)
+
+    # For starters, set up appropriate queue channels and rings
+    mchan = opts[:queue_channel]
+    mring = opts[:queue_ring]
+    if mchan
+      chan = mchan
+    else
+      chan = where
+    end
+    if mring
+      ring = mring
+    else
+      case where
+      when User
+        ring = 1
+      else
+        ring = 2
+      end
+    end
+
+    message = original_message.to_s.gsub(/[\r\n]+/, "\n")
+    case opts[:newlines]
+    when :join
+      lines = [message.gsub("\n", opts[:join_with])]
+    when :split
+      lines = Array.new
+      message.each_line { |line|
+        line.chomp!
+        next unless(line.length > 0)
+        lines << line
+      }
+    else
+      raise "Unknown :newlines option #{opts[:newlines]} while sending #{original_message.inspect}"
+    end
+
     # The IRC protocol requires that each raw message must be not longer
     # than 512 characters. From this length with have to subtract the EOL
     # terminators (CR+LF) and the length of ":botnick!botuser@bothost "
@@ -713,21 +770,55 @@ class IrcBot
 
     # And this is what's left
     left = max_len - fixed.length
-    begin
-      if(left >= message.length)
-        sendq "#{fixed}#{message}", chan, ring
-        log_sent(type, where, message)
-        return
-      end
-      line = message.slice!(0, left)
-      lastspace = line.rindex(/\s+/)
-      if(lastspace)
-        message = line.slice!(lastspace, line.length) + message
-        message.gsub!(/^\s+/, "")
-      end
-      sendq "#{fixed}#{line}", chan, ring
-      log_sent(type, where, line)
-    end while(message.length > 0)
+
+    case opts[:overlong]
+    when :split
+      truncate = false
+      split_at = opts[:split_at]
+    when :truncate
+      truncate = opts[:truncate_text]
+      truncate = @default_send_options[:truncate_text] if truncate.length > left
+      truncate = "" if truncate.length > left
+    else
+      raise "Unknown :overlong option #{opts[:overlong]} while sending #{original_message.inspect}"
+    end
+
+    # Counter to check the number of lines sent by this command
+    cmd_lines = 0
+    max_lines = opts[:max_lines]
+    line = String.new
+    lines.each { |msg|
+      begin
+        if(left >= msg.length)
+          sendq "#{fixed}#{msg}", chan, ring
+          log_sent(type, where, msg)
+          return
+        end
+        if opts[:max_lines] and cmd_lines == max_lines - 1
+          debug "Max lines count reached for message #{original_message.inspect} while sending #{msg.inspect}, truncating"
+          truncate = opts[:truncate_text]
+          truncate = @default_send_options[:truncate_text] if truncate.length > left
+          truncate = "" if truncate.length > left
+        end
+        if truncate
+          line.replace msg.slice(0, left-truncate.length)
+          line.sub!(/\s+\S*$/, truncate)
+          raise "PROGRAMMER ERROR! #{line.inspect} of length #{line.length} > #{left}" if line.length > left
+          sendq "#{fixed}#{line}", chan, ring
+          log_sent(type, where, line)
+          return
+        end
+        line.replace msg.slice!(0, left)
+        lastspace = line.rindex(opts[:split_at])
+        if(lastspace)
+          msg.replace line.slice!(lastspace, line.length) + msg
+          msg.gsub!(/^#{opts[:split_at]}/, "") if opts[:purge_split]
+        end
+        sendq "#{fixed}#{line}", chan, ring
+        log_sent(type, where, line)
+	cmd_lines += 1
+      end while(msg.length > 0)
+    }
   end
 
   # queue an arbitraty message for the server
@@ -737,72 +828,39 @@ class IrcBot
   end
 
   # send a notice message to channel/nick +where+
-  def notice(where, message, mchan="", mring=-1)
-    if mchan == ""
-      chan = where
-    else
-      chan = mchan
+  def notice(where, message, options={})
+    unless quiet_on?(where)
+      sendmsg "NOTICE", where, message, options
     end
-    if mring < 0
-      case where
-      when User
-        ring = 1
-      else
-        ring = 2
-      end
-    else
-      ring = mring
-    end
-    message.each_line { |line|
-      line.chomp!
-      next unless(line.length > 0)
-      sendmsg "NOTICE", where, line, chan, ring
-    }
   end
 
   # say something (PRIVMSG) to channel/nick +where+
-  def say(where, message, mchan="", mring=-1)
-    if mchan == ""
-      chan = where
-    else
-      chan = mchan
+  def say(where, message, options={})
+    unless quiet_on?(where)
+      sendmsg "PRIVMSG", where, message, options
     end
-    if mring < 0
+  end
+
+  # perform a CTCP action with message +message+ to channel/nick +where+
+  def action(where, message, options={})
+    mchan = options.fetch(:queue_channel, nil)
+    mring = options.fetch(:queue_ring, nil)
+    if mchan
+      chan = mchan
+    else
+      chan = where
+    end
+    if mring
+      ring = mring
+    else
       case where
       when User
         ring = 1
       else
         ring = 2
       end
-    else
-      ring = mring
     end
-    message.to_s.gsub(/[\r\n]+/, "\n").each_line { |line|
-      line.chomp!
-      next unless(line.length > 0)
-      unless quiet_on?(where)
-        sendmsg "PRIVMSG", where, line, chan, ring 
-      end
-    }
-  end
-
-  # perform a CTCP action with message +message+ to channel/nick +where+
-  def action(where, message, mchan="", mring=-1)
-    if mchan == ""
-      chan = where
-    else
-      chan = mchan
-    end
-    if mring < 0
-      case where
-      when Channel
-        ring = 2
-      else
-        ring = 1
-      end
-    else
-      ring = mring
-    end
+    # FIXME doesn't check message length. Can we make this exploit sendmsg?
     sendq "PRIVMSG #{where} :\001ACTION #{message}\001", chan, ring
     case where
     when Channel

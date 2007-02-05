@@ -1,3 +1,26 @@
+2007-02-05  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* sendmsg improvements: the bot sendmsg() method and all the methods
+	that rely on it (say(), notice(), and message methods such as reply())
+	now accept an option hash to customize its behaviour.
+		* :newlines, which can be set to either :split or :join,
+		depending on whether newlines in messages should be used as
+		split-points, or should be be replaced by some string (defined
+		in the :join_with option)
+		* :max_lines, which determines the maximum number of lines to be
+		sent by each messages. Last line is truncated (see next
+		options). Set to nil to have no limits.
+		* :overlong, which determines the behaviour when overlong lines
+		are to be sent; possible values are :split or :truncate.
+		* If :overlong is set to :split, :split_at determines the
+		string/regexp to split at; default is /\s+/, other usual
+		choice could be /\s+\|\s+/.
+		* If :overlong is set to :split, the :purge_split option
+		determines whether the :split_at expression should be removed
+		from the next lines (defaults to true).
+		* If :overlong is set to :truncate, the value of the option
+		:truncate_text is replaced at the end of the truncated line
+
 2007-02-03  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Plugin message mapper: Enhancements to the :requirements option.

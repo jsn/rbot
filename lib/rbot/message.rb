@@ -214,27 +214,27 @@ module Irc
     # <tt>@bot.say m.replyto, string</tt>
     # So if the message is private, it will reply to the user. If it was
     # in a channel, it will reply in the channel.
-    def plainreply(string)
-      @bot.say @replyto, string
+    def plainreply(string, options={})
+      @bot.say @replyto, string, options
       @replied = true
     end
 
     # Same as reply, but when replying in public it adds the nick of the user
     # the bot is replying to
-    def nickreply(string)
+    def nickreply(string, options={})
       extra = self.public? ? "#{@source}#{@bot.config['core.nick_postfix']} " : ""
-      @bot.say @replyto, extra + string
+      @bot.say @replyto, extra + string, options
       @replied = true
     end
 
     # the default reply style is to nickreply unless the reply already contains
     # the nick or core.reply_with_nick is set to false
     #
-    def reply(string)
+    def reply(string, options={})
       if @bot.config['core.reply_with_nick'] and not string =~ /\b#{@source}\b/
-        return nickreply(string)
+        return nickreply(string, options)
       end
-      plainreply(string)
+      plainreply(string, options)
     end
 
     # convenience method to reply to a message with an action. It's the
@@ -242,8 +242,8 @@ module Irc
     # <tt>@bot.action m.replyto, string</tt>
     # So if the message is private, it will reply to the user. If it was
     # in a channel, it will reply in the channel.
-    def act(string)
-      @bot.action @replyto, string
+    def act(string, options={})
+      @bot.action @replyto, string, options
       @replied = true
     end
 
