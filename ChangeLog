@@ -20,6 +20,10 @@
 		from the next lines (defaults to true).
 		* If :overlong is set to :truncate, the value of the option
 		:truncate_text is replaced at the end of the truncated line
+	* LinkBot plugin: initial commit of a plugin to handle messages from
+	eggdrops and other bots that act as cross-network channel links.
+	Suggested by hagabaka (Yaohan Chen <yaohan.chen@gmail.com>)
+
 
 2007-02-03  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
