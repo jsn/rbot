@@ -34,7 +34,7 @@ class LinkBot < Plugin
     return unless m.kind_of?(PrivMessage)
     # Now we know that _m_ is a PRIVMSG from a linkbot. Let's split it
     # in nick, network, message
-    if m.message.match(/^\((\w+?)@(\w+?)\)\s+(.*)$/)
+    if m.message.match(/^\((\S+?)@(\S+?)\)\s+(.*)$/)
       new_nick = $1
       network = $2
       message = $3
