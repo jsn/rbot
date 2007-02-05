@@ -26,9 +26,9 @@ class ::String
 end
 
 class ::RssBlob
-  attr :url
-  attr :handle
-  attr :type
+  attr_accessor :url
+  attr_accessor :handle
+  attr_accessor :type
   attr :watchers
   attr_accessor :xml
   attr_accessor :title
@@ -188,6 +188,8 @@ class RSSFeedsPlugin < Plugin
       "rss watched [#{Bold}handle#{Bold}] : list all watched rss feeds (matching #{Bold}handle#{Bold})"
     when "add"
       "rss add #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : add a new rss called #{Bold}handle#{Bold} from url #{Bold}url#{Bold} (of type #{Bold}type#{Bold})"
+    when "change"
+      "rss change #{Bold}what#{Bold} of #{Bold}handle#{Bold} to #{Bold}new#{Bold} : change the handle, url or type of rss called #{Bold}handle#{Bold} to value #{Bold}new#{Bold}"
     when /^(del(ete)?|rm)$/
       "rss del(ete)|rm #{Bold}handle#{Bold} : delete rss feed #{Bold}handle#{Bold}"
     when "replace"
@@ -201,7 +203,7 @@ class RSSFeedsPlugin < Plugin
     when "rewatch"
       "rss rewatch : restart threads that watch for changes in watched rss"
     else
-      "manage RSS feeds: rss show|list|watched|add|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch"
+      "manage RSS feeds: rss show|list|watched|add|change|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch"
     end
   end
 
@@ -329,6 +331,41 @@ class RSSFeedsPlugin < Plugin
     end
     m.reply reply
     return handle
+  end
+
+  def change_rss(m, params)
+    handle = params[:handle].downcase
+    feed = @feeds.fetch(handle, nil)
+    return m.reply "No such feed with handle #{handle}" unless feed
+    case params[:what].intern
+    when :handle
+      new = params[:new].downcase
+      if @feeds.key?(new) and @feeds[new]
+        m.reply "There already is a feed with handle #{new}"
+        return
+      else
+        @feeds[new] = feed
+        @feeds.delete(handle)
+        feed.handle = new
+        handle = new
+      end
+    when :url
+      new = params[:new]
+      feed.mutex.synchronize do
+        feed.url = new
+      end
+    when :format, :type
+      new = params[:new]
+      new = nil if new == 'default'
+      feed.mutex.synchronize do
+        feed.type = new
+      end
+    else
+      m.reply "Don't know how to change #{params[:what]} for feeds"
+      return
+    end
+    m.reply "Feed changed:"
+    list_rss(m, {:handle => handle})
   end
 
   def del_rss(m, params, pass=false)
@@ -616,6 +653,12 @@ plugin.map 'rss watched :handle',
 plugin.map 'rss add :handle :url :type',
   :action => 'add_rss',
   :defaults => {:type => nil}
+plugin.map 'rss change :what of :handle to :new',
+  :action => 'change_rss',
+  :requirements => { :what => /handle|url|format|type/ }
+plugin.map 'rss change :what for :handle to :new',
+  :action => 'change_rss',
+  :requirements => { :what => /handle|url|format|type/ }
 plugin.map 'rss del :handle',
   :action => 'del_rss'
 plugin.map 'rss delete :handle',
