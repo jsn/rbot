@@ -7,32 +7,16 @@
 #
 # TODO allow manual addition of words
 
-AZ_RULES = {
-  :italian => {
-    :good => /s\.f\.|s\.m\.|agg\.|v\.tr\.|v\.(pronom\.)?intr\./, # avv\.|pron\.|cong\.
-    :bad => /var\./,
-    :first => 'abaco',
-    :last => 'zuzzurellone',
-    :url => "http://www.demauroparavia.it/%s",
-    :wapurl => "http://wap.demauroparavia.it/index.php?lemma=%s"
-  },
-  :english => {
-    :good => /(?:singular )?noun|verb|adj/,
-    :first => 'abacus',
-    :last => 'zuni',
-    :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
-  }
-}
-
 class AzGame
 
   attr_reader :range, :word
   attr_accessor :tries, :total_tries, :total_failed, :failed, :winner
-  def initialize(plugin, lang, word)
+  def initialize(plugin, lang, rules, word)
     @plugin = plugin
     @lang = lang.to_sym
     @word = word.downcase
-    @range = [AZ_RULES[lang][:first].dup, AZ_RULES[lang][:last].dup]
+    @rules = rules
+    @range = [@rules[:first].dup, @rules[:last].dup]
     @total_tries = 0
     @total_failed = 0 # not used, reported, updated
     @tries = Hash.new(0)
@@ -99,6 +83,23 @@ class AzGamePlugin < Plugin
       @wordcache = Hash.new
     end
     debug "\n\n\nA-Z wordcache: #{@wordcache.inspect}\n\n\n"
+    @rules = {
+      :italian => {
+      :good => /s\.f\.|s\.m\.|agg\.|v\.tr\.|v\.(pronom\.)?intr\./, # avv\.|pron\.|cong\.
+      :bad => /var\./,
+      :first => 'abaco',
+      :last => 'zuzzurellone',
+      :url => "http://www.demauroparavia.it/%s",
+      :wapurl => "http://wap.demauroparavia.it/index.php?lemma=%s"
+    },
+    :english => {
+      :good => /(?:singular )?noun|verb|adj/,
+      :first => 'abacus',
+      :last => 'zuni',
+      :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
+    }
+    }
+
   end
 
   def save
@@ -183,7 +184,7 @@ class AzGamePlugin < Plugin
       lang = (params[:lang] || @bot.config['core.language']).to_sym
       method = 'random_pick_'+lang.to_s
       m.reply "let me think ..."
-      if AZ_RULES.has_key?(lang) and self.respond_to?(method)
+      if @rules.has_key?(lang) and self.respond_to?(method)
         word = self.send(method)
         if word.empty?
           m.reply "couldn't think of anything ..."
@@ -194,7 +195,7 @@ class AzGamePlugin < Plugin
         return
       end
       m.reply "got it!"
-      @games[k] = AzGame.new(self, lang, word)
+      @games[k] = AzGame.new(self, lang, @rules[lang], word)
     end
     tr = @games[k].total_tries
     case tr
@@ -297,7 +298,7 @@ class AzGamePlugin < Plugin
     end
     wc = @wordcache[:italian]
     return true if wc.key?(word.to_sym)
-    rules = AZ_RULES[:italian]
+    rules = @rules[:italian]
     p = @bot.httputil.get_cached(rules[:wapurl] % word)
     if not p
       error "could not connect!"
@@ -324,7 +325,7 @@ class AzGamePlugin < Plugin
       m.reply "#{min} > #{max}"
       return word
     end
-    rules = AZ_RULES[:italian]
+    rules = @rules[:italian]
     min = rules[:first] if min.empty?
     max = rules[:last]  if max.empty?
     debug "looking for word between #{min.inspect} and #{max.inspect}"
@@ -392,7 +393,7 @@ class AzGamePlugin < Plugin
     end
     wc = @wordcache[:english]
     return true if wc.key?(word.to_sym)
-    rules = AZ_RULES[:english]
+    rules = @rules[:english]
     p = @bot.httputil.get_cached(rules[:url] % URI.escape(word))
     if not p
       error "could not connect!"
@@ -416,7 +417,7 @@ class AzGamePlugin < Plugin
       m.reply "#{min} > #{max}"
       return word
     end
-    rules = AZ_RULES[:english]
+    rules = @rules[:english]
     min = rules[:first] if min.empty?
     max = rules[:last]  if max.empty?
     debug "looking for word between #{min.inspect} and #{max.inspect}"
