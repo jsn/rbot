@@ -786,19 +786,21 @@ class IrcBot
     # Counter to check the number of lines sent by this command
     cmd_lines = 0
     max_lines = opts[:max_lines]
+    maxed = false
     line = String.new
     lines.each { |msg|
       begin
-        if(left >= msg.length)
-          sendq "#{fixed}#{msg}", chan, ring
-          log_sent(type, where, msg)
-          break
-        end
-        if opts[:max_lines] and cmd_lines == max_lines - 1
+        if max_lines and cmd_lines == max_lines - 1
           debug "Max lines count reached for message #{original_message.inspect} while sending #{msg.inspect}, truncating"
           truncate = opts[:truncate_text]
           truncate = @default_send_options[:truncate_text] if truncate.length > left
           truncate = "" if truncate.length > left
+          maxed = true
+        end
+        if(left >= msg.length) and not maxed
+          sendq "#{fixed}#{msg}", chan, ring
+          log_sent(type, where, msg)
+          break
         end
         if truncate
           line.replace msg.slice(0, left-truncate.length)
