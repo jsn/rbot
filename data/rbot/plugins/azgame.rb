@@ -2,8 +2,10 @@
 # A-Z Game: guess the word by reducing the interval of allowed ones
 #
 # Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Author: Yaohan Chen <yaohan.chen@gmail.com>: Japanese support
 #
 # (C) 2006 Giuseppe Bilotta
+# (C) 2007 Yaohan Chen
 #
 # TODO allow manual addition of words
 
@@ -83,6 +85,7 @@ class AzGamePlugin < Plugin
       @wordcache = Hash.new
     end
     debug "\n\n\nA-Z wordcache: #{@wordcache.inspect}\n\n\n"
+
     @rules = {
       :italian => {
       :good => /s\.f\.|s\.m\.|agg\.|v\.tr\.|v\.(pronom\.)?intr\./, # avv\.|pron\.|cong\.
@@ -97,9 +100,23 @@ class AzGamePlugin < Plugin
       :first => 'abacus',
       :last => 'zuni',
       :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
+    },
     }
-    }
-
+    
+    japanese_wordlist = "#{@bot.botclass}/azgame/wordlist-japanese"
+    if File.exist?(japanese_wordlist)
+      words = File.readlines(japanese_wordlist) \
+                             .map {|line| line.strip} .uniq
+      if(words.length >= 4) # something to guess
+        @rules[:japanese] = {
+            :good => /^\S+$/,
+            :list => words,
+            :first => words[0],
+            :last => words[-1]
+        }
+        debug "Japanese wordlist loaded, #{@rules[:japanese][:list].length} lines; first word: #{@rules[:japanese][:first]}, last word: #{@rules[:japanese][:last]}"
+      end
+    end
   end
 
   def save
@@ -114,7 +131,8 @@ class AzGamePlugin < Plugin
     return unless @games.key?(k)
     return if m.params
     word = m.plugin.downcase
-    return unless word =~ /^[a-z]+$/
+    # return unless word =~ /^[a-z]+$/
+    return unless word =~ /^\S+$/
     word_check(m, k, word)
   end
 
@@ -155,7 +173,7 @@ class AzGamePlugin < Plugin
       m.reply "no A-Z game running here, can't check if #{word} is valid, can I?"
       return
     end
-    if word !~ /^[a-z]+$/
+    if word !~ /^\S+$/
       m.reply "I only accept single words composed by letters only, sorry"
       return
     end
@@ -290,6 +308,30 @@ class AzGamePlugin < Plugin
       @bot.okay m.replyto
     else
     end
+  end
+
+  def is_japanese?(word)
+    @rules[:japanese][:list].include?(word)
+  end
+  
+  # return integer between min and max, inclusive
+  def rand_between(min, max)
+    rand(max - min + 1) + min
+  end
+  
+  def random_pick_japanese(min=nil, max=nil)
+    rules = @rules[:japanese]
+    min = rules[:first] if min.nil_or_empty?
+    max = rules[:last]  if max.nil_or_empty?
+    debug "Randomly picking word between #{min} and #{max}"
+    min_index = rules[:list].index(min)
+    max_index = rules[:list].index(max)
+    debug "Index between #{min_index} and #{max_index}"
+    index = rand_between(min_index + 1, max_index - 1)
+    debug "Index generated: #{index}"
+    word = rules[:list][index]
+    debug "Randomly picked #{word}"
+    word
   end
 
   def is_italian?(word)
