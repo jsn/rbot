@@ -854,6 +854,7 @@ module Irc
     # Mode on a Channel
     #
     class Mode
+      attr_reader :channel
       def initialize(ch)
         @channel = ch
       end
@@ -866,6 +867,7 @@ module Irc
     # Example: b (banlist)
     #
     class ModeTypeA < Mode
+      attr_reader :list
       def initialize(ch)
         super
         @list = NetmaskList.new
@@ -894,6 +896,11 @@ module Irc
         @arg = nil
       end
 
+      def status
+        @arg
+      end
+      alias :value :status
+
       def set(val)
         @arg = val
       end
@@ -911,6 +918,8 @@ module Irc
     # modes of type A
     #
     class UserMode < ModeTypeB
+      attr_reader :list
+      alias :users :list
       def initialize(ch)
         super
         @list = UserList.new
@@ -937,19 +946,20 @@ module Irc
     class ModeTypeC < Mode
       def initialize(ch)
         super
-        @arg = false
+        @arg = nil
       end
 
       def status
         @arg
       end
+      alias :value :status
 
       def set(val)
         @arg = val
       end
 
       def reset
-        @arg = false
+        @arg = nil
       end
 
     end
