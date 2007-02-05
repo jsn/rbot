@@ -285,22 +285,44 @@ module Irc
 
   # miscellaneous useful functions
   module Utils
+    SEC_PER_MIN = 60
+    SEC_PER_HR = SEC_PER_MIN * 60
+    SEC_PER_DAY = SEC_PER_HR * 24
+    SEC_PER_MNTH = SEC_PER_DAY * 30
+    SEC_PER_YR = SEC_PER_MNTH * 12
+
+    def Utils.secs_to_string_case(array, var, string, plural)
+      case var
+      when 1
+        array << "1 #{string}"
+      else
+        array << "#{var} #{plural}"
+      end
+    end
 
     # turn a number of seconds into a human readable string, e.g
     # 2 days, 3 hours, 18 minutes, 10 seconds
     def Utils.secs_to_string(secs)
-      ret = ""
-      days = (secs / (60 * 60 * 24)).to_i
-      secs = secs % (60 * 60 * 24)
-      hours = (secs / (60 * 60)).to_i
-      secs = (secs % (60 * 60))
-      mins = (secs / 60).to_i
-      secs = (secs % 60).to_i
-      ret += "#{days} days, " if days > 0
-      ret += "#{hours} hours, " if hours > 0 || days > 0
-      ret += "#{mins} minutes and " if mins > 0 || hours > 0 || days > 0
-      ret += "#{secs} seconds"
-      return ret
+      ret = []
+      years, secs = secs.divmod SEC_PER_YR
+      secs_to_string_case(ret, years, "year", "years") if years > 0
+      months, secs = secs.divmod SEC_PER_MNTH
+      secs_to_string_case(ret, months, "month", "months") if months > 0
+      days, secs = secs.divmod SEC_PER_DAY
+      secs_to_string_case(ret, days, "day", "days") if days > 0
+      hours, secs = secs.divmod SEC_PER_HR
+      secs_to_string_case(ret, hours, "hour", "hours") if hours > 0
+      mins, secs = secs.divmod SEC_PER_MIN
+      secs_to_string_case(ret, mins, "minute", "minutes") if mins > 0
+      secs_to_string_case(ret, secs, "second", "seconds") if secs > 0 or ret.empty?
+      case ret.length
+      when 0
+        raise "Empty ret array!"
+      when 1
+        return ret.to_s
+      else
+        return [ret[0, ret.length-1].join(", ") , ret[-1]].join(" and ")
+      end
     end
 
 
