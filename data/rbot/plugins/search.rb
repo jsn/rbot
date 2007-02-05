@@ -5,14 +5,6 @@ Net::HTTP.version_1_2
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 
 class ::String
-  def omissis_after(len)
-    if self.length > len
-      return self[0...len].sub(/\s+\S*$/,"...")
-    else
-      return self
-    end
-  end
-
   def ircify_html
     txt = self
 
@@ -107,7 +99,7 @@ class SearchPlugin < Plugin
       "#{n}. #{Bold}#{t}#{Bold}: #{u}"
     }.join(" | ")
 
-    m.reply "Results for #{what}: #{results}"
+    m.reply "Results for #{what}: #{results}", :split_at => /\s+\|\s+/
 
     first_pars = params[:firstpar] || @bot.config['google.first_par']
 
@@ -153,7 +145,7 @@ class SearchPlugin < Plugin
 	txt.replace @bot.plugins['url'].get_title_from_html(xml)
         next if txt.empty?
       end
-      m.reply "[#{idx}] #{txt}".omissis_after(400)
+      m.reply "[#{idx}] #{txt}", :overlong => :truncate
       first_pars -=1
     end
   end
