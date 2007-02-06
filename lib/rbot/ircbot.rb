@@ -235,6 +235,50 @@ class IrcBot
       :validate => Proc.new { |v| v > 0 },
       :desc => "Maximum console messages logfile size (in megabytes)")
 
+    BotConfig.register BotConfigEnumValue.new('send.newlines',
+      :values => ['split', 'join'], :default => 'split',
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :newlines => v.to_sym
+      },
+      :desc => "When set to split, messages with embedded newlines will be sent as separate lines. When set to join, newlines will be replaced by the value of join_with")
+    BotConfig.register BotConfigStringValue.new('send.join_with',
+      :default => ' ',
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :join_with => v.dup
+      },
+      :desc => "String used to replace newlines when send.newlines is set to join")
+    BotConfig.register BotConfigIntegerValue.new('send.max_lines',
+      :default => 0,
+      :validate => Proc.new { |v| v >= 0 },
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :max_lines => v
+      },
+      :desc => "Maximum number of IRC lines to send for each message (set to 0 for no limit)")
+    BotConfig.register BotConfigEnumValue.new('send.overlong',
+      :values => ['split', 'truncate'], :default => 'split',
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :overlong => v.to_sym
+      },
+      :desc => "When set to split, messages which are too long to fit in a single IRC line are split into multiple lines. When set to truncate, long messages are truncated to fit the IRC line length")
+    BotConfig.register BotConfigStringValue.new('send.split_at',
+      :default => '\s+',
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :split_at => Regexp.new(v)
+      },
+      :desc => "A regular expression that should match the split points for overlong messages (see send.overlong)")
+    BotConfig.register BotConfigBooleanValue.new('send.purge_split',
+      :default => true,
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :purge_split => v
+      },
+      :desc => "Set to true if the splitting boundary (set in send.split_at) should be removed when splitting overlong messages (see send.overlong)")
+    BotConfig.register BotConfigStringValue.new('send.truncate_text',
+      :default => "#{Reverse}...#{Reverse}",
+      :on_change => Proc.new { |bot, v|
+        bot.set_default_send_options :truncate_text => v.dup
+      },
+      :desc => "When truncating overlong messages (see send.overlong) or when sending too many lines per message (see send.max_lines) replace the end of the last line with this text")
+
     @argv = params[:argv]
 
     unless FileTest.directory? Config::coredir
@@ -558,27 +602,33 @@ class IrcBot
       irclog data[:serverstring], ".unknown"
     }
 
-    set_default_send_options
+    set_default_send_options :newlines => @config['send.newlines'].to_sym,
+      :join_with => @config['send.join_with'].dup,
+      :max_lines => @config['send.max_lines'],
+      :overlong => @config['send.overlong'].to_sym,
+      :split_at => Regexp.new(@config['send.split_at']),
+      :purge_split => @config['send.purge_split'],
+      :truncate_text => @config['send.truncate_text'].dup
   end
 
-  def set_default_send_options
+  def set_default_send_options(opts={})
     # Default send options for NOTICE and PRIVMSG
-    # TODO document, for plugin writers
-    # TODO some of these options, like :truncate_text and :max_lines,
-    # should be made into config variables that trigger this routine on change
-    @default_send_options = {
-      :queue_channel => nil,      # use default queue channel
-      :queue_ring => nil,         # use default queue ring
-      :newlines => :split,        # or :join
-      :join_with => ' ',          # by default, use a single space
-      :max_lines => nil,          # maximum number of lines to send with a single command
-      :overlong => :split,        # or :truncate
-      # TODO an array of splitpoints would be preferrable for this option:
-      :split_at => /\s+/,         # by default, split overlong lines at whitespace
-      :purge_split => true,       # should the split string be removed?
-      :truncate_text => "#{Reverse}...#{Reverse}"  # text to be appened when truncating
-    }
-  end
+    unless defined? @default_send_options
+      @default_send_options = {
+        :queue_channel => nil,      # use default queue channel
+        :queue_ring => nil,         # use default queue ring
+        :newlines => :split,        # or :join
+        :join_with => ' ',          # by default, use a single space
+        :max_lines => 0,          # maximum number of lines to send with a single command
+        :overlong => :split,        # or :truncate
+        # TODO an array of splitpoints would be preferrable for this option:
+        :split_at => /\s+/,         # by default, split overlong lines at whitespace
+        :purge_split => true,       # should the split string be removed?
+        :truncate_text => "#{Reverse}...#{Reverse}"  # text to be appened when truncating
+      }
+    end
+    @default_send_options.update opts unless opts.empty?
+    end
 
   # checks if we should be quiet on a channel
   def quiet_on?(channel)
@@ -792,8 +842,7 @@ class IrcBot
     line = String.new
     lines.each { |msg|
       begin
-        if max_lines and cmd_lines == max_lines - 1
-          debug "Max lines count reached for message #{original_message.inspect} while sending #{msg.inspect}, truncating"
+        if max_lines > 0 and cmd_lines == max_lines - 1
           truncate = opts[:truncate_text]
           truncate = @default_send_options[:truncate_text] if truncate.length > left
           truncate = "" if truncate.length > left
@@ -802,11 +851,13 @@ class IrcBot
         if(left >= msg.length) and not maxed
           sendq "#{fixed}#{msg}", chan, ring
           log_sent(type, where, msg)
+          cmd_lines += 1
           break
         end
         if truncate
           line.replace msg.slice(0, left-truncate.length)
-          line.sub!(/\s+\S*$/, truncate)
+          # line.sub!(/\s+\S*$/, truncate)
+          line << truncate
           raise "PROGRAMMER ERROR! #{line.inspect} of length #{line.length} > #{left}" if line.length > left
           sendq "#{fixed}#{line}", chan, ring
           log_sent(type, where, line)
@@ -820,8 +871,8 @@ class IrcBot
         end
         sendq "#{fixed}#{line}", chan, ring
         log_sent(type, where, line)
+        cmd_lines += 1
       end while(msg.length > 0)
-      cmd_lines += 1
     }
   end
 
