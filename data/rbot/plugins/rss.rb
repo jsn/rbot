@@ -19,12 +19,6 @@ require 'rss/dublincore'
 #   warning "Unable to load RSS libraries, RSS plugin functionality crippled"
 # end
 
-class ::String
-  def riphtml
-    self.gsub(/<[^>]+>/, '').gsub(/&amp;/,'&').gsub(/&quot;/,'"').gsub(/&lt;/,'<').gsub(/&gt;/,'>').gsub(/&ellip;/,'...').gsub(/&apos;/, "'").gsub("\n",'')
-  end
-end
-
 class ::RssBlob
   attr_accessor :url
   attr_accessor :handle

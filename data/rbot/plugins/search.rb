@@ -4,39 +4,6 @@ Net::HTTP.version_1_2
 
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 
-class ::String
-  def ircify_html
-    txt = self
-
-    # bold and strong -> bold
-    txt.gsub!(/<\/?(?:b|strong)\s*>/, "#{Bold}")
-
-    # italic, emphasis and underline -> underline
-    txt.gsub!(/<\/?(?:i|em|u)\s*>/, "#{Underline}")
-
-    ## This would be a nice addition, but the results are horrible
-    ## Maybe make it configurable?
-    # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
-
-    # Paragraph and br tags are converted to whitespace.
-    txt.gsub!(/<\/?(p|br)\s*\/?\s*>/, ' ')
-    txt.gsub!("\n", ' ')
-
-    # All other tags are just removed
-    txt.gsub!(/<[^>]+>/, '')
-
-    # Remove double formatting options, since they only waste bytes
-    txt.gsub!(/#{Bold}\s*#{Bold}/,"")
-    txt.gsub!(/#{Underline}\s*#{Underline}/,"")
-
-    # And finally whitespace is squeezed
-    txt.gsub!(/\s+/, ' ')
-
-    # Decode entities and strip whitespace
-    return Utils.decode_html_entities(txt).strip!
-  end
-end
-
 class SearchPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('google.hits',
     :default => 3,

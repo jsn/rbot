@@ -4,17 +4,6 @@
 # TODO *REMEMBER* to set @changed to true after edit
 # TODO or changes won't be saved
 
-unless Array.new.respond_to?(:pick_one)
-  debug "Defining the pick_one method for Array"
-  class ::Array
-    def pick_one
-      return nil if self.empty?
-      self[rand(self.length)]
-    end
-  end
-end
-
-
 class SalutPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('salut.all_languages',
     :default => true, 
