@@ -3,6 +3,8 @@
 # TODO allow online editing of salutations
 # TODO *REMEMBER* to set @changed to true after edit
 # TODO or changes won't be saved
+#
+# TODO reply in the language the salutation was in
 
 unless Array.respond_to?(:pick_one)
   debug "Defining the pick_one method for Array"
@@ -82,6 +84,7 @@ class SalutPlugin < Plugin
   def listen(m)
     return unless @match
     return unless m.kind_of?(PrivMessage)
+    return if m.address? and m.plugin == 'config'
     to_me = m.address? || m.message =~ /#{Regexp.escape(@bot.nick)}/i
     if @bot.config['salut.address_only']
       return unless to_me
@@ -89,14 +92,14 @@ class SalutPlugin < Plugin
     salut = nil
     [:both, :in, :out].each { |k|
       next unless @match[k]
-      debug "Checking salutations #{k} (#{@match[k].inspect})"
+      # debug "Checking salutations #{k} (#{@match[k].inspect})"
       if m.message =~ @match[k]
         salut = k
         break
       end
     }
     return unless salut
-    # If the bot wasn't addressed, we continue only the match was exact
+    # If the bot wasn't addressed, we continue only if the match was exact
     # (apart from space and punctuation) or if @match[:dest] matches too
     return unless to_me or m.message =~ @match[:dest] or m.message =~ /^#{@punct}#{@match[salut]}#{@punct}$/
     h = Time.new.hour
