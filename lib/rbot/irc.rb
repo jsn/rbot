@@ -3,9 +3,11 @@
 # * do we want to handle a Channel list for each User telling which
 #   Channels is the User on (of those the client is on too)?
 #   We may want this so that when a User leaves all Channels and he hasn't
-#   sent us privmsgs, we know remove him from the Server @users list
+#   sent us privmsgs, we know we can remove him from the Server @users list
 # * Maybe ChannelList and UserList should be HashesOf instead of ArrayOf?
-#   See items marked as TODO Ho
+#   See items marked as TODO Ho.
+#   The framework to do this is now in place, thanks to the new [] method
+#   for NetmaskList, which allows retrieval by Netmask or String
 #++
 # :title: IRC module
 #
@@ -681,6 +683,28 @@ module Irc
       super(Netmask, ar)
     end
 
+    # We enhance the [] method by allowing it to pick an element that matches
+    # a given Netmask or String
+    #
+    def [](*args)
+      if args.length == 1
+        case args[0]
+        when Netmask
+          self.find { |mask|
+            mask.matches?(args[0])
+          }
+        when String
+          self.find { |mask|
+            mask.matches?(args[0].to_irc_netmask(:casemap => mask.casemap))
+          }
+        else
+          super(*args)
+        end
+      else
+        super(*args)
+      end
+    end
+
   end
 
 end
@@ -813,14 +837,17 @@ module Irc
 
 
   # A UserList is an ArrayOf <code>User</code>s
+  # We derive it from NetmaskList, which allows us to inherit any special
+  # NetmaskList method
   #
-  class UserList < ArrayOf
+  class UserList < NetmaskList
 
     # Create a new UserList, optionally filling it with the elements from
     # the Array argument fed to it.
     #
     def initialize(ar=[])
-      super(User, ar)
+      super(ar)
+      @element_class = User
     end
 
   end
