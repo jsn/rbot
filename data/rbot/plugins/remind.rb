@@ -1,5 +1,3 @@
-require 'rbot/utils'
-
 class RemindPlugin < Plugin
   # read a time in string format, turn it into "seconds from now".
   # example formats handled are "5 minutes", "2 days", "five hours",

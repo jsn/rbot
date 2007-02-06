@@ -1,4 +1,4 @@
-module Irc
+module ::Irc
 module Utils
 
 require 'resolv'

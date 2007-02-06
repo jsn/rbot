@@ -6,7 +6,7 @@ begin
   $we_have_html_entities_decoder = require 'htmlentities'
 rescue LoadError
   $we_have_html_entities_decoder = false
-  module Irc
+  module ::Irc
     module Utils
       UNESCAPE_TABLE = {
     'laquo' => '<<',
@@ -281,7 +281,7 @@ rescue LoadError
 end
 
 
-module Irc
+module ::Irc
 
   # miscellaneous useful functions
   module Utils

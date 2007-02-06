@@ -69,7 +69,7 @@ $interrupted = 0
 # these first
 require 'rbot/rbotconfig'
 require 'rbot/config'
-require 'rbot/utils'
+# require 'rbot/utils'
 
 require 'rbot/irc'
 require 'rbot/rfc2812'
@@ -82,7 +82,7 @@ require 'rbot/message'
 require 'rbot/language'
 require 'rbot/dbhash'
 require 'rbot/registry'
-require 'rbot/httputil'
+# require 'rbot/httputil'
 
 module Irc
 
@@ -279,7 +279,6 @@ class IrcBot
     Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
     Dir.mkdir("#{botclass}/registry") unless File.exist?("#{botclass}/registry")
     Dir.mkdir("#{botclass}/safe_save") unless File.exist?("#{botclass}/safe_save")
-    Utils.set_safe_save_dir("#{botclass}/safe_save")
 
     # Time at which the last PING was sent
     @last_ping = nil
@@ -364,8 +363,6 @@ class IrcBot
 
     @logs = Hash.new
 
-    @httputil = Utils::HttpUtil.new(self)
-
     @plugins = nil
     @lang = Language::Language.new(self, @config['core.language'])
 
@@ -385,10 +382,15 @@ class IrcBot
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::pluginmanager
     @plugins.bot_associate(self)
+    @plugins.add_botmodule_dir(Config::coredir + "/utils")
     @plugins.add_botmodule_dir(Config::coredir)
     @plugins.add_botmodule_dir("#{botclass}/plugins")
     @plugins.add_botmodule_dir(Config::datadir + "/plugins")
     @plugins.scan
+
+    Utils.set_safe_save_dir("#{botclass}/safe_save")
+    @httputil = Utils::HttpUtil.new(self)
+
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
     @client = IrcClient.new
