@@ -445,5 +445,40 @@ module ::Irc
       end
       return txt
     end
+
+    # Get the first pars of the first _count_ _urls_.
+    # The pages are downloaded using an HttpUtil service passed as _opts_ :http_util,
+    # and echoed as replies to the IRC message passed as _opts_ :message.
+    #
+    def Utils.get_first_pars(urls, count, opts={})
+      idx = 0
+      msg = opts[:message]
+      while count > 0 and urls.length > 0
+        url = urls.shift
+        idx += 1
+
+        # FIXME what happens if some big file is returned? We should share
+        # code with the url plugin to only retrieve partial file content!
+        xml = opts[:http_util].get_cached(url)
+        if xml.nil?
+          debug "Unable to retrieve #{url}"
+          next
+        end
+        debug "Retrieved #{url}"
+        debug "\t#{xml}"
+        par = Utils.ircify_first_html_par(xml)
+        if par.empty?
+          debug "No first par found\n#{xml}"
+          # FIXME only do this if the 'url' plugin is loaded
+          # TODO even better, put the code here
+          # par = @bot.plugins['url'].get_title_from_html(xml)
+          next if par.empty?
+        end
+        msg.reply "[#{idx}] #{par}", :overlong => :truncate if msg
+        count -=1
+      end
+    end
+
+
   end
 end

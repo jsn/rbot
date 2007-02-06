@@ -1,3 +1,7 @@
+# vim: set sw=2 et:
+#
+# TODO: use lr=lang_<code> or whatever is most appropriate to let google know
+# it shouldn't use the bot's location to find the preferred language
 require 'uri'
 
 Net::HTTP.version_1_2
@@ -70,28 +74,8 @@ class SearchPlugin < Plugin
 
     first_pars = params[:firstpar] || @bot.config['google.first_par']
 
-    idx = 0
-    while first_pars > 0 and urls.length > 0
-      url.replace(urls.shift)
-      idx += 1
+    Utils.get_first_pars urls, first_pars, :http_util => @bot.httputil, :message => m
 
-      # FIXME what happens if some big file is returned? We should share
-      # code with the url plugin to only retrieve partial file content!
-      xml = @bot.httputil.get_cached(url)
-      if xml.nil?
-        debug "Unable to retrieve #{url}"
-        next
-      end
-      par = Utils.ircify_first_html_par(xml)
-      if par.empty?
-        debug "No first par found\n#{xml}"
-	# FIXME only do this if the 'url' plugin is loaded
-	par = @bot.plugins['url'].get_title_from_html(xml)
-        next if par.empty?
-      end
-      m.reply "[#{idx}] #{par}", :overlong => :truncate
-      first_pars -=1
-    end
   end
 
   def wikipedia(m, params)

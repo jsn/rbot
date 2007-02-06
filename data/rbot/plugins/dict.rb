@@ -22,6 +22,7 @@ class DictPlugin < Plugin
     super
     @dmurl = "http://www.demauroparavia.it/"
     @dmwapurl = "http://wap.demauroparavia.it/index.php?lemma=%s"
+    @dmwaplemma = "http://wap.demauroparavia.it/lemma.php?ID=%s"
     @oxurl = "http://www.askoxford.com/concise_oed/%s"
     @chambersurl = "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
   end
@@ -59,16 +60,23 @@ class DictPlugin < Plugin
     end
     entries = xml.scan(DEMAURO_LEMMA)
     text = word
+    urls = []
     if !entries.assoc(word) and !entries.assoc(word.upcase)
       return false if justcheck
       text += " not found. Similar words"
     end
     return true if justcheck
     text += ": "
+    n = 0
     text += entries[0...5].map { |ar|
-      "#{ar[0]} - #{ar[1].gsub(/<\/?em>/,'')}: #{@dmurl}#{ar[2]}"
+      n += 1
+      urls << @dmwaplemma % ar[2]
+      "#{n}. #{Bold}#{ar[0]}#{Bold} - #{ar[1].gsub(/<\/?em>/,'')}: #{@dmurl}#{ar[2]}"
     }.join(" | ")
     m.reply text
+
+    Utils.get_first_pars urls, 5, :http_util => @bot.httputil, :message => m
+
   end
 
   def is_italian?(word)
