@@ -49,8 +49,8 @@ class ::String
     txt.gsub!(/<[^>]+>/, '')
 
     # Remove double formatting options, since they only waste bytes
-    txt.gsub!(/#{Bold}\s*#{Bold}/,"")
-    txt.gsub!(/#{Underline}\s*#{Underline}/,"")
+    txt.gsub!(/#{Bold}(\s*)#{Bold}/, '\1')
+    txt.gsub!(/#{Underline}(\s*)#{Underline}/, '\1')
 
     # And finally whitespace is squeezed
     txt.gsub!(/\s+/, ' ')
