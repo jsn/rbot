@@ -82,37 +82,14 @@ class SearchPlugin < Plugin
         debug "Unable to retrieve #{url}"
         next
       end
-      # We get the first par after the first main heading, if possible
-      header_found = xml.match(/<h1(?:\s+[^>]*)?>(.*?)<\/h1>/im)
-      txt = String.new
-      if header_found
-        debug "Found header: #{header_found[1].inspect}"
-        while txt.empty? 
-          header_found = $'
-          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im]
-          break unless candidate
-          txt.replace candidate.ircify_html
-        end
-      end
-      # If we haven't found a first par yet, try to get it from the whole
-      # document
-      if txt.empty?
-	header_found = xml
-        while txt.empty? 
-          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im]
-          break unless candidate
-          txt.replace candidate.ircify_html
-          header_found = $'
-        end
-      end
-      # Nothing yet, try title
-      if txt.empty?
+      par = Utils.ircify_first_html_par(xml)
+      if par.empty?
         debug "No first par found\n#{xml}"
 	# FIXME only do this if the 'url' plugin is loaded
-	txt.replace @bot.plugins['url'].get_title_from_html(xml)
-        next if txt.empty?
+	par = @bot.plugins['url'].get_title_from_html(xml)
+        next if par.empty?
       end
-      m.reply "[#{idx}] #{txt}", :overlong => :truncate
+      m.reply "[#{idx}] #{par}", :overlong => :truncate
       first_pars -=1
     end
   end
