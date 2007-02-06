@@ -3,10 +3,8 @@
 # TODO allow online editing of salutations
 # TODO *REMEMBER* to set @changed to true after edit
 # TODO or changes won't be saved
-#
-# TODO reply in the language the salutation was in
 
-unless Array.respond_to?(:pick_one)
+unless Array.new.respond_to?(:pick_one)
   debug "Defining the pick_one method for Array"
   class ::Array
     def pick_one
@@ -32,7 +30,8 @@ class SalutPlugin < Plugin
 
   def initialize
     @salutations = Hash.new
-    @match = nil
+    @match = Hash.new
+    @match_langs = Array.new
     @main_lang_str = nil
     @main_lang = nil
     @all_langs = true
@@ -46,12 +45,16 @@ class SalutPlugin < Plugin
   end
 
   def create_match
-    @match = Hash.new
+    @match.clear
     ar_dest = Array.new
     ar_in = Array.new
     ar_out = Array.new
     ar_both = Array.new
     @salutations.each { |lang, hash|
+      ar_dest.clear
+      ar_in.clear
+      ar_out.clear
+      ar_both.clear
       hash.each { |situation, array|
         case situation.to_s
         when /^generic-dest$/
@@ -64,25 +67,34 @@ class SalutPlugin < Plugin
           ar_both += array
         end
       }
+      @match[lang] = Hash.new
+      @match[lang][:in] = Regexp.new("\\b(?:" + ar_in.uniq.map { |txt|
+        Regexp.escape(txt)
+      }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_in.empty?
+      @match[lang][:out] = Regexp.new("\\b(?:" + ar_out.uniq.map { |txt|
+        Regexp.escape(txt)
+      }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_out.empty?
+      @match[lang][:both] = Regexp.new("\\b(?:" + ar_both.uniq.map { |txt|
+        Regexp.escape(txt)
+      }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_both.empty?
+      @match[lang][:dest] = Regexp.new("\\b(?:" + ar_dest.uniq.map { |txt|
+        Regexp.escape(txt)
+      }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_dest.empty?
     }
-    @match[:in] = Regexp.new("\\b(?:" + ar_in.uniq.map { |txt|
-      Regexp.escape(txt)
-    }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_in.empty?
-    @match[:out] = Regexp.new("\\b(?:" + ar_out.uniq.map { |txt|
-      Regexp.escape(txt)
-    }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_out.empty?
-    @match[:both] = Regexp.new("\\b(?:" + ar_both.uniq.map { |txt|
-      Regexp.escape(txt)
-    }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_both.empty?
-    debug "Matches: #{@match.inspect}"
-    @match[:dest] = Regexp.new("\\b(?:" + ar_dest.uniq.map { |txt|
-      Regexp.escape(txt)
-    }.join('|') + ")\\b", Regexp::IGNORECASE) unless ar_dest.empty?
     @punct = /\s*[.,:!;?]?\s*/ # Punctuation
+
+    # Languages to match for, in order
+    @match_langs.clear
+    @match_langs << @main_lang if @match.key?(@main_lang)
+    @match_langs << :english if @match.key?(:english)
+    @match.each_key { |key|
+      @match_langs << key
+    }
+    @match_langs.uniq!
   end
 
   def listen(m)
-    return unless @match
+    return if @match.empty?
     return unless m.kind_of?(PrivMessage)
     return if m.address? and m.plugin == 'config'
     to_me = m.address? || m.message =~ /#{Regexp.escape(@bot.nick)}/i
@@ -90,18 +102,20 @@ class SalutPlugin < Plugin
       return unless to_me
     end
     salut = nil
-    [:both, :in, :out].each { |k|
-      next unless @match[k]
-      # debug "Checking salutations #{k} (#{@match[k].inspect})"
-      if m.message =~ @match[k]
-        salut = k
-        break
-      end
+    @match_langs.each { |lang|
+      [:both, :in, :out].each { |k|
+        next unless @match[lang][k]
+        if m.message =~ @match[lang][k]
+          salut = [@match[lang][k], lang, k]
+          break
+        end
+      }
+      break if salut
     }
     return unless salut
     # If the bot wasn't addressed, we continue only if the match was exact
     # (apart from space and punctuation) or if @match[:dest] matches too
-    return unless to_me or m.message =~ @match[:dest] or m.message =~ /^#{@punct}#{@match[salut]}#{@punct}$/
+    return unless to_me or m.message =~ /^#{@punct}#{salut.first}#{@punct}$/ or m.message =~ @match[salut[1]][:dest] 
     h = Time.new.hour
     case h
     when 4...12
@@ -113,8 +127,12 @@ class SalutPlugin < Plugin
     end
   end
 
-  def salut_reply(m, k, time)
-    debug "Replying to #{k} in the #{time}"
+  def salut_reply(m, salut, time)
+    lang = salut[1]
+    k = salut[2]
+    debug "Replying to #{salut.first} (#{lang} #{k}) in the #{time}"
+    # salut_ar = @salutations[@main_lang].update @salutations[:english].update @salutations[lang]
+    salut_ar = @salutations[lang]
     case k
     when :both
       sfx = ""
@@ -123,10 +141,10 @@ class SalutPlugin < Plugin
     end
     debug "Building array ..."
     rep_ar = Array.new
-    rep_ar += @salutations[@main_lang].fetch("#{time}#{sfx}".to_sym, [])
-    rep_ar += @salutations[@main_lang].fetch("#{time}".to_sym, []) unless sfx.empty?
-    rep_ar += @salutations[@main_lang].fetch("generic#{sfx}".to_sym, [])
-    rep_ar += @salutations[@main_lang].fetch("generic".to_sym, []) unless sfx.empty?
+    rep_ar += salut_ar.fetch("#{time}#{sfx}".to_sym, [])
+    rep_ar += salut_ar.fetch("#{time}".to_sym, []) unless sfx.empty?
+    rep_ar += salut_ar.fetch("generic#{sfx}".to_sym, [])
+    rep_ar += salut_ar.fetch("generic".to_sym, []) unless sfx.empty?
     debug "Choosing reply in #{rep_ar.inspect} ..."
     if rep_ar.empty?
       if m.public? # and (m.address? or m =~ /#{Regexp.escape(@bot.nick)}/)
