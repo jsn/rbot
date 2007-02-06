@@ -416,16 +416,18 @@ module ::Irc
       end
     end
 
-    # Try to grab and IRFify the first HTML par (<p> tag) in the given string.
+    H1_REGEX = /<h1(?:\s+[^>]*)?>(.*?)<\/h1>/im
+    PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/p>/im
+    # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first h1 heading
     def Utils.ircify_first_html_par(xml)
-      header_found = xml.match(/<h1(?:\s+[^>]*)?>(.*?)<\/h1>/im)
+      header_found = xml.match(H1_REGEX)
       txt = String.new
       if header_found
         debug "Found header: #{header_found[1].inspect}"
         while txt.empty? 
           header_found = $'
-          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im]
+          candidate = header_found[PAR_REGEX]
           break unless candidate
           txt = candidate.ircify_html
         end
@@ -435,7 +437,7 @@ module ::Irc
       if txt.empty?
 	header_found = xml
         while txt.empty? 
-          candidate = header_found[/<p(?:\s+[^>]*)?>.*?<\/p>/im]
+          candidate = header_found[PAR_REGEX]
           break unless candidate
           txt = candidate.ircify_html
           header_found = $'
