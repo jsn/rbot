@@ -461,6 +461,13 @@ class ArrayOf < Array
     }
   end
 
+  # We introduce the 'downcase' method, which maps downcase() to all the Array
+  # elements, properly failing when the elements don't have a downcase method
+  #
+  def downcase
+    self.map { |el| el.downcase }
+  end
+
   # Modifying methods which we don't handle yet are made private
   #
   private :[]=, :collect!, :map!, :fill, :flatten!
@@ -684,7 +691,10 @@ module Irc
     end
 
     # We enhance the [] method by allowing it to pick an element that matches
-    # a given Netmask or String
+    # a given Netmask, a String or a Regexp
+    # TODO take into consideration the opportunity to use select() instead of
+    # find(), and/or a way to let the user choose which one to take (second
+    # argument?)
     #
     def [](*args)
       if args.length == 1
@@ -696,6 +706,10 @@ module Irc
         when String
           self.find { |mask|
             mask.matches?(args[0].to_irc_netmask(:casemap => mask.casemap))
+          }
+        when Regexp
+          self.find { |mask|
+            mask.fullform =~ args[0]
           }
         else
           super(*args)
@@ -848,6 +862,13 @@ module Irc
     def initialize(ar=[])
       super(ar)
       @element_class = User
+    end
+
+    # Convenience method: convert the UserList to a list of nicks. The indices
+    # are preserved
+    #
+    def nicks
+      self.map { |user| user.nick }
     end
 
   end
@@ -1204,6 +1225,13 @@ module Irc
     #
     def initialize(ar=[])
       super(Channel, ar)
+    end
+
+    # Convenience method: convert the ChannelList to a list of channel names.
+    # The indices are preserved
+    #
+    def names
+      self.map { |chan| chan.name }
     end
 
   end
