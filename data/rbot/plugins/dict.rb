@@ -18,6 +18,13 @@ require 'uri'
 DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/anchor>/
 
 class DictPlugin < Plugin
+  BotConfig.register BotConfigIntegerValue.new('dict.hits',
+    :default => 3,
+    :desc => "Number of hits to return from a dictionary lookup")
+  BotConfig.register BotConfigIntegerValue.new('dict.first_par',
+    :default => 0,
+    :desc => "When set to n > 0, the bot will return the first paragraph from the first n dictionary hits")
+
   def initialize
     super
     @dmurl = "http://www.demauroparavia.it/"
@@ -68,14 +75,19 @@ class DictPlugin < Plugin
     return true if justcheck
     text += ": "
     n = 0
-    text += entries[0...5].map { |ar|
+    hits = @bot.config['dict.hits']
+    text += entries[0...hits].map { |ar|
       n += 1
       urls << @dmwaplemma % ar[2]
       "#{n}. #{Bold}#{ar[0]}#{Bold} - #{ar[1].gsub(/<\/?em>/,'')}: #{@dmurl}#{ar[2]}"
     }.join(" | ")
     m.reply text
 
-    Utils.get_first_pars urls, 5, :http_util => @bot.httputil, :message => m
+    first_pars = @bot.config['dict.first_par']
+
+    return unless first_pars > 0
+
+    Utils.get_first_pars urls, first_pars, :http_util => @bot.httputil, :message => m
 
   end
 
