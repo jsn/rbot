@@ -341,7 +341,10 @@ class RSSFeedsPlugin < Plugin
   def change_rss(m, params)
     handle = params[:handle].downcase
     feed = @feeds.fetch(handle, nil)
-    return m.reply "No such feed with handle #{handle}" unless feed
+    unless feed
+      m.reply "No such feed with handle #{handle}"
+      return
+    end
     case params[:what].intern
     when :handle
       new = params[:new].downcase

@@ -601,7 +601,7 @@ class QuizPlugin < Plugin
 
   def cmd_top_number( m, params )
     num = params[:number].to_i
-    return unless 1..50 === num
+    return if num < 1 or num > 50
     chan = m.channel
     q = create_quiz( chan )
     if q.nil?
