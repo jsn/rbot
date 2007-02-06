@@ -420,18 +420,30 @@ module ::Irc
     PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/p>/im
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first h1 heading
-    def Utils.ircify_first_html_par(xml)
-      header_found = xml.match(H1_REGEX)
+    #
+    # It is possible to pass some options to determine how the stripping
+    # occurs. Currently, only one option is supported:
+    #   * :strip => Regex or String to strip at the beginning of the obtained
+    #               text
+    #
+    def Utils.ircify_first_html_par(xml, opts={})
       txt = String.new
+      strip = opts[:strip]
+      strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
+
+      header_found = xml.match(H1_REGEX)
       if header_found
+        header_found = $'
         debug "Found header: #{header_found[1].inspect}"
         while txt.empty? 
-          header_found = $'
           candidate = header_found[PAR_REGEX]
           break unless candidate
           txt = candidate.ircify_html
+          header_found = $'
+	  txt.sub!(strip, '') if strip
         end
       end
+
       # If we haven't found a first par yet, try to get it from the whole
       # document
       if txt.empty?
@@ -441,6 +453,7 @@ module ::Irc
           break unless candidate
           txt = candidate.ircify_html
           header_found = $'
+	  txt.sub!(strip, '') if strip
         end
       end
       return txt
@@ -464,9 +477,7 @@ module ::Irc
           debug "Unable to retrieve #{url}"
           next
         end
-        debug "Retrieved #{url}"
-        debug "\t#{xml}"
-        par = Utils.ircify_first_html_par(xml)
+        par = Utils.ircify_first_html_par(xml, opts)
         if par.empty?
           debug "No first par found\n#{xml}"
           # FIXME only do this if the 'url' plugin is loaded

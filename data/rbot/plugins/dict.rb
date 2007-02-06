@@ -87,7 +87,8 @@ class DictPlugin < Plugin
 
     return unless first_pars > 0
 
-    Utils.get_first_pars urls, first_pars, :http_util => @bot.httputil, :message => m
+    Utils.get_first_pars urls, first_pars, :http_util => @bot.httputil, :message => m,
+      :strip => /^\S+\s+-\s+/
 
   end
 
@@ -138,7 +139,7 @@ class DictPlugin < Plugin
       return false if justcheck
       m.reply "Nothing found for #{word}, but see #{url} for possible suggestions"
     else
-      return false if justcheck
+      return true if justcheck
       m.reply "#{word}: #{url}"
     end
   end
