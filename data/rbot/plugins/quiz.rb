@@ -376,14 +376,7 @@ class QuizPlugin < Plugin
   #
   def unhilight_nick( nick )
     return nick unless @bot.config['quiz.dotted_nicks']
-    new_nick = ""
-
-    0.upto( nick.length - 1 ) do |i|
-      new_nick += nick[i, 1]
-      new_nick += "." unless i == nick.length - 1
-    end
-
-    return new_nick
+    return nick.split(//).join(".")
   end
 
 
