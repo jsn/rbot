@@ -90,6 +90,9 @@ end
 # CLASS QuizPlugin
 #######################################################################
 class QuizPlugin < Plugin
+  BotConfig.register BotConfigBooleanValue.new('quiz.dotted_nicks',
+    :default => true,
+    :desc => "When true, nicks in the top X scores will be camouflaged to prevent IRC hilighting")
   def initialize()
     super
 
@@ -372,6 +375,7 @@ class QuizPlugin < Plugin
   # which is annoying for those not watching. Example: markey -> m.a.r.k.e.y
   #
   def unhilight_nick( nick )
+    return nick unless @bot.config['quiz.dotted_nicks']
     new_nick = ""
 
     0.upto( nick.length - 1 ) do |i|
