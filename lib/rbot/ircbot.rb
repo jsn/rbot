@@ -441,9 +441,10 @@ class IrcBot
     myself.nick = @config['irc.nick']
 
     # Channels where we are quiet
-    # It's nil when we are not quiet, an empty list when we are quiet
-    # in all channels, a list of channels otherwise
-    @quiet = nil
+    # Array of channels names where the bot should be quiet
+    # '*' means all channels
+    #
+    @quiet = []
 
     @client[:welcome] = proc {|data|
       irclog "joined server #{@client.server} as #{myself}", "server"
@@ -632,24 +633,24 @@ class IrcBot
 
   # checks if we should be quiet on a channel
   def quiet_on?(channel)
-    return false unless @quiet
-    return true if @quiet.empty?
-    return @quiet.include?(channel.to_s)
+    return @quiet.include?('*') || @quiet.include?(channel.downcase)
   end
 
-  def set_quiet(channel=nil)
+  def set_quiet(channel)
     if channel
-      @quiet << channel.to_s unless @quiet.include?(channel.to_s)
+      ch = channel.downcase.dup
+      @quiet << ch unless @quiet.include?(ch)
     else
-      @quiet = []
+      @quiet.clear
+      @quiet << '*'
     end
   end
 
-  def reset_quiet(channel=nil)
+  def reset_quiet(channel)
     if channel
-      @quiet.delete_if { |x| x == channel.to_s }
+      @quiet.delete channel.downcase
     else
-      @quiet = nil
+      @quiet.clear
     end
   end
 
@@ -884,20 +885,19 @@ class IrcBot
 
   # send a notice message to channel/nick +where+
   def notice(where, message, options={})
-    unless quiet_on?(where)
-      sendmsg "NOTICE", where, message, options
-    end
+    return if where.kind_of?(Channel) and quiet_on?(where)
+    sendmsg "NOTICE", where, message, options
   end
 
   # say something (PRIVMSG) to channel/nick +where+
   def say(where, message, options={})
-    unless quiet_on?(where)
-      sendmsg "PRIVMSG", where, message, options
-    end
+    return if where.kind_of?(Channel) and quiet_on?(where)
+    sendmsg "PRIVMSG", where, message, options
   end
 
   # perform a CTCP action with message +message+ to channel/nick +where+
   def action(where, message, options={})
+    return if where.kind_of?(Channel) and quiet_on?(where)
     mchan = options.fetch(:queue_channel, nil)
     mring = options.fetch(:queue_ring, nil)
     if mchan

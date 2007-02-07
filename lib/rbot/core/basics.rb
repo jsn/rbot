@@ -59,18 +59,24 @@ class BasicsModule < CoreBotModule
 
   def bot_quiet(m, param)
     if param.has_key?(:where)
-      @bot.set_quiet param[:where].sub(/^here$/, m.target)
+      @bot.set_quiet param[:where].sub(/^here$/, m.target.downcase)
     else
       @bot.set_quiet
     end
+    # Make sense when the commmand is given in private or in a non-quieted
+    # channel
+    m.okay
   end
 
   def bot_talk(m, param)
     if param.has_key?(:where)
-      @bot.reset_quiet param[:where].sub(/^here$/, m.target)
+      @bot.reset_quiet param[:where].sub(/^here$/, m.target.downcase)
     else
       @bot.reset_quiet
     end
+    # Make sense when the commmand is given in private or in a non-quieted
+    # channel
+    m.okay
   end
 
   def bot_help(m, param)
@@ -141,17 +147,11 @@ basics.map "restart *msg",
   :defaults => { :msg => nil },
   :auth_path => 'quit'
 
-basics.map "quiet",
+basics.map "quiet [in] [:where]",
   :action => 'bot_quiet',
   :auth_path => 'talk::set'
-basics.map "quiet in :chan",
-  :action => 'bot_quiet',
-  :auth_path => 'talk::set'
-basics.map "talk",
+basics.map "talk [in] [:where]",
   :action => 'bot_talk',
-  :auth_path => 'talk::set'
-basics.map "quiet in :chan",
-  :action => 'bot_quiet',
   :auth_path => 'talk::set'
 
 basics.map "say :where *what",
