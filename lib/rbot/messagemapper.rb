@@ -438,7 +438,7 @@ module Irc
       # debug "Delimited optionals: #{rx.inspect}"
       rx.gsub!(/(?:\\ )+/, "\\s+")
       # debug "Corrected spaces: #{rx.inspect}"
-      @regexp = Regexp.new(rx)
+      @regexp = Regexp.new("^#{rx}$")
     end
 
     # Recognize the provided string components, returning a hash of
