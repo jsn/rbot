@@ -181,7 +181,9 @@ class RSSFeedsPlugin < Plugin
     when "list"
       "rss list [#{Bold}handle#{Bold}] : list all rss feeds (matching #{Bold}handle#{Bold})"
     when "watched"
-      "rss watched [#{Bold}handle#{Bold}] : list all watched rss feeds (matching #{Bold}handle#{Bold})"
+      "rss watched [#{Bold}handle#{Bold}] [in #{Bold}chan#{Bold}]: list all watched rss feeds (matching #{Bold}handle#{Bold}) (in channel #{Bold}chan#{Bold})"
+    when "who", "watches", "who watches"
+      "rss who watches [#{Bold}handle#{Bold}]]: list all watchers for rss feeds (matching #{Bold}handle#{Bold})"
     when "add"
       "rss add #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : add a new rss called #{Bold}handle#{Bold} from url #{Bold}url#{Bold} (of type #{Bold}type#{Bold})"
     when "change"
@@ -193,9 +195,9 @@ class RSSFeedsPlugin < Plugin
     when "forcereplace"
       "rss forcereplace #{Bold}handle#{Bold} #{Bold}url#{Bold} [#{Bold}type#{Bold}] : replace the url of rss called #{Bold}handle#{Bold} with #{Bold}url#{Bold} (of type #{Bold}type#{Bold})"
     when "watch"
-      "rss watch #{Bold}handle#{Bold} [#{Bold}url#{Bold} [#{Bold}type#{Bold}]] : watch rss #{Bold}handle#{Bold} for changes; when the other parameters are present, it will be created if it doesn't exist yet"
+      "rss watch #{Bold}handle#{Bold} [#{Bold}url#{Bold} [#{Bold}type#{Bold}]]  [in #{Bold}chan#{Bold}]: watch rss #{Bold}handle#{Bold} for changes (in channel #{Bold}chan#{Bold}); when the other parameters are present, the feed will be created if it doesn't exist yet"
     when /(un|rm)watch/
-      "rss unwatch|rmwatch #{Bold}handle#{Bold} : stop watching rss #{Bold}handle#{Bold} for changes"
+      "rss unwatch|rmwatch #{Bold}handle#{Bold} [in #{Bold}chan#{Bold}]: stop watching rss #{Bold}handle#{Bold} (in channel #{Bold}chan#{Bold}) for changes"
     when "rewatch"
       "rss rewatch : restart threads that watch for changes in watched rss"
     else
@@ -292,12 +294,30 @@ class RSSFeedsPlugin < Plugin
 
   def watched_rss(m, params)
     wanted = params[:handle]
+    chan = params[:chan] || m.replyto
     reply = String.new
     watchlist.each { |handle, feed|
       next if wanted and !handle.match(/#{wanted}/i)
-      next unless feed.watched_by?(m.replyto)
+      next unless feed.watched_by?(chan)
       reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
       (reply << " refreshing every #{Utils.secs_to_string(feed.refresh_rate)}") if feed.refresh_rate
+      reply << "\n"
+    }
+    if reply.empty?
+      reply = "no watched feeds"
+      reply << " matching #{wanted}" if wanted
+    end
+    m.reply reply
+  end
+
+  def who_watches(m, params)
+    wanted = params[:handle]
+    reply = String.new
+    watchlist.each { |handle, feed|
+      next if wanted and !handle.match(/#{wanted}/i)
+      reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
+      (reply << " refreshing every #{Utils.secs_to_string(feed.refresh_rate)}") if feed.refresh_rate
+      reply << ": watched by #{feed.watchers.join(', ')}"
       reply << "\n"
     }
     if reply.empty?
@@ -407,6 +427,7 @@ class RSSFeedsPlugin < Plugin
 
   def watch_rss(m, params)
     handle = params[:handle]
+    chan = params[:chan] || m.replyto
     url = params[:url]
     type = params[:type]
     if url
@@ -414,11 +435,11 @@ class RSSFeedsPlugin < Plugin
     end
     feed = @feeds.fetch(handle.downcase, nil)
     if feed
-      if feed.add_watch(m.replyto)
+      if feed.add_watch(chan)
         watchRss(feed, m)
         m.okay
       else
-        m.reply "Already watching #{feed.handle}"
+        m.reply "Already watching #{feed.handle} in #{chan}"
       end
     else
       m.reply "Couldn't watch feed #{handle} (no such feed found)"
@@ -427,15 +448,16 @@ class RSSFeedsPlugin < Plugin
 
   def unwatch_rss(m, params, pass=false)
     handle = params[:handle].downcase
+    chan = params[:chan] || m.replyto
     unless @feeds.has_key?(handle)
       m.reply("dunno that feed")
       return
     end
     feed = @feeds[handle]
-    if feed.rm_watch(m.replyto)
-      m.reply "#{m.replyto} has been removed from the watchlist for #{feed.handle}"
+    if feed.rm_watch(chan)
+      m.reply "#{chan} has been removed from the watchlist for #{feed.handle}"
     else
-      m.reply("#{m.replyto} wasn't watching #{feed.handle}") unless pass
+      m.reply("#{chan} wasn't watching #{feed.handle}") unless pass
     end
     if !feed.watched?
       stop_watch(handle)
@@ -658,10 +680,13 @@ plugin.map 'rss show :handle :limit',
   :defaults => {:limit => 5}
 plugin.map 'rss list :handle',
   :action => 'list_rss',
-  :defaults =>  {:handle => nil}
-plugin.map 'rss watched :handle',
+  :defaults => {:handle => nil}
+plugin.map 'rss watched :handle [in :chan]',
   :action => 'watched_rss',
-  :defaults =>  {:handle => nil}
+  :defaults => {:handle => nil}
+plugin.map 'rss who watches :handle',
+  :action => 'who_watches',
+  :defaults => {:handle => nil}
 plugin.map 'rss add :handle :url :type',
   :action => 'add_rss',
   :defaults => {:type => nil}
@@ -683,12 +708,12 @@ plugin.map 'rss replace :handle :url :type',
 plugin.map 'rss forcereplace :handle :url :type',
   :action => 'forcereplace_rss',
   :defaults => {:type => nil}
-plugin.map 'rss watch :handle :url :type',
+plugin.map 'rss watch :handle :url :type [in :chan]',
   :action => 'watch_rss',
   :defaults => {:url => nil, :type => nil}
-plugin.map 'rss unwatch :handle',
+plugin.map 'rss unwatch :handle [in :chan]',
   :action => 'unwatch_rss'
-plugin.map 'rss rmwatch :handle',
+plugin.map 'rss rmwatch :handle [in :chan]',
   :action => 'unwatch_rss'
 plugin.map 'rss rewatch',
   :action => 'rewatch_rss'
