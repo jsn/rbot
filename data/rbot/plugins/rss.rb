@@ -150,9 +150,6 @@ class RSSFeedsPlugin < Plugin
         unparsed[k] = f.dup
       end
     }
-    unparsed.each { |k, f|
-      debug f.inspect
-    }
     @registry[:feeds] = unparsed
   end
 
