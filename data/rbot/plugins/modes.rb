@@ -1,4 +1,4 @@
-class OpPlugin < Plugin
+class ModesPlugin < Plugin
 
   def help(plugin, topic="")
     return "'op [<user>] [<channel>]' => grant user> (if ommitted yourself) ops in <channel> (or in the current channel if no channel is specified). Use deop instead of op to remove the privilege."
@@ -97,7 +97,7 @@ class OpPlugin < Plugin
   end
 end
 
-plugin = OpPlugin.new
+plugin = ModesPlugin.new
 plugin.map("op [:user] [:channel]")
 plugin.map("opme [:channel]") # For backwards compatibility with 0.9.10
 plugin.map("deop [:user] [:channel]")
