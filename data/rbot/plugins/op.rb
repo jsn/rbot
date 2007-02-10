@@ -1,27 +1,13 @@
 class OpPlugin < Plugin
 
   def help(plugin, topic="")
-    return "op [<user>] [<channel>] => grant <user> (if ommitted yourself) ops in <channel> (or in the current channel if no channel is specified)"
+    return "'op [<user>] [<channel>]' => grant user> (if ommitted yourself) ops in <channel> (or in the current channel if no channel is specified). Use deop instead of op to remove the privilege."
   end
 
   def op(m, params)
     channel = params[:channel]
     user = params[:user]
-    unless channel
-      if m.private?
-        target = user.nil? ? "you" : user 
-        m.reply "You should tell me where you want me to op #{target}."
-        return
-      else
-        channel = m.channel.to_s
-      end
-    end
-    unless user
-      user = m.sourcenick
-    end
-
-    m.okay unless channel == m.channel.to_s
-    @bot.sendq("MODE #{channel} +o #{user}")
+    do_mode(m, channel, user, "+o")
   end
 
   def opme(m, params)
@@ -29,10 +15,48 @@ class OpPlugin < Plugin
     op(m, params)
   end
 
+  def deop(m, params)
+    channel = params[:channel]
+    user = params[:user]
+    do_mode(m, channel, user, "-o")
+  end
+
+  def deopme(m, params)
+    params[:user] = m.sourcenick
+    deop(m, params)
+  end
+
+  def do_mode(m, channel, user, mode)
+    unless channel
+      if m.private?
+        target = user.nil? ? "you" : user 
+        m.reply "You should tell me where you want me to #{mode} #{target}."
+        return
+      else
+        channel = m.channel
+      end
+    else
+      channel = m.server.channel(channel)
+
+      unless channel.has_user?(@bot.nick)
+        m.reply "I am not in that channel"
+	return
+      end
+    end
+
+    unless user
+      user = m.sourcenick
+    end
+
+    m.okay unless channel == m.channel.to_s
+    @bot.mode(channel, mode, user)
+  end
 end
 
 plugin = OpPlugin.new
 plugin.map("op [:user] [:channel]")
 plugin.map("opme [:channel]") # For backwards compatibility with 0.9.10
+plugin.map("deop [:user] [:channel]")
+plugin.map("deopme [:channel]") # For backwards compatibility with 0.9.10
 plugin.default_auth("*",false)
 
