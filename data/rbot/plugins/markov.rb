@@ -59,8 +59,9 @@ class MarkovPlugin < Plugin
   end
 
   def ignore?(user=nil)
+    return false unless user
     @registry['ignore_users'].each do |mask|
-      return true if Irc.netmaskmatch mask, user
+      return true if user.matches?(mask)
     end
     return false
   end
