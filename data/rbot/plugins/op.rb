@@ -26,6 +26,28 @@ class OpPlugin < Plugin
     deop(m, params)
   end
 
+  def hop(m, params)
+    channel = params[:channel]
+    user = params[:user]
+    do_mode(m, channel, user, "+h")
+  end
+
+  def hopme(m, params)
+    params[:user] = m.sourcenick
+    op(m, params)
+  end
+
+  def dehop(m, params)
+    channel = params[:channel]
+    user = params[:user]
+    do_mode(m, channel, user, "-h")
+  end
+
+  def dehopme(m, params)
+    params[:user] = m.sourcenick
+    deop(m, params)
+  end
+
   def do_mode(m, channel, user, mode)
     unless channel
       if m.private?
@@ -58,5 +80,9 @@ plugin.map("op [:user] [:channel]")
 plugin.map("opme [:channel]") # For backwards compatibility with 0.9.10
 plugin.map("deop [:user] [:channel]")
 plugin.map("deopme [:channel]") # For backwards compatibility with 0.9.10
+plugin.map("hop [:user] [:channel]")
+plugin.map("hopme [:channel]")
+plugin.map("dehop [:user] [:channel]")
+plugin.map("dehopme [:channel]")
 plugin.default_auth("*",false)
 
