@@ -34,7 +34,7 @@ class OpPlugin < Plugin
 
   def hopme(m, params)
     params[:user] = m.sourcenick
-    op(m, params)
+    hop(m, params)
   end
 
   def dehop(m, params)
@@ -44,6 +44,28 @@ class OpPlugin < Plugin
   end
 
   def dehopme(m, params)
+    params[:user] = m.sourcenick
+    dehop(m, params)
+  end
+
+  def voice(m, params)
+    channel = params[:channel]
+    user = params[:user]
+    do_mode(m, channel, user, "+v")
+  end
+
+  def voiceme(m, params)
+    params[:user] = m.sourcenick
+    voice(m, params)
+  end
+
+  def devoice(m, params)
+    channel = params[:channel]
+    user = params[:user]
+    do_mode(m, channel, user, "-v")
+  end
+
+  def devoiceme(m, params)
     params[:user] = m.sourcenick
     deop(m, params)
   end
@@ -84,5 +106,9 @@ plugin.map("hop [:user] [:channel]")
 plugin.map("hopme [:channel]")
 plugin.map("dehop [:user] [:channel]")
 plugin.map("dehopme [:channel]")
+plugin.map("voice [:user] [:channel]")
+plugin.map("voiceme [:channel]")
+plugin.map("devoice [:user] [:channel]")
+plugin.map("devoiceme [:channel]")
 plugin.default_auth("*",false)
 
