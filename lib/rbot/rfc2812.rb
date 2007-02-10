@@ -886,16 +886,27 @@ module Irc
       prefix, command, params = $2, $3, $5
 
       if prefix != nil
-        data[:source] = prefix
-        if prefix =~ /^(\S+)!(\S+)$/
+        # Most servers will send a full nick!user@host prefix for
+        # messages from users. Therefore, when the prefix doesn't match this
+        # syntax it's usually the server hostname.
+        #
+        # This is not always true, though, since some servers do not send a
+        # full hostmask for user messages.
+        #
+        if prefix =~ /^(?:\S+)(?:!\S+)?@(?:\S+)$/
           data[:source] = @server.user(prefix)
         else
-          if @server.hostname && @server.hostname != data[:source]
-            warning "Unknown origin #{data[:source]} for message\n#{serverstring.inspect}"
+          if @server.hostname
+            if @server.hostname != prefix
+              debug "Origin #{prefix} for message\n\t#{serverstring.inspect}\nis neither a user hostmask nor the server hostname, assuming it's a nick"
+              data[:source] = @server.user(prefix)
+            else
+              data[:source] = @server
+            end
           else
             @server.instance_variable_set(:@hostname, data[:source])
+            data[:source] = @server
           end
-          data[:source] = @server
         end
       end
 
