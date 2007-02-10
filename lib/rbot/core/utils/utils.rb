@@ -345,7 +345,7 @@ module ::Irc
     end
 
 
-    @@safe_save_dir = nil
+    @@safe_save_dir = nil unless defined?(@@safe_save_dir)
     def Utils.set_safe_save_dir(str)
       @@safe_save_dir = str.dup
     end
