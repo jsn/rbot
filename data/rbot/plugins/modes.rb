@@ -67,7 +67,7 @@ class ModesPlugin < Plugin
 
   def devoiceme(m, params)
     params[:user] = m.sourcenick
-    deop(m, params)
+    devoice(m, params)
   end
 
   def do_mode(m, channel, user, mode)
