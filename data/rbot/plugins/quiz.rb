@@ -37,7 +37,7 @@ Bold = "\002"
 #######################################################################
 class Quiz
   attr_accessor :registry, :registry_conf, :questions, :question, :answer, :answer_core,
-  :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
+    :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
 
   def initialize( channel, registry )
     if !channel
@@ -57,6 +57,10 @@ class Quiz
     end
 
     @registry_conf = @registry.sub_registry( "config" )
+
+    # Per-channel list of sources. If empty, the default one (quiz/quiz.rbot)
+    # will be used. TODO
+    @registry_conf["sources"] = [] unless @registry_conf.has_key?( "sources" )
 
     # Per-channel copy of the global questions table. Acts like a shuffled queue
     # from which questions are taken, until empty. Then we refill it with questions
@@ -93,6 +97,11 @@ class QuizPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('quiz.dotted_nicks',
     :default => true,
     :desc => "When true, nicks in the top X scores will be camouflaged to prevent IRC hilighting")
+
+  BotConfig.register BotConfigArrayValue.new('quiz.sources',
+    :default => ['quiz.rbot'],
+    :desc => "List of files and URLs that will be used to retrieve quiz questions")
+
   def initialize()
     super
 
@@ -105,7 +114,7 @@ class QuizPlugin < Plugin
   # Function that returns whether a char is a "separator", used for hints
   #
   def is_sep( ch )
-    return case ch
+    case ch
     when " " then true
     when "." then true
     when "," then true
@@ -118,8 +127,8 @@ class QuizPlugin < Plugin
   end
 
 
-  # Fetches questions from a file on the server and from the wiki, then merges
-  # and transforms the questions and fills the global question table.
+  # Fetches questions from the data sources, which can be either local files
+  # (in quiz/) or web pages.
   #
   def fetch_data( m )
     # Read the winning messages file 
@@ -132,41 +141,42 @@ class QuizPlugin < Plugin
       @win_messages << "<who> guessed right! The answer was <answer>"
     end
 
-    # TODO: Make this configurable, and add support for more than one file (there's a size limit in linux too ;) )
-    path = "#{@bot.botclass}/quiz/quiz.rbot"
-    debug "Fetching from #{path}"
+    m.reply "Fetching questions ..."
 
-    m.reply "Fetching questions from local database and wiki.."
+    # TODO Per-channel sources
 
-    # Local data
-    begin
-      datafile = File.new( path, File::RDONLY )
-      localdata = datafile.read
-    rescue
-      m.reply "Failed to read local database file. oioi."
-      localdata = nil
-    end
+    data = ""
+    @bot.config['quiz.sources'].each { |p|
+      if p =~ /^https?:\/\//
+        # Wiki data
+        begin
+          serverdata = @bot.httputil.get_cached( URI.parse( p ) ) # "http://amarok.kde.org/amarokwiki/index.php/Rbot_Quiz"
+          serverdata = serverdata.split( "QUIZ DATA START\n" )[1]
+          serverdata = serverdata.split( "\nQUIZ DATA END" )[0]
+          serverdata = serverdata.gsub( /&nbsp;/, " " ).gsub( /&amp;/, "&" ).gsub( /&quot;/, "\"" )
+          data << "\n\n" << serverdata
+        rescue
+          m.reply "Failed to download questions from #{p}, ignoring sources"
+        end
+      else
+        path = "#{@bot.botclass}/quiz/#{p}"
+        debug "Fetching from #{path}"
 
-    # Wiki data
-    begin
-      serverdata = @bot.httputil.get_cached( URI.parse( "http://amarok.kde.org/amarokwiki/index.php/Rbot_Quiz" ) )
-      serverdata = serverdata.split( "QUIZ DATA START\n" )[1]
-      serverdata = serverdata.split( "\nQUIZ DATA END" )[0]
-      serverdata = serverdata.gsub( /&nbsp;/, " " ).gsub( /&amp;/, "&" ).gsub( /&quot;/, "\"" )
-    rescue
-      m.reply "Failed to download wiki questions. oioi."
-      if localdata == nil
-        m.reply "No questions loaded, aborting."
-        return
+        # Local data
+        begin
+          datafile = File.new( path, File::RDONLY )
+          data << "\n\n" << datafile.read
+        rescue
+          m.reply "Failed to read from local database file #{p}, skipping."
+        end
       end
-    end
+    }
 
-    @questions = []
+    @questions.clear
 
     # Fuse together and remove comments, then split
-    data = "\n\n#{localdata}\n\n#{serverdata}".gsub( /^#.*$/, "" )
-    entries = data.split( "\nQuestion: " )
-    #First entry will be empty.
+    entries = data.gsub( /^#.*$/, "" ).split( "\nQuestion: " )
+    # First entry will be empty.
     entries.delete_at(0)
 
     entries.each do |e|
@@ -236,7 +246,8 @@ class QuizPlugin < Plugin
     if topic == "admin"
       "Quiz game aministration commands (requires authentication): 'quiz autoask <on/off>' => enable/disable autoask mode. 'quiz autoask delay <secs>' => delay next quiz by <secs> seconds when in autoask mode. 'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers). 'quiz setscore <player> <score>' => set <player>'s score to <score>. 'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to <jokers>. 'quiz deleteplayer <player>' => delete one player from the rank table (only works when score and jokers are set to 0)."
     else
-      "A multiplayer trivia quiz. 'quiz' => ask a question. 'quiz hint' => get a hint. 'quiz solve' => solve this question. 'quiz skip' => skip to next question. 'quiz joker' => draw a joker to win this round. 'quiz score [player]' => show score for [player] (default is yourself). 'quiz top5' => show top 5 players. 'quiz top <number>' => show top <number> players (max 50). 'quiz stats' => show some statistics. 'quiz fetch' => refetch questions from databases.\nYou can add new questions at http://amarok.kde.org/amarokwiki/index.php/Rbot_Quiz"
+      urls = @bot.config['quiz.sources'].select { |p| p =~ /^https?:\/\// }
+      "A multiplayer trivia quiz. 'quiz' => ask a question. 'quiz hint' => get a hint. 'quiz solve' => solve this question. 'quiz skip' => skip to next question. 'quiz joker' => draw a joker to win this round. 'quiz score [player]' => show score for [player] (default is yourself). 'quiz top5' => show top 5 players. 'quiz top <number>' => show top <number> players (max 50). 'quiz stats' => show some statistics. 'quiz fetch' => refetch questions from databases." + (urls.empty? ? "" : "\nYou can add new questions at #{urls.join(', ')}")
     end
   end
 
