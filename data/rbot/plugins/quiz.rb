@@ -36,7 +36,8 @@ Bold = "\002"
 # One Quiz instance per channel, contains channel specific data
 #######################################################################
 class Quiz
-  attr_accessor :registry, :registry_conf, :questions, :question, :answer, :answer_core,
+  attr_accessor :registry, :registry_conf, :questions,
+    :question, :answer, :answer_core, :answer_array,
     :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
 
   def initialize( channel, registry )
@@ -77,6 +78,7 @@ class Quiz
     @question = nil
     @answer = nil
     @answer_core = nil
+    @answer_array = [] # Array of UTF-8 characters
     @first_try = false
     @hint = nil
     @hintrange = nil
@@ -114,16 +116,7 @@ class QuizPlugin < Plugin
   # Function that returns whether a char is a "separator", used for hints
   #
   def is_sep( ch )
-    case ch
-    when " " then true
-    when "." then true
-    when "," then true
-    when "-" then true
-    when "'" then true
-    when "&" then true
-    when "\"" then true
-    else false
-    end
+    return ch !~ /\w/u
   end
 
 
@@ -448,17 +441,19 @@ class QuizPlugin < Plugin
     q.first_try = true
 
     q.hint = ""
-    (0..q.answer_core.length-1).each do |index|
-      if is_sep(q.answer_core[index,1])
-        q.hint << q.answer_core[index]
+    q.answer_array.clear
+    q.answer_core.scan(/./u) { |ch|
+      if is_sep(ch)
+        q.hint << ch
       else
         q.hint << "^"
       end
-    end
+      q.answer_array << ch
+    }
     q.hinted = false
 
     # Generate array of unique random range
-    q.hintrange = (0..q.answer_core.length-1).sort_by{rand}
+    q.hintrange = (0..q.hint.length-1).sort_by{rand}
 
     m.reply "#{Bold}#{Color}03Question: #{Color}#{Bold}" + q.question
   end
@@ -502,8 +497,8 @@ class QuizPlugin < Plugin
         begin
           index = q.hintrange.pop
           # New hint char until the char isn't a "separator" (space etc.)
-        end while is_sep(q.answer_core[index,1])
-        q.hint[index] = q.answer_core[index]
+        end while is_sep(q.answer_array[index])
+        q.hint[index] = q.answer_array[index]
       end
       m.reply "Hint: #{q.hint}"
       q.hinted = true
