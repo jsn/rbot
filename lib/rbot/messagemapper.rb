@@ -47,7 +47,7 @@ module Irc
     def initialize(parent)
       @parent = parent
       @templates = Array.new
-      @fallback = 'usage'
+      @fallback = :usage
     end
 
     # args:: hash format containing arguments for this template
@@ -162,7 +162,7 @@ module Irc
         debug "#{f.inspect} => #{r}"
       }
       debug "no handler found, trying fallback"
-      if @fallback != nil && @parent.respond_to?(@fallback)
+      if @fallback && @parent.respond_to?(@fallback)
         if m.bot.auth.allow?(@fallback, m.source, m.replyto)
           @parent.send(@fallback, m, {})
           return true

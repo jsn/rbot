@@ -101,6 +101,16 @@ class String
 end
 
 
+class Symbol
+
+  # Returns an Irc::Auth::Comand from the receiver
+  def to_irc_auth_command
+    Irc::Auth::Command.new(self)
+  end
+
+end
+
+
 module Irc
 
 
