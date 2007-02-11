@@ -1,9 +1,9 @@
 # First of all we add a method to the Regexp class
 class Regexp
 
-  # a Regexp has captures when its source has open parenthesis
-  # which are preceded by an even number of slashes and followed by
-  # a question mark
+  # a Regexp has captures when its source has open parenthesis which are
+  # preceded by an even number of slashes and not followed by a question mark
+  #
   def has_captures?
     self.source.match(/(?:^|[^\\])(?:\\\\)*\([^?]/)
   end
@@ -277,12 +277,21 @@ module Irc
     attr_reader :template
     attr_reader :items
     attr_reader :regexp
+    attr_reader :botmodule
 
     def initialize(botmodule, template, hash={})
       raise ArgumentError, "Third argument must be a hash!" unless hash.kind_of?(Hash)
       @defaults = hash[:defaults].kind_of?(Hash) ? hash.delete(:defaults) : {}
       @requirements = hash[:requirements].kind_of?(Hash) ? hash.delete(:requirements) : {}
       @template = template
+      case botmodule
+      when String
+        @botmodule = botmodule
+      when Plugins::BotModule
+        @botmodule = botmodule.name
+      else
+        raise ArgumentError, "#{botmodule.inspect} is not a botmodule nor a botmodule name"
+      end
 
       self.items = template
       # @dyn_items is an array of MessageParameters, except for the first entry
@@ -306,9 +315,9 @@ module Irc
       debug "Items: #{@items.inspect}; dyn items: #{@dyn_items.inspect}"
 
       self.regexp = template
-      debug "Command #{template.inspect} in #{botmodule} will match using #{@regexp}"
+      debug "Command #{template.inspect} in #{@botmodule} will match using #{@regexp}"
 
-      set_auth_path(botmodule, hash)
+      set_auth_path(hash)
 
       unless hash.has_key?(:action)
         hash[:action] = items[0]
@@ -319,21 +328,14 @@ module Irc
       # debug "Create template #{self.inspect}"
     end
 
-    def set_auth_path(botmodule, hash)
+    def set_auth_path(hash)
       if hash.has_key?(:auth)
-        warning "Command #{@template.inspect} in #{botmodule} uses old :auth syntax, please upgrade"
+        warning "Command #{@template.inspect} in #{@botmodule} uses old :auth syntax, please upgrade"
       end
       if hash.has_key?(:full_auth_path)
-        warning "Command #{@template.inspect} in #{botmodule} sets :full_auth_path, please don't do this"
+        warning "Command #{@template.inspect} in #{@botmodule} sets :full_auth_path, please don't do this"
       else
-        case botmodule
-        when String
-          pre = botmodule
-        when Plugins::BotModule
-          pre = botmodule.name
-        else
-          raise ArgumentError, "Can't find auth base in #{botmodule.inspect}"
-        end
+        pre = @botmodule
         words = items.reject{ |x|
           x == pre || x.kind_of?(Symbol) || x =~ /\[|\]/
         }
