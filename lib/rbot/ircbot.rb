@@ -373,7 +373,7 @@ class IrcBot
       end
       def STDOUT.write(str=nil)
         log str, 2
-        return str.to_s.length
+        return str.to_s.size
       end
       def STDERR.write(str=nil)
         if str.to_s.match(/:\d+: warning:/)
@@ -381,7 +381,7 @@ class IrcBot
         else
           error str, 2
         end
-        return str.to_s.length
+        return str.to_s.size
       end
     end
 
@@ -794,7 +794,7 @@ class IrcBot
       lines = Array.new
       message.each_line { |line|
         line.chomp!
-        next unless(line.length > 0)
+        next unless(line.size > 0)
         lines << line
       }
     else
@@ -809,7 +809,7 @@ class IrcBot
     # The maximum raw message length we can send is therefore 512 - 2 - 2
     # minus the length of our hostmask.
 
-    max_len = 508 - myself.fullform.length
+    max_len = 508 - myself.fullform.size
 
     # On servers that support IDENTIFY-MSG, we have to subtract 1, because messages
     # will have a + or - prepended
@@ -822,7 +822,7 @@ class IrcBot
     fixed = "#{type} #{where} :"
 
     # And this is what's left
-    left = max_len - fixed.length
+    left = max_len - fixed.size
 
     case opts[:overlong]
     when :split
@@ -830,8 +830,8 @@ class IrcBot
       split_at = opts[:split_at]
     when :truncate
       truncate = opts[:truncate_text]
-      truncate = @default_send_options[:truncate_text] if truncate.length > left
-      truncate = "" if truncate.length > left
+      truncate = @default_send_options[:truncate_text] if truncate.size > left
+      truncate = "" if truncate.size > left
     else
       raise "Unknown :overlong option #{opts[:overlong]} while sending #{original_message.inspect}"
     end
@@ -845,21 +845,21 @@ class IrcBot
       begin
         if max_lines > 0 and cmd_lines == max_lines - 1
           truncate = opts[:truncate_text]
-          truncate = @default_send_options[:truncate_text] if truncate.length > left
-          truncate = "" if truncate.length > left
+          truncate = @default_send_options[:truncate_text] if truncate.size > left
+          truncate = "" if truncate.size > left
           maxed = true
         end
-        if(left >= msg.length) and not maxed
+        if(left >= msg.size) and not maxed
           sendq "#{fixed}#{msg}", chan, ring
           log_sent(type, where, msg)
           cmd_lines += 1
           break
         end
         if truncate
-          line.replace msg.slice(0, left-truncate.length)
+          line.replace msg.slice(0, left-truncate.size)
           # line.sub!(/\s+\S*$/, truncate)
           line << truncate
-          raise "PROGRAMMER ERROR! #{line.inspect} of length #{line.length} > #{left}" if line.length > left
+          raise "PROGRAMMER ERROR! #{line.inspect} of size #{line.size} > #{left}" if line.size > left
           sendq "#{fixed}#{line}", chan, ring
           log_sent(type, where, line)
           return
@@ -867,13 +867,13 @@ class IrcBot
         line.replace msg.slice!(0, left)
         lastspace = line.rindex(opts[:split_at])
         if(lastspace)
-          msg.replace line.slice!(lastspace, line.length) + msg
+          msg.replace line.slice!(lastspace, line.size) + msg
           msg.gsub!(/^#{opts[:split_at]}/, "") if opts[:purge_split]
         end
         sendq "#{fixed}#{line}", chan, ring
         log_sent(type, where, line)
         cmd_lines += 1
-      end while(msg.length > 0)
+      end while(msg.size > 0)
     }
   end
 

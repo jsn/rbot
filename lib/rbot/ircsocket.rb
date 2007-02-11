@@ -3,9 +3,9 @@ class ::String
   # by the IRCd
   def irc_send_penalty
     # According to eggrdop, the initial penalty is
-    penalty = 1 + self.length/100
+    penalty = 1 + self.size/100
     # on everything but UnderNET where it's
-    # penalty = 2 + self.length/120
+    # penalty = 2 + self.size/120
 
     cmd, pars = self.split($;,2)
     debug "cmd: #{cmd}, pars: #{pars.inspect}"
@@ -14,29 +14,29 @@ class ::String
       chan, nick, msg = pars.split
       chan = chan.split(',')
       nick = nick.split(',')
-      penalty += nick.length
-      penalty *= chan.length
+      penalty += nick.size
+      penalty *= chan.size
     when :MODE
       chan, modes, argument = pars.split
       extra = 0
       if modes
         extra = 1
         if argument
-          extra += modes.split(/\+|-/).length
+          extra += modes.split(/\+|-/).size
         else
-          extra += 3 * modes.split(/\+|-/).length
+          extra += 3 * modes.split(/\+|-/).size
         end
       end
       if argument
-        extra += 2 * argument.split.length
+        extra += 2 * argument.split.size
       end
-      penalty += extra * chan.split.length
+      penalty += extra * chan.split.size
     when :TOPIC
       penalty += 1
-      penalty += 2 unless pars.split.length < 2
+      penalty += 2 unless pars.split.size < 2
     when :PRIVMSG, :NOTICE
       dests = pars.split($;,2).first
-      penalty += dests.split(',').length
+      penalty += dests.split(',').size
     when :WHO
       # I'm too lazy to implement this one correctly
       penalty += 5
@@ -85,12 +85,13 @@ module Irc
     end
 
     def length
-      length = 0
+      len = 0
       @storage.each {|c|
-        length += c[1].length 
+        len += c[1].size
       }
-      return length
+      return len
     end
+    alias :size :length
 
     def empty?
       @storage.empty?
@@ -113,7 +114,7 @@ module Irc
         return nil
       end
       save_idx = @last_idx
-      @last_idx = (@last_idx + 1) % @storage.length
+      @last_idx = (@last_idx + 1) % @storage.size
       mess = @storage[@last_idx][1].first
       @last_idx = save_idx
       return mess
@@ -124,7 +125,7 @@ module Irc
         warning "trying to access empty ring"
         return nil
       end
-      @last_idx = (@last_idx + 1) % @storage.length
+      @last_idx = (@last_idx + 1) % @storage.size
       mess = @storage[@last_idx][1].shift
       @storage.delete(@storage[@last_idx]) if @storage[@last_idx][1] == []
       return mess
@@ -180,10 +181,11 @@ module Irc
     def length
       len = 0
       @rings.each { |r|
-        len += r.length
+        len += r.size
       }
       len
     end
+    alias :size :length
 
     def next
       if empty?
@@ -195,8 +197,8 @@ module Irc
         mess = @rings[0].first
       else
         save_ring = @last_ring
-        (@rings.length - 1).times {
-          @last_ring = (@last_ring % (@rings.length - 1)) + 1
+        (@rings.size - 1).times {
+          @last_ring = (@last_ring % (@rings.size - 1)) + 1
           if !@rings[@last_ring].empty?
             mess = @rings[@last_ring].next
             break
@@ -217,8 +219,8 @@ module Irc
       if !@rings[0].empty?
         return @rings[0].shift
       end
-      (@rings.length - 1).times {
-        @last_ring = (@last_ring % (@rings.length - 1)) + 1
+      (@rings.size - 1).times {
+        @last_ring = (@last_ring % (@rings.size - 1)) + 1
         if !@rings[@last_ring].empty?
           return @rings[@last_ring].shift
         end
@@ -420,7 +422,7 @@ module Irc
             return
           end
           @flood_send = now if @flood_send < now
-          debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.length} to send"
+          debug "can send #{@sendq_burst - @burst} lines, there are #{@sendq.size} to send"
           while !@sendq.empty? and @burst < @sendq_burst and @flood_send - now < MAX_IRC_SEND_PENALTY
             debug "sending message (#{@flood_send - now} < #{MAX_IRC_SEND_PENALTY})"
             puts_critical(@sendq.shift, true)
