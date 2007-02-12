@@ -235,6 +235,8 @@ module ::Irc
         m = RemoteMessage.new(@bot, client, cmd)
         @bot.remote_dispatcher.handle(m)
       end
+
+      private :instance_variables, :instance_variable_get, :instance_variable_set
     end
 
     # The bot also manages a single (for the moment) remote dispatcher. This method
