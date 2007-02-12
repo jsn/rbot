@@ -15,6 +15,8 @@
 #
 # TODO define a class for the rank table. We might also need it for scoring in
 # other games.
+#
+# TODO when Ruby 2.0 gets out, fix the FIXME 2.0 UTF-8 workarounds
 
 # Class for storing question/answer pairs
 QuizBundle = Struct.new( "QuizBundle", :question, :answer )
@@ -78,9 +80,11 @@ class Quiz
     @question = nil
     @answer = nil
     @answer_core = nil
-    @answer_array = [] # Array of UTF-8 characters
+    # FIXME 2.0 UTF-8
+    @answer_array = []
     @first_try = false
-    @hint = nil
+    # FIXME 2.0 UTF-8
+    @hint = []
     @hintrange = nil
     @hinted = false
 
@@ -116,7 +120,7 @@ class QuizPlugin < Plugin
   # Function that returns whether a char is a "separator", used for hints
   #
   def is_sep( ch )
-    return ch !~ /\w/u
+    return ch !~ /^\w$/u
   end
 
 
@@ -440,7 +444,8 @@ class QuizPlugin < Plugin
 
     q.first_try = true
 
-    q.hint = ""
+    # FIXME 2.0 UTF-8
+    q.hint = []
     q.answer_array.clear
     q.answer_core.scan(/./u) { |ch|
       if is_sep(ch)
@@ -493,6 +498,7 @@ class QuizPlugin < Plugin
       when  1..1000 then 1
       end
 
+      # FIXME 2.0 UTF-8
       num_chars.times do
         begin
           index = q.hintrange.pop
@@ -503,7 +509,8 @@ class QuizPlugin < Plugin
       m.reply "Hint: #{q.hint}"
       q.hinted = true
 
-      if q.hint == q.answer_core
+      # FIXME 2.0 UTF-8
+      if q.hint.to_s == q.answer_core
         m.reply "#{Bold}#{Color}04BUST!#{Color}#{Bold} This round is over. #{Color}04Minus one point for #{nick}#{Color}."
 
         stats = nil
