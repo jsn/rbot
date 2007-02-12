@@ -547,7 +547,7 @@ module Irc
       if self.class == Netmask
         return self if fits_with_server_and_casemap?(opts)
       end
-      return self.fullform.to_irc_netmask(server_and_casemap.merge(opts))
+      return self.downcase.to_irc_netmask(opts)
     end
 
     # Converts the receiver into a User with the given (optional)
@@ -821,6 +821,21 @@ module Irc
       end
     end
 
+    # Users can be either simply downcased (their nick only)
+    # or fully downcased: this will return the fullform downcased
+    # according to the given casemap.
+    #
+    def full_irc_downcase(cmap=casemap)
+      self.fullform.irc_downcase(cmap)
+    end
+
+    # full_downcase() will return the fullform downcased according to the
+    # User's own casemap
+    #
+    def full_downcase
+      self.full_irc_downcase
+    end
+
     # Since to_irc_user runs the same checks on server and channel as
     # to_irc_netmask, we just try that and return self if it works.
     #
@@ -828,7 +843,7 @@ module Irc
     #
     def to_irc_user(opts={})
       return self if fits_with_server_and_casemap?(opts)
-      return self.fullform.to_irc_user(server_and_casemap(opts))
+      return self.full_downcase.to_irc_user(opts)
     end
 
     # We can replace everything at once with data from another User
