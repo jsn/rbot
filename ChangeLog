@@ -9,6 +9,9 @@
 	* Remote Service Provider: BotModules can now include the
 	RemoteBotModule interface that provides them with the remote_map()
 	method that works just like the map() method, but for remote commands
+	* Remote Service Provider: Remote clients can now login remotely
+	before executing commands. This in fact integrates the remote access
+	auth security with the User/BotUser used on IRC itself.
 
 2007-02-08  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
