@@ -6,6 +6,9 @@
 	'messages' from remote clients connected to the bot, allowing for such
 	things as svn notification without RSS polling, remote control of
 	the bot, or even (why not?) botnets.
+	* Remote Service Provider: BotModules can now include the
+	RemoteBotModule interface that provides them with the remote_map()
+	method that works just like the map() method, but for remote commands
 
 2007-02-08  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 

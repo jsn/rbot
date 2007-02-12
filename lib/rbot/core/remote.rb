@@ -10,12 +10,7 @@
 # From an idea by halorgium <rbot@spork.in>.
 #
 # TODO client ID and auth
-# TODO Irc::Plugins::RemotePlugin module to be included by plugins that want to
-# provide a remote interface. Such module would define a remote_map() method
-# that would register the plugin to received mapped commands from remote clients.
-# FIXME how should be handle cleanups/rescans? Probably just clear() the
-# RemoteDispatcher template list. Provide a cleanup() method for
-# RemoteDispatcher and think about this.
+#
 
 require 'drb/drb'
 
@@ -57,7 +52,26 @@ module ::Irc
   class RemoteDispatcher < MessageMapper
 
     def initialize(bot)
-      super(bot)
+      super
+    end
+
+    # The map method for the RemoteDispatcher returns the index of the inserted
+    # template
+    #
+    def map(botmodule, *args)
+      super
+      return @templates.length - 1
+    end
+
+    # The map method for the RemoteDispatcher returns the index of the inserted
+    # template
+    #
+    def unmap(botmodule, handle)
+      tmpl = @templates[handle]
+      raise "Botmodule #{botmodule.name} tried to unmap #{tmpl.inspect} that was handled by #{tmpl.botmodule}" unless tmpl.botmodule == botmodule.name
+      debug "Unmapping #{tmpl.inspect}"
+      @templates[handle] = nil
+      @templates.clear unless @templates.nitems > 0
     end
 
     # We redefine the handle() method from MessageMapper, taking into account
@@ -71,6 +85,8 @@ module ::Irc
       return false if @templates.empty?
       failures = []
       @templates.each do |tmpl|
+        # Skip this element if it was unmapped
+        next unless tmpl
         botmodule = @parent.plugins[tmpl.botmodule]
         options, failure = tmpl.recognize(m)
         if options.nil?
@@ -81,17 +97,18 @@ module ::Irc
             failures << [tmpl, "#{botmodule} does not respond to action #{action}"]
             next
           end
-          auth = tmpl.options[:full_auth_path]
-          debug "checking auth for #{auth}"
-          if m.bot.auth.allow?(auth, m.source, m.replyto)
+          # TODO
+          # auth = tmpl.options[:full_auth_path]
+          # debug "checking auth for #{auth}"
+          # if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
-            @parent.send(action, m, options)
+            botmodule.send(action, m, options)
             return true
-          end
-          debug "auth failed for #{auth}"
-          # if it's just an auth failure but otherwise the match is good,
-          # don't try any more handlers
-          return false
+          # end
+          # debug "auth failed for #{auth}"
+          # # if it's just an auth failure but otherwise the match is good,
+          # # don't try any more handlers
+          # return false
         end
       end
       failures.each {|f, r|
@@ -116,7 +133,6 @@ module ::Irc
       # Initialization is simple
       def initialize(bot)
         @bot = bot
-        @dispatcher = RemoteDispatcher.new(@bot)
       end
 
       # The delegate method. This is the main method used by remote clients to send
@@ -133,7 +149,18 @@ module ::Irc
         client = auth
         debug "Trying to dispatch command #{cmd.inspect} authorized by #{auth.inspect}"
         m = RemoteMessage.new(@bot, client, cmd)
-        @dispatcher.handle(m)
+        @bot.remote_dispatcher.handle(m)
+      end
+    end
+
+    # The bot also manages a single (for the moment) remote dispatcher. This method
+    # makes it accessible to the outside world, creating it if necessary.
+    #
+    def remote_dispatcher
+      if defined? @remote_dispatcher
+        @remote_dispatcher
+      else
+        @remote_dispatcher = RemoteDispatcher.new(self)
       end
     end
 
@@ -150,28 +177,71 @@ module ::Irc
 
   end
 
+  module Plugins
+
+    # We create a new Ruby module that can be included by BotModules that want to
+    # provide remote interfaces
+    #
+    module RemoteBotModule
+
+      # The remote_map acts just like the BotModule#map method, except that
+      # the map is registered to the @bot's remote_dispatcher. Also, the remote map handle
+      # is handled for the cleanup management
+      #
+      def remote_map(*args)
+        @remote_maps = Array.new unless defined? @remote_maps
+        @remote_maps << @bot.remote_dispatcher.map(self, *args)
+      end
+
+      # Unregister the remote maps.
+      #
+      def remote_cleanup
+        return unless defined? @remote_maps
+        @remote_maps.each { |h|
+          @bot.remote_dispatcher.unmap(self, h)
+        }
+        @remote_maps.clear
+      end
+
+      # Redefine the default cleanup method.
+      #
+      def cleanup
+        super
+        remote_cleanup
+      end
+    end
+
+    # And just because I like consistency:
+    #
+    module RemoteCoreBotModule
+      include RemoteBotModule
+    end
+
+    module RemotePlugin
+      include RemoteBotModule
+    end
+
+  end
+
 end
 
 class RemoteModule < CoreBotModule
 
+  include RemoteCoreBotModule
+
+  BotConfig.register BotConfigBooleanValue.new('remote.autostart',
+    :default => true,
+    :requires_rescan => true,
+    :desc => "Whether the remote service provider should be started automatically")
+
   BotConfig.register BotConfigIntegerValue.new('remote.port',
     :default => 7268, # that's 'rbot'
-    :on_change => Proc.new { |bot, v|
-      stop_service
-      @port = v
-      start_service
-    },
-    :requires_restart => true,
+    :requires_rescan => true,
     :desc => "Port on which the remote interface will be presented")
 
   BotConfig.register BotConfigStringValue.new('remote.host',
     :default => '',
-    :on_change => Proc.new { |bot, v|
-      stop_service
-      @host = v
-      start_service
-    },
-    :requires_restart => true,
+    :requires_rescan => true,
     :desc => "Port on which the remote interface will be presented")
 
   def initialize
@@ -179,7 +249,11 @@ class RemoteModule < CoreBotModule
     @port = @bot.config['remote.port']
     @host = @bot.config['remote.host']
     @drb = nil
-    start_service
+    begin
+      start_service if @bot.config['remote.autostart']
+    rescue => e
+      error "couldn't start remote service provider: #{e.inspect}"
+    end
   end
 
   def start_service
@@ -213,6 +287,10 @@ class RemoteModule < CoreBotModule
     m.reply rep
   end
 
+  def remote_test(m, params)
+    @bot.say params[:channel], "This is a remote test"
+  end
+
 end
 
 remote = RemoteModule.new
@@ -224,5 +302,8 @@ remote.map "remote start",
 remote.map "remote stop",
   :action => 'handle_stop',
   :auth_path => ':manage:'
+
+remote.remote_map "remote test :channel",
+  :action => 'remote_test'
 
 remote.default_auth('*', false)
