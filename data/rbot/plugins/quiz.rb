@@ -294,7 +294,7 @@ class QuizPlugin < Plugin
       "Quiz game aministration commands (requires authentication): 'quiz autoask <on/off>' => enable/disable autoask mode. 'quiz autoask delay <secs>' => delay next quiz by <secs> seconds when in autoask mode. 'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers). 'quiz setscore <player> <score>' => set <player>'s score to <score>. 'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to <jokers>. 'quiz deleteplayer <player>' => delete one player from the rank table (only works when score and jokers are set to 0)."
     else
       urls = @bot.config['quiz.sources'].select { |p| p =~ /^https?:\/\// }
-      "A multiplayer trivia quiz. 'quiz' => ask a question. 'quiz hint' => get a hint. 'quiz solve' => solve this question. 'quiz skip' => skip to next question. 'quiz joker' => draw a joker to win this round. 'quiz score [player]' => show score for [player] (default is yourself). 'quiz top5' => show top 5 players. 'quiz top <number>' => show top <number> players (max 50). 'quiz stats' => show some statistics. 'quiz fetch' => refetch questions from databases." + (urls.empty? ? "" : "\nYou can add new questions at #{urls.join(', ')}")
+      "A multiplayer trivia quiz. 'quiz' => ask a question. 'quiz hint' => get a hint. 'quiz solve' => solve this question. 'quiz skip' => skip to next question. 'quiz joker' => draw a joker to win this round. 'quiz score [player]' => show score for [player] (default is yourself). 'quiz top5' => show top 5 players. 'quiz top <number>' => show top <number> players (max 50). 'quiz stats' => show some statistics. 'quiz fetch' => refetch questions from databases. 'quiz refresh' => refresh the question pool for this channel." + (urls.empty? ? "" : "\nYou can add new questions at #{urls.join(', ')}")
     end
   end
 
@@ -493,7 +493,7 @@ class QuizPlugin < Plugin
     else
         q.canonical_answer = q.answers.first
     end
-    
+
     q.first_try = true
 
     # FIXME 2.0 UTF-8
@@ -634,6 +634,14 @@ class QuizPlugin < Plugin
 
   def cmd_fetch( m, params )
     fetch_data( m )
+  end
+
+
+  def cmd_refresh( m, params )
+    q = create_quiz ( m.channel )
+    q.questions.clear
+    fetch_data ( m )
+    cmd_quiz( m, params )
   end
 
 
@@ -906,6 +914,7 @@ plugin.map 'quiz joker',            :action => 'cmd_joker'
 plugin.map 'quiz score',            :action => 'cmd_score'
 plugin.map 'quiz score :player',    :action => 'cmd_score_player'
 plugin.map 'quiz fetch',            :action => 'cmd_fetch'
+plugin.map 'quiz refresh',          :action => 'cmd_refresh'
 plugin.map 'quiz top5',             :action => 'cmd_top5'
 plugin.map 'quiz top :number',      :action => 'cmd_top_number'
 plugin.map 'quiz stats',            :action => 'cmd_stats'
