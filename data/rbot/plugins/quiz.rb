@@ -2,9 +2,14 @@
 #
 # A trivia quiz game. Fast paced, featureful and fun.
 #
-# (c) 2006 Mark Kretschmann <markey@web.de>
-# (c) 2006 Jocke Andersson <ajocke@gmail.com>
-# (c) 2006 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# Author:: Mark Kretschmann <markey@web.de>
+# Author:: Jocke Andersson <ajocke@gmail.com>
+# Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# Author:: Yaohan Chen <yaohan.chen@gmail.com>
+#
+# (c) 2006 Mark Kretschmann, Jocke Andersson, Giuseppe Bilotta
+# (c) 2007 Giuseppe Bilotta, Yaohan Chen
+#
 # Licensed under GPL V2.
 
 # FIXME interesting fact: in the Quiz class, @registry.has_key? seems to be
@@ -39,7 +44,7 @@ Bold = "\002"
 #######################################################################
 class Quiz
   attr_accessor :registry, :registry_conf, :questions,
-    :question, :answer, :answer_core, :answer_array,
+    :question, :answers, :answer_cores, :canonical_answer, :answer_array,
     :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
 
   def initialize( channel, registry )
@@ -78,8 +83,9 @@ class Quiz
 
     @questions = @registry_conf["questions"]
     @question = nil
-    @answer = nil
-    @answer_core = nil
+    @answers = []
+    @answer_cores = []
+    @canonical_answer = nil
     # FIXME 2.0 UTF-8
     @answer_array = []
     @first_try = false
@@ -172,9 +178,7 @@ class QuizPlugin < Plugin
     @questions.clear
 
     # Fuse together and remove comments, then split
-    entries = data.gsub( /^#.*$/, "" ).split( "\nQuestion: " )
-    # First entry will be empty.
-    entries.delete_at(0)
+    entries = data.strip.gsub( /^#.*$/, "" ).split( /(?:^|\n+)Question: / )
 
     entries.each do |e|
       p = e.split( "\n" )
@@ -319,21 +323,27 @@ class QuizPlugin < Plugin
 
     nick = m.sourcenick.to_s 
 
-    if message == q.answer.downcase or message == q.answer_core.downcase
+    # Support multiple alternate answers and cores
+    answer = (q.answers|q.answer_cores).find { |ans| message == ans.downcase}
+    if answer
+        answer += " (hints were for alternate answer #{q.canonical_answer})" if answer != q.canonical_answer
+        # List canonical answer which the hint was based on, to avoid confusion
+        # FIXME display this more friendly
+
       points = 1
       if q.first_try
         points += 1
-        reply = "WHOPEEE! #{nick} got it on the first try! That's worth an extra point. Answer was: #{q.answer}"
+        reply = "WHOPEEE! #{nick} got it on the first try! That's worth an extra point. Answer was: #{answer}"
       elsif q.rank_table.length >= 1 and nick.downcase == q.rank_table[0][0].downcase
-        reply = "THE QUIZ CHAMPION defends his throne! Seems like #{nick} is invicible! Answer was: #{q.answer}"
+        reply = "THE QUIZ CHAMPION defends his throne! Seems like #{nick} is invicible! Answer was: #{answer}"
       elsif q.rank_table.length >= 2 and nick.downcase == q.rank_table[1][0].downcase
-        reply = "THE SECOND CHAMPION is on the way up! Hurry up #{nick}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{q.answer}"
+        reply = "THE SECOND CHAMPION is on the way up! Hurry up #{nick}, you only need #{q.rank_table[0][1].score - q.rank_table[1][1].score - 1} points to beat the king! Answer was: #{answer}"
       elsif    q.rank_table.length >= 3 and nick.downcase == q.rank_table[2][0].downcase
-        reply = "THE THIRD CHAMPION strikes again! Give it all #{nick}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{q.answer}"
+        reply = "THE THIRD CHAMPION strikes again! Give it all #{nick}, with #{q.rank_table[1][1].score - q.rank_table[2][1].score - 1} more points you'll reach the 2nd place! Answer was: #{answer}"
       else
         reply = @win_messages[rand( @win_messages.length )].dup
         reply.gsub!( "<who>", nick )
-        reply.gsub!( "<answer>", q.answer )
+        reply.gsub!( "<answer>", answer )
       end
 
       m.reply reply
@@ -416,38 +426,50 @@ class QuizPlugin < Plugin
 
     # Fill per-channel questions buffer
     if q.questions.empty?
-      temp = @questions.dup
-
-      temp.length.times do
-        i = rand( temp.length )
-        q.questions << temp[i]
-        temp.delete_at( i )
-      end
+      q.questions = @questions.sort_by { rand }
     end
 
-    i = rand( q.questions.length )
-    q.question = q.questions[i].question
-    q.answer   = q.questions[i].answer.gsub( "#", "" )
+    # pick a question and delete it (delete_at returns the deleted item)
+    picked = q.questions.delete_at( rand(q.questions.length) )
 
-    begin
-      q.answer_core = /(#)(.*)(#)/.match( q.questions[i].answer )[2]
-    rescue
-      q.answer_core = nil
+    q.question = picked.question
+    debug "Question: #{picked.question}"
+    debug "Answer: #{picked.answer}"
+    q.answers = picked.answer.split(/\s+\|\|\s+/).each { |ans| ans.strip }
+
+    q.answer_cores.clear
+    q.answers.each do |answer|
+        if /#(.+)#/ =~ answer
+            q.answer_cores << $1
+            answer.gsub!('#', '')
+        else
+            q.answer_cores << answer
+        end
     end
-    q.answer_core = q.answer.dup if q.answer_core == nil
 
     # Check if core answer is numerical and tell the players so, if that's the case
     # The rather obscure statement is needed because to_i and to_f returns 99(.0) for "99 red balloons", and 0 for "balloon"
-    q.question += "#{Color}07 (Numerical answer)#{Color}" if q.answer_core.to_i.to_s == q.answer_core or q.answer_core.to_f.to_s == q.answer_core
-
-    q.questions.delete_at( i )
+    # Doing this if *any* core answer is numerical. Maybe only checking the first one is more appropriate,
+    # because hints are based on the first alternate
+    #
+    # The "canonical answer" is also determined here, defined to be the first found numerical answer, or
+    # the first core.
+    numeric = q.answer_cores.find { |core| core.to_i.to_s == core or core.to_f.to_s == core }
+    if numeric
+        q.question += "#{Color}07 (Numerical answer)#{Color}"
+        q.canonical_answer = numeric
+    else
+        q.canonical_answer = q.answer_cores[0]
+    end
+    
+    debug "Canonical answer: #{q.canonical_answer}"
 
     q.first_try = true
 
     # FIXME 2.0 UTF-8
     q.hint = []
     q.answer_array.clear
-    q.answer_core.scan(/./u) { |ch|
+    q.canonical_answer.scan(/./u) { |ch|
       if is_sep(ch)
         q.hint << ch
       else
@@ -456,9 +478,10 @@ class QuizPlugin < Plugin
       q.answer_array << ch
     }
     q.hinted = false
+    debug "Initial hint: #{q.hint}"
 
     # Generate array of unique random range
-    q.hintrange = (0..q.hint.length-1).sort_by{rand}
+    q.hintrange = (0..q.hint.length-1).sort_by{ rand }
 
     m.reply "#{Bold}#{Color}03Question: #{Color}#{Bold}" + q.question
   end
@@ -470,7 +493,7 @@ class QuizPlugin < Plugin
     return unless @quizzes.has_key?( chan )
     q = @quizzes[chan]
 
-    m.reply "The correct answer was: #{q.answer}"
+    m.reply "The correct answer was: #{q.canonical_answer}"
 
     q.question = nil
 
@@ -510,7 +533,7 @@ class QuizPlugin < Plugin
       q.hinted = true
 
       # FIXME 2.0 UTF-8
-      if q.hint.to_s == q.answer_core
+      if q.hint.to_s == q.canonical_answer
         m.reply "#{Bold}#{Color}04BUST!#{Color}#{Bold} This round is over. #{Color}04Minus one point for #{nick}#{Color}."
 
         stats = nil
@@ -570,7 +593,7 @@ class QuizPlugin < Plugin
         jokers = "joker"
       end
       m.reply "#{Bold}#{Color}12JOKER!#{Color}#{Bold} #{nick} draws a joker and wins this round. You have #{player.jokers} #{jokers} left."
-      m.reply "The answer was: #{q.answer}."
+      m.reply "The answer was: #{q.canonical_answer}."
 
       q.question = nil
       cmd_quiz( m, nil ) if q.registry_conf["autoask"]
