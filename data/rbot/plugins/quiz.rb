@@ -1,3 +1,6 @@
+#-- vim:sw=2:et
+#++
+#
 # Plugin for the Ruby IRC bot (http://linuxbrit.co.uk/rbot/)
 #
 # A trivia quiz game. Fast paced, featureful and fun.
@@ -39,12 +42,56 @@ Bold = "\002"
 
 
 #######################################################################
+# CLASS QuizAnswer
+# Abstract an answer to a quiz question, by providing self as a string
+# and a core that can be answered as an alternative. It also provides
+# a boolean that tells if the core is numeric or not
+#######################################################################
+class QuizAnswer
+  attr_writer :info
+
+  def initialize(str)
+    @string = str.strip
+    @core = nil
+    if @string =~ /#(.+)#/
+      @core = $1
+      @string.gsub!('#', '')
+    end
+    raise ArgumentError, "empty string can't be a valid answer!" if @string.empty?
+    raise ArgumentError, "empty core can't be a valid answer!" if @core and @core.empty?
+
+    @numeric = (core.to_i.to_s == core) || (core.to_f.to_s == core)
+    @info = nil
+  end
+
+  def core
+    @core || @string
+  end
+
+  def numeric?
+    @numeric
+  end
+
+  def valid?(str)
+    str.downcase == core.downcase || str.downcase == @string.downcase
+  end
+
+  def to_str
+    [@string, @info].join
+  end
+  alias :to_s :to_str
+
+
+end
+
+
+#######################################################################
 # CLASS Quiz
 # One Quiz instance per channel, contains channel specific data
 #######################################################################
 class Quiz
   attr_accessor :registry, :registry_conf, :questions,
-    :question, :answers, :answer_cores, :canonical_answer, :answer_array,
+    :question, :answers, :canonical_answer, :answer_array,
     :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
 
   def initialize( channel, registry )
@@ -84,7 +131,6 @@ class Quiz
     @questions = @registry_conf["questions"]
     @question = nil
     @answers = []
-    @answer_cores = []
     @canonical_answer = nil
     # FIXME 2.0 UTF-8
     @answer_array = []
@@ -324,11 +370,11 @@ class QuizPlugin < Plugin
     nick = m.sourcenick.to_s 
 
     # Support multiple alternate answers and cores
-    answer = (q.answers|q.answer_cores).find { |ans| message == ans.downcase}
+    answer = q.answers.find { |ans| ans.valid?(message) }
     if answer
-        answer += " (hints were for alternate answer #{q.canonical_answer})" if answer != q.canonical_answer
-        # List canonical answer which the hint was based on, to avoid confusion
-        # FIXME display this more friendly
+      # List canonical answer which the hint was based on, to avoid confusion
+      # FIXME display this more friendly
+      answer.info = " (hints were for alternate answer #{q.canonical_answer.core})" if answer != q.canonical_answer and q.hinted
 
       points = 1
       if q.first_try
@@ -433,43 +479,27 @@ class QuizPlugin < Plugin
     picked = q.questions.delete_at( rand(q.questions.length) )
 
     q.question = picked.question
-    debug "Question: #{picked.question}"
-    debug "Answer: #{picked.answer}"
-    q.answers = picked.answer.split(/\s+\|\|\s+/).each { |ans| ans.strip }
+    q.answers = picked.answer.split(/\s+\|\|\s+/).map { |ans| QuizAnswer.new(ans) }
 
-    q.answer_cores.clear
-    q.answers.each do |answer|
-        if /#(.+)#/ =~ answer
-            q.answer_cores << $1
-            answer.gsub!('#', '')
-        else
-            q.answer_cores << answer
-        end
-    end
-
-    # Check if core answer is numerical and tell the players so, if that's the case
+    # Check if any core answer is numerical and tell the players so, if that's the case
     # The rather obscure statement is needed because to_i and to_f returns 99(.0) for "99 red balloons", and 0 for "balloon"
-    # Doing this if *any* core answer is numerical. Maybe only checking the first one is more appropriate,
-    # because hints are based on the first alternate
     #
     # The "canonical answer" is also determined here, defined to be the first found numerical answer, or
     # the first core.
-    numeric = q.answer_cores.find { |core| core.to_i.to_s == core or core.to_f.to_s == core }
+    numeric = q.answers.find { |ans| ans.numeric? }
     if numeric
         q.question += "#{Color}07 (Numerical answer)#{Color}"
         q.canonical_answer = numeric
     else
-        q.canonical_answer = q.answer_cores[0]
+        q.canonical_answer = q.answers.first
     end
     
-    debug "Canonical answer: #{q.canonical_answer}"
-
     q.first_try = true
 
     # FIXME 2.0 UTF-8
     q.hint = []
     q.answer_array.clear
-    q.canonical_answer.scan(/./u) { |ch|
+    q.canonical_answer.core.scan(/./u) { |ch|
       if is_sep(ch)
         q.hint << ch
       else
@@ -478,7 +508,6 @@ class QuizPlugin < Plugin
       q.answer_array << ch
     }
     q.hinted = false
-    debug "Initial hint: #{q.hint}"
 
     # Generate array of unique random range
     q.hintrange = (0..q.hint.length-1).sort_by{ rand }
@@ -533,7 +562,7 @@ class QuizPlugin < Plugin
       q.hinted = true
 
       # FIXME 2.0 UTF-8
-      if q.hint.to_s == q.canonical_answer
+      if q.hintrange.length == 0
         m.reply "#{Bold}#{Color}04BUST!#{Color}#{Bold} This round is over. #{Color}04Minus one point for #{nick}#{Color}."
 
         stats = nil
