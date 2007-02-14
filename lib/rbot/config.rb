@@ -65,6 +65,7 @@ module Irc
     alias :value :get
     def set(value, on_change = true)
       @manager.config[@key] = value
+      @manager.changed = true
       @on_change.call(@manager.bot, value) if on_change && @on_change
     end
     def unset
@@ -178,6 +179,7 @@ module Irc
     attr_reader :bot
     attr_reader :items
     attr_reader :config
+    attr_accessor :changed
 
     def initialize
       bot_associate(nil,true)
@@ -194,6 +196,7 @@ module Irc
       @bot = bot
       return unless @bot
 
+      @changed = false
       if(File.exist?("#{@bot.botclass}/conf.yaml"))
         begin
           newconfig = YAML::load_file("#{@bot.botclass}/conf.yaml")
@@ -208,6 +211,7 @@ module Irc
       # if we got here, we need to run the first-run wizard
       BotConfigWizard.new(@bot).run
       # save newly created config
+      @changed = true
       save
     end
 
@@ -249,6 +253,10 @@ module Irc
 
     # write current configuration to #{botclass}/conf.yaml
     def save
+      if not @changed
+        debug "Not writing conf.yaml (unchanged)"
+        return
+      end
       begin
         debug "Writing new conf.yaml ..."
         File.open("#{@bot.botclass}/conf.yaml.new", "w") do |file|
