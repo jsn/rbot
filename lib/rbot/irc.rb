@@ -644,7 +644,7 @@ module Irc
     #
     def matches?(arg)
       cmp = arg.to_irc_netmask(:casemap => casemap)
-      debug "Matching #{self.fullform} against #{arg.fullform}"
+      debug "Matching #{self.fullform} against #{arg.inspect} (#{cmp.fullform})"
       [:nick, :user, :host].each { |component|
         us = self.send(component).irc_downcase(casemap)
         them = cmp.send(component).irc_downcase(casemap)
