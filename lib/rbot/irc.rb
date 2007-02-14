@@ -1343,7 +1343,7 @@ module Irc
         :nicklen => 9,
         :prefix => {
           :modes => [:o, :v],
-          :prefixes => [:"@", :+],
+          :prefixes => [:"@", :+]
         },
         :safelist => nil,
         :statusmsg => nil,
