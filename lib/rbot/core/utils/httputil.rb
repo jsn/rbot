@@ -3,7 +3,13 @@ module Utils
 
 require 'resolv'
 require 'net/http'
-require 'net/https'
+begin
+  require 'net/https'
+rescue LoadError => e
+  error "Coudln't load 'net/https':  #{e.inspect}"
+  error "Secured HTTP connections will fail"
+end
+
 Net::HTTP.version_1_2
 
 # class for making http requests easier (mainly for plugins to use)
