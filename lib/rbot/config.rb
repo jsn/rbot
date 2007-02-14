@@ -269,6 +269,7 @@ module Irc
         debug "Officializing conf.yaml ..."
         File.rename("#{@bot.botclass}/conf.yaml.new",
                     "#{@bot.botclass}/conf.yaml")
+        @changed = false
       rescue => e
         error "failed to write configuration file conf.yaml! #{$!}"
         error "#{e.class}: #{e}"
