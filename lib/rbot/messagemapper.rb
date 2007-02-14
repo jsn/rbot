@@ -417,7 +417,7 @@ module Irc
         debug "Requirements for #{name}: #{has_req.inspect}"
         case has_req
         when nil
-          sub = is_single ? "\\S+" : ".*"
+          sub = is_single ? "\\S+" : ".*?"
         when Regexp
           # Remove captures and the ^ and $ that are sometimes placed in requirement regexps
           sub = has_req.remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
