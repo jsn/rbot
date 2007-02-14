@@ -19,4 +19,3 @@ class AutoRejoinPlugin < Plugin
 end
 
 plugin = AutoRejoinPlugin.new
-plugin.register("autorejoin")

@@ -70,16 +70,12 @@ class ImdbPlugin < Plugin
     "imdb <string> => search http://www.imdb.org for <string>"
   end
 
-  def privmsg(m)
-    unless(m.params && m.params.length > 0)
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
-    end
-
+  def imdb(m, params)
+    what = params[:what].to_s
     i = Imdb.new(@bot)
-    info = i.info(m.params)
+    info = i.info(what)
     if !info
-      m.reply "Nothing found for #{m.params}"
+      m.reply "Nothing found for #{what}"
       return nil
     end
     m.reply "#{info[1]} : #{info[0]}"
@@ -88,5 +84,5 @@ class ImdbPlugin < Plugin
 end
 
 plugin = ImdbPlugin.new
-plugin.register("imdb")
+plugin.map "imdb *what"
 

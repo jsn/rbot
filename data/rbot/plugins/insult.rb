@@ -208,58 +208,53 @@ class InsultPlugin < Plugin
 ]
   
   def help(plugin, topic="")
-    if(plugin == "insult")
-      return "insult me|<person> => insult you or <person>"
-    elsif(plugin == "msginsult")
-      return "msginsult <nick> => insult <nick> via /msg"
-    else
-      return "insult module topics: msginsult, insult"
-    end
+    return "[msg]insult me|<person> => insult you or <person>. msginsult insults in private"
   end
-  def name
-    "insult"
-  end
-  def privmsg(m)
-    suffix=""
-    unless(m.params)
-      m.reply "incorrect usage: " + help(m.plugin)
-      return
-    end
-    msgto = m.channel
-    if(m.plugin =~ /^msginsult$/)
-      prefix = "you are "
-      if (m.params =~ /^#/)
-        prefix += "all "
-      end
-      msgto = m.params
-      suffix = " (from #{m.sourcenick})"
-    elsif(m.params =~ /^me$/)
+
+  def insult(m, params)
+    who = params[:who]
+    who = m.sourcenick if ["me", @bot.nick].include?(who)
+
+    priv = params[:priv] || m.plugin == "msginsult"
+
+    case who
+    when /^#/
+      prefix = "you are all "
+    when m.sourcenick
       prefix = "you are "
     else
-      who = m.params
-      if (who == @bot.nick)
-        who = m.sourcenick
-      end
-      prefix = "#{who} is "
+      prefix = priv ? "you are " : "#{who} is "
     end
+
+    suffix = ""
+
+    if priv
+      msgto = who
+      suffix = " (from #{m.sourcenick})" unless who == m.sourcenick
+    else
+      msgto = m.channel
+    end
+
     insult = generate_insult
     @bot.say msgto, prefix + insult + suffix
   end
+
   def generate_insult
-    adj = @@adj[rand(@@adj.length)]
+    adj = @@adj.pick_one
     adj2 = ""
     loop do
-      adj2 = @@adj[rand(@@adj.length)]
+      adj2 = @@adj.pick_one
       break if adj2 != adj
     end
-    amt = @@amt[rand(@@amt.length)]
-    noun = @@noun[rand(@@noun.length)]
+    amt = @@amt.pick_one
+    noun = @@noun.pick_one
     start = "a "
-    start = "an " if ['a','e','i','o','u'].include?(adj[0].chr)
+    start = "an " if ['a','e','i','o','u'].include?(adj[0,1])
     "#{start}#{adj} #{amt} of #{adj2} #{noun}"
   end
 end
+
 plugin = InsultPlugin.new
-plugin.register("insult")
-plugin.register("msginsult")
+plugin.map "insult :who [:priv]", :action => :insult, :requirements => { :priv => /in private/ }
+plugin.map "msginsult :who", :action => :insult
 

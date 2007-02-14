@@ -67,20 +67,20 @@ class SeenPlugin < Plugin
       ret += Utils.secs_to_string(ago) + " ago, "
     end
 
-    case saw.type
-    when "PUBLIC"
+    case saw.type.to_sym
+    when :PUBLIC
       ret += "saying #{saw.message}"
-    when "ACTION"
+    when :ACTION
       ret += "doing #{saw.nick} #{saw.message}"
-    when "NICK"
+    when :NICK
       ret += "changing nick from #{saw.nick} to #{saw.message}"
-    when "PART"
+    when :PART
       ret += "leaving #{saw.where}"
-    when "JOIN"
+    when :JOIN
       ret += "joining #{saw.where}"
-    when "QUIT"
+    when :QUIT
       ret += "quitting IRC (#{saw.message})"
-    when "TOPIC"
+    when :TOPIC
       ret += "changing the topic of #{saw.where} to #{saw.message}"
     end
   end

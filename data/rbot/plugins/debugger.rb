@@ -120,7 +120,7 @@ end
 
 
 plugin = DebugPlugin.new
-plugin.register( "debug" )
+
 plugin.default_auth( 'start', false )
 plugin.default_auth( 'stop', false )
 plugin.default_auth( 'dumpstrings', false )

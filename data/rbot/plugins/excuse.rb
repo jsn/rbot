@@ -459,12 +459,12 @@ class ExcusePlugin < Plugin
   def help(plugin, topic="")
     "excuse => supply a random excuse"
   end
-  def privmsg(m)
-    excuse = @@excuses[rand(@@excuses.length)]
-    m.reply excuse
+
+  def excuse(m, params)
+    m.reply @@excuses.pick_one
   end
 end
 
 plugin = ExcusePlugin.new
-plugin.register("excuse")
+plugin.map "excuse"
 

@@ -158,7 +158,7 @@ end
 
 
 plugin = ScriptPlugin.new
-plugin.register( "script" )
+
 plugin.default_auth( 'edit', false )
 plugin.default_auth( 'eval', false )
 plugin.default_auth( 'echo', false )
