@@ -1342,8 +1342,8 @@ module Irc
         :network => nil,
         :nicklen => 9,
         :prefix => {
-          :modes => 'ov'.scan(/./),
-          :prefixes => '@+'.scan(/./)
+          :modes => [:o, :v],
+          :prefixes => [:"@", :+],
         },
         :safelist => nil,
         :statusmsg => nil,
