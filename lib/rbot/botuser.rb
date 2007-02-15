@@ -263,18 +263,19 @@ module Irc
       # This method sets the password if the proposed new password
       # is valid
       def password=(pwd=nil)
-        if pwd
+        pass = pwd.to_s
+        if pass.empty?
+          reset_password
+        else
           begin
-            raise InvalidPassword, "#{pwd} contains invalid characters" if pwd !~ /^[A-Za-z0-9]+$/
-            raise InvalidPassword, "#{pwd} too short" if pwd.length < 4
-            @password = pwd
+            raise InvalidPassword, "#{pass} contains invalid characters" if pass !~ /^[A-Za-z0-9]+$/
+            raise InvalidPassword, "#{pass} too short" if pass.length < 4
+            @password = pass
           rescue InvalidPassword => e
             raise e
           rescue => e
-            raise InvalidPassword, "Exception #{e.inspect} while checking #{pwd}"
+            raise InvalidPassword, "Exception #{e.inspect} while checking #{pass.inspect} (#{pwd.inspect})"
           end
-        else
-          reset_password
         end
       end
 
