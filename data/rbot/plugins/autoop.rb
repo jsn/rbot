@@ -70,8 +70,5 @@ end
 plugin = AutoOP.new
 
 plugin.map 'autoop list', :action => 'list'
-plugin.map 'autoop add :mask *channels', :action => 'add'
-plugin.map 'autoop add :mask', :action => 'add'
-plugin.map 'autoop rm :mask *channels', :action => 'rm'
-plugin.map 'autoop rm :mask', :action => 'rm'
-
+plugin.map 'autoop add :mask [*channels]', :action => 'add'
+plugin.map 'autoop rm :mask [*channels]', :action => 'rm'
