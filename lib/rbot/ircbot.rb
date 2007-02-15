@@ -498,6 +498,9 @@ class IrcBot
       unless ignored
         @plugins.delegate "listen", m
         @plugins.privmsg(m) if m.address?
+	if not m.replied
+          @plugins.delegate "unreplied", m
+        end
       end
     }
     @client[:notice] = proc { |data|

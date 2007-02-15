@@ -61,10 +61,13 @@ module Plugins
                          etc.
 
   privmsg(PrivMessage)::
-                         called for a PRIVMSG if the first word matches one
+                         Called for a PRIVMSG if the first word matches one
                          the plugin register()d for. Use m.plugin to get
                          that word and m.params for the rest of the message,
                          if applicable.
+
+  unreplied(PrivMessage)::
+                         Called for a PRIVMSG which has not been replied to.
 
   kick(KickMessage)::
                          Called when a user (or the bot) is kicked from a

@@ -489,8 +489,8 @@ class Keywords < Plugin
     end
   end
 
-  def listen(m)
-    return if m.address?
+  def unreplied(m)
+    # return if m.address?
     # in channel message, not to me
     # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
     # keyword lookup.
