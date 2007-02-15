@@ -1331,8 +1331,8 @@ module Irc
           :typec => nil, # Type C: needs a parameter when set
           :typed => nil  # Type D: must not have a parameter
         },
-        :channellen => 200,
-        :chantypes => "#&",
+        :channellen => 50,
+        :chantypes => "#&!+",
         :excepts => nil,
         :idchan => {},
         :invex => nil,
