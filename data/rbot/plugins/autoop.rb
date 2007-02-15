@@ -1,70 +1,75 @@
 class AutoOP < Plugin
-    def help(plugin, topic="")
-        "perform autoop based on hostmask - usage: add <hostmask> [channel channel ...], rm <hostmask> [channel], list - list current ops. If you don't specify which channels, all channels are assumed"
-    end
-    
-    def join(m)
-      return if m.address?
+  BotConfig.register BotConfigBooleanValue.new('autoop.on_nick',
+    :default => true,
+    :desc => "Determines if the bot should auto-op when someone changes nick and the new nick matches a listed netmask")
+
+  def help(plugin, topic="")
+    return "perform autoop based on hostmask - usage: add <hostmask> [channel channel ...], rm <hostmask> [channel], list - list current ops. If you don't specify which channels, all channels are assumed"
+  end
+
+  def join(m)
+    return if m.address?
+    @registry.each { |mask,channels|
+      if m.source.matches?(mask.to_irc_netmask(:server => m.server)) &&
+        (channels.empty? || channels.include?(m.channel.to_s))
+        @bot.mode(m.channel, "+o", m.source.nick)
+        return
+      end
+    }
+  end
+
+  def nick(m)
+    return if m.address?
+    return unless @bot.config['autoop.on_nick']
+    is_on = m.server.channels.inject(ChannelList.new) { |list, ch|
+      list << ch if ch.users.include?(m.source)
+      list
+    }
+    is_on.each { |channel|
+      ch = channel.to_s
       @registry.each { |mask,channels|
         if m.source.matches?(mask.to_irc_netmask(:server => m.server)) &&
-            (channels.empty? || channels.include?(m.channel.to_s))
-          @bot.mode(m.channel, "+o", m.source.nick)
+          (channels.empty? || channels.include?(ch))
+          @bot.mode(ch, "+o", m.source.nick)
           return
         end
       }
-    end
+    }
+  end
 
-    def nick(m)
-      return if m.address?
-      is_on = m.server.channels.inject(ChannelList.new) { |list, ch|
-        list << ch if ch.users.include?(m.source)
-        list
-      }
-      is_on.each { |channel|
-        ch = channel.to_s
-        @registry.each { |mask,channels|
-          if m.source.matches?(mask.to_irc_netmask(:server => m.server)) &&
-            (channels.empty? || channels.include?(ch))
-            @bot.mode(ch, "+o", m.source.nick)
-            return
-          end
-        }
-      }
-    end
+  def add(m, params)
+    @registry[params[:mask]] = params[:channels].dup
+    m.okay
+  end
 
-    def add(m, params)
-      @registry[params[:mask]] = params[:channels].dup
-      m.okay
+  def rm(m, params)
+    unless @registry.has_key?(params[:mask])
+      m.reply @bot.lang.get('dunno')
+      return
     end
-
-    def rm(m, params)
-      unless @registry.has_key?(params[:mask])
-        m.reply @bot.lang.get('dunno')
-        return
+    if (!params[:channels].empty? && @registry[params[:mask]] != nil)
+      params[:channels].each do |c|
+        @registry[params[:mask]] = @registry[params[:mask]].reject {|ele| ele =~ /^#{c}$/i}
       end
-      if (!params[:channels].empty? && @registry[params[:mask]] != nil)
-        params[:channels].each do |c|
-          @registry[params[:mask]] = @registry[params[:mask]].reject {|ele| ele =~ /^#{c}$/i}
-        end
-        if @registry[params[:mask]].empty?
-          @registry.delete(params[:mask])
-        end
-      else
+      if @registry[params[:mask]].empty?
         @registry.delete(params[:mask])
       end
-      m.okay
+    else
+      @registry.delete(params[:mask])
     end
+    m.okay
+  end
 
-    def list(m, params)
-      debug @registry.length
-      if(@registry.length > 0)
-        @registry.each { |mask,channels|
-          m.reply "#{mask} in #{channels.empty? ? 'all channels' : channels.join(', ')}"
-        }
-      else
-        m.reply "No entries"
-      end
+  def list(m, params)
+    debug @registry.length
+    if(@registry.length > 0)
+      @registry.each { |mask,channels|
+        m.reply "#{mask} in #{channels.empty? ? 'all channels' : channels.join(', ')}"
+      }
+    else
+      m.reply "No entries"
     end
+  end
 end
 
 plugin = AutoOP.new
