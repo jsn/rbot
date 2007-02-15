@@ -16,21 +16,21 @@ HE = [
     'Green Beret','waffle chef','vampire hunter','messiah','astronaut','sorceror','card sharp','matador',
     'barbarian'],
     
-    ['with a robot buddy named Sparky.','whom everyone believes is mad.','gone bad.',
-    'with a mysterious suitcase handcuffed to his arm.','living undercover at Ringling Bros. Circus.',
-    'searching for his wife''s true killer.','who dotes on his loving old ma.','looking for ''the Big One.''',
-    'who knows the secret of the alien invasion.','on the edge.','on a mission from God.','with a secret.',
-    'in drag.','plagued by the memory of his family''s brutal murder.','looking for a cure to the poison coursing through his veins.',
-    'moving from town to town, helping folk in trouble.',
-    'who must take medication to keep him sane.','who hangs with the wrong crowd.',
-    'possessed of the uncanny powers of an insect.','with a winning smile and a way with the ladies.',
-    'fleeing from a secret government programme.','from the ''hood.','haunted by an iconic dead American confidante.',
-    'with a passion for fast cars.','trapped in a world he never made.','in a wheelchair.',
-    'on the hunt for the last specimen of a great and near-mythical creature.','on the run.',
-    'for the 21st century.','who hides his scarred face behind a mask.','on the wrong side of the law.',
-    'with no name.','from the Mississippi delta.','with acid for blood.','with nothing left to lose.',
-    'haunted by memories of ''Nam.','on a search for his missing sister.','on his last day in the job.',
-    'from a doomed world.','who believes he can never love again.']
+    ['with a robot buddy named Sparky','whom everyone believes is mad','gone bad',
+    'with a mysterious suitcase handcuffed to his arm','living undercover at Ringling Bros. Circus',
+    'searching for his wife''s true killer','who dotes on his loving old ma','looking for ''the Big One''',
+    'who knows the secret of the alien invasion','on the edge','on a mission from God','with a secret',
+    'in drag','plagued by the memory of his family''s brutal murder','looking for a cure to the poison coursing through his veins',
+    'moving from town to town, helping folk in trouble',
+    'who must take medication to keep him sane','who hangs with the wrong crowd',
+    'possessed of the uncanny powers of an insect','with a winning smile and a way with the ladies',
+    'fleeing from a secret government programme','from the ''hood','haunted by an iconic dead American confidante',
+    'with a passion for fast cars','trapped in a world he never made','in a wheelchair',
+    'on the hunt for the last specimen of a great and near-mythical creature','on the run',
+    'for the 21st century','who hides his scarred face behind a mask','on the wrong side of the law',
+    'with no name','from the Mississippi delta','with acid for blood','with nothing left to lose',
+    'haunted by memories of ''Nam','on a search for his missing sister','on his last day in the job',
+    'from a doomed world','who believes he can never love again']
 
 ]
 
@@ -55,21 +55,21 @@ SHE = [
     'safe cracker','traffic cop','research scientist','queen of the dead','Hell''s Angel','museum curator',
     'advertising executive','widow','mercenary','socialite'],
     
-    ['on her way to prison for a murder she didn''t commit.','trying to make a difference in a man''s world.',
-    'with the soul of a mighty warrior.','looking for love in all the wrong places.','with an MBA from Harvard.',
-    'who hides her beauty behind a pair of thick-framed spectacles.','with the power to see death.',
-    'descended from a line of powerful witches.','from a family of eight older brothers.','with a flame-thrower.',
-    'with her own daytime radio talk show.','living on borrowed time.','who can talk to animals.',
-    'prone to fits of savage, blood-crazed rage.','who don''t take no shit from nobody.','with a knack for trouble.',
-    'who believes she is the reincarnation of an ancient Egyptian queen.','fleeing from a Satanic cult.',
-    'on the trail of a serial killer.','with a birthmark shaped like Liberty''s torch.',
-    'in the witness protection scheme.','from out of town.','from aristocratic European stock.',
-    'living homeless in New York''s sewers.','with only herself to blame.','from beyond the grave',
-    'married to the Mob.','from the wrong side of the tracks.','from a secret island of warrior women.',
-    'from Mars.','with someone else''s memories.','from a different time and place.','operating on the wrong side of the law.',
-    'who inherited a spooky stately manor from her late maiden aunt.','who dreams of becoming Elvis.',
-    'with a song in her heart and a spring in her step.','in the wrong place at the wrong time.',
-    'with an incredible destiny.','with the power to bend men''s minds.','with an evil twin sister.']
+    ['on her way to prison for a murder she didn''t commit','trying to make a difference in a man''s world',
+    'with the soul of a mighty warrior','looking for love in all the wrong places','with an MBA from Harvard',
+    'who hides her beauty behind a pair of thick-framed spectacles','with the power to see death',
+    'descended from a line of powerful witches','from a family of eight older brothers','with a flame-thrower',
+    'with her own daytime radio talk show','living on borrowed time','who can talk to animals',
+    'prone to fits of savage, blood-crazed rage','who don''t take no shit from nobody','with a knack for trouble',
+    'who believes she is the reincarnation of an ancient Egyptian queen','fleeing from a Satanic cult',
+    'on the trail of a serial killer','with a birthmark shaped like Liberty''s torch',
+    'in the witness protection scheme','from out of town','from aristocratic European stock',
+    'living homeless in New York''s sewers','with only herself to blame','from beyond the grave',
+    'married to the Mob','from the wrong side of the tracks','from a secret island of warrior women',
+    'from Mars','with someone else''s memories','from a different time and place','operating on the wrong side of the law',
+    'who inherited a spooky stately manor from her late maiden aunt','who dreams of becoming Elvis',
+    'with a song in her heart and a spring in her step','in the wrong place at the wrong time',
+    'with an incredible destiny','with the power to bend men''s minds','with an evil twin sister']
 
 ]
 
@@ -98,24 +98,21 @@ class TheyFightCrime < Plugin
     end
     
     def get_random_things(thing_array)
-        thing_array.map { |things| things[rand(things.length)] }
+        thing_array.map { |things| things.pick_one }
     end
     
-    def do_movieplot(m, params)
+    def movieplot(m, params)
         he_things = get_random_things(HE)
         she_things = get_random_things(SHE)
-        m.reply "Summary: He's #{he_things.join " "} She's #{she_things.join " "} They fight crime."
+        m.reply "Summary: He's #{he_things.join " "}. She's #{she_things.join " "}. They fight crime."
     end
 
-    def do_movietitle(m, params)
+    def movietitle(m, params)
         title_things = get_random_things(TITLE)
         m.reply "Title: #{title_things.join " "}"
     end
 end
 
 plugin = TheyFightCrime.new
-plugin.map 'movieplot', :action => 'do_movieplot'
-plugin.map 'movietitle', :action => 'do_movietitle'
-
-
-
+plugin.map 'movieplot'
+plugin.map 'movietitle'

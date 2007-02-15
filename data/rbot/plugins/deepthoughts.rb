@@ -81,15 +81,9 @@ class DeepThoughts < Plugin
     end
     
     def deepthought(m, params)
-        thought = THOUGHTS[rand(THOUGHTS.length)]
-        m.reply thought
+        m.reply THOUGHTS.pick_one
     end
 end
 
 plugin = DeepThoughts.new
 plugin.map 'deepthought'
-#plugin.map 'movieplot', :action => 'do_movieplot'
-#plugin.map 'movietitle', :action => 'do_movietitle'
-
-
-
