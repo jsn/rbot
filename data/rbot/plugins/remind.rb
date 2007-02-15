@@ -136,14 +136,12 @@ class RemindPlugin < Plugin
 
     if(repeat)
       @reminders[who][subject] = @bot.timer.add(period) {
-        time = Time.now + period
-        tstr = time.strftime("%H:%M:%S")
+        tstr = (Time.now + period).time.strftime("%H:%M:%S")
         @bot.say who, "repeat reminder (next at #{tstr}): #{subject}"
       }
     else
       @reminders[who][subject] = @bot.timer.add_once(period) {
-        time = Time.now + period
-        tstr = time.strftime("%H:%M:%S")
+        tstr = Time.now.strftime("%H:%M:%S")
         @bot.say who, "reminder (#{tstr}): #{subject}"
       }
     end
