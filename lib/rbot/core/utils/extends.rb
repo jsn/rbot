@@ -133,9 +133,9 @@ class ::Regexp
   HEX_DIGITS = /#{HEX_DIGIT}+/
   HEX_OCTET = /#{HEX_DIGIT}#{HEX_DIGIT}?/
   DEC_OCTET = /[01]?\d?\d|2[0-4]\d|25[0-5]/
-  DEC_IP = /#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}/
-  HEX_IP = /#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}/
-  IP = /#{DEC_IP}|#{HEX_IP}/
+  DEC_IP_ADDR = /#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}/
+  HEX_IP_ADDR = /#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}/
+  IP_ADDR = /#{DEC_IP_ADDR}|#{HEX_IP_ADDR}/
 
 end
 
