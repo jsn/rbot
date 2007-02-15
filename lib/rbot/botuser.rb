@@ -268,7 +268,7 @@ module Irc
           reset_password
         else
           begin
-            raise InvalidPassword, "#{pass} contains invalid characters" if pass !~ /^[A-Za-z0-9]+$/
+            raise InvalidPassword, "#{pass} contains invalid characters" if pass !~ /^[\x21-\x7e]+$/
             raise InvalidPassword, "#{pass} too short" if pass.length < 4
             @password = pass
           rescue InvalidPassword => e
