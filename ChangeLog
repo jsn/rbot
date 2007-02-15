@@ -2,6 +2,9 @@
 
 	* Plugin: new unreplied() method to handle PRIVMSGs which have not
 	been replied to.
+	* Regexp: more regexp madness. BasicUserMessage and derivate classes
+	now have a new method parse_channel_list() to parse list of channel
+	names.
 
 2007-02-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
