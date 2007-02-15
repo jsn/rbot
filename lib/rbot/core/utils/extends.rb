@@ -66,4 +66,46 @@ class ::String
   end
 end
 
+# Extensions to the Regexp class, with some commonly used regular expressions.
+#
+module ::Rx
+
+
+  # We start with some IRC related regular expressions, used to match
+  # Irc::User nicks and Irc::Channel names
+  #
+  # For each of them we define three versions of the regular expression:
+  #  * a generic one, which should match for any server but may turn out to match
+  #    more than a specific server would accept
+  #  * an RFC-compliant matcher
+  #  * TODO a server-specific one that uses the Irc::Server#supports method to build
+  #    a matcher valid for a particular server.
+  #
+  module Irc
+    CHAN_FIRST = /[#&+]/
+    CHAN_SAFE = /![A-Z0-9]{5}/
+    CHAN_ANY = /[^\x00\x07\x0A\x0D ,:]/
+    GENERIC_CHAN = /(?:#{CHAN_FIRST}|#{CHAN_SAFE})#{CHAN_ANY}+/
+    RFC_CHAN = /#{CHAN_FIRST}#{CHAN_ANY}{1,49}|#{CHAN_SAFE}#{CHAN_ANY}{1,44}/
+
+    SPECIAL_CHAR = /[\x5b-\x60\x7b-\x7d]/
+    NICK_FIRST = /#{SPECIAL_CHAR}|[[:alpha:]]/
+    NICK_ANY = /#{SPECIAL_CHAR}|[[:alnum:]]|-/
+    GENERIC_NICK = /#{NICK_FIRST}#{NICK_ANY}+/
+    RFC_NICK = /#{NICK_FIRST}#{NICK_ANY}{0,8}/
+  end
+
+
+  # Next, some general purpose ones
+  DIGITS = /[0-9]+/
+  HEX_DIGIT = /[0-9A-Za-z]/
+  HEX_DIGITS = /#{HEX_DIGIT}+/
+  HEX_OCTET = /#{HEX_DIGIT}#{HEX_DIGIT}?/
+  DEC_OCTET = /[01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5]/
+  DEC_IP = /#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}/
+  HEX_IP = /#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}/
+  IP = /#{DEC_IP}|#{HEX_IP}/
+
+end
+
 
