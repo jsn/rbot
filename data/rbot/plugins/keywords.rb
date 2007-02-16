@@ -490,11 +490,9 @@ class Keywords < Plugin
   end
 
   def unreplied(m)
-    # return if m.address?
-    # in channel message, not to me
     # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
     # keyword lookup.
-    if !@bot.config["keyword.address"] && m.message =~ /^(.*\S)\s*\?\s*$/
+    if m.message =~ /^(.*\S)\s*\?\s*$/ and (m.address? or not @bot.config["keyword.address"])
       keyword_lookup m, $1, true if @bot.auth.allow?("keyword", m.source)
     elsif @bot.config["keyword.listen"] && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/)
       # TODO MUCH more selective on what's allowed here
