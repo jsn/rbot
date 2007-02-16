@@ -550,6 +550,8 @@ class QuizPlugin < Plugin
       when  1..1000 then 1
       end
 
+      debug "Hintrange before: #{q.hintrange.inspect}"
+
       # FIXME 2.0 UTF-8
       num_chars.times do
         begin
@@ -561,8 +563,10 @@ class QuizPlugin < Plugin
       m.reply "Hint: #{q.hint}"
       q.hinted = true
 
+      debug "Hintrange before: #{q.hintrange.inspect}"
+
       # FIXME 2.0 UTF-8
-      if q.hintrange.length == 0
+      if q.hint == q.answer_array
         m.reply "#{Bold}#{Color}04BUST!#{Color}#{Bold} This round is over. #{Color}04Minus one point for #{nick}#{Color}."
 
         stats = nil
