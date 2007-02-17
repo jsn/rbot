@@ -41,7 +41,7 @@ class BansPlugin < Plugin
   end
 
   def make_badword_rx(txt)
-    return /\b#{txt}\b/i
+    return /\b(?:#{txt})\b/i
   end
 
   def initialize
