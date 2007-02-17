@@ -836,6 +836,8 @@ module Irc
     #
     # ==server events currently supported:
     #
+    # TODO handle errors ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, ERR_CANNOTSENDTOCHAN
+    #
     # welcome::     server welcome message on connect
     # yourhost::    your host details (on connection)
     # created::     when the server was started
@@ -914,32 +916,29 @@ module Irc
       argv = []
       params.scan(/(?!:)(\S+)|:(.*)/) { argv << ($1 || $2) } if params
 
-      case command
-      when 'PING'
-        data[:pingid] = argv[0]
-        handle(:ping, data)
-      when 'PONG'
-        data[:pingid] = argv[0]
-        handle(:pong, data)
-      when /^(\d+)$/            # numerical server message
+      if command =~ /^(\d+)$/ # Numeric replies
 	data[:nick] = argv[0]
         # A numeric reply /should/ be directed at the client, except when we're connecting with a used nick, in which case
         # it's directed at '*'
-	warning "Server reply #{serverstring.inspect} directed at #{data[:nick]} instead of client (#{@client.nick})" unless [@client.nick, '*'].include?(data[:nick])
+        not_us = !([@client.nick, '*'].include?(data[:nick]))
+        if not_us
+          warning "Server reply #{serverstring.inspect} directed at #{data[:nick]} instead of client (#{@client.nick})"
+        end
+
         num=command.to_i
         case num
         when RPL_WELCOME
           # "Welcome to the Internet Relay Network
           # <nick>!<user>@<host>"
+          if not_us
+            warning "Server thinks client (#{@client.inspect}) has a different nick"
+            @client.nick = data[:nick]
+          end
           if argv[1] =~ /(\S+)(?:!(\S+?))?@(\S+)/
             nick = $1
             user = $2
             host = $2
             warning "Welcome message nick mismatch (#{nick} vs #{data[:nick]})" if nick != data[:nick]
-            if nick and nick != @client.nick
-              warning "Server thinks client (#{@client.inspect}) has a different nick"
-              @client.nick = nick
-            end
             @client.user = user if user
             @client.host = host if host
           end
@@ -1104,8 +1103,18 @@ module Irc
         else
           handle(:unknown, data)
         end
-      # end of numeric replies
-      when 'PRIVMSG'
+	return # We've processed the numeric reply
+      end
+
+      # Otherwise, the command should be a single word
+      case command.to_sym
+      when :PING
+        data[:pingid] = argv[0]
+        handle(:ping, data)
+      when :PONG
+        data[:pingid] = argv[0]
+        handle(:pong, data)
+      when :PRIVMSG
         # you can either bind to 'PRIVMSG', to get every one and
         # parse it yourself, or you can bind to 'MSG', 'PUBLIC',
         # etc and get it all nicely split up for you.
@@ -1128,7 +1137,7 @@ module Irc
         else
           handle(:msg, data)
         end
-      when 'NOTICE'
+      when :NOTICE
         begin
           data[:target] = @server.user_or_channel(argv[0])
         rescue
@@ -1146,7 +1155,7 @@ module Irc
           # "server notice" (not from user, noone to reply to)
           handle(:snotice, data)
         end
-      when 'KICK'
+      when :KICK
         data[:channel] = @server.channel(argv[0])
         data[:target] = @server.user(argv[1])
         data[:message] = argv[2]
@@ -1157,7 +1166,7 @@ module Irc
         end
 
         handle(:kick, data)
-      when 'PART'
+      when :PART
         data[:channel] = @server.channel(argv[0])
         data[:message] = argv[1]
 
@@ -1167,7 +1176,7 @@ module Irc
         end
 
         handle(:part, data)
-      when 'QUIT'
+      when :QUIT
         data[:message] = argv[0]
         data[:was_on] = @server.channels.inject(ChannelList.new) { |list, ch|
           list << ch if ch.has_user?(data[:source])
@@ -1177,23 +1186,23 @@ module Irc
         @server.delete_user(data[:source])
 
         handle(:quit, data)
-      when 'JOIN'
+      when :JOIN
         data[:channel] = @server.channel(argv[0])
         data[:channel].add_user(data[:source])
 
         handle(:join, data)
-      when 'TOPIC'
+      when :TOPIC
         data[:channel] = @server.channel(argv[0])
         data[:topic] = Channel::Topic.new(argv[1], data[:source], Time.new)
         data[:channel].topic.replace(data[:topic])
 
         handle(:changetopic, data)
-      when 'INVITE'
+      when :INVITE
         data[:target] = @server.user(argv[0])
         data[:channel] = @server.channel(argv[1])
 
         handle(:invite, data)
-      when 'NICK'
+      when :NICK
         data[:is_on] = @server.channels.inject(ChannelList.new) { |list, ch|
           list << ch if ch.has_user?(data[:source])
           list
@@ -1206,7 +1215,7 @@ module Irc
         debug "#{data[:oldnick]} (now #{data[:newnick]}) was on #{data[:is_on].join(', ')}"
 
         handle(:nick, data)
-      when 'MODE'
+      when :MODE
         # MODE ([+-]<modes> (<params>)*)*
         # When a MODE message is received by a server,
         # Type C will have parameters too, so we must
