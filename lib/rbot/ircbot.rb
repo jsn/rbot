@@ -438,7 +438,6 @@ class IrcBot
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
     @client = IrcClient.new
-    myself.nick = @config['irc.nick']
 
     # Channels where we are quiet
     # Array of channels names where the bot should be quiet
@@ -691,6 +690,8 @@ class IrcBot
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
     quit if $interrupted > 0
+    myself.nick = @config['irc.nick']
+    myself.user = @config['irc.user']
   end
 
   # begin event handling loop

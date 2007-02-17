@@ -922,29 +922,31 @@ module Irc
         data[:pingid] = argv[0]
         handle(:pong, data)
       when /^(\d+)$/            # numerical server message
+	data[:nick] = argv[0]
+        # A numeric reply /should/ be directed at the client, except when we're connecting with a used nick, in which case
+        # it's directed at '*'
+	warning "Server reply #{serverstring.inspect} directed at #{data[:nick]} instead of client (#{@client.nick})" unless [@client.nick, '*'].include?(data[:nick])
         num=command.to_i
         case num
         when RPL_WELCOME
           # "Welcome to the Internet Relay Network
           # <nick>!<user>@<host>"
-          case argv[1]
-          when /((\S+)!(\S+))/
-            data[:netmask] = $1
-            data[:nick] = $2
-            data[:address] = $3
-            @client = @server.user(data[:netmask])
-            set = true
-          when /Welcome to the Internet Relay Network\s(\S+)/
-            data[:nick] = $1
-          when /Welcome.*\s+(\S+)$/
-            data[:nick] = $1
-          when /^(\S+)$/
-            data[:nick] = $1
+          if argv[1] =~ /(\S+)(?:!(\S+?))?@(\S+)/
+            nick = $1
+            user = $2
+            host = $2
+            warning "Welcome message nick mismatch (#{nick} vs #{data[:nick]})" if nick != data[:nick]
+            if nick and nick != @client.nick
+              warning "Server thinks client (#{@client.inspect}) has a different nick"
+              @client.nick = nick
+            end
+            @client.user = user if user
+            @client.host = host if host
           end
-          @client = @server.user(data[:nick]) unless set
           handle(:welcome, data)
         when RPL_YOURHOST
           # "Your host is <servername>, running version <ver>"
+          data[:message] = argv[1]
           handle(:yourhost, data)
         when RPL_CREATED
           # "This server was created <date>"
@@ -1216,7 +1218,7 @@ module Irc
         case data[:channel]
         when User
           # TODO
-          warn "Unhandled user mode message '#{serverstring}'"
+          warning "Unhandled user mode message '#{serverstring}'"
         else
           # data[:modes] is an array where each element
           # is either a flag which doesn't need parameters
@@ -1252,13 +1254,13 @@ module Irc
                   data[:modes] << [setting + m]
                   who_wants_params << data[:modes].length - 1
                 else
-                  warn "Unknown mode #{m} in #{serverstring.inspect}"
+                  warning "Unknown mode #{m} in #{serverstring.inspect}"
                 end
               }
             else
               idx = who_wants_params.shift
               if idx.nil?
-                warn "Oops, problems parsing #{serverstring.inspect}"
+                warning "Oops, problems parsing #{serverstring.inspect}"
                 break
               end
               data[:modes][idx] << arg
@@ -1282,7 +1284,7 @@ module Irc
 
         handle(:mode, data)
       else
-        warn "Unknown message #{serverstring.inspect}"
+        warning "Unknown message #{serverstring.inspect}"
         handle(:unknown, data)
       end
     end
