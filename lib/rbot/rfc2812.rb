@@ -812,16 +812,16 @@ module Irc
   RPL_DATASTR=290
 
   # implements RFC 2812 and prior IRC RFCs.
-  # clients register handler proc{}s for different server events and IrcClient
+  # clients register handler proc{}s for different server events and Client
   # handles dispatch
-  class IrcClient
+  class Client
 
-    attr_reader :server, :client
+    attr_reader :server, :user
 
-    # create a new IrcClient instance
+    # create a new Client instance
     def initialize
       @server = Server.new         # The Server
-      @client = @server.user("")   # The User representing the client on this Server
+      @user = @server.user("")   # The User representing the client on this Server
 
       @handlers = Hash.new
 
@@ -921,9 +921,9 @@ module Irc
 	data[:target] = argv[0]
         # A numeric reply /should/ be directed at the client, except when we're connecting with a used nick, in which case
         # it's directed at '*'
-        not_us = !([@client.nick, '*'].include?(data[:target]))
+        not_us = !([@user.nick, '*'].include?(data[:target]))
         if not_us
-          warning "Server reply #{serverstring.inspect} directed at #{data[:target]} instead of client (#{@client.nick})"
+          warning "Server reply #{serverstring.inspect} directed at #{data[:target]} instead of client (#{@user.nick})"
         end
 
         num=command.to_i
@@ -932,16 +932,16 @@ module Irc
           # "Welcome to the Internet Relay Network
           # <nick>!<user>@<host>"
           if not_us
-            warning "Server thinks client (#{@client.inspect}) has a different nick"
-            @client.nick = data[:target]
+            warning "Server thinks client (#{@user.inspect}) has a different nick"
+            @user.nick = data[:target]
           end
           if argv[1] =~ /(\S+)(?:!(\S+?))?@(\S+)/
             nick = $1
             user = $2
             host = $2
             warning "Welcome message nick mismatch (#{nick} vs #{data[:target]})" if nick != data[:target]
-            @client.user = user if user
-            @client.host = host if host
+            @user.user = user if user
+            @user.host = host if host
           end
           handle(:welcome, data)
         when RPL_YOURHOST
@@ -1162,7 +1162,7 @@ module Irc
         data[:message] = argv[2]
 
         @server.delete_user_from_channel(data[:target], data[:channel])
-        if data[:target] == @client
+        if data[:target] == @user
           @server.delete_channel(data[:channel])
         end
 
@@ -1172,7 +1172,7 @@ module Irc
         data[:message] = argv[1]
 
         @server.delete_user_from_channel(data[:source], data[:channel])
-        if data[:source] == @client
+        if data[:source] == @user
           @server.delete_channel(data[:channel])
         end
 

@@ -112,7 +112,7 @@ if ($opts["help"])
   exit 0
 end
 
-if(bot = Irc::IrcBot.new(ARGV.shift, :argv => orig_opts))
+if(bot = Irc::Bot.new(ARGV.shift, :argv => orig_opts))
   # just run the bot
   bot.mainloop
 end

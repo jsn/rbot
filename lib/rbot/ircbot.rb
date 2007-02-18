@@ -88,8 +88,8 @@ module Irc
 
 # Main bot class, which manages the various components, receives messages,
 # handles them or passes them to plugins, and contains core functionality.
-class IrcBot
-  # the bot's IrcAuth data
+class Bot
+  # the bot's Auth data
   attr_reader :auth
 
   # the bot's BotConfig data
@@ -134,7 +134,7 @@ class IrcBot
   # bot User in the client/server connection
   # TODO multiserver
   def myself
-    @client.client
+    @client.user
   end
 
   # bot User in the client/server connection
@@ -142,7 +142,7 @@ class IrcBot
     myself.nick
   end
 
-  # create a new IrcBot with botclass +botclass+
+  # create a new Bot with botclass +botclass+
   def initialize(botclass, params = {})
     # BotConfig for the core bot
     # TODO should we split socket stuff into ircsocket, etc?
@@ -437,7 +437,7 @@ class IrcBot
 
 
     @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
-    @client = IrcClient.new
+    @client = Client.new
 
     # Channels where we are quiet
     # Array of channels names where the bot should be quiet

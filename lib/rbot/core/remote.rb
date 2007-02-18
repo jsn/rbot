@@ -192,9 +192,9 @@ module ::Irc
 
   end
 
-  class IrcBot
+  class Bot
 
-    # The Irc::IrcBot::RemoteObject class represents and object that will take care
+    # The Irc::Bot::RemoteObject class represents and object that will take care
     # of interfacing with remote clients
     #
     # Example client session:
