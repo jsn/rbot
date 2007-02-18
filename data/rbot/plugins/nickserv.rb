@@ -1,8 +1,6 @@
 # Automatically lookup nicks in @registry and identify when asked
 # Takes over proper nick if required and nick is registered
 # TODO allow custom IDENTIFY and GHOST names
-# TODO instead of nickserv.wait it would be ideal if we could just
-# set up "don't send further commands until you receive this particular message"
 
 class NickServPlugin < Plugin
   
@@ -13,6 +11,11 @@ class NickServPlugin < Plugin
     :default => "IDENTIFY", :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
     :desc => "String to look for to see if the nick server is asking us to identify")
+  BotConfig.register BotConfigStringValue.new('nickserv.nick_avail',
+    :default => "not (currently )?online|killed|recovered|disconnesso|libero",
+    :requires_restart => false,
+    :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_nick_avail", v },
+    :desc => "String to look for to see if the nick server is informing us that our nick is now available")
   BotConfig.register BotConfigBooleanValue.new('nickserv.wants_nick',
     :default => false, :requires_restart => false,
     :desc => "Set to false if the nick server doesn't expect the nick as a parameter in the identify command")
@@ -36,16 +39,15 @@ class NickServPlugin < Plugin
   end
   
   def genpasswd
-    # generate a random password
-    passwd = ""
-    8.times do
-      passwd += (rand(26) + (rand(2) == 0 ? 65 : 97) ).chr
-    end
-    return passwd
+    return Irc::Auth.random_password
   end
 
   def set_ident_request(val)
     @ident_request = Regexp.new(val)
+  end
+
+  def set_nick_avail(val)
+    @nick_avail = Regexp.new(val)
   end
 
   def initialize
@@ -60,6 +62,7 @@ class NickServPlugin < Plugin
       end
     end
     set_ident_request(@bot.config['nickserv.ident_request'])
+    set_nick_avail(@bot.config['nickserv.nick_avail'])
   end
 
   # Returns the nickserv name
@@ -141,25 +144,20 @@ class NickServPlugin < Plugin
   def nicktaken(nick)
     if @registry.has_key?(nick)
       ns_say "GHOST #{nick} #{@registry[nick]}"
-      if do_identify nick
-        sleep @bot.config['nickserv.wait']
-        @bot.nickchg nick
-        # We need to wait after changing nick, otherwise the server
-        # might refuse to execute further commangs, e.g. subsequent JOIN
-        # commands until the nick has changed.
-        sleep @bot.config['nickserv.wait']
-      else
-        debug "Failed to identify for nick #{nick}, cannot take over"
-      end
     end
   end
 
   def listen(m)
     return unless(m.kind_of? NoticeMessage)
+    return unless m.source.downcase == ns_nick.downcase
 
-    if (m.sourcenick.downcase == ns_nick.downcase && m.message =~ @ident_request)
+    case m.message
+    when @ident_request
       debug "nickserv asked us to identify for nick #{@bot.nick}"
       do_identify
+    when @nick_avail
+      debug "our nick seems to be free now"
+      @bot.nickchg @bot.config['irc.nick']
     end
   end
 
