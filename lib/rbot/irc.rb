@@ -1370,6 +1370,7 @@ module Irc
     def clear
       reset_lists
       reset_capabilities
+      @hostname = @version = @usermodes = @chanmodes = nil
     end
 
     # This method is used to parse a 004 RPL_MY_INFO line

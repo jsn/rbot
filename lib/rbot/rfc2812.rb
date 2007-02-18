@@ -917,12 +917,12 @@ module Irc
       params.scan(/(?!:)(\S+)|:(.*)/) { argv << ($1 || $2) } if params
 
       if command =~ /^(\d+)$/ # Numeric replies
-	data[:nick] = argv[0]
+	data[:target] = argv[0]
         # A numeric reply /should/ be directed at the client, except when we're connecting with a used nick, in which case
         # it's directed at '*'
-        not_us = !([@client.nick, '*'].include?(data[:nick]))
+        not_us = !([@client.nick, '*'].include?(data[:target]))
         if not_us
-          warning "Server reply #{serverstring.inspect} directed at #{data[:nick]} instead of client (#{@client.nick})"
+          warning "Server reply #{serverstring.inspect} directed at #{data[:target]} instead of client (#{@client.nick})"
         end
 
         num=command.to_i
@@ -932,13 +932,13 @@ module Irc
           # <nick>!<user>@<host>"
           if not_us
             warning "Server thinks client (#{@client.inspect}) has a different nick"
-            @client.nick = data[:nick]
+            @client.nick = data[:target]
           end
           if argv[1] =~ /(\S+)(?:!(\S+?))?@(\S+)/
             nick = $1
             user = $2
             host = $2
-            warning "Welcome message nick mismatch (#{nick} vs #{data[:nick]})" if nick != data[:nick]
+            warning "Welcome message nick mismatch (#{nick} vs #{data[:target]})" if nick != data[:target]
             @client.user = user if user
             @client.host = host if host
           end
