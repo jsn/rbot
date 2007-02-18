@@ -6,10 +6,15 @@ class BasicsModule < CoreBotModule
 
   def listen(m)
     return unless m.kind_of?(PrivMessage)
-    if(m.private? && m.message =~ /^\001PING\s+(.+)\001/)
-      @bot.notice m.sourcenick, "\001PING #$1\001"
-      @bot.irclog "@ #{m.sourcenick} pinged me"
-      return
+    if m.message =~ /^\001PING\s+(.+)\001/
+      ping_id = $1
+      if m.private?
+        @bot.notice m.source, "\001PING #{ping_id}\001"
+        @bot.irclog "@ #{m.source} pinged me"
+      else
+        @bot.notice m.source, "\001PING #{ping_id}\001"
+        @bot.irclog "@ #{m.source} pinged #{m.target}"
+      end
     end
   end
 
