@@ -15,12 +15,16 @@
 # Takes over proper nick if required and nick is registered
 
 # TODO:: allow custom IDENTIFY and GHOST names
+#
+# FIXME:: identified? status returns false after a rescan, even if the bot
+#         previously identified successfully
 
 class NickServPlugin < Plugin
   
   BotConfig.register BotConfigStringValue.new('nickserv.name',
     :default => "nickserv", :requires_restart => false,
     :desc => "Name of the nick server (all lowercase)")
+
   BotConfig.register BotConfigStringValue.new('nickserv.ident_request',
     :default => "IDENTIFY", :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
@@ -30,9 +34,16 @@ class NickServPlugin < Plugin
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_nick_avail", v },
     :desc => "String to look for to see if the nick server is informing us that our nick is now available")
+  BotConfig.register BotConfigStringValue.new('nickserv.identified_string',
+    :default => "(Password|Contrase|Mot de passe).+(acce[pt]t|r[ie]cog?n).+(identif|r[ie]cog?n)",
+    :requires_restart => false,
+    :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_identified_string", v },
+    :desc => "String to look for to see if the nick server is informing us that we have identified successfully")
+
   BotConfig.register BotConfigBooleanValue.new('nickserv.wants_nick',
     :default => false, :requires_restart => false,
     :desc => "Set to false if the nick server doesn't expect the nick as a parameter in the identify command")
+
   BotConfig.register BotConfigIntegerValue.new('nickserv.wait',
     :default => 30, :validate => Proc.new { |v| v > 0 }, :requires_restart => false,
     :desc => "Seconds to wait after sending a message to nickserv, e.g. after ghosting")
@@ -64,6 +75,10 @@ class NickServPlugin < Plugin
     @nick_avail = Regexp.new(val)
   end
 
+  def set_identified_string(val)
+    @identified_string = Regexp.new(val)
+  end
+
   def initialize
     super
     # this plugin only wants to store strings!
@@ -77,6 +92,8 @@ class NickServPlugin < Plugin
     end
     set_ident_request(@bot.config['nickserv.ident_request'])
     set_nick_avail(@bot.config['nickserv.nick_avail'])
+    set_identified_string(@bot.config['nickserv.identified'])
+    @identified = false
   end
 
   # Returns the nickserv name
@@ -152,6 +169,7 @@ class NickServPlugin < Plugin
   end
   
   def connect
+    @identified = false
     do_identify
   end
   
@@ -172,7 +190,15 @@ class NickServPlugin < Plugin
     when @nick_avail
       debug "our nick seems to be free now"
       @bot.nickchg @bot.config['irc.nick']
+    when @identified_string
+      debug "we identified successfully to nickserv"
+      @identified = true
+      @bot.plugins.delegate('identified')
     end
+  end
+
+  def identified?
+    return @identified
   end
 
 end

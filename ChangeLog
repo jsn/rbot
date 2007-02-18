@@ -4,6 +4,10 @@
 	title/author/copyright/license information. Authors of new plugins are
 	encouraged to use it. Many existing plugins have been changed to
 	follow the same spec.
+	* NickServ plugin: delegate #identified() to other plugins after
+	successfull identification. Also provide #identified?() method to test
+	if the bot has successfully identified. Not perfect yet (gets reset
+	after a rescan.)
 
 2007-02-15  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
