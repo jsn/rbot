@@ -34,8 +34,8 @@ module Irc
     #
     def Auth.random_password(l=8)
       pwd = ""
-      8.times do
-        pwd += (rand(26) + (rand(2) == 0 ? 65 : 97) ).chr
+      l.times do
+        pwd << (rand(26) + (rand(2) == 0 ? 65 : 97) ).chr
       end
       return pwd
     end
