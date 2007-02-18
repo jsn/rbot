@@ -92,7 +92,7 @@ class NickServPlugin < Plugin
     end
     set_ident_request(@bot.config['nickserv.ident_request'])
     set_nick_avail(@bot.config['nickserv.nick_avail'])
-    set_identified_string(@bot.config['nickserv.identified'])
+    set_identified_string(@bot.config['nickserv.identified_string'])
     @identified = false
   end
 
