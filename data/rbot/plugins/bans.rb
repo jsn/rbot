@@ -1,10 +1,19 @@
-# BansPlugin v3 for 0.9.11
+#-- vim:sw=2:et
+#++
 #
-# Managing kick and bans, automatically removing bans after timeouts, quiet bans, and kickban/quietban based on regexp
+# :title: Bans Plugin v3 for rbot 0.9.11 and later
 #
-# (c) 2006 Marco Gulino <marco@kmobiletools.org>
-# (c) 2007 kamu <mr.kamu@gmail.com>
-# (c) 2007 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# Author:: Marco Gulino <marco@kmobiletools.org>
+# Author:: kamu <mr.kamu@gmail.com>
+# Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2006 Marco Gulino
+# Copyright:: (C) 2007 kamu, Giuseppe Bilotta
+#
+# License:: GPL V2.
+#
+# Managing kick and bans, automatically removing bans after timeouts, quiet
+# bans, and kickban/quietban based on regexp
 #
 # v1 -> v2 (kamu's version, never released)
 #   * reworked
@@ -13,15 +22,15 @@
 #
 # v2 -> v3 (GB)
 #   * remove the 'bans' prefix from most of the commands
-#   * (un)quiet has been renamed to (un)silence because 'quiet' was used to tell the bot to keep quiet
+#   * (un)quiet has been renamed to (un)silence because 'quiet' was used to
+#     tell the bot to keep quiet
 #   * both (un)quiet and (un)silence are accepted as actions
 #   * use the more descriptive 'onjoin' term for autoactions
-#   * convert v1's (0.9.10) :bans and :bansmasks to BadWordActions and WhitelistEntries
+#   * convert v1's (0.9.10) :bans and :bansmasks to BadWordActions and
+#     WhitelistEntries
 #   * enhanced list manipulation facilities
 #   * fixed regexp usage in requirements for plugin map
 #   * add proper auth management
-#
-# Licensed under GPL V2.
 
 OnJoinAction = Struct.new("OnJoinAction", :host, :action, :channel, :reason)
 BadWordAction = Struct.new("BadWordAction", :regexp, :action, :channel, :timer, :reason)

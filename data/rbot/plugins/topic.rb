@@ -1,4 +1,12 @@
-# Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#-- vim:sw=2:et
+#++
+#
+# :title: Topic manipulation plugin for rbot
+#
+# Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+# License:: GPL v2
+#
 # Add a bunch of topic manipulation features
 
 class TopicPlugin < Plugin

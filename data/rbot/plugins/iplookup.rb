@@ -23,7 +23,7 @@ module ArinWhois
     def customer?
       keys.grep(/^(City|Address|StateProv|(Org|Cust)Name)$/).any?
     end
-    
+
     def network?
       keys.grep(/^(CIDR|NetHandle|Parent)$/).any?
     end
@@ -31,38 +31,38 @@ module ArinWhois
     def contact?
       keys.grep(/^(R|Org)(Tech|Abuse)(Handle|Name|Phone|Email)$/).any?
     end
-    
+
     def valid?
       customer? or network? or contact?
     end
-    
+
     def owner
       self[keys.grep(/^(Org|Cust)Name$/).first]
     end
-    
+
     def location
       [ self['City'], self['StateProv'], self['Country'] ].compact.join(', ')
     end
-    
+
     def address
       [ self['Address'], location, self['PostalCode'] ].compact.join(', ')
     end
-    
+
   end
 
   class ArinWhoisParser
-    
+
     def initialize(data)
       @data = data
     end
-    
+
     def split_array_at(a, &block)
       return a unless a.any?
       a = a.to_a
-      
+
       results = []
       last_cutpoint = 0
-      
+
       a.each_with_index do |el,i|
         if block.call(el)
           unless i == 0
@@ -71,14 +71,14 @@ module ArinWhois
           end
         end
       end
-      
+
       if last_cutpoint < a.size or last_cutpoint == 0
         results << a[last_cutpoint..-1]
       end
-      
+
       results
     end
-    
+
     # Whois output format
     # ------------------------
     # Owner info block:
@@ -96,26 +96,26 @@ module ArinWhois
     #
     # Contacts:
     #   ({R,Org}{Tech,Abuse}{Handle,Name,Phone,Email})*
-    
+
     def parse_chunks
       return if @data =~ /^No match found /
       chunks = @data.gsub(/^# ARIN WHOIS database, last updated.+/m, '').scan(/(([^\n]+\n)+\n)/m)
       chunks.map do |chunk|
         result = Chunk.new
-        
+
         chunk[0].scan(/([A-Za-z]+?):(.*)/).each do |tuple|
           tuple[1].strip!
           result[tuple[0]] = tuple[1].empty? ? nil : tuple[1]
         end
-        
+
         result
       end
     end
-    
-    
+
+
     def get_parsed_data
       return unless chunks = parse_chunks
-      
+
       results = split_array_at(parse_chunks) {|chunk|chunk.customer?}
       results.map do |chunks|
         {
@@ -125,12 +125,12 @@ module ArinWhois
         }
       end
     end
-    
+
     # Return a hash with :customer, :net, and :contacts info filled in.
     def get_most_specific_owner
       return unless datas = get_parsed_data
-      
-      datas_with_bitmasks = datas.map do |data| 
+
+      datas_with_bitmasks = datas.map do |data|
         bitmask = data[:net]['CIDR'].split('/')[1].to_i
         [bitmask, data]
       end
@@ -155,12 +155,12 @@ module_function
     arin = ArinWhoisParser.new data
     arin.get_most_specific_owner
   end
-  
+
   def lookup_location(ip)
     result = lookup(ip)
     result[:customer].location
   end
-  
+
   def lookup_address(ip)
     result = lookup(ip)
     result[:customer].address
@@ -186,7 +186,7 @@ class IPLookupPlugin < Plugin
   def help(plugin, topic="")
     "iplookup [ip address / domain name] => lookup info about the owner of the IP address from the ARIN whois database"
   end
-  
+
   def iplookup(m, params)
     reply = ""
     if params[:domain]
@@ -200,7 +200,7 @@ class IPLookupPlugin < Plugin
     else
       ip = params[:ip]
     end
-    
+
     reply += ArinWhois.lookup_info(ip)
     m.reply reply
   end
@@ -210,7 +210,7 @@ class IPLookupPlugin < Plugin
     #m.reply "users = #{users.inspect}"
     #m.reply @bot.sendq("WHO #{params[:user]}")
   end
-  
+
 end
 
 plugin = IPLookupPlugin.new

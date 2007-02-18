@@ -1,16 +1,21 @@
-# Plugin for the Ruby IRC bot (http://linuxbrit.co.uk/rbot/)
+#-- vim:sw=2:et
+#++
+#
+# :title: Half-Life 2 plugin for rbot
+#
+# Author:: Ole Christian Rynning <oc@rynning.no>
+# Copyright:: (C) 2006 Ole Christian Rynning
+# License:: GPL v2
 #
 # Simple Half-Life 2 (Source Engine) plugin to query online
 # servers to see if its online and kicking and how many users.
 #
 # Added 2 seconds timeout to the response. And sockets are now
 # closing properly.
-#
-# (c) 2006 Ole Christian Rynning <oc@rynning.no>
-# Licensed under GPL V2.
 
 require 'socket'
 require 'timeout'
+
 class HL2Plugin < Plugin
 
   A2S_INFO = "\xFF\xFF\xFF\xFF\x54\x53\x6F\x75\x72\x63\x65\x20\x45\x6E\x67\x69\x6E\x65\x20\x51\x75\x65\x72\x79\x00"
@@ -50,6 +55,7 @@ class HL2Plugin < Plugin
   end
 
 end
+
 plugin = HL2Plugin.new
 plugin.map 'hl2 :conn_str'
 

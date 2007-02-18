@@ -1,6 +1,11 @@
-# IMDB plugin for RubyBot
-# (c) 2005 Arnaud Cornet <arnaud.cornet@gmail.com>
-# Licensed under MIT License.
+#-- vim:sw=2:et
+#++
+#
+# :title: IMDB plugin for rbot
+#
+# Author:: Arnaud Cornet <arnaud.cornet@gmail.com>
+# Copyright:: (C) 2005 Arnaud Cornet
+# License:: MIT license
 
 require 'net/http'
 require 'cgi'

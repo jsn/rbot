@@ -1,8 +1,11 @@
 #-- vim:sw=2:et
 #++
 #
-# Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Copyright (C) 2006 Giuseppe Bilotta
+# :title: linkbot management for rbot
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006 Giuseppe Bilotta
+# License:: GPL v2
 #
 # Based on an idea by hagabaka (Yaohan Chen <yaohan.chen@gmail.com>)
 #
@@ -14,8 +17,10 @@
 #
 # This plugin also shows how to create 'fake' messages from a plugin, letting
 # the bot parse them.
+#
 # TODO a possible enhancement to the Irc framework could be to create 'fake'
 # servers to make this even easier.
+
 class LinkBot < Plugin
   BotConfig.register BotConfigArrayValue.new('linkbot.nicks',
     :default => [],

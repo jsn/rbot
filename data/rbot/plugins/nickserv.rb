@@ -1,6 +1,20 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Nickserv management plugin for rbot
+#
+# Author:: Tom Gilbert (giblet) <tom@linuxbrit.co.uk>
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2002-2005 Tom Gilbert
+# Copyright:: (C) 2006 Tom Gilbert, Giuseppe Bilotta
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+#
 # Automatically lookup nicks in @registry and identify when asked
+#
 # Takes over proper nick if required and nick is registered
-# TODO allow custom IDENTIFY and GHOST names
+
+# TODO:: allow custom IDENTIFY and GHOST names
 
 class NickServPlugin < Plugin
   

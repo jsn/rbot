@@ -1,6 +1,11 @@
-# Time Zone Plugin for rbot
-# (c) 2006 Ian Monroe <ian@monroe.nu>
-# Licensed under MIT License.
+#-- vim:sw=2:et
+#++
+#
+# :title: Time Zone Plugin for rbot
+#
+# Author:: Ian Monroe <ian@monroe.nu>
+# Copyright:: (C) 2006 Ian Monroe
+# License:: MIT license
 
 require 'tzinfo'
 

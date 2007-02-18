@@ -1,12 +1,17 @@
-# Plugin for the Ruby IRC bot (http://linuxbrit.co.uk/rbot/)
+#-- vim:sw=2:et
+#++
+#
+# :title: Script plugin for rbot
+#
+# Author:: Mark Kretschmann <markey@web.de>
+# Copyright:: (C) 2006 Mark Kretschmann
+# License:: GPL v2
 #
 # Create mini plugins on IRC.
 #
-# Scripts are little Ruby programs that run in the context of the script plugin. You 
-# can create them directly in an IRC channel, and invoke them just like normal rbot plugins. 
-#
-# (c) 2006 Mark Kretschmann <markey@web.de>
-# Licensed under GPL V2.
+# Scripts are little Ruby programs that run in the context of the script
+# plugin. You can create them directly in an IRC channel, and invoke them just
+# like normal rbot plugins. 
 
 
 Command = Struct.new( "Command", :code, :nick, :created, :channel )

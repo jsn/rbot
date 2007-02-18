@@ -192,6 +192,7 @@ class MarkovPlugin < Plugin
     random_markov(m, message)
   end
 end
+
 plugin = MarkovPlugin.new
 plugin.map 'markov ignore :action :option', :action => "ignore"
 plugin.map 'markov ignore :action', :action => "ignore"

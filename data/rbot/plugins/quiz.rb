@@ -1,30 +1,30 @@
 #-- vim:sw=2:et
 #++
 #
-# Plugin for the Ruby IRC bot (http://linuxbrit.co.uk/rbot/)
-#
-# A trivia quiz game. Fast paced, featureful and fun.
+# :title: Quiz plugin for rbot
 #
 # Author:: Mark Kretschmann <markey@web.de>
 # Author:: Jocke Andersson <ajocke@gmail.com>
 # Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 # Author:: Yaohan Chen <yaohan.chen@gmail.com>
 #
-# (c) 2006 Mark Kretschmann, Jocke Andersson, Giuseppe Bilotta
-# (c) 2007 Giuseppe Bilotta, Yaohan Chen
+# Copyright:: (C) 2006 Mark Kretschmann, Jocke Andersson, Giuseppe Bilotta
+# Copyright:: (C) 2007 Giuseppe Bilotta, Yaohan Chen
 #
-# Licensed under GPL V2.
+# License:: GPL v2
+#
+# A trivia quiz game. Fast paced, featureful and fun.
 
-# FIXME interesting fact: in the Quiz class, @registry.has_key? seems to be
-# case insensitive. Although this is all right for us, this leads to rank vs
-# registry mismatches. So we have to make the @rank_table comparisons case
-# insensitive as well. For the moment, redefine everything to downcase before
-# matching the nick.
+# FIXME:: interesting fact: in the Quiz class, @registry.has_key? seems to be
+#         case insensitive. Although this is all right for us, this leads to
+#         rank vs registry mismatches. So we have to make the @rank_table
+#         comparisons case insensitive as well. For the moment, redefine
+#         everything to downcase before matching the nick.
 #
-# TODO define a class for the rank table. We might also need it for scoring in
-# other games.
+# TODO:: define a class for the rank table. We might also need it for scoring
+#        in other games.
 #
-# TODO when Ruby 2.0 gets out, fix the FIXME 2.0 UTF-8 workarounds
+# TODO:: when Ruby 2.0 gets out, fix the FIXME 2.0 UTF-8 workarounds
 
 # Class for storing question/answer pairs
 QuizBundle = Struct.new( "QuizBundle", :question, :answer )

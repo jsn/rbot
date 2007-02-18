@@ -1,9 +1,11 @@
-# Plugin for the Ruby IRC bot (http://linuxbrit.co.uk/rbot/)
-# (c) 2005 Mark Kretschmann <markey@web.de>
-# Licensed under GPL V2.
-
-require "net/http"
-
+#-- vim:sw=2:et
+#++
+#
+# :title: Grouphug Plugin for rbot
+#
+# Author:: Mark Kretschmann <markey@web.de>
+# Copyright:: (C) 2005 Mark Kretschmann
+# License:: GPL v2
 
 class GrouphugPlugin < Plugin
   def help( plugin, topic="" )
@@ -14,7 +16,7 @@ class GrouphugPlugin < Plugin
     path = "random"
     path = "confessions/#{params[:num]}" if params[:num]
     begin
-      data = bot.httputil.get_cached(URI.parse("http://grouphug.us/#{path}"))
+      data = @bot.httputil.get_cached(URI.parse("http://grouphug.us/#{path}"))
 
       reg = Regexp.new( '(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)', Regexp::MULTILINE )
       confession = reg.match( data )[4].ircify_html

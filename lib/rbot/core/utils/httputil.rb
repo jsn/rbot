@@ -1,3 +1,15 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: rbot HTTP provider
+#
+# Author:: Tom Gilbert <tom@linuxbrit.co.uk>
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2002-2005 Tom Gilbert
+# Copyright:: (C) 2006 Tom Gilbert, Giuseppe Bilotta
+# Copyright:: (C) 2006,2007 Giuseppe Bilotta
+
 module ::Irc
 module Utils
 
@@ -6,7 +18,7 @@ require 'net/http'
 begin
   require 'net/https'
 rescue LoadError => e
-  error "Coudln't load 'net/https':  #{e.inspect}"
+  error "Couldn't load 'net/https':  #{e.inspect}"
   error "Secured HTTP connections will fail"
 end
 

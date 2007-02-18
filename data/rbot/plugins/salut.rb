@@ -1,8 +1,17 @@
-# vim: set sw=2 et:
+#-- vim:sw=2:et
+#++
+#
+# :title: Salutations plugin for rbot
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+# License:: GPL v2
+#
 # Salutations plugin: respond to salutations
-# TODO allow online editing of salutations
-# TODO *REMEMBER* to set @changed to true after edit
-# TODO or changes won't be saved
+#
+# TODO:: allow online editing of salutations
+#
+# TODO:: *REMEMBER* to set @changed to true after edit or changes won't be saved
 
 class SalutPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('salut.all_languages',

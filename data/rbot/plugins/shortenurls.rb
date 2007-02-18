@@ -1,13 +1,15 @@
 #-- vim:sw=2:et
 #++
 #
+# :title: ShortURL plugin for rbot
+#
+# Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2007 Giuseppe Bilotta
+# License:: GPL v2
+#
 # Plugin to handle ShortURL, merges the funcionality of the old rubyurl and tinyurl plugins
 # Note that it's called ShortenURLs and not ShortURL, to prevent conflicts with
 # the actual ruby package used
-#
-# Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
-# (C) 2007 Giuseppe Bilotta
-# Based on existing rbot plugins, as mentioned above :)
 
 require "shorturl"
 require "uri"

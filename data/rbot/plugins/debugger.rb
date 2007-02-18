@@ -1,7 +1,11 @@
-# Debugging/profiling for rbot
+#-- vim:sw=2:et
+#++
 #
-# (c) 2006 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
-# Licensed under GPL V2.
+# :title: Debugging/profiling for rbot
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+# License:: GPL v2
 
 class DebugPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('debug.interval',

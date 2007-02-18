@@ -1,10 +1,13 @@
+#-- vim:sw=2:et
+#++
 #
-# World of Warcraft Realm Status plugin for rbot
-# by MrChucho (mrchucho@mrchucho.net)
-# Copyright (C) 2006 Ralph M. Churchill
+# :title: World of Warcraft Realm Status plugin for rbot
 #
-# Requires: insatiable appetite for World of Warcraft
+# Author:: MrChucho (mrchucho@mrchucho.net)
+# Copyright:: (C) 2006 Ralph M. Churchill
 #
+# Requires:: insatiable appetite for World of Warcraft
+
 require 'open-uri'
 require 'rexml/document'
 

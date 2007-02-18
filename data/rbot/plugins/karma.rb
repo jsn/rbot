@@ -82,6 +82,7 @@ class KarmaPlugin < Plugin
     end
   end
 end
+
 plugin = KarmaPlugin.new
 plugin.map 'karmastats', :action => 'stats'
 plugin.map 'karma :key', :defaults => {:key => false}

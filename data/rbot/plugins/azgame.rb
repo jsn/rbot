@@ -1,11 +1,17 @@
-# vim: set et sw=2:
+#-- vim:sw=2:et
+#++
+#
+# :title: A-Z Game Plugin for rbot
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Author:: Yaohan Chen <yaohan.chen@gmail.com>: Japanese support
+#
+# Copyright:: (C) 2006 Giuseppe Bilotta
+# Copyright:: (C) 2007 GIuseppe Bilotta, Yaohan Chen
+#
+# License:: GPL v2
+#
 # A-Z Game: guess the word by reducing the interval of allowed ones
-#
-# Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Author: Yaohan Chen <yaohan.chen@gmail.com>: Japanese support
-#
-# (C) 2006 Giuseppe Bilotta
-# (C) 2007 Yaohan Chen
 #
 # TODO allow manual addition of words
 

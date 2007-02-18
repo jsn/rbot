@@ -1,7 +1,13 @@
 #-- vim:sw=2:et
 #++
+#
+# :title: Roshambo (rock-paper-scissors) plugin for rbot
+#
+# Author:: Hans Fugal
+# Copyright:: (C) 2004 Hans Fugal
+#
 # Play the game of roshambo (rock-paper-scissors)
-# Copyright (C) 2004 Hans Fugal
+#
 # Distributed under the same license as rbot itself
 
 require 'time'

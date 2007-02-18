@@ -1,9 +1,18 @@
 #-- vim:sw=2:et
 #++
 #
-# Extensions to standard classes, to be used by the various plugins
+# :title: Standard classes extensions
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006,2007 Giuseppe Bilotta
+# License:: GPL v2
+#
+# This file collects extensions to standard Ruby classes and to some core rbot
+# classes to be used by the various plugins
+#
 # Please note that global symbols have to be prefixed by :: because this plugin
 # will be read into an anonymous module
+
 
 # Extensions to the Array class
 #
@@ -17,6 +26,7 @@ class ::Array
     self[rand(self.length)]
   end
 end
+
 
 # Extensions to the String class
 #
@@ -65,6 +75,7 @@ class ::String
     self.gsub(/<[^>]+>/, '').gsub(/&amp;/,'&').gsub(/&quot;/,'"').gsub(/&lt;/,'<').gsub(/&gt;/,'>').gsub(/&ellip;/,'...').gsub(/&apos;/, "'").gsub("\n",'')
   end
 end
+
 
 # Extensions to the Regexp class, with some common and/or complex regular
 # expressions.
@@ -138,6 +149,7 @@ class ::Regexp
   IP_ADDR = /#{DEC_IP_ADDR}|#{HEX_IP_ADDR}/
 
 end
+
 
 module ::Irc
 

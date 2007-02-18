@@ -1,8 +1,11 @@
+#-- vim:sw=2:et
+#++
 #
-# Forecast plugin for rbot
-# by MrChucho (mrchucho@mrchucho.net)
-# Copyright (C) 2006 Ralph M. Churchill
+# :title: Forecast plugin for rbot
 #
+# Author:: MrChucho (mrchucho@mrchucho.net)
+# Copyright:: (C) 2006 Ralph M. Churchill
+
 require 'soap/wsdlDriver'
 require 'open-uri'
 require 'rexml/document'

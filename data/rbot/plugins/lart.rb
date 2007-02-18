@@ -1,24 +1,29 @@
-#  Original Author:
-#               Michael Brailsford  <brailsmt@yahoo.com>
-#               aka brailsmt
-#  Author:      Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-#  Purpose:     Provide for humorous larts and praises
-#  Original Copyright:
-#               2002 Michael Brailsford.  All rights reserved.
-#  Copyright:   2006 Giuseppe Bilotta.  All rights reserved.
-#  License:     This plugin is licensed under the BSD license.  The terms of
-#               which follow.
+#-- vim:sw=2:et
+#++
 #
-#  Redistribution and use in source and binary forms, with or without
-#  modification, are permitted provided that the following conditions
-#  are met:
+# :title: lart/praise plugin for rbot
 #
-#  1. Redistributions of source code must retain the above copyright notice,
-#     this list of conditions and the following disclaimer.
+# Author::    Michael Brailsford  <brailsmt@yahoo.com> aka brailsmt
+# Author::    Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 #
-#  2. Redistributions in binary form must reproduce the above copyright
-#     notice, this list of conditions and the following disclaimer in the
-#     documentation and/or other materials provided with the distribution.
+# Copyright:: (C) 2002 Michael Brailsford.  All rights reserved.
+# Copyright:: (C) 2006 Giuseppe Bilotta.  All rights reserved.
+#
+# License::  This plugin is licensed under the BSD license.  The terms of
+#            which follow.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# Purpose::   Provide for humorous larts and praises
 
 class LartPlugin < Plugin
 

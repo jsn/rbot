@@ -1,13 +1,18 @@
 #-- vim:sw=2:et
 #++
 #
-# RSS feed plugin for RubyBot
-# (c) 2004 Stanislav Karchebny <berkus@madfire.net>
-# (c) 2005 Ian Monroe <ian@monroe.nu>
-# (c) 2005 Mark Kretschmann <markey@web.de>
-# (c) 2006 Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+# :title: RSS feed plugin for rbot
 #
-# Licensed under MIT License.
+# Author:: Stanislav Karchebny <berkus@madfire.net>
+# Author:: Ian Monroe <ian@monroe.nu>
+# Author:: Mark Kretschmann <markey@web.de>
+# Author:: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2004 Stanislav Karchebny
+# Copyright:: (C) 2005 Ian Monroe, Mark Kretschmann
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+#
+# License:: MIT license
 
 require 'rss/parser'
 require 'rss/1.0'

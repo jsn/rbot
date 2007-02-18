@@ -836,7 +836,8 @@ module Irc
     #
     # ==server events currently supported:
     #
-    # TODO handle errors ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL, ERR_CANNOTSENDTOCHAN
+    # TODO handle errors ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
+    # TODO handle errors ERR_CHANOPRIVSNEEDED, ERR_CANNOTSENDTOCHAN
     #
     # welcome::     server welcome message on connect
     # yourhost::    your host details (on connection)

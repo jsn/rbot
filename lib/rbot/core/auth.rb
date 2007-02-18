@@ -1,6 +1,11 @@
 #-- vim:sw=2:et
 #++
-
+#
+# :title: rbot auth management from IRC
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006,2007 Giuseppe Bilotta
+# License:: GPL v2
 
 class AuthModule < CoreBotModule
 

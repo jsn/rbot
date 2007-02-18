@@ -1,6 +1,11 @@
 #-- vim:sw=2:et
 #++
-
+#
+# :title: rbot basic management from IRC
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006,2007 Giuseppe Bilotta
+# License:: GPL v2
 
 class BasicsModule < CoreBotModule
 
@@ -92,11 +97,6 @@ class BasicsModule < CoreBotModule
   # when (/^(botsnack|ciggie)$/i)
   #   @bot.say m.replyto, @lang.get("thanks_X") % m.sourcenick if(m.public?)
   #   @bot.say m.replyto, @lang.get("thanks") if(m.private?)
-  # when (/^(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi(\W|$)|yo(\W|$)).*/i)
-  #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick if(m.public?)
-  #   @bot.say m.replyto, @lang.get("hello") if(m.private?)
-  # when (/^\s*(hello|howdy|hola|salut|bonjour|sup|niihau|hey|hi|yo(\W|$))[\s,-.]+#{Regexp.escape(@bot.nick)}$/i)
-  #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
   # when (/^#{Regexp.escape(@bot.nick)}!*$/)
   #   @bot.say m.replyto, @lang.get("hello_X") % m.sourcenick
 

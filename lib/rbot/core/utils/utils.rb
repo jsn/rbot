@@ -1,3 +1,17 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: rbot utilities provider
+#
+# Author:: Tom Gilbert <tom@linuxbrit.co.uk>
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2002-2006 Tom Gilbert
+# Copyright:: (C) 2007 Giuseppe Bilotta
+#
+# TODO some of these Utils should be rewritten as extensions to the approriate
+# standard Ruby classes and accordingly be moved to extends.rb
+
 require 'net/http'
 require 'uri'
 require 'tempfile'

@@ -1,6 +1,11 @@
 #-- vim:sw=2:et
 #++
-
+#
+# :title: rbot config management from IRC
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006,2007 Giuseppe Bilotta
+# License:: GPL v2
 
 class ConfigModule < CoreBotModule
 
@@ -163,7 +168,7 @@ class ConfigModule < CoreBotModule
   #  end
 
   def bot_version(m, param)
-    m.reply  "I'm a v. #{$version} rubybot, (c) Tom Gilbert - http://linuxbrit.co.uk/rbot/"
+    m.reply  "I'm a v. #{$version} rubybot, (c) Tom Gilbert and the rbot development team - http://linuxbrit.co.uk/rbot/"
   end
 
   def handle_help(m, params)

@@ -1,7 +1,18 @@
-# vim: set sw=2 et:
+#-- vim:sw=2:et
+#++
 #
-# TODO: use lr=lang_<code> or whatever is most appropriate to let google know
-# it shouldn't use the bot's location to find the preferred language
+# :title: Google and Wikipedia search plugin for rbot
+#
+# Author:: Tom Gilbert (giblet) <tom@linuxbrit.co.uk>
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2002-2005 Tom Gilbert
+# Copyright:: (C) 2006 Tom Gilbert, Giuseppe Bilotta
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+
+# TODO:: use lr=lang_<code> or whatever is most appropriate to let google know
+#        it shouldn't use the bot's location to find the preferred language
+
 require 'uri'
 
 Net::HTTP.version_1_2

@@ -696,7 +696,7 @@ class IrcBot
     end
     quit if $interrupted > 0
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
-    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert"
+    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert and the rbot development team"
     quit if $interrupted > 0
     myself.nick = @config['irc.nick']
     myself.user = @config['irc.user']

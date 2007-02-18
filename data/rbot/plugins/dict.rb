@@ -1,15 +1,20 @@
-# vim: set sw=2 et:
+#-- vim:sw=2:et
+#++
 #
-# dict plugin: provides a link to the definition of a word in one of the supported
+# :title: Dictionary lookup plugin for rbot
+#
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+# License:: GPL v2
+#
+# Provides a link to the definition of a word in one of the supported
 # dictionaries. Currently available are
 #   * the Oxford dictionary for (British) English
 #   * the De Mauro/Paravia dictionary for Italian
 #   * the Chambers dictionary for English (accepts both US and UK)
 #
-# other plugins can use this one to check if a given word is valid in italian
+# Other plugins can use this one to check if a given word is valid in italian
 # or english by using the is_italian?/is_british?/is_english? methods
-#
-# Author: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 #
 # TODO: cache results and reuse them if get_cached returns a cache copy
 

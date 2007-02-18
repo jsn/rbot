@@ -1,10 +1,15 @@
-# Weather plugin for rbot
+#-- vim:sw=2:et
+#++
 #
-# NOAA National Weather Service support by MrChucho (mrchucho@mrchucho.net)
-# Copyright (C) 2006 Ralph M. Churchill
+# :title: Weather plugin for rbot
 #
-# Weather Undeground support by Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Copyright (C) 2006 Giuseppe Bilotta
+# Author:: MrChucho (mrchucho@mrchucho.net): NOAA National Weather Service support
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+#
+# Copyright:: (C) 2006 Ralph M. Churchill
+# Copyright:: (C) 2006-2007 Giuseppe Bilotta
+#
+# License:: GPL v2
 
 require 'uri'
 require 'rexml/document'

@@ -11,7 +11,6 @@
 #
 # TODO find a way to manage session id (logging out, manually and/or
 # automatically)
-#
 
 require 'drb/drb'
 
