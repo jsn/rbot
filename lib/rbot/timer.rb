@@ -45,10 +45,16 @@ module Timer
       # really short duration timers can overrun and leave @in negative,
       # for these we set @in to @period
       @in = @period if @in <= 0
-      if(@data)
-        @func.call(@data)
-      else
-        @func.call
+      begin
+        if(@data)
+          @func.call(@data)
+        else
+          @func.call
+        end
+      rescue => e
+        error "Timer action #{self.inspect} with function #{@func.inspect} failed with error #{e.inspect}"
+        error e.backtrace.join("\n")
+        # TODO maybe we want to block this Action?
       end
       return @once
     end
