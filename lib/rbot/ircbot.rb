@@ -534,6 +534,8 @@ class Bot
       @last_ping = nil
     }
     @client[:nick] = proc {|data|
+      # debug "Message source is #{data[:source].inspect}"
+      # debug "Bot is #{myself.inspect}"
       source = data[:source]
       old = data[:oldnick]
       new = data[:newnick]
@@ -753,18 +755,13 @@ class Bot
         exit 2
       end
 
-      stop_server_pings
-      server.clear
-      if @socket.connected?
-        @socket.clearq
-        @socket.shutdown
-      end
+      disconnect
 
-      log "disconnected"
+      log "\n\nDisconnected\n\n"
 
       quit if $interrupted > 0
 
-      log "waiting to reconnect"
+      log "\n\nWaiting to reconnect\n\n"
       sleep @config['server.reconnect_wait']
     end
   end
@@ -961,6 +958,26 @@ class Bot
     sendq "TOPIC #{where} :#{topic}", where, 2
   end
 
+  def disconnect(message = nil)
+    message = @lang.get("quit") if (message.nil? || message.empty?)
+    if @socket.connected?
+      debug "Clearing socket"
+      @socket.clearq
+      debug "Sending quit message"
+      @socket.emergency_puts "QUIT :#{message}"
+      debug "Flushing socket"
+      @socket.flush
+      debug "Shutting down socket"
+      @socket.shutdown
+    end
+    debug "Logging quits"
+    server.channels.each { |ch|
+      irclog "@ quit (#{message})", ch
+    }
+    stop_server_pings
+    @client.reset
+  end
+
   # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
     @quit_mutex.synchronize do
@@ -973,21 +990,7 @@ class Bot
       # rescue => e
       #   debug "failed to restore signals: #{e.inspect}\nProbably running on windows?"
       # end
-      message = @lang.get("quit") if (message.nil? || message.empty?)
-      if @socket.connected?
-        debug "Clearing socket"
-        @socket.clearq
-        debug "Sending quit message"
-        @socket.emergency_puts "QUIT :#{message}"
-        debug "Flushing socket"
-        @socket.flush
-        debug "Shutting down socket"
-        @socket.shutdown
-      end
-      debug "Logging quits"
-      server.channels.each { |ch|
-        irclog "@ quit (#{message})", ch
-      }
+      disconnect
       debug "Saving"
       save
       debug "Cleaning up"

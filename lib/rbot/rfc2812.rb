@@ -821,13 +821,19 @@ module Irc
     # create a new Client instance
     def initialize
       @server = Server.new         # The Server
-      @user = @server.user("")   # The User representing the client on this Server
+      @user = @server.user("")     # The User representing the client on this Server
 
       @handlers = Hash.new
 
       # This is used by some messages to build lists of users that
       # will be delegated when the ENDOF... message is received
       @tmpusers = []
+    end
+
+    # clear the server and reset the User
+    def reset
+      @server.clear
+      @user = @server.user("")
     end
 
     # key::   server event to handle
