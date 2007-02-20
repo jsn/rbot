@@ -6,6 +6,16 @@
 	<yaohan.chen@gmail.com>. People take turns to continue a chain of
 	words by saying words that begin with the final letter(s) of the
 	previous word.
+	* IRC messages are not UTF-8: Most of the string processing across
+	rbot is done against IRC messages, which do not have a well-defined
+	encoding. Although many clients are now using UTF-8, there is no
+	guarantee that an arbitrary string received from IRC will be UTF-8
+	encoded. We have to force ASCII (byte-wise/charset agnostic) matching
+	because otherwise some strings can give problems: in particular, for
+	example, the bytesequence "\340\350\354\362\371" (that is the aeiou
+	vowels, each with a grave accent) will cause the string to be
+	considered up to the "\354" (i with grave accent) only: so either the
+	rest of the message is ignored, or the matching fails.
 
 2007-02-18  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
