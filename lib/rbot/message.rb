@@ -14,10 +14,11 @@ module Irc
     :desc => "when replying with nick put this character after the nick of the user the bot is replying to"
   )
 
-  Color = "\003"
   Bold = "\002"
   Underline = "\037"
   Reverse = "\026"
+  Color = "\003"
+  ColorRx = /#{Color}\d\d?(?:,\d\d?)?/
 
   # base user message class, all user messages derive from this
   # (a user message is defined as having a source hostmask, a target
@@ -112,7 +113,7 @@ module Irc
     # strip mIRC colour escapes from a string
     def BasicUserMessage.stripcolour(string)
       return "" unless string
-      ret = string.gsub(/\cC\d\d?(?:,\d\d?)?/, "")
+      ret = string.gsub(ColorRx, "")
       #ret.tr!("\x00-\x1f", "")
       ret
     end
