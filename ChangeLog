@@ -2,6 +2,10 @@
 
 	* Timers: failing timer actions don't prevent the global timer ticker
 	from functioning properly.
+	* Shiritori plugin: new word game,  contributed by Yaohan Chen
+	<yaohan.chen@gmail.com>. People take turns to continue a chain of
+	words by saying words that begin with the final letter(s) of the
+	previous word.
 
 2007-02-18  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
