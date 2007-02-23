@@ -328,6 +328,7 @@ module ::Irc
       secs_to_string_case(ret, hours, "hour", "hours") if hours > 0
       mins, secs = secs.divmod SEC_PER_MIN
       secs_to_string_case(ret, mins, "minute", "minutes") if mins > 0
+      secs = secs.to_i
       secs_to_string_case(ret, secs, "second", "seconds") if secs > 0 or ret.empty?
       case ret.length
       when 0
