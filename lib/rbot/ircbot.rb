@@ -712,6 +712,7 @@ class Bot
         connect
         @timer.start
 
+        quit_msg = nil
         while @socket.connected?
           quit if $interrupted > 0
 
@@ -737,6 +738,7 @@ class Bot
       rescue Errno::ETIMEDOUT, Errno::ECONNABORTED, TimeoutError, SocketError => e
         error "network exception: #{e.class}: #{e}"
         debug e.backtrace.join("\n")
+        quit_msg = e.to_s
       rescue BDB::Fatal => e
         fatal "fatal bdb error: #{e.class}: #{e}"
         fatal e.backtrace.join("\n")
@@ -748,6 +750,7 @@ class Bot
       rescue Exception => e
         error "non-net exception: #{e.class}: #{e}"
         error e.backtrace.join("\n")
+        quit_msg = e.to_s
       rescue => e
         fatal "unexpected exception: #{e.class}: #{e}"
         fatal e.backtrace.join("\n")
@@ -755,7 +758,7 @@ class Bot
         exit 2
       end
 
-      disconnect
+      disconnect(quit_msg)
 
       log "\n\nDisconnected\n\n"
 
