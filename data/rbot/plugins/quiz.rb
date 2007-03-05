@@ -291,7 +291,7 @@ class QuizPlugin < Plugin
 
   def help( plugin, topic="" )
     if topic == "admin"
-      "Quiz game aministration commands (requires authentication): 'quiz autoask <on/off>' => enable/disable autoask mode. 'quiz autoask delay <secs>' => delay next quiz by <secs> seconds when in autoask mode. 'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers). 'quiz setscore <player> <score>' => set <player>'s score to <score>. 'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to <jokers>. 'quiz deleteplayer <player>' => delete one player from the rank table (only works when score and jokers are set to 0)."
+      "Quiz game aministration commands (requires authentication): 'quiz autoask <on/off>' => enable/disable autoask mode. 'quiz autoask delay <secs>' => delay next quiz by <secs> seconds when in autoask mode. 'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers). 'quiz setscore <player> <score>' => set <player>'s score to <score>. 'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to <jokers>. 'quiz deleteplayer <player>' => delete one player from the rank table (only works when score and jokers are set to 0). 'quiz cleanup' => remove players with no points and no jokers."
     else
       urls = @bot.config['quiz.sources'].select { |p| p =~ /^https?:\/\// }
       "A multiplayer trivia quiz. 'quiz' => ask a question. 'quiz hint' => get a hint. 'quiz solve' => solve this question. 'quiz skip' => skip to next question. 'quiz joker' => draw a joker to win this round. 'quiz score [player]' => show score for [player] (default is yourself). 'quiz top5' => show top 5 players. 'quiz top <number>' => show top <number> players (max 50). 'quiz stats' => show some statistics. 'quiz fetch' => refetch questions from databases. 'quiz refresh' => refresh the question pool for this channel." + (urls.empty? ? "" : "\nYou can add new questions at #{urls.join(', ')}")
@@ -791,7 +791,7 @@ class QuizPlugin < Plugin
         destplayer = PlayerStats.new(0,0,0)
       end
 
-      if sourceplayer == destplayer
+      if sourceplayer.object_id == destplayer.object_id
         m.reply "Source and destination are the same, I'm not going to touch them"
         return
       end
@@ -898,6 +898,27 @@ class QuizPlugin < Plugin
     q.registry[nick] = player
     m.reply "Jokers for player #{nick} set to #{val}."
   end
+
+
+  def cmd_cleanup(m, params)
+    chan = m.channel
+    q = create_quiz( chan )
+    if q.nil?
+      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
+      return
+    end
+
+    null_players = []
+    q.registry.each { |nick, player|
+      null_players << nick if player.jokers == 0 and player.score == 0
+    }
+    debug "Cleaning up by removing #{null_players * ', '}"
+    null_players.each { |nick|
+      cmd_del_player(m, :nick => nick)
+    }
+
+  end
+
 end
 
 
@@ -926,3 +947,4 @@ plugin.map 'quiz transfer :source :dest :score :jokers', :action => 'cmd_transfe
 plugin.map 'quiz deleteplayer :nick', :action => 'cmd_del_player', :auth_path => 'edit'
 plugin.map 'quiz setscore :nick :score', :action => 'cmd_set_score', :auth_path => 'edit'
 plugin.map 'quiz setjokers :nick :jokers', :action => 'cmd_set_jokers', :auth_path => 'edit'
+plugin.map 'quiz cleanup', :action => 'cmd_cleanup', :auth_path => 'edit'
