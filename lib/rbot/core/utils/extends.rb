@@ -95,23 +95,9 @@ class ::Regexp
 
   IN_ON = /in|on/
 
-  # We start with some IRC related regular expressions, used to match
-  # Irc::User nicks and Irc::Channel names
-  #
-  # For each of them we define three versions of the regular expression:
-  #  * a generic one, which should match for any server but may turn out to
-  #    match more than a specific server would accept
-  #  * an RFC-compliant matcher
-  #  * TODO a server-specific one that uses the Irc::Server#supports method to build
-  #    a matcher valid for a particular server.
-  #
   module Irc
-    CHAN_FIRST = /[#&+]/
-    CHAN_SAFE = /![A-Z0-9]{5}/
-    CHAN_ANY = /[^\x00\x07\x0A\x0D ,:]/
-    GEN_CHAN = /(?:#{CHAN_FIRST}|#{CHAN_SAFE})#{CHAN_ANY}+/
-    RFC_CHAN = /#{CHAN_FIRST}#{CHAN_ANY}{1,49}|#{CHAN_SAFE}#{CHAN_ANY}{1,44}/
-
+    # Match a list of channel anmes separated by optional commas, whitespace
+    # and optionally the word "and"
     CHAN_LIST = Regexp.new_list(GEN_CHAN)
 
     # Match "in #channel" or "on #channel" and/or "in private" (optionally
@@ -126,27 +112,11 @@ class ::Regexp
     IN_CHAN_LIST_PVT_SFX = Regexp.new_list(/#{GEN_CHAN}|here|private|pvt/, IN_ON)
     IN_CHAN_LIST_PVT = /#{IN_ON}\s+#{IN_CHAN_LIST_PVT_SFX}|anywhere|everywhere/
 
-    SPECIAL_CHAR = /[\x5b-\x60\x7b-\x7d]/
-    NICK_FIRST = /#{SPECIAL_CHAR}|[[:alpha:]]/
-    NICK_ANY = /#{SPECIAL_CHAR}|[[:alnum:]]|-/
-    GEN_NICK = /#{NICK_FIRST}#{NICK_ANY}+/
-    RFC_NICK = /#{NICK_FIRST}#{NICK_ANY}{0,8}/
-
     # Match a list of nicknames separated by optional commas, whitespace and
     # optionally the word "and"
-    NICK_LIST = Regexp.new_list(GEN_CHAN)
+    NICK_LIST = Regexp.new_list(GEN_NICK)
 
   end
-
-  # Next, some general purpose ones
-  DIGITS = /\d+/
-  HEX_DIGIT = /[0-9A-Fa-f]/
-  HEX_DIGITS = /#{HEX_DIGIT}+/
-  HEX_OCTET = /#{HEX_DIGIT}#{HEX_DIGIT}?/
-  DEC_OCTET = /[01]?\d?\d|2[0-4]\d|25[0-5]/
-  DEC_IP_ADDR = /#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}/
-  HEX_IP_ADDR = /#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}/
-  IP_ADDR = /#{DEC_IP_ADDR}|#{HEX_IP_ADDR}/
 
 end
 

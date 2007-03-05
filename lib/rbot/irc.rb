@@ -475,6 +475,82 @@ class ArrayOf < Array
 end
 
 
+# We extend the Regexp class with an Irc module which will contain some
+# Irc-specific regexps
+#
+class Regexp
+
+  # We start with some general-purpose ones which will be used in the
+  # Irc module too, but are useful regardless
+  DIGITS = /\d+/
+  HEX_DIGIT = /[0-9A-Fa-f]/
+  HEX_DIGITS = /#{HEX_DIGIT}+/
+  HEX_OCTET = /#{HEX_DIGIT}#{HEX_DIGIT}?/
+  DEC_OCTET = /[01]?\d?\d|2[0-4]\d|25[0-5]/
+  DEC_IP_ADDR = /#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}/
+  HEX_IP_ADDR = /#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}/
+  IP_ADDR = /#{DEC_IP_ADDR}|#{HEX_IP_ADDR}/
+
+  # IPv6, from Resolv::IPv6, without the \A..\z anchors
+  HEX_16BIT = /#{HEX_DIGIT}{1,4}/
+  IP6_8Hex = /(?:#{HEX_16BIT}:){7}#{HEX_16BIT}/
+  IP6_CompressedHex = /((?:#{HEX_16BIT}(?::#{HEX_16BIT})*)?)::((?:#{HEX_16BIT}(?::#{HEX_16BIT})*)?)/
+  IP6_6Hex4Dec = /((?:#{HEX_16BIT}:){6,6})#{DEC_IP_ADDR}/
+  IP6_CompressedHex4Dec = /((?:#{HEX_16BIT}(?::#{HEX_16BIT})*)?)::((?:#{HEX_16BIT}:)*)#{DEC_IP_ADDR}/
+  IP6_ADDR = /(?:#{IP6_8Hex})|(?:#{IP6_CompressedHex})|(?:#{IP6_6Hex4Dec})|(?:#{IP6_CompressedHex4Dec})/
+
+  # We start with some IRC related regular expressions, used to match
+  # Irc::User nicks and users and Irc::Channel names
+  #
+  # For each of them we define two versions of the regular expression:
+  #  * a generic one, which should match for any server but may turn out to
+  #    match more than a specific server would accept
+  #  * an RFC-compliant matcher
+  #
+  module Irc
+
+    # Channel-name-matching regexps
+    CHAN_FIRST = /[#&+]/
+    CHAN_SAFE = /![A-Z0-9]{5}/
+    CHAN_ANY = /[^\x00\x07\x0A\x0D ,:]/
+    GEN_CHAN = /(?:#{CHAN_FIRST}|#{CHAN_SAFE})#{CHAN_ANY}+/
+    RFC_CHAN = /#{CHAN_FIRST}#{CHAN_ANY}{1,49}|#{CHAN_SAFE}#{CHAN_ANY}{1,44}/
+
+    # Nick-matching regexps
+    SPECIAL_CHAR = /[\x5b-\x60\x7b-\x7d]/
+    NICK_FIRST = /#{SPECIAL_CHAR}|[[:alpha:]]/
+    NICK_ANY = /#{SPECIAL_CHAR}|[[:alnum:]]|-/
+    GEN_NICK = /#{NICK_FIRST}#{NICK_ANY}+/
+    RFC_NICK = /#{NICK_FIRST}#{NICK_ANY}{0,8}/
+
+    USER_CHAR = /[^\x00\x0a\x0d @]/
+    GEN_USER = /#{USER_CHAR}+/
+
+    # Host-matching regexps
+    HOSTNAME_COMPONENT = /[[:alnum:]](?:[[:alnum:]]|-)*[[:alnum:]]*/
+    HOSTNAME = /#{HOSTNAME_COMPONENT}(?:\.#{HOSTNAME_COMPONENT})*/
+    HOSTADDR = /#{IP_ADDR}|#{IP6_ADDR}/
+
+    GEN_HOST = /#{HOSTNAME}|#{HOSTADDR}/
+
+    # FreeNode network replaces the host of affiliated users with
+    # 'virtual hosts' 
+    # FIXME we need the true syntax to match it properly ...
+    PDPC_HOST_PART = /[0-9A-Za-z.-]+/
+    PDPC_HOST = /#{PDPC_HOST_PART}(?:\/#{PDPC_HOST_PART})+/
+
+    # NOTE: the final optional and non-greedy dot is needed because some
+    # servers (e.g. FreeNode) send the hostname of the services as "services."
+    # which is not RFC compliant, but sadly done.
+    GEN_MASK_HOST = /#{PDPC_HOST}|#{GEN_HOST}\.??/ 
+
+    # Netmask-matching Regexp
+    GEN_MASK = /(#{GEN_NICK})(?:(?:!(#{GEN_USER}))?@(#{GEN_MASK_HOST}))?/
+  end
+
+end
+
+
 module Irc
 
 
@@ -517,7 +593,7 @@ module Irc
       # Now we can see if the given string _str_ is an actual Netmask
       if str.respond_to?(:to_str)
         case str.to_str
-        when /^(?:(\S+?)(?:!(\S+)@(?:(\S+))?)?)?$/
+        when /^(?:#{Regexp::Irc::GEN_MASK})?$/
           # We do assignment using our internal methods
           self.nick = $1
           self.user = $2
