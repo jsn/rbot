@@ -533,19 +533,34 @@ class Regexp
 
     GEN_HOST = /#{HOSTNAME}|#{HOSTADDR}/
 
-    # FreeNode network replaces the host of affiliated users with
-    # 'virtual hosts' 
-    # FIXME we need the true syntax to match it properly ...
-    PDPC_HOST_PART = /[0-9A-Za-z.-]+/
-    PDPC_HOST = /#{PDPC_HOST_PART}(?:\/#{PDPC_HOST_PART})+/
+    # # FreeNode network replaces the host of affiliated users with
+    # # 'virtual hosts' 
+    # # FIXME we need the true syntax to match it properly ...
+    # PDPC_HOST_PART = /[0-9A-Za-z.-]+/
+    # PDPC_HOST = /#{PDPC_HOST_PART}(?:\/#{PDPC_HOST_PART})+/
 
-    # NOTE: the final optional and non-greedy dot is needed because some
-    # servers (e.g. FreeNode) send the hostname of the services as "services."
-    # which is not RFC compliant, but sadly done.
-    GEN_MASK_HOST = /#{PDPC_HOST}|#{GEN_HOST}\.??/ 
+    # # NOTE: the final optional and non-greedy dot is needed because some
+    # # servers (e.g. FreeNode) send the hostname of the services as "services."
+    # # which is not RFC compliant, but sadly done.
+    # GEN_HOST_EXT = /#{PDPC_HOST}|#{GEN_HOST}\.??/ 
+
+    # Sadly, different networks have different, RFC-breaking ways of cloaking
+    # the actualy host address: see above for an example to handle FreeNode.
+    # Another example would be Azzurra, wich also inserts a "=" in the
+    # cloacked host. So let's just not care about this and go with the simplest
+    # thing:
+    GEN_HOST_EXT = /\S+/
+
+    # User-matching Regexp
+    GEN_USER_ID = /(#{GEN_NICK})(?:(?:!(#{GEN_USER}))?@(#{GEN_HOST_EXT}))?/
+
+    # For Netmask, we want to allow wildcards * and ? in the nick
+    # (they are already allowed in the user and host part
+    GEN_NICK_MASK = /(?:#{NICK_FIRST}|[?*])?(?:#{NICK_ANY}|[?*])+/
 
     # Netmask-matching Regexp
-    GEN_MASK = /(#{GEN_NICK})(?:(?:!(#{GEN_USER}))?@(#{GEN_MASK_HOST}))?/
+    GEN_MASK = /(#{GEN_NICK_MASK})(?:(?:!(#{GEN_USER}))?@(#{GEN_HOST_EXT}))?/
+
   end
 
 end

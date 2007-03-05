@@ -902,7 +902,7 @@ module Irc
         # This is not always true, though, since some servers do not send a
         # full hostmask for user messages.
         #
-        if prefix =~ /^#{Regexp::Irc::GEN_MASK}$/
+        if prefix =~ /^#{Regexp::Irc::GEN_USER_ID}$/
           data[:source] = @server.user(prefix)
         else
           if @server.hostname
