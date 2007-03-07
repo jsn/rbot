@@ -92,7 +92,8 @@ end
 class Quiz
   attr_accessor :registry, :registry_conf, :questions,
     :question, :answers, :canonical_answer, :answer_array,
-    :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors
+    :first_try, :hint, :hintrange, :rank_table, :hinted, :has_errors,
+    :all_seps
 
   def initialize( channel, registry )
     if !channel
@@ -139,6 +140,9 @@ class Quiz
     @hint = []
     @hintrange = nil
     @hinted = false
+
+    # True if the answers is entirely done by separators
+    @all_seps = false
 
     # We keep this array of player stats for performance reasons. It's sorted by score
     # and always synced with the registry player stats hash. This way we can do fast
@@ -507,6 +511,15 @@ class QuizPlugin < Plugin
       end
       q.answer_array << ch
     }
+    q.all_seps = false
+    # It's possible that an answer is entirely done by separators,
+    # in which case we'll hide everything
+    if q.answer_array == q.hint
+      q.hint.map! { |ch|
+        "^"
+      }
+      q.all_seps = true
+    end
     q.hinted = false
 
     # Generate array of unique random range
@@ -555,7 +568,7 @@ class QuizPlugin < Plugin
         begin
           index = q.hintrange.pop
           # New hint char until the char isn't a "separator" (space etc.)
-        end while is_sep(q.answer_array[index])
+        end while is_sep(q.answer_array[index]) and not q.all_seps
         q.hint[index] = q.answer_array[index]
       end
       m.reply "Hint: #{q.hint}"
