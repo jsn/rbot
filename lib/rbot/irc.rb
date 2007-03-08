@@ -554,12 +554,18 @@ class Regexp
     # User-matching Regexp
     GEN_USER_ID = /(#{GEN_NICK})(?:(?:!(#{GEN_USER}))?@(#{GEN_HOST_EXT}))?/
 
-    # For Netmask, we want to allow wildcards * and ? in the nick
-    # (they are already allowed in the user and host part
-    GEN_NICK_MASK = /(?:#{NICK_FIRST}|[?*])?(?:#{NICK_ANY}|[?*])+/
+    # Things such has the BIP proxy send invalid nicks in a complete netmask,
+    # so we want to match this, rather: this matches either a compliant nick
+    # or a a string with a very generic nick, a very generic hostname after an
+    # @ sign, and an optional user after a !
+    BANG_AT = /#{GEN_NICK}|\S+?(?:!\S+?)?@\S+?/
 
-    # Netmask-matching Regexp
-    GEN_MASK = /(#{GEN_NICK_MASK})(?:(?:!(#{GEN_USER}))?@(#{GEN_HOST_EXT}))?/
+    # # For Netmask, we want to allow wildcards * and ? in the nick
+    # # (they are already allowed in the user and host part
+    # GEN_NICK_MASK = /(?:#{NICK_FIRST}|[?*])?(?:#{NICK_ANY}|[?*])+/
+
+    # # Netmask-matching Regexp
+    # GEN_MASK = /(#{GEN_NICK_MASK})(?:(?:!(#{GEN_USER}))?@(#{GEN_HOST_EXT}))?/
 
   end
 
@@ -608,7 +614,9 @@ module Irc
       # Now we can see if the given string _str_ is an actual Netmask
       if str.respond_to?(:to_str)
         case str.to_str
-        when /^(?:#{Regexp::Irc::GEN_MASK})?$/
+          # We match a pretty generic string, to work around non-compliant
+          # servers
+        when /^(?:(\S+?)(?:(?:!(\S+?))?@(\S+))?)?$/
           # We do assignment using our internal methods
           self.nick = $1
           self.user = $2

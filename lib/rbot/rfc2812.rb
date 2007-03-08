@@ -902,12 +902,12 @@ module Irc
         # This is not always true, though, since some servers do not send a
         # full hostmask for user messages.
         #
-        if prefix =~ /^#{Regexp::Irc::GEN_USER_ID}$/
+        if prefix =~ /^#{Regexp::Irc::BANG_AT}$/
           data[:source] = @server.user(prefix)
         else
           if @server.hostname
             if @server.hostname != prefix
-              # TODO do we want to be able to differentiated messages that are passed on to us from /other/ servers?
+              # TODO do we want to be able to differentiate messages that are passed on to us from /other/ servers?
               debug "Origin #{prefix} for message\n\t#{serverstring.inspect}\nis neither a user hostmask nor the server hostname\nI'll pretend that it's from the server anyway"
               data[:source] = @server
             else
