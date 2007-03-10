@@ -1,7 +1,9 @@
 2007-03-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* IRC settings: ability to change the IRC name for the bot. Thanks to
-	jsn- (Dmitry Kim <dmitry.kim@gmail.com>).
+	jsn (Dmitry Kim <dmitry.kim@gmail.com>).
+	* Plugin: allow customization of the plugin load path. Thanks to
+	jsn (Dmitry Kim <dmitry.kim@gmail.com>).
 
 2007-02-20  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
