@@ -89,6 +89,7 @@ module Irc
 # Main bot class, which manages the various components, receives messages,
 # handles them or passes them to plugins, and contains core functionality.
 class Bot
+  COPYRIGHT_NOTICE = "(c) Tom Gilbert and the rbot development team"
   # the bot's Auth data
   attr_reader :auth
 
@@ -183,6 +184,12 @@ class Bot
     BotConfig.register BotConfigStringValue.new('irc.nick', :default => "rbot",
       :desc => "IRC nickname the bot should attempt to use", :wizard => true,
       :on_change => Proc.new{|bot, v| bot.sendq "NICK #{v}" })
+    BotConfig.register BotConfigStringValue.new('irc.name',
+      :default => "Ruby bot", :requires_restart => true,
+      :desc => "IRC realname the bot should use")
+    BotConfig.register BotConfigBooleanValue.new('irc.name_copyright',
+      :default => true, :requires_restart => true,
+      :desc => "Append copyright notice to bot realname? (please don't disable unless it's really necessary)")
     BotConfig.register BotConfigStringValue.new('irc.user', :default => "rbot",
       :requires_restart => true,
       :desc => "local user the bot should appear to be", :wizard => true)
@@ -697,8 +704,12 @@ class Bot
       raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
     end
     quit if $interrupted > 0
+
+    realname = @config['irc.name'].clone || 'Ruby bot'
+    realname << ' ' + COPYRIGHT_NOTICE if @config['irc.name_copyright'] 
+
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
-    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :Ruby bot. (c) Tom Gilbert and the rbot development team"
+    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :#{realname}"
     quit if $interrupted > 0
     myself.nick = @config['irc.nick']
     myself.user = @config['irc.user']
