@@ -242,6 +242,12 @@ class Bot
       :validate => Proc.new { |v| v > 0 },
       :desc => "Maximum console messages logfile size (in megabytes)")
 
+    BotConfig.register BotConfigArrayValue.new('plugins.path',
+      :wizard => true, :default => ['(default)', '(default)/contrib'],
+      :requires_restart => false,
+      :on_change => Proc.new { |bot, v| bot.setup_plugins_path },
+      :desc => "Where the bot should look for plugin. List multiple directories using commas to separate. Use '(default)' for default prepackaged plugins collection, '(default)/contrib' for prepackaged unsupported plugins collection")
+
     BotConfig.register BotConfigEnumValue.new('send.newlines',
       :values => ['split', 'join'], :default => 'split',
       :on_change => Proc.new { |bot, v|
@@ -433,10 +439,7 @@ class Bot
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::pluginmanager
     @plugins.bot_associate(self)
-    @plugins.add_botmodule_dir(Config::coredir + "/utils")
-    @plugins.add_botmodule_dir(Config::coredir)
-    @plugins.add_botmodule_dir("#{botclass}/plugins")
-    @plugins.add_botmodule_dir(Config::datadir + "/plugins")
+    setup_plugins_path()
     @plugins.scan
 
     Utils.set_safe_save_dir("#{botclass}/safe_save")
@@ -629,6 +632,18 @@ class Bot
       :split_at => Regexp.new(@config['send.split_at']),
       :purge_split => @config['send.purge_split'],
       :truncate_text => @config['send.truncate_text'].dup
+  end
+
+  def setup_plugins_path
+    @plugins.clear_botmodule_dirs
+    @plugins.add_botmodule_dir(Config::coredir + "/utils")
+    @plugins.add_botmodule_dir(Config::coredir)
+    @plugins.add_botmodule_dir("#{botclass}/plugins")
+
+    @config['plugins.path'].each do |_|
+        path = _.sub(/^\(default\)/, Config::datadir + '/plugins')
+        @plugins.add_botmodule_dir(path)
+    end
   end
 
   def set_default_send_options(opts={})

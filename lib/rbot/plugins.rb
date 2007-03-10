@@ -390,6 +390,11 @@ module Plugins
       debug "Botmodule loading path: #{@dirs.join(', ')}"
     end
 
+    def clear_botmodule_dirs
+      @dirs.clear
+      debug "Botmodule loading path cleared"
+    end
+
     # load plugins from pre-assigned list of directories
     def scan
       @failed.clear
