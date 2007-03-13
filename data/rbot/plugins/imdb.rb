@@ -6,8 +6,11 @@
 # Author:: Arnaud Cornet <arnaud.cornet@gmail.com>
 # Copyright:: (C) 2005 Arnaud Cornet
 # License:: MIT license
+#
+# Notes by Giuseppe Bilotta:
+# TODO return more than one match (configurable)
+# TODO why do we use CGI.unescapeHTML? shall we rely on the rbot methods?
 
-require 'net/http'
 require 'cgi'
 require 'uri/common'
 
@@ -21,7 +24,7 @@ class Imdb
     @http = @bot.httputil.get_proxy(URI.parse("http://us.imdb.com/find?q=#{str}"))
     @http.start
     begin
-    resp, data = @http.get("/find?q=#{str}", "User-Agent" => "Mozilla/5.0")
+    resp, data = @http.get("/find?q=#{str}", @bot.httputil.headers)
     rescue Net::ProtoRetriableError => detail
       head = detail.data
       if head.code == "301" or head.code == "302"
@@ -29,7 +32,7 @@ class Imdb
         end
     end
     if resp.code == "200"
-      m = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(:?[^>]*)>([^<]*)<\/a>/.match(resp.body)
+      m = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/.match(resp.body)
       if m
         url = m[1]
         title = m[2]
@@ -47,14 +50,13 @@ class Imdb
       debug "IMDB: search returned NIL"
       return nil
     end
-    resp, data = @http.get(sr, "User-Agent" =>
-      "Mozilla/5.0 (compatible; Konqueror/3.1; Linux)")
+    resp, data = @http.get(sr, @bot.httputil.headers)
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
       title = CGI.unescapeHTML(m[1])
 
-      m = /<b>([0-9.]+)\/10<\/b> \(([0-9,]+) votes?\)/.match(resp.body)
+      m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
       return nil if !m
       score = m[1]
       votes = m[2]
