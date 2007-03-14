@@ -1,3 +1,11 @@
+2007-03-14  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Socket filtering: socket data, both input and output, can now be
+	filtered. This is used for example to transcode all input and output
+	so that messages are internally managed as UTF-8. By default, the bot
+	will try cp1252 (Windows Western European) encoding for non-UTF-8
+	strings. Thanks to jsn (Dmitry Kim <dmitry.kim@gmail.com>).
+
 2007-03-10  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* IRC settings: ability to change the IRC name for the bot. Thanks to

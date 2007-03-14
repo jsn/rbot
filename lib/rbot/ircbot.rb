@@ -440,14 +440,14 @@ class Bot
     @plugins = Plugins::pluginmanager
     @plugins.bot_associate(self)
     setup_plugins_path()
+
+    @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
+    @client = Client.new
+
     @plugins.scan
 
     Utils.set_safe_save_dir("#{botclass}/safe_save")
     @httputil = Utils::HttpUtil.new(self)
-
-
-    @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
-    @client = Client.new
 
     # Channels where we are quiet
     # Array of channels names where the bot should be quiet

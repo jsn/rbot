@@ -258,6 +258,26 @@ module Irc
     # max lines to burst
     attr_reader :sendq_burst
 
+    # an optional filter object. we call @filter.in(data) for
+    # all incoming data and @filter.out(data) for all outgoing data
+    attr_reader :filter
+
+    # default trivial filter class
+    class IdentityFilter
+        def in(x)
+            x
+        end
+
+        def out(x)
+            x
+        end
+    end
+
+    # set filter to identity, not to nil
+    def filter=(f)
+        @filter = f || IdentityFilter.new
+    end
+
     # server:: server to connect to
     # port::   IRCd port
     # host::   optional local host to bind to (ruby 1.7+ required)
@@ -271,6 +291,7 @@ module Irc
       @port = port.to_i
       @host = host
       @sock = nil
+      @filter = IdentityFilter.new
       @spooler = false
       @lines_sent = 0
       @lines_received = 0
@@ -380,7 +401,7 @@ module Irc
         return nil
       end
       begin
-        reply = @sock.gets
+        reply = @filter.in(@sock.gets)
         @lines_received += 1
         reply.strip! if reply
         debug "RECV: #{reply.inspect}"
@@ -483,7 +504,7 @@ module Irc
         if @sock.nil?
           error "SEND attempted on closed socket"
         else
-          @sock.puts message
+          @sock.puts(@filter.out(message))
           @last_send = Time.new
           @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1
