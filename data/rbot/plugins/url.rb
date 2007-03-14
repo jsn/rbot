@@ -10,6 +10,9 @@ class UrlPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('url.display_link_info',
     :default => false,
     :desc => "Get the title of any links pasted to the channel and display it (also tells if the link is broken or the site is down)")
+  BotConfig.register BotConfigBooleanValue.new('url.titles_only',
+    :default => false,
+    :desc => "Only show info for links that have <title> tags (in other words, don't display info for jpegs, mpegs, etc.)")
 
   def initialize
     super
@@ -89,10 +92,12 @@ class UrlPlugin < Plugin
               data = read_data_from_response(response, 4096)
               return get_title_from_html(data)
             else
-              # content doesn't have title, just display info.
-              size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
-              size = size ? ", size: #{size} bytes" : ""
-              return "[Link Info] type: #{response['content-type']}#{size}"
+              unless @bot.config['url.titles_only']
+                # content doesn't have title, just display info.
+                size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+                size = size ? ", size: #{size} bytes" : ""
+                return "[Link Info] type: #{response['content-type']}#{size}"
+              end
             end
           else
             return "[Link Info] Error getting link (#{response.code} - #{response.message})"
