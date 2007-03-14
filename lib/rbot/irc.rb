@@ -1526,6 +1526,10 @@ module Irc
             groups.each { |g|
               k, v = g.split(':')
               @supports[key][k] = v.to_i || 0
+              if @supports[key][k] == 0
+                warn "Deleting #{key} limit of 0 for #{k}"
+                @supports[key].delete(k)
+              end
             }
           }
         when :chanmodes
@@ -1677,7 +1681,8 @@ module Irc
           channel_names.each { |n|
             count += 1 if k.include?(n[0])
           }
-          raise IndexError, "Already joined #{count} channels with prefix #{k}" if count == @supports[:chanlimit][k]
+          # raise IndexError, "Already joined #{count} channels with prefix #{k}" if count == @supports[:chanlimit][k]
+          warn "Already joined #{count}/#{@supports[:chanlimit][k]} channels with prefix #{k}, we may be going over server limits" if count >= @supports[:chanlimit][k]
         }
 
         # So far, everything is fine. Now create the actual Channel
