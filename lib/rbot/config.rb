@@ -70,6 +70,7 @@ module Irc
     end
     def unset
       @manager.config.delete(@key)
+      @manager.changed = true
     end
 
     # set string will raise ArgumentErrors on failed parse/validate
