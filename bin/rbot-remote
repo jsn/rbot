@@ -1,0 +1,76 @@
+#! /usr/bin/ruby
+require 'drb'
+require 'optparse'
+
+#++
+#
+# :title: RemoteCtl example script
+#
+# Author:: jsn (dmitry kim) <dmitry dot kim at gmail dot org>
+# Copyright:: (C) 2007 dmitry kim
+# License:: in public domain
+
+user = nil
+pw = nil
+dst = nil
+uri = 'druby://localhost:7268'
+
+opts = OptionParser.new
+opts.on('-u', '--user <user>', "remote user (mandatory)") { |v| user = v }
+opts.on('-p', '--password <pw>', "remote user password (mandatory)") { |v| pw = v }
+opts.on('-d', '--destination <user or #channel>') { |v| dst = v }
+opts.on('-r', '--uri <drb uri>', "rbot url (#{uri})") { |v| uri = v }
+opts.on('-h', '--help', "this message") { |v| pw = nil } # sorry!
+opts.on('-a', '--about', "what it's all about.") { |v|
+    puts <<EOF
+This is just a proof-of-concept example for rbot druby-based api. This program
+reads lines of text from the standard input and sends them to a specified irc
+channel or user via rbot. Make sure you have remotectl.rb plugin loaded before
+use.
+
+The necessary setup is:
+    1) # create a new rbot user ("rmuser", in this example) with a password
+       # ("rmpw", in this example). in an open query to rbot:
+
+       <you> user create rmuser rmpw
+       <rbot> created botuser remote
+
+    2) # add a remotectl permission to your newly created remote user:
+
+       <you> permissions set +remotectl for rmuser
+       <rbot> okies!
+
+    3) # add specific permissions for the commands you want to allow via
+       # remote interface. for example, in this script we want 'say',
+       # 'action' and other basic commands to work:
+
+       <you> permissions set +basics::talk::do for remote
+       <rbot> alright
+
+    4) # run the #{$0} and type something. the message should
+       # show up on your channel / arrive as an irc private message.
+       
+       [you@yourhost ~]$ ./bin/rbot-remote -u rmuser -p rmpw -d '#your-channel'
+       hello, world!
+       <Ctrl-D>
+       [you@yourhost ~]$
+EOF
+    exit 0
+}
+opts.parse!
+
+if !pw || !user || !dst
+    puts opts.to_s
+    exit 0
+end
+
+rbot = DRbObject.new_with_uri(uri)
+id = rbot.delegate(nil, "remote login #{user} #{pw}")[:return]
+puts "id is #{id.inspect}"
+loop {
+    s = gets or break
+    s.chomp!
+    rv = rbot.delegate(id, "dispatch say #{dst} #{s}") or break
+    puts "rv is #{rv.inspect}"
+}
+
