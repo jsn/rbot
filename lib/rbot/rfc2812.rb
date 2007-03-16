@@ -914,7 +914,7 @@ module Irc
               data[:source] = @server
             end
           else
-            @server.instance_variable_set(:@hostname, data[:source])
+            @server.instance_variable_set(:@hostname, prefix)
             data[:source] = @server
           end
         end
