@@ -243,7 +243,7 @@ class Bot
       :desc => "Maximum console messages logfile size (in megabytes)")
 
     BotConfig.register BotConfigArrayValue.new('plugins.path',
-      :wizard => true, :default => ['(default)', '(default)/contrib'],
+      :wizard => true, :default => ['(default)', '(default)/games', '(default)/contrib'],
       :requires_restart => false,
       :on_change => Proc.new { |bot, v| bot.setup_plugins_path },
       :desc => "Where the bot should look for plugin. List multiple directories using commas to separate. Use '(default)' for default prepackaged plugins collection, '(default)/contrib' for prepackaged unsupported plugins collection")
