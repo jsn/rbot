@@ -973,12 +973,16 @@ class Bot
   def irclog(message, where="server")
     message = message.chomp
     stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    where = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
-    unless(@logs.has_key?(where))
-      @logs[where] = File.new("#{@botclass}/logs/#{where}", "a")
-      @logs[where].sync = true
+    if where.class <= Server
+      where_str = "server"
+    else
+      where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
     end
-    @logs[where].puts "[#{stamp}] #{message}"
+    unless(@logs.has_key?(where_str))
+      @logs[where_str] = File.new("#{@botclass}/logs/#{where_str}", "a")
+      @logs[where_str].sync = true
+    end
+    @logs[where_str].puts "[#{stamp}] #{message}"
     #debug "[#{stamp}] <#{where}> #{message}"
   end
 
@@ -1162,15 +1166,15 @@ class Bot
   def irclogprivmsg(m)
     if(m.action?)
       if(m.private?)
-        irclog "* [#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
+        irclog "* [#{m.source}(#{m.sourceaddress})] #{m.message}", m.source
       else
-        irclog "* #{m.sourcenick} #{m.message}", m.target
+        irclog "* #{m.source} #{m.message}", m.target
       end
     else
       if(m.public?)
-        irclog "<#{m.sourcenick}> #{m.message}", m.target
+        irclog "<#{m.source}> #{m.message}", m.target
       else
-        irclog "[#{m.sourcenick}(#{m.sourceaddress})] #{m.message}", m.sourcenick
+        irclog "[#{m.source}(#{m.sourceaddress})] #{m.message}", m.source
       end
     end
   end
@@ -1200,7 +1204,7 @@ class Bot
       debug "joined channel #{m.channel}"
       irclog "@ Joined channel #{m.channel}", m.channel
     else
-      irclog "@ #{m.sourcenick} joined channel #{m.channel}", m.channel
+      irclog "@ #{m.source} joined channel #{m.channel}", m.channel
     end
   end
 
@@ -1209,16 +1213,16 @@ class Bot
       debug "left channel #{m.channel}"
       irclog "@ Left channel #{m.channel} (#{m.message})", m.channel
     else
-      irclog "@ #{m.sourcenick} left channel #{m.channel} (#{m.message})", m.channel
+      irclog "@ #{m.source} left channel #{m.channel} (#{m.message})", m.channel
     end
   end
 
   def irclogkick(m)
     if(m.address?)
       debug "kicked from channel #{m.channel}"
-      irclog "@ You have been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
+      irclog "@ You have been kicked from #{m.channel} by #{m.source} (#{m.message})", m.channel
     else
-      irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.sourcenick} (#{m.message})", m.channel
+      irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.source} (#{m.message})", m.channel
     end
   end
 
