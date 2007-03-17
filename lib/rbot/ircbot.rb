@@ -437,7 +437,7 @@ class Bot
     @auth.botowner.password= @config['auth.password']
 
     Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
-    @plugins = Plugins::pluginmanager
+    @plugins = Plugins::manager
     @plugins.bot_associate(self)
     setup_plugins_path()
 

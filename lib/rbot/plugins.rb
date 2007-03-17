@@ -109,7 +109,7 @@ module Plugins
     # initialise your bot module. Always call super if you override this method,
     # as important variables are set up for you
     def initialize
-      @manager = Plugins::pluginmanager
+      @manager = Plugins::manager
       @bot = @manager.bot
 
       @botmodule_triggers = Array.new
@@ -627,7 +627,7 @@ module Plugins
   end
 
   # Returns the only PluginManagerClass instance
-  def Plugins.pluginmanager
+  def Plugins.manager
     return PluginManagerClass.instance
   end
 
