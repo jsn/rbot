@@ -147,14 +147,10 @@ class Bot
   def initialize(botclass, params = {})
     # BotConfig for the core bot
     # TODO should we split socket stuff into ircsocket, etc?
-    BotConfig.register BotConfigStringValue.new('server.name',
-      :default => "localhost", :requires_restart => true,
-      :desc => "What server should the bot connect to?",
-      :wizard => true)
-    BotConfig.register BotConfigIntegerValue.new('server.port',
-      :default => 6667, :type => :integer, :requires_restart => true,
-      :desc => "What port should the bot connect to?",
-      :validate => Proc.new {|v| v > 0}, :wizard => true)
+    BotConfig.register BotConfigArrayValue.new('server.list',
+      :default => ['irc://localhost'], :wizard => true,
+      :requires_restart => true,
+      :desc => "List of irc servers rbot should try to connect to. Use comma to separate values. Servers are in format 'server.doma.in:port'. If port is not specified, default value (6667) is used.")
     BotConfig.register BotConfigBooleanValue.new('server.ssl',
       :default => false, :requires_restart => true, :wizard => true,
       :desc => "Use SSL to connect to this server?")
@@ -441,7 +437,17 @@ class Bot
     @plugins.bot_associate(self)
     setup_plugins_path()
 
-    @socket = IrcSocket.new(@config['server.name'], @config['server.port'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
+    if @config['server.name']
+        debug "upgrading configuration (server.name => server.list)"
+        srv_uri = 'irc://' + @config['server.name']
+        srv_uri += ":#{@config['server.port']}" if @config['server.port']
+        @config.items['server.list'.to_sym].set_string(srv_uri)
+        @config.delete('server.name'.to_sym)
+        @config.delete('server.port'.to_sym)
+        debug "server.list is now #{@config['server.list'].inspect}"
+    end
+
+    @socket = IrcSocket.new(@config['server.list'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
     @client = Client.new
 
     @plugins.scan
@@ -716,7 +722,7 @@ class Bot
       quit if $interrupted > 0
       @socket.connect
     rescue => e
-      raise e.class, "failed to connect to IRC server at #{@config['server.name']} #{@config['server.port']}: " + e
+      raise e.class, "failed to connect to IRC server at #{@socket.server_uri}: " + e
     end
     quit if $interrupted > 0
 
@@ -724,7 +730,7 @@ class Bot
     realname << ' ' + COPYRIGHT_NOTICE if @config['irc.name_copyright'] 
 
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
-    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@config['server.name']} :#{realname}"
+    @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@socket.server_uri.host} :#{realname}"
     quit if $interrupted > 0
     myself.nick = @config['irc.nick']
     myself.user = @config['irc.user']

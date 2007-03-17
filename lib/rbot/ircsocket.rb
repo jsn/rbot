@@ -262,6 +262,9 @@ module Irc
     # all incoming data and @filter.out(data) for all outgoing data
     attr_reader :filter
 
+    # normalized uri of the current server
+    attr_reader :server_uri
+
     # default trivial filter class
     class IdentityFilter
         def in(x)
@@ -278,17 +281,17 @@ module Irc
         @filter = f || IdentityFilter.new
     end
 
-    # server:: server to connect to
-    # port::   IRCd port
+    # server_list:: list of servers to connect to
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
-    def initialize(server, port, host, sendq_delay=2, sendq_burst=4, opts={})
+    def initialize(server_list, host, sendq_delay=2, sendq_burst=4, opts={})
       @timer = Timer::Timer.new
       @timer.add(0.2) do
         spool
       end
-      @server = server.dup
-      @port = port.to_i
+      @server_list = server_list.dup
+      @server_uri = nil
+      @conn_count = 0
       @host = host
       @sock = nil
       @filter = IdentityFilter.new
@@ -327,18 +330,25 @@ module Irc
         warning "reconnecting while connected"
         return
       end
+      srv_uri = @server_list[@conn_count % @server_list.size].dup
+      srv_uri = 'irc://' + srv_uri if !srv_uri =~ /:\/\//
+      @conn_count += 1
+      @server_uri = URI.parse(srv_uri)
+      @server_uri.port = 6667 if !@server_uri.port
+      debug "connection attempt \##{@conn_count} (#{@server_uri.host}:#{@server_uri.port})"
+
       if(@host)
         begin
-          @sock=TCPSocket.new(@server, @port, @host)
+          @sock=TCPSocket.new(@server_uri.host, @server_uri.port, @host)
         rescue ArgumentError => e
           error "Your version of ruby does not support binding to a "
           error "specific local address, please upgrade if you wish "
           error "to use HOST = foo"
           error "(this option has been disabled in order to continue)"
-          @sock=TCPSocket.new(@server, @port)
+          @sock=TCPSocket.new(@server_uri.host, @server_uri.port)
         end
       else
-        @sock=TCPSocket.new(@server, @port)
+        @sock=TCPSocket.new(@server_uri.host, @server_uri.port)
       end
       if(@ssl)
         require 'openssl'
