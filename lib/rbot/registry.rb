@@ -131,20 +131,26 @@ module Irc
           Dir.mkdir(dir) 
         end
       }
-      @registry = DBTree.new bot, "registry/#{@name}"
+      @registry = nil
       @default = nil
       # debug "initializing registry accessor with name #{@name}"
     end
 
+    def registry
+        @registry ||= DBTree.new @bot, "registry/#{@name}"
+    end
+
     def flush
-      # debug "fushing registry #{@registry}"
-      @registry.flush
-      @registry.sync
+      # debug "fushing registry #{registry}"
+      return if !@registry
+      registry.flush
+      registry.sync
     end
 
     def close
-      # debug "closing registry #{@registry}"
-      @registry.close
+      # debug "closing registry #{registry}"
+      return if !@registry
+      registry.close
     end
 
     # convert value to string form for storing in the registry
@@ -186,8 +192,8 @@ module Irc
 
     # lookup a key in the registry
     def [](key)
-      if @registry.has_key?(key)
-        return restore(@registry[key])
+      if registry.has_key?(key)
+        return restore(registry[key])
       elsif @default != nil
         return restore(@default)
       else
@@ -197,7 +203,7 @@ module Irc
 
     # set a key in the registry
     def []=(key,value)
-      @registry[key] = store(value)
+      registry[key] = store(value)
     end
 
     # set the default value for registry lookups, if the key sought is not
@@ -208,45 +214,45 @@ module Irc
 
     # just like Hash#each
     def each(&block)
-      @registry.each {|key,value|
+      registry.each {|key,value|
         block.call(key, restore(value))
       }
     end
 
     # just like Hash#each_key
     def each_key(&block)
-      @registry.each {|key, value|
+      registry.each {|key, value|
         block.call(key)
       }
     end
 
     # just like Hash#each_value
     def each_value(&block)
-      @registry.each {|key, value|
+      registry.each {|key, value|
         block.call(restore(value))
       }
     end
 
     # just like Hash#has_key?
     def has_key?(key)
-      return @registry.has_key?(key)
+      return registry.has_key?(key)
     end
     alias include? has_key?
     alias member? has_key?
 
     # just like Hash#has_both?
     def has_both?(key, value)
-      return @registry.has_both?(key, store(value))
+      return registry.has_both?(key, store(value))
     end
 
     # just like Hash#has_value?
     def has_value?(value)
-      return @registry.has_value?(store(value))
+      return registry.has_value?(store(value))
     end
 
     # just like Hash#index?
     def index(value)
-      ind = @registry.index(store(value))
+      ind = registry.index(store(value))
       if ind
         return ind
       else
@@ -256,18 +262,18 @@ module Irc
 
     # delete a key from the registry
     def delete(key)
-      return @registry.delete(key)
+      return registry.delete(key)
     end
 
     # returns a list of your keys
     def keys
-      return @registry.keys
+      return registry.keys
     end
 
     # Return an array of all associations [key, value] in your namespace
     def to_a
       ret = Array.new
-      @registry.each {|key, value|
+      registry.each {|key, value|
         ret << [key, restore(value)]
       }
       return ret
@@ -276,7 +282,7 @@ module Irc
     # Return an hash of all associations {key => value} in your namespace
     def to_hash
       ret = Hash.new
-      @registry.each {|key, value|
+      registry.each {|key, value|
         ret[key] = restore(value)
       }
       return ret
@@ -284,7 +290,7 @@ module Irc
 
     # empties the registry (restricted to your namespace)
     def clear
-      @registry.clear
+      registry.clear
     end
     alias truncate clear
 
