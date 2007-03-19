@@ -277,6 +277,7 @@ module Plugins
       @botmodules[:Plugin].clear
       @names_hash.clear
       @commandmappers.clear
+      @failures_shown = false
     end
 
     # Associate with bot _bot_
@@ -489,15 +490,16 @@ module Plugins
         list << "no plugins active"
       end
       # Ignored plugins next
-      unless @ignored.empty?
+      unless @ignored.empty? or @failures_shown
         list << "; #{Underline}#{@ignored.length} plugin#{'s' if @ignored.length > 1} ignored#{Underline}"
         list << ": use #{Bold}help ignored plugins#{Bold} to see why" unless short
       end
       # Failed plugins next
-      unless @failed.empty?
+      unless @failed.empty? or @failures_shown
         list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}"
         list << ": use #{Bold}help failed plugins#{Bold} to see why" unless short
       end
+      @failures_shown = true
       list
     end
 
