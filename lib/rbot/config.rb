@@ -71,6 +71,7 @@ module Irc
     def unset
       @manager.config.delete(@key)
       @manager.changed = true
+      @on_change.call(@manager.bot, value) if @on_change
     end
 
     # set string will raise ArgumentErrors on failed parse/validate
