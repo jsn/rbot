@@ -331,7 +331,7 @@ module Irc
         return
       end
       srv_uri = @server_list[@conn_count % @server_list.size].dup
-      srv_uri = 'irc://' + srv_uri if !srv_uri =~ /:\/\//
+      srv_uri = 'irc://' + srv_uri if !(srv_uri =~ /:\/\//)
       @conn_count += 1
       @server_uri = URI.parse(srv_uri)
       @server_uri.port = 6667 if !@server_uri.port
