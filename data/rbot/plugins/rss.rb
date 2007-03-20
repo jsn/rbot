@@ -53,11 +53,13 @@ class ::RssBlob
   end
 
   def dup
-    self.class.new(@url,
-                   @handle,
-                   @type ? @type.dup : nil,
-                   @watchers.dup,
-                   @xml ? @xml.dup : nil)
+    @mutex.synchronize do
+      self.class.new(@url,
+                     @handle,
+                     @type ? @type.dup : nil,
+                     @watchers.dup,
+                     @xml ? @xml.dup : nil)
+    end
   end
 
   # Downcase all watchers, possibly turning them into Strings if they weren't
@@ -81,12 +83,16 @@ class ::RssBlob
     if watched_by?(who)
       return nil
     end
-    @watchers << who.downcase
+    @mutex.synchronize do
+      @watchers << who.downcase
+    end
     return who
   end
 
   def rm_watch(who)
-    @watchers.delete(who.downcase)
+    @mutex.synchronize do
+      @watchers.delete(who.downcase)
+    end
   end
 
   def to_a
@@ -151,9 +157,7 @@ class RSSFeedsPlugin < Plugin
   def save
     unparsed = Hash.new()
     @feeds.each { |k, f|
-      f.mutex.synchronize do
-        unparsed[k] = f.dup
-      end
+      unparsed[k] = f.dup
     }
     @registry[:feeds] = unparsed
   end
