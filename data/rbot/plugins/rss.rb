@@ -14,15 +14,19 @@
 #
 # License:: MIT license
 
-require 'rss/parser'
-require 'rss/1.0'
-require 'rss/2.0'
-require 'rss/dublincore'
-# begin
-#   require 'rss/dublincore/2.0'
-# rescue
-#   warning "Unable to load RSS libraries, RSS plugin functionality crippled"
-# end
+# require 'rss/parser'
+# require 'rss/1.0'
+# require 'rss/2.0'
+# require 'rss/dublincore'
+# # begin
+# #   require 'rss/dublincore/2.0'
+# # rescue
+# #   warning "Unable to load RSS libraries, RSS plugin functionality crippled"
+# # end
+#
+# GB: Let's just go for the simple stuff:
+#
+require 'rss'
 
 class ::RssBlob
   attr_accessor :url
@@ -620,6 +624,11 @@ class RSSFeedsPlugin < Plugin
       report_problem("reading feed #{feed} failed", nil, m)
       return nil
     end
+    # Ok, 0.9 feeds are not supported, maybe because
+    # Netscape happily removed the DTD. So what we do is just to
+    # reassign the 0.9 RDFs to 1.0, and hope it goes right.
+    xml.gsub!("xmlns=\"http://my.netscape.com/rdf/simple/0.9/\"",
+              "xmlns=\"http://purl.org/rss/1.0/\"")
     feed.mutex.synchronize do
       feed.xml = xml
     end
@@ -633,11 +642,12 @@ class RSSFeedsPlugin < Plugin
       begin
         ## do validate parse
         rss = RSS::Parser.parse(xml)
-        debug "parsed #{feed}"
+        debug "parsed and validated #{feed}"
       rescue RSS::InvalidRSSError
         ## do non validate parse for invalid RSS 1.0
         begin
           rss = RSS::Parser.parse(xml, false)
+          debug "parsed but not validated #{feed}"
         rescue RSS::Error => e
           report_problem("parsing rss stream failed, whoops =(", e, m)
           return nil
