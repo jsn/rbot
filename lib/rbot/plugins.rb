@@ -499,13 +499,14 @@ module Plugins
         list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}"
         list << ": use #{Bold}help failed plugins#{Bold} to see why" unless short
       end
-      @failures_shown = true
       list
     end
 
     # return list of help topics (plugin names)
     def helptopics
-      return status
+      rv = status
+      @failures_shown = true
+      rv
     end
 
     def length
