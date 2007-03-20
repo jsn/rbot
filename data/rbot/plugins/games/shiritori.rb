@@ -354,21 +354,26 @@ class ShiritoriPlugin < Plugin
         # Optionally use a module to normalize Japanese words, enabling input in multiple writing systems
       }
     }
-    @rulesets.each_value do |ruleset|
-      # set default values for each rule to default_ruleset's values
-      ruleset.replace @default_ruleset.merge(ruleset)
-      unless ruleset.has_key?(:words)
-        if ruleset.has_key?(:wordlist_file)
-          # TODO read words only when rule is used
-          # read words separated by newlines from file
+  end
+
+  def load_ruleset(ruleset_name)
+    # set default values for each rule to default_ruleset's values
+    ruleset = @rulesets[ruleset_name].dup
+    ruleset.replace @default_ruleset.merge(ruleset)
+    unless ruleset.has_key?(:words)
+      if ruleset.has_key?(:wordlist_file)
+        begin
           ruleset[:words] =
             File.new("#{@bot.botclass}/shiritori/#{ruleset[:wordlist_file]}").grep(
               ruleset[:listen]) {|l| ruleset[:normalize].call l.chomp}
-        else
-          raise NotImplementedError
+        rescue
+          raise "unable to load word list"
         end
+      else
+        raise NotImplementedError, "ruleset not implemented (properly)"
       end
     end
+    return ruleset
   end
   
   # start shiritori in a channel
@@ -377,15 +382,20 @@ class ShiritoriPlugin < Plugin
       m.reply "Already playing shiritori here"
       @games[m.channel].announce
     else
-      if @rulesets.has_key? params[:ruleset]
-        @games[m.channel] = ShiritoriGame.new(
-          m.channel, @rulesets[params[:ruleset]],
-          @bot.timer,
-          lambda {|msg| m.reply msg},
-          lambda {remove_game m.channel} )
-        m.reply "Shiritori has started. Please say the first word"
+      ruleset = params[:ruleset].downcase
+      if @rulesets.has_key? ruleset
+        begin
+          @games[m.channel] = ShiritoriGame.new(
+            m.channel, load_ruleset(ruleset),
+            @bot.timer,
+            lambda {|msg| m.reply msg},
+            lambda {remove_game m.channel} )
+          m.reply "Shiritori has started. Please say the first word"
+        rescue => e
+          m.reply "couldn't start #{ruleset} shiritori: #{e}"
+        end
       else
-        m.reply "There is no defined ruleset named #{params[:ruleset]}"
+        m.reply "There is no defined ruleset named #{ruleset}"
       end
     end
   end
