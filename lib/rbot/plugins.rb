@@ -531,15 +531,19 @@ module Plugins
         }.join("\n")
       when /ignored?\s*plugins?/
         return "no plugins were ignored" if @ignored.empty?
-        return @ignored.inject(Array.new) { |list, p|
-          case p[:reason]
-          when :loaded
-            list << "#{p[:name]} in #{p[:dir]} (overruled by previous)"
-          else
-            list << "#{p[:name]} in #{p[:dir]} (#{p[:reason].to_s})"
-          end
-          list
-        }.join(", ")
+
+        tmp = Hash.new
+        @ignored.each do |p|
+          reason = p[:loaded] ? 'overruled by previous' : p[:reason].to_s
+          ((tmp[p[:dir]] ||= Hash.new)[reason] ||= Array.new).push(p[:name])
+        end
+
+        return tmp.map do |dir, reasons|
+          s = reasons.map { |r, list|
+            list.map { |_| _.sub(/\.rb$/, '') }.join(', ') + " (#{r})"
+          }.join('; ')
+          "in #{dir}: #{s}"
+        end.join('; ')
       when /^(\S+)\s*(.*)$/
         key = $1
         params = $2
