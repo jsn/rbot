@@ -15,7 +15,9 @@ class RemoteCtlPlugin < Plugin
 
     def remote_command(m, params)
         s = params[:string].to_s
-        new_m = PrivMessage.new(@bot, @bot.server, @bot.server.user('-remote.client-'), @bot.myself, s)
+        u = @bot.server.user("remote:#{m.source.username}")
+        @bot.auth.login(u, m.source.username, m.source.password)
+        new_m = PrivMessage.new(@bot, @bot.server, u, @bot.myself, s)
         @bot.plugins.delegate "listen", new_m
         @bot.plugins.privmsg(new_m)
     end
