@@ -19,8 +19,8 @@ dunno:
   ich kann es nicht tun
   am besten du schaust selber nach
 dunno_about_X:
-  ich weiss nichts über %s
-  ich habe nie von %s gehört :(
+  ich weiss nichts Ã¼ber %s
+  ich habe nie von %s gehÃ¶rt :(
   was zum Teufel ist %s?
 insult:
   %s: Arsch!
@@ -56,14 +56,14 @@ welcome:
   np :)
 thanks:
   Danke :)
-  Süss!
+  SÃ¼ss!
   juhu :)
   :-D
   Prost!
 thanks_X:
   %s: danke :)
   %s: :-D
-  %s: süss!
+  %s: sÃ¼ss!
   %s: juhu :)
   %s: Prost
 quit:

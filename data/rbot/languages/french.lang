@@ -3,8 +3,8 @@ okay:
 dunno:
   de quoi est mort votre dernier esclave?
   je vous aurais bien aide, mais je ne vous aime pas
-  faites-le vous-même
-  parle à mon cul, ma tête est malade
+  faites-le vous-mÃªme
+  parle Ã  mon cul, ma tÃªte est malade
   je ne sais pas
   je ne peut pas faire ca Dave.
 dunno_about_X:
@@ -12,10 +12,10 @@ dunno_about_X:
 insult:
   %s: putin!
   %s: :(
-  %s: je te déteste :(
+  %s: je te dÃ©teste :(
   %s: tu es completement debile
-  %s: mais t'as une tête a faire sauter les plaques d'egouts!
-  %s: est-ce que vous êtes ivre?
+  %s: mais t'as une tÃªte a faire sauter les plaques d'egouts!
+  %s: est-ce que vous Ãªtes ivre?
 hello:
   bonjour
   salut
