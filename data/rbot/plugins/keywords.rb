@@ -117,13 +117,6 @@ class Keywords < Plugin
     end
   end
 
-  # drop static keywords and reload them from files, picking up any new
-  # keyword files that have been added
-  def rescan
-    @statickeywords = Hash.new
-    scan
-  end
-
   # load static keywords from files, picking up any new keyword files that
   # have been added
   def scan
