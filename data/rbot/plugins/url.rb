@@ -27,89 +27,56 @@ class UrlPlugin < Plugin
     return unless TITLE_RE.match(pagedata)
     title = $1.strip.gsub(/\s*\n+\s*/, " ")
     title = Utils.decode_html_entities title
-    title = title[0..255] if title.length > 255
-    "[Link Info] title: #{title}"
+    "title: #{title}"
   end
 
-  def read_data_from_response(response, amount)
+  def get_title_for_url(uri_str)
 
-    amount_read = 0
-    chunks = []
-
-    response.read_body do |chunk|   # read body now
-
-      amount_read += chunk.length
-
-      # if amount_read > amount
-      #   amount_of_overflow = amount_read - amount
-      #   chunk = chunk[0...-amount_of_overflow]
-      # end
-
-      chunks << chunk
-
-      break if amount_read >= amount
-
-    end
-
-    chunks.join('')
-
-  end
-
-  def get_title_for_url(uri_str, depth=@bot.config['http.max_redir'])
-    # This god-awful mess is what the ruby http library has reduced me to.
-    # Python's HTTP lib is so much nicer. :~(
-
-    if depth == 0
-        raise "Error: Maximum redirects hit."
-    end
-
-    debug "+ Getting #{uri_str.to_s}"
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
 
     title = nil
 
-    debug "+ connecting to #{url.host}:#{url.port}"
-    http = @bot.httputil.get_proxy(url)
-    http.start { |http|
-
-      http.request_get(url.request_uri(), @bot.httputil.headers) { |response|
-
+    begin
+      @bot.httputil.get_response(url) { |response|
         case response
-          when Net::HTTPRedirection
-            # call self recursively if this is a redirect
-            redirect_to = response['location']  || '/'
-            debug "+ redirect location: #{redirect_to.inspect}"
-            url = URI.join(url.to_s, redirect_to)
-            debug "+ whee, redirecting to #{url.to_s}!"
-            return get_title_for_url(url, depth-1)
-          when Net::HTTPSuccess
-            if response['content-type'] =~ /^text\//
-              # since the content is 'text/*' and is small enough to
-              # be a webpage, retrieve the title from the page
-              debug "+ getting #{url.request_uri}"
-              # was 5*10^4 ... seems to much to me ... 4k should be enough for everybody ;)
-              data = read_data_from_response(response, 4096)
-              return get_title_from_html(data)
-            else
-              unless @bot.config['url.titles_only']
-                # content doesn't have title, just display info.
-                size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
-                size = size ? ", size: #{size} bytes" : ""
-                return "[Link Info] type: #{response['content-type']}#{size}"
-              end
-            end
+        when Net::HTTPSuccess
+          if response['content-type'] =~ /^text\//
+            # since the content is 'text/*' and is small enough to
+            # be a webpage, retrieve the title from the page
+            debug "+ getting #{url.request_uri}"
+
+            # we look for the title in the first 4k bytes
+            # TODO make the amount of data configurable
+            response.partial_body(4096) { |part|
+              title = get_title_from_html(part)
+              return title if title
+            }
+            # if nothing was found, return nothing
+            return
           else
-            return "[Link Info] Error getting link (#{response.code} - #{response.message})"
-          end # end of "case response"
+            unless @bot.config['url.titles_only']
+              # content doesn't have title, just display info.
+              size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
+              size = size ? ", size: #{size} bytes" : ""
+              return "type: #{response['content-type']}#{size}"
+            end
+          end
+        when Net::HTTPResponse
+          return "Error getting link (#{response.code} - #{response.message})"
+        else
+          raise response
+        end
+      }
+    rescue Object => e
+      if e.class <= StandardError
+        error e.inspect
+        debug e.backtrace.join("\n")
+      end
 
-      } # end of request block
-    } # end of http start block
-
-    return title
-
-  rescue SocketError => e
-    return "[Link Info] Error connecting to site (#{e.message})"
+      msg = e.respond_to?(:message) ? e.message : e.to_s
+      return "Error connecting to site (#{e.message})"
+    end
   end
 
   def listen(m)
@@ -122,17 +89,19 @@ class UrlPlugin < Plugin
         list = @registry[m.target]
 
         if @bot.config['url.display_link_info']
-          debug "Getting title for #{urlstr}..."
-          begin
-          title = get_title_for_url urlstr
-          if title
-            m.reply title
-            debug "Title found!"
-          else
-            debug "Title not found!"
-          end
-          rescue => e
-            debug "Failed: #{e}"
+          Thread.start do
+            debug "Getting title for #{urlstr}..."
+            begin
+              title = get_title_for_url urlstr
+              if title
+                m.reply "[Link Info] #{title}"
+                debug "Title found!"
+              else
+                debug "Title not found!"
+              end
+            rescue => e
+              debug "Failed: #{e}"
+            end
           end
         end
 

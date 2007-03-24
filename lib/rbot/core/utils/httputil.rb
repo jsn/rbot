@@ -10,9 +10,6 @@
 # Copyright:: (C) 2006 Tom Gilbert, Giuseppe Bilotta
 # Copyright:: (C) 2006,2007 Giuseppe Bilotta
 
-module ::Irc
-module Utils
-
 require 'resolv'
 require 'net/http'
 begin
@@ -22,7 +19,29 @@ rescue LoadError => e
   error "Secured HTTP connections will fail"
 end
 
+module ::Net
+  class HTTPResponse
+    # Read chunks from the body until we have at least _size_ bytes, yielding
+    # the partial text at each chunk. Return the partial body.
+    def partial_body(size, &block)
+
+      partial = String.new
+
+      self.read_body { |chunk|
+        partial << chunk
+        yield partial
+        break if size and partial.length >= size
+      }
+
+      return partial
+    end
+  end
+end
+
 Net::HTTP.version_1_2
+
+module ::Irc
+module Utils
 
 # class for making http requests easier (mainly for plugins to use)
 # this class can check the bot proxy configuration to determine if a proxy
@@ -262,6 +281,90 @@ class HttpUtil
     end
     @last_response = nil
     return nil
+  end
+
+  # uri::         uri to query (Uri object or String)
+  # opts::        options. Currently used:
+  # :open_timeout::     open timeout for the proxy
+  # :read_timeout::     read timeout for the proxy
+  # :cache::            should we cache results?
+  #
+  # This method is used to get responses following redirections.
+  #
+  # It will return either a Net::HTTPResponse or an error.
+  #
+  # If a block is given, it will yield the response or error instead of
+  # returning it
+  #
+  def get_response(uri_or_str, opts={}, &block)
+    if uri_or_str.kind_of?(URI)
+      uri = uri_or_str
+    else
+      uri = URI.parse(uri_or_str.to_s)
+    end
+    debug "Getting #{uri}"
+
+    options = {
+      :read_timeout => 10,
+      :open_timeout => 5,
+      :max_redir => @bot.config["http.max_redir"],
+      :cache => false,
+      :yield => :none
+    }.merge(opts)
+
+    cache = options[:cache]
+
+    proxy = get_proxy(uri)
+    proxy.open_timeout = options[:open_timeout]
+    proxy.read_timeout = options[:read_timeout]
+
+    begin
+      proxy.start() {|http|
+        req = Net::HTTP::Get.new(uri.request_uri(), @headers)
+        if uri.user and uri.password
+          req.basic_auth(uri.user, uri.password)
+        end
+        http.request(req) { |resp|
+          case resp
+          when Net::HTTPSuccess
+            if cache
+              debug "Caching #{uri.to_s}"
+              cache_response(uri.to_s, resp)
+            end
+          when Net::HTTPRedirection
+            if resp.key?('location')
+              new_loc = URI.join(uri, resp['location']) rescue URI.parse(resp['location'])
+              debug "Redirecting #{uri} to #{new_loc}"
+              if options[:max_redir] > 0
+                new_opts = options.dup
+                new_opts[:max_redir] -= 1
+                return get_response(new_loc, new_opts, &block)
+              else
+                raise "Too many redirections"
+              end
+            end
+          end
+          if block_given?
+            yield resp
+          else
+            return resp
+          end
+        }
+      }
+    rescue StandardError, Timeout::Error => e
+      error "HttpUtil.get_response exception: #{e.inspect}, while trying to get #{uri}"
+      debug e.backtrace.join("\n")
+      def e.body
+        nil
+      end
+      if block_given?
+        yield e
+      else
+        return e
+      end
+    end
+
+    raise "This shouldn't happen"
   end
 
   def cache_response(k, resp)

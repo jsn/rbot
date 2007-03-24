@@ -1,3 +1,15 @@
+2007-03-24  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* HttpUtil: new get_response method to follow redirects and get an
+	Net::HTTPResponse object with an open connection, allowing partial
+	body retrieval.
+	* HttpUtil: extend Net::HTTPResponse with a #partial_body() method. The
+	method take an argument (max bytes to download) and an optional block;
+	the method yields all the partial content that it's being downloaded,
+	instead of the single chunks yield by #read_body().
+	* url plugin: use the new HttpUtil methods.
+	* url plugin: do not block while trying to get link info.
+
 2007-03-14  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* Socket filtering: socket data, both input and output, can now be
