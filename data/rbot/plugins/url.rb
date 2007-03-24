@@ -40,10 +40,10 @@ class UrlPlugin < Plugin
 
       amount_read += chunk.length
 
-      if amount_read > amount
-        amount_of_overflow = amount_read - amount
-        chunk = chunk[0...-amount_of_overflow]
-      end
+      # if amount_read > amount
+      #   amount_of_overflow = amount_read - amount
+      #   chunk = chunk[0...-amount_of_overflow]
+      # end
 
       chunks << chunk
 
