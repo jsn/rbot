@@ -126,10 +126,51 @@ class RSSFeedsPlugin < Plugin
     :default => 300, :validate => Proc.new{|v| v > 30},
     :desc => "How many seconds to sleep before checking RSS feeds again")
 
+  # We used to save the Mutex with the RssBlob, which was idiotic. And
+  # since Mutexes dumped in one version might not be resotrable in another,
+  # we need a few tricks to be able to restore data from other versions of Ruby
+  #
+  # When migrating 1.8.6 => 1.8.5, all we need to do is define an empty
+  # #marshal_load() method for Mutex. For 1.8.5 => 1.8.6 we need something
+  # dirtier, as seen later on in the initialization code.
+  unless Mutex.new.respond_to?(:marshal_load)
+    class Mutex
+      def marshal_load(str)
+        return
+      end
+    end
+  end
+
   def initialize
     super
     if @registry.has_key?(:feeds)
+      # When migrating from Ruby 1.8.5 to 1.8.6, dumped Mutexes may render the
+      # data unrestorable. If this happens, we patch the data, thus allowing
+      # the restore to work.
+      #
+      # This is actually pretty safe for a number of reasons:
+      #  * the code is only called if standard marshalling fails
+      #  * the string we look for is quite unlikely to appear randomly
+      #  * if the string appears somewhere and the patched string isn't recoverable
+      #    either, we'll get another (unrecoverable) error, which makes the rss
+      #    plugin unsable, just like it was if no recovery was attempted
+      #  * if the string appears somewhere and the patched string is recoverable,
+      #    we may get a b0rked feed, which is eventually overwritten by a clean
+      #    one, so the worst thing that can happen is that a feed update spams
+      #    the watchers once
+      @registry.recovery = Proc.new { |val|
+        patched = val.sub(":\v@mutexo:\nMutex", ":\v@mutexo:\vObject")
+        ret = Marshal.restore(patched)
+        ret.each_value { |blob|
+          blob.mutex = nil
+          blob
+        }
+      }
+
       @feeds = @registry[:feeds]
+
+      @registry.recovery = nil
+
       @feeds.keys.grep(/[A-Z]/) { |k|
         @feeds[k.downcase] = @feeds[k]
         @feeds.delete(k)
@@ -162,6 +203,7 @@ class RSSFeedsPlugin < Plugin
     unparsed = Hash.new()
     @feeds.each { |k, f|
       unparsed[k] = f.dup
+      # we don't want to save the mutex
       unparsed[k].mutex = nil
     }
     @registry[:feeds] = unparsed
