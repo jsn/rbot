@@ -118,6 +118,9 @@ module Irc
   # (derived from the plugin's class name, so change it and lose your data).
   # Calls to registry.each etc, will only iterate over your namespace.
   class BotRegistryAccessor
+
+    attr_accessor :recovery
+
     # plugins don't call this - a BotRegistryAccessor is created for them and
     # is accessible via @registry.
     def initialize(bot, name)
@@ -133,6 +136,7 @@ module Irc
       }
       @registry = nil
       @default = nil
+      @recover = nil
       # debug "initializing registry accessor with name #{@name}"
     end
 
@@ -175,10 +179,19 @@ module Irc
       begin
         Marshal.restore(val)
       rescue Exception => e
-        warning "failed to restore marshal data for #{val.inspect}, falling back to default"
+        error "failed to restore marshal data for #{val.inspect}, attempting recovery or fallback to default"
         debug e.inspect
         debug e.backtrace.join("\n")
-        if @default != nil
+        if @recovery
+          begin
+            return @recovery.call(val)
+          rescue Exception => ee
+            error "marshal recovery failed, trying default"
+            debug ee.inspect
+            debug ee.backtrace.join("\n")
+          end
+        end
+        unless @default.nil?
           begin
             return Marshal.restore(@default)
           rescue
