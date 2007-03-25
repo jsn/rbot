@@ -2,6 +2,7 @@ require 'uri'
 
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
+LINK_INFO = "[Link Info]"
 
 class UrlPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
@@ -13,6 +14,9 @@ class UrlPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('url.titles_only',
     :default => false,
     :desc => "Only show info for links that have <title> tags (in other words, don't display info for jpegs, mpegs, etc.)")
+  BotConfig.register BotConfigBooleanValue.new('url.first_par',
+    :default => false,
+    :desc => "Also try to get the first paragraph of a web page")
 
   def initialize
     super
@@ -25,9 +29,7 @@ class UrlPlugin < Plugin
 
   def get_title_from_html(pagedata)
     return unless TITLE_RE.match(pagedata)
-    title = $1.strip.gsub(/\s*\n+\s*/, " ")
-    title = Utils.decode_html_entities title
-    "title: #{title}"
+    $1.ircify_html
   end
 
   def get_title_for_url(uri_str)
@@ -41,24 +43,42 @@ class UrlPlugin < Plugin
       @bot.httputil.get_response(url) { |response|
         case response
         when Net::HTTPSuccess
+          extra = String.new
+
           if response['content-type'] =~ /^text\//
+
+            title = String.new
+
             # since the content is 'text/*' and is small enough to
             # be a webpage, retrieve the title from the page
             debug "+ getting #{url.request_uri}"
 
-            # we look for the title in the first 4k bytes
-            response.partial_body(@bot.config['http.info_bytes']) { |part|
-              title = get_title_from_html(part)
-              return title if title
-            }
+            # we act differently depending on whether we want the first par or not:
+            # in the first case we download the initial part and the parse it; in the second
+            # case we only download as much as we need to find the title
+            if @bot.config['url.first_par']
+              partial = response.partial_body(@bot.config['http.info_bytes'])
+              first_par = Utils.ircify_first_html_par(partial)
+              extra << "\n#{LINK_INFO} #{first_par}" unless first_par.empty?
+              title = get_title_from_html(partial)
+              if title
+                return "title: #{title}#{extra}"
+              end
+            else
+              response.partial_body(@bot.config['http.info_bytes']) { |part|
+                title = get_title_from_html(part)
+                return "title: #{title}" if title
+              }
+            end
             # if nothing was found, provide more basic info
           end
+
           debug response.to_hash.inspect
           unless @bot.config['url.titles_only']
             # content doesn't have title, just display info.
             size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
             size = size ? ", size: #{size} bytes" : ""
-            return "type: #{response['content-type']}#{size}"
+            return "type: #{response['content-type']}#{size}#{extra}"
           end
         when Net::HTTPResponse
           return "Error getting link (#{response.code} - #{response.message})"
@@ -92,7 +112,7 @@ class UrlPlugin < Plugin
             begin
               title = get_title_for_url urlstr
               if title
-                m.reply "[Link Info] #{title}"
+                m.reply "#{LINK_INFO} #{title}"
                 debug "Title found!"
               else
                 debug "Title not found!"
