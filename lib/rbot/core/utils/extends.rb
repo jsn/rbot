@@ -51,22 +51,32 @@ class ::String
     ## Maybe make it configurable?
     # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
 
-    # Paragraph and br tags are converted to whitespace.
+    # Paragraph and br tags are converted to whitespace
     txt.gsub!(/<\/?(p|br)\s*\/?\s*>/, ' ')
     txt.gsub!("\n", ' ')
+    txt.gsub!("\r", ' ')
 
     # All other tags are just removed
     txt.gsub!(/<[^>]+>/, '')
+
+    # Convert HTML entities. We do it now to be able to handle stuff
+    # such as &nbsp;
+    txt = Utils.decode_html_entities(txt)
 
     # Remove double formatting options, since they only waste bytes
     txt.gsub!(/#{Bold}(\s*)#{Bold}/, '\1')
     txt.gsub!(/#{Underline}(\s*)#{Underline}/, '\1')
 
+    # Simplify whitespace that appears on both sides of a formatting option
+    txt.gsub!(/\s+(#{Bold}|#{Underline})\s+/, ' \1')
+    txt.sub!(/\s+(#{Bold}|#{Underline})\z/, '\1')
+    txt.sub!(/\A(#{Bold}|#{Underline})\s+/, '\1')
+
     # And finally whitespace is squeezed
     txt.gsub!(/\s+/, ' ')
 
     # Decode entities and strip whitespace
-    return Utils.decode_html_entities(txt).strip!
+    return txt.strip
   end
 
   # This method will strip all HTML crud from the receiver
