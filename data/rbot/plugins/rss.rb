@@ -162,6 +162,7 @@ class RSSFeedsPlugin < Plugin
     unparsed = Hash.new()
     @feeds.each { |k, f|
       unparsed[k] = f.dup
+      unparsed[k].mutex = nil
     }
     @registry[:feeds] = unparsed
   end
