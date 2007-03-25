@@ -29,7 +29,7 @@ module ::Net
 
       self.read_body { |chunk|
         partial << chunk
-        yield partial
+        yield partial if block_given?
         break if size and size > 0 and partial.length >= size
       }
 
@@ -76,7 +76,7 @@ class HttpUtil
       :default => false,
       :desc => "Set this to true if you want the bot to never expire the cached pages")
     BotConfig.register BotConfigIntegerValue.new('http.info_bytes',
-      :default => 4096,
+      :default => 8192,
       :desc => "How many bytes to download from a web page to find some information. Set to 0 to let the bot download the whole page.")
 
   def initialize(bot)
