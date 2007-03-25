@@ -47,20 +47,18 @@ class UrlPlugin < Plugin
             debug "+ getting #{url.request_uri}"
 
             # we look for the title in the first 4k bytes
-            # TODO make the amount of data configurable
-            response.partial_body(4096) { |part|
+            response.partial_body(@bot.config['http.info_bytes']) { |part|
               title = get_title_from_html(part)
               return title if title
             }
-            # if nothing was found, return nothing
-            return
-          else
-            unless @bot.config['url.titles_only']
-              # content doesn't have title, just display info.
-              size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2')
-              size = size ? ", size: #{size} bytes" : ""
-              return "type: #{response['content-type']}#{size}"
-            end
+            # if nothing was found, provide more basic info
+          end
+          debug response.to_hash.inspect
+          unless @bot.config['url.titles_only']
+            # content doesn't have title, just display info.
+            size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
+            size = size ? ", size: #{size} bytes" : ""
+            return "type: #{response['content-type']}#{size}"
           end
         when Net::HTTPResponse
           return "Error getting link (#{response.code} - #{response.message})"

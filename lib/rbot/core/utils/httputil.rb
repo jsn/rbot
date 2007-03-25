@@ -23,14 +23,14 @@ module ::Net
   class HTTPResponse
     # Read chunks from the body until we have at least _size_ bytes, yielding
     # the partial text at each chunk. Return the partial body.
-    def partial_body(size, &block)
+    def partial_body(size=0, &block)
 
       partial = String.new
 
       self.read_body { |chunk|
         partial << chunk
         yield partial
-        break if size and partial.length >= size
+        break if size and size > 0 and partial.length >= size
       }
 
       return partial
@@ -75,6 +75,9 @@ class HttpUtil
     BotConfig.register BotConfigIntegerValue.new('http.no_expire_cache',
       :default => false,
       :desc => "Set this to true if you want the bot to never expire the cached pages")
+    BotConfig.register BotConfigIntegerValue.new('http.info_bytes',
+      :default => 4096,
+      :desc => "How many bytes to download from a web page to find some information. Set to 0 to let the bot download the whole page.")
 
   def initialize(bot)
     @bot = bot
