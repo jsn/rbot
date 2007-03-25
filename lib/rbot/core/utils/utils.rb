@@ -20,7 +20,8 @@ begin
   require 'htmlentities'
   $we_have_html_entities_decoder = true
 rescue LoadError
-  if require 'rubygems' rescue false
+  gems = require 'rubygems' rescue false
+  if gems
     retry
   else
     $we_have_html_entities_decoder = false
@@ -443,6 +444,9 @@ module ::Irc
     # to mark actual text
     AFTER_PAR1_REGEX = /<\w+\s+[^>]*body[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
 
+    # At worst, we can try stuff which is comprised between two <br>
+    AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first heading
     #
@@ -495,6 +499,8 @@ module ::Irc
         # Nothing yet ... let's get drastic: we look for non-par elements too,
         # but only for those that match something that we know is likely to
         # contain text
+
+        # Attempt #1
         header_found = xml
         while txt.empty? or txt.count(" ") < min_spaces
           candidate = header_found[AFTER_PAR1_REGEX]
@@ -502,7 +508,18 @@ module ::Irc
           txt = candidate.ircify_html
           header_found = $'
           txt.sub!(strip, '') if strip
-          debug "(other attempt) #{txt.inspect} has #{txt.count(" ")} spaces"
+          debug "(other attempt \#1) #{txt.inspect} has #{txt.count(" ")} spaces"
+        end
+
+        # Attempt #2
+        header_found = xml
+        while txt.empty? or txt.count(" ") < min_spaces
+          candidate = header_found[AFTER_PAR2_REGEX]
+          break unless candidate
+          txt = candidate.ircify_html
+          header_found = $'
+          txt.sub!(strip, '') if strip
+          debug "(other attempt \#2) #{txt.inspect} has #{txt.count(" ")} spaces"
         end
 
         debug "Last candidate #{txt.inspect} has #{txt.count(" ")} spaces"
