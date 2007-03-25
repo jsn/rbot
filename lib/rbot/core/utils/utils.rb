@@ -432,7 +432,8 @@ module ::Irc
     end
 
     HX_REGEX = /<h(\d)(?:\s+[^>]*)?>.*?<\/h\1>/im
-    PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|(?:div|html|body|table|td|tr)(?:\s+[^>]*)?)>/im
+    PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+    AFTER_PAR1_REGEX = /<\w+\s+[^>]*body[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first heading
     #
@@ -471,6 +472,19 @@ module ::Irc
 	  txt.sub!(strip, '') if strip
         end
       end
+
+      # Nothing yet ... let's get drastic: we ca
+      if txt.empty?
+	header_found = xml
+        while txt.empty? 
+          candidate = header_found[AFTER_PAR1_REGEX]
+          break unless candidate
+          txt = candidate.ircify_html
+          header_found = $'
+	  txt.sub!(strip, '') if strip
+        end
+      end
+
       return txt
     end
 
