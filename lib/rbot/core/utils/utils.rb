@@ -17,12 +17,16 @@ require 'uri'
 require 'tempfile'
 
 begin
-  $we_have_html_entities_decoder = require 'htmlentities'
+  require 'htmlentities'
+  $we_have_html_entities_decoder = true
 rescue LoadError
-  $we_have_html_entities_decoder = false
-  module ::Irc
-    module Utils
-      UNESCAPE_TABLE = {
+  if require 'rubygems' rescue false
+    retry
+  else
+    $we_have_html_entities_decoder = false
+    module ::Irc
+      module Utils
+        UNESCAPE_TABLE = {
     'laquo' => '<<',
     'raquo' => '>>',
     'quot' => '"',
@@ -289,7 +293,8 @@ rescue LoadError
     'sigma' => '&#963;',
     'oacute' => '\xf3',
 =end
-      }
+        }
+      end
     end
   end
 end
@@ -431,7 +436,7 @@ module ::Irc
       end
     end
 
-    HX_REGEX = /<h(\d)(?:\s+[^>]*)?>.*?<\/h\1>/im
+    HX_REGEX = /<h(\d)(?:\s+[^>]*)?>(.*?)<\/h\1>/im
     PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
 
     # Some blogging and forum platforms use spans or divs with a 'body' in their class
@@ -442,9 +447,10 @@ module ::Irc
     # If possible, grab the one after the first heading
     #
     # It is possible to pass some options to determine how the stripping
-    # occurs. Currently, only one option is supported:
+    # occurs. Currently supported options are
     #   * :strip => Regex or String to strip at the beginning of the obtained
     #               text
+    #   * :min_spaces => Minimum number of spaces a paragraph should have
     #
     def Utils.ircify_first_html_par(xml, opts={})
       txt = String.new
@@ -452,47 +458,57 @@ module ::Irc
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
 
-      header_found = xml.match(HX_REGEX)
-      if header_found
-        header_found = $'
-        debug "Found header: #{header_found[1].inspect}"
-        while txt.empty? 
+      min_spaces = opts[:min_spaces] || 8
+      min_spaces = 0 if min_spaces < 0
+
+      while true
+        debug "Minimum number of spaces: #{min_spaces}"
+        header_found = xml.match(HX_REGEX)
+        if header_found
+          header_found = $'
+          while txt.empty? or txt.count(" ") < min_spaces
+            candidate = header_found[PAR_REGEX]
+            break unless candidate
+            txt = candidate.ircify_html
+            header_found = $'
+            txt.sub!(strip, '') if strip
+            debug "(Hx attempt) #{txt.inspect} has #{txt.count(" ")} spaces"
+          end
+        end
+
+        return txt unless txt.empty? or txt.count(" ") < min_spaces
+
+        # If we haven't found a first par yet, try to get it from the whole
+        # document
+        header_found = xml
+        while txt.empty? or txt.count(" ") < min_spaces
           candidate = header_found[PAR_REGEX]
           break unless candidate
           txt = candidate.ircify_html
           header_found = $'
-	  txt.sub!(strip, '') if strip
+          txt.sub!(strip, '') if strip
+          debug "(par attempt) #{txt.inspect} has #{txt.count(" ")} spaces"
         end
+
+        return txt unless txt.empty? or txt.count(" ") < min_spaces
+
+        # Nothing yet ... let's get drastic: we look for non-par elements too,
+        # but only for those that match something that we know is likely to
+        # contain text
+        header_found = xml
+        while txt.empty? or txt.count(" ") < min_spaces
+          candidate = header_found[AFTER_PAR1_REGEX]
+          break unless candidate
+          txt = candidate.ircify_html
+          header_found = $'
+          txt.sub!(strip, '') if strip
+          debug "(other attempt) #{txt.inspect} has #{txt.count(" ")} spaces"
+        end
+
+        debug "Last candidate #{txt.inspect} has #{txt.count(" ")} spaces"
+        return txt unless txt.count(" ") < min_spaces
+        min_spaces /= 2
       end
-
-      return txt unless txt.empty?
-
-      # If we haven't found a first par yet, try to get it from the whole
-      # document
-      header_found = xml
-      while txt.empty? 
-        candidate = header_found[PAR_REGEX]
-        break unless candidate
-        txt = candidate.ircify_html
-        header_found = $'
-        txt.sub!(strip, '') if strip
-      end
-
-      return txt unless txt.empty?
-
-      # Nothing yet ... let's get drastic: we look for non-par elements too,
-      # but only for those that match something that we know is likely to
-      # contain text
-      header_found = xml
-      while txt.empty? 
-        candidate = header_found[AFTER_PAR1_REGEX]
-        break unless candidate
-        txt = candidate.ircify_html
-        header_found = $'
-        txt.sub!(strip, '') if strip
-      end
-
-      return txt
     end
 
     # Get the first pars of the first _count_ _urls_.
