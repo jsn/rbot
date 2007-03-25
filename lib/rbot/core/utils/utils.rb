@@ -431,10 +431,10 @@ module ::Irc
       end
     end
 
-    H1_REGEX = /<h1(?:\s+[^>]*)?>(.*?)<\/h1>/im
-    PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/p>/im
+    HX_REGEX = /<h(\d)(?:\s+[^>]*)?>.*?<\/h\1>/im
+    PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|(?:div|html|body|table|td|tr)(?:\s+[^>]*)?)>/im
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
-    # If possible, grab the one after the first h1 heading
+    # If possible, grab the one after the first heading
     #
     # It is possible to pass some options to determine how the stripping
     # occurs. Currently, only one option is supported:
@@ -446,7 +446,7 @@ module ::Irc
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
 
-      header_found = xml.match(H1_REGEX)
+      header_found = xml.match(HX_REGEX)
       if header_found
         header_found = $'
         debug "Found header: #{header_found[1].inspect}"
