@@ -433,7 +433,11 @@ module ::Irc
 
     HX_REGEX = /<h(\d)(?:\s+[^>]*)?>.*?<\/h\1>/im
     PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+
+    # Some blogging and forum platforms use spans or divs with a 'body' in their class
+    # to mark actual text
     AFTER_PAR1_REGEX = /<\w+\s+[^>]*body[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first heading
     #
@@ -444,6 +448,7 @@ module ::Irc
     #
     def Utils.ircify_first_html_par(xml, opts={})
       txt = String.new
+
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
 
@@ -460,29 +465,31 @@ module ::Irc
         end
       end
 
+      return txt unless txt.empty?
+
       # If we haven't found a first par yet, try to get it from the whole
       # document
-      if txt.empty?
-	header_found = xml
-        while txt.empty? 
-          candidate = header_found[PAR_REGEX]
-          break unless candidate
-          txt = candidate.ircify_html
-          header_found = $'
-	  txt.sub!(strip, '') if strip
-        end
+      header_found = xml
+      while txt.empty? 
+        candidate = header_found[PAR_REGEX]
+        break unless candidate
+        txt = candidate.ircify_html
+        header_found = $'
+        txt.sub!(strip, '') if strip
       end
 
-      # Nothing yet ... let's get drastic: we ca
-      if txt.empty?
-	header_found = xml
-        while txt.empty? 
-          candidate = header_found[AFTER_PAR1_REGEX]
-          break unless candidate
-          txt = candidate.ircify_html
-          header_found = $'
-	  txt.sub!(strip, '') if strip
-        end
+      return txt unless txt.empty?
+
+      # Nothing yet ... let's get drastic: we look for non-par elements too,
+      # but only for those that match something that we know is likely to
+      # contain text
+      header_found = xml
+      while txt.empty? 
+        candidate = header_found[AFTER_PAR1_REGEX]
+        break unless candidate
+        txt = candidate.ircify_html
+        header_found = $'
+        txt.sub!(strip, '') if strip
       end
 
       return txt
