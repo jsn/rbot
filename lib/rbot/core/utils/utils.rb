@@ -20,7 +20,12 @@ begin
   require 'htmlentities'
   $we_have_html_entities_decoder = true
 rescue LoadError
-  gems = require 'rubygems' rescue false
+  gems = nil
+  begin
+    gems = require 'rubygems'
+  rescue LoadError
+    gems = false
+  end
   if gems
     retry
   else
