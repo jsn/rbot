@@ -440,12 +440,12 @@ module ::Irc
     HX_REGEX = /<h(\d)(?:\s+[^>]*)?>(.*?)<\/h\1>/im
     PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
 
-    # Some blogging and forum platforms use spans or divs with a 'body' in their class
+    # Some blogging and forum platforms use spans or divs with a 'body' or 'message' or 'text' in their class
     # to mark actual text
-    AFTER_PAR1_REGEX = /<\w+\s+[^>]*body[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+    AFTER_PAR1_REGEX = /<\w+\s+[^>]*(?:body|message|text)[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
 
     # At worst, we can try stuff which is comprised between two <br>
-    AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+    AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?\/?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?\/?>/im
 
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first heading
@@ -456,14 +456,16 @@ module ::Irc
     #               text
     #   * :min_spaces => Minimum number of spaces a paragraph should have
     #
-    def Utils.ircify_first_html_par(xml, opts={})
-      txt = String.new
+    def Utils.ircify_first_html_par(xml_org, opts={})
+      xml = xml_org.gsub(/<!--.*?-->/, '')
 
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
 
       min_spaces = opts[:min_spaces] || 8
       min_spaces = 0 if min_spaces < 0
+
+      txt = String.new
 
       while true
         debug "Minimum number of spaces: #{min_spaces}"
@@ -510,6 +512,8 @@ module ::Irc
           txt.sub!(strip, '') if strip
           debug "(other attempt \#1) #{txt.inspect} has #{txt.count(" ")} spaces"
         end
+
+        return txt unless txt.empty? or txt.count(" ") < min_spaces
 
         # Attempt #2
         header_found = xml

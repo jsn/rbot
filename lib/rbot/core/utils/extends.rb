@@ -41,18 +41,24 @@ class ::String
   def ircify_html
     txt = self
 
+    # remove scripts
+    txt.gsub!(/<script(?:\s+[^>]*)?>.*?<\/script>/im, "")
+
+    # remove styles
+    txt.gsub!(/<style(?:\s+[^>]*)?>.*?<\/style>/im, "")
+
     # bold and strong -> bold
-    txt.gsub!(/<\/?(?:b|strong)\s*>/, "#{Bold}")
+    txt.gsub!(/<\/?(?:b|strong)(?:\s+[^>]*)?>/im, "#{Bold}")
 
     # italic, emphasis and underline -> underline
-    txt.gsub!(/<\/?(?:i|em|u)\s*>/, "#{Underline}")
+    txt.gsub!(/<\/?(?:i|em|u)(?:\s+[^>]*)?>/im, "#{Underline}")
 
     ## This would be a nice addition, but the results are horrible
     ## Maybe make it configurable?
     # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
 
     # Paragraph and br tags are converted to whitespace
-    txt.gsub!(/<\/?(p|br)\s*\/?\s*>/, ' ')
+    txt.gsub!(/<\/?(p|br)(?:\s+[^>]*)?\s*\/?\s*>/, ' ')
     txt.gsub!("\n", ' ')
     txt.gsub!("\r", ' ')
 
