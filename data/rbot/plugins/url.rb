@@ -59,7 +59,7 @@ class UrlPlugin < Plugin
             if @bot.config['url.first_par']
               partial = response.partial_body(@bot.config['http.info_bytes'])
               first_par = Utils.ircify_first_html_par(partial)
-              extra << "\n#{LINK_INFO} #{first_par}" unless first_par.empty?
+              extra << "\n#{LINK_INFO} text: #{first_par}" unless first_par.empty?
               title = get_title_from_html(partial)
               if title
                 return "title: #{title}#{extra}"
@@ -112,7 +112,7 @@ class UrlPlugin < Plugin
             begin
               title = get_title_for_url urlstr
               if title
-                m.reply "#{LINK_INFO} #{title}"
+                m.reply "#{LINK_INFO} #{title}", :overlong => :truncate
                 debug "Title found!"
               else
                 debug "Title not found!"
