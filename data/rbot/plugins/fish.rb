@@ -3,11 +3,12 @@ require 'uri/common'
 Net::HTTP.version_1_2
 
 class BabelPlugin < Plugin
+  LANGS = %w{en fr de it pt es nl ru zh zt el ja ko}
   def help(plugin, topic="")
-    "translate to <lang> <string> => translate from english to <lang>, translate from <lang> <string> => translate to english from <lang>, translate <fromlang> <tolang> <string> => translate from <fromlang> to <tolang>. Languages: en, fr, de, it, pt, es, nl"
+    "translate to <lang> <string> => translate from english to <lang>, translate from <lang> <string> => translate to english from <lang>, translate <fromlang> <tolang> <string> => translate from <fromlang> to <tolang>. Languages: #{LANGS.join(', ')}"
   end
   def translate(m, params)
-    langs = ["en", "fr", "de", "it", "pt", "es", "nl"]
+    langs = LANGS
     trans_from = params[:fromlang] ? params[:fromlang] : 'en'
     trans_to = params[:tolang] ? params[:tolang] : 'en'
     trans_text = params[:phrase].to_s
@@ -31,9 +32,13 @@ class BabelPlugin < Plugin
 
     http = @bot.httputil.get_proxy(URI.parse("http://babelfish.altavista.com"))
 
+    headers = {
+      "content-type" => "application/x-www-form-urlencoded; charset=utf-8",
+      'accept-charset' => 'utf-8'
+    }
+
     http.start {|http|
-      resp = http.post(query, data, {"content-type",
-      "application/x-www-form-urlencoded"})
+      resp = http.post(query, data, headers)
   
   if (resp.code == "200")
     lines = Array.new
