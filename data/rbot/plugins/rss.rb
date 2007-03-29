@@ -134,7 +134,7 @@ class RSSFeedsPlugin < Plugin
   # #marshal_load() method for Mutex. For 1.8.5 => 1.8.6 we need something
   # dirtier, as seen later on in the initialization code.
   unless Mutex.new.respond_to?(:marshal_load)
-    class Mutex
+    class ::Mutex
       def marshal_load(str)
         return
       end
