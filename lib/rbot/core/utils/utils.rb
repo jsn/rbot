@@ -506,8 +506,10 @@ module ::Irc
     end
 
     # Get the first pars of the first _count_ _urls_.
-    # The pages are downloaded using an HttpUtil service passed as _opts_ :http_util,
-    # and echoed as replies to the IRC message passed as _opts_ :message.
+    # The pages are downloaded using the bot httputil service.
+    # Returns an array of the first paragraphs fetched.
+    # If (optional) _opts_ :message is specified, those paragraphs are
+    # echoed as replies to the IRC message passed as _opts_ :message
     #
     def Utils.get_first_pars(urls, count, opts={})
       idx = 0
