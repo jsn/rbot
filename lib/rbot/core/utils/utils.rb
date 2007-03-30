@@ -316,6 +316,18 @@ module ::Irc
     SEC_PER_MNTH = SEC_PER_DAY * 30
     SEC_PER_YR = SEC_PER_MNTH * 12
 
+    @@bot = nil unless defined? @@bot
+    @@safe_save_dir = nil unless defined?(@@safe_save_dir)
+
+    def Utils.bot
+      @@bot
+    end
+
+    def Utils.bot=(b)
+      @@bot = b
+      @@safe_save_dir = "#{@@bot.botclass}/safe_save"
+    end
+
     def Utils.secs_to_string_case(array, var, string, plural)
       case var
       when 1
@@ -371,11 +383,6 @@ module ::Irc
     end
 
 
-    @@safe_save_dir = nil unless defined?(@@safe_save_dir)
-    def Utils.set_safe_save_dir(str)
-      @@safe_save_dir = str.dup
-    end
-
     def Utils.safe_save(file)
       raise 'No safe save directory defined!' if @@safe_save_dir.nil?
       basename = File.basename(file)
@@ -384,45 +391,6 @@ module ::Irc
       yield temp if block_given?
       temp.close
       File.rename(temp.path, file)
-    end
-
-
-    # returns a string containing the result of an HTTP GET on the uri
-    def Utils.http_get(uristr, readtimeout=8, opentimeout=4)
-
-      # ruby 1.7 or better needed for this (or 1.6 and debian unstable)
-      Net::HTTP.version_1_2
-      # (so we support the 1_1 api anyway, avoids problems)
-
-      uri = URI.parse uristr
-      query = uri.path
-      if uri.query
-        query += "?#{uri.query}"
-      end
-
-      proxy_host = nil
-      proxy_port = nil
-      if(ENV['http_proxy'] && proxy_uri = URI.parse(ENV['http_proxy']))
-        proxy_host = proxy_uri.host
-        proxy_port = proxy_uri.port
-      end
-
-      begin
-        http = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port)
-        http.open_timeout = opentimeout
-        http.read_timeout = readtimeout
-
-        http.start {|http|
-          resp = http.get(query)
-          if resp.code == "200"
-            return resp.body
-          end
-        }
-      rescue => e
-        # cheesy for now
-        error "Utils.http_get exception: #{e.inspect}, while trying to get #{uristr}"
-        return nil
-      end
     end
 
     def Utils.decode_html_entities(str)
@@ -544,13 +512,14 @@ module ::Irc
     def Utils.get_first_pars(urls, count, opts={})
       idx = 0
       msg = opts[:message]
+      retval = Array.new
       while count > 0 and urls.length > 0
         url = urls.shift
         idx += 1
 
         # FIXME what happens if some big file is returned? We should share
         # code with the url plugin to only retrieve partial file content!
-        xml = opts[:http_util].get_cached(url)
+        xml = self.bot.httputil.get_cached(url)
         if xml.nil?
           debug "Unable to retrieve #{url}"
           next
@@ -565,7 +534,9 @@ module ::Irc
         end
         msg.reply "[#{idx}] #{par}", :overlong => :truncate if msg
         count -=1
+        retval.push(par)
       end
+      return retval
     end
 
 

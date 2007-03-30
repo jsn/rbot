@@ -452,7 +452,7 @@ class Bot
 
     @plugins.scan
 
-    Utils.set_safe_save_dir("#{botclass}/safe_save")
+    Utils.bot = self
     @httputil = Utils::HttpUtil.new(self)
 
     # Channels where we are quiet

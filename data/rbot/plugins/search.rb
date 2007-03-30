@@ -87,7 +87,7 @@ class SearchPlugin < Plugin
 
     return unless first_pars > 0
 
-    Utils.get_first_pars urls, first_pars, :http_util => @bot.httputil, :message => m
+    Utils.get_first_pars urls, first_pars, :message => m
 
   end
 
