@@ -58,7 +58,7 @@ class UnicodePlugin < Plugin
         end
 
         def out(data)
-            rv = @default_out.iconv(data)
+            rv = @default_out.iconv(data) rescue data # XXX: yeah, i know :/
             debug "<< #{rv}"
             rv
         end
