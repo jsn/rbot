@@ -13,10 +13,15 @@ class GrouphugPlugin < Plugin
   end
 
   def confess(m, params)
+    opts = { :cache => false }
     path = "random"
-    path = "confessions/#{params[:num]}" if params[:num]
+    if params[:num]
+      path = "confessions/#{params[:num]}"
+      opts.delete(:cache)
+    end
+
     begin
-      data = @bot.httputil.get_cached(URI.parse("http://grouphug.us/#{path}"))
+      data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
 
       reg = Regexp.new( '(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)', Regexp::MULTILINE )
       confession = reg.match( data )[4].ircify_html

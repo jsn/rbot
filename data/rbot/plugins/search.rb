@@ -62,7 +62,7 @@ class SearchPlugin < Plugin
     hits = params[:hits] || @bot.config['google.hits']
 
     begin
-      wml = @bot.httputil.get_cached(url)
+      wml = @bot.httputil.get(url)
     rescue => e
       m.reply "error googling for #{what}"
       return

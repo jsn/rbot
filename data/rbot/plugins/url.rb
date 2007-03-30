@@ -40,59 +40,48 @@ class UrlPlugin < Plugin
     title = nil
 
     begin
-      @bot.httputil.get_response(url) { |response|
-        case response
-        when Net::HTTPSuccess
-          extra = String.new
+      range = @bot.config['http.info_bytes']
+      response = @bot.httputil.get_response(url, :range => "bytes=0-#{range}")
+      if response.code != "206" && response.code != "200"
+        return "Error getting link (#{response.code} - #{response.message})"
+      end
+      extra = String.new
 
-          if response['content-type'] =~ /^text\//
+      if response['content-type'] =~ /^text\//
 
-            title = String.new
+        body = response.body.slice(0, range)
+        title = String.new
 
-            # since the content is 'text/*' and is small enough to
-            # be a webpage, retrieve the title from the page
-            debug "+ getting #{url.request_uri}"
+        # since the content is 'text/*' and is small enough to
+        # be a webpage, retrieve the title from the page
+        debug "+ getting #{url.request_uri}"
 
-            # we act differently depending on whether we want the first par or not:
-            # in the first case we download the initial part and the parse it; in the second
-            # case we only download as much as we need to find the title
-            if @bot.config['url.first_par']
-              partial = response.partial_body(@bot.config['http.info_bytes'])
-              first_par = Utils.ircify_first_html_par(partial)
-              extra << "\n#{LINK_INFO} text: #{first_par}" unless first_par.empty?
-              title = get_title_from_html(partial)
-              if title
-                return "title: #{title}#{extra}"
-              end
-            else
-              response.partial_body(@bot.config['http.info_bytes']) { |part|
-                title = get_title_from_html(part)
-                return "title: #{title}" if title
-              }
-            end
-            # if nothing was found, provide more basic info
-          end
-
-          debug response.to_hash.inspect
-          unless @bot.config['url.titles_only']
-            # content doesn't have title, just display info.
-            size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
-            size = size ? ", size: #{size} bytes" : ""
-            return "type: #{response['content-type']}#{size}#{extra}"
-          end
-        when Net::HTTPResponse
-          return "Error getting link (#{response.code} - #{response.message})"
+        # we act differently depending on whether we want the first par or not:
+        # in the first case we download the initial part and the parse it; in the second
+        # case we only download as much as we need to find the title
+        if @bot.config['url.first_par']
+          first_par = Utils.ircify_first_html_par(body)
+          extra << "\n#{LINK_INFO} text: #{first_par}" unless first_par.empty?
+          title = get_title_from_html(body)
+          return "title: #{title}#{extra}" if title
         else
-          raise response
+          title = get_title_from_html(body)
+          return "title: #{title}" if title
         end
-      }
-    rescue Object => e
-      if e.class <= StandardError
-        error e.inspect
-        debug e.backtrace.join("\n")
+
+        # if nothing was found, provide more basic info
       end
 
-      msg = e.respond_to?(:message) ? e.message : e.to_s
+      debug response.to_hash.inspect
+      unless @bot.config['url.titles_only']
+        # content doesn't have title, just display info.
+        size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
+        size = size ? ", size: #{size} bytes" : ""
+        return "type: #{response['content-type']}#{size}#{extra}"
+      end
+    rescue Exception => e
+      error e.inspect
+      debug e.backtrace.join("\n")
       return "Error connecting to site (#{e.message})"
     end
   end

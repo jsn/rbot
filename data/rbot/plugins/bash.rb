@@ -25,11 +25,12 @@ class BashPlugin < Plugin
   def bash(m, id=0)
 
 	if(id != 0)
-    	xml = @bot.httputil.get URI.parse("http://bash.org/xml/?" + id + "&num=1")
+    	xml = @bot.httputil.get("http://bash.org/xml/?" + id + "&num=1")
 	elsif(id == "latest")
-    	xml = @bot.httputil.get URI.parse("http://bash.org/xml/?latest&num=1")
+    	xml = @bot.httputil.get("http://bash.org/xml/?latest&num=1")
 	else
-    	xml = @bot.httputil.get URI.parse("http://bash.org/xml/?random&num=1")
+    	xml = @bot.httputil.get("http://bash.org/xml/?random&num=1",
+                                :cache => false)
 	end	
     unless xml
       m.reply "bash.org rss parse failed"

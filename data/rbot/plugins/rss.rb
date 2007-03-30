@@ -654,7 +654,9 @@ class RSSFeedsPlugin < Plugin
   def fetchRss(feed, m=nil)
     begin
       # Use 60 sec timeout, cause the default is too low
-      xml = @bot.httputil.get_cached(feed.url, 60, 60)
+      xml = @bot.httputil.get(feed.url,
+                              :read_timeout => 60,
+                              :open_timeout => 60)
     rescue URI::InvalidURIError, URI::BadURIError => e
       report_problem("invalid rss feed #{feed.url}", e, m)
       return nil

@@ -124,7 +124,7 @@ class Bot
 
   # bot's httputil help object, for fetching resources via http. Sets up
   # proxies etc as defined by the bot configuration/environment
-  attr_reader :httputil
+  attr_accessor :httputil
 
   # server we are connected to
   # TODO multiserver
@@ -451,9 +451,6 @@ class Bot
     @client = Client.new
 
     @plugins.scan
-
-    Utils.bot = self
-    @httputil = Utils::HttpUtil.new(self)
 
     # Channels where we are quiet
     # Array of channels names where the bot should be quiet

@@ -318,6 +318,7 @@ module ::Irc
     end
 
     def Utils.bot=(b)
+      debug "initializing utils"
       @@bot = b
       @@safe_save_dir = "#{@@bot.botclass}/safe_save"
     end
@@ -523,7 +524,7 @@ module ::Irc
 
         # FIXME what happens if some big file is returned? We should share
         # code with the url plugin to only retrieve partial file content!
-        xml = self.bot.httputil.get_cached(url)
+        xml = self.bot.httputil.get(url)
         if xml.nil?
           debug "Unable to retrieve #{url}"
           next
@@ -549,3 +550,5 @@ module ::Irc
 
   end
 end
+
+Irc::Utils.bot = Irc::Plugins.manager.bot

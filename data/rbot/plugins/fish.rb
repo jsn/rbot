@@ -30,39 +30,40 @@ class BabelPlugin < Plugin
       return
     end
 
-    http = @bot.httputil.get_proxy(URI.parse("http://babelfish.altavista.com"))
-
     headers = {
-      "content-type" => "application/x-www-form-urlencoded; charset=utf-8",
-      'accept-charset' => 'utf-8'
+      "content-type" => "application/x-www-form-urlencoded; charset=utf-8"
     }
 
-    http.start {|http|
-      resp = http.post(query, data, headers)
-  
-  if (resp.code == "200")
-    lines = Array.new
-    resp.body.each_line do |l|
-      lines.push l
-    end
-
-    l = lines.join(" ")
-    debug "babelfish response: #{l}"
-
-    if(l =~ /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div>/)
-      answer = $1
-      # cache the answer
-      if(answer.length > 0)
-        @registry["#{trans_pair}/#{data_text}"] = answer
-      end
-      m.reply answer
+    begin
+      resp = @bot.httputil.get_response('http://babelfish.altavista.com'+query,
+                                        :method => :post,
+                                        :body => data,
+                                        :headers => headers)
+    rescue Exception => e
+      m.reply "http error: #{e.message}"
       return
     end
-    m.reply "couldn't parse babelfish response html :("
-  else
-    m.reply "couldn't talk to babelfish :("
-  end
-  }
+
+    if (resp.code == "200")
+      lines = Array.new
+      resp.body.each_line { |l| lines.push l }
+
+      l = lines.join(" ")
+      debug "babelfish response: #{l}"
+
+      if(l =~ /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div>/)
+        answer = $1
+        # cache the answer
+        if(answer.length > 0)
+          @registry["#{trans_pair}/#{data_text}"] = answer
+        end
+        m.reply answer
+        return
+      end
+      m.reply "couldn't parse babelfish response html :("
+    else
+      m.reply "couldn't talk to babelfish :("
+    end
   end
 end
 plugin = BabelPlugin.new

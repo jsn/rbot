@@ -29,30 +29,26 @@ class WserverPlugin < Plugin
         return
       end
         
-      http = @bot.httputil.get_proxy(uri)
-      http.open_timeout = 5
       
-      http.start {|http|
-        resp = http.head('/')
-        server = resp['Server']
-        if(server && server.length > 0)
-          m.reply "#{uri.host} is running #{server}"
-        else
-          m.reply "couldn't tell what #{uri.host} is running"
-        end
-        
-        if(resp.code == "302" || resp.code == "301") 
-          newloc = resp['location']
-          newuri = URI.parse(newloc)
-          # detect and ignore incorrect redirects (to relative paths etc)
-          if (newuri.host != nil)
-            if(uri.host != newuri.host)
-              m.reply "#{uri.host} redirects to #{newuri.scheme}://#{newuri.host}"
-              raise resp['location']
-            end
+      resp = @bot.httputil.head(uri)
+      server = resp['Server']
+      if(server && server.length > 0)
+        m.reply "#{uri.host} is running #{server}"
+      else
+        m.reply "couldn't tell what #{uri.host} is running"
+      end
+
+      if(resp.code == "302" || resp.code == "301") 
+        newloc = resp['location']
+        newuri = URI.parse(newloc)
+        # detect and ignore incorrect redirects (to relative paths etc)
+        if (newuri.host != nil)
+          if(uri.host != newuri.host)
+            m.reply "#{uri.host} redirects to #{newuri.scheme}://#{newuri.host}"
+            raise resp['location']
           end
         end
-      }
+      end
     rescue TimeoutError => err
       m.reply "timed out connecting to #{uri.host}:#{uri.port} :("
       return

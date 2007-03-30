@@ -57,9 +57,10 @@ class DictPlugin < Plugin
 
     word = params[:word].downcase
     url = @dmwapurl % URI.escape(word)
-    xml = @bot.httputil.get_cached(url)
+    xml = nil
+    info = @bot.httputil.get_response(url) rescue nil
+    xml = info.body if info
     if xml.nil?
-      info = @bot.httputil.last_response
       info = info ? " (#{info.code} - #{info.message})" : ""
       return false if justcheck
       m.reply "An error occurred while looking for #{word}#{info}"
@@ -108,7 +109,7 @@ class DictPlugin < Plugin
     word = params[:word].join
     [word, word + "_1"].each { |check|
       url = @oxurl % URI.escape(check)
-      h = @bot.httputil.head(url)
+      h = @bot.httputil.head(url, :max_redir => 5)
       if h
         m.reply("#{word} found: #{url}") unless justcheck
         return true
@@ -128,10 +129,11 @@ class DictPlugin < Plugin
 
     word = params[:word].to_s.downcase
     url = @chambersurl % URI.escape(word)
-    xml = @bot.httputil.get_cached(url)
+    xml = nil
+    info = @bot.httputil.get_response(url) rescue nil
+    xml = info.body if info
     case xml
     when nil
-      info = @bot.httputil.last_response
       info = info ? " (#{info.code} - #{info.message})" : ""
       return false if justcheck
       m.reply "An error occurred while looking for #{word}#{info}"

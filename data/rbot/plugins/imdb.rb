@@ -21,16 +21,16 @@ class Imdb
 
   def search(rawstr)
     str = URI.escape(rawstr)
-    @http = @bot.httputil.get_proxy(URI.parse("http://us.imdb.com/find?q=#{str}"))
-    @http.start
+    resp = nil
     begin
-    resp, data = @http.get("/find?q=#{str}", @bot.httputil.headers)
-    rescue Net::ProtoRetriableError => detail
-      head = detail.data
-      if head.code == "301" or head.code == "302"
-            return head['location'].gsub(/http:\/\/us.imdb.com/, "").gsub(/\?.*/, "")
-        end
+      resp = @bot.httputil.get_response("http://us.imdb.com/find?q=#{str}",
+                                        :max_redir => -1)
+    rescue Exception => e
+      error e.message
+      warning e.backtrace.join("\n")
+      return nil
     end
+
     if resp.code == "200"
       m = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/.match(resp.body)
       if m
@@ -50,7 +50,16 @@ class Imdb
       debug "IMDB: search returned NIL"
       return nil
     end
-    resp, data = @http.get(sr, @bot.httputil.headers)
+    resp = nil
+    begin
+      resp = @bot.httputil.get_response('http://us.imdb.com' + sr,
+                                        :max_redir => -1)
+    rescue Exception => e
+      error e.message
+      warning e.backtrace.join("\n")
+      return nil
+    end
+
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m

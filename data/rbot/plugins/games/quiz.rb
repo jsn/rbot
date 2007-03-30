@@ -203,7 +203,7 @@ class QuizPlugin < Plugin
       if p =~ /^https?:\/\//
         # Wiki data
         begin
-          serverdata = @bot.httputil.get_cached( URI.parse( p ) ) # "http://amarok.kde.org/amarokwiki/index.php/Rbot_Quiz"
+          serverdata = @bot.httputil.get(p) # "http://amarok.kde.org/amarokwiki/index.php/Rbot_Quiz"
           serverdata = serverdata.split( "QUIZ DATA START\n" )[1]
           serverdata = serverdata.split( "\nQUIZ DATA END" )[0]
           serverdata = serverdata.gsub( /&nbsp;/, " " ).gsub( /&amp;/, "&" ).gsub( /&quot;/, "\"" )

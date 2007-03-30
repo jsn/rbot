@@ -24,7 +24,7 @@ class ThreatPlugin < Plugin
     green = "\x0303" # low
     black = "\x0301" # default
 
-    page = @bot.httputil.get_cached("http://www.dhs.gov/index.shtm")
+    page = @bot.httputil.get("http://www.dhs.gov/index.shtm")
 
     if page =~ /\"Current National Threat Level is (.*?)\"/
       state = $1

@@ -351,7 +351,7 @@ class AzGamePlugin < Plugin
     wc = @wordcache[:italian]
     return true if wc.key?(word.to_sym)
     rules = @rules[:italian]
-    p = @bot.httputil.get_cached(rules[:wapurl] % word)
+    p = @bot.httputil.get(rules[:wapurl] % word)
     if not p
       error "could not connect!"
       return false
@@ -404,11 +404,11 @@ class AzGamePlugin < Plugin
         l = ('a'..'z').to_a[rand(26)]
         debug "getting random word from dictionary, starting with letter #{l}"
         first = rules[:url] % "lettera_#{l}_0_50"
-        p = @bot.httputil.get_cached(first)
+        p = @bot.httputil.get(first)
         max_page = p.match(/ \/ (\d+)<\/label>/)[1].to_i
         pp = rand(max_page)+1
         debug "getting random word from dictionary, starting with letter #{l}, page #{pp}"
-        p = @bot.httputil.get_cached(first+"&pagina=#{pp}") if pp > 1
+        p = @bot.httputil.get(first+"&pagina=#{pp}") if pp > 1
         lemmi = Array.new
         good = rules[:good]
         bad =  rules[:bad]
@@ -446,7 +446,7 @@ class AzGamePlugin < Plugin
     wc = @wordcache[:english]
     return true if wc.key?(word.to_sym)
     rules = @rules[:english]
-    p = @bot.httputil.get_cached(rules[:url] % URI.escape(word))
+    p = @bot.httputil.get(rules[:url] % URI.escape(word))
     if not p
       error "could not connect!"
       return false
@@ -497,7 +497,7 @@ class AzGamePlugin < Plugin
         ll = ('a'..'z').to_a[rand(26)]
         random = [l,ll].join('*') + '*'
         debug "getting random word from dictionary, matching #{random}"
-        p = @bot.httputil.get_cached(rules[:url] % URI.escape(random))
+        p = @bot.httputil.get(rules[:url] % URI.escape(random))
         debug p
         lemmi = Array.new
         good = rules[:good]
