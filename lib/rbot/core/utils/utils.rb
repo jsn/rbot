@@ -310,12 +310,6 @@ module ::Irc
 
   # miscellaneous useful functions
   module Utils
-    SEC_PER_MIN = 60
-    SEC_PER_HR = SEC_PER_MIN * 60
-    SEC_PER_DAY = SEC_PER_HR * 24
-    SEC_PER_MNTH = SEC_PER_DAY * 30
-    SEC_PER_YR = SEC_PER_MNTH * 12
-
     @@bot = nil unless defined? @@bot
     @@safe_save_dir = nil unless defined?(@@safe_save_dir)
 
@@ -327,6 +321,13 @@ module ::Irc
       @@bot = b
       @@safe_save_dir = "#{@@bot.botclass}/safe_save"
     end
+
+
+    SEC_PER_MIN = 60
+    SEC_PER_HR = SEC_PER_MIN * 60
+    SEC_PER_DAY = SEC_PER_HR * 24
+    SEC_PER_MNTH = SEC_PER_DAY * 30
+    SEC_PER_YR = SEC_PER_MNTH * 12
 
     def Utils.secs_to_string_case(array, var, string, plural)
       case var
@@ -392,6 +393,7 @@ module ::Irc
       temp.close
       File.rename(temp.path, file)
     end
+
 
     def Utils.decode_html_entities(str)
       if $we_have_html_entities_decoder
@@ -532,7 +534,10 @@ module ::Irc
           # FIXME only do this if the 'url' plugin is loaded
           # TODO even better, put the code here
           # par = @bot.plugins['url'].get_title_from_html(xml)
-          next if par.empty?
+          if par.empty?
+            retval.push(nil)
+            next
+          end
         end
         msg.reply "[#{idx}] #{par}", :overlong => :truncate if msg
         count -=1
