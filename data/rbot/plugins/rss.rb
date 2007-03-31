@@ -14,19 +14,124 @@
 #
 # License:: MIT license
 
-# require 'rss/parser'
-# require 'rss/1.0'
-# require 'rss/2.0'
-# require 'rss/dublincore'
-# # begin
-# #   require 'rss/dublincore/2.0'
-# # rescue
-# #   warning "Unable to load RSS libraries, RSS plugin functionality crippled"
-# # end
-#
-# GB: Let's just go for the simple stuff:
-#
 require 'rss'
+
+# Add support for Slashdot namespace in RDF. The code is just an adaptation of
+# the DublinCore code.
+module ::RSS
+
+  unless defined?(SLASH_PREFIX)
+    SLASH_PREFIX = 'slash'
+    SLASH_URI = "http://purl.org/rss/1.0/modules/slash/"
+
+    RDF.install_ns(SLASH_PREFIX, SLASH_URI)
+
+    module BaseSlashModel
+      def append_features(klass)
+        super
+
+        return if klass.instance_of?(Module)
+        SlashModel::ELEMENT_NAME_INFOS.each do |name, plural_name|
+          plural = plural_name || "#{name}s"
+          full_name = "#{SLASH_PREFIX}_#{name}"
+          full_plural_name = "#{SLASH_PREFIX}_#{plural}"
+          klass_name = "Slash#{Utils.to_class_name(name)}"
+          klass.install_must_call_validator(SLASH_PREFIX, SLASH_URI)
+          klass.install_have_children_element(name, SLASH_URI, "*",
+                                              full_name, full_plural_name)
+          klass.module_eval(<<-EOC, *get_file_and_line_from_caller(0))
+          remove_method :#{full_name}
+          remove_method :#{full_name}=
+          remove_method :set_#{full_name}
+
+          def #{full_name}
+            @#{full_name}.first and @#{full_name}.first.value
+          end
+
+          def #{full_name}=(new_value)
+            @#{full_name}[0] = Utils.new_with_value_if_need(#{klass_name}, new_value)
+          end
+          alias set_#{full_name} #{full_name}=
+        EOC
+        end
+      end
+    end
+
+    module SlashModel
+      extend BaseModel
+      extend BaseSlashModel
+
+      TEXT_ELEMENTS = {
+      "department" => nil,
+      "section" => nil,
+      "comments" =>  nil,
+      "hit_parade" => nil
+      }
+
+      ELEMENT_NAME_INFOS = SlashModel::TEXT_ELEMENTS.to_a
+
+      ELEMENTS = TEXT_ELEMENTS.keys
+
+      ELEMENTS.each do |name, plural_name|
+        module_eval(<<-EOC, *get_file_and_line_from_caller(0))
+        class Slash#{Utils.to_class_name(name)} < Element
+          include RSS10
+
+          content_setup
+
+          class << self
+            def required_prefix
+              SLASH_PREFIX
+            end
+
+            def required_uri
+              SLASH_URI
+            end
+          end
+
+          @tag_name = #{name.dump}
+
+          alias_method(:value, :content)
+          alias_method(:value=, :content=)
+
+          def initialize(*args)
+            if Utils.element_initialize_arguments?(args)
+              super
+            else
+              super()
+              self.content = args[0]
+            end
+          end
+
+          def full_name
+            tag_name_with_prefix(SLASH_PREFIX)
+          end
+
+          def maker_target(target)
+            target.new_#{name}
+          end
+
+          def setup_maker_attributes(#{name})
+            #{name}.content = content
+          end
+        end
+      EOC
+      end
+    end
+
+    class RDF
+      class Item; include SlashModel; end
+    end
+
+    SlashModel::ELEMENTS.each do |name|
+      class_name = Utils.to_class_name(name)
+      BaseListener.install_class_name(SLASH_URI, name, "Slash#{class_name}")
+    end
+
+    SlashModel::ELEMENTS.collect! {|name| "#{SLASH_PREFIX}_#{name}"}
+  end
+end
+
 
 class ::RssBlob
   attr_accessor :url
@@ -621,28 +726,44 @@ class RSSFeedsPlugin < Plugin
         date += " :: "
       end
     end
+
     title = "#{Bold}#{item.title.chomp.riphtml}#{Bold}" if item.title
+
     desc = item.description.gsub(/\s+/,' ').strip.riphtml if item.description
+
     link = item.link.chomp if item.link
+
+    debug item.inspect
+    category = item.dc_subject rescue item.category rescue nil
+    author = item.dc_creator rescue item.author rescue nil
+
     line1 = nil
     line2 = nil
+
+    at = ((item.title && item.link) ? ' @ ' : '')
     case feed.type
     when 'blog'
-      line1 = "#{handle}#{date}#{item.category.content} blogged at #{link}"
+      abt = category ? "about #{category} " : ""
+      line1 = "#{handle}#{date}#{author} blogged #{abt}at #{link}"
       line2 = "#{handle}#{title} - #{desc}"
     when 'forum'
-      line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
+      line1 = "#{handle}#{date}#{title}#{at}#{link}"
     when 'wiki'
-      line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link} has been edited by #{item.dc_creator}. #{desc}"
+      line1 = "#{handle}#{date}#{title}#{at}#{link} has been edited by #{author}. #{desc}"
     when 'gmane'
-      line1 = "#{handle}#{date}Message #{title} sent by #{item.dc_creator}. #{desc}"
+      line1 = "#{handle}#{date}Message #{title} sent by #{author}. #{desc}"
     when 'trac'
       line1 = "#{handle}#{date}#{title} @ #{link}"
       unless item.title =~ /^Changeset \[(\d+)\]/
         line2 = "#{handle}#{date}#{desc}"
       end
+    when '/.'
+      dept = "(from the #{item.slash_department} dept) " rescue nil
+      sec = " in section #{item.slash_section}" rescue nil
+
+      line1 = "#{handle}#{date}#{dept}#{title}#{at}#{link} (posted by #{author}#{sec})"
     else
-      line1 = "#{handle}#{date}#{title}#{' @ ' if item.title && item.link}#{link}"
+      line1 = "#{handle}#{date}#{title}#{at}#{link}"
     end
     places.each { |loc|
       @bot.say loc, line1, :overlong => :truncate
