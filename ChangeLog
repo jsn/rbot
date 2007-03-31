@@ -1,3 +1,20 @@
+2007-03-31  Dmitry Kim <dmitry.kim@gmail.com>
+
+	* HttpUtil: major rework. get_response() method now respects
+	caching (can be turned off via options) and supports different HTTP
+	methods (GET (default), HEAD and POST) and ranged requests. get() and
+	head() methods are now just a thin wrappers around get_request().
+	Semantics for user-supplied &block has been made consistent across
+	these methods.
+	* HttpUtil: get_cached() method has been removed (obsoleted by new
+	get()). post() method has been added. get_partial() method for ranged
+	requests has been added. Net::HTTPResponse partial_body() method has
+	been removed (mostly because it won't play well with future HTTP
+	encodings support), please use get_partial() or get_request() instead.
+	* Utils: http_get() method has been removed (long obsoleted by
+        HttpUtil)
+	* different plugins: modified to accomodate for HttpUtil changes.
+
 2007-03-24  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
 
 	* HttpUtil: new get_response method to follow redirects and get an
