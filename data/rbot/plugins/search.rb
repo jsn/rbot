@@ -63,6 +63,7 @@ class SearchPlugin < Plugin
 
     begin
       wml = @bot.httputil.get(url)
+      raise unless wml
     rescue => e
       m.reply "error googling for #{what}"
       return
