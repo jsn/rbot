@@ -301,6 +301,22 @@ class HttpUtil
       resp.body
     end
 
+    class << resp.body
+      def http_headers
+        if defined?(@http_headers)
+          @http_headers
+        else
+          nil
+        end
+      end
+
+      def http_headers=(rsp)
+        @http_headers=rsp
+      end
+    end
+
+    resp.body.http_headers = resp.to_hash
+
     return resp
   end
 

@@ -433,7 +433,7 @@ module ::Irc
     #   * :min_spaces => Minimum number of spaces a paragraph should have
     #
     def Utils.ircify_first_html_par(xml_org, opts={})
-      xml = xml_org.gsub(/<!--.*?-->/, '')
+      xml = xml_org.gsub(/<!--.*?-->/, '').utfy_xml
 
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
