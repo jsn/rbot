@@ -20,6 +20,25 @@ rescue LoadError => e
   error "Secured HTTP connections will fail"
 end
 
+module ::Net 
+  class HTTPResponse 
+    # Read chunks from the body until we have at least _size_ bytes, yielding 
+    # the partial text at each chunk. Return the partial body. 
+    def partial_body(size=0, &block) 
+
+      partial = String.new 
+
+      self.read_body { |chunk| 
+        partial << chunk 
+        yield partial if block_given? 
+        break if size and size > 0 and partial.length >= size 
+      } 
+
+      return partial 
+    end 
+  end 
+end
+
 Net::HTTP.version_1_2
 
 module ::Irc
