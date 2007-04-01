@@ -55,6 +55,7 @@ class ::String
 
     if self.respond_to?(:http_headers) and headers = self.http_headers
       if headers['content-type'].first.match(/charset="?(\S+?)"?\s*;?/i)
+        debug "charset #{charset} set from header"
         charset = $1
       end
     end
@@ -66,10 +67,10 @@ class ::String
       when /<meta\s+http-equiv\s*=\s*"Content-Type".*charset\s*=\s*"?(\S+?)"?\s*;?/i
         charset = $1
       end
+      debug "charset #{charset} set from string"
     end
 
     if charset
-      debug "charset: #{charset}"
       return Iconv.iconv('utf-8', charset, self).join rescue self
     else
       debug "Couldn't find charset for #{self.inspect}"
