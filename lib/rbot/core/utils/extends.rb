@@ -54,7 +54,7 @@ class ::String
     charset = nil
 
     if self.respond_to?(:http_headers) and headers = self.http_headers
-      if headers['content-type'].first.match(/charset="?(\S+?)"?\s*;?/i)
+      if headers['content-type'].first.match(/charset=(\S+?)\s*(?:;|\Z)/i)
         debug "charset #{charset} set from header"
         charset = $1
       end
@@ -64,7 +64,7 @@ class ::String
       case self
       when /<\?xml.*encoding="(\S+)".*\?>/i
         charset = $1
-      when /<meta\s+http-equiv\s*=\s*"Content-Type".*charset\s*=\s*"?(\S+?)"?\s*;?/i
+      when /<meta\s+http-equiv\s*=\s*["']?Content-Type["']?.*charset\s*=\s*(\S+?)(?:;|["']|\s).*>/i
         charset = $1
       end
       debug "charset #{charset} set from string"
