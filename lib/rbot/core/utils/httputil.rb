@@ -13,6 +13,7 @@
 
 require 'resolv'
 require 'net/http'
+require 'iconv'
 begin
   require 'net/https'
 rescue LoadError => e
@@ -22,19 +23,65 @@ end
 
 module ::Net 
   class HTTPResponse 
+    attr_accessor :no_cache 
+    if !instance_methods.include?('raw_body')
+      alias :raw_body :body
+    end
+
+    def body_charset(str=self.raw_body)
+      ctype = self['content-type'] || 'text/html'
+      return nil unless ctype =~ /^text/i || ctype =~ /x(ht)?ml/i
+
+      charset = 'latin1' # should be in config
+
+      if self['content-type'].match(/charset=["']?([^\s"']+)["']?/i)
+        charset = $1
+        debug "charset #{charset} set from header"
+      end
+
+      case str
+      when /<\?xml\s[^>]*encoding=['"]([^\s"'>]+)["'][^>]*\?>/i
+        charset = $1
+        debug "xml charset #{charset} set from xml pi"
+      when /<(meta\s[^>]*http-equiv=["']?Content-Type["']?[^>]*)>/i
+        meta = $1
+        if meta =~ /charset=['"]?([^\s'";]+)['"]?/
+          charset = $1
+          debug "html charset #{charset} set from meta"
+        end
+      end
+      return charset
+    end
+
+    def body_to_utf(str)
+      charset = self.body_charset(str) or return str
+
+      begin
+        return Iconv.iconv('utf-8//ignore', charset, str).first
+      rescue
+        debug "conversion failed"
+        return str
+      end
+    end
+
+    def body
+      return self.body_to_utf(self.raw_body)
+    end
+
     # Read chunks from the body until we have at least _size_ bytes, yielding 
     # the partial text at each chunk. Return the partial body. 
     def partial_body(size=0, &block) 
 
+      self.no_cache = true
       partial = String.new 
 
       self.read_body { |chunk| 
         partial << chunk 
-        yield partial if block_given? 
+        yield self.body_to_utf(partial) if block_given? 
         break if size and size > 0 and partial.length >= size 
       } 
 
-      return partial 
+      return self.body_to_utf(partial)
     end 
   end 
 end
@@ -85,6 +132,7 @@ class HttpUtil
 
     def self.maybe_new(resp)
       debug "maybe new #{resp}"
+      return nil if resp.no_cache
       return nil unless Net::HTTPOK === resp ||
       Net::HTTPMovedPermanently === resp ||
       Net::HTTPFound === resp ||
@@ -160,7 +208,7 @@ class HttpUtil
       @response = resp
       begin
         self.revalidate
-        self.response.body
+        self.response.raw_body
       rescue Exception => e
         error e.message
         error e.backtrace.join("\n")
@@ -298,25 +346,9 @@ class HttpUtil
     if block_given?
       yield(resp)
     else
-      resp.body
+      # Net::HTTP wants us to read the whole body here
+      resp.raw_body
     end
-
-    class << resp.body
-      def http_headers
-        if defined?(@http_headers)
-          @http_headers
-        else
-          nil
-        end
-      end
-
-      def http_headers=(rsp)
-        @http_headers=rsp
-      end
-    end
-
-    resp.body.http_headers = resp.to_hash
-
     return resp
   end
 
@@ -417,9 +449,16 @@ class HttpUtil
         elsif Net::HTTPServerError === resp || Net::HTTPClientError === resp
           debug "http error, deleting cached obj" if cached
           @cache.delete(cache_key)
-        elsif opts[:cache] && cached = CachedObject.maybe_new(resp) rescue nil
-          debug "storing to cache"
-          @cache[cache_key] = cached
+        elsif opts[:cache]
+          begin
+            return handle_response(uri, resp, opts, &block)
+          ensure
+            if cached = CachedObject.maybe_new(resp) rescue nil
+              debug "storing to cache"
+              @cache[cache_key] = cached
+            end
+          end
+          return ret
         end
         return handle_response(uri, resp, opts, &block)
       end

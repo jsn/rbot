@@ -27,57 +27,12 @@ class ::Array
   end
 end
 
-begin
-  require 'iconv'
-  $we_have_iconv = true
-rescue LoadError
-  $we_have_iconv = false
-end
-
 # Extensions to the String class
 #
 # TODO make ircify_html() accept an Hash of options, and make riphtml() just
 # call ircify_html() with stronger purify options.
 #
 class ::String
-
-  # This method will try to transcode a String supposed to hold an XML or HTML
-  # document from the original charset to UTF-8.
-  #
-  # To find the original encoding, it will first see if the String responds to
-  # #http_headers(), and if it does it will assume that the charset indicated
-  # there is the correct one. Otherwise, it will try to detect the charset from
-  # some typical XML and HTML headers
-  def utfy_xml
-    return self unless $we_have_iconv
-
-    charset = nil
-
-    if self.respond_to?(:http_headers) and headers = self.http_headers
-      if headers['content-type'].first.match(/charset=(\S+?)\s*(?:;|\Z)/i)
-        debug "charset #{charset} set from header"
-        charset = $1
-      end
-    end
-
-    if not charset
-      case self
-      when /<\?xml.*encoding="(\S+)".*\?>/i
-        charset = $1
-      when /<meta\s+http-equiv\s*=\s*["']?Content-Type["']?.*charset\s*=\s*(\S+?)(?:;|["']|\s).*>/i
-        charset = $1
-      end
-      debug "charset #{charset} set from string"
-    end
-
-    if charset
-      return Iconv.iconv('utf-8', charset, self).join rescue self
-    else
-      debug "Couldn't find charset for #{self.inspect}"
-      return self
-    end
-
-  end
 
   # This method will return a purified version of the receiver, with all HTML
   # stripped off and some of it converted to IRC formatting
