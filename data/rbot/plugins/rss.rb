@@ -397,7 +397,7 @@ class RSSFeedsPlugin < Plugin
 
     m.reply "lemme fetch it..."
     title = items = nil
-    fetched = fetchRss(feed, m)
+    fetched = fetchRss(feed, m, false)
     return unless fetched or feed.xml
     if not fetched and feed.items
       m.reply "using old data"
@@ -772,12 +772,13 @@ class RSSFeedsPlugin < Plugin
     }
   end
 
-  def fetchRss(feed, m=nil)
+  def fetchRss(feed, m=nil, cache=true)
     begin
       # Use 60 sec timeout, cause the default is too low
       xml = @bot.httputil.get(feed.url,
                               :read_timeout => 60,
-                              :open_timeout => 60)
+                              :open_timeout => 60,
+                              :cache => cache)
     rescue URI::InvalidURIError, URI::BadURIError => e
       report_problem("invalid rss feed #{feed.url}", e, m)
       return nil
