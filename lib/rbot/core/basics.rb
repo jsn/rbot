@@ -113,10 +113,6 @@ class BasicsModule < CoreBotModule
       return "part <channel> => part channel <channel>"
     when "hide"
       return "hide => part all channels"
-    when "save"
-      return "save => save current dynamic data and configuration"
-    when "rescan"
-      return "rescan => reload modules and static facts"
     when "nick"
       return "nick <nick> => attempt to change nick to <nick>"
     when "say"
@@ -131,12 +127,14 @@ class BasicsModule < CoreBotModule
       return "version => describes software version"
     when "ping"
       return "ping => replies with a pong"
+    when "mode"
+      return "mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> to <mode>"
     #     when "botsnack"
     #       return "botsnack => reward #{myself} for being good"
     #     when "hello"
     #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
     else
-      return "#{name}: quit, restart, join, part, hide, save, rescan, nick, say, action, topic, quiet, talk, version, ping"#, botsnack, hello"
+      return "#{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk, version, ping, mode"#, botsnack, hello"
     end
   end
 end

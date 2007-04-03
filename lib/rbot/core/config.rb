@@ -176,25 +176,36 @@ class ConfigModule < CoreBotModule
   end
 
   def help(plugin, topic="")
-    case topic
-    when "list"
+    case plugin
+    when "config"
+      case topic
+      when ""
+      "config-related tasks: config topics, save, rescan"
+      when "list"
       "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
-    when "get"
+      when "get"
       "config get <key> => get configuration value for key <key>"
-    when "unset"
+      when "unset"
       "reset key <key> to the default"
-    when "set"
+      when "set"
       "config set <key> <value> => set configuration value for key <key> to <value>"
-    when "desc"
+      when "desc"
       "config desc <key> => describe what key <key> configures"
-    when "add"
+      when "add"
       "config add <value> to <key> => add value <value> to key <key> if <key> is an array"
-    when "rm"
+      when "rm"
       "config rm <value> from <key> => remove value <value> from key <key> if <key> is an array"
-    else
+      else
       "config module - bot configuration. usage: list, desc, get, set, unset, add, rm"
-    # else
-    #   "no help for config #{topic}"
+      # else
+      #   "no help for config #{topic}"
+      end
+    when "save"
+      "save => save current dynamic data and configuration"
+    when "rescan"
+      "rescan => reload modules and static facts"
+    else
+      "config-related tasks: config, save, rescan"
     end
   end
 
