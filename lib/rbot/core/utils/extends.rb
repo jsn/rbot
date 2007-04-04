@@ -57,7 +57,7 @@ class ::String
     # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
 
     # Paragraph and br tags are converted to whitespace
-    txt.gsub!(/<\/?(p|br)(?:\s+[^>]*)?\s*\/?\s*>/, ' ')
+    txt.gsub!(/<\/?(p|br)(?:\s+[^>]*)?\s*\/?\s*>/i, ' ')
     txt.gsub!("\n", ' ')
     txt.gsub!("\r", ' ')
 
