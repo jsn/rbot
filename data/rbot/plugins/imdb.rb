@@ -105,7 +105,7 @@ class Imdb
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
       title_date = m[1]
-      title, date = title_date.scan(/^(.*)\((\d\d\d\d(?:[IV]+)?)\)$/).first
+      title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:[IV]+)?)\)\s*(.+)?$/).first
       title.strip!
 
       dir = nil
@@ -122,26 +122,26 @@ class Imdb
         country = data.ircify_html
       end
 
-      info << [title, "(#{country}, #{date})", dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
+      info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
 
+      ratings = "no votes"
       m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
-      return nil if !m
-      score = m[1]
-      votes = m[2]
+      if m
+        ratings = "#{m[1]}/10 (#{m[2]} voters)"
+      end
 
       genre = Array.new
       resp.body.scan(/<a href="\/Sections\/Genres\/[^\/]+\/">([^<]+)<\/a>/) do |gnr|
         genre << gnr
       end
 
-      info << "Ratings: #{score}/10 (#{votes} voters). Genre: #{genre.join('/')}"
-
       plot = nil
       data = grab_info(/Plot (?:Outline|Summary)/, resp.body)
       if data
-        plot = "Plot: #{data.ircify_html.gsub(/\s+more$/,'')}"
-        info << plot
+        plot = "Plot: " + data.ircify_html.gsub(/\s+more$/,'')
       end
+
+      info << ["Ratings: " << ratings, "Genre: " << genre.join('/') , plot].compact.join(". ")
 
       return info
     end
@@ -179,7 +179,7 @@ class Imdb
         death = "Death: #{data.ircify_html.gsub(/\s+more$/,'')}"
       end
 
-      info << [birth, death].compact.join('. ')
+      info << [birth, death].compact.join('. ') if birth or death
 
       movies = {}
 
@@ -192,21 +192,35 @@ class Imdb
       if filmorate
         filmorate.scan(/<div class="filmo">.*?<a href="\/title.*?<\/div>/m) { |str|
           what = str.match(/<a name="[^"]+">([^<]+)<\/a>/)[1] rescue nil
-          # next unless what
-          next unless ['Actor', 'Director'].include?(what)
+          next unless what
           movies[what] = str.scan(TITLE_MATCH)[0..2].map { |url, tit|
             tit
           }
         }
       end
 
-      unless movies.empty?
-        ar = []
-        movies.keys.sort.each { |key|
-          ar << key.dup
-          ar.last << ": " + movies[key].join(', ')
+      preferred = ['Actor', 'Director']
+      if resp.body.match(/Jump to filmography as:&nbsp;(.*?)<\/div>/)
+        txt = $1
+        preferred = txt.scan(/<a[^>]+>([^<]+)<\/a>/)[0..2].map { |pref|
+          pref.first
         }
-        info << "Top Movies:: " + ar.join('. ')
+      end
+
+      unless movies.empty?
+        all_keys = movies.keys.sort
+        debug all_keys.inspect
+        keys = []
+        preferred.each { |key|
+          keys << key if all_keys.include? key
+        }
+        keys = all_keys if keys.empty?
+        ar = []
+        keys.each { |key|
+          ar << key.dup
+          ar.last << ": " + movies[key].join('; ')
+        }
+        info << ar.join('. ')
       end
       return info
 
