@@ -651,9 +651,9 @@ class QuizPlugin < Plugin
 
 
   def cmd_refresh( m, params )
-    q = create_quiz ( m.channel )
+    q = create_quiz(m.channel)
     q.questions.clear
-    fetch_data ( m )
+    fetch_data(m)
     cmd_quiz( m, params )
   end
 
