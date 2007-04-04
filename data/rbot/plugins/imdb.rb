@@ -9,9 +9,7 @@
 #
 # Notes by Giuseppe Bilotta:
 # TODO return more than one match (configurable)
-# TODO why do we use CGI.unescapeHTML? shall we rely on the rbot methods?
 
-require 'cgi'
 require 'uri/common'
 
 class Imdb
@@ -21,6 +19,10 @@ class Imdb
 
   def search(rawstr)
     str = URI.escape(rawstr) << ";site=aka"
+    return do_search(str)
+  end
+
+  def do_search(str)
     resp = nil
     begin
       resp = @bot.httputil.get_response("http://us.imdb.com/find?q=#{str}",
@@ -38,7 +40,12 @@ class Imdb
         return url
       end
     elsif resp.code == "302"
-      return resp['location'].gsub(/http:\/\/us.imdb.com/, "").gsub(/\?.*/, "")
+      new_loc = resp['location'].gsub(/http:\/\/us.imdb.com/, "")
+      if new_loc.match(/\/find\?q=(.*)/)
+        return do_search($1)
+      else
+        return new_loc.gsub(/\?.*/, "")
+      end
     end
     return nil
   end
@@ -78,7 +85,7 @@ class Imdb
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
-      title = CGI.unescapeHTML(m[1])
+      title = Utils.decode_html_entities(m[1])
 
       m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
       return nil if !m
@@ -117,7 +124,7 @@ class Imdb
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
-      name = CGI.unescapeHTML(m[1])
+      name = Utils.decode_html_entities(m[1])
 
       birth = nil
       data = grab_info("Date of Birth", resp.body)
