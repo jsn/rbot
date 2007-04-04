@@ -4,11 +4,12 @@
 # :title: IMDB plugin for rbot
 #
 # Author:: Arnaud Cornet <arnaud.cornet@gmail.com>
-# Copyright:: (C) 2005 Arnaud Cornet
-# License:: MIT license
+# Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 #
-# Notes by Giuseppe Bilotta:
-# TODO return more than one match (configurable)
+# Copyright:: (C) 2005 Arnaud Cornet
+# Copyright:: (C) 2007 Giuseppe Bilotta
+#
+# License:: MIT license
 
 require 'uri/common'
 
@@ -39,37 +40,51 @@ class Imdb
     end
 
     if resp.code == "200"
-      m = TITLE_OR_NAME_MATCH.match(resp.body)
-      if m
-        url = m[1]
-        return url
+      m = []
+      m << TITLE_OR_NAME_MATCH.match(resp.body)
+      if resp.body.match(/\(Exact Matches\)<\/b>/)
+        m << TITLE_OR_NAME_MATCH.match($')
+      end
+      debug m.inspect
+      m.compact!
+      debug m.inspect
+      unless m.empty?
+        return m.map { |mm|
+          mm[1]
+        }.uniq
       end
     elsif resp.code == "302"
+      debug "automatic redirection"
       new_loc = resp['location'].gsub(IMDB, "")
       if new_loc.match(/\/find\?q=(.*)/)
         return do_search($1)
       else
-        return new_loc.gsub(/\?.*/, "")
+        return [new_loc.gsub(/\?.*/, "")]
       end
     end
     return nil
   end
 
   def info(rawstr)
-    sr = search(rawstr)
-    if !sr
+    urls = search(rawstr)
+    debug urls
+    if urls.nil_or_empty?
       debug "IMDB: search returned NIL"
       return nil
     end
-    type = sr.match(/^\/([^\/]+)\//)[1].downcase.intern rescue nil
-    case type
-    when :title
-      return info_title(sr)
-    when :name
-      return info_name(sr)
-    else
-      return "#{sr}"
-    end
+    results = []
+    urls.each { |sr|
+      type = sr.match(/^\/([^\/]+)\//)[1].downcase.intern rescue nil
+      case type
+      when :title
+        results << info_title(sr)
+      when :name
+        results << info_name(sr)
+      else
+        results << "#{sr}"
+      end
+    }
+    return results
   end
 
   def grab_info(info, body)
@@ -192,7 +207,13 @@ class ImdbPlugin < Plugin
       m.reply "Nothing found for #{what}"
       return nil
     end
-    m.reply info
+    if info.length == 1
+      m.reply info
+    else
+      m.reply info.map { |i|
+        i.gsub(/\n+/, " | ")
+      }.join("\n")
+    end
   end
 end
 
