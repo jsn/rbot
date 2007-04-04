@@ -1456,10 +1456,10 @@ module Irc
     # Resets the Channel and User list
     #
     def reset_lists
-      @users.each { |u|
+      @users.reverse_each { |u|
         delete_user(u)
       }
-      @channels.each { |u|
+      @channels.reverse_each { |u|
         delete_channel(u)
       }
     end

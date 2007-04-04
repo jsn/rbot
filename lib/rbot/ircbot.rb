@@ -530,7 +530,7 @@ class Bot
       nickchg new
       # If we're setting our nick at connection because our choice was taken,
       # we have to fix our nick manually, because there will be no NICK message
-      # yo inform us that our nick has been changed.
+      # to inform us that our nick has been changed.
       if data[:target] == '*'
         debug "setting my connection nick to #{new}"
         nick = new
