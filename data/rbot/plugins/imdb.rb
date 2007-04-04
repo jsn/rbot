@@ -45,9 +45,7 @@ class Imdb
       if resp.body.match(/\(Exact Matches\)<\/b>/)
         m << TITLE_OR_NAME_MATCH.match($')
       end
-      debug m.inspect
       m.compact!
-      debug m.inspect
       unless m.empty?
         return m.map { |mm|
           mm[1]
@@ -101,29 +99,50 @@ class Imdb
       return nil
     end
 
+    info = []
+
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
-      title = Utils.decode_html_entities(m[1])
+      title_date = m[1]
+      title, date = title_date.scan(/^(.*)\((\d\d\d\d(?:[IV]+)?)\)$/).first
+      title.strip!
+
+      dir = nil
+      data = grab_info(/Directors?/, resp.body)
+      if data
+        dir = data.scan(NAME_MATCH).map { |url, name|
+          name
+        }.join(', ')
+      end
+
+      country = nil
+      data = grab_info(/Country/, resp.body)
+      if data
+        country = data.ircify_html
+      end
+
+      info << [title, "(#{country}, #{date})", dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
 
       m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
       return nil if !m
       score = m[1]
       votes = m[2]
 
-      plot = nil
-      data = grab_info(/Plot (?:Outline|Summary)/, resp.body)
-      if data
-        plot = "Plot: #{data.ircify_html.gsub(/\s+more$/,'')}"
-      end
-
       genre = Array.new
       resp.body.scan(/<a href="\/Sections\/Genres\/[^\/]+\/">([^<]+)<\/a>/) do |gnr|
         genre << gnr
       end
-      info = "#{title} : http://us.imdb.com#{sr}\n"
-      info << "Ratings: #{score}/10 (#{votes} voters). Genre: #{genre.join('/')}\n"
-      info << plot if plot
+
+      info << "Ratings: #{score}/10 (#{votes} voters). Genre: #{genre.join('/')}"
+
+      plot = nil
+      data = grab_info(/Plot (?:Outline|Summary)/, resp.body)
+      if data
+        plot = "Plot: #{data.ircify_html.gsub(/\s+more$/,'')}"
+        info << plot
+      end
+
       return info
     end
     return nil
@@ -139,10 +158,14 @@ class Imdb
       return nil
     end
 
+    info = []
+
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
-      name = Utils.decode_html_entities(m[1])
+      name = m[1]
+
+      info << "#{name} : http://us.imdb.com#{sr}"
 
       birth = nil
       data = grab_info("Date of Birth", resp.body)
@@ -155,6 +178,8 @@ class Imdb
       if data
         death = "Death: #{data.ircify_html.gsub(/\s+more$/,'')}"
       end
+
+      info << [birth, death].compact.join('. ')
 
       movies = {}
 
@@ -170,22 +195,18 @@ class Imdb
           # next unless what
           next unless ['Actor', 'Director'].include?(what)
           movies[what] = str.scan(TITLE_MATCH)[0..2].map { |url, tit|
-            Utils.decode_html_entities(tit)
+            tit
           }
         }
       end
-      debug movies.inspect
 
-      info = "#{name} : http://us.imdb.com#{sr}\n"
-      info << [birth, death].compact.join('. ') << "\n"
       unless movies.empty?
-        info << "Top Movies:: "
         ar = []
         movies.keys.sort.each { |key|
           ar << key.dup
           ar.last << ": " + movies[key].join(', ')
         }
-        info << ar.join('. ')
+        info << "Top Movies:: " + ar.join('. ')
       end
       return info
 
@@ -208,10 +229,10 @@ class ImdbPlugin < Plugin
       return nil
     end
     if info.length == 1
-      m.reply info
+      m.reply Utils.decode_html_entities info.first.join("\n")
     else
       m.reply info.map { |i|
-        i.gsub(/\n+/, " | ")
+        Utils.decode_html_entities i.join(" | ")
       }.join("\n")
     end
   end
