@@ -20,7 +20,7 @@ class Imdb
   end
 
   def search(rawstr)
-    str = URI.escape(rawstr)
+    str = URI.escape(rawstr) << ";site=aka"
     resp = nil
     begin
       resp = @bot.httputil.get_response("http://us.imdb.com/find?q=#{str}",
