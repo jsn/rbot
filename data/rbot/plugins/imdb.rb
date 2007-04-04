@@ -138,15 +138,37 @@ class Imdb
         death = "Death: #{data.ircify_html.gsub(/\s+more$/,'')}"
       end
 
-      awards = nil
-      data = grab_info("Awards", resp.body)
-      if data
-        awards = "Awards: #{data.ircify_html.gsub(/\s+more$/,'')}"
+      movies = {}
+
+      filmorate = nil
+      begin
+        filmorate = @bot.httputil.get("http://us.imdb.com" + sr + "filmorate")
+      rescue Exception
       end
+
+      if filmorate
+        filmorate.scan(/<div class="filmo">.*?<a href="\/title.*?<\/div>/m) { |str|
+          what = str.match(/<a name="[^"]+">([^<]+)<\/a>/)[1] rescue nil
+          # next unless what
+          next unless ['Actor', 'Director'].include?(what)
+          movies[what] = str.scan(/<a href="\/title\/[^"]+">([^<]+)<\/a>/)[0..2].map { |tit|
+            Utils.decode_html_entities(tit)
+          }
+        }
+      end
+      debug movies.inspect
 
       info = "#{name} : http://us.imdb.com#{sr}\n"
       info << [birth, death].compact.join('. ') << "\n"
-      info << awards if awards
+      unless movies.empty?
+        info << "Top Movies:: "
+        ar = []
+        movies.keys.sort.each { |key|
+          ar << key.dup
+          ar.last << ": " + movies[key].join(', ')
+        }
+        info << ar.join('. ')
+      end
       return info
 
     end

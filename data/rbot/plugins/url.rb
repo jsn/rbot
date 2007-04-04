@@ -60,9 +60,9 @@ class UrlPlugin < Plugin
         # in the first case we download the initial part and the parse it; in the second
         # case we only download as much as we need to find the title
         if @bot.config['url.first_par']
-          first_par = Utils.ircify_first_html_par(body)
-          extra << "\n#{LINK_INFO} text: #{first_par}" unless first_par.empty?
           title = get_title_from_html(body)
+          first_par = Utils.ircify_first_html_par(body, :strip => title)
+          extra << "\n#{LINK_INFO} text: #{first_par}" unless first_par.empty?
           return "title: #{title}#{extra}" if title
         else
           title = get_title_from_html(body)
