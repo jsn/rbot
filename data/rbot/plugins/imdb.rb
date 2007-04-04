@@ -13,6 +13,11 @@
 require 'uri/common'
 
 class Imdb
+  IMDB = "http://us.imdb.com"
+  TITLE_OR_NAME_MATCH = /<a href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  TITLE_MATCH = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  NAME_MATCH = /<a href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+
   def initialize(bot)
     @bot = bot
   end
@@ -25,7 +30,7 @@ class Imdb
   def do_search(str)
     resp = nil
     begin
-      resp = @bot.httputil.get_response("http://us.imdb.com/find?q=#{str}",
+      resp = @bot.httputil.get_response(IMDB + "/find?q=#{str}",
                                         :max_redir => -1)
     rescue Exception => e
       error e.message
@@ -34,13 +39,13 @@ class Imdb
     end
 
     if resp.code == "200"
-      m = /<a href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>(?:[^<]*)<\/a>/.match(resp.body)
+      m = TITLE_OR_NAME_MATCH.match(resp.body)
       if m
         url = m[1]
         return url
       end
     elsif resp.code == "302"
-      new_loc = resp['location'].gsub(/http:\/\/us.imdb.com/, "")
+      new_loc = resp['location'].gsub(IMDB, "")
       if new_loc.match(/\/find\?q=(.*)/)
         return do_search($1)
       else
@@ -74,8 +79,7 @@ class Imdb
   def info_title(sr)
     resp = nil
     begin
-      resp = @bot.httputil.get_response('http://us.imdb.com' + sr,
-                                        :max_redir => -1)
+      resp = @bot.httputil.get_response(IMDB + sr, :max_redir => -1)
     rescue Exception => e
       error e.message
       warning e.backtrace.join("\n")
@@ -113,8 +117,7 @@ class Imdb
   def info_name(sr)
     resp = nil
     begin
-      resp = @bot.httputil.get_response('http://us.imdb.com' + sr,
-                                        :max_redir => -1)
+      resp = @bot.httputil.get_response(IMDB + sr, :max_redir => -1)
     rescue Exception => e
       error e.message
       warning e.backtrace.join("\n")
@@ -142,7 +145,7 @@ class Imdb
 
       filmorate = nil
       begin
-        filmorate = @bot.httputil.get("http://us.imdb.com" + sr + "filmorate")
+        filmorate = @bot.httputil.get(IMDB + sr + "filmorate")
       rescue Exception
       end
 
@@ -151,7 +154,7 @@ class Imdb
           what = str.match(/<a name="[^"]+">([^<]+)<\/a>/)[1] rescue nil
           # next unless what
           next unless ['Actor', 'Director'].include?(what)
-          movies[what] = str.scan(/<a href="\/title\/[^"]+">([^<]+)<\/a>/)[0..2].map { |tit|
+          movies[what] = str.scan(TITLE_MATCH)[0..2].map { |url, tit|
             Utils.decode_html_entities(tit)
           }
         }
