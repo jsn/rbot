@@ -25,7 +25,8 @@ class Imdb
   end
 
   def search(rawstr)
-    str = URI.escape(rawstr) << ";site=aka"
+    str = URI.escape(rawstr)
+    str << ";site=aka" if @bot.config['imdb.aka']
     return do_search(str)
   end
 
@@ -245,6 +246,9 @@ class Imdb
 end
 
 class ImdbPlugin < Plugin
+  BotConfig.register BotConfigBooleanValue.new('imdb.aka',
+    :default => true,
+    :desc => "Look for IMDB matches also in translated titles and other 'also known as' information")
   BotConfig.register BotConfigBooleanValue.new('imdb.popular',
     :default => true,
     :desc => "Display info on popular IMDB entries matching the request closely")
