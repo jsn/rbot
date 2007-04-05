@@ -438,6 +438,7 @@ class HttpUtil
 
     get_proxy(uri, opts).start do |http|
       http.request(req) do |resp|
+        resp['x-rbot-location'] = uri.to_s
         if Net::HTTPNotModified === resp
           debug "not modified"
           begin
