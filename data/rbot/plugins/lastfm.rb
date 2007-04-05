@@ -43,19 +43,25 @@ class LastFmPlugin < Plugin
         if page
           if page.match(/<h1 class="h1artist"><a href="([^"]+)">(.*?)<\/a><\/h1>/)
             url = LASTFM + $1
-            title = $2
+            title = $2.ircify_html
           else
             raise "No URL/Title found for #{artist}"
           end
 
-          wiki = page.match(/<div class="wikiAbstract">(.*?)<\/div>/m)[1].ircify_html
+          wiki = "This #{action} doesn't have a description yet. You can help by writing it: #{url}/+wiki?action=edit"
+          if page.match(/<div class="wikiAbstract">(.*?)<\/div>/m)
+            wiki = $1.ircify_html
+          end
+
           m.reply "%s : %s\n%s" % [title, url, wiki]
         else
           m.reply "no data found on #{artist}"
         end
-      rescue
+      rescue Exception => e
         m.reply "I had problems looking for #{artist}"
-        debug page
+        error e.inspect
+        debug e.backtrace.join("\n")
+        debug page[0...10*1024]
         return
       end
     when :song, :track
@@ -63,7 +69,7 @@ class LastFmPlugin < Plugin
     when :album
       m.reply "not implemented yet, sorry"
     else
-      return usage unless what.length == 1
+      return usage(m) unless what.length == 1
       user = what.first
       begin
         data = open("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
