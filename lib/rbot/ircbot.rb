@@ -879,12 +879,13 @@ class Bot
           sub_lines = Array.new
           begin
             sub_lines << msg.slice!(0, left)
+            break if msg.empty?
             lastspace = sub_lines.last.rindex(opts[:split_at])
             if lastspace
               msg.replace sub_lines.last.slice!(lastspace, sub_lines.last.size) + msg
               msg.gsub!(/^#{opts[:split_at]}/, "") if opts[:purge_split]
             end
-          end while msg.size > 0
+          end until msg.empty?
           sub_lines
         when :truncate
           line.slice(0, left - truncate.size) << truncate
@@ -896,11 +897,12 @@ class Bot
 
     if opts[:max_lines] > 0 and all_lines.length > opts[:max_lines]
       lines = all_lines[0...opts[:max_lines]]
-      lines.last.slice!(0, left - truncate.size)
-      lines.last << truncate
+      new_last = lines.last.slice(0, left - truncate.size) << truncate
+      lines.last.replace(new_last)
     else
       lines = all_lines
     end
+    debug lines.inspect
 
     lines.each { |line|
       sendq "#{fixed}#{line}", chan, ring
