@@ -18,6 +18,7 @@ require 'uri'
 Net::HTTP.version_1_2
 
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
+GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif></td><td>&nbsp;</td><td nowrap><font size=\+1><b>(.+)</b></td></tr><tr><td>}
 
 class SearchPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('google.hits',
@@ -37,6 +38,8 @@ class SearchPlugin < Plugin
     case topic
     when "search", "google"
       "#{topic} <string> => search google for <string>"
+    when "gcalc"
+      "gcalc <equation> => use the google calculator to find the answer to <equation>"
     when "wp"
       "wp [<code>] <string> => search for <string> on Wikipedia. You can select a national <code> to only search the national Wikipedia"
     else
@@ -92,6 +95,35 @@ class SearchPlugin < Plugin
 
   end
 
+  def gcalc(m, params)
+    what = params[:words].to_s
+    searchfor = URI.escape(what).sub('+','%2B')
+    
+    debug "Getting gcalc thing: #{searchfor.inspect}"
+    url = "http://www.google.com/search?q=#{searchfor}"
+
+    begin
+      html = @bot.httputil.get(url)
+    rescue => e
+      m.reply "error googlecalcing #{what}"
+      return
+    end
+
+    debug "#{html.size} bytes of html recieved"
+    
+    results = html.scan(GOOGLE_CALC_RESULT)
+    debug "results: #{results.inspect}"
+    
+    if results.length != 1
+      m.reply "couldn't calculate #{what}"
+      return
+    end
+    
+    result = results[0][0].ircify_html
+    debug "replying with: #{result.inspect}"
+    m.reply "#{result}"
+  end
+
   def wikipedia(m, params)
     lang = params[:lang]
     site = "#{lang.nil? ? '' : lang + '.'}wikipedia.org"
@@ -108,6 +140,7 @@ plugin = SearchPlugin.new
 
 plugin.map "search *words", :action => 'google'
 plugin.map "google *words", :action => 'google'
+plugin.map "gcalc *words", :action => 'gcalc'
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }
 plugin.map "wp *words", :action => 'wikipedia'
 
