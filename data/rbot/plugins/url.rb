@@ -56,17 +56,13 @@ class UrlPlugin < Plugin
         # be a webpage, retrieve the title from the page
         debug "+ getting #{url.request_uri}"
 
-        # we act differently depending on whether we want the first par or not:
-        # in the first case we download the initial part and the parse it; in the second
-        # case we only download as much as we need to find the title
+	title = get_title_from_html(body)
         if @bot.config['url.first_par']
-          title = get_title_from_html(body)
           first_par = Utils.ircify_first_html_par(body, :strip => title)
-          extra << "\n#{LINK_INFO} text: #{first_par}" unless first_par.empty?
-          return "title: #{title}#{extra}" if title
+          extra << ", #{Bold}text#{Bold}: #{first_par}" unless first_par.empty?
+          return "#{Bold}title#{Bold}: #{title}#{extra}" if title
         else
-          title = get_title_from_html(body)
-          return "title: #{title}" if title
+          return "#{Bold}title#{Bold}: #{title}" if title
         end
 
         # if nothing was found, provide more basic info
@@ -78,11 +74,11 @@ class UrlPlugin < Plugin
         size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
         if response.code == '206'
           if response['content-range'] =~ /bytes\s*[^\/]+\/(\d+)/
-            size = $1
+            size = $1.to_s.reverse.scan(/\d{1,3}/).join(',').reverse
           end
         end
-        size = size ? ", size: #{size} bytes" : ""
-        return "type: #{response['content-type']}#{size}#{extra}"
+        size = size ? ", #{Bold}size#{Bold}: #{size} bytes" : ""
+        return "#{Bold}type#{Bold}: #{response['content-type']}#{size}#{extra}"
       end
     rescue Exception => e
       error e.inspect
