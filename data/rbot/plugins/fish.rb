@@ -5,7 +5,7 @@ Net::HTTP.version_1_2
 class BabelPlugin < Plugin
   LANGS = %w{en fr de it pt es nl ru zh zt el ja ko}
   def help(plugin, topic="")
-    "translate to <lang> <string> => translate from english to <lang>, translate from <lang> <string> => translate to english from <lang>, translate <fromlang> <tolang> <string> => translate from <fromlang> to <tolang>. Languages: #{LANGS.join(', ')}"
+    "translate to <lang> <string> => translate from english to <lang>, translate from <lang> <string> => translate to english from <lang>, translate <fromlang> <tolang> <string> => translate from <fromlang> to <tolang>. If <string> is an http url, translates the referenced webpage and returns the 1st content paragraph. Languages: #{LANGS.join(', ')}"
   end
   def translate(m, params)
     langs = LANGS
@@ -13,7 +13,6 @@ class BabelPlugin < Plugin
     trans_to = params[:tolang] ? params[:tolang] : 'en'
     trans_text = params[:phrase].to_s
     
-    query = "/babelfish/tr"
     lang_match = langs.join("|")
     unless(trans_from =~ /^(#{lang_match})$/ && trans_to =~ /^(#{lang_match})$/)
       m.reply "invalid language: valid languagess are: #{langs.join(' ')}"
@@ -22,6 +21,14 @@ class BabelPlugin < Plugin
 
     data_text = URI.escape trans_text
     trans_pair = "#{trans_from}_#{trans_to}"
+
+    if (trans_text =~ /^http:\/\//) && (URI.parse(trans_text) rescue nil)
+      url = 'http://babelfish.altavista.com/babelfish/trurl_pagecontent' +
+        "?lp=#{trans_pair}&url=#{data_text}"
+
+      return Utils.get_first_pars([url], 1, :message => m)
+    end
+
     data = "lp=#{trans_pair}&doit=done&intl=1&tt=urltext&urltext=#{data_text}"
 
     # check cache for previous lookups
@@ -33,6 +40,8 @@ class BabelPlugin < Plugin
     headers = {
       "content-type" => "application/x-www-form-urlencoded; charset=utf-8"
     }
+
+    query = "/babelfish/tr"
 
     begin
       resp = @bot.httputil.get_response('http://babelfish.altavista.com'+query,
