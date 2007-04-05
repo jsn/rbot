@@ -61,6 +61,12 @@ class ::String
     txt.gsub!("\n", ' ')
     txt.gsub!("\r", ' ')
 
+    # Superscripts and subscripts are turned into ^{...} and _{...}
+    # where the {} are omitted for single characters
+    txt.gsub!(/<sup>(.*?)<\/sup>/, '^{\1}')
+    txt.gsub!(/<sub>(.*?)<\/sub>/, '_{\1}')
+    txt.gsub!(/(^|_)\{(.)\}/, '\1\2')
+
     # All other tags are just removed
     txt.gsub!(/<[^>]+>/, '')
 
