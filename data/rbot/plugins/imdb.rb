@@ -135,7 +135,7 @@ class Imdb
       country = nil
       data = grab_info(/Country/, resp.body)
       if data
-        country = data.ircify_html
+        country = data.ircify_html.gsub(' / ','/')
       end
 
       info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
