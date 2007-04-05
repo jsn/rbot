@@ -32,36 +32,38 @@ module ::Net
       ctype = self['content-type'] || 'text/html'
       return nil unless ctype =~ /^text/i || ctype =~ /x(ht)?ml/i
 
-      charset = 'latin1' # should be in config
+      charsets = ['latin1'] # should be in config
 
       if self['content-type'].match(/charset=["']?([^\s"']+)["']?/i)
-        charset = $1
-        debug "charset #{charset} set from header"
+        charsets << $1
+        debug "charset #{charsets.last} added from header"
       end
 
       case str
       when /<\?xml\s[^>]*encoding=['"]([^\s"'>]+)["'][^>]*\?>/i
-        charset = $1
-        debug "xml charset #{charset} set from xml pi"
+        charsets << $1
+        debug "xml charset #{charsets.last} added from xml pi"
       when /<(meta\s[^>]*http-equiv=["']?Content-Type["']?[^>]*)>/i
         meta = $1
         if meta =~ /charset=['"]?([^\s'";]+)['"]?/
-          charset = $1
-          debug "html charset #{charset} set from meta"
+          charsets << $1
+          debug "html charset #{charsets.last} added from meta"
         end
       end
-      return charset
+      return charsets.uniq
     end
 
     def body_to_utf(str)
-      charset = self.body_charset(str) or return str
+      charsets = self.body_charset(str) or return str
 
-      begin
-        return Iconv.iconv('utf-8//ignore', charset, str).first
-      rescue
-        debug "conversion failed"
-        return str
-      end
+      charsets.reverse_each { |charset|
+        begin
+          return Iconv.iconv('utf-8//ignore', charset, str).first
+        rescue
+          debug "conversion failed for #{charset}"
+        end
+      }
+      return str
     end
 
     def body
