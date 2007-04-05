@@ -41,8 +41,8 @@ class Imdb
 
     if resp.code == "200"
       m = []
-      m << TITLE_OR_NAME_MATCH.match(resp.body)
-      if resp.body.match(/\(Exact Matches\)<\/b>/)
+      m << TITLE_OR_NAME_MATCH.match(resp.body) if @bot.config['imdb.popular']
+      if resp.body.match(/\(Exact Matches\)<\/b>/) and @bot.config['imdb.exact']
         m << TITLE_OR_NAME_MATCH.match($')
       end
       m.compact!
@@ -230,6 +230,13 @@ class Imdb
 end
 
 class ImdbPlugin < Plugin
+  BotConfig.register BotConfigBooleanValue.new('imdb.popular',
+    :default => true,
+    :desc => "Display info on popular IMDB entries matching the request closely")
+  BotConfig.register BotConfigBooleanValue.new('imdb.exact',
+    :default => true,
+    :desc => "Display info on IMDB entries matching the request exactly")
+
   def help(plugin, topic="")
     "imdb <string> => search http://www.imdb.org for <string>"
   end
