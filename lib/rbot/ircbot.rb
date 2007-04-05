@@ -827,16 +827,16 @@ class Bot
       end
     end
 
-    message = original_message.to_s.gsub(/[\r\n]+/, "\n")
+    multi_line = original_message.to_s.gsub(/[\r\n]+/, "\n")
+    messages = Array.new
     case opts[:newlines]
     when :join
-      lines = [message.gsub("\n", opts[:join_with])]
+      messages << [multi_line.gsub("\n", opts[:join_with])]
     when :split
-      lines = Array.new
-      message.each_line { |line|
+      multi_line.each_line { |line|
         line.chomp!
         next unless(line.size > 0)
-        lines << line
+        messages << line
       }
     else
       raise "Unknown :newlines option #{opts[:newlines]} while sending #{original_message.inspect}"
@@ -865,56 +865,45 @@ class Bot
     # And this is what's left
     left = max_len - fixed.size
 
-    case opts[:overlong]
-    when :split
-      truncate = false
-      split_at = opts[:split_at]
-    when :truncate
-      truncate = opts[:truncate_text]
-      truncate = @default_send_options[:truncate_text] if truncate.size > left
-      truncate = "" if truncate.size > left
+    truncate = opts[:truncate_text]
+    truncate = @default_send_options[:truncate_text] if truncate.size > left
+    truncate = "" if truncate.size > left
+
+    all_lines = messages.map { |line|
+      if line.size < left
+        line
+      else
+        case opts[:overlong]
+        when :split
+          msg = line.dup
+          sub_lines = Array.new
+          begin
+            sub_lines << msg.slice!(0, left)
+            lastspace = sub_lines.last.rindex(opts[:split_at])
+            if lastspace
+              msg.replace sub_lines.last.slice!(lastspace, sub_lines.last.size) + msg
+              msg.gsub!(/^#{opts[:split_at]}/, "") if opts[:purge_split]
+            end
+          end while msg.size > 0
+          sub_lines
+        when :truncate
+          line.slice(0, left - truncate.size) << truncate
+        else
+          raise "Unknown :overlong option #{opts[:overlong]} while sending #{original_message.inspect}"
+        end
+      end
+    }.flatten
+
+    if all_lines.length > opts[:max_lines]
+      lines = all_lines[0...opts[:max_lines]]
+      lines.last = lines.last.slice(0, left - truncate.size) << truncate
     else
-      raise "Unknown :overlong option #{opts[:overlong]} while sending #{original_message.inspect}"
+      lines = all_lines
     end
 
-    # Counter to check the number of lines sent by this command
-    cmd_lines = 0
-    max_lines = opts[:max_lines]
-    maxed = false
-    line = String.new
-    lines.each { |msg|
-      begin
-        if max_lines > 0 and cmd_lines == max_lines - 1
-          truncate = opts[:truncate_text]
-          truncate = @default_send_options[:truncate_text] if truncate.size > left
-          truncate = "" if truncate.size > left
-          maxed = true
-        end
-        if(left >= msg.size) and not maxed
-          sendq "#{fixed}#{msg}", chan, ring
-          log_sent(type, where, msg)
-          cmd_lines += 1
-          break
-        end
-        if truncate
-          line.replace msg.slice(0, left-truncate.size)
-          # line.sub!(/\s+\S*$/, truncate)
-          line << truncate
-          raise "PROGRAMMER ERROR! #{line.inspect} of size #{line.size} > #{left}" if line.size > left
-          sendq "#{fixed}#{line}", chan, ring
-          log_sent(type, where, line)
-          return
-        end
-        line.replace msg.slice!(0, left)
-        lastspace = line.rindex(opts[:split_at])
-        if(lastspace)
-          msg.replace line.slice!(lastspace, line.size) + msg
-          msg.gsub!(/^#{opts[:split_at]}/, "") if opts[:purge_split]
-        end
-        sendq "#{fixed}#{line}", chan, ring
-        log_sent(type, where, line)
-        cmd_lines += 1
-      end while(msg.size > 0)
+    lines.each { |line|
+      sendq "#{fixed}#{line}", chan, ring
+      log_sent(type, where, line)
     }
   end
 
