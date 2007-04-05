@@ -120,7 +120,7 @@ class Imdb
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
       title_date = m[1]
-      pre_title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:[IV]+)?)\)\s*(.+)?$/).first
+      pre_title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:\/[IV]+)?)\)\s*(.+)?$/).first
       pre_title.strip!
       title = fix_article(pre_title)
 
