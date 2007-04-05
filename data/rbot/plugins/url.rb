@@ -76,6 +76,11 @@ class UrlPlugin < Plugin
       unless @bot.config['url.titles_only']
         # content doesn't have title, just display info.
         size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
+        if response.code == '206'
+          if response['content-range'] =~ /bytes\s*[^\/]+\/(\d+)/
+            size = $1
+          end
+        end
         size = size ? ", size: #{size} bytes" : ""
         return "type: #{response['content-type']}#{size}#{extra}"
       end
