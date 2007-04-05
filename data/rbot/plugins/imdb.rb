@@ -18,6 +18,7 @@ class Imdb
   TITLE_OR_NAME_MATCH = /<a href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   TITLE_MATCH = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   NAME_MATCH = /<a href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  FINAL_ARTICLE_MATCH = /, ([A-Z]\S{0,2})$/
 
   def initialize(bot)
     @bot = bot
@@ -89,6 +90,19 @@ class Imdb
     /<div class="info">\s+<h5>#{info}:<\/h5>\s+(.*?)<\/div>/mi.match(body)[1] rescue nil
   end
 
+  def fix_article(org_tit)
+    title = org_tit.dup
+    if @bot.config['imdb.fix_article'] and title.gsub!(FINAL_ARTICLE_MATCH, '')
+      art = $1.dup
+      debug art.inspect
+      if art[-1,1].match(/[a-z]/)
+        art << " "
+      end
+      return art + title
+    end
+    return title
+  end
+
   def info_title(sr)
     resp = nil
     begin
@@ -105,8 +119,9 @@ class Imdb
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
       title_date = m[1]
-      title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:[IV]+)?)\)\s*(.+)?$/).first
-      title.strip!
+      pre_title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:[IV]+)?)\)\s*(.+)?$/).first
+      pre_title.strip!
+      title = fix_article(pre_title)
 
       dir = nil
       data = grab_info(/Directors?/, resp.body)
@@ -194,7 +209,7 @@ class Imdb
           what = str.match(/<a name="[^"]+">([^<]+)<\/a>/)[1] rescue nil
           next unless what
           movies[what] = str.scan(TITLE_MATCH)[0..2].map { |url, tit|
-            tit
+            fix_article(tit)
           }
         }
       end
@@ -236,6 +251,9 @@ class ImdbPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('imdb.exact',
     :default => true,
     :desc => "Display info on IMDB entries matching the request exactly")
+  BotConfig.register BotConfigBooleanValue.new('imdb.fix_article',
+    :default => false,
+    :desc => "Try to detect an article placed at the end and move it in front of the title")
 
   def help(plugin, topic="")
     "imdb <string> => search http://www.imdb.org for <string>"
