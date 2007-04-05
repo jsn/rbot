@@ -894,9 +894,10 @@ class Bot
       end
     }.flatten
 
-    if all_lines.length > opts[:max_lines]
+    if opts[:max_lines] > 0 and all_lines.length > opts[:max_lines]
       lines = all_lines[0...opts[:max_lines]]
-      lines.last = lines.last.slice(0, left - truncate.size) << truncate
+      lines.last.slice!(0, left - truncate.size)
+      lines.last << truncate
     else
       lines = all_lines
     end
