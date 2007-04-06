@@ -202,7 +202,7 @@ class Imdb
       if year = opts[:movies_in_year]
         filmoyear = @bot.httputil.get(IMDB + sr + "filmoyear")
         if filmoyear
-          info << filmoyear.scan(/#{TITLE_MATCH} \(#{year}\)[^\]]*\[(.*)\](?:$|\s*<)/)
+          info << filmoyear.scan(/#{TITLE_MATCH} \(#{year}\)[^\]]*\[(.*)\]([^<]+)?(?:$|\s*<)/)
         end
         return info
       end
@@ -276,15 +276,18 @@ class Imdb
       data = info[1]
 
       movies = []
-      data.each { |url, pre_title, pre_roles|
+      data.each { |url, pre_title, pre_roles, extra|
         title = fix_article(pre_title.ircify_html)
-        roles = pre_roles.split(/\]\s+\[/).map { |txt|
+        role_array = pre_roles.split(/\]\s+\[/).map { |txt|
           if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
             "#{$1} (#{$2})"
           else
             txt
           end
-        }.join(', ')
+        }
+        role_array.last << " " + extra.ircify_html if extra
+
+        roles = role_array.join(', ')
         movies << [roles, title].join(": ")
       }
 
