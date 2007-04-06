@@ -35,13 +35,19 @@ class ::LastFmEvent
 end
 
 class LastFmPlugin < Plugin
+  BotConfig.register BotConfigIntegerValue.new('lastfm.max_events',
+    :default => 25, :validate => Proc.new{|v| v > 1},
+    :desc => "Maximum number of events to display.")
+  BotConfig.register BotConfigIntegerValue.new('lastfm.default_events',
+    :default => 3, :validate => Proc.new{|v| v > 1},
+    :desc => "Default number of events to display.")
 
   LASTFM = "http://www.last.fm"
 
   def help(plugin, topic="")
     case topic.intern
     when :event, :events
-      "lastfm events in <location> => show information on events in or near <location>. lastfm events by <artist/group> => show information on events by <artist/group>"
+      "lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to #{@bot.config['lastfm.default_events']} and cannot be higher than #{@bot.config['lastfm.max_events']}"
     when :artist, :group
       "lastfm artist <name> => show information on artist/group <name> from last.fm"
     when :song, :track
@@ -54,6 +60,9 @@ class LastFmPlugin < Plugin
   end
 
   def find_event(m, params)
+    num = params[:num] || @bot.config['lastfm.default_events']
+    num = num.to_i.clip(1, @bot.config['lastfm.max_events'])
+
     location = artist = nil
     location = params[:location].to_s if params[:location]
     artist = params[:who].to_s if params[:who]
@@ -101,10 +110,10 @@ class LastFmPlugin < Plugin
         }
         # debug events.inspect
 
-        events[0..2].each { |event|
+        events[0...num].each { |event|
           disp_events << event.to_s
         }
-        m.reply disp_events.join(' | ')
+        m.reply disp_events.join(' | '), :split_at => /\s+\|\s+/
       else
         m.reply "No events found #{spec}"
         return
@@ -174,9 +183,9 @@ class LastFmPlugin < Plugin
 end
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm event[s] in *location', :action => :find_event
-plugin.map 'lastfm event[s] by *who', :action => :find_event
-plugin.map 'lastfm event[s] [for] *who', :action => :find_event
+plugin.map 'lastfm [:num] event[s] in *location', :action => :find_event, :requirements => { :num => /\d+/ }
+plugin.map 'lastfm [:num] event[s] by *who', :action => :find_event, :requirements => { :num => /\d+/ }
+plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_event, :requirements => { :num => /\d+/ }
 plugin.map 'lastfm artist *who', :action => :find_artist
 plugin.map 'lastfm group *who', :action => :find_artist
 plugin.map 'lastfm track *dunno', :action => :find_track
