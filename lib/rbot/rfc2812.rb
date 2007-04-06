@@ -942,10 +942,10 @@ module Irc
             warning "Server thinks client (#{@user.inspect}) has a different nick"
             @user.nick = data[:target]
           end
-          if argv[1] =~ /(\S+)(?:!(\S+?))?@(\S+)/
+          if argv[1] =~ /([^@!\s]+)(?:!([^@!\s]+?))?@(\S+)/
             nick = $1
             user = $2
-            host = $2
+            host = $3
             warning "Welcome message nick mismatch (#{nick} vs #{data[:target]})" if nick != data[:target]
             @user.user = user if user
             @user.host = host if host
