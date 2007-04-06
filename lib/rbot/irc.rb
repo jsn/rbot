@@ -629,12 +629,19 @@ module Irc
       end
     end
 
-    # A Netmask is easily converted to a String for the usual representation
+    # A Netmask is easily converted to a String for the usual representation.
+    # We skip the user or host parts if they are "*", unless we've been asked
+    # for the full form
     #
+    def to_s
+      ret = nick.dup
+      ret << "!" << user unless user == "*"
+      ret << "@" << host unless host == "*"
+      return ret
+    end
     def fullform
       "#{nick}!#{user}@#{host}"
     end
-    alias :to_s :fullform
 
     # Converts the receiver into a Netmask with the given (optional)
     # server/casemap association. We return self unless a conversion
@@ -900,7 +907,7 @@ module Irc
     # Checks if a User is well-known or not by looking at the hostname and user
     #
     def known?
-      return nick!= "*" && user!="*" && host!="*"
+      return nick != "*" && user != "*" && host != "*"
     end
 
     # Is the user away?
@@ -1164,7 +1171,7 @@ module Irc
       #
       def initialize(text="", set_by="", set_on=Time.new)
         @text = text
-        @set_by = set_by.to_irc_user
+        @set_by = set_by.to_irc_netmask
         @set_on = set_on
       end
 

@@ -1001,11 +1001,15 @@ module Irc
         when RPL_TOPIC_INFO
           data[:nick] = @server.user(argv[0])
           data[:channel] = @server.get_channel(argv[1])
-          data[:source] = @server.user(argv[2])
+
+          # This must not be an IRC::User because it might not be an actual User,
+          # and we risk overwriting valid User data
+          data[:source] = argv[2].to_irc_netmask(:server => @server)
+
           data[:time] = Time.at(argv[3].to_i)
 
           if data[:channel]
-            data[:channel].topic.set_by = data[:nick]
+            data[:channel].topic.set_by = data[:source]
             data[:channel].topic.set_on = data[:time]
           else
             warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
