@@ -27,6 +27,24 @@ class ::Array
   end
 end
 
+# Extensions for the Numeric classes
+#
+class ::Numeric
+
+  # This method forces a real number to be not more than a given positive
+  # number or not less than a given positive number, or between two any given
+  # numbers
+  #
+  def clip(left,right=0)
+    raise ArgumentError unless left.kind_of?(Numeric) and right.kind_of?(Numeric)
+    l = [left,right].min
+    u = [left,right].max
+    return l if self < l
+    return u if self > u
+    return self
+  end
+end
+
 # Extensions to the String class
 #
 # TODO make ircify_html() accept an Hash of options, and make riphtml() just
