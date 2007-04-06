@@ -72,8 +72,8 @@ class BabelPlugin < Plugin
       debug "babelfish response: #{l}"
 
       case l
-      when /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div>/
-        answer = $1
+      when /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div><\/td>\s*<\/tr>/m
+        answer = $1.gsub(/\s*[\r\n]+\s*/,' ')
         # cache the answer
         if(answer.length > 0)
           @registry["#{trans_pair}/#{data_text}"] = answer
