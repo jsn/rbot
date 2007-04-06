@@ -69,8 +69,20 @@ class LastFmPlugin < Plugin
           pre_events.each { |day, month, year, url_who, who, url_where, where, how_many|
             date = Time.utc(year.to_i, month.to_i, day.to_i)
             url = LASTFM + url_who
-            artist = who.ircify_html
-            loc = where.ircify_html
+            if who.match(/<strong>(.*?)<\/strong>(.*)?/)
+              artist = Bold + $1.ircify_html + Bold
+              artist << ": " << $2.ircify_html if $2
+            else
+              debug "who: #{who.inspect}"
+              artist = who.ircify_html
+            end
+            if where.match(/<strong>(.*?)<\/strong>(.*)?/)
+              loc = Bold + $1.ircify_html + Bold
+              loc << ", " << $2.ircify_html if $2
+            else
+              debug where.inspect
+              loc = where.ircify_html
+            end
             attendance = how_many.ircify_html
             events << LastFmEvent.new(url, date, artist, loc, attendance)
           }
