@@ -22,6 +22,16 @@ class ::LastFmEvent
     @location = location
     @attendance = attendance
   end
+
+  def compact_display
+    if @attendance.empty?
+      return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @url]
+    else
+      return "%s %s @ %s (%s) %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @attendance, @url]
+    end
+  end
+  alias :to_s :compact_display
+
 end
 
 class LastFmPlugin < Plugin
@@ -31,7 +41,7 @@ class LastFmPlugin < Plugin
   def help(plugin, topic="")
     case topic.intern
     when :event, :events
-      "lastfm events in <location> => show information on events in or near <location> from last.fm"
+      "lastfm events in <location> => show information on events in or near <location>. lastfm events by <artist/group> => show information on events by <artist/group>"
     when :artist, :group
       "lastfm artist <name> => show information on artist/group <name> from last.fm"
     when :song, :track
@@ -44,11 +54,20 @@ class LastFmPlugin < Plugin
   end
 
   def find_event(m, params)
-    location = params[:location].to_s
+    location = artist = nil
+    location = params[:location].to_s if params[:location]
+    artist = params[:who].to_s if params[:who]
     page = nil
+    spec = location ? "in #{location}" : "by #{artist}"
     begin
-      esc = URI.escape(location)
-      page = @bot.httputil.get "#{LASTFM}/events/?findloc=#{esc}"
+      if location
+        esc = URI.escape(location)
+        page = @bot.httputil.get "#{LASTFM}/events/?findloc=#{esc}"
+      else
+        esc = URI.escape(artist)
+        page = @bot.httputil.get "#{LASTFM}/events?s=#{esc}&findloc="
+      end
+
       if page
         events = Array.new
         disp_events = Array.new
@@ -58,7 +77,7 @@ class LastFmPlugin < Plugin
         pre_events = page.scan(/<tr class="vevent\s+\w+\s+\S+?-(\d\d)-(\d\d)-(\d\d\d\d)\s*">.*?<a class="url summary" href="(\/event\/\d+)">(.*?)<\/a>.*?<a href="(\/venue\/\d+)">(.*?)<\/a>.*?<td class="attendance">(.*?)<\/td>\s+<\/tr>/m)
         # debug pre_events.inspect
         if pre_events.empty?
-          m.reply "No events found in #{location}, sorry"
+          m.reply "No events found #{spec}, sorry"
         end
         pre_events.each { |day, month, year, url_who, who, url_where, where, how_many|
           date = Time.utc(year.to_i, month.to_i, day.to_i)
@@ -70,7 +89,7 @@ class LastFmPlugin < Plugin
             debug "who: #{who.inspect}"
             artist = who.ircify_html
           end
-          if where.match(/<strong>(.*?)<\/strong>(.+)?/)
+          if where.match(/<strong>(.*?)<\/strong>(?:<br\s*\/>(.+)?)?/)
             loc = Bold + $1.ircify_html + Bold
             loc << ", " << $2.ircify_html if $2
           else
@@ -83,15 +102,15 @@ class LastFmPlugin < Plugin
         # debug events.inspect
 
         events[0..2].each { |event|
-          disp_events << "%s %s @ %s (%s) %s" % [event.date.strftime("%a %b, %d %Y"), event.artist, event.location, event.attendance, event.url]
+          disp_events << event.to_s
         }
         m.reply disp_events.join(' | ')
       else
-        m.reply "No events found in #{location}"
+        m.reply "No events found #{spec}"
         return
       end
     rescue Exception => e
-      m.reply "I had problems looking for events in #{location}"
+      m.reply "I had problems looking for events #{spec}"
       error e.inspect
       debug e.backtrace.join("\n")
       debug page[0...10*1024] if page
@@ -155,7 +174,8 @@ class LastFmPlugin < Plugin
 end
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm event[s] in :location', :action => :find_event
+plugin.map 'lastfm event[s] in *location', :action => :find_event
+plugin.map 'lastfm event[s] by *who', :action => :find_event
 plugin.map 'lastfm artist *who', :action => :find_artist
 plugin.map 'lastfm group *who', :action => :find_artist
 plugin.map 'lastfm track *dunno', :action => :find_track
