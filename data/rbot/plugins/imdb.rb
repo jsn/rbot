@@ -51,7 +51,6 @@ class Imdb
 
 
     matcher = MATCHER[opts[:type]]
-    debug matcher.inspect
 
     if resp.code == "200"
       m = []
@@ -181,7 +180,7 @@ class Imdb
     return nil
   end
 
-  def info_name(sr)
+  def info_name(sr, opts={})
     resp = nil
     begin
       resp = @bot.httputil.get_response(IMDB + sr, :max_redir => -1)
@@ -199,6 +198,14 @@ class Imdb
       name = m[1]
 
       info << "#{name} : http://us.imdb.com#{sr}"
+
+      if year = opts[:movies_in_year]
+        filmoyear = @bot.httputil.get(IMDB + sr + "filmoyear")
+        if filmoyear
+          info << filmoyear.scan(/#{TITLE_MATCH} \(#{year}\)[^\]]*\[(.*)\](?:$|\s*<)/)
+        end
+        return info
+      end
 
       birth = nil
       data = grab_info("Date of Birth", resp.body)
@@ -260,6 +267,35 @@ class Imdb
     end
     return nil
   end
+
+  def year_movies(urls, year)
+    urls.map { |url|
+      info = info_name(url, :movies_in_year => year)
+
+      name_url = info.first
+      data = info[1]
+
+      movies = []
+      data.each { |url, pre_title, pre_roles|
+        title = fix_article(pre_title.ircify_html)
+        roles = pre_roles.split(/\]\s+\[/).map { |txt|
+          if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
+            "#{$1} (#{$2})"
+          else
+            txt
+          end
+        }.join(', ')
+        movies << [roles, title].join(": ")
+      }
+
+      if movies.empty?
+        [name_url, nil]
+      else
+        [name_url, movies.join(" | ")]
+      end
+    }
+  end
+
 end
 
 class ImdbPlugin < Plugin
@@ -280,10 +316,16 @@ class ImdbPlugin < Plugin
     "imdb <string> => search http://www.imdb.org for <string>: prefix <string> with 'name' or 'title' if you only want to search for people or films respectively, e.g.: imdb name ed wood"
   end
 
+  attr_reader :i
+
+  def initialize
+    super
+    @i = Imdb.new(@bot)
+  end
+
   def imdb(m, params)
     what = params[:what].to_s
     type = params[:type].intern
-    i = Imdb.new(@bot)
     info = i.info(what, :type => type)
     if !info
       m.reply "Nothing found for #{what}"
@@ -292,13 +334,39 @@ class ImdbPlugin < Plugin
     if info.length == 1
       m.reply Utils.decode_html_entities info.first.join("\n")
     else
-      m.reply info.map { |i|
-        Utils.decode_html_entities i.join(" | ")
+      m.reply info.map { |si|
+        Utils.decode_html_entities si.join(" | ")
       }.join("\n")
     end
   end
+
+  def movies(m, params)
+    who = params[:who].to_s
+    year = params[:year]
+
+    name_urls = i.search(who, :type => :name)
+    unless name_urls
+      m.reply "nothing found about #{who}, sorry"
+      return
+    end
+
+    movie_urls = i.year_movies(name_urls, year)
+    debug movie_urls.inspect
+    debug movie_urls[0][1]
+
+    if movie_urls.length == 1 and movie_urls[0][1]
+      m.reply movie_urls.join("\n")
+    else
+      m.reply movie_urls.map { |si|
+        si[1] = "no movies in #{year}" unless si[1]
+        Utils.decode_html_entities si.join(" | ")
+      }.join("\n")
+    end
+  end
+
 end
 
 plugin = ImdbPlugin.new
+plugin.map "movies :prefix *who in :year", :requirements => { :prefix => /with|by|from/, :year => /\d+/ }
 plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :defaults => { :type => 'both' }
 
