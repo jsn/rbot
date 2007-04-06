@@ -137,7 +137,7 @@ class LastFmPlugin < Plugin
           wiki = $1.ircify_html
         end
 
-        m.reply "%s : %s\n%s" % [title, url, wiki]
+        m.reply "%s : %s\n%s" % [title, url, wiki], :overlong => :truncate
       else
         m.reply "no data found on #{artist}"
         return
@@ -176,6 +176,7 @@ end
 plugin = LastFmPlugin.new
 plugin.map 'lastfm event[s] in *location', :action => :find_event
 plugin.map 'lastfm event[s] by *who', :action => :find_event
+plugin.map 'lastfm event[s] [for] *who', :action => :find_event
 plugin.map 'lastfm artist *who', :action => :find_artist
 plugin.map 'lastfm group *who', :action => :find_artist
 plugin.map 'lastfm track *dunno', :action => :find_track
