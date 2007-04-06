@@ -257,7 +257,7 @@ class Bot
       },
       :desc => "String used to replace newlines when send.newlines is set to join")
     BotConfig.register BotConfigIntegerValue.new('send.max_lines',
-      :default => 0,
+      :default => 5,
       :validate => Proc.new { |v| v >= 0 },
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :max_lines => v
