@@ -13,9 +13,14 @@ class BabelPlugin < Plugin
     :desc => "Default language to translate to")
 
   def help(plugin, topic="")
-    from = @bot.config['translate.default_from']
-    to = @bot.config['translate.default_to']
-    "translate to <lang> <string> => translate from #{from} to <lang>, translate from <lang> <string> => translate to #{to} from <lang>, translate <fromlang> <tolang> <string> => translate from <fromlang> to <tolang>. If <string> is an http url, translates the referenced webpage and returns the 1st content paragraph. Languages: #{LANGS.join(', ')}"
+    case topic
+    when 'cache'
+      "translate cache [view|clear] => view or clear the translate cache contents"
+    else
+      from = @bot.config['translate.default_from']
+      to = @bot.config['translate.default_to']
+      "translate to <lang> <string> => translate from #{from} to <lang>, translate from <lang> <string> => translate to #{to} from <lang>, translate <fromlang> <tolang> <string> => translate from <fromlang> to <tolang>. If <string> is an http url, translates the referenced webpage and returns the 1st content paragraph. Languages: #{LANGS.join(', ')}. Other topics: cache"
+    end
   end
 
   def translate(m, params)
@@ -81,10 +86,36 @@ class BabelPlugin < Plugin
       m.reply "babelfish doesn't support translation from #{trans_from} to #{trans_to}"
     end
   end
+
+  def cache_mgmt(m, params)
+    cmd = params[:cmd].intern
+    case cmd
+    when :view
+      cache = []
+      @registry.each { |key, val|
+        cache << "%s => %s" % [key, val]
+      }
+      m.reply "translate cache: #{cache.inspect}"
+    when :clear
+      keys = []
+      @registry.each { |key, val|
+        keys << key
+      }
+      keys.each { |key|
+        @registry.delete(key)
+      }
+      cache_mgmt(m, :cmd => 'view')
+    end
+  end
+
 end
 
 plugin = BabelPlugin.new
+
+plugin.default_auth('cache', false)
+
 plugin.map 'translate to :tolang *phrase'
 plugin.map 'translate from :fromlang *phrase'
+plugin.map 'translate cache :cmd', :action => :cache_mgmt, :auth_path => 'cache!', :requirements => { :cmd => /view|clear/ }
 plugin.map 'translate :fromlang :tolang *phrase'
 
