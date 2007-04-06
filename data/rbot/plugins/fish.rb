@@ -55,41 +55,34 @@ class BabelPlugin < Plugin
     query = "/babelfish/tr"
 
     begin
-      resp = @bot.httputil.get_response('http://babelfish.altavista.com'+query,
-                                        :method => :post,
-                                        :body => data,
-                                        :headers => headers)
+      body = @bot.httputil.get('http://babelfish.altavista.com'+query,
+                               :method => :post,
+                               :body => data,
+                               :headers => headers)
     rescue Exception => e
       m.reply "http error: #{e.message}"
       return
     end
 
-    if (resp.code == "200")
-      lines = Array.new
-      resp.body.each_line { |l| lines.push l }
-
-      l = lines.join(" ")
-      debug "babelfish response: #{l}"
-
-      case l
-      when /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div><\/td>\s*<\/tr>/m
-        answer = $1.gsub(/\s*[\r\n]+\s*/,' ')
-        # cache the answer
-        if(answer.length > 0)
-          @registry["#{trans_pair}/#{data_text}"] = answer
-        end
-        m.reply answer
-        return
-      when /^\s+<option value="#{trans_pair}"\s+SELECTED>/
-        m.reply "couldn't parse babelfish response html :("
-      else
-        m.reply "babelfish doesn't support translation from #{trans_from} to #{trans_to}"
-      end
-    else
+    case body
+    when nil
       m.reply "couldn't talk to babelfish :("
+    when /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div><\/td>\s*<\/tr>/m
+      answer = $1.gsub(/\s*[\r\n]+\s*/,' ')
+      # cache the answer
+      if(answer.length > 0)
+        @registry["#{trans_pair}/#{data_text}"] = answer
+      end
+      m.reply answer
+      return
+    when /^\s+<option value="#{trans_pair}"\s+SELECTED>/
+      m.reply "couldn't parse babelfish response html :("
+    else
+      m.reply "babelfish doesn't support translation from #{trans_from} to #{trans_to}"
     end
   end
 end
+
 plugin = BabelPlugin.new
 plugin.map 'translate to :tolang *phrase'
 plugin.map 'translate from :fromlang *phrase'
