@@ -20,17 +20,25 @@ class Imdb
   NAME_MATCH = /<a href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   FINAL_ARTICLE_MATCH = /, ([A-Z]\S{0,2})$/
 
+  MATCHER = {
+    :title => TITLE_MATCH,
+    :name => NAME_MATCH,
+    :both => TITLE_OR_NAME_MATCH
+  }
+
   def initialize(bot)
     @bot = bot
   end
 
-  def search(rawstr)
+  def search(rawstr, rawopts={})
     str = URI.escape(rawstr)
     str << ";site=aka" if @bot.config['imdb.aka']
-    return do_search(str)
+    opts = rawopts.dup
+    opts[:type] = :both unless opts[:type]
+    return do_search(str, opts)
   end
 
-  def do_search(str)
+  def do_search(str, opts={})
     resp = nil
     begin
       resp = @bot.httputil.get_response(IMDB + "/find?q=#{str}",
@@ -41,11 +49,15 @@ class Imdb
       return nil
     end
 
+
+    matcher = MATCHER[opts[:type]]
+    debug matcher.inspect
+
     if resp.code == "200"
       m = []
-      m << TITLE_OR_NAME_MATCH.match(resp.body) if @bot.config['imdb.popular']
+      m << matcher.match(resp.body) if @bot.config['imdb.popular']
       if resp.body.match(/\(Exact Matches\)<\/b>/) and @bot.config['imdb.exact']
-        m << TITLE_OR_NAME_MATCH.match($')
+        m << matcher.match($')
       end
       m.compact!
       unless m.empty?
@@ -57,7 +69,7 @@ class Imdb
       debug "automatic redirection"
       new_loc = resp['location'].gsub(IMDB, "")
       if new_loc.match(/\/find\?q=(.*)/)
-        return do_search($1)
+        return do_search($1, opts)
       else
         return [new_loc.gsub(/\?.*/, "")]
       end
@@ -65,8 +77,9 @@ class Imdb
     return nil
   end
 
-  def info(rawstr)
-    urls = search(rawstr)
+  def info(rawstr, opts={})
+    debug opts.inspect
+    urls = search(rawstr, opts)
     debug urls
     if urls.nil_or_empty?
       debug "IMDB: search returned NIL"
@@ -260,13 +273,14 @@ class ImdbPlugin < Plugin
     :desc => "Try to detect an article placed at the end and move it in front of the title")
 
   def help(plugin, topic="")
-    "imdb <string> => search http://www.imdb.org for <string>"
+    "imdb <string> => search http://www.imdb.org for <string>: prefix <string> with 'name' or 'title' if you only want to search for people or films respectively, e.g.: imdb name ed wood"
   end
 
   def imdb(m, params)
     what = params[:what].to_s
+    type = params[:type].intern
     i = Imdb.new(@bot)
-    info = i.info(what)
+    info = i.info(what, :type => type)
     if !info
       m.reply "Nothing found for #{what}"
       return nil
@@ -282,5 +296,5 @@ class ImdbPlugin < Plugin
 end
 
 plugin = ImdbPlugin.new
-plugin.map "imdb *what"
+plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :defaults => { :type => 'both' }
 
