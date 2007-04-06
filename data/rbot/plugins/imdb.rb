@@ -106,10 +106,14 @@ class Imdb
 
   def fix_article(org_tit)
     title = org_tit.dup
+    debug title.inspect
+    if title.match(/^"(.*)"$/)
+      return "\"#{fix_article($1)}\""
+    end
     if @bot.config['imdb.fix_article'] and title.gsub!(FINAL_ARTICLE_MATCH, '')
       art = $1.dup
       debug art.inspect
-      if art[-1,1].match(/[a-z]/)
+      if art[-1,1].match(/[A-Za-z]/)
         art << " "
       end
       return art + title
@@ -135,7 +139,7 @@ class Imdb
       title_date = m[1]
       pre_title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:\/[IV]+)?)\)\s*(.+)?$/).first
       pre_title.strip!
-      title = fix_article(pre_title)
+      title = fix_article(pre_title.ircify_html)
 
       dir = nil
       data = grab_info(/Directors?/, resp.body)
@@ -223,7 +227,7 @@ class Imdb
           what = str.match(/<a name="[^"]+">([^<]+)<\/a>/)[1] rescue nil
           next unless what
           movies[what] = str.scan(TITLE_MATCH)[0..2].map { |url, tit|
-            fix_article(tit)
+            fix_article(tit.ircify_html)
           }
         }
       end
