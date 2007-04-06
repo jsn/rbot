@@ -372,7 +372,7 @@ module ::Irc
           return p.readlines.join("\n")
         else
           begin
-            $stderr = $stdout
+            $stderr.reopen($stdout)
             exec(command, *args)
           rescue Exception => e
             puts "exec of #{command} led to exception: #{e.inspect}"
