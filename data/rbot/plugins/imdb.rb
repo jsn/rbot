@@ -202,7 +202,7 @@ class Imdb
       if year = opts[:movies_in_year]
         filmoyear = @bot.httputil.get(IMDB + sr + "filmoyear")
         if filmoyear
-          info << filmoyear.scan(/#{TITLE_MATCH} \(#{year}\)[^\[\n]*\[(.*)\]([^<]+)?(?:$|\s*<)/)
+          info << filmoyear.scan(/#{TITLE_MATCH} \(#{year}\)[^\[\n]*((?:\s+\[[^\]]+\](?:\s+\([^\[<]+\))*)+)\s+</)
         end
         return info
       end
@@ -279,24 +279,22 @@ class Imdb
 
       movies = []
       # Sort by pre-title putting movies before TV series
-      debug data.map { |a| a[1] }.join("\n")
-      data.sort! { |a, b|
+      data.sort { |a, b|
         aclip = a[1][0,5]
         bclip = b[1][0,5]
         quot = '&#34;'
         (aclip == quot ? 1 : -1) <=> (bclip == quot ? 1 : -1)
-      }
-      debug data.map { |a| a[1] }.join("\n")
-      data.each { |url, pre_title, pre_roles, extra|
+      }.each { |url, pre_title, pre_roles|
         title = fix_article(pre_title.ircify_html)
-        role_array = pre_roles.split(/\]\s+\[/).map { |txt|
+        role_array = []
+        pre_roles.strip.scan(/\[([^\]]+)\]((?:\s+\([^\[]+\))+)?/) { |txt, comm|
           if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
-            "#{$1} (#{$2})"
+            role_array << "#{$1} (#{$2})"
           else
-            txt
+            role_array << txt
           end
+          role_array.last << " " + comm.ircify_html if comm
         }
-        role_array.last << " " + extra.ircify_html if extra
 
         roles = role_array.join(', ')
         movies << [roles, title].join(": ")
