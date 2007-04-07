@@ -7,6 +7,9 @@ class RoulettePlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('roulette.kick',
     :default => false, 
     :desc => "Kicks shot players from the channel")
+  BotConfig.register BotConfigBooleanValue.new('roulette.twice_in_a_row',
+    :default => false, 
+    :desc => "Allow players to go twice in a row")
 
   def initialize
     super
@@ -43,13 +46,18 @@ class RoulettePlugin < Plugin
       totals = RouletteHistory.new(0,0,0,0,0)
     end
 
+    if @players.last == m.sourcenick and not @bot.config['roulette.twice_in_a_row']
+      m.reply "you can't go twice in a row!"
+      return
+    end
+
     unless @players.include?(m.sourcenick)
       @players << m.sourcenick
       playerdata.games += 1
     end
     playerdata.shots += 1
     totals.shots += 1
-    
+
     shot = @chambers.pop
     if shot
       m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => *BANG*"
@@ -73,7 +81,7 @@ class RoulettePlugin < Plugin
 
     @registry["player " + m.sourcenick] = playerdata
     @registry["totals"] = totals
-    
+
     if shot || @chambers.empty?
       reload(m)
     elsif @chambers.length == 1 and @bot.config['roulette.autospin']
