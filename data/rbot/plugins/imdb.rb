@@ -120,7 +120,7 @@ class Imdb
     return title
   end
 
-  def info_title(sr)
+  def info_title(sr, opts={})
     resp = nil
     begin
       resp = @bot.httputil.get_response(IMDB + sr, :max_redir => -1)
@@ -144,7 +144,7 @@ class Imdb
       data = grab_info(/Directors?/, resp.body)
       if data
         dir = data.scan(NAME_MATCH).map { |url, name|
-          name
+          name.ircify_html
         }.join(', ')
       end
 
@@ -155,6 +155,8 @@ class Imdb
       end
 
       info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
+
+      return info if opts[:title_only]
 
       ratings = "no votes"
       m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
@@ -198,6 +200,8 @@ class Imdb
       name = m[1]
 
       info << "#{name} : http://us.imdb.com#{sr}"
+
+      return info if opts[:name_only]
 
       if year = opts[:movies_in_year]
         filmoyear = @bot.httputil.get(IMDB + sr + "filmoyear")
@@ -311,6 +315,24 @@ class Imdb
     }
   end
 
+  def name_in_movie(name_urls, movie_urls)
+    info = []
+    movie_urls.each { |movie|
+      title_info = info_title(movie, :title_only => true)
+      valid = []
+
+      data = @bot.httputil.get(IMDB + movie + "fullcredits")
+      data.scan(/#{NAME_MATCH}<\/td><td[^>]+> \.\.\. <\/td><td[^>]+>(.+?)<\/td>/).each { |url, name, role|
+        valid << [url, name.ircify_html, role.ircify_html] if name_urls.include?(url)
+      }
+      valid.each { |url, name, role|
+        info << "%s : %s was %s in %s" % [name, IMDB + url, role, title_info]
+      }
+    }
+    return info
+  end
+
+
 end
 
 class ImdbPlugin < Plugin
@@ -382,9 +404,32 @@ class ImdbPlugin < Plugin
     end
   end
 
+  def character(m, params)
+    who = params[:who].to_s
+    movie = params[:movie].to_s
+
+    name_urls = i.search(who, :type => :name)
+    unless name_urls
+      m.reply "nothing found about #{who}, sorry"
+      return
+    end
+
+    movie_urls = i.search(movie, :type => :title)
+    unless movie_urls
+      m.reply "nothing found about #{hwo}, sorry"
+      return
+    end
+
+    info = i.name_in_movie(name_urls, movie_urls)
+    m.reply info.join("\n")
+  end
+
 end
 
 plugin = ImdbPlugin.new
-plugin.map "movies :prefix *who in :year", :requirements => { :prefix => /with|by|from/, :year => /\d+/ }
+
 plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :defaults => { :type => 'both' }
+plugin.map "movies :prefix *who in :year", :requirements => { :prefix => /with|by|from/, :year => /\d+/ }
+plugin.map "character [played] by *who in *movie"
+plugin.map "character of *who in *movie"
 
