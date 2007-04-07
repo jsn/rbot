@@ -18,8 +18,6 @@
 #
 # TODO: cache results and reuse them if get_cached returns a cache copy
 
-require 'uri'
-
 DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/anchor>/
 
 class DictPlugin < Plugin

@@ -1,7 +1,3 @@
-require 'net/http'
-require 'uri'
-Net::HTTP.version_1_2
-
 class WserverPlugin < Plugin
   def help(plugin, topic="")
     "wserver <uri> => try and determine what webserver <uri> is using"

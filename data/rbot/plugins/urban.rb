@@ -1,5 +1,3 @@
-require 'uri'
-
 class UrbanPlugin < Plugin
 
   def help( plugin, topic="")

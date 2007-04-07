@@ -1,7 +1,3 @@
-require 'net/http'
-require 'uri/common'
-Net::HTTP.version_1_2
-
 class BabelPlugin < Plugin
   LANGS = %w{en fr de it pt es nl ru zh zt el ja ko}
 

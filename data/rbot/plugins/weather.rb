@@ -11,7 +11,6 @@
 #
 # License:: GPL v2
 
-require 'uri'
 require 'rexml/document'
 
 # Wraps NOAA National Weather Service information

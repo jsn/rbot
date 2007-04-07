@@ -13,10 +13,6 @@
 # TODO:: use lr=lang_<code> or whatever is most appropriate to let google know
 #        it shouldn't use the bot's location to find the preferred language
 
-require 'uri'
-
-Net::HTTP.version_1_2
-
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif></td><td>&nbsp;</td><td nowrap><font size=\+1><b>(.+)</b></td></tr><tr><td>}
 

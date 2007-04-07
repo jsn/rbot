@@ -1,5 +1,3 @@
-require 'uri'
-
 Url = Struct.new("Url", :channel, :nick, :time, :url)
 TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
 LINK_INFO = "[Link Info]"
