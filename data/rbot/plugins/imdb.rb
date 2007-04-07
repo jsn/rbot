@@ -286,6 +286,9 @@ class Imdb
         (aclip == quot ? 1 : -1) <=> (bclip == quot ? 1 : -1)
       }.each { |url, pre_title, pre_roles|
         title = fix_article(pre_title.ircify_html)
+        if title[0] == ?" and not @bot.config['imdb.tv_series_in_movies']
+          next
+        end
         role_array = []
         pre_roles.strip.scan(/\[([^\]]+)\]((?:\s+\([^\[]+\))+)?/) { |txt, comm|
           if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
@@ -323,6 +326,9 @@ class ImdbPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('imdb.fix_article',
     :default => false,
     :desc => "Try to detect an article placed at the end and move it in front of the title")
+  BotConfig.register BotConfigBooleanValue.new('imdb.tv_series_in_movies',
+    :default => false,
+    :desc => "Whether searching movies by person/year should also return TV series")
 
   def help(plugin, topic="")
     "imdb <string> => search http://www.imdb.org for <string>: prefix <string> with 'name' or 'title' if you only want to search for people or films respectively, e.g.: imdb name ed wood"
