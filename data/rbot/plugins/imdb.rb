@@ -18,6 +18,7 @@ class Imdb
   TITLE_OR_NAME_MATCH = /<a href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   TITLE_MATCH = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   NAME_MATCH = /<a href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  CREDIT_NAME_MATCH = /#{NAME_MATCH}<\/td><td[^>]+> \.\.\. <\/td><td[^>]+>(.+?)<\/td>/
   FINAL_ARTICLE_MATCH = /, ([A-Z]\S{0,2})$/
 
   MATCHER = {
@@ -89,9 +90,9 @@ class Imdb
       type = sr.match(/^\/([^\/]+)\//)[1].downcase.intern rescue nil
       case type
       when :title
-        results << info_title(sr)
+        results << info_title(sr, opts)
       when :name
-        results << info_name(sr)
+        results << info_name(sr, opts)
       else
         results << "#{sr}"
       end
@@ -157,6 +158,13 @@ class Imdb
       info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
 
       return info if opts[:title_only]
+
+      if opts[:characters]
+        info << resp.body.scan(CREDIT_NAME_MATCH).map { |url, name, role|
+          "%s: %s" % [name, role]
+        }.join('; ')
+        return info
+      end
 
       ratings = "no votes"
       m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
@@ -322,7 +330,7 @@ class Imdb
       valid = []
 
       data = @bot.httputil.get(IMDB + movie + "fullcredits")
-      data.scan(/#{NAME_MATCH}<\/td><td[^>]+> \.\.\. <\/td><td[^>]+>(.+?)<\/td>/).each { |url, name, role|
+      data.scan(CREDIT_NAME_MATCH).each { |url, name, role|
         valid << [url, name.ircify_html, role.ircify_html] if name_urls.include?(url)
       }
       valid.each { |url, name, role|
@@ -363,13 +371,21 @@ class ImdbPlugin < Plugin
     @i = Imdb.new(@bot)
   end
 
+  # Find a person or movie on IMDB. A :type (name/title, default both) can be
+  # specified to limit the search to either.
+  #
   def imdb(m, params)
-    what = params[:what].to_s
-    type = params[:type].intern
-    info = i.info(what, :type => type)
-    if !info
-      m.reply "Nothing found for #{what}"
-      return nil
+    if params[:movie]
+      movie = params[:movie].to_s
+      info = i.info(movie, :type => :title, :characters => true)
+    else
+      what = params[:what].to_s
+      type = params[:type].intern
+      info = i.info(what, :type => type)
+      if !info
+        m.reply "nothing found for #{what}"
+        return nil
+      end
     end
     if info.length == 1
       m.reply Utils.decode_html_entities info.first.join("\n")
@@ -380,6 +396,9 @@ class ImdbPlugin < Plugin
     end
   end
 
+  # Find the movies with a participation of :who in the year :year
+  # TODO: allow year to be either a year or a decade ('[in the] 1960s') 
+  #
   def movies(m, params)
     who = params[:who].to_s
     year = params[:year]
@@ -404,6 +423,8 @@ class ImdbPlugin < Plugin
     end
   end
 
+  # Find the character played by :who in :movie
+  #
   def character(m, params)
     who = params[:who].to_s
     movie = params[:movie].to_s
@@ -428,6 +449,18 @@ class ImdbPlugin < Plugin
     end
   end
 
+  # Report the characters in movie :movie
+  #
+  def characters(m, params)
+    movie = params[:movie].to_s
+
+    urls = i.search(movie, :type => :title)
+    unless urls
+      m.reply "nothing found about #{movie}"
+    end
+
+  end
+
 end
 
 plugin = ImdbPlugin.new
@@ -436,4 +469,5 @@ plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :de
 plugin.map "movies :prefix *who in :year", :requirements => { :prefix => /with|by|from/, :year => /\d+/ }
 plugin.map "character [played] by *who in *movie"
 plugin.map "character of *who in *movie"
+plugin.map "characters in *movie", :action => :imdb
 
