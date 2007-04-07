@@ -416,12 +416,16 @@ class ImdbPlugin < Plugin
 
     movie_urls = i.search(movie, :type => :title)
     unless movie_urls
-      m.reply "nothing found about #{hwo}, sorry"
+      m.reply "nothing found about #{who}, sorry"
       return
     end
 
     info = i.name_in_movie(name_urls, movie_urls)
-    m.reply info.join("\n")
+    if info.empty?
+      m.reply "nothing found about #{who} in #{movie}, sorry"
+    else
+      m.reply info.join("\n")
+    end
   end
 
 end
