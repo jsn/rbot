@@ -58,6 +58,7 @@ class RiPlugin < Plugin
     end
     if tgt
       @bot.say(tgt, ret)
+      m.okay
     else
       m.reply(ret)
     end
