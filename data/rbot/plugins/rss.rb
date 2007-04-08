@@ -20,6 +20,16 @@ require 'rss'
 # the DublinCore code.
 module ::RSS
 
+  # Make an  'unique' ID for a given item, based on appropriate bot options
+  # Currently only suppored is bot.config['rss.show_updated']: when true, the
+  # description is included in the uid hashing, otherwise it's not
+  #
+  def RSS.item_uid_for_bot(item, opts={})
+    options = { :show_updated => true}.merge(opts)
+    desc = options[:show_updated] ? item.description : nil
+    [item.title, item.link, desc].hash
+  end
+
   unless defined?(SLASH_PREFIX)
     SLASH_PREFIX = 'slash'
     SLASH_URI = "http://purl.org/rss/1.0/modules/slash/"
@@ -230,6 +240,10 @@ class RSSFeedsPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('rss.thread_sleep',
     :default => 300, :validate => Proc.new{|v| v > 30},
     :desc => "How many seconds to sleep before checking RSS feeds again")
+
+  BotConfig.register BotConfigBooleanValue.new('rss.show_updated',
+    :default => true,
+    :desc => "Whether feed items for which the description was changed should be shown as new")
 
   # We used to save the Mutex with the RssBlob, which was idiotic. And
   # since Mutexes dumped in one version might not be resotrable in another,
@@ -663,16 +677,40 @@ class RSSFeedsPlugin < Plugin
               parseRss(feed)
               failures -= 1 if failures > 0
             else
-              otxt = feed.items.map { |item| item.to_s }
+              # This one is used for debugging
+              otxt = []
+
+              # These are used for checking new items vs old ones
+              uid_opts = { :show_updated => @bot.config['rss.show_updated'] }
+              oids = Set.new feed.items.map { |item|
+                uid = RSS.item_uid_for_bot(item, uid_opts)
+                otxt << item.to_s
+                debug [uid, otxt.last].inspect
+                uid
+              }
+
               unless parseRss(feed)
                 debug "no items in feed #{feed}"
                 failures += 1
               else
                 debug "Checking if new items are available for #{feed}"
                 failures -= 1 if failures > 0
+
                 dispItems = feed.items.reject { |item|
-                  otxt.include?(item.to_s)
+                  uid = RSS.item_uid_for_bot(item, uid_opts)
+                  txt = item.to_s
+                  if oids.include?(uid)
+                    debug "rejecting old #{uid} #{item.inspect}"
+                    debug [uid, txt].inspect
+                    true
+                  else
+                    debug "accepting new #{uid} #{item.inspect}"
+                    debug [uid, txt].inspect
+                    warn "same text! #{txt}" if otxt.include?(txt)
+                    false
+                  end
                 }
+
                 if dispItems.length > 0
                   debug "Found #{dispItems.length} new items in #{feed}"
                   # When displaying watched feeds, publish them from older to newer
@@ -733,7 +771,7 @@ class RSSFeedsPlugin < Plugin
 
     title = "#{Bold}#{item.title.ircify_html}#{Bold}" if item.title
 
-    desc = item.description.ircify_html if item.description
+    desc = item.description.ircify_html(:a_href => :link_out) if item.description
 
     link = item.link.chomp if item.link
 
