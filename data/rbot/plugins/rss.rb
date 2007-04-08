@@ -668,7 +668,10 @@ class RSSFeedsPlugin < Plugin
         unless fetchRss(feed)
           failures += 1
         else
-          if first_run or (oldxml and oldxml == feed.xml)
+          if first_run
+            debug "first run for #{feed}, getting items"
+            parseRss(feed)
+          elsif oldxml and oldxml == feed.xml
             debug "xml for #{feed} didn't change"
             failures -= 1 if failures > 0
           else
