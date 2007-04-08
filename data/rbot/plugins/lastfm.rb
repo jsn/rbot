@@ -70,10 +70,10 @@ class LastFmPlugin < Plugin
     spec = location ? "in #{location}" : "by #{artist}"
     begin
       if location
-        esc = URI.escape(location)
+        esc = CGI.escape(location)
         page = @bot.httputil.get "#{LASTFM}/events/?findloc=#{esc}"
       else
-        esc = URI.escape(artist)
+        esc = CGI.escape(artist)
         page = @bot.httputil.get "#{LASTFM}/events?s=#{esc}&findloc="
       end
 
@@ -131,7 +131,7 @@ class LastFmPlugin < Plugin
     artist = params[:who].to_s
     page = nil
     begin
-      esc = URI.escape(artist)
+      esc = URI.escape(CGI.escape(artist))
       page = @bot.httputil.get "#{LASTFM}/music/#{esc}"
       if page
         if page.match(/<h1 class="h1artist"><a href="([^"]+)">(.*?)<\/a><\/h1>/)

@@ -17,7 +17,6 @@
 # TODO allow selection of only quotes with vote > 0
 
 require 'rexml/document'
-require 'uri/common'
 
 class ::BashQuote
   attr_accessor :num, :text, :vote
@@ -56,7 +55,7 @@ class BashPlugin < Plugin
   end
 
   def search(m, params)
-    esc = URI.escape(params[:words].to_s)
+    esc = CGI.escape(params[:words].to_s)
     html = @bot.httputil.get("http://bash.org/?search=#{esc}")
     html_bash(m, :html => html)
   end

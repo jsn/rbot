@@ -446,7 +446,7 @@ class AzGamePlugin < Plugin
     wc = @wordcache[:english]
     return true if wc.key?(word.to_sym)
     rules = @rules[:english]
-    p = @bot.httputil.get(rules[:url] % URI.escape(word))
+    p = @bot.httputil.get(rules[:url] % CGI.escape(word))
     if not p
       error "could not connect!"
       return false
@@ -497,7 +497,7 @@ class AzGamePlugin < Plugin
         ll = ('a'..'z').to_a[rand(26)]
         random = [l,ll].join('*') + '*'
         debug "getting random word from dictionary, matching #{random}"
-        p = @bot.httputil.get(rules[:url] % URI.escape(random))
+        p = @bot.httputil.get(rules[:url] % CGI.escape(random))
         debug p
         lemmi = Array.new
         good = rules[:good]

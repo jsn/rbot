@@ -54,7 +54,7 @@ class DictPlugin < Plugin
     justcheck = params[:justcheck]
 
     word = params[:word].downcase
-    url = @dmwapurl % URI.escape(word)
+    url = @dmwapurl % CGI.escape(word)
     xml = nil
     info = @bot.httputil.get_response(url) rescue nil
     xml = info.body if info
@@ -106,7 +106,7 @@ class DictPlugin < Plugin
 
     word = params[:word].join
     [word, word + "_1"].each { |check|
-      url = @oxurl % URI.escape(check)
+      url = @oxurl % CGI.escape(check)
       h = @bot.httputil.head(url, :max_redir => 5)
       if h
         m.reply("#{word} found: #{url}") unless justcheck
@@ -126,7 +126,7 @@ class DictPlugin < Plugin
     justcheck = params[:justcheck]
 
     word = params[:word].to_s.downcase
-    url = @chambersurl % URI.escape(word)
+    url = @chambersurl % CGI.escape(word)
     xml = nil
     info = @bot.httputil.get_response(url) rescue nil
     xml = info.body if info

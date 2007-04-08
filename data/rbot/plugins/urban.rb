@@ -16,7 +16,7 @@ class UrbanPlugin < Plugin
       end
     end
     # we give a very high 'skip' because this will allow us to get the number of definitions by retrieving the previous definition
-    uri = "http://www.urbanwap.com/search.php?term=#{URI.escape words}&skip=65536"
+    uri = "http://www.urbanwap.com/search.php?term=#{CGI.escape words}&skip=65536"
     page = @bot.httputil.get(uri)
     if page.nil?
       m.reply "Couldn't retrieve an urban dictionary definition of #{words}"
@@ -37,7 +37,7 @@ class UrbanPlugin < Plugin
       n = numdefs
     end
     if n < numdefs
-      uri = "http://www.urbanwap.com/search.php?term=#{URI.escape words}&skip=#{n-1}"
+      uri = "http://www.urbanwap.com/search.php?term=#{CGI.escape words}&skip=#{n-1}"
       page = @bot.httputil.get(uri)
       if page.nil?
         case n % 10

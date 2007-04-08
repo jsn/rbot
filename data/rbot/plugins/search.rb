@@ -45,7 +45,7 @@ class SearchPlugin < Plugin
 
   def google(m, params)
     what = params[:words].to_s
-    searchfor = URI.escape what
+    searchfor = CGI.escape what
     # This method is also called by other methods to restrict searching to some sites
     if params[:site]
       site = "site:#{params[:site]}+"
@@ -93,7 +93,7 @@ class SearchPlugin < Plugin
 
   def gcalc(m, params)
     what = params[:words].to_s
-    searchfor = URI.escape(what).sub('+','%2B')
+    searchfor = CGI.escape(what)
     
     debug "Getting gcalc thing: #{searchfor.inspect}"
     url = "http://www.google.com/search?q=#{searchfor}"

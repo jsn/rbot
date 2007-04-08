@@ -32,7 +32,7 @@ class Imdb
   end
 
   def search(rawstr, rawopts={})
-    str = URI.escape(rawstr)
+    str = CGI.escape(rawstr)
     str << ";site=aka" if @bot.config['imdb.aka']
     opts = rawopts.dup
     opts[:type] = :both unless opts[:type]

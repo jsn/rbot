@@ -31,7 +31,7 @@ class BabelPlugin < Plugin
       return
     end
 
-    data_text = URI.escape trans_text
+    data_text = CGI.escape trans_text
     trans_pair = "#{trans_from}_#{trans_to}"
 
     if (trans_text =~ /^http:\/\//) && (URI.parse(trans_text) rescue nil)

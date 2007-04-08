@@ -164,7 +164,7 @@ class WeatherPlugin < Plugin
 
   def wu_station(m, where, units)
     begin
-      xml = @bot.httputil.get(@wu_station_url % [units, URI.escape(where)])
+      xml = @bot.httputil.get(@wu_station_url % [units, CGI.escape(where)])
       case xml
       when nil
         m.reply "couldn't retrieve weather information, sorry"
@@ -186,7 +186,7 @@ class WeatherPlugin < Plugin
 
   def wu_weather(m, where, units)
     begin
-      xml = @bot.httputil.get(@wu_url % [units, URI.escape(where)])
+      xml = @bot.httputil.get(@wu_url % [units, CGI.escape(where)])
       case xml
       when nil
         m.reply "couldn't retrieve weather information, sorry"

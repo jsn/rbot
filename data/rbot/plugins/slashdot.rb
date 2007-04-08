@@ -1,5 +1,4 @@
 require 'rexml/document'
-require 'uri/common'
 
 class SlashdotPlugin < Plugin
   include REXML
@@ -8,15 +7,10 @@ class SlashdotPlugin < Plugin
   end
   
   def search_slashdot(m, params)
-   max = params[:limit].to_i
-   search = params[:search].to_s
+    max = params[:limit].to_i
+    search = params[:search].to_s
 
-    begin
-      xml = @bot.httputil.get("http://slashdot.org/search.pl?content_type=rss&query=#{URI.escape(search)}")
-    rescue URI::InvalidURIError, URI::BadURIError => e
-      m.reply "illegal search string #{search}"
-      return
-    end
+    xml = @bot.httputil.get("http://slashdot.org/search.pl?content_type=rss&query=#{CGI.escape(search)}")
     unless xml
       m.reply "search for #{search} failed"
       return
@@ -39,7 +33,7 @@ class SlashdotPlugin < Plugin
     doc.elements.each("*/item") {|e|
       desc = e.elements["title"].text
       desc.gsub!(/(.{150}).*/, '\1..')
-      reply = sprintf("%s | %s", e.elements["link"].text, desc)
+      reply = sprintf("%s | %s", e.elements["link"].text, desc.ircify_html)
       m.reply reply
       done += 1
       break if done >= max

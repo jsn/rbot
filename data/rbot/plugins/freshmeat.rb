@@ -1,5 +1,4 @@
 require 'rexml/document'
-require 'uri/common'
 
 class FreshmeatPlugin < Plugin
   include REXML
@@ -11,12 +10,7 @@ class FreshmeatPlugin < Plugin
     max = params[:limit].to_i
     search = params[:search].to_s
     max = 8 if max > 8
-    begin
-      xml = @bot.httputil.get("http://freshmeat.net/search-xml/?orderby=locate_projectname_full_DESC&q=#{URI.escape(search)}")
-    rescue URI::InvalidURIError, URI::BadURIError => e
-      m.reply "illegal search string #{search}"
-      return
-    end
+    xml = @bot.httputil.get("http://freshmeat.net/search-xml/?orderby=locate_projectname_full_DESC&q=#{CGI.escape(search)}")
     unless xml
       m.reply "search for #{search} failed"
       return
