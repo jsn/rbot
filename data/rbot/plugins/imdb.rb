@@ -329,7 +329,7 @@ class Imdb
           else
             role = txt
           end
-          next if role_req and role.downcase != role_req.downcase
+          next if role_req and not role.match(/^#{role_req}/i)
           if comm
             extra ||= ""
             extra += comm.ircify_html if comm
@@ -437,15 +437,16 @@ class ImdbPlugin < Plugin
     who = params[:who].to_s
     years = params[:years]
     role = params[:role]
-    if not role
+    if role and role.downcase == 'anything'
+      role = nil
+    elsif not role
       case params[:prefix].intern
       when :with
-        role = /actor|actress/
+        role = /actor|actress/i
       when :by
-        role = /director/
+        role = 'director'
       end
     end
-    role = nil if role.downcase = 'anything'
 
     name_urls = i.search(who, :type => :name)
     unless name_urls
