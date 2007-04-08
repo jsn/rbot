@@ -211,10 +211,10 @@ class Imdb
 
       return info if opts[:name_only]
 
-      if year = opts[:movies_in_year]
+      if opts[:movies_by_year]
         filmoyear = @bot.httputil.get(IMDB + sr + "filmoyear")
         if filmoyear
-          info << filmoyear.scan(/#{TITLE_MATCH} \(#{year}\)[^\[\n]*((?:\s+\[[^\]]+\](?:\s+\([^\[<]+\))*)+)\s+</)
+          info << filmoyear.scan(/#{TITLE_MATCH} \((\d\d\d\d)\)[^\[\n]*((?:\s+\[[^\]]+\](?:\s+\([^\[<]+\))*)+)\s+</)
         end
         return info
       end
@@ -280,9 +280,25 @@ class Imdb
     return nil
   end
 
-  def year_movies(urls, year)
+  def year_movies(urls, years_txt_org)
+    years_txt = years_txt_org.dup
+    years_txt.sub!(/^'/,'')
+    years_txt = "9#{years_txt}" if years_txt.match(/^\d\ds?$/)
+    years_txt = "1#{years_txt}" if years_txt.match(/^\d\d\ds?$/)
+
+    years = []
+    case years_txt
+    when /^\d\d\d\d$/
+      years << years_txt
+    when /^(\d\d\d\d)s$/
+      base = $1.to_i
+      base.upto(base+9) { |year|
+        years << year.to_s
+      }
+    end
+
     urls.map { |url|
-      info = info_name(url, :movies_in_year => year)
+      info = info_name(url, :movies_by_year => true)
 
       debug info.inspect
 
@@ -296,11 +312,13 @@ class Imdb
         bclip = b[1][0,5]
         quot = '&#34;'
         (aclip == quot ? 1 : -1) <=> (bclip == quot ? 1 : -1)
-      }.each { |url, pre_title, pre_roles|
+      }.each { |url, pre_title, year, pre_roles|
+        next unless years.include?(year)
         title = fix_article(pre_title.ircify_html)
         if title[0] == ?" and not @bot.config['imdb.tv_series_in_movies']
           next
         end
+        title << " (#{year})" unless years.length == 1
         role_array = []
         pre_roles.strip.scan(/\[([^\]]+)\]((?:\s+\([^\[]+\))+)?/) { |txt, comm|
           if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
@@ -401,7 +419,7 @@ class ImdbPlugin < Plugin
   #
   def movies(m, params)
     who = params[:who].to_s
-    year = params[:year]
+    years = params[:years]
 
     name_urls = i.search(who, :type => :name)
     unless name_urls
@@ -409,7 +427,7 @@ class ImdbPlugin < Plugin
       return
     end
 
-    movie_urls = i.year_movies(name_urls, year)
+    movie_urls = i.year_movies(name_urls, years)
     debug movie_urls.inspect
     debug movie_urls[0][1]
 
@@ -417,7 +435,7 @@ class ImdbPlugin < Plugin
       m.reply movie_urls.join("\n")
     else
       m.reply movie_urls.map { |si|
-        si[1] = "no movies in #{year}" unless si[1]
+        si[1] = "no movies in #{years}" unless si[1]
         Utils.decode_html_entities si.join(" | ")
       }.join("\n")
     end
@@ -466,7 +484,7 @@ end
 plugin = ImdbPlugin.new
 
 plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :defaults => { :type => 'both' }
-plugin.map "movies :prefix *who in :year", :requirements => { :prefix => /with|by|from/, :year => /\d+/ }
+plugin.map "movies :prefix *who in [the] :years", :requirements => { :prefix => /with|by|from/, :years => /'?\d+s?/ }
 plugin.map "character [played] by *who in *movie"
 plugin.map "character of *who in *movie"
 plugin.map "characters in *movie", :action => :imdb
