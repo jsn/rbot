@@ -21,6 +21,10 @@ rescue LoadError => e
   error "Secured HTTP connections will fail"
 end
 
+# To handle Gzipped pages
+require 'stringio'
+require 'zlib'
+
 module ::Net 
   class HTTPResponse 
     attr_accessor :no_cache 
@@ -66,8 +70,21 @@ module ::Net
       return str
     end
 
+    def decompress_body(str)
+      method = self['content-encoding']
+      case method
+      when nil
+        return str
+      when 'gzip', 'x-gzip'
+        debug "gunzipping body"
+        return Zlib::GzipReader.new(StringIO.new(str)).read
+      else
+        raise "Unhandled content encoding #{method}"
+      end
+    end
+
     def body
-      return self.body_to_utf(self.raw_body)
+      return self.body_to_utf(self.decompress_body(self.raw_body))
     end
 
     # Read chunks from the body until we have at least _size_ bytes, yielding 
