@@ -67,6 +67,11 @@ class UrlPlugin < Plugin
       end
 
       debug response.to_hash.inspect
+
+      enc = response['content-encoding']
+
+      extra << ", #{Bold}encoding#{Bold}: #{enc}" if enc
+
       unless @bot.config['url.titles_only']
         # content doesn't have title, just display info.
         size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
