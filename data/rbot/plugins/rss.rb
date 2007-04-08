@@ -641,16 +641,18 @@ class RSSFeedsPlugin < Plugin
     end
     status = Hash.new
     status[:failures] = 0
+    status[:first_run] = true
     @watch[feed.handle] = @bot.timer.add(0, status) {
       debug "watcher for #{feed} started"
       failures = status[:failures]
+      first_run = status.delete(:first_run)
       begin
         debug "fetching #{feed}"
         oldxml = feed.xml ? feed.xml.dup : nil
         unless fetchRss(feed)
           failures += 1
         else
-          if oldxml and oldxml == feed.xml
+          if first_run or (oldxml and oldxml == feed.xml)
             debug "xml for #{feed} didn't change"
             failures -= 1 if failures > 0
           else
