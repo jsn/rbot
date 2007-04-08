@@ -280,7 +280,7 @@ class Imdb
     return nil
   end
 
-  def year_movies(urls, years_txt_org)
+  def year_movies(urls, years_txt_org, role_req)
     years_txt = years_txt_org.dup
     years_txt.sub!(/^'/,'')
     years_txt = "9#{years_txt}" if years_txt.match(/^\d\ds?$/)
@@ -321,16 +321,32 @@ class Imdb
         title << " (#{year})" unless years.length == 1
         role_array = []
         pre_roles.strip.scan(/\[([^\]]+)\]((?:\s+\([^\[]+\))+)?/) { |txt, comm|
+          role = nil
+          extra = nil
           if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
-            role_array << "#{$1} (#{$2})"
+            role = $1
+            extra = "(#{$2})"
           else
-            role_array << txt
+            role = txt
           end
-          role_array.last << " " + comm.ircify_html if comm
+          next if role_req and role.downcase != role_req.downcase
+          if comm
+            extra ||= ""
+            extra += comm.ircify_html if comm
+          end
+          role_array << [role, extra]
         }
+        next if role_req and role_array.empty?
 
-        roles = role_array.join(', ')
-        movies << [roles, title].join(": ")
+        roles = role_array.map { |ar|
+          if role_req
+            ar[1] # works for us both if it's nil and if it's something
+          else
+            ar.compact.join(" ")
+          end
+        }.compact.join(', ')
+        roles = nil if roles.empty?
+        movies << [roles, title].compact.join(": ")
       }
 
       if movies.empty?
@@ -420,6 +436,7 @@ class ImdbPlugin < Plugin
   def movies(m, params)
     who = params[:who].to_s
     years = params[:years]
+    role = params[:role]
 
     name_urls = i.search(who, :type => :name)
     unless name_urls
@@ -427,7 +444,7 @@ class ImdbPlugin < Plugin
       return
     end
 
-    movie_urls = i.year_movies(name_urls, years)
+    movie_urls = i.year_movies(name_urls, years, role)
     debug movie_urls.inspect
     debug movie_urls[0][1]
 
@@ -484,7 +501,7 @@ end
 plugin = ImdbPlugin.new
 
 plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :defaults => { :type => 'both' }
-plugin.map "movies :prefix *who in [the] :years", :requirements => { :prefix => /with|by|from/, :years => /'?\d+s?/ }
+plugin.map "movies :prefix *who in [the] :years [as :role]", :requirements => { :prefix => /with|by|from/, :years => /'?\d+s?/ }
 plugin.map "character [played] by *who in *movie"
 plugin.map "character of *who in *movie"
 plugin.map "characters in *movie", :action => :imdb
