@@ -55,7 +55,7 @@ class ::String
   # This method will return a purified version of the receiver, with all HTML
   # stripped off and some of it converted to IRC formatting
   #
-  def ircify_html
+  def ircify_html(opts={})
     txt = self.dup
 
     # remove scripts
@@ -73,6 +73,21 @@ class ::String
     ## This would be a nice addition, but the results are horrible
     ## Maybe make it configurable?
     # txt.gsub!(/<\/?a( [^>]*)?>/, "#{Reverse}")
+    case val = opts[:a_href]
+    when Reverse, Bold, Underline
+      txt.gsub!(/<(?:\/a\s*|a (?:[^>]*\s+)?href\s*=\s*(?:[^>]*\s*)?)>/, val)
+    when :link_out
+      # Not good for nested links, but the best we can do without something like hpricot
+      txt.gsub!(/<a (?:[^>]*\s+)?href\s*=\s*(?:([^"'>][^\s>]*)\s+|"((?:[^"]|\\")*)"|'((?:[^']|\\')*)')(?:[^>]*\s+)?>(.*?)<\/a>/) { |match|
+        debug match
+        debug [$1, $2, $3, $4].inspect
+        link = $1 || $2 || $3
+        str = $4
+        str + ": " + link
+      }
+    else
+      warn "unknown :a_href option #{val} passed to ircify_html" if val
+    end
 
     # Paragraph and br tags are converted to whitespace
     txt.gsub!(/<\/?(p|br)(?:\s+[^>]*)?\s*\/?\s*>/i, ' ')
@@ -110,9 +125,9 @@ class ::String
 
   # As above, but modify the receiver
   #
-  def ircify_html!
+  def ircify_html!(opts={})
     old_hash = self.hash
-    replace self.ircify_html
+    replace self.ircify_html(opts)
     return self unless self.hash == old_hash
   end
 
