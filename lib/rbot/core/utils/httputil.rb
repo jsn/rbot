@@ -13,6 +13,7 @@
 
 require 'resolv'
 require 'net/http'
+require 'cgi'
 require 'iconv'
 begin
   require 'net/https'
