@@ -56,7 +56,7 @@ class ::String
   # stripped off and some of it converted to IRC formatting
   #
   def ircify_html
-    txt = self
+    txt = self.dup
 
     # remove scripts
     txt.gsub!(/<script(?:\s+[^>]*)?>.*?<\/script>/im, "")
@@ -106,6 +106,14 @@ class ::String
 
     # Decode entities and strip whitespace
     return txt.strip
+  end
+
+  # As above, but modify the receiver
+  #
+  def ircify_html!
+    old_hash = self.hash
+    replace self.ircify_html
+    return self unless self.hash == old_hash
   end
 
   # This method will strip all HTML crud from the receiver
