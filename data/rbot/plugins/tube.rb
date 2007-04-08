@@ -1,9 +1,6 @@
 #Tube Status Enquiry plugin for rbot
 #Plugin by Colm Linehan
 
-require 'rexml/document'
-require 'uri/common'
-
 class TubePlugin < Plugin
   include REXML
   def help(plugin, topic="")
