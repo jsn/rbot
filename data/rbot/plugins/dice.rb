@@ -21,58 +21,82 @@
 ####################################################
 
 class DiceDisplay
-  attr_reader :total, :view
-  def initialize(view, total)
+  attr_reader :total, :view, :dice
+  def initialize(dice, view, total)
     @total = total
+    @dice = dice
     @view = view
+  end
+
+  def get_view()
+    return "["+ dice.to_s + ": " + total.to_s + " | " + view + "] "
   end
 end
 
 class DicePlugin < Plugin
   def help(plugin, topic="")
-    "dice <string> (where <string> is something like: d6 or 2d6 or 2d6+4 or 2d6+1d20 or 2d6+1d5+4d7-3d4-6) => Rolls that set of virtual dice"
+    plugin + " <string> (where <string> is something like: d6 or 2d6 or 2d6+4 or 2d6+1d20 or 2d6+1d5+4d7-3d4-6) => Rolls that set of virtual dice"
   end
 
   def rolldice(d)
     dice = d.split(/d/)
+    repr = []
     r = 0
     unless dice[0] =~ /^[0-9]+/
       dice[0] = 1
     end
     for i in 0...dice[0].to_i
-      r = r + rand(dice[1].to_i) + 1
+      tmp = rand(dice[1].to_i) + 1
+      repr << tmp.to_s
+      r = r + tmp
     end
-    return r
+    return DiceDisplay.new(d, repr.join(", "), r)
   end
 
   def iddice(d)
+    dice = d
     porm = d.slice!(0,1)
     if d =~ /d/
-      r = rolldice(d)
+      rolled = rolldice(d)
+      d = rolled.view
+      r = rolled.total
     else
       r = d
     end
+
     if porm == "-"
       r = 0 - r.to_i
     end
-    viewer = DiceDisplay.new("[" + porm.to_s + d.to_s + "=" + r.to_s + "] ", r)
+
+    viewer = DiceDisplay.new(porm + dice, d.to_s, r)
     return viewer
   end
 
   def privmsg(m)
-    unless(m.params && m.params =~ /^[0-9]*d[0-9]+([+-]([0-9]+|[0-9]*d[0-9])+)*$/)
+    # If either not given parameters or given incorrect parameters, return with
+    # the help message
+    unless(m.params && m.params =~ /^[0-9]*d[0-9]+(\s*[+-]\s*([0-9]+|[0-9]*d[0-9])+)*$/)
       m.nickreply "incorrect usage: " + help(m.plugin)
       return
     end
-    a = m.params.scan(/^[0-9]*d[0-9]+|[+-][0-9]*d[0-9]+|[+-][0-9]+/)
-    r = rolldice(a[0])
-    t = "[" + a[0].to_s + "=" + r.to_s + "] "
+
+    # Extract the actual dice request from the message parameters, splitting it
+    # into dice and modifiers
+    a = m.params.gsub(/\s+/,'').scan(/^[0-9]*d[0-9]+|[+-][0-9]*d[0-9]+|[+-][0-9]+/)
+
+    # Roll the dice with the extracted request
+    rolled = rolldice(a[0])
+    r = rolled.total
+    t = rolled.get_view()
+
+    # Deal with all the remaining parts of the given dice request
     for i in 1...a.length
       tmp = iddice(a[i])
       r = r + tmp.total.to_i
-      t = t + tmp.view.to_s
+      t = t + tmp.get_view
     end
-    m.nickreply r.to_s + " | " + t
+    t.chop!
+    m.nickreply r.to_s + " || " + m.params + ": " + t
   end
 end
 plugin = DicePlugin.new
