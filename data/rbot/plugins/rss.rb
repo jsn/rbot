@@ -688,6 +688,7 @@ class RSSFeedsPlugin < Plugin
               oids = Set.new feed.items.map { |item|
                 uid = RSS.item_uid_for_bot(item, uid_opts)
                 otxt << item.to_s
+                debug [uid, item].inspect
                 debug [uid, otxt.last].inspect
                 uid
               }
@@ -698,6 +699,10 @@ class RSSFeedsPlugin < Plugin
               else
                 debug "Checking if new items are available for #{feed}"
                 failures -= 1 if failures > 0
+                # debug "Old:"
+                # debug oldxml
+                # debug "New:"
+                # debug feed.xml
 
                 dispItems = feed.items.reject { |item|
                   uid = RSS.item_uid_for_bot(item, uid_opts)
