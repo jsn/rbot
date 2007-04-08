@@ -2,7 +2,6 @@
 #Plugin by Colm Linehan
 
 class TubePlugin < Plugin
-  include REXML
   def help(plugin, topic="")
   "tube [district|circle|metropolitan|central|jubilee|bakerloo|waterlooandcity|hammersmithandcity|victoria|eastlondon|northern|piccadilly] => display tube service status for the specified line(Docklands Light Railway is not currently supported)" # , tube stations => list tube stations (not lines) with problems"
   end
