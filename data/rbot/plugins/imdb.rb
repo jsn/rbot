@@ -437,6 +437,15 @@ class ImdbPlugin < Plugin
     who = params[:who].to_s
     years = params[:years]
     role = params[:role]
+    if not role
+      case params[:prefix].intern
+      when :with
+        role = /actor|actress/
+      when :by
+        role = /director/
+      end
+    end
+    role = nil if role.downcase = 'anything'
 
     name_urls = i.search(who, :type => :name)
     unless name_urls
