@@ -325,7 +325,7 @@ class Imdb
           extra = nil
           if txt.match(/^(.*)\s+\.\.\.\.\s+(.*)$/)
             role = $1
-            extra = "(#{$2})"
+            extra = "(#{$2.ircify_html})"
           else
             role = txt
           end
