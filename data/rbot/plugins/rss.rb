@@ -463,7 +463,7 @@ class RSSFeedsPlugin < Plugin
       reply = "no feeds found"
       reply << " matching #{wanted}" if wanted
     end
-    m.reply reply
+    m.reply reply, :max_lines => reply.length
   end
 
   def watched_rss(m, params)
