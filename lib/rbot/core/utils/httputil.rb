@@ -241,6 +241,7 @@ class HttpUtil
     @cache = Hash.new
     @headers = {
       'Accept-Charset' => 'utf-8;q=1.0, *;q=0.8',
+      'Accept-Encoding' => 'gzip;q=1, identity;q=0.8, *;q=0.2',
       'User-Agent' =>
         "rbot http util #{$version} (http://linuxbrit.co.uk/rbot/)"
     } 
