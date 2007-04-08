@@ -246,6 +246,8 @@ class RSSFeedsPlugin < Plugin
     end
   end
 
+  attr_reader :feeds
+
   def initialize
     super
     if @registry.has_key?(:feeds)
@@ -729,9 +731,9 @@ class RSSFeedsPlugin < Plugin
       end
     end
 
-    title = "#{Bold}#{item.title.chomp.riphtml}#{Bold}" if item.title
+    title = "#{Bold}#{item.title.ircify_html}#{Bold}" if item.title
 
-    desc = item.description.gsub(/\s+/,' ').strip.riphtml if item.description
+    desc = item.description.ircify_html if item.description
 
     link = item.link.chomp if item.link
 
