@@ -60,7 +60,7 @@ class ScriptPlugin < Plugin
 
         begin
           eval( code )
-        rescue => e
+        rescue Exception => e
           m.reply( "Script '#{name}' crapped out :(" )
           m.reply( e.inspect )
         end
@@ -75,7 +75,7 @@ class ScriptPlugin < Plugin
         # TODO allow different safe levels for different botusers
         begin
           eval( code )
-        rescue => e
+        rescue Exception => e
           m.reply( "Script '#{name}' crapped out :(" )
           m.reply( e.inspect )
         end
@@ -89,7 +89,7 @@ class ScriptPlugin < Plugin
         # TODO allow different safe levels for different botusers
         begin
           m.reply eval( code ).to_s
-        rescue => e
+        rescue Exception => e
           m.reply( "Script '#{name}' crapped out :(" )
           m.reply( e.inspect )
         end

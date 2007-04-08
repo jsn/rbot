@@ -902,7 +902,6 @@ class Bot
     else
       lines = all_lines
     end
-    debug lines.inspect
 
     lines.each { |line|
       sendq "#{fixed}#{line}", chan, ring
