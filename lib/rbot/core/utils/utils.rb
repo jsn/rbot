@@ -15,6 +15,7 @@
 require 'net/http'
 require 'uri'
 require 'tempfile'
+require 'set'
 
 begin
   require 'htmlentities'
