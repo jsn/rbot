@@ -27,6 +27,20 @@ class ::Array
   end
 end
 
+# Extensions to the Range class
+#
+class ::Range
+
+  # This method returns a random number between the lower and upper bound
+  #
+  def pick_one
+    len = self.last - self.first
+    len += 1 unless self.exclude_end?
+    self.first + Kernel::rand(len)
+  end
+  alias :rand :pick_one
+end
+
 # Extensions for the Numeric classes
 #
 class ::Numeric
