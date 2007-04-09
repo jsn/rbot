@@ -6,6 +6,18 @@ rescue Exception => e
   exit 2
 end
 
+if BDB::VERSION_MAJOR < 4
+  fatal "Your bdb (Berkeley DB) version #{BDB::VERSION} is too old!"
+  fatal "rbot will only run with bdb version 4 or higher, please upgrade."
+  fatal "For maximum reliability, upgrade to version 4.2 or higher."
+  raise BDB::Fatal, BDB::VERSION + " is too old"
+end
+
+if BDB::VERSION_MAJOR == 4 and BDB::VERSION_MINOR < 2
+  warning "Your bdb (Berkeley DB) version #{BDB::VERSION} may not be reliable."
+  warning "If possible, try upgrade version 4.2 or later."
+end
+
 # make BTree lookups case insensitive
 module BDB
   class CIBtree < Btree
