@@ -252,7 +252,7 @@ class AuthModule < CoreBotModule
       when "view"
         return "permissions view [for <user>]: display the permissions for user <user>"
       else
-        return "topics: syntax, (re)set, view"
+        return "permission topics: syntax, (re)set, view"
       end
     when "user"
       case topic
@@ -275,10 +275,12 @@ class AuthModule < CoreBotModule
       when "destroy"
         return "user destroy <botuser> <password> : destroys <botuser>; this function #{Bold}must#{Bold} be called in two steps. On the first call, no password must be specified: <botuser> is then queued for destruction. On the second call, you must specify the correct password for <botuser>, and it will be destroyed. If you want to cancel the destruction, issue the command +user cancel destroy <botuser>+"
       else
-        return "user show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy"
+        return "user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy"
       end
+    when "auth"
+      return "auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user"
     else
-      return "#{name}: login, whoami, permission syntax, permissions [re]set, permissions view, user"
+      return "auth commands: auth, login, whoami, permission[s], user"
     end
   end
 
