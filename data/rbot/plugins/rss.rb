@@ -760,13 +760,13 @@ class RSSFeedsPlugin < Plugin
       if opts.key?(:date) && opts[:date]
         if item.respond_to?(:pubDate) 
           if item.pubDate.class <= Time
-            date = item.pubDate.strftime("%Y/%m/%d %H.%M.%S")
+            date = item.pubDate.strftime("%Y/%m/%d %H:%M")
           else
             date = item.pubDate.to_s
           end
         elsif  item.respond_to?(:date)
           if item.date.class <= Time
-            date = item.date.strftime("%Y/%m/%d %H.%M.%S")
+            date = item.date.strftime("%Y/%m/%d %H:%M")
           else
             date = item.date.to_s
           end
