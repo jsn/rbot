@@ -11,8 +11,6 @@
 #
 # License:: MIT license
 
-require 'uri/common'
-
 class Imdb
   IMDB = "http://us.imdb.com"
   TITLE_OR_NAME_MATCH = /<a href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/

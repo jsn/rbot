@@ -12,8 +12,6 @@
 # TODO some of these Utils should be rewritten as extensions to the approriate
 # standard Ruby classes and accordingly be moved to extends.rb
 
-require 'net/http'
-require 'uri'
 require 'tempfile'
 require 'set'
 
