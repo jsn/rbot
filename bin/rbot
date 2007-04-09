@@ -50,7 +50,7 @@ if $version =~ /svn/
       rev = " (revision #{$1}"
     end
     svn_st = `svn st #{up}`
-    if svn_st =~ /^M /
+    if svn_st =~ /^[MDA] /
       rev << ", local changes"
     end
     rev << ")"
