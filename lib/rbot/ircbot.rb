@@ -289,6 +289,7 @@ class Bot
       :desc => "When truncating overlong messages (see send.overlong) or when sending too many lines per message (see send.max_lines) replace the end of the last line with this text")
 
     @argv = params[:argv]
+    @run_dir = params[:run_dir] || Dir.pwd
 
     unless FileTest.directory? Config::coredir
       error "core directory '#{Config::coredir}' not found, did you setup.rb?"
@@ -1047,9 +1048,16 @@ class Bot
     msg = message ? message : "restarting, back in #{@config['server.reconnect_wait']}..."
     shutdown(msg)
     sleep @config['server.reconnect_wait']
-    # now we re-exec
-    # Note, this fails on Windows
-    exec($0, *@argv)
+    begin
+      # now we re-exec
+      # Note, this fails on Windows
+      debug "going to exec #{$0} #{@argv.inspect} from #{@run_dir}"
+      Dir.chdir(@run_dir)
+      exec($0, *@argv)
+    rescue Exception => e
+      $interrupted += 1
+      raise e
+    end
   end
 
   # call the save method for all of the botmodules
