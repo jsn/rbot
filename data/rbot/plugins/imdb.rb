@@ -420,7 +420,7 @@ class ImdbPlugin < Plugin
       end
     end
     if info.length == 1
-      m.reply Utils.decode_html_entities info.first.join("\n")
+      m.reply Utils.decode_html_entities(info.first.join("\n"))
     else
       m.reply info.map { |si|
         Utils.decode_html_entities si.join(" | ")

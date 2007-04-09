@@ -1,12 +1,13 @@
-DEFAULT_FONTS = ['rectangles', 'smslant']
-MAX_WIDTH=68
-
 class FigletPlugin < Plugin
+  DEFAULT_FONTS = ['rectangles', 'smslant']
+  MAX_WIDTH=68
+
   def initialize
     super
     @figlet_path = "/usr/bin/figlet"
 
     # check that figlet actually has the font installed
+    @figlet_font = nil
     for fontname in DEFAULT_FONTS
       # check if figlet can render this font properly
       if system("#{@figlet_path} -f #{fontname} test test test")
