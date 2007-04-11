@@ -639,21 +639,38 @@ module Irc
       ret << "@" << host unless host == "*"
       return ret
     end
+
     def fullform
       "#{nick}!#{user}@#{host}"
+    end
+
+    # This method downcases the fullform of the netmask. While this may not be
+    # significantly different from the #downcase() method provided by the
+    # ServerOrCasemap mixin, it's significantly different for Netmask
+    # subclasses such as User whose simple downcasing uses the nick only.
+    #
+    def full_irc_downcase(cmap=casemap)
+      self.fullform.irc_downcase(cmap)
+    end
+
+    # full_downcase() will return the fullform downcased according to the
+    # User's own casemap
+    #
+    def full_downcase
+      self.full_irc_downcase
     end
 
     # Converts the receiver into a Netmask with the given (optional)
     # server/casemap association. We return self unless a conversion
     # is needed (different casemap/server)
     #
-    # Subclasses of Netmask will return a new Netmask
+    # Subclasses of Netmask will return a new Netmask, using full_downcase
     #
     def to_irc_netmask(opts={})
       if self.class == Netmask
         return self if fits_with_server_and_casemap?(opts)
       end
-      return self.downcase.to_irc_netmask(opts)
+      return self.full_downcase.to_irc_netmask(opts)
     end
 
     # Converts the receiver into a User with the given (optional)
@@ -925,21 +942,6 @@ module Irc
       else
         @away = false
       end
-    end
-
-    # Users can be either simply downcased (their nick only)
-    # or fully downcased: this will return the fullform downcased
-    # according to the given casemap.
-    #
-    def full_irc_downcase(cmap=casemap)
-      self.fullform.irc_downcase(cmap)
-    end
-
-    # full_downcase() will return the fullform downcased according to the
-    # User's own casemap
-    #
-    def full_downcase
-      self.full_irc_downcase
     end
 
     # Since to_irc_user runs the same checks on server and channel as
