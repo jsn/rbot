@@ -321,7 +321,7 @@ class String
         raise "Unexpected match #{m} when converting #{self}"
       end
     }
-    Regexp.new(regmask)
+    Regexp.new("^#{regmask}$")
   end
 
 end
