@@ -13,6 +13,16 @@ $logger.datetime_format = $dateformat
 $logger.level = $cl_loglevel if $cl_loglevel
 $logger.level = 0 if $debug
 
+require 'pp'
+
+class Exception
+  def pretty_print(q)
+    q.group(1, "#<%s: %s" % [self.class, self.message], ">") {
+      q.seplist(self.backtrace, lambda { "\n" }) { |v| v } if self.backtrace
+    }
+  end
+end
+
 def rawlog(level, message=nil, who_pos=1)
   call_stack = caller
   if call_stack.length > who_pos
@@ -23,7 +33,14 @@ def rawlog(level, message=nil, who_pos=1)
   # Output each line. To distinguish between separate messages and multi-line
   # messages originating at the same time, we blank #{who} after the first message
   # is output.
-  message.to_s.each_line { |l|
+  # Also, we output strings as-is but for other objects we use pretty_inspect
+  case message
+  when String
+    str = message
+  else
+    str = message.pretty_inspect
+  end
+  str.each_line { |l|
     $logger.add(level, l.chomp, who)
     who.gsub!(/./," ")
   }
@@ -344,9 +361,8 @@ class Bot
     begin
       @config = BotConfig.configmanager
       @config.bot_associate(self)
-    rescue => e
-      fatal e.inspect
-      fatal e.backtrace.join("\n")
+    rescue Exception => e
+      fatal e
       log_session_end
       exit 2
     end
@@ -369,8 +385,10 @@ class Bot
         exit if fork
       rescue NotImplementedError
         warning "Could not background, fork not supported"
-      rescue => e
-        warning "Could not background. #{e.inspect}"
+      rescue SystemExit
+        exit 0
+      rescue Exception => e
+        warning "Could not background. #{e.pretty_inspect}"
       end
       Dir.chdir botclass
       # File.umask 0000                # Ensure sensible umask. Adjust as needed.
@@ -424,9 +442,8 @@ class Bot
       @auth = Auth::authmanager
       @auth.bot_associate(self)
       # @auth.load("#{botclass}/botusers.yaml")
-    rescue => e
-      fatal e.inspect
-      fatal e.backtrace.join("\n")
+    rescue Exception => e
+      fatal e
       log_session_end
       exit 2
     end
@@ -712,9 +729,9 @@ class Bot
       trap("SIGTERM") { got_sig("SIGTERM") }
       trap("SIGHUP") { got_sig("SIGHUP") }
     rescue ArgumentError => e
-      debug "failed to trap signals (#{e.inspect}): running on Windows?"
-    rescue => e
-      debug "failed to trap signals: #{e.inspect}"
+      debug "failed to trap signals (#{e.pretty_inspect}): running on Windows?"
+    rescue Exception => e
+      debug "failed to trap signals: #{e.pretty_inspect}"
     end
     begin
       quit if $interrupted > 0
@@ -766,24 +783,20 @@ class Bot
         log_session_end
         exit 0
       rescue Errno::ETIMEDOUT, Errno::ECONNABORTED, TimeoutError, SocketError => e
-        error "network exception: #{e.class}: #{e}"
-        debug e.backtrace.join("\n")
+        error "network exception: #{e.pretty_inspect}"
         quit_msg = e.to_s
       rescue BDB::Fatal => e
-        fatal "fatal bdb error: #{e.class}: #{e}"
-        fatal e.backtrace.join("\n")
+        fatal "fatal bdb error: #{e.pretty_inspect}"
         DBTree.stats
         # Why restart? DB problems are serious stuff ...
         # restart("Oops, we seem to have registry problems ...")
         log_session_end
         exit 2
       rescue Exception => e
-        error "non-net exception: #{e.class}: #{e}"
-        error e.backtrace.join("\n")
+        error "non-net exception: #{e.pretty_inspect}"
         quit_msg = e.to_s
       rescue => e
-        fatal "unexpected exception: #{e.class}: #{e}"
-        fatal e.backtrace.join("\n")
+        fatal "unexpected exception: #{e.pretty_inspect}"
         log_session_end
         exit 2
       end

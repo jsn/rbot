@@ -51,9 +51,9 @@ module Timer
         else
           @func.call
         end
-      rescue => e
-        error "Timer action #{self.inspect} with function #{@func.inspect} failed with error #{e.inspect}"
-        error e.backtrace.join("\n")
+      rescue Exception => e
+        error "Timer action #{self.inspect} with function #{@func.inspect} failed!"
+        error e.pretty_inspect
         # TODO maybe we want to block this Action?
       end
       return @once

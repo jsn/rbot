@@ -374,7 +374,7 @@ module ::Irc
             $stderr.reopen($stdout)
             exec(command, *args)
           rescue Exception => e
-            puts "exec of #{command} led to exception: #{e.inspect}"
+            puts "exec of #{command} led to exception: #{e.pretty_inspect}"
             Kernel::exit! 0
           end
           puts "exec of #{command} failed"

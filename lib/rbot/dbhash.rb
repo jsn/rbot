@@ -1,7 +1,7 @@
 begin
   require 'bdb'
 rescue Exception => e
-  error "Got exception: "+e
+  error "Got exception: #{e.pretty_inspect}"
   error "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
   exit 2
 end
@@ -92,7 +92,7 @@ module Irc
           @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER, "set_lg_max" => @@lg_max)
           debug "DBTree: environment opened with max log size #{@@env.conf['lg_max']}"
         rescue => e
-          debug "DBTree: failed to open environment: #{e}. Retrying ..."
+          debug "DBTree: failed to open environment: #{e.pretty_inspect}. Retrying ..."
           @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
         end
         #@@env = BDB::Env.open("#{@bot.botclass}", BDB::CREATE | BDB::INIT_MPOOL | BDB::RECOVER)
@@ -131,8 +131,8 @@ module Irc
       begin
         debug "DBTree: checkpointing ..."
         @@env.checkpoint
-      rescue => e
-        debug "Failed: #{e}"
+      rescue Excpetion => e
+        debug "Failed: #{e.pretty_inspect}"
       end
       begin
         debug "DBTree: flushing log ..."
@@ -142,8 +142,8 @@ module Irc
         logs.each { |log|
           File.delete(log)
         }
-      rescue => e
-        debug "Failed: #{e}"
+      rescue Exception => e
+        debug "Failed: #{e.pretty_inspect}"
       end
     end
 
@@ -180,8 +180,8 @@ module Irc
           debug "DBTree: cleaning up environment in #{path}"
           BDB::Env.remove("#{path}")
         end
-      rescue => e
-        error "failed to clean up environment: #{e.inspect}"
+      rescue Exception => e
+        error "failed to clean up environment: #{e.pretty_inspect}"
       end
     end
 

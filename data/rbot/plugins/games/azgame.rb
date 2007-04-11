@@ -92,7 +92,7 @@ class AzGamePlugin < Plugin
     else
       @wordcache = Hash.new
     end
-    debug "\n\n\nA-Z wordcache: #{@wordcache.inspect}\n\n\n"
+    debug "A-Z wordcache: #{@wordcache.pretty_inspect}"
 
     @rules = {
       :italian => {

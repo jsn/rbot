@@ -76,7 +76,7 @@ module Irc
           k.to_sym
         }
         @command = path.last
-        debug "Created command #{@command.inspect} with path #{@path.join(', ')}"
+        debug "Created command #{@command.inspect} with path #{@path.pretty_inspect}"
       end
 
       # Returs self
@@ -427,7 +427,7 @@ module Irc
       #
       def set_default_permission(cmd, val)
         @default_perm.set_permission(Command.new(cmd), val)
-        debug "Default permissions now:\n#{@default_perm.inspect}"
+        debug "Default permissions now: #{@default_perm.pretty_inspect}"
       end
 
       # default knows everybody

@@ -267,7 +267,7 @@ module Irc
       else
         reg = nil
       end
-      "<#{self.class.to_s}%s%s%s%s>" % [name, mul, opt, reg]
+      "<%s %s%s%s%s>" % [self.class, name, mul, opt, reg]
     end
   end
 

@@ -395,13 +395,12 @@ module Irc
       end
     end
 
-    def handle_socket_error(string, err)
-      error "#{string} failed: #{err.inspect}"
-      debug err.backtrace.join("\n")
+    def handle_socket_error(string, e)
+      error "#{string} failed: #{e.pretty_inspect}"
       # We assume that an error means that there are connection
       # problems and that we should reconnect, so we
       shutdown
-      raise SocketError.new(err.inspect)
+      raise SocketError.new(e.inspect)
     end
 
     # get the next line from the server (blocks)
@@ -416,7 +415,7 @@ module Irc
         reply.strip! if reply
         debug "RECV: #{reply.inspect}"
         return reply
-      rescue => e
+      rescue Exception => e
         handle_socket_error(:RECV, e)
       end
     end
@@ -461,9 +460,8 @@ module Irc
           if @sendq.empty?
             @timer.stop
           end
-        rescue => e
-          error "Spooling failed: #{e.inspect}"
-          error e.backtrace.join("\n")
+        rescue Exception => e
+          error "Spooling failed: #{e.pretty_inspect}"
         end
       end
     end
@@ -495,9 +493,8 @@ module Irc
       return unless connected?
       begin
         @sock.close
-      rescue => err
-        error "error while shutting down: #{err.inspect}"
-        debug err.backtrace.join("\n")
+      rescue Exception => e
+        error "error while shutting down: #{e.pretty_inspect}"
       end
       @rawsock = nil if @ssl
       @sock = nil
@@ -520,7 +517,7 @@ module Irc
           @lines_sent += 1
           @burst += 1
         end
-      rescue => e
+      rescue Exception => e
         handle_socket_error(:SEND, e)
       end
     end

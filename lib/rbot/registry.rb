@@ -180,15 +180,13 @@ module Irc
         Marshal.restore(val)
       rescue Exception => e
         error "failed to restore marshal data for #{val.inspect}, attempting recovery or fallback to default"
-        debug e.inspect
-        debug e.backtrace.join("\n")
+        debug e
         if @recovery
           begin
             return @recovery.call(val)
           rescue Exception => ee
             error "marshal recovery failed, trying default"
-            debug ee.inspect
-            debug ee.backtrace.join("\n")
+            debug ee
           end
         end
         unless @default.nil?

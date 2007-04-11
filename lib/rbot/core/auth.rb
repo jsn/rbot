@@ -12,7 +12,7 @@ class AuthModule < CoreBotModule
   def initialize
     super
     load_array(:default, true)
-    debug "initialized auth. Botusers: #{@bot.auth.save_array.inspect}"
+    debug "initialized auth. Botusers: #{@bot.auth.save_array.pretty_inspect}"
   end
 
   def save
@@ -23,12 +23,12 @@ class AuthModule < CoreBotModule
     if @bot.auth.changed?
       @registry[key] = @bot.auth.save_array
       @bot.auth.reset_changed
-      debug "saved botusers (#{key}): #{@registry[key].inspect}"
+      debug "saved botusers (#{key}): #{@registry[key].pretty_inspect}"
     end
   end
 
   def load_array(key=:default, forced=false)
-    debug "loading botusers (#{key}): #{@registry[key].inspect}"
+    debug "loading botusers (#{key}): #{@registry[key].pretty_inspect}"
     @bot.auth.load_array(@registry[key], forced) if @registry.has_key?(key)
   end
 

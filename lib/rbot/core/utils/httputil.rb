@@ -18,7 +18,7 @@ require 'iconv'
 begin
   require 'net/https'
 rescue LoadError => e
-  error "Couldn't load 'net/https':  #{e.inspect}"
+  error "Couldn't load 'net/https':  #{e.pretty_inspect}"
   error "Secured HTTP connections will fail"
 end
 
@@ -230,8 +230,7 @@ class HttpUtil
         self.revalidate
         self.response.raw_body
       rescue Exception => e
-        error e.message
-        error e.backtrace.join("\n")
+        error e
         raise e
       end
     end
@@ -463,8 +462,7 @@ class HttpUtil
           begin
             cached.revalidate(resp)
           rescue Exception => e
-            error e.message
-            error e.backtrace.join("\n")
+            error e
           end
           debug "reusing cached"
           resp = cached.response
@@ -498,8 +496,7 @@ class HttpUtil
         Net::HTTPPartialContent === resp
       return resp.body
     rescue Exception => e
-      error e.message
-      error e.backtrace.join("\n")
+      error e
     end
     return nil
   end
@@ -512,8 +509,7 @@ class HttpUtil
         Net::HTTPServerError == resp
       return resp
     rescue Exception => e
-      error e.message
-      error e.backtrace.join("\n")
+      error e
     end
     return nil
   end
@@ -525,8 +521,7 @@ class HttpUtil
       raise 'http error' unless Net::HTTPOK === resp
       return resp
     rescue Exception => e
-      error e.message
-      error e.backtrace.join("\n")
+      error e
     end
     return nil
   end
@@ -547,7 +542,7 @@ class HttpUtil
         (now - val.last_used > max_last) || (now - val.first_used > max_first)
       }
     rescue => e
-      error "Failed to remove stale cache: #{e.inspect}"
+      error "Failed to remove stale cache: #{e.pretty_inspect}"
     end
     debug "#{@cache.size} pages after"
   end
