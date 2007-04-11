@@ -36,56 +36,56 @@ class UrlPlugin < Plugin
     return if url.scheme !~ /https?/
 
     title = nil
+    extra = String.new
 
     begin
-      range = @bot.config['http.info_bytes']
-      response = @bot.httputil.get_response(url, :range => "bytes=0-#{range}")
-      if response.code != "206" && response.code != "200"
-        return "Error getting link (#{response.code} - #{response.message})"
-      end
-      extra = String.new
+      debug "+ getting #{url.request_uri}"
+      @bot.httputil.get_response(url) { |resp|
+        case resp
+        when Net::HTTPSuccess
 
-      if response['content-type'] =~ /^text\//
-
-        body = response.body.slice(0, range)
-        title = String.new
-
-        # since the content is 'text/*' and is small enough to
-        # be a webpage, retrieve the title from the page
-        debug "+ getting #{url.request_uri}"
-
-	title = get_title_from_html(body)
-        if @bot.config['url.first_par']
-          first_par = Utils.ircify_first_html_par(body, :strip => title)
-          extra << ", #{Bold}text#{Bold}: #{first_par}" unless first_par.empty?
-          return "#{Bold}title#{Bold}: #{title}#{extra}" if title
-        else
-          return "#{Bold}title#{Bold}: #{title}" if title
-        end
-
-        # if nothing was found, provide more basic info
-      end
-
-      debug response.to_hash.inspect
-
-      enc = response['content-encoding']
-
-      extra << ", #{Bold}encoding#{Bold}: #{enc}" if enc
-
-      unless @bot.config['url.titles_only']
-        # content doesn't have title, just display info.
-        size = response['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
-        if response.code == '206'
-          if response['content-range'] =~ /bytes\s*[^\/]+\/(\d+)/
-            size = $1.to_s.reverse.scan(/\d{1,3}/).join(',').reverse
+          if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
+            # The page is text or HTML, so we can try finding a title and, if
+            # requested, the first par.
+            #
+            # We act differently depending on whether we want the first par or
+            # not: in the first case we download the initial part and the parse
+            # it; in the second case we only download as much as we need to find
+            # the title
+            #
+            if @bot.config['url.first_par']
+              partial = resp.partial_body(@bot.config['http.info_bytes'])
+              title = get_title_from_html(partial)
+              first_par = Utils.ircify_first_html_par(partial, :strip => title)
+              extra << ", #{Bold}text#{Bold}: #{first_par}" unless first_par.empty?
+              return "#{Bold}title#{Bold}: #{title}#{extra}" if title
+            else
+              resp.partial_body(@bot.config['http.info_bytes']) { |part|
+                title = get_title_from_html(part)
+                return "#{Bold}title#{Bold}: #{title}" if title
+              }
+            end
+          # if nothing was found, provide more basic info, as for non-html pages
           end
+
+          debug resp.to_hash.inspect
+
+          enc = resp['content-encoding']
+
+          extra << ", #{Bold}encoding#{Bold}: #{enc}" if enc
+
+          unless @bot.config['url.titles_only']
+            # content doesn't have title, just display info.
+            size = resp['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
+            size = size ? ", #{Bold}size#{Bold}: #{size} bytes" : ""
+            return "#{Bold}type#{Bold}: #{resp['content-type']}#{size}#{extra}"
+          end
+        else
+          return "Error getting link (#{resp.code} - #{resp.message})"
         end
-        size = size ? ", #{Bold}size#{Bold}: #{size} bytes" : ""
-        return "#{Bold}type#{Bold}: #{response['content-type']}#{size}#{extra}"
-      end
+      }
     rescue Exception => e
-      error e.inspect
-      debug e.backtrace.join("\n")
+      error e
       return "Error connecting to site (#{e.message})"
     end
   end
