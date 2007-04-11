@@ -1,8 +1,9 @@
 Url = Struct.new("Url", :channel, :nick, :time, :url)
-TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
-LINK_INFO = "[Link Info]"
 
 class UrlPlugin < Plugin
+  TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
+  LINK_INFO = "[Link Info]"
+
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
     :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
@@ -166,6 +167,7 @@ class UrlPlugin < Plugin
     end
   end
 end
+
 plugin = UrlPlugin.new
 plugin.map 'urls search :channel :limit :string', :action => 'search',
                           :defaults => {:limit => 4},

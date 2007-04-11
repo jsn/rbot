@@ -26,9 +26,9 @@ end
 require 'stringio'
 require 'zlib'
 
-module ::Net 
-  class HTTPResponse 
-    attr_accessor :no_cache 
+module ::Net
+  class HTTPResponse
+    attr_accessor :no_cache
     if !instance_methods.include?('raw_body')
       alias :raw_body :body
     end
@@ -88,22 +88,22 @@ module ::Net
       return self.body_to_utf(self.decompress_body(self.raw_body))
     end
 
-    # Read chunks from the body until we have at least _size_ bytes, yielding 
-    # the partial text at each chunk. Return the partial body. 
-    def partial_body(size=0, &block) 
+    # Read chunks from the body until we have at least _size_ bytes, yielding
+    # the partial text at each chunk. Return the partial body.
+    def partial_body(size=0, &block)
 
       self.no_cache = true
-      partial = String.new 
+      partial = String.new
 
-      self.read_body { |chunk| 
-        partial << chunk 
-        yield self.body_to_utf(partial) if block_given? 
-        break if size and size > 0 and partial.length >= size 
-      } 
+      self.read_body { |chunk|
+        partial << chunk
+        yield self.body_to_utf(self.decompress_body(partial)) if block_given?
+        break if size and size > 0 and partial.length >= size
+      }
 
-      return self.body_to_utf(partial)
-    end 
-  end 
+      return self.body_to_utf(self.decompress_body(partial))
+    end
+  end
 end
 
 Net::HTTP.version_1_2
@@ -244,12 +244,12 @@ class HttpUtil
       'Accept-Encoding' => 'gzip;q=1, identity;q=0.8, *;q=0.2',
       'User-Agent' =>
         "rbot http util #{$version} (http://linuxbrit.co.uk/rbot/)"
-    } 
+    }
     debug "starting http cache cleanup timer"
     @timer = @bot.timer.add(300) {
       self.remove_stale_cache unless @bot.config['http.no_expire_cache']
     }
-  end 
+  end
 
   def cleanup
     debug 'stopping http cache cleanup timer'
@@ -305,7 +305,7 @@ class HttpUtil
   # proxying based on the bot's proxy configuration.
   # This will include per-url proxy configuration based on the bot config
   # +http_proxy_include/exclude+ options.
-  
+
   def get_proxy(uri, options = {})
     opts = {
       :read_timeout => 10,
@@ -444,7 +444,7 @@ class HttpUtil
         return handle_response(uri, cached.response, opts, &block)
       end
     end
-    
+
     headers = @headers.dup.merge(opts[:headers] || {})
     headers['Range'] = opts[:range] if opts[:range]
 
