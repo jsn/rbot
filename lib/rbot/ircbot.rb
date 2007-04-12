@@ -15,6 +15,13 @@ $logger.level = 0 if $debug
 
 require 'pp'
 
+unless Kernel.instance_methods.include?("pretty_inspect")
+  def pretty_inspect
+    PP.pp(self, '')
+  end
+  public :pretty_inspect
+end
+
 class Exception
   def pretty_print(q)
     q.group(1, "#<%s: %s" % [self.class, self.message], ">") {
