@@ -71,7 +71,7 @@ class RoulettePlugin < Plugin
         totals.wins += 1
         @registry["player " + plyr] = pdata
       }
-      @players = Array.new
+      @players.clear
       @bot.kick(m.replyto, m.sourcenick, "*BANG*") if @bot.config['roulette.kick']
     else
       m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => +click+"
@@ -117,7 +117,7 @@ class RoulettePlugin < Plugin
     totals.games += 1
     @registry["totals"] = totals
 
-    @players = Array.new
+    @players.clear
   end
 
   def spin(m, params={})
