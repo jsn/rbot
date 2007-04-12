@@ -546,7 +546,6 @@ module ::Irc
       return retval
     end
 
-
   end
 end
 

@@ -1,4 +1,4 @@
-Url = Struct.new("Url", :channel, :nick, :time, :url, :info)
+define_structure :Url, :channel, :nick, :time, :url, :info
 
 class ::UrlLinkError < RuntimeError
 end

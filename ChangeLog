@@ -1,3 +1,12 @@
+2007-04-12  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+
+	* Basic class extensions: Module#define_structure() method. Syntax:
+		define_structure :SomeName, :attr_a, :attr_b
+	is equivalent to
+		SomeName = Struct.new("SomeName", :attr_a, :attr_b)
+	except that the new Struct is not created if it already exists and the
+	attributes list is the same.
+
 2007-03-31  Dmitry Kim <dmitry.kim@gmail.com>
 
 	* HttpUtil: major rework. get_response() method now respects
@@ -12,7 +21,7 @@
 	been removed (mostly because it won't play well with future HTTP
 	encodings support), please use get_partial() or get_request() instead.
 	* Utils: http_get() method has been removed (long obsoleted by
-        HttpUtil)
+	HttpUtil)
 	* different plugins: modified to accomodate for HttpUtil changes.
 
 2007-03-24  Giuseppe Bilotta <giuseppe.bilotta@gmail.com>

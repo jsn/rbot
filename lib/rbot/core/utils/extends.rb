@@ -13,6 +13,30 @@
 # Please note that global symbols have to be prefixed by :: because this plugin
 # will be read into an anonymous module
 
+# Extensions to the Module class
+#
+class ::Module
+
+  # Many plugins define Struct objects to hold their data. On rescans, lots of
+  # warnings are echoed because of the redefinitions. Using this method solves
+  # the problem, by checking if the Struct already exists, and if it has the
+  # same attributes
+  #
+  def define_structure(name, *members)
+    sym = name.to_sym
+    if Struct.const_defined?(sym)
+      kl = Struct.const_get(sym)
+      if kl.new.members.map { |member| member.intern } == members.map
+        debug "Struct #{sym} previously defined, skipping"
+        const_set(sym, kl)
+        return
+      end
+    end
+    debug "Defining struct #{sym} with members #{members.inspect}"
+    const_set(sym, Struct.new(name.to_s, *members))
+  end
+end
+
 
 # Extensions to the Array class
 #

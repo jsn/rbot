@@ -32,10 +32,9 @@
 #   * fixed regexp usage in requirements for plugin map
 #   * add proper auth management
 
-OnJoinAction = Struct.new("OnJoinAction", :host, :action, :channel, :reason)
-BadWordAction = Struct.new("BadWordAction", :regexp, :action, :channel, :timer, :reason)
-WhitelistEntry = Struct.new("WhitelistEntry", :host, :channel)
-
+define_structure :OnJoinAction, :host, :action, :channel, :reason
+define_structure :BadWordAction, :regexp, :action, :channel, :timer, :reason
+define_structure :WhitelistEntry, :host, :channel
 
 class BansPlugin < Plugin
 

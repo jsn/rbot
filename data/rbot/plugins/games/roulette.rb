@@ -1,4 +1,4 @@
-RouletteHistory = Struct.new("RouletteHistory", :games, :shots, :deaths, :misses, :wins)
+define_structure :RouletteHistory, :games, :shots, :deaths, :misses, :wins
 
 class RoulettePlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('roulette.autospin',

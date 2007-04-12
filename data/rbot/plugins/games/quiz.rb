@@ -27,10 +27,10 @@
 # TODO:: when Ruby 2.0 gets out, fix the FIXME 2.0 UTF-8 workarounds
 
 # Class for storing question/answer pairs
-QuizBundle = Struct.new( "QuizBundle", :question, :answer )
+define_structure :QuizBundle, :question, :answer
 
 # Class for storing player stats
-PlayerStats = Struct.new( "PlayerStats", :score, :jokers, :jokers_time )
+define_structure :PlayerStats, :score, :jokers, :jokers_time
 # Why do we still need jokers_time? //Firetech
 
 # Maximum number of jokers a player can gain

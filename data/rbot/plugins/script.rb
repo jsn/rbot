@@ -13,9 +13,7 @@
 # plugin. You can create them directly in an IRC channel, and invoke them just
 # like normal rbot plugins. 
 
-
-Command = Struct.new( "Command", :code, :nick, :created, :channel )
-
+define_structure :Command, :code, :nick, :created, :channel
 
 class ScriptPlugin < Plugin
 

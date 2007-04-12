@@ -1,6 +1,6 @@
 # GB: Ok, we *really* need to switch to db for this plugin too
 
-Quote = Struct.new("Quote", :num, :date, :source, :quote)
+define_structure :Quote, :num, :date, :source, :quote
 
 class QuotePlugin < Plugin
   def initialize
