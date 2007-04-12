@@ -1029,7 +1029,7 @@ class Bot
   # disconnect from the server and cleanup all plugins and modules
   def shutdown(message = nil)
     @quit_mutex.synchronize do
-      debug "Shutting down ..."
+      debug "Shutting down:"
       ## No we don't restore them ... let everything run through
       # begin
       #   trap("SIGINT", "DEFAULT")
@@ -1038,16 +1038,19 @@ class Bot
       # rescue => e
       #   debug "failed to restore signals: #{e.inspect}\nProbably running on windows?"
       # end
+      debug "\tdisconnecting..."
       disconnect
-      debug "Saving"
+      debug "\tsaving ..."
       save
-      debug "Cleaning up"
+      debug "\tcleaning up ..."
       @save_mutex.synchronize do
         @plugins.cleanup
       end
+      debug "\tstopping timers ..."
+      @timer.stop
       # debug "Closing registries"
       # @registry.close
-      debug "Cleaning up the db environment"
+      debug "\t\tcleaning up the db environment ..."
       DBTree.cleanup_env
       log "rbot quit (#{message})"
     end
