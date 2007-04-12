@@ -289,6 +289,7 @@ class RSSFeedsPlugin < Plugin
       }
 
       @feeds = @registry[:feeds]
+      raise unless @feeds
 
       @registry.recovery = nil
 
