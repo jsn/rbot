@@ -337,7 +337,7 @@ class RSSFeedsPlugin < Plugin
         debug "Stopping watch #{handle}"
         @bot.timer.remove(@watch[handle])
         @watch.delete(handle)
-      rescue => e
+      rescue Exception => e
         report_problem("Failed to stop watch for #{handle}", e, nil)
       end
     end
