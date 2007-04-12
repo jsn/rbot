@@ -1,4 +1,7 @@
-Url = Struct.new("Url", :channel, :nick, :time, :url)
+Url = Struct.new("Url", :channel, :nick, :time, :url, :info)
+
+class ::UrlLinkError < RuntimeError
+end
 
 class UrlPlugin < Plugin
   TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
@@ -16,6 +19,10 @@ class UrlPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('url.first_par',
     :default => false,
     :desc => "Also try to get the first paragraph of a web page")
+  BotConfig.register BotConfigBooleanValue.new('url.info_on_list',
+    :default => false,
+    :desc => "Show link info when listing/searching for urls")
+
 
   def initialize
     super
@@ -82,12 +89,17 @@ class UrlPlugin < Plugin
             return "#{Bold}type#{Bold}: #{resp['content-type']}#{size}#{extra}"
           end
         else
-          return "Error getting link (#{resp.code} - #{resp.message})"
+          raise UrlLinkError, "getting link (#{resp.code} - #{resp.message})"
         end
       }
     rescue Exception => e
-      error e
-      return "Error connecting to site (#{e.message})"
+      case e
+      when UrlLinkError
+        raise e
+      else
+        error e
+        raise "connecting to site/processing information (#{e.message})"
+      end
     end
   end
 
@@ -100,6 +112,7 @@ class UrlPlugin < Plugin
         urlstr = $1
         list = @registry[m.target]
 
+        title = nil
         if @bot.config['url.display_link_info']
           Thread.start do
             debug "Getting title for #{urlstr}..."
@@ -112,7 +125,7 @@ class UrlPlugin < Plugin
                 debug "Title not found!"
               end
             rescue => e
-              debug "Failed: #{e}"
+              m.reply "Error #{e.message}"
             end
           end
         end
@@ -120,7 +133,7 @@ class UrlPlugin < Plugin
         # check to see if this url is already listed
         return if list.find {|u| u.url == urlstr }
 
-        url = Url.new(m.target, m.sourcenick, Time.new, urlstr)
+        url = Url.new(m.target, m.sourcenick, Time.new, urlstr, title)
         debug "#{list.length} urls so far"
         if list.length > @bot.config['url.max_urls']
           list.pop
@@ -133,6 +146,20 @@ class UrlPlugin < Plugin
     end
   end
 
+  def reply_urls(m, list, max)
+    list[0..(max-1)].each do |url|
+      disp = "[#{url.time.strftime('%Y/%m/%d %H:%M:%S')}] <#{url.nick}> #{url.url}"
+      if @bot.config['url.info_on_list']
+        title = url.info || get_title_for_url(url.url) rescue nil
+        if title and not url.info
+          url.info = title
+        end
+        disp << " --> #{title}" if title
+      end
+      m.reply disp, :overlong => :truncate
+    end
+  end
+
   def urls(m, params)
     channel = params[:channel] ? params[:channel] : m.target
     max = params[:limit].to_i
@@ -142,9 +169,7 @@ class UrlPlugin < Plugin
     if list.empty?
       m.reply "no urls seen yet for channel #{channel}"
     else
-      list[0..(max-1)].each do |url|
-        m.reply "[#{url.time.strftime('%Y/%m/%d %H:%M:%S')}] <#{url.nick}> #{url.url}"
-      end
+      reply_urls(m, list, max)
     end
   end
 
@@ -161,9 +186,7 @@ class UrlPlugin < Plugin
     if list.empty?
       m.reply "no matches for channel #{channel}"
     else
-      list[0..(max-1)].each do |url|
-        m.reply "[#{url.time.strftime('%Y/%m/%d %H:%M:%S')}] <#{url.nick}> #{url.url}"
-      end
+      reply_urls(m, list, max)
     end
   end
 end
