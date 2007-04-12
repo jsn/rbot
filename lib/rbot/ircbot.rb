@@ -1077,6 +1077,8 @@ class Bot
       debug "going to exec #{$0} #{@argv.inspect} from #{@run_dir}"
       Dir.chdir(@run_dir)
       exec($0, *@argv)
+    rescue Errno::ENOENT
+      exec("ruby", *(@argv.unshift $0))
     rescue Exception => e
       $interrupted += 1
       raise e
