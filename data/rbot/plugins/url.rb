@@ -146,13 +146,24 @@ class UrlPlugin < Plugin
     end
   end
 
-  def reply_urls(m, list, max)
+  def reply_urls(opts={})
+    list = opts[:list]
+    max = opts[:max]
+    channel = opts[:channel]
+    m = opts[:msg]
+    return unless list and max and m
     list[0..(max-1)].each do |url|
       disp = "[#{url.time.strftime('%Y/%m/%d %H:%M:%S')}] <#{url.nick}> #{url.url}"
       if @bot.config['url.info_on_list']
         title = url.info || get_title_for_url(url.url) rescue nil
-        if title and not url.info
-          url.info = title
+        # If the url info was missing and we now have some, try to upgrade it
+        if channel and title and not url.info
+          ll = @registry[channel]
+          debug ll
+          if el = ll.find { |u| u.url == url.url }
+            el.info = title
+            @registry[channel] = ll
+          end
         end
         disp << " --> #{title}" if title
       end
@@ -169,7 +180,7 @@ class UrlPlugin < Plugin
     if list.empty?
       m.reply "no urls seen yet for channel #{channel}"
     else
-      reply_urls(m, list, max)
+      reply_urls :msg => m, :channel => channel, :list => list, :max => max
     end
   end
 
@@ -181,12 +192,13 @@ class UrlPlugin < Plugin
     max = 1 if max < 1
     regex = Regexp.new(string, Regexp::IGNORECASE)
     list = @registry[channel].find_all {|url|
-      regex.match(url.url) || regex.match(url.nick)
+      regex.match(url.url) || regex.match(url.nick) ||
+        (@bot.config['url.info_on_list'] && regex.match(url.info))
     }
     if list.empty?
       m.reply "no matches for channel #{channel}"
     else
-      reply_urls(m, list, max)
+      reply_urls :msg => m, :channel => channel, :list => list, :max => max
     end
   end
 end
