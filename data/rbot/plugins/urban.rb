@@ -10,7 +10,8 @@ class UrbanPlugin < Plugin
 
     if words.empty?
       resp = @bot.httputil.head('http://www.urbandictionary.com/random.php',
-                               :max_redir => -1)
+                               :max_redir => -1,
+                               :cache => false)
       if resp.code == "302" && (loc = resp['location'])
         words = URI.unescape(loc.match(/define.php\?term=(.*)$/)[1]) rescue nil
       end
