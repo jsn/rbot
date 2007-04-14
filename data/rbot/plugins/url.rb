@@ -92,6 +92,7 @@ class UrlPlugin < Plugin
           raise UrlLinkError, "getting link (#{resp.code} - #{resp.message})"
         end
       }
+      return nil
     rescue Exception => e
       case e
       when UrlLinkError
