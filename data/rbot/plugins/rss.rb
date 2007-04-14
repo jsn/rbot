@@ -16,8 +16,6 @@
 
 require 'rss'
 
-# Add support for Slashdot namespace in RDF. The code is just an adaptation of
-# the DublinCore code.
 module ::RSS
 
   # Make an  'unique' ID for a given item, based on appropriate bot options
@@ -30,6 +28,8 @@ module ::RSS
     [item.title, item.link, desc].hash
   end
 
+  # Add support for Slashdot namespace in RDF. The code is just an adaptation
+  # of the DublinCore code.
   unless defined?(SLASH_PREFIX)
     SLASH_PREFIX = 'slash'
     SLASH_URI = "http://purl.org/rss/1.0/modules/slash/"
@@ -785,8 +785,10 @@ class RSSFeedsPlugin < Plugin
     link = item.link.chomp if item.link
 
     debug item.inspect
-    category = item.dc_subject rescue item.category rescue nil
+    category = item.dc_subject rescue item.category.content rescue nil
+    category = nil if category and category.empty?
     author = item.dc_creator rescue item.author rescue nil
+    author = nil if author and author.empty?
 
     line1 = nil
     line2 = nil
@@ -794,8 +796,9 @@ class RSSFeedsPlugin < Plugin
     at = ((item.title && item.link) ? ' @ ' : '')
     case feed.type
     when 'blog'
+      author << " " if author
       abt = category ? "about #{category} " : ""
-      line1 = "#{handle}#{date}#{author} blogged #{abt}at #{link}"
+      line1 = "#{handle}#{date}#{author}blogged #{abt}at #{link}"
       line2 = "#{handle}#{title} - #{desc}"
     when 'forum'
       line1 = "#{handle}#{date}#{title}#{at}#{link}"
