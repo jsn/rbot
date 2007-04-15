@@ -78,7 +78,21 @@ module ::Net
         return str
       when 'gzip', 'x-gzip'
         debug "gunzipping body"
-        return Zlib::GzipReader.new(StringIO.new(str)).read
+        begin
+          return Zlib::GzipReader.new(StringIO.new(str)).read
+        rescue Zlib::Error => e
+          # If we can't unpack the whole stream (e.g. because we're doing a
+          # partial read
+          debug "full gunzipping failed (#{e}), trying to recover as much as possible"
+          ret = ""
+          begin
+            Zlib::GzipReader.new(StringIO.new(str)).each_byte { |byte|
+              ret << byte
+            }
+          rescue
+          end
+          return ret
+        end
       else
         raise "Unhandled content encoding #{method}"
       end

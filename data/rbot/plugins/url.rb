@@ -52,6 +52,8 @@ class UrlPlugin < Plugin
         case resp
         when Net::HTTPSuccess
 
+          debug resp.to_hash
+
           if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
             # The page is text or HTML, so we can try finding a title and, if
             # requested, the first par.
@@ -75,8 +77,6 @@ class UrlPlugin < Plugin
             end
           # if nothing was found, provide more basic info, as for non-html pages
           end
-
-          debug resp.to_hash.inspect
 
           enc = resp['content-encoding']
 
