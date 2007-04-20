@@ -393,7 +393,14 @@ class ImdbPlugin < Plugin
     :desc => "Whether searching movies by person/year should also return TV series")
 
   def help(plugin, topic="")
-    "imdb <string> => search http://www.imdb.org for <string>: prefix <string> with 'name' or 'title' if you only want to search for people or films respectively, e.g.: imdb name ed wood"
+    case plugin
+    when "movies"
+      "movies by <who> in <years> [as <role>] => display the movies in the <years> where which <who> was <role>; <role> can be one of actor, actress, director or anything: if it's omitted, the role is defined by the prefix: \"movies by ...\" implies director, \"movies with ...\" implies actor or actress; the years can be specified as \"in the 60s\" or as \"in 1953\""
+    when /characters?/
+      "character played by <who> in <movie> => show the character played by <who> in movie <movie>. characters in <movie> => show the actors and characters in movie <movie>"
+    else
+      "imdb <string> => search http://www.imdb.org for <string>: prefix <string> with 'name' or 'title' if you only want to search for people or films respectively, e.g.: imdb name ed wood. see also movies and characters"
+    end
   end
 
   attr_reader :i
