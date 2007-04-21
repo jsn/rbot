@@ -24,21 +24,21 @@ class UnicodePlugin < Plugin
     :on_change => Proc.new { |bot, v| reconfigure_filter(bot) })
 
     BotConfig.register BotConfigArrayValue.new(
-    'encoding.charsets', :default => ['utf-8', 'cp1252'],
+    'encoding.charsets', :default => ['utf-8', 'cp1252', 'iso-8859-15'],
     :desc => "Ordered list of iconv(3) charsets the bot should try",
     :on_change => Proc.new { |bot, v| reconfigure_filter(bot) })
 
     class UnicodeFilter
         def initialize(oenc, *iencs)
             o = oenc.dup
-            o += '//ignore' if !o.include?('/')
+            # o += '//ignore' if !o.include?('/')
             i = iencs[0].dup
-            i += '//ignore' if !i.include?('/')
+            # i += '//ignore' if !i.include?('/')
             @iencs = iencs.dup
             @iconvs = @iencs.map { |_| Iconv.new('utf-8', _) }
             debug "*** o = #{o}, i = #{i}, iencs = #{iencs.inspect}"
-            @default_in = Iconv.new('utf-8', i)
-            @default_out = Iconv.new(o, 'utf-8')
+            @default_in = Iconv.new('utf-8//ignore', i)
+            @default_out = Iconv.new(o, 'utf-8//ignore')
         end
 
         def in(data)
@@ -53,7 +53,7 @@ class UnicodePlugin < Plugin
             }
 
             rv = @default_in.iconv(data) if !rv
-            debug ">> #{rv}"
+            debug ">> #{rv.inspect}"
             return rv
         end
 
