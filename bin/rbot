@@ -68,6 +68,7 @@ opts = GetoptLong.new(
   ["--help",  "-h", GetoptLong::NO_ARGUMENT],
   ["--loglevel",  "-l", GetoptLong::REQUIRED_ARGUMENT],
   ["--trace",  "-t", GetoptLong::REQUIRED_ARGUMENT],
+  ["--pidfile", "-p", GetoptLong::REQUIRED_ARGUMENT],
   ["--version", "-v", GetoptLong::NO_ARGUMENT]
 )
 
@@ -117,6 +118,7 @@ if ($opts["help"])
   puts "  -v, --version      version information"
   puts "  -d, --debug        enable debug messages"
   puts "  -b, --background   background (daemonize) the bot"
+  puts "  -p, --pidfile      write the bot pid to this file"
   puts "config directory defaults to ~/.rbot"
   exit 0
 end

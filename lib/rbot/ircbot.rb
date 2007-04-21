@@ -429,6 +429,10 @@ class Bot
 
     log_session_start
 
+    File.open($opts['pidfile'] || "#{@botclass}/rbot.pid", 'w') do |pf|
+      pf << "#{$$}\n"
+    end
+
     @registry = BotRegistry.new self
 
     @timer = Timer::Timer.new(1.0) # only need per-second granularity
