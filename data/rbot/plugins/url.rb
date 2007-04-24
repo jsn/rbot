@@ -76,6 +76,8 @@ class UrlPlugin < Plugin
               }
             end
           # if nothing was found, provide more basic info, as for non-html pages
+          else
+            resp.no_cache = true
           end
 
           enc = resp['content-encoding']
