@@ -34,6 +34,10 @@ class DiceDisplay
 end
 
 class DicePlugin < Plugin
+  BotConfig.register BotConfigIntegerValue.new('dice.max_dices',
+      :default => 100, :validate => Proc.new{|v| v > 0},
+      :desc => "Maximum number of dices to throw.")
+
   def help(plugin, topic="")
     plugin + " <string> (where <string> is something like: d6 or 2d6 or 2d6+4 or 2d6+1d20 or 2d6+1d5+4d7-3d4-6) => Rolls that set of virtual dice"
   end
@@ -83,6 +87,16 @@ class DicePlugin < Plugin
     # Extract the actual dice request from the message parameters, splitting it
     # into dice and modifiers
     a = m.params.gsub(/\s+/,'').scan(/^[0-9]*d[0-9]+|[+-][0-9]*d[0-9]+|[+-][0-9]+/)
+    # check nr of total dices
+    nr = 0
+    a.each { |dice|
+      # We use .max with 1 so that specs such as d6 count as 1 and not as 0
+      nr += [dice.split(/d/)[0].to_i, 1].max
+    }
+    if nr > @bot.config['dice.max_dices']
+      m.reply "can't handle more than %u dices" % @bot.config['dice.max_dices']
+      return
+    end
 
     # Roll the dice with the extracted request
     rolled = rolldice(a[0])
