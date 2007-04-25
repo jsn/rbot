@@ -81,7 +81,7 @@ opts.each {|opt, arg|
   $opts[opt.sub(/^-+/, "")] = arg
 }
 
-$cl_loglevel = $opts["loglevel"].to_i
+$cl_loglevel = $opts["loglevel"].to_i if $opts["loglevel"]
 
 if ($opts["trace"])
   set_trace_func proc { |event, file, line, id, binding, classname|
