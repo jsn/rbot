@@ -61,13 +61,21 @@ module ::Net
     def body_to_utf(str)
       charsets = self.body_charset(str) or return str
 
-      charsets.reverse_each { |charset|
-        begin
-          return Iconv.iconv('utf-8//ignore', charset, str).first
-        rescue
-          debug "conversion failed for #{charset}"
+      charsets.reverse_each do |charset|
+        # XXX: this one is really ugly, but i don't know how to make it better
+        #  -jsn
+
+        0.upto(5) do |off|
+          begin
+            debug "trying #{charset} / offset #{off}"
+            return Iconv.iconv('utf-8//ignore',
+                               charset,
+                               str.slice(0 .. (-1 - off))).first
+          rescue
+            debug "conversion failed for #{charset} / offset #{off}"
+          end
         end
-      }
+      end
       return str
     end
 
