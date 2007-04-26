@@ -33,7 +33,7 @@ class UnicodePlugin < Plugin
             o = oenc.dup
             o += '//ignore' if !o.include?('/')
             i = iencs[0].dup
-            i += '//ignore' if !i.include?('/')
+            # i += '//ignore' if !i.include?('/')
             @iencs = iencs.dup
             @iconvs = @iencs.map { |_| Iconv.new('utf-8', _) }
             debug "*** o = #{o}, i = #{i}, iencs = #{iencs.inspect}"
