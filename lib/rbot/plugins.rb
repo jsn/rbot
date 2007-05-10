@@ -141,6 +141,10 @@ module Plugins
       @handler.handle(m)
     end
 
+    def call_event(ev, *args)
+      @bot.plugins.delegate('event_' + ev.to_s.gsub(/[^\w\?!]+/, '_'), *args)
+    end
+
     def map(*args)
       @handler.map(self, *args)
       # register this map
@@ -578,12 +582,13 @@ module Plugins
     # +message+ as a parameter
     def delegate(method, *args)
       # debug "Delegating #{method.inspect}"
+      ret = Array.new
       [core_modules, plugins].each { |pl|
         pl.each {|p|
           if(p.respond_to? method)
             begin
               # debug "#{p.botmodule_class} #{p.name} responds"
-              p.send method, *args
+              ret.push p.send(method, *args)
             rescue Exception => err
               raise if err.kind_of?(SystemExit)
               error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
@@ -592,6 +597,7 @@ module Plugins
           end
         }
       }
+      return ret
       # debug "Finished delegating #{method.inspect}"
     end
 
