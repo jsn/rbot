@@ -1099,8 +1099,10 @@ module Irc
           # "<nick> :- <server> Message of the Day -"
           if argv[1] =~ /^-\s+(\S+)\s/
             server = $1
-            @motd = ""
+          else
+            warning "Server doesn't have an RFC compliant MOTD start."
           end
+          @motd = ""
         when RPL_MOTD
           if(argv[1] =~ /^-\s+(.*)$/)
             @motd << $1
