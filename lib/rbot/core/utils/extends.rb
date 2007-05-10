@@ -85,8 +85,7 @@ end
 
 # Extensions to the String class
 #
-# TODO make ircify_html() accept an Hash of options, and make riphtml() just
-# call ircify_html() with stronger purify options.
+# TODO make riphtml() just call ircify_html() with stronger purify options.
 #
 class ::String
 
@@ -156,9 +155,14 @@ class ::String
 
     # And finally whitespace is squeezed
     txt.gsub!(/\s+/, ' ')
+    txt.strip!
+
+    if opts[:limit] && txt.size > opts[:limit]
+      txt = txt.slice(0, opts[:limit]) + "#{Reverse}...#{Reverse}"
+    end
 
     # Decode entities and strip whitespace
-    return txt.strip
+    return txt
   end
 
   # As above, but modify the receiver

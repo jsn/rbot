@@ -230,11 +230,11 @@ end
 
 class RSSFeedsPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('rss.head_max',
-    :default => 30, :validate => Proc.new{|v| v > 0 && v < 200},
+    :default => 100, :validate => Proc.new{|v| v > 0 && v < 200},
     :desc => "How many characters to use of a RSS item header")
 
   BotConfig.register BotConfigIntegerValue.new('rss.text_max',
-    :default => 90, :validate => Proc.new{|v| v > 0 && v < 400},
+    :default => 200, :validate => Proc.new{|v| v > 0 && v < 400},
     :desc => "How many characters to use of a RSS item text")
 
   BotConfig.register BotConfigIntegerValue.new('rss.thread_sleep',
@@ -778,9 +778,9 @@ class RSSFeedsPlugin < Plugin
       end
     end
 
-    title = "#{Bold}#{item.title.ircify_html}#{Bold}" if item.title
+    title = "#{Bold}#{item.title.ircify_html :limit => @bot.config['rss.head_max']}#{Bold}" if item.title
 
-    desc = item.description.ircify_html(:a_href => :link_out) if item.description
+    desc = item.description.ircify_html(:limit => @bot.config['rss.text_max'], :a_href => :link_out) if item.description
 
     link = item.link.chomp if item.link
 
