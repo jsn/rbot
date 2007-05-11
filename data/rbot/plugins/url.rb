@@ -38,10 +38,14 @@ class UrlPlugin < Plugin
     $1.ircify_html
   end
 
-  def get_title_for_url(uri_str)
+  def get_title_for_url(uri_str, nick = nil, channel = nil)
 
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
+
+    logopts = Hash.new
+    logopts[:nick] = nick if nick
+    logopts[:channel] = channel if channel
 
     title = nil
     extra = String.new
@@ -65,13 +69,18 @@ class UrlPlugin < Plugin
             #
             if @bot.config['url.first_par']
               partial = resp.partial_body(@bot.config['http.info_bytes'])
-              title = get_title_from_html(partial)
+              logopts[:title] = title = get_title_from_html(partial)
               first_par = Utils.ircify_first_html_par(partial, :strip => title)
-              extra << ", #{Bold}text#{Bold}: #{first_par}" unless first_par.empty?
+              unless first_par.empty?
+                logopts[:extra] = first_par
+                extra << ", #{Bold}text#{Bold}: #{first_par}"
+              end
+              call_event(:url_added, url.to_s, logopts)
               return "#{Bold}title#{Bold}: #{title}#{extra}" if title
             else
               resp.partial_body(@bot.config['http.info_bytes']) { |part|
-                title = get_title_from_html(part)
+                logopts[:title] = title = get_title_from_html(part)
+                call_event(:url_added, url.to_s, logopts)
                 return "#{Bold}title#{Bold}: #{title}" if title
               }
             end
@@ -81,15 +90,24 @@ class UrlPlugin < Plugin
           end
 
           enc = resp['content-encoding']
-
-          extra << ", #{Bold}encoding#{Bold}: #{enc}" if enc
+          logopts[:extra] = String.new
+          logopts[:extra] << "Content Type: #{resp['content-type']}"
+          if enc
+            logopts[:extra] << ", encoding: #{enc}"
+            extra << ", #{Bold}encoding#{Bold}: #{enc}"
+          end
 
           unless @bot.config['url.titles_only']
             # content doesn't have title, just display info.
             size = resp['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
-            size = size ? ", #{Bold}size#{Bold}: #{size} bytes" : ""
+            if size
+              logopts[:extra] << ", size: #{size} bytes"
+              size = ", #{Bold}size#{Bold}: #{size} bytes"
+            end
+            call_event(:url_added, url.to_s, logopts)
             return "#{Bold}type#{Bold}: #{resp['content-type']}#{size}#{extra}"
           end
+          call_event(:url_added, url.to_s, logopts)
         else
           raise UrlLinkError, "getting link (#{resp.code} - #{resp.message})"
         end
@@ -120,7 +138,7 @@ class UrlPlugin < Plugin
           Thread.start do
             debug "Getting title for #{urlstr}..."
             begin
-              title = get_title_for_url urlstr
+              title = get_title_for_url urlstr, m.source.nick, m.channel
               if title
                 m.reply "#{LINK_INFO} #{title}", :overlong => :truncate
                 debug "Title found!"
@@ -158,7 +176,7 @@ class UrlPlugin < Plugin
     list[0..(max-1)].each do |url|
       disp = "[#{url.time.strftime('%Y/%m/%d %H:%M:%S')}] <#{url.nick}> #{url.url}"
       if @bot.config['url.info_on_list']
-        title = url.info || get_title_for_url(url.url) rescue nil
+        title = url.info || get_title_for_url(url.url, url.nick, channel) rescue nil
         # If the url info was missing and we now have some, try to upgrade it
         if channel and title and not url.info
           ll = @registry[channel]
