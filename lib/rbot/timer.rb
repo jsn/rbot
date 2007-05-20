@@ -117,16 +117,19 @@ module Timer
 
     # block action with handle +handle+
     def block(handle)
+      raise "no such timer #{handle}" unless @timers[handle]
       @timers[handle].blocked = true
     end
 
     # unblock action with handle +handle+
     def unblock(handle)
+      raise "no such timer #{handle}" unless @timers[handle]
       @timers[handle].blocked = false
     end
 
     # reschedule action with handle +handle+ to change its period
     def reschedule(handle, period)
+      raise "no such timer #{handle}" unless @timers[handle]
       @timers[handle].reschedule(period)
     end
 
