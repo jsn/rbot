@@ -945,6 +945,9 @@ plugin.map 'rss replace :handle :url :type',
 plugin.map 'rss forcereplace :handle :url :type',
   :action => 'forcereplace_rss',
   :defaults => {:type => nil}
+plugin.map 'rss watch :handle [in :chan]',
+  :action => 'watch_rss',
+  :defaults => {:url => nil, :type => nil}
 plugin.map 'rss watch :handle :url :type [in :chan]',
   :action => 'watch_rss',
   :defaults => {:url => nil, :type => nil}
