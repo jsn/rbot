@@ -12,6 +12,8 @@
 
 # TODO:: use lr=lang_<code> or whatever is most appropriate to let google know
 #        it shouldn't use the bot's location to find the preferred language
+# TODO:: support localized uncyclopedias -- not easy because they have different names
+#        for most languages
 
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif></td><td>&nbsp;</td><td nowrap><font size=\+1><b>(.+)</b></td></tr><tr><td>}
@@ -38,8 +40,10 @@ class SearchPlugin < Plugin
       "gcalc <equation> => use the google calculator to find the answer to <equation>"
     when "wp"
       "wp [<code>] <string> => search for <string> on Wikipedia. You can select a national <code> to only search the national Wikipedia"
+    when "unpedia"
+      "unpedia <string> => search for <string> on Uncyclopedia"
     else
-      "search <string> (or: google <string>) => search google for <string> | wp <string> => search for <string> on Wikipedia"
+      "search <string> (or: google <string>) => search google for <string> | wp <string> => search for <string> on Wikipedia | unpedia <string> => search for <string> on Uncyclopedia"
     end
   end
 
@@ -130,6 +134,16 @@ class SearchPlugin < Plugin
     params[:firstpar] = @bot.config['wikipedia.first_par']
     return google(m, params)
   end
+
+  def unpedia(m, params)
+    site = "uncyclopedia.org"
+    debug "Looking up things on #{site}"
+    params[:site] = site
+    params[:filter] = / - Uncyclopedia.*$/
+    params[:hits] = @bot.config['wikipedia.hits']
+    params[:firstpar] = @bot.config['wikipedia.first_par']
+    return google(m, params)
+  end
 end
 
 plugin = SearchPlugin.new
@@ -139,4 +153,5 @@ plugin.map "google *words", :action => 'google'
 plugin.map "gcalc *words", :action => 'gcalc'
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }
 plugin.map "wp *words", :action => 'wikipedia'
+plugin.map "unpedia *words", :action => 'unpedia'
 
