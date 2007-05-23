@@ -91,7 +91,7 @@ class SearchPlugin < Plugin
 
     # If we return a single, full result, change the output to a more compact representation
     if single
-      m.reply "Result for %s: %s -- %s" % [what, results, Utils.get_first_pars(urls, first_pars)]
+      m.reply "Result for %s: %s -- %s" % [what, results, Utils.get_first_pars(urls, first_pars)], :overlong => :truncate
       return
     end
 
