@@ -64,6 +64,10 @@ class SearchPlugin < Plugin
 
     hits = params[:hits] || @bot.config['google.hits']
 
+    first_pars = params[:firstpar] || @bot.config['google.first_par']
+
+    single = (hits == 1 and first_pars == 1)
+
     begin
       wml = @bot.httputil.get(url)
       raise unless wml
@@ -82,12 +86,16 @@ class SearchPlugin < Plugin
       t = Utils.decode_html_entities res[2].gsub(filter, '').strip
       u = URI.unescape res[1]
       urls.push(u)
-      "#{n}. #{Bold}#{t}#{Bold}: #{u}"
+      single ? u : "#{n}. #{Bold}#{t}#{Bold}: #{u}"
     }.join(" | ")
 
-    m.reply "Results for #{what}: #{results}", :split_at => /\s+\|\s+/
+    # If we return a single, full result, change the output to a more compact representation
+    if single
+      m.reply "Result for %s: %s -- %s" % [what, results, Utils.get_first_pars(urls, first_pars)]
+      return
+    end
 
-    first_pars = params[:firstpar] || @bot.config['google.first_par']
+    m.reply "Results for #{what}: #{results}", :split_at => /\s+\|\s+/
 
     return unless first_pars > 0
 
