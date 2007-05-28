@@ -1,4 +1,11 @@
-# GB: Ok, we *really* need to switch to db for this plugin too
+#-- vim:sw=2:et
+#++
+#
+# :title: Quotes plugin
+#
+# TODO:: use new auth system
+# TODO:: use message mapper instead of multiple ifs
+# TODO:: switch to db
 
 define_structure :Quote, :num, :date, :source, :quote
 
@@ -20,6 +27,7 @@ class QuotePlugin < Plugin
       @changed[channel] = false
     }
   end
+
   def save
     Dir.mkdir("#{@bot.botclass}/quotes") if(!FileTest.directory?("#{@bot.botclass}/quotes"))
     @lists.each {|channel, quotes|
@@ -42,10 +50,12 @@ class QuotePlugin < Plugin
       end
     }
   end
+
   def cleanup
     @lists.clear
     @changed.clear
   end
+
   def addquote(source, channel, quote)
     @lists[channel] = Array.new if(!@lists.has_key?(channel))
     num = @lists[channel].length 
@@ -53,6 +63,7 @@ class QuotePlugin < Plugin
     @changed[channel] = true
     return num
   end
+
   def getquote(source, channel, num=nil)
     return nil unless(@lists.has_key?(channel))
     return nil unless(@lists[channel].length > 0)
@@ -66,6 +77,7 @@ class QuotePlugin < Plugin
       @lists[channel].length - 1
     end
   end
+
   def delquote(channel, num)
     return false unless(@lists.has_key?(channel))
     return false unless(@lists[channel].length > 0)
@@ -77,6 +89,7 @@ class QuotePlugin < Plugin
     end
     return false
   end
+
   def countquote(source, channel=nil, regexp=nil)
     unless(channel)
       total=0
@@ -94,6 +107,7 @@ class QuotePlugin < Plugin
     end
     return matches.length
   end
+
   def searchquote(source, channel, regexp)
     return nil unless(@lists.has_key?(channel))
     return nil unless(@lists[channel].length > 0)
@@ -104,6 +118,7 @@ class QuotePlugin < Plugin
       return nil
     end
   end
+
   def help(plugin, topic="")
     case topic
     when "addquote"
@@ -126,6 +141,7 @@ class QuotePlugin < Plugin
       return "Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
     end
   end
+
   def listen(m)
     return unless(m.kind_of? PrivMessage)
 
