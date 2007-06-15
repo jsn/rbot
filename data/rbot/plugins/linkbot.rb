@@ -13,7 +13,7 @@
 # channels from different networks. For the time being, a PRIVMSG echoed by an
 # eggdrop is assumed to be in the form:
 #    <eggdrop> (nick@network) text of the message
-# (TODO make it configurable) and it's fed back to the message delegators.
+# and it's fed back to the message delegators.
 #
 # This plugin also shows how to create 'fake' messages from a plugin, letting
 # the bot parse them.
@@ -26,9 +26,18 @@ class LinkBot < Plugin
     :default => [],
     :desc => "Nick(s) of the bots that act as channel links across networks")
 
+  BotConfig.register BotConfigArrayValue.new('linkbot.message_patterns',
+    :default => ['^<(\S+?)@(\S+?)>\s+(.*)$', '^\((\S+?)@(\S+?)\)\s+(.*)$'],
+    :desc => "List of regexp which match linkbot messages; each regexp needs to have three captures, which in order are the nickname of the original speaker, network, and original message")
+  # TODO use template strings instead of regexp for user friendliness
+  
   # Initialize the plugin
   def initialize
     super
+    
+    @message_patterns = @bot.config['linkbot.message_patterns'].map {|p|
+      Regexp.new(p)
+    }
   end
 
   # Main method
@@ -39,10 +48,11 @@ class LinkBot < Plugin
     return unless m.kind_of?(PrivMessage)
     # Now we know that _m_ is a PRIVMSG from a linkbot. Let's split it
     # in nick, network, message
-    if m.message.match(/^\((\S+?)@(\S+?)\)\s+(.*)$/)
-      new_nick = $1
-      network = $2
-      message = $3
+    if @message_patterns.any? {|p| m.message.match p}
+      # if the regexp doesn't contain all parts, the default values get used
+      new_nick = $1 || 'unknown_nick'
+      network = $2 || 'unknown_network'
+      message = $3 || 'unknown_message'
 
       debug "#{m.sourcenick} reports that #{new_nick} said #{message.inspect} on #{network}"
       # One way to pass the new message back to the bot is to create a PrivMessage
