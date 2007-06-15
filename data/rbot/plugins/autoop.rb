@@ -38,8 +38,23 @@ class AutoOP < Plugin
   end
 
   def add(m, params)
-    @registry[params[:mask]] = params[:channels].dup
-    m.okay
+    if params[:channels].empty? || !@registry.has_key?(params[:mask])
+      # if the channels parameter is omitted (meaning all channels), or the
+      # hostmask isn't present in the registry, we just (over)write the channels
+      # in the registry
+      @registry[params[:mask]] = params[:channels].dup
+      m.okay
+    else
+      # otherwise, merge the channels with the ones existing in the registry
+      current_channels = @registry[params[:mask]]
+      if current_channels.empty?
+        m.reply "#{params[:mask]} is already being auto-opped on all channels"
+      else
+        # merge the already set channels
+        @registry[params[:mask]] = (params[:channels] | current_channels).uniq
+        m.okay
+      end
+    end
   end
 
   def rm(m, params)
