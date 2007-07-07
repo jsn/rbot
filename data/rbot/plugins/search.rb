@@ -16,7 +16,7 @@
 #        for most languages
 
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
-GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif></td><td>&nbsp;</td><td nowrap><font size=\+1><b>(.+)</b></td></tr><tr><td>}
+GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif(?: alt="")?></td><td>&nbsp;</td><td nowrap>(?:<h2 class=r>)?<font size=\+1><b>(.+)</b>(?:</h2>)?</td></tr><tr><td>}
 
 class SearchPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('google.hits',
@@ -108,7 +108,7 @@ class SearchPlugin < Plugin
     searchfor = CGI.escape(what)
     
     debug "Getting gcalc thing: #{searchfor.inspect}"
-    url = "http://www.google.com/search?q=#{searchfor}"
+    url = "http://www.google.com/search?oe=UTF-8&q=#{searchfor}"
 
     begin
       html = @bot.httputil.get(url)
