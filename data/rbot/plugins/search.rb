@@ -15,8 +15,11 @@
 # TODO:: support localized uncyclopedias -- not easy because they have different names
 #        for most languages
 
+GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
+GOOGLE_WAP_SEARCH = "http://www.google.com/wml/search?hl=en&q="
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif(?: alt="")?></td><td>&nbsp;</td><td nowrap>(?:<h2 class=r>)?<font size=\+1><b>(.+)</b>(?:</h2>)?</td></tr><tr><td>}
+GOOGLE_DEF_RESULT = %r{<p> (Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
 
 class SearchPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('google.hits',
@@ -38,6 +41,8 @@ class SearchPlugin < Plugin
       "#{topic} <string> => search google for <string>"
     when "gcalc"
       "gcalc <equation> => use the google calculator to find the answer to <equation>"
+    when "gdef"
+      "gdef <term(s)> => use the google define mechanism to find a definition of <term(s)>"
     when "wp"
       "wp [<code>] <string> => search for <string> on Wikipedia. You can select a national <code> to only search the national Wikipedia"
     when "unpedia"
@@ -60,7 +65,7 @@ class SearchPlugin < Plugin
     # e.g.: "Wikipedia, the free encyclopedia" when doing Wikipedia searches
     filter = params[:filter] || ""
 
-    url = "http://www.google.com/wml/search?q=#{site}#{searchfor}"
+    url = GOOGLE_WAP_SEARCH + site + searchfor
 
     hits = params[:hits] || @bot.config['google.hits']
 
@@ -108,7 +113,7 @@ class SearchPlugin < Plugin
     searchfor = CGI.escape(what)
     
     debug "Getting gcalc thing: #{searchfor.inspect}"
-    url = "http://www.google.com/search?oe=UTF-8&q=#{searchfor}"
+    url = GOOGLE_SEARCH + searchfor
 
     begin
       html = @bot.httputil.get(url)
@@ -130,6 +135,35 @@ class SearchPlugin < Plugin
     result = results[0][0].ircify_html
     debug "replying with: #{result.inspect}"
     m.reply "#{result}"
+  end
+
+  def gdef(m, params)
+    what = params[:words].to_s
+    searchfor = CGI.escape("define " + what)
+    
+    debug "Getting gdef thing: #{searchfor.inspect}"
+    url = GOOGLE_WAP_SEARCH + searchfor
+
+    begin
+      html = @bot.httputil.get(url)
+    rescue => e
+      m.reply "error googledefining #{what}"
+      return
+    end
+
+    debug html
+    results = html.scan(GOOGLE_DEF_RESULT)
+    debug "results: #{results.inspect}"
+    
+    if results.length != 1
+      m.reply "couldn't find a definition for #{what} on Google"
+      return
+    end
+    
+    head = results[0][0].ircify_html
+    text = results[0][1].ircify_html
+    link = results[0][2]
+    m.reply "#{head} -- #{link}\n#{text}"
   end
 
   def wikipedia(m, params)
@@ -159,6 +193,7 @@ plugin = SearchPlugin.new
 plugin.map "search *words", :action => 'google'
 plugin.map "google *words", :action => 'google'
 plugin.map "gcalc *words", :action => 'gcalc'
+plugin.map "gdef *words", :action => 'gdef'
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }
 plugin.map "wp *words", :action => 'wikipedia'
 plugin.map "unpedia *words", :action => 'unpedia'
