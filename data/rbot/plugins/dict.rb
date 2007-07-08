@@ -19,6 +19,7 @@
 # TODO: cache results and reuse them if get_cached returns a cache copy
 
 DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/anchor>/
+CHAMBERS_LEMMA = /<p><span class="hwd">(.*?)<\/span> <span class="psa">(.*?)<\/span>(.*?)<\/p>/
 
 class DictPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('dict.hits',
@@ -143,10 +144,16 @@ class DictPlugin < Plugin
     when /No exact matches for <b>.*?<\/b>, but the following may be helpful./
       return false if justcheck
       m.reply "Nothing found for #{word}, but see #{url} for possible suggestions"
-    else
-      return true if justcheck
-      m.reply "#{word}: #{url}"
+      return
     end
+    # Else, we have a hit
+    return true if justcheck
+    m.reply "#{word}: #{url}"
+    entries = xml.scan(CHAMBERS_LEMMA)
+    hits = @bot.config['dict.hits']
+    entries[0...hits].map { |ar|
+      m.reply(("#{Bold}%s#{Bold} #{Underline}%s#{Underline}%s" % ar).ircify_html, :overlong => :truncate)
+    }
   end
 
   def is_english?(word)
