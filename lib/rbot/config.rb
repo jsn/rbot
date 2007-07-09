@@ -169,7 +169,7 @@ module Irc
       string
     end
     def desc
-      _("#{@desc} [valid values are: #{values.join(', ')}]")
+      _("%{desc} [valid values are: %{values}]") % {:desc => @desc, :values => values.join(', ')}
     end
   end
 
@@ -207,7 +207,7 @@ module Irc
           }
           return
         rescue
-          error _("failed to read conf.yaml: #{$!}")
+          error "failed to read conf.yaml: #{$!}"
         end
       end
       # if we got here, we need to run the first-run wizard
@@ -273,7 +273,7 @@ module Irc
                     "#{@bot.botclass}/conf.yaml")
         @changed = false
       rescue => e
-        error _("failed to write configuration file conf.yaml! #{$!}")
+        error "failed to write configuration file conf.yaml! #{$!}"
         error "#{e.class}: #{e}"
         error e.backtrace.join("\n")
       end
