@@ -35,3 +35,14 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
+desc "Update pot/po files."
+task :updatepo do
+  require 'gettext/utils'
+  GetText.update_pofiles("rbot", Dir.glob("{lib,bin}/**/*.{rb,rhtml}"), "rbot")
+end
+
+desc "Create mo-files"
+task :makemo do
+  require 'gettext/utils'
+  GetText.create_mofiles(true)
+end

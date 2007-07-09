@@ -16,7 +16,7 @@ module Irc
     # work with is @bot.botclass.
     def upgrade_data
       if File.exist?("#{@bot.botclass}/registry.db")
-        log "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
+        log _("upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format")
         old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil,
                              "r+", 0600)
         new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
@@ -36,7 +36,7 @@ module Irc
         Dir.mkdir("#{@bot.botclass}/registry") unless File.exist?("#{@bot.botclass}/registry")
         env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)# | BDB::TXN_NOSYNC)
         dbs = Hash.new
-        log "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format"
+        log _("upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format")
         old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
           "r+", 0600, "env" => env)
         old.each {|k,v|
@@ -49,13 +49,13 @@ module Irc
             dirs.length.times { |i|
               dir = dirs[0,i+1].join("/")+"/"
               unless File.exist?(dir)
-                log "creating subregistry directory #{dir}"
-                Dir.mkdir(dir) 
+                log _("creating subregistry directory #{dir}")
+                Dir.mkdir(dir)
               end
             }
           end
           unless dbs.has_key?(prefix)
-            log "creating db #{@bot.botclass}/registry/#{prefix}.db"
+            log _("creating db #{@bot.botclass}/registry/#{prefix}.db")
             dbs[prefix] = BDB::CIBtree.open("#{@bot.botclass}/registry/#{prefix}.db",
               nil, BDB::CREATE | BDB::EXCL,
               0600, "env" => env)
@@ -65,7 +65,7 @@ module Irc
         old.close
         File.rename("#{@bot.botclass}/plugin_registry.db", "#{@bot.botclass}/plugin_registry.db.old")
         dbs.each {|k,v|
-          log "closing db #{k}"
+          log _("closing db #{k}")
           v.close
         }
         env.close
@@ -131,7 +131,7 @@ module Irc
         dir = dirs[0,i+1].join("/")+"/"
         unless File.exist?(dir)
           debug "creating subregistry directory #{dir}"
-          Dir.mkdir(dir) 
+          Dir.mkdir(dir)
         end
       }
       @registry = nil
@@ -179,13 +179,13 @@ module Irc
       begin
         Marshal.restore(val)
       rescue Exception => e
-        error "failed to restore marshal data for #{val.inspect}, attempting recovery or fallback to default"
+        error _("failed to restore marshal data for #{val.inspect}, attempting recovery or fallback to default")
         debug e
         if @recovery
           begin
             return @recovery.call(val)
           rescue Exception => ee
-            error "marshal recovery failed, trying default"
+            error _("marshal recovery failed, trying default")
             debug ee
           end
         end

@@ -234,7 +234,7 @@ module Plugins
     # default usage method provided as a utility for simple plugins. The
     # MessageMapper uses 'usage' as its default fallback method.
     def usage(m, params = {})
-      m.reply "incorrect usage, ask for help using '#{@bot.nick}: help #{m.plugin}'"
+      m.reply(_("incorrect usage, ask for help using '%{command}'") % {:command => "#{@bot.nick}: help #{m.plugin}"})
     end
 
   end
@@ -471,39 +471,65 @@ module Plugins
     end
 
     def status(short=false)
-      list = ""
+      output = []
       if self.core_length > 0
-        list << "#{self.core_length} core module#{'s' if core_length > 1}"
         if short
-          list << " loaded"
+          output << n_("%{count} core module loaded", "%{count} core modules loaded",
+                    self.core_length) % {:count => self.core_length}
         else
-          list << ": " + core_modules.collect{ |p| p.name}.sort.join(", ")
+          output <<  n_("%{count} core module: %{list}",
+                     "%{count} core modules: %{list}", self.core_length) %
+                     { :count => self.core_length,
+                       :list => core_modules.collect{ |p| p.name}.sort.join(", ") }
         end
       else
-        list << "no core botmodules loaded"
+        output << _("no core botmodules loaded")
       end
       # Active plugins first
       if(self.length > 0)
-        list << "; #{self.length} plugin#{'s' if length > 1}"
         if short
-          list << " loaded"
+          output << n_("%{count} plugin loaded", "%{count} plugins loaded",
+                       self.length) % {:count => self.length}
         else
-          list << ": " + plugins.collect{ |p| p.name}.sort.join(", ")
+          output << n_("%{count} plugin: %{list}",
+                       "%{count} plugins: %{list}", self.length) %
+                   { :count => self.length,
+                     :list => core_modules.collect{ |p| p.name}.sort.join(", ") }
         end
       else
-        list << "no plugins active"
+        output << "no plugins active"
       end
       # Ignored plugins next
       unless @ignored.empty? or @failures_shown
-        list << "; #{Underline}#{@ignored.length} plugin#{'s' if @ignored.length > 1} ignored#{Underline}"
-        list << ": use #{Bold}help ignored plugins#{Bold} to see why" unless short
+        if short
+          output << n_("%{highlight}%{count} plugin ignored%{highlight}",
+                       "%{highlight}%{count} plugins ignored%{highlight}",
+                       @ignored.length) %
+                    { :count => @ignored.length, :highlight => Underline }
+        else
+          output << n_("%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%{bold} to see why",
+                       "%{highlight}%{count} plugins ignored%{highlight}: use %{bold}%{command}%{bold} to see why",
+                       @ignored.length) %
+                    { :count => @ignored.length, :highlight => Underline,
+                      :bold => Bold, :command => "help ignored plugins"}
+        end
       end
       # Failed plugins next
       unless @failed.empty? or @failures_shown
-        list << "; #{Reverse}#{@failed.length} plugin#{'s' if @failed.length > 1} failed to load#{Reverse}"
-        list << ": use #{Bold}help failed plugins#{Bold} to see why" unless short
+        if short
+          output << n_("%{highlight}%{count} plugin failed to load%{highlight}",
+                       "%{highlight}%{count} plugins failed to load%{highlight}",
+                       @ignored.length) %
+                    { :count => @ignored.length, :highlight => Reverse }
+        else
+          output << n_("%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%{command}%{bold} to see why",
+                       "%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%{command}%{bold} to see why",
+                       @ignored.length) %
+                    { :count => @ignored.length, :highlight => Reverse,
+                      :bold => Bold, :command => "#{Bold}help failed plugins#{Bold}"}
+        end
       end
-      list
+      output.join '; '
     end
 
     # return list of help topics (plugin names)
@@ -526,23 +552,28 @@ module Plugins
       case topic
       when /fail(?:ed)?\s*plugins?.*(trace(?:back)?s?)?/
         # debug "Failures: #{@failed.inspect}"
-        return "no plugins failed to load" if @failed.empty?
-        return @failed.inject(Array.new) { |list, p|
-          list << "#{Bold}#{p[:name]}#{Bold} in #{p[:dir]} failed"
-          list << "with error #{p[:reason].class}: #{p[:reason]}"
-          list << "at #{p[:reason].backtrace.join(', ')}" if $1 and not p[:reason].backtrace.empty?
-          list
+        return _("no plugins failed to load") if @failed.empty?
+        return @failed.collect { |p|
+          _('%{highlight}%{plugin}%{highlight} in %{dir}failed with error %{exception}: %{reason}') % {
+              :highlight => Bold, :plugin => p[:name], :dir => p[:dir],
+              :exception => p[:reason].class, :reason => p[:reason],
+          } + if $1 && !p[:reason].backtrace.empty?
+                _('at %{backtrace}') % {:backtrace => p[:reason].backtrace.join(', ')}
+              else
+                ''
+              end
         }.join("\n")
       when /ignored?\s*plugins?/
-        return "no plugins were ignored" if @ignored.empty?
+        return _('no plugins were ignored') if @ignored.empty?
 
         tmp = Hash.new
         @ignored.each do |p|
-          reason = p[:loaded] ? 'overruled by previous' : p[:reason].to_s
+          reason = p[:loaded] ? _('overruled by previous') : _(p[:reason].to_s)
           ((tmp[p[:dir]] ||= Hash.new)[reason] ||= Array.new).push(p[:name])
         end
 
         return tmp.map do |dir, reasons|
+          # FIXME get rid of these string concatenations to make gettext easier
           s = reasons.map { |r, list|
             list.map { |_| _.sub(/\.rb$/, '') }.join(', ') + " (#{r})"
           }.join('; ')
@@ -566,7 +597,7 @@ module Plugins
 	# Nope, let's see if it's a command, and ask for help at the corresponding botmodule
         k = key.to_sym
         if commands.has_key?(k)
-          p = commands[k][:botmodule] 
+          p = commands[k][:botmodule]
           begin
             return p.help(key, params)
           rescue Exception => err

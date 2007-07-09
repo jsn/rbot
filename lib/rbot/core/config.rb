@@ -22,7 +22,7 @@ class ConfigModule < CoreBotModule
         modules.push key unless modules.include?(name)
       end
       if modules.empty?
-        m.reply "no such module #{params[:module]}"
+        m.reply _("no such module %{module}") % {:module => params[:module]}
       else
         m.reply modules.join(", ")
       end
@@ -38,7 +38,7 @@ class ConfigModule < CoreBotModule
   def handle_get(m, params)
     key = params[:key].to_s.intern
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}"
+      m.reply _("no such config key %{key}") % {:key => key}
       return
     end
     return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
@@ -49,7 +49,7 @@ class ConfigModule < CoreBotModule
   def handle_desc(m, params)
     key = params[:key].to_s.intern
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}"
+      m.reply _("no such config key %{key}") % {:key => key}
     end
     puts @bot.config.items[key].inspect
     m.reply "#{key}: #{@bot.config.items[key].desc}"
@@ -58,34 +58,34 @@ class ConfigModule < CoreBotModule
   def handle_unset(m, params)
     key = params[:key].to_s.intern
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}"
+      m.reply _("no such config key %{key}") % {:key => key}
     end
     return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     @bot.config.items[key].unset
     handle_get(m, params)
-    m.reply "this config change will take effect on the next restart" if @bot.config.items[key].requires_restart
-    m.reply "this config change will take effect on the next rescan" if @bot.config.items[key].requires_rescan
+    m.reply _("this config change will take effect on the next restart") if @bot.config.items[key].requires_restart
+    m.reply _("this config change will take effect on the next rescan") if @bot.config.items[key].requires_rescan
   end
 
   def handle_set(m, params)
     key = params[:key].to_s.intern
     value = params[:value].join(" ")
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}" unless params[:silent]
+      m.reply _("no such config key %{key}") % {:key => key} unless params[:silent]
       return false
     end
     return false if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].set_string(value)
     rescue ArgumentError => e
-      m.reply "failed to set #{key}: #{e.message}" unless params[:silent]
+      m.reply _("failed to set %{key}: %{error}") % {:key => key, :error => e.message} unless params[:silent]
       return false
     end
     if @bot.config.items[key].requires_restart
-      m.reply "this config change will take effect on the next restart" unless params[:silent]
+      m.reply _("this config change will take effect on the next restart") unless params[:silent]
       return :restart
     elsif @bot.config.items[key].requires_rescan
-      m.reply "this config change will take effect on the next rescan" unless params[:silent]
+      m.reply _("this config change will take effect on the next rescan") unless params[:silent]
       return :rescan
     else
       m.okay unless params[:silent]
@@ -97,46 +97,46 @@ class ConfigModule < CoreBotModule
     key = params[:key].to_s.intern
     value = params[:value]
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}"
+      m.reply _("no such config key %{key}") % {:key => key}
       return
     end
     unless @bot.config.items[key].kind_of?(BotConfigArrayValue)
-      m.reply "config key #{key} is not an array"
+      m.reply _("config key %{key} is not an array") % {:key => key}
       return
     end
     return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].add(value)
     rescue ArgumentError => e
-      m.reply "failed to add #{value} to #{key}: #{e.message}"
+      m.reply _("failed to add %{value} to %{key}: %{error}") % {:value => value, :key => key, :error => e.message}
       return
     end
     handle_get(m,{:key => key})
-    m.reply "this config change will take effect on the next restart" if @bot.config.items[key].requires_restart
-    m.reply "this config change will take effect on the next rescan" if @bot.config.items[key].requires_rescan
+    m.reply _("this config change will take effect on the next restart") if @bot.config.items[key].requires_restart
+    m.reply _("this config change will take effect on the next rescan") if @bot.config.items[key].requires_rescan
   end
 
   def handle_rm(m, params)
     key = params[:key].to_s.intern
     value = params[:value]
     unless @bot.config.items.has_key?(key)
-      m.reply "no such config key #{key}"
+      m.reply _("no such config key %{key}") % {:key => key}
       return
     end
     unless @bot.config.items[key].kind_of?(BotConfigArrayValue)
-      m.reply "config key #{key} is not an array"
+      m.reply _("config key %{key} is not an array") % {:key => key}
       return
     end
     return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
     begin
       @bot.config.items[key].rm(value)
     rescue ArgumentError => e
-      m.reply "failed to remove #{value} from #{key}: #{e.message}"
+      m.reply _("failed to remove %{value} from %{key}: %{error}") % {:value => value, :key => key, :error => e.message}
       return
     end
     handle_get(m,{:key => key})
-    m.reply "this config change will take effect on the next restart" if @bot.config.items[key].requires_restart
-    m.reply "this config change will take effect on the next rescan" if @bot.config.items[key].requires_rescan
+    m.reply _("this config change will take effect on the next restart") if @bot.config.items[key].requires_restart
+    m.reply _("this config change will take effect on the next rescan") if @bot.config.items[key].requires_rescan
   end
 
   def bot_save(m, param)
@@ -145,11 +145,11 @@ class ConfigModule < CoreBotModule
   end
 
   def bot_rescan(m, param)
-    m.reply "saving ..."
+    m.reply _("saving ...")
     @bot.save
-    m.reply "rescanning ..."
+    m.reply _("rescanning ...")
     @bot.rescan
-    m.reply "done. #{@bot.plugins.status(true)}"
+    m.reply _("done. %{plugin_status}") % {:plugin_status => @bot.plugins.status(true)}
   end
 
   def bot_nick(m, param)
@@ -168,7 +168,7 @@ class ConfigModule < CoreBotModule
   #  end
 
   def bot_version(m, param)
-    m.reply  "I'm a v. #{$version} rubybot, (c) Tom Gilbert and the rbot development team - http://linuxbrit.co.uk/rbot/"
+    m.reply _("I'm a v. %{version} rubybot, (c) Tom Gilbert and the rbot development team - http://linuxbrit.co.uk/rbot/") % {:version => $version}
   end
 
   def handle_help(m, params)
@@ -180,32 +180,32 @@ class ConfigModule < CoreBotModule
     when "config"
       case topic
       when ""
-      "config-related tasks: config topics, save, rescan"
+      _("config-related tasks: config topics, save, rescan")
       when "list"
-      "config list => list configuration modules, config list <module> => list configuration keys for module <module>"
+      _("config list => list configuration modules, config list <module> => list configuration keys for module <module>")
       when "get"
-      "config get <key> => get configuration value for key <key>"
+      _("config get <key> => get configuration value for key <key>")
       when "unset"
-      "reset key <key> to the default"
+      _("reset key <key> to the default")
       when "set"
-      "config set <key> <value> => set configuration value for key <key> to <value>"
+      _("config set <key> <value> => set configuration value for key <key> to <value>")
       when "desc"
-      "config desc <key> => describe what key <key> configures"
+      _("config desc <key> => describe what key <key> configures")
       when "add"
-      "config add <value> to <key> => add value <value> to key <key> if <key> is an array"
+      _("config add <value> to <key> => add value <value> to key <key> if <key> is an array")
       when "rm"
-      "config rm <value> from <key> => remove value <value> from key <key> if <key> is an array"
+      _("config rm <value> from <key> => remove value <value> from key <key> if <key> is an array")
       else
-      "config module - bot configuration. usage: list, desc, get, set, unset, add, rm"
+      _("config module - bot configuration. usage: list, desc, get, set, unset, add, rm")
       # else
       #   "no help for config #{topic}"
       end
     when "save"
-      "save => save current dynamic data and configuration"
+      _("save => save current dynamic data and configuration")
     when "rescan"
-      "rescan => reload modules and static facts"
+      _("rescan => reload modules and static facts")
     else
-      "config-related tasks: config, save, rescan"
+      _("config-related tasks: config, save, rescan")
     end
   end
 

@@ -19,13 +19,13 @@ module Irc
 
     BotConfig.register BotConfigStringValue.new( 'auth.password',
       :default => 'rbotauth', :wizard => true,
-      :desc => 'Password for the bot owner' )
+      :desc => _('Password for the bot owner'))
     BotConfig.register BotConfigBooleanValue.new( 'auth.login_by_mask',
       :default => 'true',
-      :desc => 'Set false to prevent new botusers from logging in without a password when the user netmask is known')
+      :desc => _('Set false to prevent new botusers from logging in without a password when the user netmask is known'))
     BotConfig.register BotConfigBooleanValue.new( 'auth.autologin',
       :default => 'true',
-      :desc => 'Set false to prevent new botusers from recognizing IRC users without a need to manually login')
+      :desc => _('Set false to prevent new botusers from recognizing IRC users without a need to manually login'))
     # BotConfig.register BotConfigIntegerValue.new( 'auth.default_level',
     #   :default => 10, :wizard => true,
     #   :desc => 'The default level for new/unknown users' )
@@ -683,7 +683,8 @@ module Irc
         else
           # cmds = cmdtxt.split('::')
           # @bot.say chan, "you don't have #{cmds.last} (#{cmds.first}) permissions here" if chan
-          @bot.say chan, "#{user}, you don't have '#{cmdtxt}' permissions here" if chan
+          @bot.say chan, _("%{user}, you don't have '%{command}' permissions here") %
+                        {:user=>user, :command=>cmdtxt} if chan
           return false
         end
       end

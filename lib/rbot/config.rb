@@ -169,7 +169,7 @@ module Irc
       string
     end
     def desc
-      "#{@desc} [valid values are: " + values.join(", ") + "]"
+      _("#{@desc} [valid values are: #{values.join(', ')}]")
     end
   end
 
@@ -207,7 +207,7 @@ module Irc
           }
           return
         rescue
-          error "failed to read conf.yaml: #{$!}"
+          error _("failed to read conf.yaml: #{$!}")
         end
       end
       # if we got here, we need to run the first-run wizard
@@ -238,7 +238,7 @@ module Irc
       #        return @config[key]
       #      end
       if @config.has_key?(key.to_sym)
-        warning "Unregistered lookup #{key.to_sym.inspect}"
+        warning _("Unregistered lookup #{key.to_sym.inspect}")
         return @config[key.to_sym]
       end
       return false
@@ -273,7 +273,7 @@ module Irc
                     "#{@bot.botclass}/conf.yaml")
         @changed = false
       rescue => e
-        error "failed to write configuration file conf.yaml! #{$!}"
+        error _("failed to write configuration file conf.yaml! #{$!}")
         error "#{e.class}: #{e}"
         error e.backtrace.join("\n")
       end
@@ -301,18 +301,16 @@ module Irc
     end
 
     def run()
-      puts "First time rbot configuration wizard"
+      puts _("First time rbot configuration wizard")
       puts "===================================="
-      puts "This is the first time you have run rbot with a config directory of:"
-      puts @bot.botclass
-      puts "This wizard will ask you a few questions to get you started."
-      puts "The rest of rbot's configuration can be manipulated via IRC once"
-      puts "rbot is connected and you are auth'd."
+      puts _("This is the first time you have run rbot with a config directory of: #{@bot.botclass}")
+      puts _("This wizard will ask you a few questions to get you started.")
+      puts _("The rest of rbot's configuration can be manipulated via IRC once rbot is connected and you are auth'd.")
       puts "-----------------------------------"
 
       return unless @questions
       @questions.sort{|a,b| a.order <=> b.order }.each do |q|
-        puts q.desc
+        puts _(q.desc)
         begin
           print q.key.to_s + " [#{q.to_s}]: "
           response = STDIN.gets
@@ -320,10 +318,10 @@ module Irc
           unless response.empty?
             q.set_string response, false
           end
-          puts "configured #{q.key} => #{q.to_s}"
+          puts _("configured #{q.key} => #{q.to_s}")
           puts "-----------------------------------"
         rescue ArgumentError => e
-          puts "failed to set #{q.key}: #{e.message}"
+          puts _("failed to set #{q.key}: #{e.message}")
           retry
         end
       end

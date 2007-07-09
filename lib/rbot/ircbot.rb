@@ -90,6 +90,8 @@ fatal "fatal test"
 # The following global is used for the improved signal handling.
 $interrupted = 0
 
+require 'rbot/load-gettext'
+
 # these first
 require 'rbot/rbotconfig'
 require 'rbot/config'
@@ -217,7 +219,7 @@ class Bot
       :default => [], :wizard => true,
       :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'")
     BotConfig.register BotConfigArrayValue.new('irc.ignore_users',
-      :default => [], 
+      :default => [],
       :desc => "Which users to ignore input from. This is mainly to avoid bot-wars triggered by creative people")
 
     BotConfig.register BotConfigIntegerValue.new('core.save_every',
@@ -384,7 +386,7 @@ class Bot
     end
 
     # See http://blog.humlab.umu.se/samuel/archives/000107.html
-    # for the backgrounding code 
+    # for the backgrounding code
     if $daemonize
       begin
         exit if fork
@@ -555,7 +557,7 @@ class Bot
       }
     }
     @client[:nicktaken] = proc { |data|
-      new = "#{data[:nick]}_" 
+      new = "#{data[:nick]}_"
       nickchg new
       # If we're setting our nick at connection because our choice was taken,
       # we have to fix our nick manually, because there will be no NICK message
@@ -753,7 +755,7 @@ class Bot
     quit if $interrupted > 0
 
     realname = @config['irc.name'].clone || 'Ruby bot'
-    realname << ' ' + COPYRIGHT_NOTICE if @config['irc.name_copyright'] 
+    realname << ' ' + COPYRIGHT_NOTICE if @config['irc.name_copyright']
 
     @socket.emergency_puts "PASS " + @config['server.password'] if @config['server.password']
     @socket.emergency_puts "NICK #{@config['irc.nick']}\nUSER #{@config['irc.user']} 4 #{@socket.server_uri.host} :#{realname}"

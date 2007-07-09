@@ -104,37 +104,38 @@ class BasicsModule < CoreBotModule
   def help(cmd, topic="")
     case cmd
     when "quit"
-      return "quit [<message>] => quit IRC with message <message>"
+      _("quit [<message>] => quit IRC with message <message>")
     when "restart"
-      return "restart => completely stop and restart the bot (including reconnect)"
+      _("restart => completely stop and restart the bot (including reconnect)")
     when "join"
-      return "join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{myself} also responds to invites if you have the required access level"
+      _("join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{myself} also responds to invites if you have the required access level")
     when "part"
-      return "part <channel> => part channel <channel>"
+      _("part <channel> => part channel <channel>")
     when "hide"
-      return "hide => part all channels"
+      _("hide => part all channels")
     when "nick"
-      return "nick <nick> => attempt to change nick to <nick>"
+      _("nick <nick> => attempt to change nick to <nick>")
     when "say"
-      return "say <channel>|<nick> <message> => say <message> to <channel> or in private message to <nick>"
+      _("say <channel>|<nick> <message> => say <message> to <channel> or in private message to <nick>")
     when "action"
-      return "action <channel>|<nick> <message> => does a /me <message> to <channel> or in private message to <nick>"
+      _("action <channel>|<nick> <message> => does a /me <message> to <channel> or in private message to <nick>")
     when "quiet"
-      return "quiet [in here|<channel>] => with no arguments, stop speaking in all channels, if \"in here\", stop speaking in this channel, or stop speaking in <channel>"
+      _("quiet [in here|<channel>] => with no arguments, stop speaking in all channels, if \"in here\", stop speaking in this channel, or stop speaking in <channel>")
     when "talk"
-      return "talk [in here|<channel>] => with no arguments, resume speaking in all channels, if \"in here\", resume speaking in this channel, or resume speaking in <channel>"
+      _("talk [in here|<channel>] => with no arguments, resume speaking in all channels, if \"in here\", resume speaking in this channel, or resume speaking in <channel>")
     when "version"
-      return "version => describes software version"
+      _("version => describes software version")
     when "ping"
-      return "ping => replies with a pong"
+      _("ping => replies with a pong")
     when "mode"
-      return "mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> to <mode>"
+      _("mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> to <mode>")
     #     when "botsnack"
     #       return "botsnack => reward #{myself} for being good"
     #     when "hello"
     #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
     else
-      return "#{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk, version, ping, mode"#, botsnack, hello"
+      _("%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk,version, ping, mode") % {:name=>name}
+      #, botsnack, hello
     end
   end
 end
