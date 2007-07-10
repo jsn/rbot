@@ -38,7 +38,7 @@ end
 desc "Update pot/po files."
 task :updatepo do
   require 'gettext/utils'
-  GetText.update_pofiles("rbot", Dir.glob("{lib,bin}/**/*.{rb,rhtml}"), "rbot")
+  GetText.update_pofiles("rbot", Dir.glob("{lib,bin,data}/**/*.{rb,rhtml}"), "rbot")
 end
 
 desc "Create mo-files"

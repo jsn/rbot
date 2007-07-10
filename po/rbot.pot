@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-07-09 03:58-0400\n"
+"POT-Creation-Date: 2007-07-10 00:57-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,10 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-
-#: lib/rbot/load-gettext.rb:32
-msgid "using ruby-gettext"
-msgstr ""
 
 #: lib/rbot/registry.rb:19
 msgid ""
@@ -37,10 +33,6 @@ msgstr ""
 
 #: lib/rbot/plugins.rb:237
 msgid "incorrect usage, ask for help using '%{command}'"
-msgstr ""
-
-#: lib/rbot/plugins.rb:400
-msgid "Botmodule loading path cleared"
 msgstr ""
 
 #: lib/rbot/plugins.rb:477
@@ -145,16 +137,8 @@ msgstr ""
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr ""
 
-#: lib/rbot/config.rb:259
-msgid "Not writing conf.yaml (unchanged)"
-msgstr ""
-
-#: lib/rbot/config.rb:263
-msgid "Writing new conf.yaml ..."
-msgstr ""
-
-#: lib/rbot/config.rb:271
-msgid "Officializing conf.yaml ..."
+#: lib/rbot/config.rb:172
+msgid "%{desc} [valid values are: %{values}]"
 msgstr ""
 
 #: lib/rbot/config.rb:304
@@ -467,133 +451,133 @@ msgstr ""
 msgid "are you nuts, creating a botuser with a publicly known password?"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:511
+#: lib/rbot/core/auth.rb:510
 msgid "failed to create %{user}: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:515
+#: lib/rbot/core/auth.rb:514
 msgid "created botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:523
+#: lib/rbot/core/auth.rb:522
 msgid " (queued for destruction)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:526
+#: lib/rbot/core/auth.rb:525
 msgid "I have no botusers other than the default ones"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:527
+#: lib/rbot/core/auth.rb:526
 msgid "botuser: %{list}"
 msgid_plural "botusers: %{list}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/core/auth.rb:534
+#: lib/rbot/core/auth.rb:533
 msgid "You can't destroy %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:545
+#: lib/rbot/core/auth.rb:544
 msgid "no such botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:551
+#: lib/rbot/core/auth.rb:550
 msgid "%{user} removed from the destruction queue"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:553
+#: lib/rbot/core/auth.rb:552
 msgid "%{user} was not queued for destruction"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:560
+#: lib/rbot/core/auth.rb:559
 msgid ""
 "%{user} already queued for destruction, use %{highlight}user destroy %{user} "
 "<password>%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:563
+#: lib/rbot/core/auth.rb:562
 msgid ""
 "%{user} queued for destruction, use %{highlight}user destroy %{user} "
 "<password>%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:567
+#: lib/rbot/core/auth.rb:566
 msgid "%{user} is not queued for destruction yet"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:569
+#: lib/rbot/core/auth.rb:568
 msgid "wrong password for %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:578 lib/rbot/core/auth.rb:618
+#: lib/rbot/core/auth.rb:577 lib/rbot/core/auth.rb:617
 msgid "failed: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:580
+#: lib/rbot/core/auth.rb:579
 msgid "botuser %{user} destroyed"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:588
+#: lib/rbot/core/auth.rb:587
 msgid "please don't touch the default users"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:597
+#: lib/rbot/core/auth.rb:596
 msgid "no such botuser %{source}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:599
+#: lib/rbot/core/auth.rb:598
 msgid "botuser %{dest} exists already"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:620
+#: lib/rbot/core/auth.rb:619
 msgid "botuser %{source} copied to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:622
+#: lib/rbot/core/auth.rb:621
 msgid "botuser %{source} renamed to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:641
+#: lib/rbot/core/auth.rb:640
 msgid "selecting data to export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:657
+#: lib/rbot/core/auth.rb:656
 msgid "preparing data for export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:680
+#: lib/rbot/core/auth.rb:679
 msgid "failed to prepare data: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:685
+#: lib/rbot/core/auth.rb:684
 msgid "exporting to %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:692
+#: lib/rbot/core/auth.rb:691
 msgid "failed to export users: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:696 lib/rbot/core/auth.rb:774
+#: lib/rbot/core/auth.rb:695 lib/rbot/core/auth.rb:773
 msgid "done"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:713
+#: lib/rbot/core/auth.rb:712
 msgid "reading %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:717
+#: lib/rbot/core/auth.rb:716
 msgid "failed to import from: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:724
+#: lib/rbot/core/auth.rb:723
 msgid "selecting data to import ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:734
+#: lib/rbot/core/auth.rb:733
 msgid "parsing data from import ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:754
+#: lib/rbot/core/auth.rb:753
 msgid "failed to parse data: %{exception}"
 msgstr ""
 
@@ -772,4 +756,171 @@ msgstr ""
 msgid ""
 "%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
 "quiet, talk,version, ping, mode"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:52
+msgid "Hostname or hostname:port of the DICT server used to lookup words"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:55
+msgid ""
+"When multiple databases reply a number of definitions that above this limit, "
+"only the database names will be listed. Otherwise, the full definitions from "
+"each database are replied"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:58
+msgid "Each definition is truncated to this length"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:61
+msgid "Format of headwords; <word> will be replaced with the actual word"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:64
+msgid ""
+"Format of database names; <database> will be replaced with the database name"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:67
+msgid ""
+"Format of definitions. <word> will be replaced with the formatted headword, "
+"<def> will be replaced with the truncated definition, and <database> with "
+"the formatted database name"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:70
+msgid ""
+"Format of match results. <matches> will be replaced with the formatted "
+"headwords, <database> with the formatted database name"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:90
+msgid ""
+"An error occured connecting to the DICT server. Check the dictclient.server "
+"configuration or retry later"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:92
+msgid "A protocol error occured"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:94
+msgid "An error occured"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:116
+msgid ""
+"Many definitions for %{phrase} were found in %{databases}. Use 'define "
+"<phrase> from <database> to view a definition."
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:133
+msgid "No definition for %{phrase} found from %{database}."
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:154
+msgid "Nothing matched %{query} from %{database} using %{strategy}"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:164
+msgid "Databases: %{list}"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:172
+msgid "Strategies: %{list}"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:179
+msgid ""
+"define <phrase> [from <database>] => Show definition of a phrase; match "
+"<phrase> [using <strategy>] [from <database>] => Show matching phrases; "
+"dictclient databases => List databases; dictclient strategies => List "
+"strategies"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:203
+msgid "%{current_player}, it's your turn. %{previous_word} -> %{current_word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:207
+msgid "No one has given the first word yet. Say the first word to start."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:209
+msgid ""
+"Poor %{current_player} is playing alone! Anyone care to join? %"
+"{previous_word} -> %{current_word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:240
+msgid "%{player} took too long and is out of the game. Try again next game!"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:245
+msgid "%{player} is the last remaining player and the winner! Congratulations!"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:253
+msgid "%{player} took too long and skipped the turn."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:281
+msgid "%{player} has given the first word: %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:287
+msgid "Welcome to shiritori, %{speaker}."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:292
+msgid "The word %{used_word} has been used. Retry from %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:297
+msgid ""
+"It's impossible to continue the chain from %{word}. The game has ended. "
+"Thanks a lot, %{player}! :("
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:301
+msgid ""
+"It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:306
+msgid ""
+"It's impossible to continue the chain from %{word}. Start with another word."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:327
+msgid ""
+"A game in which each player must continue the previous player's word, by "
+"using its last one or few characters/letters of the word to start a new "
+"word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available "
+"rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:398
+msgid "Already playing shiritori here"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:409
+msgid "Shiritori has started. Please say the first word"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:411
+msgid "couldn't start %{ruleset} shiritori: %{error}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:415
+msgid "There is no ruleset named %{ruleset}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:433
+msgid "Shiritori has stopped. Hope you had fun!"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:436
+msgid "No game to stop here, because no game is being played."
 msgstr ""

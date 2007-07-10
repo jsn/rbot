@@ -45,7 +45,7 @@ class WordlistDictionary < Dictionary
   def initialize(words)
     super()
     @words = words
-    debug "Created dictionary with #{@words.length} words"
+    # debug "Created dictionary with #{@words.length} words"
   end
   
     # whether string s is a word
@@ -120,7 +120,7 @@ class Shiritori
     # TODO optionally allow used words
     # TODO ruby2 unicode
     if len(s) < @overlap_lengths.min || !@dictionary.has_word?(s)
-      debug "#{s} is too short or not in dictionary"
+      # debug "#{s} is too short or not in dictionary"
       :ignore
     elsif @used_words.empty?
       if !@check_continuable || continuable_from?(s)
@@ -171,6 +171,10 @@ class ShiritoriGame
                                       @ruleset[:allow_reuse])
   end
   
+  def say(s)
+     @say.call(s)
+  end
+
   # Whether the players must take turns
   # * when there is only one player, turns are not enforced
   # * when time_limit > 0, new players can join at any time, but existing players must
@@ -195,13 +199,17 @@ class ShiritoriGame
   
   # announce the current word, and player if take_turns?
   def announce
-    if take_turns?
-      @say.call "#{current_player}, it's your turn. #{previous_word} -> #{current_word}"
+    say (if take_turns?
+      _("%{current_player}, it's your turn. %{previous_word} -> %{current_word}") %
+       { :current_player => current_player, :previous_word => previous_word,
+         :current_word => current_word }
     elsif @players.empty?
-      @say.call "No one has given the first word yet. Say the first word to start."
+      _("No one has given the first word yet. Say the first word to start.")
     else
-      @say.call "Poor #{current_player} is playing alone! Anyone care to join? #{previous_word} -> #{current_word}"
-    end
+      _("Poor %{current_player} is playing alone! Anyone care to join? %{previous_word} -> %{current_word}") %
+      { :current_player => current_player, :previous_word => previous_word,
+        :current_word => current_word }
+    end)
   end
   # create/reschedule timer
   def restart_timer
@@ -229,18 +237,21 @@ class ShiritoriGame
   # handle when turn time limit goes out
   def time_out
     if @ruleset[:lose_when_timeout]
-      @say.call "#{current_player} took too long and is out of the game. Try again next game!"
+      say _("%{player} took too long and is out of the game. Try again next game!") %
+      { :player => current_player }
       if @players.length == 2 
         # 2 players before, and one should remain now
         # since the game is ending, save the trouble of removing and booting the player
-        @say.call "#{@players[1]} is the last remaining player and the winner! Congratulations!"
+        say _("%{player} is the last remaining player and the winner! Congratulations!") %
+          {:player => @players.last}
         die
       else
         @booted_players << @players.shift
         announce
       end
     else
-      @say.call "#{current_player} took too long and skipped the turn."
+      say _("%{player} took too long and skipped the turn.") %
+          {:player => current_player}
       next_player
     end
   end
@@ -267,28 +278,32 @@ class ShiritoriGame
     case @game.process @ruleset[:normalize].call(message)
     when :start
       @players << speaker
-      m.reply "#{speaker} has given the first word: #{current_word}"
+      m.reply _("%{player} has given the first word: %{word}") %
+              {:player => speaker, :word => current_word}
     when :next
       if !@players.include?(speaker)
         # A new player
         @players.unshift speaker
-        m.reply "Welcome to shiritori, #{speaker}."
+        m.reply _("Welcome to shiritori, %{speaker}.") %
+                {:player => speaker}
       end
       next_player
     when :used
-      m.reply "The word #{message} has been used. Retry from #{current_word}"
+      m.reply _("The word %{used_word} has been used. Retry from %{word}") %
+              {:used_word => message, :word => current_word}
     when :end
       # TODO respect shiritori.end_when_uncontinuable setting
       if @ruleset[:end_when_uncontinuable]
-        m.reply "It's impossible to continue the chain from #{message}. The game has ended. Thanks a lot, #{speaker}! :("
+        m.reply _("It's impossible to continue the chain from %{word}. The game has ended. Thanks a lot, %{player}! :(") %
+                {:word => message, :player => speaker}
         die
       else
-        m.reply "It's impossible to continue the chain from #{message}. Retry from #{current_word}"
+        m.reply _("It's impossible to continue the chain from %{bad_word}. Retry from %{word}") % {:bad_word => message, :word => current_word}
       end
     when :start_end
       # when the first word is uncontinuable, the game doesn't stop, as presumably
       # someone wanted to play
-      m.reply "It's impossible to continue the chain from #{message}. Start with another word."
+      m.reply _("It's impossible to continue the chain from %{word}. Start with another word.") % {:word => message}
     end
   end
   
@@ -309,7 +324,8 @@ end
 # shiritori plugin for rbot
 class ShiritoriPlugin < Plugin
   def help(plugin, topic="")
-    "A game in which each player must continue the previous player's word, by using its last one or few characters/letters of the word to start a new word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available rulesets: #{@rulesets.keys.join ', '}. 'shiritori stop' => Stop the current shiritori game."
+    _("A game in which each player must continue the previous player's word, by using its last one or few characters/letters of the word to start a new word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game.") %
+      {:rulesets => @rulesets.keys.join(', ')}
   end
   
   def initialize()
@@ -379,7 +395,7 @@ class ShiritoriPlugin < Plugin
   # start shiritori in a channel
   def cmd_shiritori(m, params)
     if @games.has_key?( m.channel )
-      m.reply "Already playing shiritori here"
+      m.reply _("Already playing shiritori here")
       @games[m.channel].announce
     else
       ruleset = params[:ruleset].downcase
@@ -390,12 +406,13 @@ class ShiritoriPlugin < Plugin
             @bot.timer,
             lambda {|msg| m.reply msg},
             lambda {remove_game m.channel} )
-          m.reply "Shiritori has started. Please say the first word"
+          m.reply _("Shiritori has started. Please say the first word")
         rescue => e
-          m.reply "couldn't start #{ruleset} shiritori: #{e}"
+          m.reply _("couldn't start %{ruleset} shiritori: %{error}") %
+                  {:ruleset => ruleset, :error => e}
         end
       else
-        m.reply "There is no defined ruleset named #{ruleset}"
+        m.reply _("There is no ruleset named %{ruleset}") % {:ruleset => ruleset}
       end
     end
   end
@@ -413,10 +430,10 @@ class ShiritoriPlugin < Plugin
     if @games.has_key? m.channel
       # TODO display statistics
       @games[m.channel].die
-      m.reply "Shiritori has stopped. Hope you had fun!"
+      m.reply _("Shiritori has stopped. Hope you had fun!")
     else
       # TODO display statistics
-      m.reply "No game to stop here, because no game is being played."
+      m.reply _("No game to stop here, because no game is being played.")
     end
   end
   

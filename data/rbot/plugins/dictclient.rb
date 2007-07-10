@@ -49,25 +49,25 @@ end
 class DictClientPlugin < Plugin
   BotConfig.register BotConfigStringValue.new('dictclient.server',
     :default => 'dict.org',
-    :desc => 'Hostname or hostname:port of the DICT server used to lookup words')
+    :desc => _('Hostname or hostname:port of the DICT server used to lookup words'))
   BotConfig.register BotConfigIntegerValue.new('dictclient.max_defs_before_collapse',
     :default => 4,
-    :desc => 'When multiple databases reply a number of definitions that above this limit, only the database names will be listed. Otherwise, the full definitions from each database are replied')
+    :desc => _('When multiple databases reply a number of definitions that above this limit, only the database names will be listed. Otherwise, the full definitions from each database are replied'))
   BotConfig.register BotConfigIntegerValue.new('dictclient.max_length_per_def',
     :default => 200,
-    :desc => 'Each definition is truncated to this length') 
+    :desc => _('Each definition is truncated to this length'))
   BotConfig.register BotConfigStringValue.new('dictclient.headword_format',
     :default => "#{Bold}<headword>#{Bold}",
-    :desc => 'Format of headwords; <word> will be replaced with the actual word')
+    :desc => _('Format of headwords; <word> will be replaced with the actual word'))
   BotConfig.register BotConfigStringValue.new('dictclient.database_format',
     :default => "#{Underline}<database>#{Underline}",
-    :desc => 'Format of database names; <database> will be replaced with the database name')
+    :desc => _('Format of database names; <database> will be replaced with the database name'))
   BotConfig.register BotConfigStringValue.new('dictclient.definition_format',
     :default => '<headword>: <definition> -<database>',
-    :desc => 'Format of definitions. <word> will be replaced with the formatted headword, <def> will be replaced with the truncated definition, and <database> with the formatted database name')
+    :desc => _('Format of definitions. <word> will be replaced with the formatted headword, <def> will be replaced with the truncated definition, and <database> with the formatted database name'))
   BotConfig.register BotConfigStringValue.new('dictclient.match_format',
     :default => '<matches>––<database>',
-    :desc => 'Format of match results. <matches> will be replaced with the formatted headwords, <database> with the formatted database name')
+    :desc => _('Format of match results. <matches> will be replaced with the formatted headwords, <database> with the formatted database name'))
   
   def initialize
     super
@@ -87,11 +87,11 @@ class DictClientPlugin < Plugin
       ret = yield dict
       dict.disconnect
     rescue ConnectError
-      m.reply 'An error occured connecting to the DICT server. Check the dictclient.server configuration or retry later' if m
+      m.reply _('An error occured connecting to the DICT server. Check the dictclient.server configuration or retry later') if m
     rescue ProtocolError
-      m.reply 'A protocol error occured' if m
+      m.reply _('A protocol error occured') if m
     rescue DICTError
-      m.reply 'An error occured' if m
+      m.reply _('An error occured') if m
     end
     ret
   end
@@ -113,10 +113,10 @@ class DictClientPlugin < Plugin
         # the number of definitions is above dictclient.max_defs_before_collapse
         if results.any? {|r| r.database != results[0].database} &&
            results.length > @bot.config['dictclient.max_defs_before_collapse']
-          "Definitions for #{format_headword phrase} were found in #{
-            results.collect {|r| r.database}.uniq.collect {|d|
-              format_database d}.join ', '
-          }. Specify database to view full result."
+          _("Many definitions for %{phrase} were found in %{databases}. Use 'define <phrase> from <database> to view a definition.") % 
+          { :phrase => format_headword(phrase),
+            :databases => results.collect {|r| r.database}.uniq.
+                                  collect {|d| format_database d}.join(', ') }
         # otherwise display the definitions
         else
           results.collect {|r|
@@ -130,8 +130,9 @@ class DictClientPlugin < Plugin
           }.join ' '
         end
       else
-        "No definition for #{format_headword phrase} found from #{
-          format_database params[:database]}."
+        _("No definition for %{phrase} found from %{database}.") % 
+          { :phrase => format_headword(phrase),
+            :database => format_database(params[:database]) }
       end
     )
   end
@@ -150,30 +151,32 @@ class DictClientPlugin < Plugin
           )
         }.join ' '
       else
-        "Nothing matched for #{format_headword phrase
-        } from #{format_database params[:database]} using #{params[:strategy]}"
+        _("Nothing matched %{query} from %{database} using %{strategy}") % 
+        { :query => format_headword(phrase),
+          :database => format_database(params[:database]),
+          :strategy => params[:strategy] }
       end
     )
   end
     
   def cmd_databases(m, params)
     with_dict(m) do |d|
-      m.reply "Databases: #{
-        d.show_db.collect {|db, d|"#{format_database db}: #{d}"}.join '; '
-      }"
+      m.reply _("Databases: %{list}") % {
+        :list => d.show_db.collect {|db, des| "#{format_database db}: #{des}"}.join('; ')
+      }
     end
   end
   
   def cmd_strategies(m, params)
     with_dict(m) do |d|
-      m.reply "Strategies: #{
-        d.show_strat.collect {|s, d| "#{s}: #{d}"}.join '; '
-      }"
+      m.reply _("Strategies: %{list}") % {
+        :list => d.show_strat.collect {|s, des| "#{s}: #{des}"}.join('; ')
+      }
     end
   end
     
   def help(plugin, topic='')
-    "define <phrase> [from <database>] => Show definition of a phrase; match <phrase> [using <strategy>] [from <database>] => Show matching phrases; dictclient databases => List databases; dictclient strategies => List strategies"
+    _("define <phrase> [from <database>] => Show definition of a phrase; match <phrase> [using <strategy>] [from <database>] => Show matching phrases; dictclient databases => List databases; dictclient strategies => List strategies")
   end
 end
 
