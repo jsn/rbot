@@ -12,20 +12,11 @@ begin
     # patch for ruby-gettext 1.9.0 to cope with anonymous modules used by rbot
     # FIXME remove the patch when ruby-gettext is fixed, or rbot switches to named modules
   # fix for module names that are not constant names
-    def bound_targets(klass)  # :nodoc:
-      ret = []
-      ary = klass.name.split(/::/)
-      while(v = ary.shift)
-        begin
-          ret.unshift(((ret.size == 0) ?
-            Object.const_get(v) : ret[0].const_get(v)))
-        rescue NameError
-          # when an anonymous module is encountered, only the previous modules
-          # are returned
-          break
-        end
-      end
-      ((ret + klass.ancestors + [GetText]) & @@__textdomainmanagers.keys).uniq
+    if !instance_methods.include?('orig_bound_targets')
+      alias :orig_bound_targets :bound_targets
+    end
+    def bound_targets(*a)  # :nodoc:
+      orig_bound_targets(*a) rescue orig_bound_targets(Object)
     end
   end
 
