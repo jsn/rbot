@@ -29,10 +29,13 @@ begin
     end
   end
 
-  debug 'using ruby-gettext'
-  gettext_info = StringIO.new
-  current_textdomain_info(:out=>gettext_info)
-  gettext_info.string.each_line {|l| debug l}
+  begin
+    gettext_info = StringIO.new
+    current_textdomain_info(:out=>gettext_info) # fails sometimes
+    debug 'using ruby-gettext'
+    gettext_info.string.each_line {|l| debug l}
+  rescue Exception
+  end
 
 rescue LoadError
   warn 'ruby-gettext package not available; translations are disabled'
