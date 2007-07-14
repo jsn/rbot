@@ -494,7 +494,7 @@ module Plugins
           output << n_("%{count} plugin: %{list}",
                        "%{count} plugins: %{list}", self.length) %
                    { :count => self.length,
-                     :list => core_modules.collect{ |p| p.name}.sort.join(", ") }
+                     :list => plugins.collect{ |p| p.name}.sort.join(", ") }
         end
       else
         output << "no plugins active"
