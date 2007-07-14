@@ -150,29 +150,29 @@ class AzGamePlugin < Plugin
     isit = @games[k].check(word)
     case isit.first
     when :bingo
-      m.reply "#{Bold}BINGO!#{Bold}: the word was #{Underline}#{word}#{Underline}. Congrats, #{Bold}#{m.sourcenick}#{Bold}!"
+      m.reply _("%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, %{bold}%{player}%{bold}!") % {:bold => Bold, :underline => Underline, :word => word, :player => m.sourcenick}
       @games[k].total_tries += 1
       @games[k].tries[m.source] += 1
       @games[k].winner = m.source
       ar = @games[k].score.inject([]) { |res, kv|
         res.push("%s: %d (%s)" % kv.flatten)
       }
-      m.reply "The game was won after #{@games[k].total_tries} tries. Scores for this game:    #{ar.join('; ')}"
+      m.reply _("The game was won after %{tries} tries. Scores for this game:    %{scores}") % {:tries => @games[k].total_tries, :scores => ar.join('; ')}
       @games.delete(k)
     when :out
-      m.reply "#{word} is not in the range #{Bold}#{isit.last}#{Bold}" if m.address?
+      m.reply _("%{word} is not in the range %{bold}%{range}%{bold}") % {:word => word, :bold => Bold, :range => isit.last} if m.address?
     when :noexist
-      m.reply "#{word} doesn't exist or is not acceptable for the game"
+      m.reply _("%{word} doesn't exist or is not acceptable for the game") % {:word => word}
       @games[k].total_failed += 1
       @games[k].failed[m.source] += 1
     when :in
-      m.reply "close, but no cigar. New range: #{Bold}#{isit.last}#{Bold}"
+      m.reply _("close, but no cigar. New range: %{bold}%{range}%{bold}") % {:bold => Bold, :range => isit.last}
       @games[k].total_tries += 1
       @games[k].tries[m.source] += 1
     when :ignore
-      m.reply "#{word} is already one of the range extrema: #{isit.last}" if m.address?
+      m.reply _("%{word} is already one of the range extrema: %{range}") % {:word => word, :range => isit.last} if m.address?
     else
-      m.reply "hm, something went wrong while verifying #{word}"
+      m.reply _("hm, something went wrong while verifying %{word}")
     end
   end
 
@@ -180,11 +180,11 @@ class AzGamePlugin < Plugin
     k = m.channel.downcase.to_s
     word = params[:word].downcase
     if not @games.key?(k)
-      m.reply "no A-Z game running here, can't check if #{word} is valid, can I?"
+      m.reply _("no A-Z game running here, can't check if %{word} is valid, can I?")
       return
     end
     if word !~ /^\S+$/
-      m.reply "I only accept single words composed by letters only, sorry"
+      m.reply _("I only accept single words composed by letters only, sorry")
       return
     end
     word_check(m, k, word)
@@ -194,14 +194,14 @@ class AzGamePlugin < Plugin
     return if m.channel.nil? # Shouldn't happen, but you never know
     k = m.channel.downcase.to_s # to_sym?
     if @games.key?(k)
-      m.reply "the word in #{Bold}#{@games[k].range}#{Bold} was:   #{Bold}#{@games[k].word}"
+      m.reply _("the word in %{bold}%{range}%{bold} was:   %{bold}%{word}%{bold}") % {:bold => Bold, :range => @games[k].range, :word => @games[k].word}
       ar = @games[k].score.inject([]) { |res, kv|
         res.push("%s: %d (%s)" % kv.flatten)
       }
-      m.reply "The game was cancelled after #{@games[k].total_tries} tries. Scores for this game would have been:    #{ar.join('; ')}"
+      m.reply _("The game was cancelled after %{tries} tries. Scores for this game would have been:    %{scores}") % {:tries => @games[k].total_tries, :scores => ar.join('; ')}
       @games.delete(k)
     else
-      m.reply "no A-Z game running in this channel ..."
+      m.reply _("no A-Z game running in this channel ...")
     end
   end
 
@@ -211,43 +211,40 @@ class AzGamePlugin < Plugin
     unless @games.key?(k)
       lang = (params[:lang] || @bot.config['core.language']).to_sym
       method = 'random_pick_'+lang.to_s
-      m.reply "let me think ..."
+      m.reply _("let me think ...")
       if @rules.has_key?(lang) and self.respond_to?(method)
         word = self.send(method)
         if word.empty?
-          m.reply "couldn't think of anything ..."
+          m.reply _("couldn't think of anything ...")
           return
         end
       else
-        m.reply "I can't play A-Z in #{lang}, sorry"
+        m.reply _("I can't play A-Z in %{lang}, sorry") % {:lang => lang}
         return
       end
-      m.reply "got it!"
+      m.reply _("got it!")
       @games[k] = AzGame.new(self, lang, @rules[lang], word)
     end
     tr = @games[k].total_tries
-    case tr
-    when 0
-      tr_msg = ""
-    when 1
-      tr_msg = " (after 1 try"
+    # this message building code is rewritten to make translation easier
+    if tr == 0
+      tr_msg = ''
     else
-      tr_msg = " (after #{tr} tries"
-    end
-
-    unless tr_msg.empty?
       f_tr = @games[k].total_failed
-      case f_tr
-      when 0
-        tr_msg << ")"
-      when 1
-        tr_msg << " and 1 invalid try)"
+      if f_tr > 0
+        tr_msg = _(" (after %{total_tries} and %{invalid_tries}") %
+           { :total_tries => n_("%{count} try", "%{count} tries", tr) %
+                             {:count => tr},
+             :invalid_tries => n_("%{count} invalid try", "%{count} invalid tries", tr) %
+                               {:count => f_tr} }
       else
-        tr_msg << " and #{f_tr} invalid tries)"
+        tr_msg = _(" (after %{total_tries}") %
+                 { :total_tries => n_("%{count} try", "%{count} tries", tr) %
+                             {:count => tr}}
       end
     end
 
-    m.reply "A-Z: #{Bold}#{@games[k].range}#{Bold}" + tr_msg
+    m.reply _("A-Z: %{bold}%{range}%{bold}") % {:bold => Bold, :range => @games[k].range} + tr_msg
     return
   end
 
@@ -258,10 +255,10 @@ class AzGamePlugin < Plugin
     cmd = params[:cmd].to_sym rescue :count
     case cmd
     when :count
-      m.reply "I have #{wc.size > 0 ? wc.size : 'no'} #{lang} words in my cache"
+      m.reply n_("I have %{count} %{lang} word in my cache", "I have %{count} %{lang} words in my cache", wc.size) % {:count => wc.size, :lang => lang}
     when :show, :list
       if pars.empty?
-        m.reply "provide a regexp to match"
+        m.reply _("provide a regexp to match")
         return
       end
       begin
@@ -273,45 +270,48 @@ class AzGamePlugin < Plugin
         matches = []
       end
       if matches.size == 0
-        m.reply "no #{lang} word I know match #{pars[0]}"
+        m.reply _("no %{lang} word I know match %{pattern}") % {:lang => lang, :pattern => pars[0]}
       elsif matches.size > 25
-        m.reply "more than 25 #{lang} words I know match #{pars[0]}, try a stricter matching"
+        m.reply _("more than 25 %{lang} words I know match %{pattern}, try a stricter matching") % {:lang => lang, :pattern => pars[0]}
       else
         m.reply "#{matches.join(', ')}"
       end
     when :info
       if pars.empty?
-        m.reply "provide a word"
+        m.reply _("provide a word")
         return
       end
       word = pars[0].downcase.to_sym
       if not wc.key?(word)
-        m.reply "I don't know any #{lang} word #{word}"
+        m.reply _("I don't know any %{lang} word %{word}") % {:lang => lang, :word => word}
         return
       end
-      tr = "#{word} learned from #{wc[word][:who]}"
-      (tr << " on #{wc[word][:when]}") if wc[word].key?(:when)
+      if wc[word].key?(:when)
+        tr = _("%{word} learned from %{user} on %{date}") % {:word => word, :user => wc[word][:who], :date => wc[word][:when]}
+      else
+        tr = _("%{word} learned from %{user}") % {:word => word, :user => wc[word][:who]} 
+      end
       m.reply tr
-    when :delete
+    when :delete 
       if pars.empty?
-        m.reply "provide a word"
+        m.reply _("provide a word")
         return
       end
       word = pars[0].downcase.to_sym
       if not wc.key?(word)
-        m.reply "I don't know any #{lang} word #{word}"
+        m.reply _("I don't know any %{lang} word %{word}") % {:lang => lang, :word => word}
         return
       end
       wc.delete(word)
       @bot.okay m.replyto
     when :add
       if pars.empty?
-        m.reply "provide a word"
+        m.reply _("provide a word")
         return
       end
       word = pars[0].downcase.to_sym
       if wc.key?(word)
-        m.reply "I already know the #{lang} word #{word}"
+        m.reply _("I already know the %{lang} word %{word}")
         return
       end
       wc[word] = { :who => m.sourcenick, :when => Time.now }
@@ -527,17 +527,17 @@ class AzGamePlugin < Plugin
   def help(plugin, topic="")
     case topic
     when 'manage'
-      return "az [lang] word [count|list|add|delete] => manage the az wordlist for language lang (defaults to current bot language)"
+      return _("az [lang] word [count|list|add|delete] => manage the az wordlist for language lang (defaults to current bot language)")
     when 'cancel'
-      return "az cancel => abort current game"
+      return _("az cancel => abort current game")
     when 'check'
-      return 'az check <word> => checks <word> against current game'
+      return _('az check <word> => checks <word> against current game')
     when 'rules'
-      return "try to guess the word the bot is thinking of; if you guess wrong, the bot will use the new word to restrict the range of allowed words: eventually, the range will be so small around the correct word that you can't miss it"
+      return _("try to guess the word the bot is thinking of; if you guess wrong, the bot will use the new word to restrict the range of allowed words: eventually, the range will be so small around the correct word that you can't miss it")
     when 'play'
-      return "az => start a game if none is running, show the current word range otherwise; you can say 'az <language>' if you want to play in a language different from the current bot default"
+      return _("az => start a game if none is running, show the current word range otherwise; you can say 'az <language>' if you want to play in a language different from the current bot default")
     end
-    return "az topics: play, rules, cancel, manage, check"
+    return _("az topics: play, rules, cancel, manage, check")
   end
 
 end
