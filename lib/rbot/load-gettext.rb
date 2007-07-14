@@ -26,6 +26,7 @@ begin
     debug 'using ruby-gettext'
     gettext_info.string.each_line {|l| debug l}
   rescue Exception
+    warn "ruby-gettext was loaded but appears to be non-functional. maybe an mo file doesn't exist for your locale."
   end
 
 rescue LoadError
@@ -42,6 +43,10 @@ rescue LoadError
 
   def n_(s_single, s_plural, n)
     n > 1 ? s_plural : s_single
+  end
+
+  def Nn_(s_single, s_plural)
+    n_(s_single, s_plural)
   end
 
   def s_(*args)
