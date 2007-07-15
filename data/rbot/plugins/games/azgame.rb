@@ -66,12 +66,12 @@ class AzGame
     debug "Total score: #{t}"
     ret = Hash.new
     @tries.each { |k, a|
-      ret[k] = [t*a/n, "%d %s" % [a, a > 1 ? "tries" : "try"]]
+      ret[k] = [t*a/n, n_("%{count} try", "%{count} tries", a) % {:count => a}]
     }
     if @winner
       debug "replacing winner score of %d with %d" % [ret[@winner].first, t]
       tries = ret[@winner].last
-      ret[@winner] = [t, "winner, #{tries}"]
+      ret[@winner] = [t, _("winner, %{tries}") % {:tries => tries}]
     end
     return ret.sort_by { |h| h.last.first }.reverse
   end

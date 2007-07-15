@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-07-13 23:31-0400\n"
+"POT-Creation-Date: 2007-07-14 03:25-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -925,6 +925,17 @@ msgstr ""
 msgid "No game to stop here, because no game is being played."
 msgstr ""
 
+#: data/rbot/plugins/games/azgame.rb:69 data/rbot/plugins/games/azgame.rb:236
+#: data/rbot/plugins/games/azgame.rb:242
+msgid "%{count} try"
+msgid_plural "%{count} tries"
+msgstr[0] ""
+msgstr[1] ""
+
+#: data/rbot/plugins/games/azgame.rb:74
+msgid "winner, %{tries}"
+msgstr ""
+
 #: data/rbot/plugins/games/azgame.rb:153
 msgid ""
 "%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, "
@@ -997,12 +1008,6 @@ msgstr ""
 #: data/rbot/plugins/games/azgame.rb:235
 msgid " (after %{total_tries} and %{invalid_tries}"
 msgstr ""
-
-#: data/rbot/plugins/games/azgame.rb:236 data/rbot/plugins/games/azgame.rb:242
-msgid "%{count} try"
-msgid_plural "%{count} tries"
-msgstr[0] ""
-msgstr[1] ""
 
 #: data/rbot/plugins/games/azgame.rb:238
 msgid "%{count} invalid try"

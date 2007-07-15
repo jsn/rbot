@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-07-13 23:31-0400\n"
+"POT-Creation-Date: 2007-07-14 03:25-0400\n"
 "PO-Revision-Date: 2007-07-09 01:36-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -831,46 +831,46 @@ msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:203
 msgid "%{current_player}, it's your turn. %{previous_word} -> %{current_word}"
-msgstr "%{current_player}様の番です。%{previous_word} -> %{current_word}"
+msgstr "%{current_player} さんの番です。%{previous_word} -> %{current_word}"
 
 #: data/rbot/plugins/games/shiritori.rb:207
 msgid "No one has given the first word yet. Say the first word to start."
-msgstr "しりとりの始めの言葉を言ってください"
+msgstr "しりとりの始めの言葉を教えてください。"
 
 #: data/rbot/plugins/games/shiritori.rb:209
 msgid ""
 "Poor %{current_player} is playing alone! Anyone care to join? %"
 "{previous_word} -> %{current_word}"
 msgstr ""
-"%{current_player}様は一人で寂しいでしょう。他の人しりとりしませんか？"
+"%{current_player}さんは一人で寂しいでしょう。他の人もしりとりしませんか？"
 "{previous_word} -> %{current_word}"
 
 #: data/rbot/plugins/games/shiritori.rb:240
 msgid "%{player} took too long and is out of the game. Try again next game!"
 msgstr ""
-"残念ですが%{player}様はタイムアウトで負けです。今度のゲームがんばってね！"
+"残念ですが%{player}さんはタイムアウトで負けです。今度のゲームがんばってね！"
 
 #: data/rbot/plugins/games/shiritori.rb:245
 msgid "%{player} is the last remaining player and the winner! Congratulations!"
-msgstr "%{player}様は勝者です！おめでとうございます！"
+msgstr "%{player}さんは勝者です！おめでとうございます！"
 
 #: data/rbot/plugins/games/shiritori.rb:253
 msgid "%{player} took too long and skipped the turn."
-msgstr "%{player}様はタイムアウトで、番を飛びました。"
+msgstr "%{player}さんはタイムアウトで、番を飛びました。"
 
 #: data/rbot/plugins/games/shiritori.rb:281
 msgid "%{player} has given the first word: %{word}"
-msgstr "%{player}様は始めの言葉を決めました：%{word}"
+msgstr "%{player}さんは始めの言葉を決めました：%{word}"
 
 #: data/rbot/plugins/games/shiritori.rb:287
 msgid "Welcome to shiritori, %{speaker}."
-msgstr "しりとりへようこそ、%{speaker}様"
+msgstr "しりとりへようこそ、%{speaker}さん"
 
 #: data/rbot/plugins/games/shiritori.rb:292
 msgid "The word %{used_word} has been used. Retry from %{word}"
 msgstr ""
-"「%{used_word}」はもう使った言葉なのでダメです。もう一度「%{word}」から続いて"
-"ください"
+"「%{used_word}」はもう使った言葉なのでダメです。もう一度「%{word}」から続けて"
+"ください。"
 
 #: data/rbot/plugins/games/shiritori.rb:297
 msgid ""
@@ -884,12 +884,12 @@ msgid ""
 "It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
 msgstr ""
 "「%{bad_word}」からしりとりが続けられないのでダメです。もう一度「%{word}」か"
-"ら続いてください"
+"ら続けてください。"
 
 #: data/rbot/plugins/games/shiritori.rb:306
 msgid ""
 "It's impossible to continue the chain from %{word}. Start with another word."
-msgstr "「%{word}」ではしりごりを始められないのです。他の言葉で始めてください"
+msgstr "「%{word}」ではしりごりを始められないのです。他の言葉で始めてください。"
 
 #: data/rbot/plugins/games/shiritori.rb:327
 msgid ""
@@ -904,7 +904,7 @@ msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:398
 msgid "Already playing shiritori here"
-msgstr "今しりとりを遊んでいます"
+msgstr "もうすでにしりとりを遊んでいます"
 
 #: data/rbot/plugins/games/shiritori.rb:409
 msgid "Shiritori has started. Please say the first word"
@@ -916,42 +916,52 @@ msgstr "%{ruleset}のしりとりを始められませんでした。理由は�
 
 #: data/rbot/plugins/games/shiritori.rb:415
 msgid "There is no ruleset named %{ruleset}"
-msgstr "「%{ruleset}」というルールスは知りません"
+msgstr "「%{ruleset}」というルールセットは知りません。"
 
 #: data/rbot/plugins/games/shiritori.rb:433
 msgid "Shiritori has stopped. Hope you had fun!"
-msgstr "しりとりのゲームが止まりました"
+msgstr "しりとりのゲームが中止になりました。"
 
 #: data/rbot/plugins/games/shiritori.rb:436
 msgid "No game to stop here, because no game is being played."
-msgstr "しりとりのゲームをしていません"
+msgstr "しりとりのゲームをしていません。"
+
+#: data/rbot/plugins/games/azgame.rb:69 data/rbot/plugins/games/azgame.rb:236
+#: data/rbot/plugins/games/azgame.rb:242
+msgid "%{count} try"
+msgid_plural "%{count} tries"
+msgstr[0] "%{count}つのトライ"
+
+#: data/rbot/plugins/games/azgame.rb:74
+msgid "winner, %{tries}"
+msgstr "（勝者）%{tries}"
 
 #: data/rbot/plugins/games/azgame.rb:153
 msgid ""
 "%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, "
 "%{bold}%{player}%{bold}!"
 msgstr ""
-"%{bold}ビンゴー!%{bold} 秘密の言葉は%{underline}%{word}%{underline}でした。お"
-"めでとうございます。%{bold}%{player}%{bold}!"
+"%{bold}ビンゴー!%{bold} 秘密の言葉は %{underline}%{word}%{underline} でした。お"
+"めでとうございます、%{bold}%{player}%{bold} さん！"
 
 #: data/rbot/plugins/games/azgame.rb:160
 msgid ""
 "The game was won after %{tries} tries. Scores for this game:    %{scores}"
-msgstr "このゲームが%{tries}のトライの後勝ちました。スコーは：    %{scores}"
+msgstr "このゲームが%{tries}つのトライ後勝ちました。スコーは：    %{scores} でした。"
 
 #: data/rbot/plugins/games/azgame.rb:163
 msgid "%{word} is not in the range %{bold}%{range}%{bold}"
-msgstr "%{word}は%{bold}%{range}%{bold}のレンジの以外です。"
+msgstr "%{word}は%{bold}%{range}%{bold}のレンジ外です。"
 
 #: data/rbot/plugins/games/azgame.rb:165
 msgid "%{word} doesn't exist or is not acceptable for the game"
-msgstr "%{word}は言葉じゃない。或はこのゲームに受けない。"
+msgstr "「%{word}」って言葉は存在しませんか、このゲームに入れることができません。"
 
 #: data/rbot/plugins/games/azgame.rb:169
 msgid "close, but no cigar. New range: %{bold}%{range}%{bold}"
 msgstr ""
-"レンジーを小さくしました。もっと頑張ってくださいね！新しいレーンジは：%{bold}%"
-"{range}%{bold}"
+"レーンジを小さくしました。もっと頑張ってくださいね！新しいレーンジは：%"
+"{bold}%{range}%{bold}"
 
 #: data/rbot/plugins/games/azgame.rb:173
 msgid "%{word} is already one of the range extrema: %{range}"
@@ -963,7 +973,7 @@ msgstr "%{word}をチェックしたとき何かエラーが発生しました�
 
 #: data/rbot/plugins/games/azgame.rb:183
 msgid "no A-Z game running here, can't check if %{word} is valid, can I?"
-msgstr "今A-Zのゲームをしていませんから、%{word}のチェックができません。"
+msgstr "今A-Zのゲームをしていませんから、「%{word}」のチェックができません。"
 
 #: data/rbot/plugins/games/azgame.rb:187
 msgid "I only accept single words composed by letters only, sorry"
@@ -972,19 +982,19 @@ msgstr ""
 #: data/rbot/plugins/games/azgame.rb:197
 msgid "the word in %{bold}%{range}%{bold} was:   %{bold}%{word}%{bold}"
 msgstr ""
-"%{bold}%{range}%{bold}の以内の秘密の言葉は   %{bold}%{word}%{bold}でした。"
+"%{bold}%{range}%{bold}の以内の秘密の言葉は「%{bold}%{word}%{bold}」でした。"
 
 #: data/rbot/plugins/games/azgame.rb:201
 msgid ""
 "The game was cancelled after %{tries} tries. Scores for this game would have "
 "been:    %{scores}"
 msgstr ""
-"このゲームは%{tries}のトライの後キャンセルしました。いままでのスコアは    %"
-"{scores}でした。"
+"このゲームは%{tries}回のトライの後キャンセルされました。いままでのスコアは %"
+"{scores} でした。"
 
 #: data/rbot/plugins/games/azgame.rb:204
 msgid "no A-Z game running in this channel ..."
-msgstr "このチャンネルにはA-Zのゲームを遊んでありません。"
+msgstr "このチャンネルにはA-Zのゲームを遊んでいません。"
 
 #: data/rbot/plugins/games/azgame.rb:214
 msgid "let me think ..."
@@ -1000,21 +1010,16 @@ msgstr "申し訳ありませんが、%{lang}の言語でA-Zのゲームがで�
 
 #: data/rbot/plugins/games/azgame.rb:225
 msgid "got it!"
-msgstr "考えました！"
+msgstr "わかりました！"
 
 #: data/rbot/plugins/games/azgame.rb:235
 msgid " (after %{total_tries} and %{invalid_tries}"
 msgstr " (%{total_tries}と%{invalid_tries}の後"
 
-#: data/rbot/plugins/games/azgame.rb:236 data/rbot/plugins/games/azgame.rb:242
-msgid "%{count} try"
-msgid_plural "%{count} tries"
-msgstr[0] "%{count}のトライ"
-
 #: data/rbot/plugins/games/azgame.rb:238
 msgid "%{count} invalid try"
 msgid_plural "%{count} invalid tries"
-msgstr[0] "%{count}の失敗したトライ"
+msgstr[0] "%{count}つの間違えたトライ"
 
 #: data/rbot/plugins/games/azgame.rb:241
 msgid " (after %{total_tries}"
@@ -1027,7 +1032,7 @@ msgstr ""
 #: data/rbot/plugins/games/azgame.rb:258
 msgid "I have %{count} %{lang} word in my cache"
 msgid_plural "I have %{count} %{lang} words in my cache"
-msgstr[0] "キャッシュに%{lang}の言葉は%{count}あります。"
+msgstr[0] "キャッシュには、%{lang}の言葉は%{count}本あります。"
 
 #: data/rbot/plugins/games/azgame.rb:261
 msgid "provide a regexp to match"
@@ -1049,19 +1054,19 @@ msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:286 data/rbot/plugins/games/azgame.rb:302
 msgid "I don't know any %{lang} word %{word}"
-msgstr ""
+msgstr "%{lang} の言葉「%{word}」知っていません。"
 
 #: data/rbot/plugins/games/azgame.rb:290
 msgid "%{word} learned from %{user} on %{date}"
-msgstr ""
+msgstr "「{word}」は %{user} さんに%{date}に教えてもらいました"
 
 #: data/rbot/plugins/games/azgame.rb:292
 msgid "%{word} learned from %{user}"
-msgstr ""
+msgstr "「{word}」は %{user} さんに教えてもらいました"
 
 #: data/rbot/plugins/games/azgame.rb:314
 msgid "I already know the %{lang} word %{word}"
-msgstr ""
+msgstr "%{lang} の言葉「%{word}」はもう知っています。"
 
 #: data/rbot/plugins/games/azgame.rb:530
 msgid ""
@@ -1071,11 +1076,11 @@ msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:532
 msgid "az cancel => abort current game"
-msgstr ""
+msgstr "az cancel => いま遊んでいるゲームを終了します"
 
 #: data/rbot/plugins/games/azgame.rb:534
 msgid "az check <word> => checks <word> against current game"
-msgstr ""
+msgstr "az check <word> => いま遊んでいるゲームのルールで、<word> をチェックします"
 
 #: data/rbot/plugins/games/azgame.rb:536
 msgid ""

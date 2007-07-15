@@ -5,8 +5,8 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2007-07-13 23:31-0400\n"
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2007-07-14 03:25-0400\n"
 "PO-Revision-Date: 2007-07-14 00:06-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: English\n"
@@ -1042,6 +1042,17 @@ msgstr "Shiritori has stopped. Hope you had fun!"
 msgid "No game to stop here, because no game is being played."
 msgstr "No game to stop here, because no game is being played."
 
+#: data/rbot/plugins/games/azgame.rb:69 data/rbot/plugins/games/azgame.rb:236
+#: data/rbot/plugins/games/azgame.rb:242
+msgid "%{count} try"
+msgid_plural "%{count} tries"
+msgstr[0] "%{count} try"
+msgstr[1] "%{count} tries"
+
+#: data/rbot/plugins/games/azgame.rb:74
+msgid "winner, %{tries}"
+msgstr ""
+
 #: data/rbot/plugins/games/azgame.rb:153
 msgid ""
 "%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, "
@@ -1119,12 +1130,6 @@ msgstr "got it!"
 #: data/rbot/plugins/games/azgame.rb:235
 msgid " (after %{total_tries} and %{invalid_tries}"
 msgstr " (after %{total_tries} and %{invalid_tries}"
-
-#: data/rbot/plugins/games/azgame.rb:236 data/rbot/plugins/games/azgame.rb:242
-msgid "%{count} try"
-msgid_plural "%{count} tries"
-msgstr[0] "%{count} try"
-msgstr[1] "%{count} tries"
 
 #: data/rbot/plugins/games/azgame.rb:238
 msgid "%{count} invalid try"
