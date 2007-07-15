@@ -947,7 +947,7 @@ msgstr ""
 #: data/rbot/plugins/games/azgame.rb:160
 msgid ""
 "The game was won after %{tries} tries. Scores for this game:    %{scores}"
-msgstr "このゲームが%{tries}つのトライ後勝ちました。スコーは：    %{scores} でした。"
+msgstr "このゲームが%{tries}つのトライの後勝ちました。スコアは：    %{scores} でした。"
 
 #: data/rbot/plugins/games/azgame.rb:163
 msgid "%{word} is not in the range %{bold}%{range}%{bold}"
