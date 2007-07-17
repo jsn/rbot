@@ -15,6 +15,7 @@ class RoulettePlugin < Plugin
     super
     reset_chambers
     @players = Array.new
+    @last = ''
   end
 
   def help(plugin, topic="")
@@ -46,11 +47,12 @@ class RoulettePlugin < Plugin
       totals = RouletteHistory.new(0,0,0,0,0)
     end
 
-    if @players.last == m.sourcenick and not @bot.config['roulette.twice_in_a_row']
+    if @last == m.sourcenick and not @bot.config['roulette.twice_in_a_row']
       m.reply "you can't go twice in a row!"
       return
     end
 
+    @last = m.sourcenick
     unless @players.include?(m.sourcenick)
       @players << m.sourcenick
       playerdata.games += 1
@@ -72,6 +74,7 @@ class RoulettePlugin < Plugin
         @registry["player " + plyr] = pdata
       }
       @players.clear
+      @last = ''
       @bot.kick(m.replyto, m.sourcenick, "*BANG*") if @bot.config['roulette.kick']
     else
       m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => +click+"
@@ -118,6 +121,7 @@ class RoulettePlugin < Plugin
     @registry["totals"] = totals
 
     @players.clear
+    @last = ''
   end
 
   def spin(m, params={})
