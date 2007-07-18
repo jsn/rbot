@@ -1,17 +1,26 @@
 # load gettext module and provide fallback in case of failure
 
-require 'stringio'
+class GetTextVersionError < Exception
+end
 
 # try to load gettext, or provide fake getttext functions
 begin
+  require 'gettext/version'
+
+  gettext_version = GetText::VERSION.split('.').map {|n| n.to_i}
+  include Comparable # required for Array#between?
+  raise GetTextVersionError unless gettext_version.between? [1, 8, 0], [1, 10, 0]
+
   require 'gettext'
+
   include GetText
+
   bindtextdomain 'rbot'
 
   module GetText
-    # patch for ruby-gettext 1.9.0 to cope with anonymous modules used by rbot
+    # patch for ruby-gettext 1.8.0 up to 1.10.0 (and more?) to cope with anonymous
+    # modules used by rbot
     # FIXME remove the patch when ruby-gettext is fixed, or rbot switches to named modules
-  # fix for module names that are not constant names
     if !instance_methods.include?('orig_bound_targets')
       alias :orig_bound_targets :bound_targets
     end
@@ -21,6 +30,7 @@ begin
   end
 
   begin
+    require 'stringio'
     gettext_info = StringIO.new
     current_textdomain_info(:out=>gettext_info) # fails sometimes
     debug 'using ruby-gettext'
@@ -29,8 +39,8 @@ begin
     warn "ruby-gettext was loaded but appears to be non-functional. maybe an mo file doesn't exist for your locale."
   end
 
-rescue LoadError
-  warn 'ruby-gettext package not available; translations are disabled'
+rescue LoadError, GetTextVersionError
+  warn 'ruby-gettext package not available, or its version is unsupported; translations are disabled'
 
   # dummy functions that return msg_id without translation
   def _(s)
