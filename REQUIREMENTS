@@ -2,13 +2,14 @@ Ruby modules needed for rbot
 ============================
 
 Core requirements
-      bdb (berkley db) http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb
-                       (which requires libdb2 or better, from
-                       www.sleepycat.com)
+      bdb (berkley db)      http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb
+                            (which requires libdb2 or better, from
+                            www.sleepycat.com)
       net/http 1.2+
-      net/https        (for debian, this will also need libopenssl-ruby)
+      net/https             (for debian, this will also need libopenssl-ruby)
       socket
       uri
+      ruby-uettext 1.8.0+   optional, if installed rbot can use localized messages     
 
 Plugin requirements
 (these are all optional, if you don't have them, the plugins just won't
