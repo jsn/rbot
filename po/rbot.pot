@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-07-14 03:25-0400\n"
+"POT-Creation-Date: 2007-07-20 20:10-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -837,6 +837,61 @@ msgid ""
 "<phrase> [using <strategy>] [from <database>] => Show matching phrases; "
 "dictclient databases => List databases; dictclient strategies => List "
 "strategies"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:54
+msgid "Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:70
+msgid "The definition you provided is invalid: %{reason}"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:81 data/rbot/plugins/alias.rb:98
+msgid "No such alias is defined"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:87
+msgid "No aliases defined"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:96
+msgid "Alias of %{command}"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:107
+msgid ""
+"Not all substitutions in command text have matching arguments in alias text"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:124
+msgid ""
+"The alias seems to have caused infinite recursion. Please examine your alias "
+"definitions"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:140
+msgid "Error handling the alias, the command is not defined"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:150
+msgid "Create and use aliases for commands. Topics: create, commands"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:152
+msgid ""
+"\"alias <text> => <command>\" => add text as an alias of command. Text can "
+"contain placeholders marked with : or * for :words and *multiword arguments. "
+"The command can contain placeholders enclosed with < > which will be "
+"substituded with argument values. For example: alias googlerbot *terms => "
+"google site:linuxbrit.co.uk/rbot/ <terms>"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:154
+msgid ""
+"alias list => list defined aliases | alias whatis <alias> => show definition "
+"of the alias | alias remove <alias> => remove defined alias | see the "
+"\"create\" topic about adding aliases"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:203
