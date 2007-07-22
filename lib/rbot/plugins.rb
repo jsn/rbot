@@ -519,13 +519,13 @@ module Plugins
         if short
           output << n_("%{highlight}%{count} plugin failed to load%{highlight}",
                        "%{highlight}%{count} plugins failed to load%{highlight}",
-                       @ignored.length) %
-                    { :count => @ignored.length, :highlight => Reverse }
+                       @failed.length) %
+                    { :count => @failed.length, :highlight => Reverse }
         else
           output << n_("%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%{command}%{bold} to see why",
                        "%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%{command}%{bold} to see why",
-                       @ignored.length) %
-                    { :count => @ignored.length, :highlight => Reverse,
+                       @failed.length) %
+                    { :count => @failed.length, :highlight => Reverse,
                       :bold => Bold, :command => "#{Bold}help failed plugins#{Bold}"}
         end
       end
