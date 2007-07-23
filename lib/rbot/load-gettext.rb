@@ -9,7 +9,9 @@ begin
 
   gettext_version = GetText::VERSION.split('.').map {|n| n.to_i}
   include Comparable # required for Array#between?
-  raise GetTextVersionError unless gettext_version.between? [1, 8, 0], [1, 10, 0]
+  unless gettext_version.between? [1, 8, 0], [1, 10, 0]
+    raise GetTextVersionError, "Unsupported ruby-gettext version installed: #{gettext_version.join '.'}; supported versions are 1.8.0-1.10.0"
+  end
 
   require 'gettext'
 
@@ -40,7 +42,7 @@ begin
   end
 
 rescue LoadError, GetTextVersionError
-  warn 'ruby-gettext package not available, or its version is unsupported; translations are disabled'
+  warn "failed to load ruby-gettext package: #{$!}; translations are disabled"
 
   # dummy functions that return msg_id without translation
   def _(s)
