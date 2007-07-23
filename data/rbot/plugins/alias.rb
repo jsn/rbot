@@ -29,6 +29,7 @@
 #   to detect and stop this, but a few recursive calls can still cause spamming
 
 require 'yaml'
+require 'set'
 
 class AliasPlugin < Plugin
   # an exception raised when loading or getting input of invalid alias definitions
@@ -103,8 +104,9 @@ class AliasPlugin < Plugin
     # each alias is implemented by adding a message map, whose handler creates a message
     # containing the aliased command
 
-    command.grep(/<(\w+)>/) {$1}.all? {|s| text =~ /(?:^|\s)[:*]#{s}(?:\s|$)/ } or
-      raise AliasDefinitionError.new(_('Not all substitutions in command text have matching arguments in alias text'))
+    command.grep(/<(\w+)>/) {$1}.to_set ==
+      text.grep(/(?:^|\s)[:*](\w+)(?:\s|$)/) {$1}.to_set or
+      raise AliasDefinitionError.new(_('The arguments in alias must match the substitutions in command, and vice versa'))
     
     @aliases[text] = command
     map text, :action => :"alias_handle<#{text}>", :auth_path => 'run'
