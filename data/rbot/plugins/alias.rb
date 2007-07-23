@@ -170,6 +170,9 @@ plugin.map 'alias whatis *text',
 plugin.map 'alias remove *text',
            :action => :cmd_remove,
            :auth_path => 'edit'
+plugin.map 'alias rm *text',
+           :action => :cmd_remove,
+           :auth_path => 'edit'
 plugin.map 'alias *text => *command',
            :action => :cmd_add,
            :auth_path => 'edit'
