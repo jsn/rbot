@@ -1,0 +1,75 @@
+okay:
+  好的
+  好阿 :)
+  好！
+  好
+  好了
+  沒問題！
+  好吧
+  當然
+  嗯
+  我來幫你搞定
+dunno:
+  不知道
+  咬我阿
+  想不到
+  沒有頭緒
+  ...嗯？
+  *聳肩*
+  別問我
+  天曉得？
+  我不行啦
+  你最好自己搞定！
+dunno_about_X:
+  我完全不懂 %s
+  我從沒聽過 %s :(
+  %s? 那又如何？
+  什麼是 %s？
+insult:
+  %s: 討厭鬼！
+  %s: :(
+  %s: 我討厭你 :(
+  %s: 去死吧！
+  %s: 我生氣了！
+  %s: 你傷了我的心
+hello:
+  hello :)
+  hola :)
+  你好
+  嗨！
+  嗯
+  嗨
+  唷
+  啥事？
+hello_X:
+  hello %s :)
+  %s: 我在
+  %s: hola :)
+  %s: 你好
+  嗨 %s :)
+  %s: 嗯
+  %s: 嗨！
+  唷 %s！
+  %s: 啥事？
+  啥阿 %s？
+welcome:
+  沒問題
+  你客氣了
+  de nada
+  any time
+  np :)
+thanks:
+  謝謝 :)
+  schweet!
+  謝 :)
+  =D
+  cheers!
+thanks_X:
+  %s: 謝謝 :)
+  %s: schweet!
+  %s: =D
+  %s: 謝 :)
+  %s: cheers
+quit:
+  好吧，掰
+  再見
