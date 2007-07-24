@@ -42,7 +42,12 @@ class ::Definition
   end
 
   def body
-    definition[1..-1].join.gsub(/\s+/, ' ').strip
+    # two or more consecutive newlines are replaced with double spaces, while single
+    # newlines are replaced with single spaces
+    lb = /\r?\n/
+    definition[1..-1].join.
+      gsub(/\s*(:#{lb}){2,}\s*/, '  ').
+      gsub(/\s*#{lb}\s*/, ' ').strip
   end
 end
 
@@ -127,7 +132,7 @@ class DictClientPlugin < Plugin
             ).gsub(
               '<definition>', r.body.truncate(@bot.config['dictclient.max_length_per_def'])
             )
-          }.join ' '
+          }.join ' | '
         end
       else
         _("No definition for %{phrase} found from %{database}.") % 
@@ -162,7 +167,7 @@ class DictClientPlugin < Plugin
   def cmd_databases(m, params)
     with_dict(m) do |d|
       m.reply _("Databases: %{list}") % {
-        :list => d.show_db.collect {|db, des| "#{format_database db}: #{des}"}.join('; ')
+        :list => d.show_db.collect {|db, des| "#{format_database db}: #{des}"}.join(' | ')
       }
     end
   end
@@ -170,7 +175,7 @@ class DictClientPlugin < Plugin
   def cmd_strategies(m, params)
     with_dict(m) do |d|
       m.reply _("Strategies: %{list}") % {
-        :list => d.show_strat.collect {|s, des| "#{s}: #{des}"}.join('; ')
+        :list => d.show_strat.collect {|s, des| "#{s}: #{des}"}.join(' | ')
       }
     end
   end
