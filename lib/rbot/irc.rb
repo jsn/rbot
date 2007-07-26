@@ -970,6 +970,17 @@ module Irc
       end
     end
 
+    def modes_on(channel)
+      channel.modes_of(self)
+    end
+
+    def is_op?(channel)
+      channel.has_op?(self)
+    end
+
+    def is_voice?(channel)
+      channel.has_voice?(self)
+    end
   end
 
 
