@@ -1336,6 +1336,21 @@ module Irc
       @mode[sym.to_sym] = kl.new(self)
     end
 
+    def modes_of(user)
+      l = []
+      @mode.map { |s, m|
+        l << s if (m.class <= UserMode and m.list[user])
+      }
+      l
+    end
+
+    def has_op?(user)
+      @mode.has_key?(:o) and @mode[:o].list[user]
+    end
+
+    def has_voice?(user)
+      @mode.has_key?(:v) and @mode[:v].list[user]
+    end
   end
 
 
