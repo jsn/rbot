@@ -554,7 +554,7 @@ module Plugins
         # debug "Failures: #{@failed.inspect}"
         return _("no plugins failed to load") if @failed.empty?
         return @failed.collect { |p|
-          _('%{highlight}%{plugin}%{highlight} in %{dir}failed with error %{exception}: %{reason}') % {
+          _('%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %{reason}') % {
               :highlight => Bold, :plugin => p[:name], :dir => p[:dir],
               :exception => p[:reason].class, :reason => p[:reason],
           } + if $1 && !p[:reason].backtrace.empty?
