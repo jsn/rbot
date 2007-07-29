@@ -971,15 +971,33 @@ module Irc
     end
 
     def modes_on(channel)
-      channel.modes_of(self)
+      case channel
+      when Channel
+        channel.modes_of(self)
+      else
+        return @server.channel(channel).modes_of(self) if @server
+        raise "Can't resolve channel #{channel}"
+      end
     end
 
     def is_op?(channel)
-      channel.has_op?(self)
+      case channel
+      when Channel
+        channel.has_op?(self)
+      else
+        return @server.channel(channel).has_op?(self) if @server
+        raise "Can't resolve channel #{channel}"
+      end
     end
 
     def is_voice?(channel)
-      channel.has_voice?(self)
+      case channel
+      when Channel
+        channel.has_voice?(self)
+      else
+        return @server.channel(channel).has_voice?(self) if @server
+        raise "Can't resolve channel #{channel}"
+      end
     end
   end
 
