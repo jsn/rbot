@@ -1114,6 +1114,44 @@ module Irc
         when RPL_DATASTR
           data[:text] = argv[1]
           handle(:datastr, data)
+	when RPL_WHOREPLY
+          data[:channel] = argv[1]
+          data[:user] = argv[2]
+          data[:host] = argv[3]
+          data[:userserver] = argv[4]
+          data[:nick] = argv[5]
+          if argv[6] =~ /^(H|G)(\*)?(.*)?$/
+            data[:away] = ($1 == 'G')
+            data[:ircop] = $2
+            data[:modes] = $3.scan(/./).map { |mode|
+              m = @server.supports[:prefix][:prefixes].index(mode.to_sym)
+              @server.supports[:prefix][:modes][m]
+            } rescue []
+          else
+            warning "Strange WHO reply: #{serverstring.inspect}"
+          end
+          data[:hopcount], data[:real] = argv[7].split(" ", 2)
+
+          user = @server.get_user(data[:nick])
+
+          user.user = data[:user]
+          user.host = data[:host]
+          user.away = data[:away] # FIXME doesn't provide the actual message
+          # TODO ircop status
+          # TODO userserver
+          # TODO hopcount
+          # TODO real
+
+          channel = @server.get_channel(data[:channel])
+
+          channel.add_user(user, :silent=>true)
+          data[:modes].map { |mode|
+            channel.mode[mode].set(user)
+          }
+
+          handle(:who, data)
+        when RPL_ENDOFWHO
+          handle(:eowho, data)
         else
           handle(:unknown, data)
         end
