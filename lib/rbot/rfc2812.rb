@@ -1130,7 +1130,7 @@ module Irc
           else
             warning "Strange WHO reply: #{serverstring.inspect}"
           end
-          data[:hopcount], data[:real] = argv[7].split(" ", 2)
+          data[:hopcount], data[:real_name] = argv[7].split(" ", 2)
 
           user = @server.get_user(data[:nick])
 
@@ -1140,7 +1140,7 @@ module Irc
           # TODO ircop status
           # TODO userserver
           # TODO hopcount
-          # TODO real
+          user.real_name = data[:real_name]
 
           channel = @server.get_channel(data[:channel])
 

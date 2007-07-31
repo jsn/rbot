@@ -885,7 +885,7 @@ module Irc
   class User < Netmask
     alias :to_s :nick
 
-    attr :real_name
+    attr_accessor :real_name
 
     # Create a new IRC User from a given Netmask (or anything that can be converted
     # into a Netmask) provided that the given Netmask does not have globs.
