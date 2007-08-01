@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-07-23 14:52-0400\n"
+"POT-Creation-Date: 2007-08-01 00:36-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
@@ -95,8 +95,9 @@ msgid "no plugins failed to load"
 msgstr "沒有外掛程式載入失敗"
 
 #: lib/rbot/plugins.rb:557
+#, fuzzy
 msgid ""
-"%{highlight}%{plugin}%{highlight} in %{dir}failed with error %{exception}: %"
+"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
 msgstr ""
 "%{dir} 的 %{highlight}%{plugin}%{highlight} 外掛程式發生錯誤 %{exception}: %"
@@ -134,7 +135,7 @@ msgstr ""
 "Set false to prevent new botusers from recognizing IRC users without a need "
 "to manually login"
 
-#: lib/rbot/botuser.rb:686
+#: lib/rbot/botuser.rb:690
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr "%{user}，你並沒有 '%{command}' 權限"
 
@@ -869,7 +870,8 @@ msgstr ""
 
 #: data/rbot/plugins/alias.rb:109
 msgid ""
-"Not all substitutions in command text have matching arguments in alias text"
+"The arguments in alias must match the substitutions in command, and vice "
+"versa"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:126
@@ -933,7 +935,7 @@ msgid "%{player} has given the first word: %{word}"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:287
-msgid "Welcome to shiritori, %{speaker}."
+msgid "Welcome to shiritori, %{player}."
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:292

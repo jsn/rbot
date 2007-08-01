@@ -284,7 +284,7 @@ class ShiritoriGame
       if !@players.include?(speaker)
         # A new player
         @players.unshift speaker
-        m.reply _("Welcome to shiritori, %{speaker}.") %
+        m.reply _("Welcome to shiritori, %{player}.") %
                 {:player => speaker}
       end
       next_player

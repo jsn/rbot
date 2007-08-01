@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-07-23 14:52-0400\n"
+"POT-Creation-Date: 2007-08-01 00:36-0400\n"
 "PO-Revision-Date: 2007-07-09 01:36-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -92,7 +92,7 @@ msgstr ""
 
 #: lib/rbot/plugins.rb:557
 msgid ""
-"%{highlight}%{plugin}%{highlight} in %{dir}failed with error %{exception}: %"
+"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
 msgstr ""
 
@@ -124,7 +124,7 @@ msgid ""
 "to manually login"
 msgstr ""
 
-#: lib/rbot/botuser.rb:686
+#: lib/rbot/botuser.rb:690
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr ""
 
@@ -851,7 +851,8 @@ msgstr ""
 
 #: data/rbot/plugins/alias.rb:109
 msgid ""
-"Not all substitutions in command text have matching arguments in alias text"
+"The arguments in alias must match the substitutions in command, and vice "
+"versa"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:126
@@ -897,29 +898,29 @@ msgid ""
 "Poor %{current_player} is playing alone! Anyone care to join? %"
 "{previous_word} -> %{current_word}"
 msgstr ""
-"%{current_player}さんは一人で寂しいでしょう。他の人もしりとりしませんか？"
+"%{current_player} さんは一人で寂しいでしょう。他の人もしりとりしませんか？%"
 "{previous_word} -> %{current_word}"
 
 #: data/rbot/plugins/games/shiritori.rb:240
 msgid "%{player} took too long and is out of the game. Try again next game!"
 msgstr ""
-"残念ですが%{player}さんはタイムアウトで負けです。今度のゲームがんばってね！"
+"残念ですが %{player} さんはタイムアウトで負けです。今度のゲームがんばってね！"
 
 #: data/rbot/plugins/games/shiritori.rb:245
 msgid "%{player} is the last remaining player and the winner! Congratulations!"
-msgstr "%{player}さんは勝者です！おめでとうございます！"
+msgstr "%{player} さんは勝者です！おめでとうございます！"
 
 #: data/rbot/plugins/games/shiritori.rb:253
 msgid "%{player} took too long and skipped the turn."
-msgstr "%{player}さんはタイムアウトで、番を飛びました。"
+msgstr "%{player} さんはタイムアウトで、番を飛びました。"
 
 #: data/rbot/plugins/games/shiritori.rb:281
 msgid "%{player} has given the first word: %{word}"
-msgstr "%{player}さんは始めの言葉を決めました：%{word}"
+msgstr "%{player} さんは始めの言葉を決めました：%{word}"
 
 #: data/rbot/plugins/games/shiritori.rb:287
-msgid "Welcome to shiritori, %{speaker}."
-msgstr "しりとりへようこそ、%{speaker}さん"
+msgid "Welcome to shiritori, %{player}."
+msgstr "しりとりへようこそ、%{player} さん"
 
 #: data/rbot/plugins/games/shiritori.rb:292
 msgid "The word %{used_word} has been used. Retry from %{word}"
@@ -932,7 +933,8 @@ msgid ""
 "It's impossible to continue the chain from %{word}. The game has ended. "
 "Thanks a lot, %{player}! :("
 msgstr ""
-"「%{word}」からしりとりが続けられないので、ゲームが終わってしまいました。"
+"%{player} さんが使った言葉「%{word}」からしりとりが続けられないので、ゲームが"
+"終わってしまいました。"
 
 #: data/rbot/plugins/games/shiritori.rb:301
 msgid ""
