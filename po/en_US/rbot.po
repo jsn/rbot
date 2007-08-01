@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-01 00:36-0400\n"
+"POT-Creation-Date: 2007-08-01 00:47-0400\n"
 "PO-Revision-Date: 2007-07-14 00:06-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: English\n"
@@ -110,12 +110,11 @@ msgid "no plugins failed to load"
 msgstr "no plugins failed to load"
 
 #: lib/rbot/plugins.rb:557
-#, fuzzy
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
 msgstr ""
-"%{highlight}%{plugin}%{highlight} in %{dir}failed with error %{exception}: %"
+"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
 
 #: lib/rbot/plugins.rb:561
@@ -1036,9 +1035,8 @@ msgid "%{player} has given the first word: %{word}"
 msgstr "%{player} has given the first word: %{word}"
 
 #: data/rbot/plugins/games/shiritori.rb:287
-#, fuzzy
 msgid "Welcome to shiritori, %{player}."
-msgstr "Welcome to shiritori, %{speaker}."
+msgstr "Welcome to shiritori, %{player}."
 
 #: data/rbot/plugins/games/shiritori.rb:292
 msgid "The word %{used_word} has been used. Retry from %{word}"
