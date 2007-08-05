@@ -130,7 +130,7 @@ class UrlPlugin < Plugin
     # TODO support multiple urls in one line
     if m.message =~ /(f|ht)tps?:\/\//
       if m.message =~ /((f|ht)tps?:\/\/.*?)(?:\s+|$)/
-        urlstr = $1
+        urlstr = URI.escape $1
         list = @registry[m.target]
 
         title = nil
