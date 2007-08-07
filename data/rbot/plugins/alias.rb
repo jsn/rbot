@@ -43,9 +43,12 @@ class AliasPlugin < Plugin
     @data_path = "#{@bot.botclass}/alias/"
     @data_file = "#{@data_path}/aliases.yaml"
     # hash of alias => command entries
-    @aliases = if File.exist?(@data_file)
-                 YAML.load_file(@data_file)
+    @aliases = if File.exist?(@data_file) &&
+                  data = YAML.load_file(@data_file) &&
+                  data.respond_to?(:each_pair)
+                 data
                else
+                 warning _("Data file is not found or corrupt, reinitializing data")
                  Hash.new
                end
     @aliases.each_pair do |a, c|
@@ -60,7 +63,7 @@ class AliasPlugin < Plugin
 
   def save 
     Dir.mkdir(@data_path) unless File.exist?(@data_path)
-    File.open(@data_file, 'w') {|f| f.write @aliases.to_yaml}
+    Utils.safe_save(@data_file) {|f| f.write @aliases.to_yaml}
   end
 
   def cmd_add(m, params)

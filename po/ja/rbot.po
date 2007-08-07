@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-01 00:47-0400\n"
+"POT-Creation-Date: 2007-08-07 16:41-0400\n"
 "PO-Revision-Date: 2007-07-09 01:36-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -829,47 +829,51 @@ msgid ""
 "strategies"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:55
+#: data/rbot/plugins/alias.rb:51
+msgid "Data file is not found or corrupt, reinitializing data"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:58
 msgid "Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:71
+#: data/rbot/plugins/alias.rb:74
 msgid "The definition you provided is invalid: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:82 data/rbot/plugins/alias.rb:99
+#: data/rbot/plugins/alias.rb:85 data/rbot/plugins/alias.rb:102
 msgid "No such alias is defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:88
+#: data/rbot/plugins/alias.rb:91
 msgid "No aliases defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:97
+#: data/rbot/plugins/alias.rb:100
 msgid "Alias of %{command}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:109
+#: data/rbot/plugins/alias.rb:112
 msgid ""
 "The arguments in alias must match the substitutions in command, and vice "
 "versa"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:126
+#: data/rbot/plugins/alias.rb:129
 msgid ""
 "The alias seems to have caused infinite recursion. Please examine your alias "
 "definitions"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:142
+#: data/rbot/plugins/alias.rb:145
 msgid "Error handling the alias, the command is not defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:152
+#: data/rbot/plugins/alias.rb:155
 msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:154
+#: data/rbot/plugins/alias.rb:157
 msgid ""
 "\"alias <text> => <command>\" => add text as an alias of command. Text can "
 "contain placeholders marked with : or * for :words and *multiword arguments. "
@@ -878,7 +882,7 @@ msgid ""
 "google site:linuxbrit.co.uk/rbot/ <terms>"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:156
+#: data/rbot/plugins/alias.rb:159
 msgid ""
 "alias list => list defined aliases | alias whatis <alias> => show definition "
 "of the alias | alias remove <alias> => remove defined alias | see the "
