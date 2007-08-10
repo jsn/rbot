@@ -106,7 +106,7 @@ module ::Net
       end
     end
 
-    def body
+    def cooked_body
       return self.body_to_utf(self.decompress_body(self.raw_body))
     end
 
@@ -384,6 +384,9 @@ class HttpUtil
       else
         warning ":| redirect w/o location?"
       end
+    end
+    class << resp
+      alias :body :cooked_body
     end
     if block_given?
       yield(resp)
