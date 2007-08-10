@@ -254,7 +254,8 @@ class TranslatorPlugin < Plugin
 
   def cmd_translate(m, params)
     # get the first word of the command
-    translator = @translators[m.message[/\A(\w+)\s/, 1]]
+    tname = m.message[/\A(\w+)\s/, 1]
+    translator = @translators[tname]
     from, to, phrase = params[:from], params[:to], params[:phrase].to_s
     if translator
       begin
@@ -269,7 +270,7 @@ class TranslatorPlugin < Plugin
           end
         else
           m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
-                  {:source => from, :target => to}
+                  {:translator => tname, :source => from, :target => to}
         end
       rescue Timeout::Error
         m.reply _('The translator timed out')
