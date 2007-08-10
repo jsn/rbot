@@ -199,8 +199,7 @@ class BabelfishTranslator < Translator
     super(Translator::Direction.pairs(language_pairs), cache)
   end
 
-  def translate(text, from, to)
-    super
+  def do_translate(text, from, to)
     if @form.fields.name('trtext').empty?
       @form.add_field!('trtext', text)
     else
