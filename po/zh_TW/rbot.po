@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-07 16:41-0400\n"
+"POT-Creation-Date: 2007-08-10 05:14-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
@@ -905,6 +905,45 @@ msgid ""
 "alias list => list defined aliases | alias whatis <alias> => show definition "
 "of the alias | alias remove <alias> => remove defined alias | see the "
 "\"create\" topic about adding aliases"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:217
+msgid "Number of seconds to wait for the translation service before timeout"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:235
+msgid "Translator %{name} cannot be used: %{reason}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:243
+msgid "Supported directions of translation for %{translator}: %{directions}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:246
+msgid "%{source} -> %{targets}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:251
+msgid ""
+"Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
+"{translators}. Use help <translator> to look up supported from and to "
+"languages"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:267
+msgid "No translation returned"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:272
+msgid "%{translator} doesn't support translating from %{source} to %{target}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:276
+msgid "The translator timed out"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:279
+msgid "No translator called %{name}"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:203
