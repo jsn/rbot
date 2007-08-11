@@ -414,7 +414,7 @@ class HttpUtil
   #
   # Generic http transaction method
   #
-  # It will return a HTTP::Response object or raise an exception
+  # It will return a Net::HTTPResponse object or raise an exception
   #
   # If a block is given, it will yield the response (see :yield option)
 
