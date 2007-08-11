@@ -386,6 +386,7 @@ class HttpUtil
       end
     end
     class << resp
+      undef_method :body
       alias :body :cooked_body
     end
     if block_given?
