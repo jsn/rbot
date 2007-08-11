@@ -19,8 +19,12 @@ require 'timeout'
 #             methods in the Direction module are convenient for initializing this
 #             attribute
 class Translator
+  INFO = 'Some translation service'
 
   class UnsupportedDirectionError < ArgumentError
+  end
+
+  class NoTranslationError < RuntimeError
   end
 
   attr_reader :directions, :cache
@@ -36,18 +40,26 @@ class Translator
     from != to && @directions[from].include?(to)
   end
 
-  # this implements checking of languages and caching. subclasses should define the
+  # this implements argument checking and caching. subclasses should define the
   # do_translate method to implement actual translation
   def translate(text, from, to)
     raise UnsupportedDirectionError unless support?(from, to)
-    @cache[[text, from, to]] ||= do_translate(text, from, to)
+    raise ArgumentError, _("Cannot translate empty string") if text.empty?
+    request = [text, from, to]
+    unless @cache.has_key? request
+      translation = do_translate(text, from, to)
+      raise NoTranslationError if translation.empty?
+      @cache[request] = translation
+    else
+      @cache[request]
+    end
   end
 
   module Direction
     # given the set of supported languages, return a hash suitable for the directions
     # attribute which includes any language to any other language
     def self.all_to_all(languages)
-      directions = all_to_all(languages)
+      directions = all_to_none(languages)
       languages.each {|l| directions[l] = languages.to_set}
       directions
     end
@@ -88,6 +100,8 @@ end
 
 
 class NiftyTranslator < Translator
+  INFO = '@nifty Translation <http://nifty.amikai.com/amitext/indexUTF8.jsp>'
+
   def initialize(cache={})
    require 'mechanize'
    super(Translator::Direction.all_from_to(%w[ja en zh_CN ko], %w[ja]), cache)
@@ -107,6 +121,7 @@ end
 
 
 class ExciteTranslator < Translator
+  INFO = 'Excite.jp Translation <http://www.excite.co.jp/world/>'
 
   def initialize(cache={})
     require 'mechanize'
@@ -158,6 +173,8 @@ end
 
 
 class GoogleTranslator < Translator
+  INFO = 'Google Translate <http://www.google.com/translate_t>'
+
   def initialize(cache={})
     require 'mechanize'
     load_form!
@@ -188,6 +205,8 @@ end
 
 
 class BabelfishTranslator < Translator
+  INFO = 'AltaVista Babel Fish Translation <http://babelfish.altavista.com/babelfish/>'
+
   def initialize(cache)
     require 'mechanize'
     
@@ -210,6 +229,28 @@ class BabelfishTranslator < Translator
   end
 end
 
+class WorldlingoTranslator < Translator
+  INFO = 'WorldLingo Free Online Translator <http://www.worldlingo.com/en/products_services/worldlingo_translator.html>'
+
+  LANGUAGES = %w[en fr de it pt es ru nl el sv ar ja ko zh_CN zh_TW]
+  def initialize(cache)
+    require 'uri'
+    super(Translator::Direction.all_to_all(LANGUAGES), cache)
+  end
+
+  def translate(text, from, to)
+    response = Irc::Plugins.manager['translator'].bot.httputil.get_response(
+               URI.escape("http://www.worldlingo.com/SEfpX0LV2xIxsIIELJ,2E5nOlz5RArCY,/texttranslate?wl_srcenc=utf-8&wl_trgenc=utf-8&wl_text=#{text}&wl_srclang=#{from.upcase}&wl_trglang=#{to.upcase}"))
+    # WorldLingo seems to respond an XML when error occurs
+    case response['Content-Type']
+    when %r'text/plain'
+      response.body
+    else
+      raise Translator::NoTranslationError
+    end
+  end
+end
+
 class TranslatorPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('translate.timeout',
     :default => 30, :validate => Proc.new{|v| v > 0},
@@ -221,7 +262,8 @@ class TranslatorPlugin < Plugin
       'nifty' => NiftyTranslator,
       'excite' => ExciteTranslator,
       'google_translate' => GoogleTranslator,
-      'babelfish' => BabelfishTranslator
+      'babelfish' => BabelfishTranslator,
+      'worldlingo' => WorldlingoTranslator,
     }
 
     @translators = {}
@@ -239,15 +281,16 @@ class TranslatorPlugin < Plugin
 
   def help(plugin, topic=nil)
     if @translators.has_key?(topic)
-      _('Supported directions of translation for %{translator}: %{directions}') % {
-        :translator => topic,
-        :directions => @translators[topic].directions.map do |source, targets|
+      translator = @translators[topic]
+      _('%{info}, supported directions of translation: %{directions}') % {
+        :info => translator.class::INFO,
+        :directions => translator.directions.map do |source, targets|
                          _('%{source} -> %{targets}') %
                          {:source => source, :targets => targets.to_a.join(', ')}
                        end.join(' | ')
       }
     else
-      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. Use help <translator> to look up supported from and to languages') %
+      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. Use "help translator <translator>" to look up supported from and to languages') %
         {:translators => @translators.keys.join(', ')}
     end
   end
@@ -259,24 +302,21 @@ class TranslatorPlugin < Plugin
     from, to, phrase = params[:from], params[:to], params[:phrase].to_s
     if translator
       begin
-        if translator.support?(from, to)
           translation = Timeout.timeout(@bot.config['translate.timeout']) do
             translator.translate(phrase, from, to)
           end
-          if translation.empty?
-            m.reply _('No translation returned')
-          else
-            m.reply translation
-          end
-        else
+          m.reply translation
+      rescue Translator::UnsupportedDirectionError
           m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
                   {:translator => tname, :source => from, :target => to}
-        end
+      rescue Translator::NoTranslationError
+        m.reply _('%{translator} failed to provide a translation') %
+                {:translator => tname}
       rescue Timeout::Error
         m.reply _('The translator timed out')
       end
     else
-      m.reply _('No translator called %{name}') % {:name => translator}
+      m.reply _('No translator called %{name}') % {:name => tname}
     end
   end
 end

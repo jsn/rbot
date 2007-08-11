@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-10 05:14-0400\n"
+"POT-Creation-Date: 2007-08-10 23:18-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -839,51 +839,51 @@ msgid ""
 "strategies"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:51
+#: data/rbot/plugins/alias.rb:52
 msgid "Data file is not found or corrupt, reinitializing data"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:58
+#: data/rbot/plugins/alias.rb:59
 msgid "Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:74
+#: data/rbot/plugins/alias.rb:75
 msgid "The definition you provided is invalid: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:85 data/rbot/plugins/alias.rb:102
+#: data/rbot/plugins/alias.rb:86 data/rbot/plugins/alias.rb:103
 msgid "No such alias is defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:91
+#: data/rbot/plugins/alias.rb:92
 msgid "No aliases defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:100
+#: data/rbot/plugins/alias.rb:101
 msgid "Alias of %{command}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:112
+#: data/rbot/plugins/alias.rb:113
 msgid ""
 "The arguments in alias must match the substitutions in command, and vice "
 "versa"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:129
+#: data/rbot/plugins/alias.rb:130
 msgid ""
 "The alias seems to have caused infinite recursion. Please examine your alias "
 "definitions"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:145
+#: data/rbot/plugins/alias.rb:146
 msgid "Error handling the alias, the command is not defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:155
+#: data/rbot/plugins/alias.rb:156
 msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:157
+#: data/rbot/plugins/alias.rb:158
 msgid ""
 "\"alias <text> => <command>\" => add text as an alias of command. Text can "
 "contain placeholders marked with : or * for :words and *multiword arguments. "
@@ -892,49 +892,53 @@ msgid ""
 "google site:linuxbrit.co.uk/rbot/ <terms>"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:159
+#: data/rbot/plugins/alias.rb:160
 msgid ""
 "alias list => list defined aliases | alias whatis <alias> => show definition "
 "of the alias | alias remove <alias> => remove defined alias | see the "
 "\"create\" topic about adding aliases"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:217
+#: data/rbot/plugins/translator.rb:47
+msgid "Cannot translate empty string"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:257
 msgid "Number of seconds to wait for the translation service before timeout"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:235
+#: data/rbot/plugins/translator.rb:276
 msgid "Translator %{name} cannot be used: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:243
-msgid "Supported directions of translation for %{translator}: %{directions}"
+#: data/rbot/plugins/translator.rb:285
+msgid "%{info}, supported directions of translation: %{directions}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:246
+#: data/rbot/plugins/translator.rb:288
 msgid "%{source} -> %{targets}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:251
+#: data/rbot/plugins/translator.rb:293
 msgid ""
 "Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
-"{translators}. Use help <translator> to look up supported from and to "
-"languages"
+"{translators}. Use \"help translator <translator>\" to look up supported "
+"from and to languages"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:267
-msgid "No translation returned"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:272
+#: data/rbot/plugins/translator.rb:310
 msgid "%{translator} doesn't support translating from %{source} to %{target}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:276
+#: data/rbot/plugins/translator.rb:313
+msgid "%{translator} failed to provide a translation"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:316
 msgid "The translator timed out"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:279
+#: data/rbot/plugins/translator.rb:319
 msgid "No translator called %{name}"
 msgstr ""
 
