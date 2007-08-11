@@ -239,8 +239,8 @@ class WorldlingoTranslator < Translator
   end
 
   def translate(text, from, to)
-    response = Irc::Plugins.manager['translator'].bot.httputil.get_response(
-               URI.escape("http://www.worldlingo.com/SEfpX0LV2xIxsIIELJ,2E5nOlz5RArCY,/texttranslate?wl_srcenc=utf-8&wl_trgenc=utf-8&wl_text=#{text}&wl_srclang=#{from.upcase}&wl_trglang=#{to.upcase}"))
+    response = Irc::Utils.bot.httputil.get_response(URI.escape(
+               "http://www.worldlingo.com/SEfpX0LV2xIxsIIELJ,2E5nOlz5RArCY,/texttranslate?wl_srcenc=utf-8&wl_trgenc=utf-8&wl_text=#{text}&wl_srclang=#{from.upcase}&wl_trglang=#{to.upcase}"))
     # WorldLingo seems to respond an XML when error occurs
     case response['Content-Type']
     when %r'text/plain'
