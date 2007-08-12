@@ -569,7 +569,7 @@ class Bot
       @plugins.delegate "nicktaken", data[:nick]
     }
     @client[:badnick] = proc {|data|
-      arning "bad nick (#{data[:nick]})"
+      warning "bad nick (#{data[:nick]})"
     }
     @client[:ping] = proc {|data|
       sendq "PONG #{data[:pingid]}"
