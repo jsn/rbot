@@ -85,6 +85,7 @@ class SearchPlugin < Plugin
       m.reply "no results found for #{what}"
       return
     end
+    single ||= (results.length==1)
     urls = Array.new
     results = results[0...hits].map { |res|
       n = res[0]
