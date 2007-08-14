@@ -44,15 +44,16 @@ class AliasPlugin < Plugin
     @data_file = "#{@data_path}/aliases.yaml"
     # hash of alias => command entries
     data = nil
-    @aliases = if File.exist?(@data_file) &&
-                  (data = YAML.load_file(@data_file)) &&
-                  data.respond_to?(:each_pair)
-                 data
-               else
-                 warning _("Data file is not found or corrupt, reinitializing data")
-                 Hash.new
+    aliases = if File.exist?(@data_file) &&
+                 (data = YAML.load_file(@data_file)) &&
+                 data.respond_to?(:each_pair)
+                data
+              else
+                warning _("Data file is not found or corrupt, reinitializing data")
+                Hash.new
                end
-    @aliases.each_pair do |a, c|
+    @aliases = Hash.new
+    aliases.each_pair do |a, c|
       begin
         add_alias(a, c)
       rescue AliasDefinitionError
