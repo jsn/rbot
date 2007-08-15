@@ -252,23 +252,23 @@ class WorldlingoTranslator < Translator
 end
 
 class TranslatorPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('translate.timeout',
+  BotConfig.register BotConfigIntegerValue.new('translator.timeout',
     :default => 30, :validate => Proc.new{|v| v > 0},
     :desc => _("Number of seconds to wait for the translation service before timeout"))
 
+  TRANSLATORS = {
+    'nifty' => NiftyTranslator,
+    'excite' => ExciteTranslator,
+    'google_translate' => GoogleTranslator,
+    'babelfish' => BabelfishTranslator,
+    'worldlingo' => WorldlingoTranslator,
+  }
+
   def initialize
     super
-    translator_classes = {
-      'nifty' => NiftyTranslator,
-      'excite' => ExciteTranslator,
-      'google_translate' => GoogleTranslator,
-      'babelfish' => BabelfishTranslator,
-      'worldlingo' => WorldlingoTranslator,
-    }
 
     @translators = {}
-
-    translator_classes.each_pair do |name, c|
+    TRANSLATORS.each_pair do |name, c|
       begin
         @translators[name] = c.new(@registry.sub_registry(name))
         map "#{name} :from :to *phrase", :action => :cmd_translate
@@ -277,6 +277,13 @@ class TranslatorPlugin < Plugin
                {:name => name, :reason => $!}
       end
     end
+
+    BotConfig.register BotConfigArrayValue.new('translator.default_list',
+      :default => TRANSLATORS.keys,
+      :validate => Proc.new {|l| l.all? {|t| TRANSLATORS.has_key?(t)}},
+      :desc => _("List of translators to try in order when translator name not specified"),
+      :on_change => Proc.new {|bot, v| update_default})
+    update_default
   end
 
   def help(plugin, topic=nil)
@@ -290,25 +297,39 @@ class TranslatorPlugin < Plugin
                        end.join(' | ')
       }
     else
-      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. Use "help translator <translator>" to look up supported from and to languages') %
+      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. If "translator" is used in place of the translator name, the first translator in translator.default_list which supports the specified direction will be picked automatically. Use "help translator <translator>" to look up supported from and to languages') %
         {:translators => @translators.keys.join(', ')}
+    end
+  end
+
+  def update_default
+    @default_translators = bot.config['translator.default_list'] & @translators.keys 
+  end
+
+  def cmd_translator(m, params)
+    from, to = params[:from], params[:to]
+    translator = @default_translators.find {|t| @translators[t].support?(from, to)}
+    if translator
+      cmd_translate m, params.merge({:translator => translator})
+    else
+      m.reply _('None of the default translators (translator.default_list) supports translating from %{source} to %{target}') % {:source => from, :target => to}
     end
   end
 
   def cmd_translate(m, params)
     # get the first word of the command
-    tname = m.message[/\A(\w+)\s/, 1]
+    tname = params[:translator] || m.message[/\A(\w+)\s/, 1]
     translator = @translators[tname]
     from, to, phrase = params[:from], params[:to], params[:phrase].to_s
     if translator
       begin
-          translation = Timeout.timeout(@bot.config['translate.timeout']) do
-            translator.translate(phrase, from, to)
-          end
-          m.reply translation
+        translation = Timeout.timeout(@bot.config['translator.timeout']) do
+          translator.translate(phrase, from, to)
+        end
+        m.reply translation
       rescue Translator::UnsupportedDirectionError
-          m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
-                  {:translator => tname, :source => from, :target => to}
+        m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
+                {:translator => tname, :source => from, :target => to}
       rescue Translator::NoTranslationError
         m.reply _('%{translator} failed to provide a translation') %
                 {:translator => tname}
@@ -322,4 +343,4 @@ class TranslatorPlugin < Plugin
 end
 
 plugin = TranslatorPlugin.new
-
+plugin.map 'translator :from :to *phrase', :action => :cmd_translator
