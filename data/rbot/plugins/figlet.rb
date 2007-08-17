@@ -2,15 +2,18 @@ class FigletPlugin < Plugin
   DEFAULT_FONTS = ['rectangles', 'smslant']
   MAX_WIDTH=68
 
+  BotConfig.register BotConfigStringValue.new('figlet.path',
+     :default => '/usr/bin/figlet',
+     :desc => _('Path to the figlet program'))
+
   def initialize
     super
-    @figlet_path = "/usr/bin/figlet"
 
     # check that figlet actually has the font installed
     @figlet_font = nil
     for fontname in DEFAULT_FONTS
       # check if figlet can render this font properly
-      if system("#{@figlet_path} -f #{fontname} test test test")
+      if system("#{figlet_path} -f #{fontname} test test test")
         @figlet_font = fontname
         break
       end
@@ -22,6 +25,10 @@ class FigletPlugin < Plugin
     # add the font from DEFAULT_FONTS to the cmdline (if figlet has that font)
     @figlet_params += ['-f', @figlet_font] if @figlet_font
 
+  end
+
+  def figlet_path
+    @bot.config['figlet.path']
   end
 
   def help(plugin, topic="")
@@ -36,7 +43,7 @@ class FigletPlugin < Plugin
     end
 
     # collect the parameters to pass to safe_exec
-    exec_params = [@figlet_path] + @figlet_params + [message]
+    exec_params = [figlet_path] + @figlet_params + [message]
 
     # run figlet
     m.reply Utils.safe_exec(*exec_params)
