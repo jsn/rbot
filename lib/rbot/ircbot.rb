@@ -10,7 +10,7 @@ $daemonize = false unless $daemonize
 $dateformat = "%Y/%m/%d %H:%M:%S"
 $logger = Logger.new($stderr)
 $logger.datetime_format = $dateformat
-$logger.level = $cl_loglevel if $cl_loglevel
+$logger.level = $cl_loglevel if defined? $cl_loglevel
 $logger.level = 0 if $debug
 
 require 'pp'
@@ -426,7 +426,7 @@ class Bot
     $logger = Logger.new(@logfile, @config['log.keep'], @config['log.max_size']*1024*1024)
     $logger.datetime_format= $dateformat
     $logger.level = @config['log.level']
-    $logger.level = $cl_loglevel if $cl_loglevel
+    $logger.level = $cl_loglevel if defined? $cl_loglevel
     $logger.level = 0 if $debug
 
     log_session_start
