@@ -1275,7 +1275,7 @@ module Irc
     # Checks if the receiver already has a user with the given _nick_
     #
     def has_user?(nick)
-      user_nicks.index(nick.irc_downcase(casemap))
+      @users.index(nick.to_irc_user(server_and_casemap))
     end
 
     # Returns the user with nick _nick_, if available
