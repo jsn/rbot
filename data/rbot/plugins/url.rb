@@ -127,44 +127,43 @@ class UrlPlugin < Plugin
   def listen(m)
     return unless m.kind_of?(PrivMessage)
     return if m.address?
-    # TODO support multiple urls in one line
-    if m.message =~ /(f|ht)tps?:\/\//
-      if m.message =~ /((f|ht)tps?:\/\/.*?)(?:\s+|$)/
-        urlstr = URI.escape $1
-        list = @registry[m.target]
-
-        title = nil
-        if @bot.config['url.display_link_info']
-          Thread.start do
-            debug "Getting title for #{urlstr}..."
-            begin
-              title = get_title_for_url urlstr, m.source.nick, m.channel
-              if title
-                m.reply "#{LINK_INFO} #{title}", :overlong => :truncate
-                debug "Title found!"
-              else
-                debug "Title not found!"
-              end
-            rescue => e
-              m.reply "Error #{e.message}"
+    urls = URI.extract(m.message)
+    return if urls.empty?
+    debug "found urls #{urls.inspect}"
+    list = @registry[m.target]
+    urls.each { |urlstr|
+      debug "working on #{urlstr}"
+      title = nil
+      if @bot.config['url.display_link_info']
+        Thread.start do
+          debug "Getting title for #{urlstr}..."
+          begin
+            title = get_title_for_url urlstr, m.source.nick, m.channel
+            if title
+              m.reply "#{LINK_INFO} #{title}", :overlong => :truncate
+              debug "Title found!"
+            else
+              debug "Title not found!"
             end
+          rescue => e
+            m.reply "Error #{e.message}"
           end
         end
-
-        # check to see if this url is already listed
-        return if list.find {|u| u.url == urlstr }
-
-        url = Url.new(m.target, m.sourcenick, Time.new, urlstr, title)
-        debug "#{list.length} urls so far"
-        if list.length > @bot.config['url.max_urls']
-          list.pop
-        end
-        debug "storing url #{url.url}"
-        list.unshift url
-        debug "#{list.length} urls now"
-        @registry[m.target] = list
       end
-    end
+
+      # check to see if this url is already listed
+      next if list.find {|u| u.url == urlstr }
+
+      url = Url.new(m.target, m.sourcenick, Time.new, urlstr, title)
+      debug "#{list.length} urls so far"
+      if list.length > @bot.config['url.max_urls']
+        list.pop
+      end
+      debug "storing url #{url.url}"
+      list.unshift url
+      debug "#{list.length} urls now"
+    }
+    @registry[m.target] = list
   end
 
   def reply_urls(opts={})
