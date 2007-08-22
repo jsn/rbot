@@ -39,7 +39,7 @@ class ::BashQuote
     text = String.new
     @text.each_line { |l|
       debug "line: #{l.inspect}"
-      cur_nick = l.match(/^\s*(&lt;.*?&gt;|\(.*?\)|.*?:)/)[1] rescue nil
+      cur_nick = l.match(/^\s*(&lt;.*?&gt;|\(.*?\)|.*?:)\s/)[1] rescue nil
       debug "nick: #{cur_nick.inspect}; last: #{last_nick.inspect}"
       if cur_nick and cur_nick == last_nick
         text << l.sub(cur_nick,"")
