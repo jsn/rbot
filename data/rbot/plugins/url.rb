@@ -70,6 +70,10 @@ class UrlPlugin < Plugin
             if @bot.config['url.first_par']
               partial = resp.partial_body(@bot.config['http.info_bytes'])
               logopts[:title] = title = get_title_from_html(partial)
+              if url.fragment and not url.fragment.empty?
+                fragreg = /.*?<a\s+[^>]*name=["']?#{url.fragment}["']?.*?>/im
+                partial.sub!(fragreg,'')
+              end
               first_par = Utils.ircify_first_html_par(partial, :strip => title)
               unless first_par.empty?
                 logopts[:extra] = first_par
