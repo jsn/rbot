@@ -1289,8 +1289,8 @@ module Irc
     #
     def add_user(user, opts={})
       silent = opts.fetch(:silent, false) 
-      if has_user?(user) && !silent
-        warn "Trying to add user #{user} to channel #{self} again"
+      if has_user?(user)
+        warn "Trying to add user #{user} to channel #{self} again" unless silent
       else
         @users << user.to_irc_user(server_and_casemap)
       end
