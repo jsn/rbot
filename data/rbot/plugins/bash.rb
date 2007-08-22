@@ -19,16 +19,38 @@
 require 'rexml/document'
 
 class ::BashQuote
-  attr_accessor :num, :text, :vote
+  attr_accessor :num, :text, :irc_text, :vote
 
   def initialize(num, text, vote)
     @num = num.to_i
     @text = text
     @vote = vote
+    @irc_text = mk_irc_text
   end
 
   def url
     "http://www.bash.org/?#{@num}"
+  end
+
+  private
+  def mk_irc_text
+    cur_nick = nil
+    last_nick = nil
+    text = String.new
+    @text.each_line { |l|
+      debug "line: #{l.inspect}"
+      cur_nick = l.match(/^\s*(&lt;.*?&gt;|.*?:)/)[1] rescue nil
+      debug "nick: #{cur_nick.inspect}; last: #{last_nick.inspect}"
+      if cur_nick and cur_nick == last_nick
+        text << l.sub(cur_nick,"")
+      else
+        last_nick = cur_nick.dup if cur_nick
+        text << l
+      end
+    }
+    debug text
+    # TODO: the gsub of br tags to | should be an ircify_html option
+    text.gsub(/(?:<br \/>\s*)+/, ' | ').ircify_html
   end
 
 end
@@ -98,8 +120,7 @@ class BashPlugin < Plugin
       # may want to echo more than one for latest/random
       quote = quotes.first
     end
-    # TODO: the gsub of br tags to | should be an ircify_html option
-    m.reply "#%d (%d): %s" % [quote.num, quote.vote, quote.text.gsub(/(?:<br \/>\s*)+/, ' | ').ircify_html]
+    m.reply "#%d (%d): %s" % [quote.num, quote.vote, quote.irc_text]
   end
 
   def xml_bash(m, id=nil)
