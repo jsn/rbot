@@ -11,9 +11,9 @@ class UrlPlugin < Plugin
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
     :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
-  BotConfig.register BotConfigBooleanValue.new('url.display_link_info',
-    :default => false,
-    :desc => "Get the title of any links pasted to the channel and display it (also tells if the link is broken or the site is down)")
+  BotConfig.register BotConfigIntegerValue.new('url.display_link_info',
+    :default => 0,
+    :desc => "Get the title of links pasted to the channel and display it (also tells if the link is broken or the site is down). Do it for at most this many links per line (set to 0 to disable)")
   BotConfig.register BotConfigBooleanValue.new('url.titles_only',
     :default => false,
     :desc => "Only show info for links that have <title> tags (in other words, don't display info for jpegs, mpegs, etc.)")
@@ -28,6 +28,9 @@ class UrlPlugin < Plugin
   def initialize
     super
     @registry.set_default(Array.new)
+    unless @bot.config['url.display_link_info'].kind_of?(Integer)
+      @bot.config.items[:'url.display_link_info'].set_string(@bot.config['url.display_link_info'].to_s)
+    end
   end
 
   def help(plugin, topic="")
@@ -138,11 +141,14 @@ class UrlPlugin < Plugin
     return if urls.empty?
     debug "found urls #{urls.inspect}"
     list = @registry[m.target]
+    urls_displayed = 0
     urls.each { |urlstr|
       debug "working on #{urlstr}"
       next unless urlstr =~ /^https?:/
       title = nil
-      if @bot.config['url.display_link_info']
+      debug "display link info: #{@bot.config['url.display_link_info']}"
+      if @bot.config['url.display_link_info'] > urls_displayed
+        urls_displayed += 1
         Thread.start do
           debug "Getting title for #{urlstr}..."
           begin
