@@ -299,6 +299,9 @@ class AuthModule < CoreBotModule
   def set_prop(botuser, prop, val)
     k = prop.to_s.gsub("-","_")
     botuser.send( (k + "=").to_sym, val)
+    if prop == :password and botuser == @bot.auth.botowner
+      @bot.config.items[:'auth.password'].set_string(@bot.auth.botowner.password)
+    end
   end
 
   def reset_prop(botuser, prop)

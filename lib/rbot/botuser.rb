@@ -19,6 +19,7 @@ module Irc
 
     BotConfig.register BotConfigStringValue.new( 'auth.password',
       :default => 'rbotauth', :wizard => true,
+      :on_change => Proc.new {|bot, v| bot.auth.botowner.password = v},
       :desc => _('Password for the bot owner'))
     BotConfig.register BotConfigBooleanValue.new( 'auth.login_by_mask',
       :default => 'true',
