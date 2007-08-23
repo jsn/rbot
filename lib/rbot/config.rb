@@ -114,14 +114,35 @@ module Irc
     def parse(string)
       return true if string == "true"
       return false if string == "false"
-      raise ArgumentError, "#{string} does not match either 'true' or 'false'"
+      if string =~ /^-?\d+$/
+        return string.to_i != 0
+      end
+      raise ArgumentError, "#{string} does not match either 'true' or 'false', and it's not an integer either"
+    end
+    def get
+      r = super
+      if r.kind_of?(Integer)
+        return r != 0
+      else
+        return r
+      end
     end
   end
 
   class BotConfigIntegerValue < BotConfigValue
     def parse(string)
+      return 1 if string == "true"
+      return 0 if string == "false"
       raise ArgumentError, "not an integer: #{string}" unless string =~ /^-?\d+$/
       string.to_i
+    end
+    def get
+      r = super
+      if r.kind_of?(Integer)
+        return r
+      else
+        return r ? 1 : 0
+      end
     end
   end
 
