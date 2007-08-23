@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-10 23:18-0400\n"
+"POT-Creation-Date: 2007-08-23 16:29+0200\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
@@ -15,110 +15,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: lib/rbot/registry.rb:19
-msgid ""
-"upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
-msgstr ""
-
-#: lib/rbot/registry.rb:39
-msgid ""
-"upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
-"format"
-msgstr ""
-
-#: lib/rbot/registry.rb:188
-msgid "marshal recovery failed, trying default"
-msgstr ""
-
-#: lib/rbot/plugins.rb:237
-msgid "incorrect usage, ask for help using '%{command}'"
-msgstr "用法錯誤，請用 %{command} 尋求協助"
-
-#: lib/rbot/plugins.rb:477
-msgid "%{count} core module loaded"
-msgid_plural "%{count} core modules loaded"
-msgstr[0] "%{count} 個核心模組已載入"
-
-#: lib/rbot/plugins.rb:480
-msgid "%{count} core module: %{list}"
-msgid_plural "%{count} core modules: %{list}"
-msgstr[0] "%{count} 個核心模組: %{list}"
-
-#: lib/rbot/plugins.rb:486
-msgid "no core botmodules loaded"
-msgstr "未載入任何核心模組"
-
-#: lib/rbot/plugins.rb:491
-msgid "%{count} plugin loaded"
-msgid_plural "%{count} plugins loaded"
-msgstr[0] "%{count} 個外掛程式已載入"
-
-#: lib/rbot/plugins.rb:494
-msgid "%{count} plugin: %{list}"
-msgid_plural "%{count} plugins: %{list}"
-msgstr[0] "%{count} 個外掛程式: %{list}"
-
-#: lib/rbot/plugins.rb:505
-msgid "%{highlight}%{count} plugin ignored%{highlight}"
-msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
-msgstr[0] "%{highlight}%{count} 個外掛程式被忽略%{highlight}"
-
-#: lib/rbot/plugins.rb:510
-msgid ""
-"%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
-"{bold} to see why"
-msgid_plural ""
-"%{highlight}%{count} plugins ignored%{highlight}: use %{bold}%{command}%"
-"{bold} to see why"
-msgstr[0] ""
-"%{highlight}%{count} 個外掛程式被忽略%{highlight}: 執行 %{bold}%{command}%"
-"{bold} 以瞭解原因"
-
-#: lib/rbot/plugins.rb:520
-msgid "%{highlight}%{count} plugin failed to load%{highlight}"
-msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
-msgstr[0] "%{highlight}%{count} 個外掛程式載入失敗%{highlight}"
-
-#: lib/rbot/plugins.rb:525
-msgid ""
-"%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
-"{command}%{bold} to see why"
-msgid_plural ""
-"%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%"
-"{command}%{bold} to see why"
-msgstr[0] ""
-"%{highlight}%{count} 個外掛程式載入失敗%{highlight}: 執行 %{bold}%{command}%"
-"{bold} 以瞭解原因"
-
-#: lib/rbot/plugins.rb:555
-msgid "no plugins failed to load"
-msgstr "沒有外掛程式載入失敗"
-
-#: lib/rbot/plugins.rb:557
-msgid ""
-"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
-"{reason}"
-msgstr ""
-"%{dir} 的 %{highlight}%{plugin}%{highlight} 外掛程式發生錯誤 %{exception}: %"
-"{reason}"
-
-#: lib/rbot/plugins.rb:561
-msgid "at %{backtrace}"
-msgstr ""
-
-#: lib/rbot/plugins.rb:567
-msgid "no plugins were ignored"
-msgstr "沒有外掛程式被忽略"
-
-#: lib/rbot/plugins.rb:571
-msgid "overruled by previous"
-msgstr "已被前者取代"
-
-#: lib/rbot/botuser.rb:22
+#: lib/rbot/botuser.rb:23
 msgid "Password for the bot owner"
 msgstr "機器人擁有者的密碼"
 
-#: lib/rbot/botuser.rb:25
+#: lib/rbot/botuser.rb:26
 msgid ""
 "Set false to prevent new botusers from logging in without a password when "
 "the user netmask is known"
@@ -126,7 +27,7 @@ msgstr ""
 "設定為 false 可以避免新使用者們如果符合使用者遮罩(user mask)，就不需要密碼也"
 "能登入"
 
-#: lib/rbot/botuser.rb:28
+#: lib/rbot/botuser.rb:29
 msgid ""
 "Set false to prevent new botusers from recognizing IRC users without a need "
 "to manually login"
@@ -134,23 +35,23 @@ msgstr ""
 "Set false to prevent new botusers from recognizing IRC users without a need "
 "to manually login"
 
-#: lib/rbot/botuser.rb:690
+#: lib/rbot/botuser.rb:691
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr "%{user}，你並沒有 '%{command}' 權限"
 
-#: lib/rbot/config.rb:172
+#: lib/rbot/config.rb:193
 msgid "%{desc} [valid values are: %{values}]"
 msgstr "%{desc} [符合規定的值為: %{values}]"
 
-#: lib/rbot/config.rb:304
+#: lib/rbot/config.rb:325
 msgid "First time rbot configuration wizard"
 msgstr "首次使用 rbot 設定精靈"
 
-#: lib/rbot/config.rb:307
+#: lib/rbot/config.rb:328
 msgid "This wizard will ask you a few questions to get you started."
 msgstr "這個設定精靈會透過一些問句來協助你開始使用。"
 
-#: lib/rbot/config.rb:308
+#: lib/rbot/config.rb:329
 msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
@@ -358,230 +259,298 @@ msgstr "抱歉，我需要更多參數來執行 %{command}"
 msgid "I can only %{command} these: %{arguments}"
 msgstr "我只能用這些參數執行 %{command}: %{argument}"
 
-#: lib/rbot/core/auth.rb:326
+#: lib/rbot/core/auth.rb:329
 msgid "you can't mess with %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:339
+#: lib/rbot/core/auth.rb:342
 msgid "you can't see the properties of %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:348
+#: lib/rbot/core/auth.rb:351
 msgid "no way I'm telling you the master password!"
 msgstr "我不會告訴你密碼的！"
 
-#: lib/rbot/core/auth.rb:349
+#: lib/rbot/core/auth.rb:352
 msgid "you can't ask for someone else's password"
 msgstr "你不能詢問其他人的密碼"
 
-#: lib/rbot/core/auth.rb:351
+#: lib/rbot/core/auth.rb:354
 msgid ""
 "c'mon, you can't be asking me seriously to tell you the password in public!"
 msgstr "別鬧了，你不是真的要我在公開場合講出密碼吧！"
 
-#: lib/rbot/core/auth.rb:352
+#: lib/rbot/core/auth.rb:355
 msgid "the password for %{user} is %{password}"
 msgstr "%{user} 的密碼是 %{password}"
 
-#: lib/rbot/core/auth.rb:366
+#: lib/rbot/core/auth.rb:369
 msgid "can %{action}"
 msgstr "能 %{action}"
 
-#: lib/rbot/core/auth.rb:368
+#: lib/rbot/core/auth.rb:371
 msgid "can not %{action}"
 msgstr "不能 %{action}"
 
-#: lib/rbot/core/auth.rb:372
+#: lib/rbot/core/auth.rb:375
 msgid "knows no netmasks"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:374
+#: lib/rbot/core/auth.rb:377
 msgid "knows %{netmasks}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:381 lib/rbot/core/auth.rb:408
-#: lib/rbot/core/auth.rb:426 lib/rbot/core/auth.rb:458
+#: lib/rbot/core/auth.rb:384 lib/rbot/core/auth.rb:411
+#: lib/rbot/core/auth.rb:429 lib/rbot/core/auth.rb:461
 msgid "you can't change the default user"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:382 lib/rbot/core/auth.rb:410
-#: lib/rbot/core/auth.rb:428 lib/rbot/core/auth.rb:460
+#: lib/rbot/core/auth.rb:385 lib/rbot/core/auth.rb:413
+#: lib/rbot/core/auth.rb:431 lib/rbot/core/auth.rb:463
 msgid "you can't edit %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:397 lib/rbot/core/auth.rb:444
+#: lib/rbot/core/auth.rb:400 lib/rbot/core/auth.rb:447
 msgid "I ignored %{things} because %{reason}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:401 lib/rbot/core/auth.rb:448
+#: lib/rbot/core/auth.rb:404 lib/rbot/core/auth.rb:451
 msgid "I haven't changed anything"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:419
+#: lib/rbot/core/auth.rb:422
 msgid "is that a joke? setting the password in public?"
 msgstr "這是個玩笑嗎？在公開場合設定密碼？"
 
-#: lib/rbot/core/auth.rb:451
+#: lib/rbot/core/auth.rb:454
 msgid "the password for %{user} is now %{password}"
 msgstr "%{user} 的密碼已經是 %{password}"
 
-#: lib/rbot/core/auth.rb:465
+#: lib/rbot/core/auth.rb:468
 msgid ""
 "I can only add/remove netmasks. See +help user add+ for more instructions"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:484
+#: lib/rbot/core/auth.rb:487
 msgid "sorry, I don't know how to %{request}"
 msgstr "抱歉，我不知道如何 %{request}"
 
-#: lib/rbot/core/auth.rb:493
+#: lib/rbot/core/auth.rb:496
 msgid "couldn't find botuser %{user}"
 msgstr "找不到使用者 %{user}"
 
-#: lib/rbot/core/auth.rb:495
+#: lib/rbot/core/auth.rb:498
 msgid "I'm not telling the master password to anyway, pal"
 msgstr "我怎麼樣都不會說出密碼的"
 
-#: lib/rbot/core/auth.rb:496
+#: lib/rbot/core/auth.rb:499
 msgid "the password for botuser %{user} is %{password}"
 msgstr "使用者 %{user} 的密碼是 %{password}"
 
-#: lib/rbot/core/auth.rb:499
+#: lib/rbot/core/auth.rb:502
 msgid "I told %{user} that %{message}"
 msgstr "我告訴 %{user} 關於 %{message}"
 
-#: lib/rbot/core/auth.rb:505
+#: lib/rbot/core/auth.rb:508
 msgid "are you nuts, creating a botuser with a publicly known password?"
 msgstr "你瘋了嗎？用誰都曉得的密碼建立使用者？"
 
-#: lib/rbot/core/auth.rb:510
+#: lib/rbot/core/auth.rb:513
 msgid "failed to create %{user}: %{exception}"
 msgstr "無法建立 %{user}: %{exception}"
 
-#: lib/rbot/core/auth.rb:514
+#: lib/rbot/core/auth.rb:517
 msgid "created botuser %{user}"
 msgstr "已建立使用者 %{user}"
 
-#: lib/rbot/core/auth.rb:522
+#: lib/rbot/core/auth.rb:525
 msgid " (queued for destruction)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:525
+#: lib/rbot/core/auth.rb:528
 msgid "I have no botusers other than the default ones"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:526
+#: lib/rbot/core/auth.rb:529
 msgid "botuser: %{list}"
 msgid_plural "botusers: %{list}"
 msgstr[0] "使用者: %{list}"
 
-#: lib/rbot/core/auth.rb:533
+#: lib/rbot/core/auth.rb:536
 msgid "You can't destroy %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:544
+#: lib/rbot/core/auth.rb:547
 msgid "no such botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:550
+#: lib/rbot/core/auth.rb:553
 msgid "%{user} removed from the destruction queue"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:552
+#: lib/rbot/core/auth.rb:555
 msgid "%{user} was not queued for destruction"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:559
+#: lib/rbot/core/auth.rb:562
 msgid ""
 "%{user} already queued for destruction, use %{highlight}user destroy %{user} "
 "<password>%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:562
+#: lib/rbot/core/auth.rb:565
 msgid ""
 "%{user} queued for destruction, use %{highlight}user destroy %{user} "
 "<password>%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:566
+#: lib/rbot/core/auth.rb:569
 msgid "%{user} is not queued for destruction yet"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:568
+#: lib/rbot/core/auth.rb:571
 msgid "wrong password for %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:577 lib/rbot/core/auth.rb:617
+#: lib/rbot/core/auth.rb:580 lib/rbot/core/auth.rb:620
 msgid "failed: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:579
+#: lib/rbot/core/auth.rb:582
 msgid "botuser %{user} destroyed"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:587
+#: lib/rbot/core/auth.rb:590
 msgid "please don't touch the default users"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:596
+#: lib/rbot/core/auth.rb:599
 msgid "no such botuser %{source}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:598
+#: lib/rbot/core/auth.rb:601
 msgid "botuser %{dest} exists already"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:619
+#: lib/rbot/core/auth.rb:622
 msgid "botuser %{source} copied to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:621
+#: lib/rbot/core/auth.rb:624
 msgid "botuser %{source} renamed to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:640
+#: lib/rbot/core/auth.rb:643
 msgid "selecting data to export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:656
+#: lib/rbot/core/auth.rb:659
 msgid "preparing data for export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:679
+#: lib/rbot/core/auth.rb:682
 msgid "failed to prepare data: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:684
+#: lib/rbot/core/auth.rb:687
 msgid "exporting to %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:691
+#: lib/rbot/core/auth.rb:694
 msgid "failed to export users: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:695 lib/rbot/core/auth.rb:773
+#: lib/rbot/core/auth.rb:698 lib/rbot/core/auth.rb:776
 msgid "done"
 msgstr "完成"
 
-#: lib/rbot/core/auth.rb:712
+#: lib/rbot/core/auth.rb:715
 msgid "reading %{file} ..."
 msgstr "讀取 %{file} ..."
 
-#: lib/rbot/core/auth.rb:716
+#: lib/rbot/core/auth.rb:719
 msgid "failed to import from: %{exception}"
 msgstr "載入失敗: %{exception}"
 
-#: lib/rbot/core/auth.rb:723
+#: lib/rbot/core/auth.rb:726
 msgid "selecting data to import ..."
 msgstr "選擇資料以載入 ..."
 
-#: lib/rbot/core/auth.rb:733
+#: lib/rbot/core/auth.rb:736
 msgid "parsing data from import ..."
 msgstr "分析載入資料 ..."
 
-#: lib/rbot/core/auth.rb:753
+#: lib/rbot/core/auth.rb:756
 msgid "failed to parse data: %{exception}"
 msgstr "分析資料失敗: %{excaption}"
+
+#: lib/rbot/core/basics.rb:107
+msgid "quit [<message>] => quit IRC with message <message>"
+msgstr "quit [<message>] => 講 <message> 並離開 IRC"
+
+#: lib/rbot/core/basics.rb:109
+msgid "restart => completely stop and restart the bot (including reconnect)"
+msgstr "restart => 徹底停止並重新啟動機器人（包括重新連線）"
+
+#: lib/rbot/core/basics.rb:113
+msgid "part"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:115
+msgid "hide => part all channels"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:117
+msgid "nick <nick> => attempt to change nick to <nick>"
+msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+
+#: lib/rbot/core/basics.rb:119
+msgid ""
+"say <channel>|<nick> <message> => say <message> to <channel> or in private "
+"message to <nick>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:121
+msgid ""
+"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
+"private message to <nick>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:123
+msgid ""
+"quiet [in here|<channel>] => with no arguments, stop speaking in all "
+"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
+"<channel>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:125
+msgid ""
+"talk [in here|<channel>] => with no arguments, resume speaking in all "
+"channels, if \"in here\", resume speaking in this channel, or resume "
+"speaking in <channel>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:127
+msgid "version => describes software version"
+msgstr "version => 描述軟體版本"
+
+#: lib/rbot/core/basics.rb:129
+msgid "ping => replies with a pong"
+msgstr "ping => 回答 pong"
+
+#: lib/rbot/core/basics.rb:131
+msgid ""
+"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
+"to <mode>"
+msgstr ""
+"mode <channel> <mode> <nicks> => 設定 <nicks> 在 <channel> 頻道的權限為 "
+"<mode>"
+
+#: lib/rbot/core/basics.rb:137
+msgid ""
+"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
+"quiet, talk,version, ping, mode"
+msgstr ""
 
 #: lib/rbot/core/config.rb:25
 msgid "no such module %{module}"
@@ -698,200 +667,154 @@ msgstr "rescan => 重新載入模組與靜態論據"
 msgid "config-related tasks: config, save, rescan"
 msgstr "設定相關任務: config, save, rescan"
 
-#: lib/rbot/core/basics.rb:107
-msgid "quit [<message>] => quit IRC with message <message>"
-msgstr "quit [<message>] => 講 <message> 並離開 IRC"
+#: lib/rbot/plugins.rb:237
+msgid "incorrect usage, ask for help using '%{command}'"
+msgstr "用法錯誤，請用 %{command} 尋求協助"
 
-#: lib/rbot/core/basics.rb:109
-msgid "restart => completely stop and restart the bot (including reconnect)"
-msgstr "restart => 徹底停止並重新啟動機器人（包括重新連線）"
+#: lib/rbot/plugins.rb:477
+msgid "%{count} core module loaded"
+msgid_plural "%{count} core modules loaded"
+msgstr[0] "%{count} 個核心模組已載入"
 
-#: lib/rbot/core/basics.rb:113
-msgid "part"
-msgstr ""
+#: lib/rbot/plugins.rb:480
+msgid "%{count} core module: %{list}"
+msgid_plural "%{count} core modules: %{list}"
+msgstr[0] "%{count} 個核心模組: %{list}"
 
-#: lib/rbot/core/basics.rb:115
-msgid "hide => part all channels"
-msgstr ""
+#: lib/rbot/plugins.rb:486
+msgid "no core botmodules loaded"
+msgstr "未載入任何核心模組"
 
-#: lib/rbot/core/basics.rb:117
-msgid "nick <nick> => attempt to change nick to <nick>"
-msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+#: lib/rbot/plugins.rb:491
+msgid "%{count} plugin loaded"
+msgid_plural "%{count} plugins loaded"
+msgstr[0] "%{count} 個外掛程式已載入"
 
-#: lib/rbot/core/basics.rb:119
+#: lib/rbot/plugins.rb:494
+msgid "%{count} plugin: %{list}"
+msgid_plural "%{count} plugins: %{list}"
+msgstr[0] "%{count} 個外掛程式: %{list}"
+
+#: lib/rbot/plugins.rb:505
+msgid "%{highlight}%{count} plugin ignored%{highlight}"
+msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
+msgstr[0] "%{highlight}%{count} 個外掛程式被忽略%{highlight}"
+
+#: lib/rbot/plugins.rb:510
 msgid ""
-"say <channel>|<nick> <message> => say <message> to <channel> or in private "
-"message to <nick>"
-msgstr ""
+"%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
+"{bold} to see why"
+msgid_plural ""
+"%{highlight}%{count} plugins ignored%{highlight}: use %{bold}%{command}%"
+"{bold} to see why"
+msgstr[0] ""
+"%{highlight}%{count} 個外掛程式被忽略%{highlight}: 執行 %{bold}%{command}%"
+"{bold} 以瞭解原因"
 
-#: lib/rbot/core/basics.rb:121
+#: lib/rbot/plugins.rb:520
+msgid "%{highlight}%{count} plugin failed to load%{highlight}"
+msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
+msgstr[0] "%{highlight}%{count} 個外掛程式載入失敗%{highlight}"
+
+#: lib/rbot/plugins.rb:525
 msgid ""
-"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
-"private message to <nick>"
-msgstr ""
+"%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
+"{command}%{bold} to see why"
+msgid_plural ""
+"%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%"
+"{command}%{bold} to see why"
+msgstr[0] ""
+"%{highlight}%{count} 個外掛程式載入失敗%{highlight}: 執行 %{bold}%{command}%"
+"{bold} 以瞭解原因"
 
-#: lib/rbot/core/basics.rb:123
+#: lib/rbot/plugins.rb:555
+msgid "no plugins failed to load"
+msgstr "沒有外掛程式載入失敗"
+
+#: lib/rbot/plugins.rb:557
 msgid ""
-"quiet [in here|<channel>] => with no arguments, stop speaking in all "
-"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
-"<channel>"
+"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
+"{reason}"
+msgstr ""
+"%{dir} 的 %{highlight}%{plugin}%{highlight} 外掛程式發生錯誤 %{exception}: %"
+"{reason}"
+
+#: lib/rbot/plugins.rb:561
+msgid "at %{backtrace}"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:125
+#: lib/rbot/plugins.rb:567
+msgid "no plugins were ignored"
+msgstr "沒有外掛程式被忽略"
+
+#: lib/rbot/plugins.rb:571
+msgid "overruled by previous"
+msgstr "已被前者取代"
+
+#: lib/rbot/registry.rb:19
 msgid ""
-"talk [in here|<channel>] => with no arguments, resume speaking in all "
-"channels, if \"in here\", resume speaking in this channel, or resume "
-"speaking in <channel>"
+"upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:127
-msgid "version => describes software version"
-msgstr "version => 描述軟體版本"
-
-#: lib/rbot/core/basics.rb:129
-msgid "ping => replies with a pong"
-msgstr "ping => 回答 pong"
-
-#: lib/rbot/core/basics.rb:131
+#: lib/rbot/registry.rb:39
 msgid ""
-"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
-"to <mode>"
-msgstr ""
-"mode <channel> <mode> <nicks> => 設定 <nicks> 在 <channel> 頻道的權限為 "
-"<mode>"
-
-#: lib/rbot/core/basics.rb:137
-msgid ""
-"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
-"quiet, talk,version, ping, mode"
+"upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
+"format"
 msgstr ""
 
-#: data/rbot/plugins/dictclient.rb:57
-msgid "Hostname or hostname:port of the DICT server used to lookup words"
+#: lib/rbot/registry.rb:188
+msgid "marshal recovery failed, trying default"
 msgstr ""
 
-#: data/rbot/plugins/dictclient.rb:60
-msgid ""
-"When multiple databases reply a number of definitions that above this limit, "
-"only the database names will be listed. Otherwise, the full definitions from "
-"each database are replied"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:63
-msgid "Each definition is truncated to this length"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:66
-msgid "Format of headwords; <word> will be replaced with the actual word"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:69
-msgid ""
-"Format of database names; <database> will be replaced with the database name"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:72
-msgid ""
-"Format of definitions. <word> will be replaced with the formatted headword, "
-"<def> will be replaced with the truncated definition, and <database> with "
-"the formatted database name"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:75
-msgid ""
-"Format of match results. <matches> will be replaced with the formatted "
-"headwords, <database> with the formatted database name"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:95
-msgid ""
-"An error occured connecting to the DICT server. Check the dictclient.server "
-"configuration or retry later"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:97
-msgid "A protocol error occured"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:99
-msgid "An error occured"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:121
-msgid ""
-"Many definitions for %{phrase} were found in %{databases}. Use 'define "
-"<phrase> from <database> to view a definition."
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:138
-msgid "No definition for %{phrase} found from %{database}."
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:159
-msgid "Nothing matched %{query} from %{database} using %{strategy}"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:169
-msgid "Databases: %{list}"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:177
-msgid "Strategies: %{list}"
-msgstr ""
-
-#: data/rbot/plugins/dictclient.rb:184
-msgid ""
-"define <phrase> [from <database>] => Show definition of a phrase; match "
-"<phrase> [using <strategy>] [from <database>] => Show matching phrases; "
-"dictclient databases => List databases; dictclient strategies => List "
-"strategies"
+#: data/rbot/plugins/figlet.rb:7
+msgid "Path to the figlet program"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:52
 msgid "Data file is not found or corrupt, reinitializing data"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:59
+#: data/rbot/plugins/alias.rb:60
 msgid "Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:75
+#: data/rbot/plugins/alias.rb:76
 msgid "The definition you provided is invalid: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:86 data/rbot/plugins/alias.rb:103
+#: data/rbot/plugins/alias.rb:87 data/rbot/plugins/alias.rb:104
 msgid "No such alias is defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:92
+#: data/rbot/plugins/alias.rb:93
 msgid "No aliases defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:101
+#: data/rbot/plugins/alias.rb:102
 msgid "Alias of %{command}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:113
+#: data/rbot/plugins/alias.rb:114
 msgid ""
 "The arguments in alias must match the substitutions in command, and vice "
 "versa"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:130
+#: data/rbot/plugins/alias.rb:131
 msgid ""
 "The alias seems to have caused infinite recursion. Please examine your alias "
 "definitions"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:146
+#: data/rbot/plugins/alias.rb:147
 msgid "Error handling the alias, the command is not defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:156
+#: data/rbot/plugins/alias.rb:157
 msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:158
+#: data/rbot/plugins/alias.rb:159
 msgid ""
 "\"alias <text> => <command>\" => add text as an alias of command. Text can "
 "contain placeholders marked with : or * for :words and *multiword arguments. "
@@ -900,140 +823,11 @@ msgid ""
 "google site:linuxbrit.co.uk/rbot/ <terms>"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:160
+#: data/rbot/plugins/alias.rb:161
 msgid ""
 "alias list => list defined aliases | alias whatis <alias> => show definition "
 "of the alias | alias remove <alias> => remove defined alias | see the "
 "\"create\" topic about adding aliases"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:47
-msgid "Cannot translate empty string"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:257
-msgid "Number of seconds to wait for the translation service before timeout"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:276
-msgid "Translator %{name} cannot be used: %{reason}"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:285
-msgid "%{info}, supported directions of translation: %{directions}"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:288
-msgid "%{source} -> %{targets}"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:293
-msgid ""
-"Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
-"{translators}. Use \"help translator <translator>\" to look up supported "
-"from and to languages"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:310
-msgid "%{translator} doesn't support translating from %{source} to %{target}"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:313
-msgid "%{translator} failed to provide a translation"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:316
-msgid "The translator timed out"
-msgstr ""
-
-#: data/rbot/plugins/translator.rb:319
-msgid "No translator called %{name}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:203
-msgid "%{current_player}, it's your turn. %{previous_word} -> %{current_word}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:207
-msgid "No one has given the first word yet. Say the first word to start."
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:209
-msgid ""
-"Poor %{current_player} is playing alone! Anyone care to join? %"
-"{previous_word} -> %{current_word}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:240
-msgid "%{player} took too long and is out of the game. Try again next game!"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:245
-msgid "%{player} is the last remaining player and the winner! Congratulations!"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:253
-msgid "%{player} took too long and skipped the turn."
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:281
-msgid "%{player} has given the first word: %{word}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:287
-msgid "Welcome to shiritori, %{player}."
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:292
-msgid "The word %{used_word} has been used. Retry from %{word}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:297
-msgid ""
-"It's impossible to continue the chain from %{word}. The game has ended. "
-"Thanks a lot, %{player}! :("
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:301
-msgid ""
-"It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:306
-msgid ""
-"It's impossible to continue the chain from %{word}. Start with another word."
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:327
-msgid ""
-"A game in which each player must continue the previous player's word, by "
-"using its last one or few characters/letters of the word to start a new "
-"word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available "
-"rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:398
-msgid "Already playing shiritori here"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:409
-msgid "Shiritori has started. Please say the first word"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:411
-msgid "couldn't start %{ruleset} shiritori: %{error}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:415
-msgid "There is no ruleset named %{ruleset}"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:433
-msgid "Shiritori has stopped. Hope you had fun!"
-msgstr ""
-
-#: data/rbot/plugins/games/shiritori.rb:436
-msgid "No game to stop here, because no game is being played."
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:69 data/rbot/plugins/games/azgame.rb:236
@@ -1204,4 +998,226 @@ msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:540
 msgid "az topics: play, rules, cancel, manage, check"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:203
+msgid "%{current_player}, it's your turn. %{previous_word} -> %{current_word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:207
+msgid "No one has given the first word yet. Say the first word to start."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:209
+msgid ""
+"Poor %{current_player} is playing alone! Anyone care to join? %"
+"{previous_word} -> %{current_word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:240
+msgid "%{player} took too long and is out of the game. Try again next game!"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:245
+msgid "%{player} is the last remaining player and the winner! Congratulations!"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:253
+msgid "%{player} took too long and skipped the turn."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:281
+msgid "%{player} has given the first word: %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:287
+msgid "Welcome to shiritori, %{player}."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:292
+msgid "The word %{used_word} has been used. Retry from %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:297
+msgid ""
+"It's impossible to continue the chain from %{word}. The game has ended. "
+"Thanks a lot, %{player}! :("
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:301
+msgid ""
+"It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:306
+msgid ""
+"It's impossible to continue the chain from %{word}. Start with another word."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:327
+msgid ""
+"A game in which each player must continue the previous player's word, by "
+"using its last one or few characters/letters of the word to start a new "
+"word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available "
+"rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:398
+msgid "Already playing shiritori here"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:409
+msgid "Shiritori has started. Please say the first word"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:411
+msgid "couldn't start %{ruleset} shiritori: %{error}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:415
+msgid "There is no ruleset named %{ruleset}"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:433
+msgid "Shiritori has stopped. Hope you had fun!"
+msgstr ""
+
+#: data/rbot/plugins/games/shiritori.rb:436
+msgid "No game to stop here, because no game is being played."
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:57
+msgid "Hostname or hostname:port of the DICT server used to lookup words"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:60
+msgid ""
+"When multiple databases reply a number of definitions that above this limit, "
+"only the database names will be listed. Otherwise, the full definitions from "
+"each database are replied"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:63
+msgid "Each definition is truncated to this length"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:66
+msgid "Format of headwords; <word> will be replaced with the actual word"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:69
+msgid ""
+"Format of database names; <database> will be replaced with the database name"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:72
+msgid ""
+"Format of definitions. <word> will be replaced with the formatted headword, "
+"<def> will be replaced with the truncated definition, and <database> with "
+"the formatted database name"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:75
+msgid ""
+"Format of match results. <matches> will be replaced with the formatted "
+"headwords, <database> with the formatted database name"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:95
+msgid ""
+"An error occured connecting to the DICT server. Check the dictclient.server "
+"configuration or retry later"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:97
+msgid "A protocol error occured"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:99
+msgid "An error occured"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:121
+msgid ""
+"Many definitions for %{phrase} were found in %{databases}. Use 'define "
+"<phrase> from <database> to view a definition."
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:138
+msgid "No definition for %{phrase} found from %{database}."
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:159
+msgid "Nothing matched %{query} from %{database} using %{strategy}"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:169
+msgid "Databases: %{list}"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:177
+msgid "Strategies: %{list}"
+msgstr ""
+
+#: data/rbot/plugins/dictclient.rb:184
+msgid ""
+"define <phrase> [from <database>] => Show definition of a phrase; match "
+"<phrase> [using <strategy>] [from <database>] => Show matching phrases; "
+"dictclient databases => List databases; dictclient strategies => List "
+"strategies"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:47
+msgid "Cannot translate empty string"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:257
+msgid "Number of seconds to wait for the translation service before timeout"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:276
+msgid "Translator %{name} cannot be used: %{reason}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:284
+msgid "List of translators to try in order when translator name not specified"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:292
+msgid "%{info}, supported directions of translation: %{directions}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:295
+msgid "%{source} -> %{targets}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:300
+msgid ""
+"Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
+"{translators}. If \"translator\" is used in place of the translator name, "
+"the first translator in translator.default_list which supports the specified "
+"direction will be picked automatically. Use \"help translator <translator>\" "
+"to look up supported from and to languages"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:315
+msgid ""
+"None of the default translators (translator.default_list) supports "
+"translating from %{source} to %{target}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:331
+msgid "%{translator} doesn't support translating from %{source} to %{target}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:334
+msgid "%{translator} failed to provide a translation"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:337
+msgid "The translator timed out"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:340
+msgid "No translator called %{name}"
 msgstr ""
