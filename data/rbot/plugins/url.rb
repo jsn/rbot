@@ -137,6 +137,7 @@ class UrlPlugin < Plugin
     list = @registry[m.target]
     urls.each { |urlstr|
       debug "working on #{urlstr}"
+      next unless urlstr =~ /^https?:/
       title = nil
       if @bot.config['url.display_link_info']
         Thread.start do
