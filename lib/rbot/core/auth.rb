@@ -352,8 +352,8 @@ class AuthModule < CoreBotModule
           return m.reply(_("you can't ask for someone else's password"))
         end
         return m.reply(_("c'mon, you can't be asking me seriously to tell you the password in public!")) if m.public?
-        return m.reply(_("the password for %{user} is %{password}")) %
-          { :user => butarget.username, :password => butarget.password }
+        return m.reply(_("the password for %{user} is %{password}") %
+          { :user => butarget.username, :password => butarget.password })
       else
         props = splits[1..-1]
       end
