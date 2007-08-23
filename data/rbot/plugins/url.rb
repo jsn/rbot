@@ -6,6 +6,7 @@ end
 class UrlPlugin < Plugin
   TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
   LINK_INFO = "[Link Info]"
+  OUR_UNSAFE = Regexp.new("[^#{URI::PATTERN::UNRESERVED}#{URI::PATTERN::RESERVED}%# ]", false, 'N')
 
   BotConfig.register BotConfigIntegerValue.new('url.max_urls',
     :default => 100, :validate => Proc.new{|v| v > 0},
@@ -131,7 +132,9 @@ class UrlPlugin < Plugin
   def listen(m)
     return unless m.kind_of?(PrivMessage)
     return if m.address?
-    urls = URI.extract(m.message)
+
+    escaped = URI.escape(m.message, OUR_UNSAFE)
+    urls = URI.extract(escaped)
     return if urls.empty?
     debug "found urls #{urls.inspect}"
     list = @registry[m.target]
