@@ -575,6 +575,7 @@ class RSSFeedsPlugin < Plugin
 
   def del_rss(m, params, pass=false)
     feed = unwatch_rss(m, params, true)
+    return unless feed
     if feed.watched?
       m.reply "someone else is watching #{feed.handle}, I won't remove it from my list"
       return
