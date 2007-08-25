@@ -10,11 +10,11 @@
 module Irc
 module Language
 
-  # This constant has holds the mapping
-  # from long language names to usual POSIX
+  # This constant hash holds the mapping
+  # from long language names to the usual POSIX
   # locale specifications
   Lang2Locale = {
-    :english  => 'en_GB',
+    :english  => 'en',
     :british_english  => 'en_GB',
     :american_english  => 'en_US',
     :italian  => 'it',
@@ -27,9 +27,29 @@ module Language
     :simplified_chinese => 'zh_CN'
   }
 
+  # Return the shortest language for the current
+  # GetText locale
+  def Language.from_locale
+    lang = locale.language
+    if locale.country
+      str = lang + "_#{locale.country}"
+      if Lang2Locale.value?(str)
+        # Get the shortest key in Lang2Locale which maps to the given lang_country
+        return Lang2Locale.select { |k, v| v == str }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+      end
+    end
+    # lang_country didn't work, let's try lan
+    if Lang2Locale.value?(lang)
+      # Get the shortest key in Lang2Locale which maps to the given lang
+      return Lang2Locale.select { |k, v| v == lang }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+    end
+    # all else fail, return 'english'
+    return 'english'
+  end
+
   class Language
     BotConfig.register BotConfigEnumValue.new('core.language', 
-      :default => "english", :wizard => true,
+      :default => Irc::Language.from_locale, :wizard => true,
       :values => Proc.new{|bot|
             Dir.new(Config::datadir + "/languages").collect {|f|
               f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
