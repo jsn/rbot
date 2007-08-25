@@ -1,5 +1,31 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Language module for rbot
+#
+# This module takes care of language handling for rbot:
+# setting the core.language value, loading the appropriate
+# .lang file etc.
+#
 module Irc
 module Language
+
+  # This constant has holds the mapping
+  # from long language names to usual POSIX
+  # locale specifications
+  Lang2Locale = {
+    :english  => 'en_GB',
+    :british_english  => 'en_GB',
+    :american_english  => 'en_US',
+    :italian  => 'it',
+    :french   => 'fr',
+    :german   => 'de',
+    :dutch    => 'nl',
+    :japanese => 'ja',
+    :russian  => 'ru',
+    :traditional_chinese => 'zh_TW',
+    :simplified_chinese => 'zh_CN'
+  }
 
   class Language
     BotConfig.register BotConfigEnumValue.new('core.language', 
@@ -16,9 +42,18 @@ module Language
       @bot = bot
       set_language language
     end
-    attr_reader :language
+    attr_reader :language, :locale
 
     def set_language(language)
+      l = language.to_s.gsub(/\s+/,'_').intern
+      if Lang2Locale.key?(l)
+        @locale = Lang2Locale[l]
+        debug "locale set to #{@locale}"
+        setlocale(@locale)
+      else
+        warn "Unable to set locale, unknown language #{l}"
+      end
+
       file = Config::datadir + "/languages/#{language}.lang"
       unless(FileTest.exist?(file))
         raise "no such language: #{language} (no such file #{file})"
