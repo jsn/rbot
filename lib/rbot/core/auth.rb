@@ -74,7 +74,7 @@ class AuthModule < CoreBotModule
         when false
           locs << x.gsub(/^here$/,'_').gsub(/^private$/,'?')
         else
-          warns << ArgumentError("%{string} doesn't look like a channel name" % {:string => x}) unless @bot.server.supports[:chantypes].include?(x[0])
+          warns << ArgumentError.new(_("'%{string}' doesn't look like a channel name") % {:string => x}) unless @bot.server.supports[:chantypes].include?(x[0])
           locs << x
         end
         unless want_more
