@@ -454,6 +454,7 @@ class ShiritoriPlugin < Plugin
   def cleanup
     @games.each_key {|g| g.die}
     @games.clear
+    super
   end
 end
 

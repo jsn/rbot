@@ -53,6 +53,7 @@ class QuotePlugin < Plugin
   def cleanup
     @lists.clear
     @changed.clear
+    super
   end
 
   def addquote(source, channel, quote)

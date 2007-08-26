@@ -319,6 +319,7 @@ class RSSFeedsPlugin < Plugin
 
   def cleanup
     stop_watches
+    super
   end
 
   def save

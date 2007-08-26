@@ -112,6 +112,7 @@ class RemindPlugin < Plugin
       }
     }
     @reminders.clear
+    super
   end
   def help(plugin, topic="")
     "reminder plugin: remind <who> [about] <message> in <time>, remind <who> [about] <message> every <time>, remind <who> [about] <message> at <time>, remind <who> no more [about] <message>, remind <who> no more. Generally <who> should be 'me', but you can remind others (nick or channel) if you have remind_others auth"

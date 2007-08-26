@@ -75,6 +75,7 @@ class UnicodePlugin < Plugin
         debug "cleaning up encodings"
         @bot.socket.filter = nil
         $KCODE = @old_kcode
+        super
     end
 
     def UnicodePlugin.reconfigure_filter(bot)

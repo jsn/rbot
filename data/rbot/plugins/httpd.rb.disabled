@@ -23,6 +23,7 @@ class HttpPlugin < Plugin
   end
   def cleanup
     @http_server.shutdown
+    super
   end
   def help(plugin, topic="")
     "no help yet"
