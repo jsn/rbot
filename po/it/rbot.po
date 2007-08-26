@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-26 03:00+0200\n"
+"POT-Creation-Date: 2007-08-26 03:12+0200\n"
 "PO-Revision-Date: 2007-08-23 17:49+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -719,9 +719,61 @@ msgstr ""
 msgid "config-related tasks: config, save, rescan"
 msgstr ""
 
+#: lib/rbot/core/utils/utils.rb:346
+msgid "year"
+msgstr "anno"
+
+#: lib/rbot/core/utils/utils.rb:346
+msgid "years"
+msgstr "anni"
+
+#: lib/rbot/core/utils/utils.rb:348
+msgid "month"
+msgstr "mese"
+
+#: lib/rbot/core/utils/utils.rb:348
+msgid "months"
+msgstr "mesi"
+
+#: lib/rbot/core/utils/utils.rb:350
+msgid "day"
+msgstr "giorno"
+
+#: lib/rbot/core/utils/utils.rb:350
+msgid "days"
+msgstr "giorni"
+
+#: lib/rbot/core/utils/utils.rb:352
+msgid "hour"
+msgstr "ora"
+
+#: lib/rbot/core/utils/utils.rb:352
+msgid "hours"
+msgstr "ore"
+
+#: lib/rbot/core/utils/utils.rb:354
+msgid "minute"
+msgstr "minuto"
+
+#: lib/rbot/core/utils/utils.rb:354
+msgid "minutes"
+msgstr "minuti"
+
+#: lib/rbot/core/utils/utils.rb:356
+msgid "second"
+msgstr "secondo"
+
+#: lib/rbot/core/utils/utils.rb:356
+msgid "seconds"
+msgstr "secondi"
+
+#: lib/rbot/core/utils/utils.rb:363
+msgid " and "
+msgstr " e "
+
 #: lib/rbot/ircbot.rb:1149
 msgid "help topics: "
-msgstr "argomenti d'aiuto: "
+msgstr "argomenti: "
 
 #: lib/rbot/ircbot.rb:1151
 msgid " (help <topic> for more info)"
@@ -734,7 +786,9 @@ msgstr "nessun aiuto disponibile su %{topic}"
 #: lib/rbot/ircbot.rb:1165
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
-msgstr "Attivo da %{up}, %{plug} plugin attivi, %{sent} righe spedite, %{recv} righe ricevute."
+msgstr ""
+"Attivo da %{up}, %{plug} plugin attivi, %{sent} righe spedite, %{recv} righe "
+"ricevute."
 
 #: lib/rbot/plugins.rb:237
 msgid "incorrect usage, ask for help using '%{command}'"

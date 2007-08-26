@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-26 03:00+0200\n"
+"POT-Creation-Date: 2007-08-26 03:12+0200\n"
 "PO-Revision-Date: 2007-07-09 01:39-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Chinese\n"
@@ -654,6 +654,58 @@ msgstr ""
 
 #: lib/rbot/core/config.rb:208
 msgid "config-related tasks: config, save, rescan"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:346
+msgid "year"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:346
+msgid "years"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:348
+msgid "month"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:348
+msgid "months"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:350
+msgid "day"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:350
+msgid "days"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:352
+msgid "hour"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:352
+msgid "hours"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:354
+msgid "minute"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:354
+msgid "minutes"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:356
+msgid "second"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:356
+msgid "seconds"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:363
+msgid " and "
 msgstr ""
 
 #: lib/rbot/ircbot.rb:1149
