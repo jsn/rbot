@@ -199,7 +199,7 @@ class ShiritoriGame
   
   # announce the current word, and player if take_turns?
   def announce
-    say (if take_turns?
+    say(if take_turns?
       _("%{current_player}, it's your turn. %{previous_word} -> %{current_word}") %
        { :current_player => current_player, :previous_word => previous_word,
          :current_word => current_word }
