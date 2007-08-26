@@ -34,18 +34,25 @@ begin
     def bound_targets(*a)  # :nodoc:
       orig_bound_targets(*a) rescue orig_bound_targets(Object)
     end
+
+    require 'stringio'
+
+    # This method is used to output debug information on the GetText
+    # textdomain, and it's called by the language setting routines
+    # in rbot
+    def rbot_gettext_debug
+      begin
+        gettext_info = StringIO.new
+        current_textdomain_info(:out => gettext_info) # fails sometimes
+      rescue Exception
+        warning "gettext failed to set call textdomain info. maybe an mo file doesn't exist for your locale."
+      ensure
+        gettext_info.string.each_line { |l| debug l}
+      end
+    end
   end
 
-  begin
-    require 'stringio'
-    gettext_info = StringIO.new
-    current_textdomain_info(:out => gettext_info) # fails sometimes
-    debug 'using ruby-gettext'
-  rescue Exception
-    warn "ruby-gettext was loaded but appears to be non-functional. maybe an mo file doesn't exist for your locale."
-  ensure
-    gettext_info.string.each_line { |l| debug l}
-  end
+  log "gettext loaded"
 
 rescue LoadError, GetTextVersionError
   warn "failed to load ruby-gettext package: #{$!}; translations are disabled"

@@ -70,6 +70,7 @@ module Language
       if Lang2Locale.key?(lang_sym)
         setlocale(Lang2Locale[lang_sym])
         debug "locale set to #{locale}"
+        rbot_gettext_debug
       else
         warn "Unable to set locale, unknown language #{language} (#{lang_str})"
       end
