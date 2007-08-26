@@ -131,6 +131,7 @@ module Timer
     def reschedule(handle, period)
       raise "no such timer #{handle}" unless @timers[handle]
       @timers[handle].reschedule(period)
+      tick
     end
 
     # you can call this when you know you're idle, or you can split off a
