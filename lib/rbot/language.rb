@@ -30,6 +30,7 @@ module Language
   # Return the shortest language for the current
   # GetText locale
   def Language.from_locale
+    return 'english' unless defined?(GetText)
     lang = locale.language
     if locale.country
       str = lang + "_#{locale.country}"
@@ -67,7 +68,7 @@ module Language
     def set_language(language)
       lang_str = language.to_s.downcase.gsub(/\s+/,'_')
       lang_sym = lang_str.intern
-      if Lang2Locale.key?(lang_sym)
+      if defined?(GetText) and Lang2Locale.key?(lang_sym)
         setlocale(Lang2Locale[lang_sym])
         debug "locale set to #{locale}"
         rbot_gettext_debug
