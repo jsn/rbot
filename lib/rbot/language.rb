@@ -72,7 +72,7 @@ module Language
         debug "locale set to #{locale}"
         rbot_gettext_debug
       else
-        warn "Unable to set locale, unknown language #{language} (#{lang_str})"
+        warning "Unable to set locale, unknown language #{language} (#{lang_str})"
       end
 
       file = Config::datadir + "/languages/#{lang_str}.lang"

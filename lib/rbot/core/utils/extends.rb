@@ -123,7 +123,7 @@ class ::String
         str + ": " + link
       }
     else
-      warn "unknown :a_href option #{val} passed to ircify_html" if val
+      warning "unknown :a_href option #{val} passed to ircify_html" if val
     end
 
     # Paragraph and br tags are converted to whitespace

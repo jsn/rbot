@@ -549,7 +549,7 @@ module Irc
 
       def load_array(ary, forced)
         unless ary
-          warn "Tried to load an empty array"
+          warning "Tried to load an empty array"
           return
         end
         raise "Won't load with unsaved changes" if @has_changes and not forced
