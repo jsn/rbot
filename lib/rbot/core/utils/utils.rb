@@ -343,24 +343,24 @@ module ::Irc
     def Utils.secs_to_string(secs)
       ret = []
       years, secs = secs.divmod SEC_PER_YR
-      secs_to_string_case(ret, years, "year", "years") if years > 0
+      secs_to_string_case(ret, years, _("year"), _("years")) if years > 0
       months, secs = secs.divmod SEC_PER_MNTH
-      secs_to_string_case(ret, months, "month", "months") if months > 0
+      secs_to_string_case(ret, months, _("month"), _("months")) if months > 0
       days, secs = secs.divmod SEC_PER_DAY
-      secs_to_string_case(ret, days, "day", "days") if days > 0
+      secs_to_string_case(ret, days, _("day"), _("days")) if days > 0
       hours, secs = secs.divmod SEC_PER_HR
-      secs_to_string_case(ret, hours, "hour", "hours") if hours > 0
+      secs_to_string_case(ret, hours, _("hour"), _("hours")) if hours > 0
       mins, secs = secs.divmod SEC_PER_MIN
-      secs_to_string_case(ret, mins, "minute", "minutes") if mins > 0
+      secs_to_string_case(ret, mins, _("minute"), _("minutes")) if mins > 0
       secs = secs.to_i
-      secs_to_string_case(ret, secs, "second", "seconds") if secs > 0 or ret.empty?
+      secs_to_string_case(ret, secs, _("second"), _("seconds")) if secs > 0 or ret.empty?
       case ret.length
       when 0
         raise "Empty ret array!"
       when 1
         return ret.to_s
       else
-        return [ret[0, ret.length-1].join(", ") , ret[-1]].join(" and ")
+        return [ret[0, ret.length-1].join(", ") , ret[-1]].join(_(" and "))
       end
     end
 
