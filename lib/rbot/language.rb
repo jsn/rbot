@@ -62,23 +62,23 @@ module Language
       @bot = bot
       set_language language
     end
-    attr_reader :language, :locale
+    attr_reader :language
 
     def set_language(language)
-      l = language.to_s.gsub(/\s+/,'_').intern
-      if Lang2Locale.key?(l)
-        @locale = Lang2Locale[l]
-        setlocale(@locale)
+      lang_str = language.to_s.downcase.gsub(/\s+/,'_')
+      lang_sym = lang_str.intern
+      if Lang2Locale.key?(lang_sym)
+        setlocale(Lang2Locale[lang_sym])
         debug "locale set to #{locale}"
       else
-        warn "Unable to set locale, unknown language #{l}"
+        warn "Unable to set locale, unknown language #{language} (#{lang_str})"
       end
 
-      file = Config::datadir + "/languages/#{language}.lang"
+      file = Config::datadir + "/languages/#{lang_str}.lang"
       unless(FileTest.exist?(file))
-        raise "no such language: #{language} (no such file #{file})"
+        raise "no such language: #{lang_str} (no such file #{file})"
       end
-      @language = language
+      @language = lang_str
       @file = file
       scan
       return if @bot.plugins.nil?
