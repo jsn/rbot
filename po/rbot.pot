@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-23 16:29+0200\n"
+"POT-Creation-Date: 2007-08-26 03:00+0200\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -655,6 +655,23 @@ msgstr ""
 
 #: lib/rbot/core/config.rb:208
 msgid "config-related tasks: config, save, rescan"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1149
+msgid "help topics: "
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1151
+msgid " (help <topic> for more info)"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1154
+msgid "no help for topic %{topic}"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1165
+msgid ""
+"Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 
 #: lib/rbot/plugins.rb:237
