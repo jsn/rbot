@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-26 03:12+0200\n"
+"POT-Creation-Date: 2007-08-26 10:30+0200\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
@@ -64,6 +64,10 @@ msgstr "請勿在重設的時候，在 #{command} 前面使用 + 或 -"
 #: lib/rbot/core/auth.rb:64
 msgid "+ or - expected in front of %{string}"
 msgstr "%{string} 前面應該有 + 或 -"
+
+#: lib/rbot/core/auth.rb:77
+msgid "'%{string}' doesn't look like a channel name"
+msgstr ""
 
 #: lib/rbot/core/auth.rb:86
 msgid "trailing comma"

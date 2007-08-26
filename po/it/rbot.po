@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-26 03:12+0200\n"
+"POT-Creation-Date: 2007-08-26 10:30+0200\n"
 "PO-Revision-Date: 2007-08-23 17:49+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -44,12 +44,10 @@ msgid "%{desc} [valid values are: %{values}]"
 msgstr "%{desc} [valori validi: %{values}]"
 
 #: lib/rbot/config.rb:325
-#, fuzzy
 msgid "First time rbot configuration wizard"
-msgstr "Prima configurazione"
+msgstr "Configurazione iniziale di rbot"
 
 #: lib/rbot/config.rb:328
-#, fuzzy
 msgid "This wizard will ask you a few questions to get you started."
 msgstr "Ti verranno fatte alcune domande per cominciare."
 
@@ -58,8 +56,8 @@ msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
 msgstr ""
-"Il resto della configurazione del bot può essere manipolata da IRC quando il "
-"bot è connesso e ti sei identificato"
+"Il resto della configurazione di rbot può essere manipolata da IRC quando "
+"rbot è connesso e ti sei identificato"
 
 #: lib/rbot/core/auth.rb:62
 msgid "please do not use + or - in front of command %{command} when resetting"
@@ -68,6 +66,10 @@ msgstr "non usare + o - davanti al comando %{command} per il reset"
 #: lib/rbot/core/auth.rb:64
 msgid "+ or - expected in front of %{string}"
 msgstr "+ o - atteso prima di %{string}"
+
+#: lib/rbot/core/auth.rb:77
+msgid "'%{string}' doesn't look like a channel name"
+msgstr "'%{string}' non sembra il nome di un canale"
 
 #: lib/rbot/core/auth.rb:86
 msgid "trailing comma"

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-08-26 03:12+0200\n"
+"POT-Creation-Date: 2007-08-26 10:30+0200\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -60,6 +60,10 @@ msgstr ""
 
 #: lib/rbot/core/auth.rb:64
 msgid "+ or - expected in front of %{string}"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:77
+msgid "'%{string}' doesn't look like a channel name"
 msgstr ""
 
 #: lib/rbot/core/auth.rb:86
