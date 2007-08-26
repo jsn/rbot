@@ -1,4 +1,9 @@
-# load gettext module and provide fallback in case of failure
+#-- vim:sw=2:et
+#++
+#
+# :title: GetText interface for rbot
+#
+# Load gettext module and provide fallback in case of failure
 
 class GetTextVersionError < Exception
 end
@@ -34,11 +39,12 @@ begin
   begin
     require 'stringio'
     gettext_info = StringIO.new
-    current_textdomain_info(:out=>gettext_info) # fails sometimes
+    current_textdomain_info(:out => gettext_info) # fails sometimes
     debug 'using ruby-gettext'
-    gettext_info.string.each_line {|l| debug l}
   rescue Exception
     warn "ruby-gettext was loaded but appears to be non-functional. maybe an mo file doesn't exist for your locale."
+  ensure
+    gettext_info.string.each_line { |l| debug l}
   end
 
 rescue LoadError, GetTextVersionError

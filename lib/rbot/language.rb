@@ -6,7 +6,7 @@
 # This module takes care of language handling for rbot:
 # setting the core.language value, loading the appropriate
 # .lang file etc.
-#
+
 module Irc
 module Language
 
@@ -68,8 +68,8 @@ module Language
       l = language.to_s.gsub(/\s+/,'_').intern
       if Lang2Locale.key?(l)
         @locale = Lang2Locale[l]
-        debug "locale set to #{@locale}"
         setlocale(@locale)
+        debug "locale set to #{locale}"
       else
         warn "Unable to set locale, unknown language #{l}"
       end
