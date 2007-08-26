@@ -716,7 +716,7 @@ class RSSFeedsPlugin < Plugin
                   else
                     debug "accepting new #{uid} #{item.inspect}"
                     debug [uid, txt].inspect
-                    warn "same text! #{txt}" if otxt.include?(txt)
+                    warning "same text! #{txt}" if otxt.include?(txt)
                     false
                   end
                 }

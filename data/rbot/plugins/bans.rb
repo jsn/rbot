@@ -67,7 +67,7 @@ class BansPlugin < Plugin
           action = :kickban
         else
           # Shouldn't happen
-          warn "Unknown action in old data #{ar.inspect} -- entry ignored"
+          warning "Unknown action in old data #{ar.inspect} -- entry ignored"
           next
         end
         bans.delete(ar)
