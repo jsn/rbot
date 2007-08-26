@@ -414,7 +414,25 @@ class RSSFeedsPlugin < Plugin
 
     m.reply "lemme fetch it..."
     title = items = nil
-    fetched = fetchRss(feed, m, false)
+    we_were_watching = false
+
+    if @watch.key?(feed.handle)
+      # If a feed is being watched, we run the watcher thread
+      # so that all watchers can be informed of changes to
+      # the feed. Before we do that, though, we remove the
+      # show requester from the watchlist, if present, lest
+      # he gets the update twice.
+      if feed.watched_by?(m.replyto)
+        we_were_watching = true
+        feed.rm_watch(m.replyto)
+      end
+      @bot.timer.reschedule(@watch[feed.handle], 0)
+      if we_were_watching
+        feed.add_watch(m.replyto)
+      end
+    else
+      fetched = fetchRss(feed, m, false)
+    end
     return unless fetched or feed.xml
     if not fetched and feed.items
       m.reply "using old data"
