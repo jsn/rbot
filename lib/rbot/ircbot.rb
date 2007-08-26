@@ -1146,12 +1146,12 @@ class Bot
     topic = nil if topic == ""
     case topic
     when nil
-      helpstr = "help topics: "
+      helpstr = _("help topics: ")
       helpstr += @plugins.helptopics
-      helpstr += " (help <topic> for more info)"
+      helpstr += _(" (help <topic> for more info)")
     else
       unless(helpstr = @plugins.help(topic))
-        helpstr = "no help for topic #{topic}"
+        helpstr = _("no help for topic %{topic}") % { :topic => topic }
       end
     end
     return helpstr
@@ -1162,7 +1162,11 @@ class Bot
     secs_up = Time.new - @startup_time
     uptime = Utils.secs_to_string secs_up
     # return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@registry.length} items stored in registry, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
-    return "Uptime #{uptime}, #{@plugins.length} plugins active, #{@socket.lines_sent} lines sent, #{@socket.lines_received} received."
+    return (_("Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received.") %
+             {
+               :up => uptime, :plug => @plugins.length,
+               :sent => @socket.lines_sent, :recv => @socket.lines_received
+             })
   end
 
   # We want to respond to a hung server in a timely manner. If nothing was received
