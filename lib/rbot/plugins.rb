@@ -526,7 +526,7 @@ module Plugins
                        "%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%{command}%{bold} to see why",
                        @failed.length) %
                     { :count => @failed.length, :highlight => Reverse,
-                      :bold => Bold, :command => "#{Bold}help failed plugins#{Bold}"}
+                      :bold => Bold, :command => "help failed plugins"}
         end
       end
       output.join '; '
