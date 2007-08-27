@@ -298,7 +298,7 @@ class RSSFeedsPlugin < Plugin
         @feeds.delete(k)
       }
       @feeds.each { |k, f|
-        f.mutex = Mutex.new unless f.mutex
+        f.mutex = Mutex.new
         f.sanitize_watchers
         parseRss(f) if f.xml
       }
