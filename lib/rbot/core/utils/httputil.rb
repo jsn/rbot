@@ -276,7 +276,6 @@ class HttpUtil
   def cleanup
     debug 'stopping http cache cleanup timer'
     @bot.timer.remove(@timer)
-    super
   end
 
   # if http_proxy_include or http_proxy_exclude are set, then examine the
@@ -589,6 +588,7 @@ class HttpUtilPlugin < CoreBotModule
     debug 'shutting down httputil'
     @bot.httputil.cleanup
     @bot.httputil = nil
+    super
   end
 end
 
