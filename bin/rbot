@@ -42,22 +42,26 @@ $version="0.9.11-svn"
 $opts = Hash.new
 
 if $version =~ /svn/
-  up = File.dirname(__FILE__) + "/.."
-  rev = " (unknown revision)"
-  begin
-    svn_out = `svn info #{up}`
-    if svn_out =~ /Last Changed Rev: (\d+)/
-      rev = " (revision #{$1}"
+  if defined?(SVN_DIR) and File.exists?(File.join(SVN_DIR, '.git'))
+    $version.sub!('svn', 'git')
+  else
+    up = File.dirname(__FILE__) + "/.."
+    rev = " (unknown revision)"
+    begin
+      svn_out = `svn info #{up}`
+      if svn_out =~ /Last Changed Rev: (\d+)/
+        rev = " (revision #{$1}"
+      end
+      svn_st = `svn st #{up}`
+      if svn_st =~ /^[MDA] /
+        rev << ", local changes"
+      end
+      rev << ")"
+    rescue => e
+      puts e.inspect
     end
-    svn_st = `svn st #{up}`
-    if svn_st =~ /^[MDA] /
-      rev << ", local changes"
-    end
-    rev << ")"
-  rescue => e
-    puts e.inspect
+    $version += rev
   end
-  $version += rev
 end
 
 orig_opts = ARGV.dup
