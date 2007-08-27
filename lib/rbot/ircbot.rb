@@ -90,10 +90,9 @@ fatal "fatal test"
 # The following global is used for the improved signal handling.
 $interrupted = 0
 
-require 'rbot/load-gettext'
-
 # these first
 require 'rbot/rbotconfig'
+require 'rbot/load-gettext'
 require 'rbot/config'
 # require 'rbot/utils'
 
