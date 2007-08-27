@@ -48,13 +48,13 @@ if $version =~ /svn/
     git_out = `git status`
 
     git_out.match(/^# On branch (.*)\n/)
-    branch = $1
+    branch = $1.dup || "unknown"
     changed = git_out.match(/^# Change(.*)\n/)
-    rev = " @ #{`git rev-parse HEAD`[0..6]}"
+    rev = "revision "
+    rev << `git rev-parse HEAD`[0..5]
     rev << ", local changes" if changed
 
-    $version << "-#{branch}" unless branch.empty?
-    $version << rev
+    $version << " (#{branch} branch, #{rev})"
   else
     up = File.dirname(__FILE__) + "/.."
     rev = " (unknown revision)"
