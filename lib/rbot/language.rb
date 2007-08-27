@@ -36,13 +36,19 @@ module Language
       str = lang + "_#{locale.country}"
       if Lang2Locale.value?(str)
         # Get the shortest key in Lang2Locale which maps to the given lang_country
-        return Lang2Locale.select { |k, v| v == str }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+        lang_str = Lang2Locale.select { |k, v| v == str }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+	if File.exist?(File.join(Config::datadir, "languages/#{lang_str}.lang"))
+          return lang_str
+        end
       end
     end
     # lang_country didn't work, let's try lan
     if Lang2Locale.value?(lang)
       # Get the shortest key in Lang2Locale which maps to the given lang
-      return Lang2Locale.select { |k, v| v == lang }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+      lang_str = Lang2Locale.select { |k, v| v == lang }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+      if File.exist?(File.join(Config::datadir, "/languages/#{lang_str}.lang"))
+        return lang_str
+      end
     end
     # all else fail, return 'english'
     return 'english'
