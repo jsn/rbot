@@ -40,11 +40,11 @@ class BasicsModule < CoreBotModule
   end
 
   def bot_quit(m, param)
-    @bot.quit(param[:msg] ? param[:msg].join(" ") : nil)
+    @bot.quit param[:msg].to_s
   end
 
   def bot_restart(m, param)
-    @bot.restart(param[:msg] ? param[:msg].join(" ") : nil)
+    @bot.restart param[:msg].to_s
   end
 
   def bot_hide(m, param)
@@ -52,11 +52,11 @@ class BasicsModule < CoreBotModule
   end
 
   def bot_say(m, param)
-    @bot.say param[:where], param[:what].join(" ")
+    @bot.say param[:where], param[:what].to_s
   end
 
   def bot_action(m, param)
-    @bot.action param[:where], param[:what].join(" ")
+    @bot.action param[:where], param[:what].to_s
   end
 
   def bot_mode(m, param)
