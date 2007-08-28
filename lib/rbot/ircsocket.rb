@@ -462,6 +462,7 @@ module Irc
           end
         rescue Exception => e
           error "Spooling failed: #{e.pretty_inspect}"
+          raise e
         end
       end
     end
@@ -499,6 +500,7 @@ module Irc
       @rawsock = nil if @ssl
       @sock = nil
       @burst = 0
+      @sendq.clear
     end
 
     private
