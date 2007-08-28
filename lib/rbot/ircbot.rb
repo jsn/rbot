@@ -1012,8 +1012,8 @@ class Bot
     sendq "TOPIC #{where} :#{topic}", where, 2
   end
 
-  def disconnect(message = nil)
-    message = @lang.get("quit") if (message.nil? || message.empty?)
+  def disconnect(message=nil)
+    message = @lang.get("quit") if (!message || message.empty?)
     if @socket.connected?
       debug "Clearing socket"
       @socket.clearq
@@ -1033,9 +1033,9 @@ class Bot
   end
 
   # disconnect from the server and cleanup all plugins and modules
-  def shutdown(message = nil)
+  def shutdown(message=nil)
     @quit_mutex.synchronize do
-      debug "Shutting down:"
+      debug "Shutting down: #{message}"
       ## No we don't restore them ... let everything run through
       # begin
       #   trap("SIGINT", "DEFAULT")
@@ -1045,7 +1045,7 @@ class Bot
       #   debug "failed to restore signals: #{e.inspect}\nProbably running on windows?"
       # end
       debug "\tdisconnecting..."
-      disconnect
+      disconnect(message)
       debug "\tsaving ..."
       save
       debug "\tcleaning up ..."
@@ -1073,9 +1073,9 @@ class Bot
   end
 
   # totally shutdown and respawn the bot
-  def restart(message = false)
-    msg = message ? message : "restarting, back in #{@config['server.reconnect_wait']}..."
-    shutdown(msg)
+  def restart(message=nil)
+    message = "restarting, back in #{@config['server.reconnect_wait']}..." if (!message || message.empty?)
+    shutdown(message)
     sleep @config['server.reconnect_wait']
     begin
       # now we re-exec
