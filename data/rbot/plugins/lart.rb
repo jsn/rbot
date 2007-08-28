@@ -125,25 +125,25 @@ class LartPlugin < Plugin
   end
 
   def handle_addlart(m, params)
-    @larts << params[:lart]
+    @larts << params[:lart].to_s
     @changed = true
     m.okay
   end
 
   def handle_rmlart(m, params)
-    @larts.delete params[:lart]
+    @larts.delete params[:lart].to_s
     @changed = true
     m.okay
   end
 
   def handle_addpraise(m, params)
-    @praises << params[:praise]
+    @praises << params[:praise].to_s
     @changed = true
     m.okay
   end
 
   def handle_rmpraise(m, params)
-    @praises.delete params[:praise]
+    @praises.delete params[:praise].to_s
     @changed = true
     m.okay
   end
