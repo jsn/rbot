@@ -111,11 +111,15 @@ class RealmPlugin < Plugin
                 tok.capitalize
             }.join(' ')
             @registry[m.sourcenick] = realm_name
-            m.reply Realm.get_realm_status(realm_name)
+            Thread.new do
+              m.reply Realm.get_realm_status(realm_name)
+            end
         else
             if @registry.has_key?(m.sourcenick)
                 realm_name = @registry[m.sourcenick]
-                m.reply Realm.get_realm_status(realm_name)
+                Thread.new do
+                  m.reply Realm.get_realm_status(realm_name)
+                end
             else
                 m.reply "I don't know which realm you want.\n#{USAGE}"
             end
