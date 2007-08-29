@@ -69,6 +69,10 @@ class DeliciousPlugin < Plugin
     if options[:channel]
       opts[:tags] << ' ' + (@bot.config['delicious.channel_fmt'] % options[:channel])
     end
+    if options[:ircline] and options[:ircline].match(/\[tag(?:s)?:([^\]]+)\]/)
+      tags = $1
+      opts[:tags] << ' ' + tags.tr(',', ' ')
+    end
     debug "backgrounding del.icio.us api call"
     Thread.new { diu_add(url, opts) }
   end
