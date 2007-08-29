@@ -48,7 +48,7 @@ class DebugPlugin < Plugin
           end
 
           @delta.clear
-          (@curr.keys + @delta.keys).uniq.each do |k,v|
+          (@curr.keys + @prev.keys).uniq.each do |k,v|
             @delta[k] = @curr[k]-@prev[k]
           end
 
