@@ -227,6 +227,79 @@ end
 
 module ::Irc
 
+  # Define standard IRC attriubtes (not so standard actually,
+  # but the closest thing we have ...)
+  Bold = "\002"
+  Underline = "\037"
+  Reverse = "\026"
+  Italic = "\011"
+  NormalText = "\017"
+
+  # Color is prefixed by \003 and followed by optional
+  # foreground and background specifications, two-digits-max
+  # numbers separated by a comma. One of the two parts
+  # must be present.
+  Color = "\003"
+  ColorRx = /#{Color}\d?\d?(?:,\d\d?)?/
+
+  # Standard color codes
+  ColorCode = {
+    :black      => 1,
+    :blue       => 2,
+    :navyblue   => 2,
+    :navy_blue  => 2,
+    :green      => 3,
+    :red        => 4,
+    :brown      => 5,
+    :purple     => 6,
+    :olive      => 7,
+    :yellow     => 8,
+    :limegreen  => 9,
+    :lime_green => 9,
+    :teal       => 10,
+    :aqualight  => 11,
+    :aqua_light => 11,
+    :royal_blue => 12,
+    :hotpink    => 13,
+    :hot_pink   => 13,
+    :darkgray   => 14,
+    :dark_gray  => 14,
+    :lightgray  => 15,
+    :light_gray => 15,
+    :white      => 16
+  }
+
+  # Convert a String or Symbol into a color number
+  def Irc.find_color(data)
+    if Integer === data
+      data
+    else
+      f = if String === data
+            data.intern
+          else
+            data
+          end
+      if ColorCode.key?(f)
+        ColorCode[f] 
+      else
+        0
+      end
+    end
+  end
+
+  # Insert the full color code for a given
+  # foreground/background combination.
+  def Irc.color(fg=nil,bg=nil)
+    str = Color.dup
+    if fg
+     str << Irc.find_color(fg).to_s
+    end
+    if bg
+      str << "," << Irc.find_color(bg).to_s
+    end
+    return str
+  end
+
 
   class BasicUserMessage
 

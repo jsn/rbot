@@ -14,13 +14,6 @@ module Irc
     :desc => "when replying with nick put this character after the nick of the user the bot is replying to"
   )
 
-  Bold = "\002"
-  Underline = "\037"
-  Reverse = "\026"
-  Italic = "\011"
-  Color = "\003"
-  ColorRx = /#{Color}\d?\d?(?:,\d\d?)?/
-
   # base user message class, all user messages derive from this
   # (a user message is defined as having a source hostmask, a target
   # nick/channel and a message part)
