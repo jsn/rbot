@@ -17,6 +17,7 @@ module Irc
   Bold = "\002"
   Underline = "\037"
   Reverse = "\026"
+  Italic = "\011"
   Color = "\003"
   ColorRx = /#{Color}\d\d?(?:,\d\d?)?/
 
