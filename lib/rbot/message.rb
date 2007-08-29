@@ -19,7 +19,7 @@ module Irc
   Reverse = "\026"
   Italic = "\011"
   Color = "\003"
-  ColorRx = /#{Color}\d\d?(?:,\d\d?)?/
+  ColorRx = /#{Color}\d?\d?(?:,\d\d?)?/
 
   # base user message class, all user messages derive from this
   # (a user message is defined as having a source hostmask, a target
