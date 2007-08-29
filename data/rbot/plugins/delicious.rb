@@ -28,7 +28,7 @@ class DeliciousPlugin < Plugin
     :default => 'channel:%s', :desc => "How to convert channels to tags?")
 
   def help(plugin, topic="")
-    "delicious => show url of del.icio.us feed of bot url log."
+    "logs urls seen to del.icio.us. you can use [tags: tag1 tag2 ...] to provide tags. special tags are: #{Underline}!hide#{Underline} - log the url as non-shared, #{Underline}!skip#{Underline} - don't log the url. Commands: !#{Bold}delicious#{Bold} => show url of del.icio.us feed of bot url log. "
   end
 
   def diu_req(verb, opts = {})
@@ -71,7 +71,20 @@ class DeliciousPlugin < Plugin
     end
     if options[:ircline] and options[:ircline].match(/\[tag(?:s)?:([^\]]+)\]/)
       tags = $1
-      opts[:tags] << ' ' + tags.tr(',', ' ')
+      tags.tr(',', ' ').split(/\s+/).each do |t|
+        if t.sub!(/^!/, '')
+          case t
+          when 'nolog', 'no-log', 'dont-log', 'dontlog', 'skip':
+            debug "skipping #{url} on user request"
+            return
+          when 'private', 'unshared', 'not-shared', 'notshared', 'hide':
+            debug "hiding #{url} on user request"
+            opts[:shared] = 'no'
+          end
+        else
+          opts[:tags] << ' ' + t
+        end
+      end
     end
     debug "backgrounding del.icio.us api call"
     Thread.new { diu_add(url, opts) }
