@@ -42,7 +42,7 @@ class UrlPlugin < Plugin
     $1.ircify_html
   end
 
-  def get_title_for_url(uri_str, nick = nil, channel = nil)
+  def get_title_for_url(uri_str, nick = nil, channel = nil, ircline = nil)
 
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
@@ -50,6 +50,7 @@ class UrlPlugin < Plugin
     logopts = Hash.new
     logopts[:nick] = nick if nick
     logopts[:channel] = channel if channel
+    logopts[:ircline] = ircline if ircline
 
     title = nil
     extra = String.new
@@ -152,7 +153,7 @@ class UrlPlugin < Plugin
         Thread.start do
           debug "Getting title for #{urlstr}..."
           begin
-            title = get_title_for_url urlstr, m.source.nick, m.channel
+            title = get_title_for_url urlstr, m.source.nick, m.channel, m.message
             if title
               m.reply "#{LINK_INFO} #{title}", :overlong => :truncate
               debug "Title found!"
