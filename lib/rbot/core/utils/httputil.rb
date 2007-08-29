@@ -84,7 +84,7 @@ module ::Net
       case method
       when nil
         return str
-      when 'gzip', 'x-gzip'
+      when /gzip/ # Matches gzip, x-gzip, and the non-rfc-compliant gzip;q=\d sent by some servers
         debug "gunzipping body"
         begin
           return Zlib::GzipReader.new(StringIO.new(str)).read
