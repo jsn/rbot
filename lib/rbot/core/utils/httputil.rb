@@ -331,7 +331,7 @@ class HttpUtil
   def get_proxy(uri, options = {})
     opts = {
       :read_timeout => 10,
-      :open_timeout => 5
+      :open_timeout => 20
     }.merge(options)
 
     proxy = nil
