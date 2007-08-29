@@ -11,7 +11,7 @@ class AutoRejoinPlugin < Plugin
     if m.address?
       r = rand(10)
       if r > 0
-	@bot.timer.add_once(r, m) {|m|
+	@bot.timer.add_once(r) {
 	  @bot.join m.channel
 	  @bot.say(m.channel, @bot.lang.get("insult") % m.sourcenick) if @bot.config['rejoin.insult']
 	}

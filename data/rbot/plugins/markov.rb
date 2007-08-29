@@ -133,7 +133,7 @@ class MarkovPlugin < Plugin
     line = generate_string(word1, word2)
     return unless line
     return if line == message
-    @bot.timer.add_once(delay, m) {|m|
+    @bot.timer.add_once(delay) {
       m.reply line
     }
   end

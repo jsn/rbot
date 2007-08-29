@@ -679,7 +679,7 @@ class RSSFeedsPlugin < Plugin
     status = Hash.new
     status[:failures] = 0
     status[:first_run] = true
-    @watch[feed.handle] = @bot.timer.add(0, status) {
+    @watch[feed.handle] = @bot.timer.add(0) {
       debug "watcher for #{feed} started"
       failures = status[:failures]
       first_run = status.delete(:first_run)
