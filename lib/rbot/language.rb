@@ -8,53 +8,52 @@
 # .lang file etc.
 
 module Irc
-module Language
+  class Language
 
-  # This constant hash holds the mapping
-  # from long language names to the usual POSIX
-  # locale specifications
-  Lang2Locale = {
-    :english  => 'en',
-    :british_english  => 'en_GB',
-    :american_english  => 'en_US',
-    :italian  => 'it',
-    :french   => 'fr',
-    :german   => 'de',
-    :dutch    => 'nl',
-    :japanese => 'ja',
-    :russian  => 'ru',
-    :traditional_chinese => 'zh_TW',
-    :simplified_chinese => 'zh_CN'
-  }
+    # This constant hash holds the mapping
+    # from long language names to the usual POSIX
+    # locale specifications
+    Lang2Locale = {
+      :english  => 'en',
+      :british_english  => 'en_GB',
+      :american_english  => 'en_US',
+      :italian  => 'it',
+      :french   => 'fr',
+      :german   => 'de',
+      :dutch    => 'nl',
+      :japanese => 'ja',
+      :russian  => 'ru',
+      :traditional_chinese => 'zh_TW',
+      :simplified_chinese => 'zh_CN'
+    }
 
-  # Return the shortest language for the current
-  # GetText locale
-  def Language.from_locale
-    return 'english' unless defined?(GetText)
-    lang = locale.language
-    if locale.country
-      str = lang + "_#{locale.country}"
-      if Lang2Locale.value?(str)
-        # Get the shortest key in Lang2Locale which maps to the given lang_country
-        lang_str = Lang2Locale.select { |k, v| v == str }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
-	if File.exist?(File.join(Config::datadir, "languages/#{lang_str}.lang"))
+    # Return the shortest language for the current
+    # GetText locale
+    def Language.from_locale
+      return 'english' unless defined?(GetText)
+      lang = locale.language
+      if locale.country
+        str = lang + "_#{locale.country}"
+        if Lang2Locale.value?(str)
+          # Get the shortest key in Lang2Locale which maps to the given lang_country
+          lang_str = Lang2Locale.select { |k, v| v == str }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+          if File.exist?(File.join(Config::datadir, "languages/#{lang_str}.lang"))
+            return lang_str
+          end
+        end
+      end
+      # lang_country didn't work, let's try lan
+      if Lang2Locale.value?(lang)
+        # Get the shortest key in Lang2Locale which maps to the given lang
+        lang_str = Lang2Locale.select { |k, v| v == lang }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
+        if File.exist?(File.join(Config::datadir, "/languages/#{lang_str}.lang"))
           return lang_str
         end
       end
+      # all else fail, return 'english'
+      return 'english'
     end
-    # lang_country didn't work, let's try lan
-    if Lang2Locale.value?(lang)
-      # Get the shortest key in Lang2Locale which maps to the given lang
-      lang_str = Lang2Locale.select { |k, v| v == lang }.transpose.first.map { |v| v.to_s }.sort { |a, b| a.length <=> b.length }.first
-      if File.exist?(File.join(Config::datadir, "/languages/#{lang_str}.lang"))
-        return lang_str
-      end
-    end
-    # all else fail, return 'english'
-    return 'english'
-  end
 
-  class Language
     BotConfig.register BotConfigEnumValue.new('core.language', 
       :default => Irc::Language.from_locale, :wizard => true,
       :values => Proc.new{|bot|
@@ -141,5 +140,4 @@ module Language
     end
   end
 
-end
 end

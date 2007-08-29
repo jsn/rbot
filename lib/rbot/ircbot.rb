@@ -448,7 +448,7 @@ class Bot
     @logs = Hash.new
 
     @plugins = nil
-    @lang = Language::Language.new(self, @config['core.language'])
+    @lang = Language.new(self, @config['core.language'])
 
     begin
       @auth = Auth::authmanager
