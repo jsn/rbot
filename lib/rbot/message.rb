@@ -150,13 +150,24 @@ module Irc
     # Access the nick of the source
     #
     def sourcenick
-      @source.nick
+      if @source.reply_to?(:nick)
+        @source.nick
+      else
+        @source.to_s
+      end
     end
 
     # Access the user@host of the source
     #
     def sourceaddress
-      "#{@source.user}@#{@source.host}"
+      str = String.new
+      if @source.reply_to?(:user)
+        str << @source.user.to_s
+      end
+      if @source.reply_to?(:host)
+        str << @source.host.to_s
+      end
+      str
     end
 
     # Was the message from an identified user?
