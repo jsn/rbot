@@ -46,7 +46,7 @@ class DeliciousPlugin < Plugin
   end
 
   def diu_add(url, opts = {})
-    old = diu_req('get', :url => url).root.get_elements('/posts/post')[0] rescue ni
+    old = diu_req('get', :url => url).root.get_elements('/posts/post')[0] rescue nil
     opts[:tags] ||= ''
     if old
       opts[:description] ||= old.attribute('description').to_s
