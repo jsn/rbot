@@ -764,13 +764,13 @@ class RSSFeedsPlugin < Plugin
       timer = nil
       seconds = @bot.config['rss.thread_sleep']
       feed.mutex.synchronize do
-	timer = @watch[feed.handle]
+        timer = @watch[feed.handle]
         seconds = feed.refresh_rate if feed.refresh_rate
       end
       seconds *= failures + 1
       seconds += seconds * (rand(100)-50)/100
       debug "watcher for #{feed} going to sleep #{seconds} seconds.."
-      @bot.timer.reschedule(timer, seconds)
+      @bot.timer.reschedule(timer, seconds) rescue warning "watcher for #{feed} failed to reschedule: #{$!.inspect}"
     }
     debug "watcher for #{feed} added"
   end
