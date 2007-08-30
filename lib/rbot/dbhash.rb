@@ -131,7 +131,7 @@ module Irc
       begin
         debug "DBTree: checkpointing ..."
         @@env.checkpoint
-      rescue Excpetion => e
+      rescue Exception => e
         debug "Failed: #{e.pretty_inspect}"
       end
       begin
