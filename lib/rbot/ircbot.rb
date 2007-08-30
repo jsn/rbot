@@ -436,7 +436,7 @@ class Bot
 
     @registry = BotRegistry.new self
 
-    @timer = Timer::Timer.new(1.0) # only need per-second granularity
+    @timer = Timer.new
     @save_mutex = Mutex.new
     if @config['core.save_every'] > 0
       @save_timer = @timer.add(@config['core.save_every']) { save }
@@ -770,7 +770,6 @@ class Bot
       begin
         quit if $interrupted > 0
         connect
-        @timer.start
 
         quit_msg = nil
         while @socket.connected?
@@ -1052,8 +1051,8 @@ class Bot
       @save_mutex.synchronize do
         @plugins.cleanup
       end
-      debug "\tstopping timers ..."
-      @timer.stop
+      # debug "\tstopping timers ..."
+      # @timer.stop
       # debug "Closing registries"
       # @registry.close
       debug "\t\tcleaning up the db environment ..."

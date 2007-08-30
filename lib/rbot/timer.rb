@@ -1,226 +1,197 @@
-module Timer
+# changes:
+#  1. Timer::Timer ---> Timer
+#  2. timer id is now the object_id of the action
+#  3. Timer resolution removed, we're always arbitrary precision now
+#  4. I don't see any obvious races [not that i did see any in old impl, though]
+#  5. We're tickless now, so no need to jerk start/stop
+#  6. We should be pretty fast now, wrt old impl
+#  7. reschedule/remove/block now accept nil as an action id (meaning "current")
+#  8. repeatability is ignored for 0-period repeatable timers
+#  9. configure() method superceeds reschedule() [the latter stays as compat]
 
-  # timer event, something to do and when/how often to do it
+require 'thread'
+require 'monitor'
+
+class Timer
   class Action
+    attr_accessor :next
 
-    # when this action is due next (updated by tick())
-    attr_reader :in
+    def initialize(options = {}, &block)
+      opts = {
+        :period => 1,
+        :blocked => false,
+        :args => [],
+        :repeat => false
+      }.merge(options)
 
-    # is this action blocked? if so it won't be run
-    attr_accessor :blocked
+      @block = nil
+      debug("adding timer #{self} :period => #{opts[:period]}, :repeat => #{opts[:repeat].inspect}")
+      self.configure(opts, &block)
+      debug("added #{self}")
+    end
 
-    # period:: how often (seconds) to run the action
-    # data::   optional data to pass to the proc
-    # once::   optional, if true, this action will be run once then removed
-    # func::   associate a block to be called to perform the action
-    #
-    # create a new action
-    def initialize(period, data=nil, once=false, &func)
+    def configure(opts = {}, &block)
+      @period = opts[:period] if opts.include? :period
+      @blocked = opts[:blocked] if opts.include? :blocked
+      @repeat = opts[:repeat] if opts.include? :repeat
+
+      if block_given?
+        @block = block 
+      elsif opts[:code]
+        @block = opts[:code]
+      end
+
+      raise 'huh?? blockless action?' unless @block
+      if opts.include? :args
+        @args = Array === opts[:args] ? opts[:args] : [opts[:args]]
+      end
+
+      if opts[:start] and (Time === opts[:start])
+        self.next = opts[:start]
+      else
+        self.next = Time.now + (opts[:start] || @period)
+      end
+    end
+
+    def reschedule(period, &block)
+      self.configure(:period => period, &block)
+    end
+
+    def block
+      @blocked = true
+    end
+
+    def unblock
       @blocked = false
-      @period = period
-      @in = period
-      @func = func
-      @data = data
-      @once = once
-      @last_tick = Time.new
     end
 
-    def tick
-      diff = Time.new - @last_tick
-      @in -= diff
-      @last_tick = Time.new
+    def blocked?
+      @blocked
     end
 
-    def inspect
-      "#<#{self.class}:#{@period}s:#{@once ? 'once' : 'repeat'}>"
-    end
-
-    def due?
-      @in <= 0
-    end
-
-    # run the action by calling its proc
-    def run
-      @in += @period
-      # really short duration timers can overrun and leave @in negative,
-      # for these we set @in to @period
-      @in = @period if @in <= 0
+    def run(now = Time.now)
+      raise 'inappropriate time to run()' unless self.next && self.next <= now
+      self.next = nil
       begin
-        if(@data)
-          @func.call(@data)
-        else
-          @func.call
-        end
+        @block.call(*@args)
       rescue Exception => e
-        error "Timer action #{self.inspect} with function #{@func.inspect} failed!"
+        error "Timer action #{self.inspect}: block #{@block.inspect} failed!"
         error e.pretty_inspect
-        # TODO maybe we want to block this Action?
       end
-      return @once
-    end
 
-    # reschedule the Action to change its period
-    def reschedule(new_period)
-      @period = new_period
-      @in = new_period
+      if @repeat && @period > 0
+        self.next = now + @period
+      end
+
+      return self.next
     end
   end
 
-  # timer handler, manage multiple Action objects, calling them when required.
-  # The timer must be ticked by whatever controls it, i.e. regular calls to
-  # tick() at whatever granularity suits your application's needs.
-  #
-  # Alternatively you can call run(), and the timer will spawn a thread and
-  # tick itself, intelligently shutting down the thread if there are no
-  # pending actions.
-  class Timer
-    def initialize(granularity = 0.1)
-      @granularity = granularity
-      @timers = Hash.new
-      @handle = 0
-      @lasttime = 0
-      @should_be_running = false
-      @thread = false
-      @next_action_time = 0
-    end
-
-    # period:: how often (seconds) to run the action
-    # data::   optional data to pass to the action's proc
-    # func::   associate a block with add() to perform the action
-    #
-    # add an action to the timer
-    def add(period, data=nil, &func)
-      debug "adding timer, period #{period}"
-      @handle += 1
-      @timers[@handle] = Action.new(period, data, &func)
-      start_on_add
-      return @handle
-    end
-
-    # period:: how long (seconds) until the action is run
-    # data::   optional data to pass to the action's proc
-    # func::   associate a block with add() to perform the action
-    #
-    # add an action to the timer which will be run just once, after +period+
-    def add_once(period, data=nil, &func)
-      debug "adding one-off timer, period #{period}"
-      @handle += 1
-      @timers[@handle] = Action.new(period, data, true, &func)
-      start_on_add
-      return @handle
-    end
-
-    # remove action with handle +handle+ from the timer
-    def remove(handle)
-      @timers.delete(handle)
-    end
-
-    # block action with handle +handle+
-    def block(handle)
-      raise "no such timer #{handle}" unless @timers[handle]
-      @timers[handle].blocked = true
-    end
-
-    # unblock action with handle +handle+
-    def unblock(handle)
-      raise "no such timer #{handle}" unless @timers[handle]
-      @timers[handle].blocked = false
-    end
-
-    # reschedule action with handle +handle+ to change its period
-    def reschedule(handle, period)
-      raise "no such timer #{handle}" unless @timers[handle]
-      @timers[handle].reschedule(period)
-      tick
-    end
-
-    # you can call this when you know you're idle, or you can split off a
-    # thread and call the run() method to do it for you.
-    def tick
-      if(@lasttime == 0)
-        # don't do anything on the first tick
-        @lasttime = Time.now
-        return
-      end
-      @next_action_time = 0
-      diff = (Time.now - @lasttime).to_f
-      @lasttime = Time.now
-      @timers.each { |key,timer|
-        timer.tick
-        next if timer.blocked
-        if(timer.due?)
-          if(timer.run)
-            # run once
-            @timers.delete(key)
-          end
-        end
-        if @next_action_time == 0 || timer.in < @next_action_time
-          @next_action_time = timer.in
-        end
-      }
-      #debug "ticked. now #{@timers.length} timers remain"
-      #debug "next timer due at #{@next_action_time}"
-    end
-
-    # for backwards compat - this is a bit primitive
-    def run(granularity=0.1)
-      while(true)
-        sleep(granularity)
-        tick
-      end
-    end
-
-    def running?
-      @thread && @thread.alive?
-    end
-
-    # return the number of seconds until the next action is due, or 0 if
-    # none are outstanding - will only be accurate immediately after a
-    # tick()
-    def next_action_time
-      @next_action_time
-    end
-
-    # start the timer, it spawns a thread to tick the timer, intelligently
-    # shutting down if no events remain and starting again when needed.
-    def start
-      return if running?
-      @should_be_running = true
-      start_thread unless @timers.empty?
-    end
-
-    # stop the timer from ticking
-    def stop
-      @should_be_running = false
-      stop_thread
-    end
-
-    private
-
-    def start_on_add
-      if running?
-        stop_thread
-        start_thread
-      elsif @should_be_running
-        start_thread
-      end
-    end
-
-    def stop_thread
-      return unless running?
-      @thread.kill
-    end
-
-    def start_thread
-      return if running?
-      @thread = Thread.new do
-        while(true)
-          tick
-          exit if @timers.empty?
-          sleep(@next_action_time)
-        end
-      end
-    end
-
+  def initialize
+    self.extend(MonitorMixin)
+    @tick = self.new_cond
+    @thread = nil
+    @actions = Hash.new
+    @current = nil
+    self.start
   end
+
+  def add(period, opts = {}, &block)
+    a = Action.new({:repeat => true, :period => period}.merge(opts), &block)
+    self.synchronize do
+      @actions[a.object_id] = a
+      @tick.signal
+    end
+    return a.object_id
+  end
+
+  def add_once(period, opts = {}, &block)
+    self.add(period, {:repeat => false}.merge(opts), &block)
+  end
+
+  def block(aid)
+    debug "blocking #{aid}"
+    self.synchronize { self[aid].block }
+  end
+
+  def unblock(aid)
+    debug "unblocking #{aid}"
+    self.synchronize do
+      self[aid].unblock
+      @tick.signal
+    end
+  end
+
+  def remove(aid)
+    self.synchronize do
+      @actions.delete(aid) # or raise "nonexistent action #{aid}"
+    end
+  end
+
+  alias :delete :remove
+
+  def configure(aid, opts = {}, &block)
+    self.synchronize do
+      self[aid].configure(opts, &block)
+      @tick.signal
+    end
+  end
+
+  def reschedule(aid, period, &block)
+    self.configure(aid, :period => period, &block)
+  end
+
+  protected
+
+  def start
+    raise 'double-started timer' if @thread
+    @thread = Thread.new do
+      loop do
+        tmout = self.run_actions
+        self.synchronize { @tick.wait(tmout) }
+      end
+    end
+  end
+
+  def [](aid)
+    aid ||= @current
+    raise "no current action" unless aid
+    raise "nonexistent action #{aid}" unless @actions.include? aid
+    @actions[aid]
+  end
+
+  def run_actions(now = Time.now)
+    nxt = nil
+    @actions.keys.each do |k|
+      a = @actions[k]
+      next if (!a) or a.blocked?
+
+      if a.next <= now
+        begin
+          @current = k
+          v = a.run(now)
+        ensure
+          @current = nil
+        end
+          
+        unless v
+          @actions.delete k
+          next
+        end
+      else
+        v = a.next
+      end
+
+      nxt = v if v and ((!nxt) or (v < nxt))
+    end
+
+    if nxt
+      delta = nxt - now
+      delta = 0 if delta < 0
+      return delta
+    else
+      return nil
+    end
+  end
+
 end

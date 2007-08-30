@@ -285,10 +285,8 @@ module Irc
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new IrcSocket
     def initialize(server_list, host, sendq_delay=2, sendq_burst=4, opts={})
-      @timer = Timer::Timer.new
-      @timer.add(0.2) do
-        spool
-      end
+      @timer = Timer.new
+      @act_id = @timer.add(0.2, :blocked => true) { spool }
       @server_list = server_list.dup
       @server_uri = nil
       @conn_count = 0
@@ -370,9 +368,9 @@ module Irc
         @sendq_delay = newfreq
         if newfreq == 0
           clearq
-          @timer.stop
+          @timer.block(@act_id)
         else
-          @timer.start
+          @timer.unblock(@act_id)
         end
       end
     end
@@ -424,7 +422,7 @@ module Irc
       if @sendq_delay > 0
         @qmutex.synchronize do
           @sendq.push msg, chan, ring
-          @timer.start
+          @timer.unblock(@act_id)
         end
       else
         # just send it if queueing is disabled
@@ -438,7 +436,7 @@ module Irc
         begin
           debug "in spooler"
           if @sendq.empty?
-            @timer.stop
+            @timer.block(@act_id)
             return
           end
           now = Time.new
@@ -448,7 +446,7 @@ module Irc
           elsif (@burst > @sendq_burst)
             # nope. can't send anything, come back to us next tick...
             debug "can't send yet"
-            @timer.start
+            @timer.unblock(@act_id)
             return
           end
           @flood_send = now if @flood_send < now
@@ -458,7 +456,7 @@ module Irc
             puts_critical(@sendq.shift, true)
           end
           if @sendq.empty?
-            @timer.stop
+            @timer.block(@act_id)
           end
         rescue Exception => e
           error "Spooling failed: #{e.pretty_inspect}"
