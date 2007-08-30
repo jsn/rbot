@@ -51,7 +51,6 @@ class ConfigModule < CoreBotModule
     unless @bot.config.items.has_key?(key)
       m.reply _("no such config key %{key}") % {:key => key}
     end
-    puts @bot.config.items[key].inspect
     m.reply "#{key}: #{@bot.config.items[key].desc}"
   end
 
