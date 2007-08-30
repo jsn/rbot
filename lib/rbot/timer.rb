@@ -12,9 +12,33 @@
 require 'thread'
 require 'monitor'
 
+# Timer handler, manage multiple Action objects, calling them when required.
+# When the Timer is constructed, a new Thread is created to manage timed
+# delays and run Actions.
+#
+# XXX: there is no way to stop the timer currently. I'm keeping it this way
+# to weed out old Timer implementation legacy in rbot code. -jsn.
 class Timer
+
+  # class representing individual timed action
   class Action
+
+    # Time when the Action should be called next
     attr_accessor :next
+
+    # options are:
+    #   start::    Time when the Action should be run for the first time.
+    #               Repeatable Actions will be repeated after that, see
+    #               :period. One-time Actions will not (obviously)
+    #               Default: Time.now + :period
+    #   period::   How often repeatable Action should be run, in seconds.
+    #               Default: 1
+    #   blocked::  if true, Action starts as blocked (i.e. will stay dormant
+    #               until unblocked)
+    #   args::     Arguments to pass to the Action callback. Default: []
+    #   repeat::   Should the Action be called repeatedly? Default: false
+    #   code::     You can specify the Action body using &block, *or* using
+    #               this option.
 
     def initialize(options = {}, &block)
       opts = {
@@ -30,6 +54,8 @@ class Timer
       debug("added #{self}")
     end
 
+    # Provides for on-the-fly reconfiguration of the Actions
+    # Accept the same arguments as the constructor
     def configure(opts = {}, &block)
       @period = opts[:period] if opts.include? :period
       @blocked = opts[:blocked] if opts.include? :blocked
@@ -53,14 +79,17 @@ class Timer
       end
     end
 
+    # modify the Action period
     def reschedule(period, &block)
       self.configure(:period => period, &block)
     end
 
+    # blocks an Action, so it won't be run
     def block
       @blocked = true
     end
 
+    # unblocks a blocked Action
     def unblock
       @blocked = false
     end
@@ -69,6 +98,8 @@ class Timer
       @blocked
     end
 
+    # calls the Action callback, resets .next to the Time of the next call,
+    # if the Action is repeatable.
     def run(now = Time.now)
       raise 'inappropriate time to run()' unless self.next && self.next <= now
       self.next = nil
@@ -87,6 +118,7 @@ class Timer
     end
   end
 
+  # creates a new Timer and starts it.
   def initialize
     self.extend(MonitorMixin)
     @tick = self.new_cond
@@ -96,6 +128,11 @@ class Timer
     self.start
   end
 
+  # creates and installs a new Action, repeatable by default.
+  #    period:: Action period
+  #    opts::   options for Action#new, see there
+  #    block::  Action callback code
+  # returns the id of the created Action
   def add(period, opts = {}, &block)
     a = Action.new({:repeat => true, :period => period}.merge(opts), &block)
     self.synchronize do
@@ -105,15 +142,24 @@ class Timer
     return a.object_id
   end
 
+  # creates and installs a new Action, one-time by default.
+  #    period:: Action delay
+  #    opts::   options for Action#new, see there
+  #    block::  Action callback code
+  # returns the id of the created Action
   def add_once(period, opts = {}, &block)
     self.add(period, {:repeat => false}.merge(opts), &block)
   end
 
+  # blocks an existing Action
+  #    aid:: Action id, obtained previously from add() or add_once()
   def block(aid)
     debug "blocking #{aid}"
     self.synchronize { self[aid].block }
   end
 
+  # unblocks an existing blocked Action
+  #    aid:: Action id, obtained previously from add() or add_once()
   def unblock(aid)
     debug "unblocking #{aid}"
     self.synchronize do
@@ -122,6 +168,8 @@ class Timer
     end
   end
 
+  # removes an existing blocked Action
+  #    aid:: Action id, obtained previously from add() or add_once()
   def remove(aid)
     self.synchronize do
       @actions.delete(aid) # or raise "nonexistent action #{aid}"
@@ -130,6 +178,10 @@ class Timer
 
   alias :delete :remove
 
+  # Provides for on-the-fly reconfiguration of Actions
+  #    aid::   Action id, obtained previously from add() or add_once()
+  #    opts::  see Action#new
+  #   block:: (optional) new Action callback code
   def configure(aid, opts = {}, &block)
     self.synchronize do
       self[aid].configure(opts, &block)
@@ -137,6 +189,10 @@ class Timer
     end
   end
 
+  # changes Action period
+  #   aid:: Action id
+  #   period:: new period
+  #   block:: (optional) new Action callback code
   def reschedule(aid, period, &block)
     self.configure(aid, :period => period, &block)
   end
