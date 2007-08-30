@@ -108,6 +108,7 @@ class Timer
       rescue Exception => e
         error "Timer action #{self.inspect}: block #{@block.inspect} failed!"
         error e.pretty_inspect
+        debug e.backtrace.join("\n")
       end
 
       if @repeat && @period > 0
