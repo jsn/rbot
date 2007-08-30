@@ -1048,6 +1048,7 @@ class Bot
       debug "\tsaving ..."
       save
       debug "\tcleaning up ..."
+      @timer.block(@save_timer) if @save_timer
       @save_mutex.synchronize do
         @plugins.cleanup
       end
@@ -1100,10 +1101,12 @@ class Bot
 
   # call the rescan method for all of the botmodules
   def rescan
+    @timer.block(@save_timer) if @save_timer
     @save_mutex.synchronize do
       @lang.rescan
       @plugins.rescan
     end
+    @timer.unblock(@save_timer) if config['core.save_every'] > 0
   end
 
   # channel:: channel to join
