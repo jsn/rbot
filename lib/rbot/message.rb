@@ -150,13 +150,13 @@ module Irc
     # Access the nick of the source
     #
     def sourcenick
-      @source.nick
+      @source.nick rescue @source.to_s
     end
 
     # Access the user@host of the source
     #
     def sourceaddress
-      "#{@source.user}@#{@source.host}"
+      "#{@source.user}@#{@source.host}" rescue @source.to_s
     end
 
     # Was the message from an identified user?
