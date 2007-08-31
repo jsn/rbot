@@ -1045,6 +1045,8 @@ class Bot
       # end
       debug "\tdisconnecting..."
       disconnect(message)
+      debug "\tstopping timer..."
+      @timer.stop
       debug "\tsaving ..."
       save
       debug "\tcleaning up ..."
@@ -1100,10 +1102,13 @@ class Bot
 
   # call the rescan method for all of the botmodules
   def rescan
+    debug "\tstopping timer..."
+    @timer.stop
     @save_mutex.synchronize do
       @lang.rescan
       @plugins.rescan
     end
+    @timer.start
   end
 
   # channel:: channel to join

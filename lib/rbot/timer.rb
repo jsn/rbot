@@ -198,17 +198,30 @@ class Timer
     self.configure(aid, :period => period, &block)
   end
 
-  protected
-
   def start
-    raise 'double-started timer' if @thread
+    raise 'already started' if @thread
+    @stopping = false
+    debug "starting timer #{self}"
     @thread = Thread.new do
       loop do
         tmout = self.run_actions
+        break if tmout and tmout < 0
         self.synchronize { @tick.wait(tmout) }
       end
     end
   end
+
+  def stop
+    raise 'already stopped' unless @thread
+    debug "stopping timer #{self}..."
+    @stopping = true
+    self.synchronize { @tick.signal }
+    @thread.join(60) or @thread.kill
+    debug "timer #{self} stopped"
+    @thread = nil
+  end
+
+  protected
 
   def [](aid)
     aid ||= @current
@@ -220,6 +233,7 @@ class Timer
   def run_actions(now = Time.now)
     nxt = nil
     @actions.keys.each do |k|
+      return -1 if @stopping
       a = @actions[k]
       next if (!a) or a.blocked?
 
