@@ -20,16 +20,19 @@ class GrouphugPlugin < Plugin
       opts.delete(:cache)
     end
 
-    begin
-      data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
+    Thread.start do
+      begin
+        data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
 
-      reg = Regexp.new( '(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)', Regexp::MULTILINE )
-      confession = reg.match( data )[4].ircify_html
-      confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
+        reg = Regexp.new('(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)',
+                         Regexp::MULTILINE)
+        confession = reg.match( data )[4].ircify_html
+        confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
 
-      m.reply confession
-    rescue
-      m.reply "failed to connect to grouphug.us"
+        m.reply confession
+      rescue
+        m.reply "failed to connect to grouphug.us"
+      end
     end
   end
 end
