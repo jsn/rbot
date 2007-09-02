@@ -644,6 +644,8 @@ module Irc
       "#{nick}!#{user}@#{host}"
     end
 
+    alias :to_str :fullform
+
     # This method downcases the fullform of the netmask. While this may not be
     # significantly different from the #downcase() method provided by the
     # ServerOrCasemap mixin, it's significantly different for Netmask
