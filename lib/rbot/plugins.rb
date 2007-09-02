@@ -270,6 +270,16 @@ module Plugins
     attr_reader :bot
     attr_reader :botmodules
 
+    # This is the list of patterns commonly delegated to plugins.
+    # A fast delegation lookup is enabled for them.
+    DEFAULT_DELEGATE_PATTERNS = %r{^(?:
+      connect|names|nick|
+      listen|ctcp_listen|privmsg|unreplied|
+      kick|join|part|quit|
+      save|cleanup|flush_registry|
+      set_.*|event_.*
+    )$}x
+
     def initialize
       @botmodules = {
         :CoreBotModule => [],
@@ -278,6 +288,9 @@ module Plugins
 
       @names_hash = Hash.new
       @commandmappers = Hash.new
+      @delegate_list = Hash.new { |h, k|
+        h[k] = Array.new
+      }
 
       @dirs = []
 
@@ -416,6 +429,8 @@ module Plugins
     def scan
       @failed.clear
       @ignored.clear
+      @delegate_list.clear
+
       processed = Hash.new
 
       @bot.config['plugins.blacklist'].each { |p|
@@ -460,6 +475,11 @@ module Plugins
         end
       }
       debug "finished loading plugins: #{status(true)}"
+      (core_modules + plugins).each { |p|
+       p.methods.grep(DEFAULT_DELEGATE_PATTERNS).each { |m|
+         @delegate_list[m.intern] << p
+       }
+      }
     end
 
     # call the save method for each active plugin
