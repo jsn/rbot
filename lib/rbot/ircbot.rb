@@ -30,7 +30,10 @@ end
 class Exception
   def pretty_print(q)
     q.group(1, "#<%s: %s" % [self.class, self.message], ">") {
-      q.seplist(self.backtrace, lambda { "\n" }) { |v| v } if self.backtrace
+      if self.backtrace and not self.backtrace.empty?
+        q.text "\n"
+        q.seplist(self.backtrace, lambda { q.text "\n" } ) { |l| q.text l }
+      end
     }
   end
 end
