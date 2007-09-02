@@ -646,18 +646,35 @@ module Plugins
     def delegate(method, *args)
       # debug "Delegating #{method.inspect}"
       ret = Array.new
-      (core_modules + plugins).each { |p|
-        if(p.respond_to? method)
+      if method.match(DEFAULT_DELEGATE_PATTERNS)
+        debug "fast-delegating #{method}"
+        m = method.to_sym
+        debug "no-one to delegate to" unless @delegate_list.has_key?(m)
+        return [] unless @delegate_list.has_key?(m)
+        @delegate_list[m].each { |p|
           begin
-            # debug "#{p.botmodule_class} #{p.name} responds"
             ret.push p.send(method, *args)
           rescue Exception => err
             raise if err.kind_of?(SystemExit)
             error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
             raise if err.kind_of?(BDB::Fatal)
           end
-        end
-      }
+        }
+      else
+        debug "slow-delegating #{method}"
+        (core_modules + plugins).each { |p|
+          if(p.respond_to? method)
+            begin
+              # debug "#{p.botmodule_class} #{p.name} responds"
+              ret.push p.send(method, *args)
+            rescue Exception => err
+              raise if err.kind_of?(SystemExit)
+              error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
+              raise if err.kind_of?(BDB::Fatal)
+            end
+          end
+        }
+      end
       return ret
       # debug "Finished delegating #{method.inspect}"
     end
