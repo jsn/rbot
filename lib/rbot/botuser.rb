@@ -628,7 +628,7 @@ module Irc
       #
       def autologin(user)
         ircuser = user.to_irc_user
-        debug "Trying to autlogin #{ircuser}"
+        debug "Trying to autologin #{ircuser}"
         return @botusers[ircuser] if @botusers.has_key?(ircuser)
         @allbotusers.each { |n, bu|
           debug "Checking with #{n}"
