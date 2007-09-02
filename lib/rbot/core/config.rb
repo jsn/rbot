@@ -9,6 +9,14 @@
 
 class ConfigModule < CoreBotModule
 
+  def version_string
+    _("I'm a v. %{version} rubybot%{copyright}%{url}") % {
+      :version => $version,
+      :copyright => ", #{Irc::Bot::COPYRIGHT_NOTICE}",
+      :url => " - #{Irc::Bot::SOURCE_URL}"
+    }
+  end
+
   def save
     @bot.config.save
   end
@@ -167,7 +175,7 @@ class ConfigModule < CoreBotModule
   #  end
 
   def bot_version(m, param)
-    m.reply _("I'm a v. %{version} rubybot, (c) Tom Gilbert and the rbot development team - http://linuxbrit.co.uk/rbot/") % {:version => $version}
+    m.reply version_string
   end
 
   def handle_help(m, params)
