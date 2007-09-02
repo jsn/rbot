@@ -120,7 +120,7 @@ module Irc
 # handles them or passes them to plugins, and contains core functionality.
 class Bot
   COPYRIGHT_NOTICE = "(c) Tom Gilbert and the rbot development team"
-  SOURCE_URL = "http://linuxbrit.co.uk"
+  SOURCE_URL = "http://linuxbrit.co.uk/rbot"
   # the bot's Auth data
   attr_reader :auth
 
