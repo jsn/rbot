@@ -626,19 +626,17 @@ module Plugins
     def delegate(method, *args)
       # debug "Delegating #{method.inspect}"
       ret = Array.new
-      [core_modules, plugins].each { |pl|
-        pl.each {|p|
-          if(p.respond_to? method)
-            begin
-              # debug "#{p.botmodule_class} #{p.name} responds"
-              ret.push p.send(method, *args)
-            rescue Exception => err
-              raise if err.kind_of?(SystemExit)
-              error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
-              raise if err.kind_of?(BDB::Fatal)
-            end
+      (core_modules + plugins).each { |p|
+        if(p.respond_to? method)
+          begin
+            # debug "#{p.botmodule_class} #{p.name} responds"
+            ret.push p.send(method, *args)
+          rescue Exception => err
+            raise if err.kind_of?(SystemExit)
+            error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
+            raise if err.kind_of?(BDB::Fatal)
           end
-        }
+        end
       }
       return ret
       # debug "Finished delegating #{method.inspect}"
