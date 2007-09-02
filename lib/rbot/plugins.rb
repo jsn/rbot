@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: rbot plugin management
+
 require 'singleton'
 
 module Irc
@@ -59,6 +64,13 @@ module Plugins
                          either a PrivMessage, NoticeMessage, KickMessage,
                          QuitMessage, PartMessage, JoinMessage, NickMessage,
                          etc.
+
+  ctcp_listen(UserMessage)::
+                         Called for all messages that contain a CTCP command.
+                         Use message.ctcp to get the CTCP command, and
+                         message.message to get the parameter string. To reply,
+                         use message.ctcp_reply, which sends a private NOTICE
+                         to the sender.
 
   privmsg(PrivMessage)::
                          Called for a PRIVMSG if the first word matches one

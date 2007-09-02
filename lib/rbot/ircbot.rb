@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: rbot core
+
 require 'thread'
 
 require 'etc'
@@ -539,8 +544,9 @@ class Bot
 
       unless ignored
         @plugins.delegate "listen", m
+        @plugins.delegate("ctcp_listen", m) if m.ctcp
         @plugins.privmsg(m) if m.address?
-	if not m.replied
+        if not m.replied
           @plugins.delegate "unreplied", m
         end
       end
