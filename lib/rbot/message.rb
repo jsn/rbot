@@ -331,9 +331,10 @@ module Irc
       @replied = true
     end
 
-    # send a CTCP response, i.e. a private notice to the sender
-    def ctcp_reply(command, string, options={})
-      @bot.ctcp_notice @source, command, string, options
+    # send a CTCP response, i.e. a private NOTICE to the sender
+    # with the same CTCP command and the reply as a parameter
+    def ctcp_reply(string, options={})
+      @bot.ctcp_notice @source, @ctcp, string, options
     end
 
     # convenience method to reply "okay" in the current language to the

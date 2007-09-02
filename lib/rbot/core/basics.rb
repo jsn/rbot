@@ -9,15 +9,15 @@
 
 class BasicsModule < CoreBotModule
 
-  def listen(m)
-    return unless m.kind_of?(PrivMessage)
-    if m.ctcp == 'PING'
-      m.ctcp_reply m.ctcp, m.message
-      if m.private?
-        @bot.irclog "@ #{m.source} pinged me"
-      else
-        @bot.irclog "@ #{m.source} pinged #{m.target}"
-      end
+  def ctcp_listen(m)
+    who = m.private? ? "me" : m.target
+    case m.ctcp.intern
+    when :PING
+      m.ctcp_reply m.message
+      @bot.irclog "@ #{m.source} pinged #{who}"
+    when :TIME
+      m.ctcp_reply Time.now.to_s
+      @bot.irclog "@ #{m.source} asked #{who} what time it is"
     end
   end
 
