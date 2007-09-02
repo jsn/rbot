@@ -188,10 +188,14 @@ module Irc
       attr_reader :perm
       attr_writer :login_by_mask
       attr_writer :autologin
+      attr_accessor :transient
 
       # Create a new BotUser with given username
-      def initialize(username)
-        @username = BotUser.sanitize_username(username)
+      def initialize(username, options={})
+        opts = {:transient => false}.merge(options)
+        @transient = opts[:transient]
+        @username = @transient ? "*" : ""
+        @username << BotUser.sanitize_username(username)
         @password = nil
         @netmasks = NetmaskList.new
         @perm = {}
@@ -378,6 +382,14 @@ module Irc
 
     end
 
+    # A TransientBotUser is a BotUser that is not intended
+    # for permanent storage.
+    #
+    class TransientBotUser < BotUser
+      def initialize
+        super(object_id, :transient => true)
+      end
+    end
 
     # This is the default BotUser: it's used for all users which haven't
     # identified with the bot
@@ -561,14 +573,15 @@ module Irc
             create_botuser(u)
           end
           get_botuser(u).from_hash(x)
+          get_botuser(u).transient = false
         }
         @has_changes=false
       end
 
       def save_array
         @allbotusers.values.map { |x|
-          x.to_hash
-        }
+          x.transient ? nil : x.to_hash
+        }.compact
       end
 
       # checks if we know about a certain BotUser username
