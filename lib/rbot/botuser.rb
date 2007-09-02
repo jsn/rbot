@@ -8,6 +8,7 @@
 # License:: GPLv2
 
 require 'singleton'
+require 'set'
 
 
 module Irc
@@ -27,6 +28,9 @@ module Irc
     BotConfig.register BotConfigBooleanValue.new( 'auth.autologin',
       :default => 'true',
       :desc => _('Set false to prevent new botusers from recognizing IRC users without a need to manually login'))
+    BotConfig.register BotConfigBooleanValue.new( 'auth.autouser',
+      :default => 'false',
+      :desc => _('Set true to allow new botusers to be created automatically'))
     # BotConfig.register BotConfigIntegerValue.new( 'auth.default_level',
     #   :default => 10, :wizard => true,
     #   :desc => 'The default level for new/unknown users' )
@@ -356,7 +360,7 @@ module Irc
       # It returns true or false depending on whether the password
       # is right. If it is, the Netmask of the user is added to the
       # list of acceptable Netmask unless it's already matched.
-      def login(user, password)
+      def login(user, password=nil)
         if password == @password or (password.nil? and (@login_by_mask || @autologin) and knows?(user))
           add_netmask(user) unless knows?(user)
           debug "#{user} logged in as #{self.inspect}"
@@ -383,11 +387,25 @@ module Irc
     end
 
     # A TransientBotUser is a BotUser that is not intended
-    # for permanent storage.
+    # for permanent storage. A TransientBotUser must be
+    # created with an associated Netmask or User. In the former
+    # case the Netmask is added to BotUser's known masks, in the
+    # latter the nick part is gobbled and so are the initial
+    # nonletter parts of the user.
     #
     class TransientBotUser < BotUser
-      def initialize
+      def initialize(mask_or_user)
         super(object_id, :transient => true)
+        reset_password
+        mask = Netmask.new(mask_or_user)
+        if User === mask_or_user
+          mask.nick = "*"
+          mask.host = mask_or_user.host.dup
+          mask.user = "*" + mask_or_user.user.sub(/^[^\w]+/,'')
+        end
+        add_netmask(mask)
+        login_by_mask=true
+        autologin=true
       end
     end
 
@@ -557,6 +575,7 @@ module Irc
         [everyone, botowner].each { |x|
           @allbotusers[x.username.to_sym] = x
         }
+        @transients = Set.new
       end
 
       def load_array(ary, forced)
@@ -647,7 +666,27 @@ module Irc
           debug "Checking with #{n}"
           return bu if bu.autologin? and login(ircuser, n)
         }
+        # Check with transient users
+        @transients.each { |bu|
+          return bu if bu.login(ircuser)
+        }
+        # Finally, create a transient if we're set to allow it
+        if @bot.config['auth.autouser']
+          bu = create_transient_botuser(ircuser)
+          return bu
+        end
         return everyone
+      end
+
+      # Creates a new transient BotUser associated with Irc::User _user_,
+      # automatically logging him in
+      #
+      def create_transient_botuser(user)
+        ircuser = user.to_irc_user
+        bu = TransientBotUser.new(ircuser)
+        bu.login(ircuser)
+        @transients << bu
+        return bu
       end
 
       # Checks if User _user_ can do _cmd_ on _chan_.
