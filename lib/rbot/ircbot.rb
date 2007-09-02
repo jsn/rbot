@@ -953,34 +953,19 @@ class Bot
     sendmsg "PRIVMSG", where, message, options
   end
 
+  def ctcp_notice(where, command, message, options={})
+    return if where.kind_of?(Channel) and quiet_on?(where)
+    sendmsg "NOTICE", where, "\001#{command} #{message}\001", options
+  end
+
+  def ctcp_say(where, command, message, options={})
+    return if where.kind_of?(Channel) and quiet_on?(where)
+    sendmsg "PRIVMSG", where, "\001#{command} #{message}\001", options
+  end
+
   # perform a CTCP action with message +message+ to channel/nick +where+
   def action(where, message, options={})
-    return if where.kind_of?(Channel) and quiet_on?(where)
-    mchan = options.fetch(:queue_channel, nil)
-    mring = options.fetch(:queue_ring, nil)
-    if mchan
-      chan = mchan
-    else
-      chan = where
-    end
-    if mring
-      ring = mring
-    else
-      case where
-      when User
-        ring = 1
-      else
-        ring = 2
-      end
-    end
-    # FIXME doesn't check message length. Can we make this exploit sendmsg?
-    sendq "PRIVMSG #{where} :\001ACTION #{message}\001", chan, ring
-    case where
-    when Channel
-      irclog "* #{myself} #{message}", where
-    else
-      irclog "* #{myself}[#{where}] #{message}", where
-    end
+    ctcp_say(where, 'ACTION', message, options)
   end
 
   # quick way to say "okay" (or equivalent) to +where+

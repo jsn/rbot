@@ -208,6 +208,12 @@ module Irc
     # channel the message was in, nil for privately addressed messages
     attr_reader :channel
 
+    # for PRIVMSGs, false unless the message was a CTCP command,
+    # in which case it evaluates to the CTCP command itself
+    # (TIME, PING, VERSION, etc). The CTCP command parameters
+    # are then stored in the message.
+    attr_reader :ctcp
+
     # for PRIVMSGs, true if the message was a CTCP ACTION (CTCP stuff
     # will be stripped from the message)
     attr_reader :action
@@ -222,6 +228,7 @@ module Irc
       @target = target
       @private = false
       @plugin = nil
+      @ctcp = false
       @action = false
 
       if target == @bot.myself
@@ -250,9 +257,11 @@ module Irc
         @address = true
       end
 
-      if(@message =~ /^\001ACTION\s(.+)\001/)
-        @message = $1
-        @action = true
+      if(@message =~ /^\001(\S+)\s(.+)\001/)
+        @ctcp = $1
+        @message = $2
+        @action = @ctcp == 'ACTION'
+        debug "Received CTCP command #{@ctcp} with options #{@message} (action? #{@action})"
       end
 
       # free splitting for plugins
@@ -313,6 +322,11 @@ module Irc
     def act(string, options={})
       @bot.action @replyto, string, options
       @replied = true
+    end
+
+    # send a CTCP response, i.e. a private notice to the sender
+    def ctcp_reply(command, string, options={})
+      @bot.ctcp_notice @source, command, string, options
     end
 
     # convenience method to reply "okay" in the current language to the
