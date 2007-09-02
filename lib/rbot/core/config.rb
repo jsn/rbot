@@ -203,8 +203,10 @@ class ConfigModule < CoreBotModule
       _("save => save current dynamic data and configuration")
     when "rescan"
       _("rescan => reload modules and static facts")
+    when "version"
+      _("version => describes software version")
     else
-      _("config-related tasks: config, save, rescan")
+      _("config-related tasks: config, save, rescan, version")
     end
   end
 

@@ -121,8 +121,6 @@ class BasicsModule < CoreBotModule
       _("quiet [in here|<channel>] => with no arguments, stop speaking in all channels, if \"in here\", stop speaking in this channel, or stop speaking in <channel>")
     when "talk"
       _("talk [in here|<channel>] => with no arguments, resume speaking in all channels, if \"in here\", resume speaking in this channel, or resume speaking in <channel>")
-    when "version"
-      _("version => describes software version")
     when "ping"
       _("ping => replies with a pong")
     when "mode"
@@ -132,7 +130,7 @@ class BasicsModule < CoreBotModule
     #     when "hello"
     #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
     else
-      _("%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk,version, ping, mode") % {:name=>name}
+      _("%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk, ping, mode") % {:name=>name}
       #, botsnack, hello
     end
   end
