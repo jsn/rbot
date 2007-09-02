@@ -181,7 +181,7 @@ module Irc
       rescue Exception => e
         error _("failed to restore marshal data for #{val.inspect}, attempting recovery or fallback to default")
         debug e
-        if @recovery
+        if defined? @recovery and @recovery
           begin
             return @recovery.call(val)
           rescue Exception => ee
