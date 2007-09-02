@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: IRC message datastructures
+
 module Irc
   BotConfig.register BotConfigArrayValue.new('core.address_prefix',
     :default => [], :wizard => true,
@@ -257,9 +262,11 @@ module Irc
         @address = true
       end
 
-      if(@message =~ /^\001(\S+)\s(.+)\001/)
+      if(@message =~ /^\001(\S+)(\s(.+))?\001/)
         @ctcp = $1
-        @message = $2
+	# FIXME need to support quoting of NULL and CR/LF, see
+	# http://www.irchelp.org/irchelp/rfc/ctcpspec.html
+        @message = $3 || String.new
         @action = @ctcp == 'ACTION'
         debug "Received CTCP command #{@ctcp} with options #{@message} (action? #{@action})"
       end
