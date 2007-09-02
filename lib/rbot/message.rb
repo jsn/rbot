@@ -164,6 +164,13 @@ module Irc
       "#{@source.user}@#{@source.host}" rescue @source.to_s
     end
 
+    # Access the botuser corresponding to the source, if any
+    #
+    def botuser
+      @bot.auth.autologin(@source) rescue @bot.auth.everyone
+    end
+
+
     # Was the message from an identified user?
     def identified?
       return @identified
