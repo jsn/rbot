@@ -167,7 +167,7 @@ module Irc
     # Access the botuser corresponding to the source, if any
     #
     def botuser
-      @bot.auth.autologin(@source) rescue @bot.auth.everyone
+      m.source.botuser rescue @bot.auth.everyone
     end
 
 

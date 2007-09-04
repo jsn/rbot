@@ -217,10 +217,10 @@ module Irc
       attr_reader :password
       attr_reader :netmasks
       attr_reader :perm
+      attr_reader :data
       attr_writer :login_by_mask
       attr_writer :autologin
       attr_writer :transient
-      attr_accessor :data
 
       # Checks if the BotUser is transient
       def transient?
@@ -808,6 +808,23 @@ module Irc
       return AuthManagerClass.instance
     end
 
+  end
+
+  class User
+
+    # A convenience method to automatically found the botuser
+    # associated with the receiver
+    #
+    def botuser
+      Irc::Auth.authmanager.irc_to_botuser(self)
+    end
+
+    # The botuser is used to store data associated with the
+    # given Irc::User
+    #
+    def data
+      self.botuser.data
+    end
   end
 
 end
