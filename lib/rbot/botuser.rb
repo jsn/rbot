@@ -645,7 +645,7 @@ module Irc
 
       def save_array
         @allbotusers.values.map { |x|
-          x.transient ? nil : x.to_hash
+          x.transient? ? nil : x.to_hash
         }.compact
       end
 
