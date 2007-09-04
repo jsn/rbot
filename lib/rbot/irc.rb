@@ -673,7 +673,7 @@ module Irc
       if self.class == Netmask
         return self if fits_with_server_and_casemap?(opts)
       end
-      return self.full_downcase.to_irc_netmask(opts)
+      return self.full_downcase.to_irc_netmask(server_and_casemap.merge(opts))
     end
 
     # Converts the receiver into a User with the given (optional)
