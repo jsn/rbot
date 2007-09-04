@@ -594,6 +594,7 @@ module Irc
     include ServerOrCasemap
 
     attr_reader :nick, :user, :host
+    alias :ident :user
 
     # Create a new Netmask from string _str_, which must be in the form
     # _nick_!_user_@_host_
@@ -718,6 +719,7 @@ module Irc
       @user = newuser.to_s
       @user = "*" if @user.empty?
     end
+    alias :ident= :user=
 
     # This method changes the hostname of the Netmask, defaulting to the generic
     # glob pattern if the result is the null string.
