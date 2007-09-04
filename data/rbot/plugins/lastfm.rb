@@ -48,7 +48,7 @@ class LastFmPlugin < Plugin
   LASTFM = "http://www.last.fm"
 
   def help(plugin, topic="")
-    case topic.intern
+    case (topic.intern rescue nil)
     when :event, :events
       "lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to #{@bot.config['lastfm.default_events']} and cannot be higher than #{@bot.config['lastfm.max_events']}"
     when :artist, :group
