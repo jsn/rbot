@@ -264,7 +264,7 @@ module Irc
             if @transient and User === m
               mask.nick = "*"
               mask.host = m.host.dup
-              mask.user = "*" + m.user.sub(/^[^\w]+/,'')
+              mask.user = "*" + m.user.sub(/^\w?[^\w]+/,'')
             end
             add_netmask(mask) unless mask.to_s == "*"
           }
