@@ -220,6 +220,7 @@ module Irc
       attr_writer :login_by_mask
       attr_writer :autologin
       attr_writer :transient
+      attr_accessor :data
 
       # Checks if the BotUser is transient
       def transient?
@@ -272,6 +273,8 @@ module Irc
         raise "must provide a usable mask for transient BotUser #{@username}" if @transient and @netmasks.empty?
 
         @perm = {}
+
+        @data = {}
       end
 
       # Inspection
@@ -284,6 +287,11 @@ module Irc
         str << " @perm=#{@perm.inspect}"
         str << " @login_by_mask=#{@login_by_mask}"
         str << " @autologin=#{@autologin}"
+        if @data.empty?
+          str << " no data"
+        else
+          str << " data for #{@data.keys.join(', ')}"
+        end
         str << ">"
       end
 
