@@ -181,8 +181,35 @@ module Irc
     end
 
 
-    # This is the basic class for bot users: they have a username, a password,
-    # a list of netmasks to match against, and a list of permissions.
+    # This is the basic class for bot users: they have a username, a
+    # password, a list of netmasks to match against, and a list of
+    # permissions. A BotUser can be marked as 'transient', usually meaning
+    # it's not intended for permanent storage. Transient BotUsers have lower
+    # priority than nontransient ones for autologin purposes.
+    #
+    # To initialize a BotUser, you pass a _username_ and an optional
+    # hash of options. Currently, only two options are recognized:
+    #
+    # transient:: true or false, determines if the BotUser is transient or
+    #             permanent (default is false, permanent BotUser).
+    #
+    #             Transient BotUsers are initialized by prepending an
+    #             asterisk (*) to the username, and appending a sanitized
+    #             version of the object_id. The username can be empty.
+    #             A random password is generated.
+    #
+    #             Permanent Botusers need the username as is, and no
+    #             password is generated.
+    #
+    # masks::     an array of Netmasks to initialize the NetmaskList. This
+    #             list is used as-is for permanent BotUsers.
+    #
+    #             Transient BotUsers will alter the list elements which are
+    #             Irc::User by globbing the nick and any initial nonletter
+    #             part of the ident.
+    #
+    #             The masks option is optional for permanent BotUsers, but
+    #             obligatory (non-empty) for transients.
     #
     class BotUser
 
@@ -192,24 +219,66 @@ module Irc
       attr_reader :perm
       attr_writer :login_by_mask
       attr_writer :autologin
-      attr_accessor :transient
+      attr_writer :transient
+
+      # Checks if the BotUser is transient
+      def transient?
+        @transient
+      end
+
+      # Checks if the BotUser is permanent (not transient)
+      def permanent?
+        !@permanent
+      end
+
+      # Sets if the BotUser is permanent or not
+      def permanent=(bool)
+        @transient=!bool
+      end
 
       # Create a new BotUser with given username
       def initialize(username, options={})
         opts = {:transient => false}.merge(options)
         @transient = opts[:transient]
-        @username = @transient ? "*" : ""
-        @username << BotUser.sanitize_username(username)
-        @password = nil
+
+        if @transient
+          @username = "*"
+          @username << BotUser.sanitize_username(username) if username and not username.to_s.empty?
+          @username << BotUser.sanitize_username(object_id)
+          reset_password
+          @login_by_mask=true
+          @autologin=true
+        else
+          @username = BotUser.sanitize_username(username)
+          @password = nil
+          reset_login_by_mask
+          reset_autologin
+        end
+
         @netmasks = NetmaskList.new
+        if opts.key?(:masks) and opts[:masks]
+          masks = opts[:masks]
+          masks = [masks] unless masks.respond_to?(:each)
+          masks.each { |m|
+            mask = m.to_irc_netmask
+            if @transient and User === m
+              mask.nick = "*"
+              mask.host = m.host.dup
+              mask.user = "*" + m.user.sub(/^[^\w]+/,'')
+            end
+            add_netmask(mask) unless mask.to_s == "*"
+          }
+        end
+        raise "must provide a usable mask for transient BotUser #{@username}" if @transient and @netmasks.empty?
+
         @perm = {}
-        reset_login_by_mask
-        reset_autologin
       end
 
       # Inspection
       def inspect
-        str = "<#{self.class}:#{'0x%08x' % self.object_id}:"
+        str = "<#{self.class}:#{'0x%08x' % self.object_id}"
+        str << " (transient)" if @transient
+        str << ":"
         str << " @username=#{@username.inspect}"
         str << " @netmasks=#{@netmasks.inspect}"
         str << " @perm=#{@perm.inspect}"
@@ -384,29 +453,6 @@ module Irc
         return candidate
       end
 
-    end
-
-    # A TransientBotUser is a BotUser that is not intended
-    # for permanent storage. A TransientBotUser must be
-    # created with an associated Netmask or User. In the former
-    # case the Netmask is added to BotUser's known masks, in the
-    # latter the nick part is gobbled and so are the initial
-    # nonletter parts of the user.
-    #
-    class TransientBotUser < BotUser
-      def initialize(mask_or_user)
-        super(object_id, :transient => true)
-        reset_password
-        mask = mask_or_user.to_irc_netmask
-        if User === mask_or_user
-          mask.nick = "*"
-          mask.host = mask_or_user.host.dup
-          mask.user = "*" + mask_or_user.user.sub(/^[^\w]+/,'')
-        end
-        add_netmask(mask)
-        login_by_mask=true
-        autologin=true
-      end
     end
 
     # This is the default BotUser: it's used for all users which haven't
@@ -683,7 +729,7 @@ module Irc
       #
       def create_transient_botuser(user)
         ircuser = user.to_irc_user
-        bu = TransientBotUser.new(ircuser)
+        bu = BotUser.new(ircuser, :transient => true, :masks => ircuser)
         bu.login(ircuser)
         @transients << bu
         return bu
