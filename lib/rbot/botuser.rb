@@ -10,6 +10,22 @@
 require 'singleton'
 require 'set'
 
+# This would be a good idea if it was failproof, but the truth
+# is that other methods can indirectly modify the hash. *sigh*
+#
+# class AuthNotifyingHash < Hash
+#   %w(clear default= delete delete_if replace invert
+#      merge! update rehash reject! replace shift []= store).each { |m|
+#     class_eval {
+#       define_method(m) { |*a|
+#         r = super(*a)
+#         Irc::Auth.authmanager.set_changed
+#         r
+#       }
+#     }
+#   }
+# end
+# 
 
 module Irc
 
@@ -274,6 +290,7 @@ module Irc
 
         @perm = {}
 
+        # @data = AuthNotifyingHash.new
         @data = {}
       end
 
@@ -345,7 +362,7 @@ module Irc
         @perm = h[:perm] if h.has_key?(:perm)
         @login_by_mask = h[:login_by_mask] if h.has_key?(:login_by_mask)
         @autologin = h[:autologin] if h.has_key?(:autologin)
-        @data = h[:data] if h.has_key?(:data)
+        @data.replace(h[:data]) if h.has_key?(:data)
       end
 
       # This method sets the password if the proposed new password
