@@ -233,6 +233,8 @@ module Irc
       attr_reader :password
       attr_reader :netmasks
       attr_reader :perm
+      # Please remember to #set_changed() the authmanager
+      # when modifying data
       attr_reader :data
       attr_writer :login_by_mask
       attr_writer :autologin
@@ -838,11 +840,42 @@ module Irc
       Irc::Auth.authmanager.irc_to_botuser(self)
     end
 
-    # The botuser is used to store data associated with the
-    # given Irc::User
+    # Bot-specific data can be stored with Irc::Users. This is
+    # internally obtained by storing data to the associated BotUser,
+    # but this is a detail plugin writers shouldn't care about.
+    # bot_data(:key) can be used to retrieve a particular data set.
+    # This method is intended for data retrieval, and if the retrieved
+    # data is modified directly there is no guarantee the changes will
+    # be saved back. Use #set_bot_data() for that.
     #
-    def data
-      self.botuser.data
+    def bot_data(key=nil)
+      return self.botuser.data if key.nil?
+      return self.botuser.data[key]
+    end
+
+    # This method is used to store bot-specific data for the receiver.
+    # If no block is passed, _value_ is stored for the key _key_;
+    # if a block is passed, it will be called with the previous
+    # _key_ value as parameter, and its return value will be stored
+    # as the new value. If _value_ is present in the block form, it
+    # will be used to initialize _key_ if it's missing
+    # 
+    def set_bot_data(key,value=nil,&block)
+      if not block_given?
+        self.botuser.data[key]=value
+        Irc::Auth.authmanager.set_changed
+        return value
+      end
+      if value and not bot_data.has_key?(key)
+        set_bot_data(key, value)
+      end
+      r = value
+      begin
+        r = yield bot_data(key)
+      ensure
+        Irc::Auth.authmanager.set_changed
+      end
+      return r
     end
   end
 
