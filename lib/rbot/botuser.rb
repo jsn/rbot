@@ -308,7 +308,8 @@ module Irc
           :netmasks => @netmasks,
           :perm => @perm,
           :login_by_mask => @login_by_mask,
-          :autologin => @autologin
+          :autologin => @autologin,
+          :data => @data
         }
       end
 
@@ -344,6 +345,7 @@ module Irc
         @perm = h[:perm] if h.has_key?(:perm)
         @login_by_mask = h[:login_by_mask] if h.has_key?(:login_by_mask)
         @autologin = h[:autologin] if h.has_key?(:autologin)
+        @data = h[:data] if h.has_key?(:data)
       end
 
       # This method sets the password if the proposed new password
