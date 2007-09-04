@@ -397,7 +397,7 @@ module Irc
       def initialize(mask_or_user)
         super(object_id, :transient => true)
         reset_password
-        mask = Netmask.new(mask_or_user)
+        mask = mask_or_user.to_irc_netmask
         if User === mask_or_user
           mask.nick = "*"
           mask.host = mask_or_user.host.dup
