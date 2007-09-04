@@ -14,6 +14,9 @@
 require 'open-uri'
 
 class ::LastFmEvent
+  # matches are:
+  # 1. day 2. moth 3. year 4. url_who 5. who 6. url_where 7. where 8. how_many
+  REGEXP = /<tr class="vevent\s+\w+\s+\S+?-(\d\d)-(\d\d)-(\d\d\d\d)\s*">.*?<a class="url summary" href="(\/event\/\d+)">(.*?)<\/a>.*?<a href="(\/venue\/\d+)">(.*?)<\/a>.*?<td class="attendance">(.*?)<\/td>\s+<\/tr>/m
   attr_accessor :url, :date, :artist, :location, :attendance
   def initialize(url, date, artist, location, attendance)
     @url = url
@@ -81,12 +84,21 @@ class LastFmPlugin < Plugin
         events = Array.new
         disp_events = Array.new
 
-        # matches are:
-        # 1. day 2. moth 3. year 4. url_who 5. who 6. url_where 7. where 8. how_many
-        pre_events = page.scan(/<tr class="vevent\s+\w+\s+\S+?-(\d\d)-(\d\d)-(\d\d\d\d)\s*">.*?<a class="url summary" href="(\/event\/\d+)">(.*?)<\/a>.*?<a href="(\/venue\/\d+)">(.*?)<\/a>.*?<td class="attendance">(.*?)<\/td>\s+<\/tr>/m)
+        pre_events = page.scan(LastFmEvent::REGEXP)
         # debug pre_events.inspect
         if pre_events.empty?
-          m.reply "No events found #{spec}, sorry"
+          # We may not find any even because the page gives a list
+          # of locations instead. In this case, retry with the first of
+          # these location
+          if page.match(/<a href="(\/events\/\?l=[^"]+)">/)
+            debug "Rechecking with #{$1}"
+            page = @bot.httputil.get(LASTFM+$1)
+            pre_events = page.scan(LastFmEvent::REGEXP) if page
+          end
+          if pre_events.empty?
+            m.reply "No events found #{spec}, sorry"
+            return
+          end
         end
         pre_events.each { |day, month, year, url_who, who, url_where, where, how_many|
           date = Time.utc(year.to_i, month.to_i, day.to_i)
