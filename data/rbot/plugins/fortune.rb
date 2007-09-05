@@ -4,18 +4,20 @@ class FortunePlugin < Plugin
     :desc => "Full path to the fortune executable")
 
   def help(plugin, topic="")
-    "fortune [<module>] => get a (short) fortune, optionally specifying fortune db"
+    "fortune [<category>] => get a (short) fortune, optionally specifying fortune category || fortune categories => show categories"
   end
+
+
+  ## Pick a fortune
   def fortune(m, params)
     db = params[:db]
     fortune = @bot.config['fortune.path']
     if fortune.empty?
-      ["/usr/share/games/fortune",
+      ["/usr/bin/fortune",
        "/usr/share/bin/fortune",
        "/usr/games/fortune",
-       "/usr/bin/fortune",
        "/usr/local/games/fortune",
-       "/usr/local/bin/fortune"].each {|f|
+       "/usr/local/bin/fortune"].each do |f|
           if FileTest.executable? f
             fortune = f
 
@@ -31,19 +33,47 @@ class FortunePlugin < Plugin
 
             break
           end
-        }
+        end
     end
-    m.reply "fortune binary not found" unless fortune
+    m.reply "fortune executable not found (try setting the 'fortune.path' variable)" unless fortune
+
     begin
-      ret = Utils.safe_exec(fortune, "-n", "255", "-s", db)
+      ret = Utils.safe_exec(fortune, "-n", "350", "-s", db)
+
+      ## cleanup ret
+      ret = ret.split(/\n+/).map do |l|
+        # check if this is a "  -- Some Dood" line
+        if l =~ /^\s+-{1,3}\s+\w/
+          # turn "-" into "--"
+          l.gsub!(/^\s+-\s/, '-- ')
+          # extra space
+          " " + l.strip
+        else
+          # just remove leading and trailing whitespace
+          l.strip
+        end
+      end.join(" ")
+
     rescue
       ret = "failed to execute fortune"
       # TODO reset fortune.path when execution fails
     end
-    m.reply ret.gsub(/\t/, "  ").split(/\n/).join(" ")
-    return
+
+    m.reply ret
   end
+
+
+  # Print the fortune categories
+  def categories(m, params)
+    ## list all fortune files in /usr/share/games/fortune
+    categories = Dir["/usr/share/games/fortune/*"].select{|f|File.split(f).last.match /^\w+$/}.select{|f|File.file? f}.map{|p|File.split(p).last}.sort
+    ## say 'em!
+    m.reply "Fortune categories: #{categories.join ', '}"
+  end
+ 
 end
 plugin = FortunePlugin.new
-plugin.map 'fortune :db', :defaults => {:db => 'fortunes'},
+plugin.map 'fortune categories', :action => "categories"
+plugin.map 'fortune list', :action => "categories"
+plugin.map 'fortune :db', :defaults => {:db => ''},
                           :requirements => {:db => /^[^-][\w-]+$/}
