@@ -473,10 +473,14 @@ class HttpUtil
 
     headers = @headers.dup.merge(opts[:headers] || {})
     headers['Range'] = opts[:range] if opts[:range]
+    headers['Authorization'] = opts[:auth_head] if opts[:auth_head]
 
     cached.setup_headers(headers) if cached && (req_class == Net::HTTP::Get)
     req = req_class.new(uri.request_uri, headers)
-    req.basic_auth(uri.user, uri.password) if uri.user && uri.password
+    if uri.user && uri.password
+      req.basic_auth(uri.user, uri.password)
+      opts[:auth_head] = req['Authorization']
+    end
     req.body = opts[:body] if req_class == Net::HTTP::Post
     debug "prepared request: #{req.to_hash.inspect}"
 
