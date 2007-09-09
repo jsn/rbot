@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Fortune plugin
+
 class FortunePlugin < Plugin
   BotConfig.register BotConfigStringValue.new('fortune.path',
     :default => '',
