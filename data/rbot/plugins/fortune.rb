@@ -66,7 +66,13 @@ class FortunePlugin < Plugin
   # Print the fortune categories
   def categories(m, params)
     ## list all fortune files in /usr/share/games/fortune
-    categories = Dir["/usr/share/games/fortune/*"].select{|f|File.split(f).last.match /^\w+$/}.select{|f|File.file? f}.map{|p|File.split(p).last}.sort
+    categories = Dir["/usr/share/games/fortune/*"].select{ |f|
+      File.split(f).last.match(/^\w+$/)
+    }.select{ |f|
+      File.file?(f)
+    }.map{ |p|
+      File.split(p).last
+    }.sort
     ## say 'em!
     m.reply "Fortune categories: #{categories.join ', '}"
   end
