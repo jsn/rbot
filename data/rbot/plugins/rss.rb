@@ -46,13 +46,20 @@ module ::RSS
           full_name = "#{SLASH_PREFIX}_#{name}"
           full_plural_name = "#{SLASH_PREFIX}_#{plural}"
           klass_name = "Slash#{Utils.to_class_name(name)}"
-          klass.install_must_call_validator(SLASH_PREFIX, SLASH_URI)
-          klass.install_have_children_element(name, SLASH_URI, "*",
-                                              full_name, full_plural_name)
+
+          # This will fail with older version of the Ruby RSS module
+          begin
+            klass.install_have_children_element(name, SLASH_URI, "*",
+                                                full_name, full_plural_name)
+            klass.install_must_call_validator(SLASH_PREFIX, SLASH_URI)
+          rescue ArgumentError
+            klass.module_eval("install_have_children_element(#{full_name.dump}, #{full_plural_name.dump})")
+          end
+
           klass.module_eval(<<-EOC, *get_file_and_line_from_caller(0))
-          remove_method :#{full_name}
-          remove_method :#{full_name}=
-          remove_method :set_#{full_name}
+          remove_method :#{full_name}     if method_defined? :#{full_name}
+          remove_method :#{full_name}=    if method_defined? :#{full_name}=
+          remove_method :set_#{full_name} if method_defined? :set_#{full_name}
 
           def #{full_name}
             @#{full_name}.first and @#{full_name}.first.value
@@ -105,9 +112,15 @@ module ::RSS
           alias_method(:value=, :content=)
 
           def initialize(*args)
-            if Utils.element_initialize_arguments?(args)
-              super
-            else
+            begin
+              if Utils.element_initialize_arguments?(args)
+                super
+              else
+                super()
+                self.content = args[0]
+              end
+            # Older Ruby RSS module
+            rescue NoMethodError
               super()
               self.content = args[0]
             end
