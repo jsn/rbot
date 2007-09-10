@@ -29,7 +29,7 @@ class UrlPlugin < Plugin
     :default => false,
     :desc => "Show link info when listing/searching for urls")
   BotConfig.register BotConfigArrayValue.new('url.no_info_hosts',
-    :default => ['localhost', '^192\.168\.', '^10\.', '^127\.0\.0\.1', '^172\.(1[6-9]|2\d|31)\.'],
+    :default => ['localhost', '^192\.168\.', '^10\.', '^127\.', '^172\.(1[6-9]|2\d|31)\.'],
     :on_change => Proc.new { |bot, v| bot.plugins['url'].reset_no_info_hosts },
     :desc => "A list of regular expressions matching hosts for which no info should be provided")
 
