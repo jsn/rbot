@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Url plugin
+
 define_structure :Url, :channel, :nick, :time, :url, :info
 
 class ::UrlLinkError < RuntimeError
@@ -23,6 +28,10 @@ class UrlPlugin < Plugin
   BotConfig.register BotConfigBooleanValue.new('url.info_on_list',
     :default => false,
     :desc => "Show link info when listing/searching for urls")
+  BotConfig.register BotConfigArrayValue.new('url.no_info_hosts',
+    :default => ['localhost', '^192\.168\.', '^10\.', '^127\.0\.0\.1', '^172\.(1[6-9]|2\d|31)\.'],
+    :on_change => Proc.new { |bot, v| bot.plugins['url'].reset_no_info_hosts },
+    :desc => "A list of regular expressions matching hosts for which no info should be provided")
 
 
   def initialize
@@ -31,6 +40,12 @@ class UrlPlugin < Plugin
     unless @bot.config['url.display_link_info'].kind_of?(Integer)
       @bot.config.items[:'url.display_link_info'].set_string(@bot.config['url.display_link_info'].to_s)
     end
+    reset_no_info_hosts
+  end
+
+  def reset_no_info_hosts
+    @no_info_hosts = Regexp.new(@bot.config['url.no_info_hosts'].join('|'), true)
+    debug "no info hosts regexp set to #{@no_info_hosts}"
   end
 
   def help(plugin, topic="")
@@ -46,6 +61,10 @@ class UrlPlugin < Plugin
 
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
+
+    if url.host =~ @no_info_hosts
+      return "Sorry, info retrieval for #{url.host} is disabled"
+    end
 
     logopts = Hash.new
     logopts[:nick] = nick if nick
