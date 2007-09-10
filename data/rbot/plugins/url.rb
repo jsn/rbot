@@ -152,22 +152,21 @@ class UrlPlugin < Plugin
     end
   end
 
-  def listen(m)
-    return unless m.kind_of?(PrivMessage)
-    return if m.address?
-
-    escaped = URI.escape(m.message, OUR_UNSAFE)
-    urls = URI.extract(escaped)
+  def handle_urls(m, urls, display_info=@bot.config['url.display_link_info'])
     return if urls.empty?
     debug "found urls #{urls.inspect}"
-    list = @registry[m.target]
+    if m.public?
+      list = @registry[m.target] 
+    else
+      list = nil
+    end
     urls_displayed = 0
     urls.each { |urlstr|
       debug "working on #{urlstr}"
       next unless urlstr =~ /^https?:/
       title = nil
-      debug "display link info: #{@bot.config['url.display_link_info']}"
-      if @bot.config['url.display_link_info'] > urls_displayed
+      debug "display link info: #{display_info}"
+      if display_info > urls_displayed
         urls_displayed += 1
         Thread.start do
           debug "Getting title for #{urlstr}..."
@@ -185,6 +184,8 @@ class UrlPlugin < Plugin
         end
       end
 
+      next unless list
+
       # check to see if this url is already listed
       next if list.find {|u| u.url == urlstr }
 
@@ -198,6 +199,21 @@ class UrlPlugin < Plugin
       debug "#{list.length} urls now"
     }
     @registry[m.target] = list
+  end
+
+  def info(m, params)
+    escaped = URI.escape(params[:urls].to_s, OUR_UNSAFE)
+    urls = URI.extract(escaped)
+    handle_urls(m, urls, params[:urls].length)
+  end
+
+  def listen(m)
+    return unless m.kind_of?(PrivMessage)
+    return if m.address?
+
+    escaped = URI.escape(m.message, OUR_UNSAFE)
+    urls = URI.extract(escaped)
+    handle_urls(m, urls)
   end
 
   def reply_urls(opts={})
@@ -258,6 +274,7 @@ class UrlPlugin < Plugin
 end
 
 plugin = UrlPlugin.new
+plugin.map 'urls info *urls', :action => 'info'
 plugin.map 'urls search :channel :limit :string', :action => 'search',
                           :defaults => {:limit => 4},
                           :requirements => {:limit => /^\d+$/},
