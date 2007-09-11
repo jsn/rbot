@@ -12,10 +12,16 @@ Core requirements
 
 Useful but fallback provided
       ruby-gettext 1.8.0+   http://www.yotabanana.com/hiki/ruby-gettext.html?ruby-gettext
-                            optional, if installed rbot can use localized messages     
+                            optional; if installed rbot can use localized messages
       htmlentities          http://htmlentities.rubyforge.org/
-                            optional, if missing rbot will use an internal table to decode
-                            the most common HTML entities
+                            optional; if installed rbot will use it to decode
+                            HTML entities; if missing, an internal table with
+                            the most common HTML entities will be used instead
+      hpricot               http://code.whytheluckystiff.net/hpricot/
+                            optional, if installed rbot will used it to find
+                            the first paragraph in HTML files; if missing,
+                            regular expressions will be used instead
+
 
 Plugin requirements
 (these are all optional, if you don't have them, the plugins just won't
@@ -25,16 +31,27 @@ bash, digg, slashdot, freshmeat, forecast:
       REXML
 rss:
       rss
-rubyurl:
+shortenurls:
       shorturl
 time:
       tzinfo
+translator:
+      mechanize
 
 External programs needed for rbot
 =================================
 
 Plugin requirements
 (These are all optional)
+
+cal plugin:
+      cal(1)
+
+figlet plugin:
+      figlet(6)
+
+fortune plugin:
+      fortune(6)
 
 host plugin:
       host(1)
