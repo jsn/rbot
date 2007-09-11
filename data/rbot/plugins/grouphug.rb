@@ -20,19 +20,17 @@ class GrouphugPlugin < Plugin
       opts.delete(:cache)
     end
 
-    Thread.start do
-      begin
-        data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
+    begin
+      data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
 
-        reg = Regexp.new('(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)',
-                         Regexp::MULTILINE)
-        confession = reg.match( data )[4].ircify_html
-        confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
+      reg = Regexp.new('(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)',
+                       Regexp::MULTILINE)
+      confession = reg.match( data )[4].ircify_html
+      confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
 
-        m.reply confession
-      rescue
-        m.reply "failed to connect to grouphug.us"
-      end
+      m.reply confession
+    rescue
+      m.reply "failed to connect to grouphug.us"
     end
   end
 end
@@ -40,6 +38,8 @@ end
 
 plugin = GrouphugPlugin.new
 
-plugin.map "grouphug [:num]", :action => :confess, :requirements => { :num => /\d+/ }
-plugin.map "confess [:num]", :action => :confess, :requirements => { :num => /\d+/ }
+plugin.map "grouphug [:num]",
+  :thread => true, :action => :confess, :requirements => { :num => /\d+/ }
+plugin.map "confess [:num]",
+  :thread => true, :action => :confess, :requirements => { :num => /\d+/ }
 

@@ -149,7 +149,12 @@ module Irc
           debug "checking auth for #{auth}"
           if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
-            @parent.send(action, m, options)
+            if tmpl.options[:thread] || tmpl.options[:threaded]
+              Thread.new { @parent.send(action, m, options) }
+            else
+              @parent.send(action, m, options)
+            end
+
             return true
           end
           debug "auth failed for #{auth}"

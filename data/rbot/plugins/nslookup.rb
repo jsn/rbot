@@ -12,32 +12,28 @@ class DnsPlugin < Plugin
   end
   
   def name_to_ip(m, params)
-    Thread.new do
-      begin
-        a = getaddresses(params[:host])
-        if a.length > 0
-          m.reply m.params + ": " + a.join(", ")
-        else
-          m.reply "#{params[:host]}: not found"
-        end
-      rescue StandardError => err
+    begin
+      a = getaddresses(params[:host])
+      if a.length > 0
+        m.reply m.params + ": " + a.join(", ")
+      else
         m.reply "#{params[:host]}: not found"
       end
+    rescue StandardError => err
+      m.reply "#{params[:host]}: not found"
     end
   end
   
   def ip_to_name(m, params)
-    Thread.new do
-       begin
-         a = gethostname(params[:ip])
-         m.reply m.params + ": " + a if a
-       rescue StandardError => err
-         m.reply "#{params[:ip]}: not found (does not reverse resolve)"
-       end
-     end
+    begin
+      a = gethostname(params[:ip])
+      m.reply m.params + ": " + a if a
+    rescue StandardError => err
+      m.reply "#{params[:ip]}: not found (does not reverse resolve)"
+    end
   end
 end
 plugin = DnsPlugin.new
-plugin.map 'dns :ip', :action => 'ip_to_name', 
+plugin.map 'dns :ip', :action => 'ip_to_name', :thread => true,
                       :requirements => {:ip => /^\d+\.\d+\.\d+\.\d+$/}
-plugin.map 'dns :host', :action => 'name_to_ip'
+plugin.map 'dns :host', :action => 'name_to_ip', :thread => true

@@ -70,67 +70,65 @@ class LastFmPlugin < Plugin
     page = nil
     spec = location ? "in #{location}" : "by #{artist}"
     query = location ? "?findloc=#{CGI.escape(location)}" : "?s=#{CGI.escape(artist)}&findloc="
-    Thread.new {
-      begin
-        page = @bot.httputil.get LASTFM + "/events/" + query
-        if page
-          events = Array.new
-          disp_events = Array.new
+    begin
+      page = @bot.httputil.get LASTFM + "/events/" + query
+      if page
+        events = Array.new
+        disp_events = Array.new
 
-          pre_events = page.scan(LastFmEvent::REGEXP)
-          # debug pre_events.inspect
-          if pre_events.empty?
-            # We may not find any even because the page gives a list
-            # of locations instead. In this case, retry with the first of
-            # these location
-            if page.match(/<a href="(\/events\/\?l=[^"]+)">/)
-              debug "Rechecking with #{$1}"
-              page = @bot.httputil.get(LASTFM+$1)
-              pre_events = page.scan(LastFmEvent::REGEXP) if page
-            end
-            if pre_events.empty?
-              m.reply "No events found #{spec}, sorry"
-              Thread.exit
-            end
+        pre_events = page.scan(LastFmEvent::REGEXP)
+        # debug pre_events.inspect
+        if pre_events.empty?
+          # We may not find any even because the page gives a list
+          # of locations instead. In this case, retry with the first of
+          # these location
+          if page.match(/<a href="(\/events\/\?l=[^"]+)">/)
+            debug "Rechecking with #{$1}"
+            page = @bot.httputil.get(LASTFM+$1)
+            pre_events = page.scan(LastFmEvent::REGEXP) if page
           end
-          pre_events.each { |day, month, year, url_who, who, url_where, where, how_many|
-            date = Time.utc(year.to_i, month.to_i, day.to_i)
-            url = LASTFM + url_who
-            if who.match(/<strong>(.*?)<\/strong>(.+)?/)
-              artist = Bold + $1.ircify_html + Bold
-              artist << ", " << $2.ircify_html if $2
-            else
-              debug "who: #{who.inspect}"
-              artist = who.ircify_html
-            end
-            if where.match(/<strong>(.*?)<\/strong>(?:<br\s*\/>(.+)?)?/)
-              loc = Bold + $1.ircify_html + Bold
-              loc << ", " << $2.ircify_html if $2
-            else
-              debug where.inspect
-              loc = where.ircify_html
-            end
-            attendance = how_many.ircify_html
-            events << LastFmEvent.new(url, date, artist, loc, attendance)
-          }
-          # debug events.inspect
-
-          events[0...num].each { |event|
-            disp_events << event.to_s
-          }
-          m.reply disp_events.join(' | '), :split_at => /\s+\|\s+/
-        else
-          m.reply "No events found #{spec}"
-          Thread.exit
+          if pre_events.empty?
+            m.reply "No events found #{spec}, sorry"
+            return
+          end
         end
-      rescue Exception => e
-        m.reply "I had problems looking for events #{spec}"
-        error e.inspect
-        debug e.backtrace.join("\n")
-        debug page[0...10*1024] if page
-        Thread.exit
+        pre_events.each { |day, month, year, url_who, who, url_where, where, how_many|
+          date = Time.utc(year.to_i, month.to_i, day.to_i)
+          url = LASTFM + url_who
+          if who.match(/<strong>(.*?)<\/strong>(.+)?/)
+            artist = Bold + $1.ircify_html + Bold
+            artist << ", " << $2.ircify_html if $2
+          else
+            debug "who: #{who.inspect}"
+            artist = who.ircify_html
+          end
+          if where.match(/<strong>(.*?)<\/strong>(?:<br\s*\/>(.+)?)?/)
+            loc = Bold + $1.ircify_html + Bold
+            loc << ", " << $2.ircify_html if $2
+          else
+            debug where.inspect
+            loc = where.ircify_html
+          end
+          attendance = how_many.ircify_html
+          events << LastFmEvent.new(url, date, artist, loc, attendance)
+        }
+        # debug events.inspect
+
+        events[0...num].each { |event|
+          disp_events << event.to_s
+        }
+        m.reply disp_events.join(' | '), :split_at => /\s+\|\s+/
+      else
+        m.reply "No events found #{spec}"
+        return
       end
-    }
+    rescue Exception => e
+      m.reply "I had problems looking for events #{spec}"
+      error e.inspect
+      debug e.backtrace.join("\n")
+      debug page[0...10*1024] if page
+      return
+    end
   end
 
   def find_artist(m, params)
@@ -178,25 +176,23 @@ class LastFmPlugin < Plugin
     action = params[:action].intern
     action = :neighbours if action == :neighbors
     user = params[:user]
-    Thread.new {
-      begin
-        data = @bot.httputil.get("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
-        m.reply "#{action} for #{user}:"
-        m.reply data.to_a[0..3].map{|l| l.split(',',2)[-1].chomp}.join(", ")
-      rescue
-        m.reply "could not find #{action} for #{user} (is #{user} a user?)"
-      end
-    }
+    begin
+      data = @bot.httputil.get("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
+      m.reply "#{action} for #{user}:"
+      m.reply data.to_a[0..3].map{|l| l.split(',',2)[-1].chomp}.join(", ")
+    rescue
+      m.reply "could not find #{action} for #{user} (is #{user} a user?)"
+    end
   end
 end
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm [:num] event[s] in *location', :action => :find_event, :requirements => { :num => /\d+/ }
-plugin.map 'lastfm [:num] event[s] by *who', :action => :find_event, :requirements => { :num => /\d+/ }
-plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_event, :requirements => { :num => /\d+/ }
-plugin.map 'lastfm artist *who', :action => :find_artist
-plugin.map 'lastfm group *who', :action => :find_artist
+plugin.map 'lastfm [:num] event[s] in *location', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] by *who', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm artist *who', :action => :find_artist, :thread => true
+plugin.map 'lastfm group *who', :action => :find_artist, :thread => true
 plugin.map 'lastfm track *dunno', :action => :find_track
 plugin.map 'lastfm song *dunno', :action => :find_track
 plugin.map 'lastfm album *dunno', :action => :find_album
-plugin.map 'lastfm :action *user'
+plugin.map 'lastfm :action *user', :thread => true

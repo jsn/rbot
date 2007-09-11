@@ -107,41 +107,40 @@ class ForecastPlugin < Plugin
     end
     
     def get_forecast(m,loc)
-      Thread.new {
-        begin
-          @cache_mutex.synchronize do
-            if @forecast_cache.has_key?(loc) and
-                Time.new - @forecast_cache[loc][:date] < 3600
-                forecast = @forecast_cache[loc][:forecast]
-                if forecast
-                  m.reply forecast
-                  Thread.exit
-                end
+      begin
+        @cache_mutex.synchronize do
+          if @forecast_cache.has_key?(loc) and
+            Time.new - @forecast_cache[loc][:date] < 3600
+            forecast = @forecast_cache[loc][:forecast]
+            if forecast
+              m.reply forecast
+              return
             end
           end
-          begin
-            l = LatLong.new
-            f = Forecast.new(*l.get_lat_long(loc))
-            forecast,forecast_date = f.forecast
-          rescue => err
-            m.reply err
-          end
-          if forecast
-            m.reply forecast
-            @cache_mutex.synchronize do
-              @forecast_cache[loc] = {
-                :forecast => forecast,
-                :date => forecast_date
-              }
-            end
-          else
-            m.reply "Couldn't find forecast for #{loc}"
-          end
-        rescue => e
-          m.reply "ERROR: #{e}"
         end
-      }
+        begin
+          l = LatLong.new
+          f = Forecast.new(*l.get_lat_long(loc))
+          forecast,forecast_date = f.forecast
+        rescue => err
+          m.reply err
+        end
+        if forecast
+          m.reply forecast
+          @cache_mutex.synchronize do
+            @forecast_cache[loc] = {
+              :forecast => forecast,
+              :date => forecast_date
+            }
+          end
+        else
+          m.reply "Couldn't find forecast for #{loc}"
+        end
+      rescue => e
+        m.reply "ERROR: #{e}"
+      end
     end
 end
 plugin = ForecastPlugin.new
-plugin.map 'forecast *location', :defaults => {:location => false}
+plugin.map 'forecast *location',
+  :defaults => {:location => false}, :thread => true

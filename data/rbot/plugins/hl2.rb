@@ -44,18 +44,16 @@ class HL2Plugin < Plugin
 
   def hl2(m, params)
     addr, port = params[:conn_str].split(':')
-    Thread.start do
-      info = a2s_info(addr, port)
-      if info != nil
-        m.reply "#{info[3]} is online with #{info[8]}/#{info[9]} players."
-      else
-        m.reply "Couldn't connect to #{params[:conn_str]}"
-      end
+    info = a2s_info(addr, port)
+    if info != nil
+      m.reply "#{info[3]} is online with #{info[8]}/#{info[9]} players."
+    else
+      m.reply "Couldn't connect to #{params[:conn_str]}"
     end
   end
 
 end
 
 plugin = HL2Plugin.new
-plugin.map 'hl2 :conn_str'
+plugin.map 'hl2 :conn_str', :thread => true
 

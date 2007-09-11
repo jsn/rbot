@@ -111,15 +111,11 @@ class RealmPlugin < Plugin
                 tok.capitalize
             }.join(' ')
             @registry[m.sourcenick] = realm_name
-            Thread.new do
-              m.reply Realm.get_realm_status(realm_name)
-            end
+            m.reply Realm.get_realm_status(realm_name)
         else
             if @registry.has_key?(m.sourcenick)
                 realm_name = @registry[m.sourcenick]
-                Thread.new do
-                  m.reply Realm.get_realm_status(realm_name)
-                end
+                m.reply Realm.get_realm_status(realm_name)
             else
                 m.reply "I don't know which realm you want.\n#{USAGE}"
             end
@@ -127,4 +123,5 @@ class RealmPlugin < Plugin
     end
 end
 plugin = RealmPlugin.new
-plugin.map 'realm *realm_name', :defaults => {:realm_name => false}
+plugin.map 'realm *realm_name',
+  :defaults => {:realm_name => false}, :thread => true
