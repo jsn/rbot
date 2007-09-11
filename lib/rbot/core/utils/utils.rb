@@ -303,6 +303,37 @@ rescue LoadError
   end
 end
 
+begin
+  require 'htmlentities'
+rescue LoadError
+  gems = nil
+  begin
+    gems = require 'rubygems'
+  rescue LoadError
+    gems = false
+  end
+  if gems
+    retry
+  else
+    module ::Irc
+      module Utils
+        # define some regular expressions to be used for first_html_par
+
+        # H1, H2, etc
+        HX_REGEX = /<h(\d)(?:\s+[^>]*)?>(.*?)<\/h\1>/im
+        # A paragraph
+        PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+
+        # Some blogging and forum platforms use spans or divs with a 'body' or 'message' or 'text' in their class
+        # to mark actual text
+        AFTER_PAR1_REGEX = /<\w+\s+[^>]*(?:body|message|text)[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+
+        # At worst, we can try stuff which is comprised between two <br>
+        AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?\/?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?\/?>/im
+      end
+    end
+  end
+end
 
 module ::Irc
 
@@ -411,16 +442,6 @@ module ::Irc
       end
     end
 
-    HX_REGEX = /<h(\d)(?:\s+[^>]*)?>(.*?)<\/h\1>/im
-    PAR_REGEX = /<p(?:\s+[^>]*)?>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
-
-    # Some blogging and forum platforms use spans or divs with a 'body' or 'message' or 'text' in their class
-    # to mark actual text
-    AFTER_PAR1_REGEX = /<\w+\s+[^>]*(?:body|message|text)[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
-
-    # At worst, we can try stuff which is comprised between two <br>
-    AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?\/?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?\/?>/im
-
     # Try to grab and IRCify the first HTML par (<p> tag) in the given string.
     # If possible, grab the one after the first heading
     #
@@ -431,6 +452,108 @@ module ::Irc
     #   * :min_spaces => Minimum number of spaces a paragraph should have
     #
     def Utils.ircify_first_html_par(xml_org, opts={})
+      if defined? ::Hpricot
+        Utils.ircify_first_html_par_wh(xml_org, opts)
+      else
+        Utils.ircify_first_html_par_woh(xml_org, opts)
+      end
+    end
+
+    # with hpricot
+    def Utils.ircify_first_html_par_wh(xml_org, opts={})
+      doc = Hpricot(xml_org)
+
+      # Strip styles and scripts
+      (doc/"style|script").remove
+
+      debug doc.inspect
+
+      strip = opts[:strip]
+      strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
+
+      min_spaces = opts[:min_spaces] || 8
+      min_spaces = 0 if min_spaces < 0
+
+      txt = String.new
+
+      h = %w{h1 h2 h3 h4 h5 h6}
+      p = %w{p}
+      ar = []
+      h.each { |hx|
+        p.each { |px|
+          ar << "#{hx}~#{px}"
+        }
+      }
+      h_p_css = ar.join("|")
+      debug "css search: #{h_p_css}"
+
+      while true
+        debug "Minimum number of spaces: #{min_spaces}"
+
+        # Initial attempt: <p> that follows <h\d>
+        pre_h = doc/h_p_css
+        debug "Hx: found: #{pre_h.pretty_inspect}"
+        pre_h.each { |p|
+          debug p
+          txt = p.to_html.ircify_html
+          txt.sub!(strip, '') if strip
+          debug "(Hx attempt) #{txt.inspect} has #{txt.count(" ")} spaces"
+          break unless txt.empty? or txt.count(" ") < min_spaces
+        }
+
+        return txt unless txt.empty? or txt.count(" ") < min_spaces
+
+        # Second natural attempt: just get any <p>
+        pars = doc/"p"
+        debug "par: found: #{pars.pretty_inspect}"
+        pars.each { |p|
+          debug p
+          txt = p.to_html.ircify_html
+          txt.sub!(strip, '') if strip
+          debug "(par attempt) #{txt.inspect} has #{txt.count(" ")} spaces"
+          break unless txt.empty? or txt.count(" ") < min_spaces
+        }
+
+        return txt unless txt.empty? or txt.count(" ") < min_spaces
+
+        # Nothing yet ... let's get drastic: we look for non-par elements too,
+        # but only for those that match something that we know is likely to
+        # contain text
+
+        # Some blogging and forum platforms use spans or divs with a 'body' or
+        # 'message' or 'text' in their class to mark actual text. Since we want
+        # the class match to be partial and case insensitive, we collect
+        # the common elements that may have this class and then filter out those
+        # we don't need
+        pars = Hpricot::Elements[]
+        pre_pars = doc/"div|span|td|tr|tbody|table"
+        pre_pars.each { |el|
+          pars.push el if el.class =~ /body|message|text/i
+        }
+        debug "other \#1: found: #{pars.pretty_inspect}"
+
+        pars.each { |p|
+          debug p
+          txt = p.to_html.ircify_html
+          txt.sub!(strip, '') if strip
+          debug "(other attempt \#1) #{txt.inspect} has #{txt.count(" ")} spaces"
+          break unless txt.empty? or txt.count(" ") < min_spaces
+        }
+
+        return txt unless txt.empty? or txt.count(" ") < min_spaces
+
+        # At worst, we can try stuff which is comprised between two <br>
+        # TODO
+
+        debug "Last candidate #{txt.inspect} has #{txt.count(" ")} spaces"
+        return txt unless txt.count(" ") < min_spaces
+        break if min_spaces == 0
+        min_spaces /= 2
+      end
+    end
+
+    # without hpricot
+    def Utils.ircify_first_html_par_woh(xml_org, opts={})
       xml = xml_org.gsub(/<!--.*?-->/m, '').gsub(/<script(?:\s+[^>]*)?>.*?<\/script>/im, "").gsub(/<style(?:\s+[^>]*)?>.*?<\/style>/im, "")
 
       strip = opts[:strip]
@@ -502,6 +625,7 @@ module ::Irc
 
         debug "Last candidate #{txt.inspect} has #{txt.count(" ")} spaces"
         return txt unless txt.count(" ") < min_spaces
+        break if min_spaces == 0
         min_spaces /= 2
       end
     end
