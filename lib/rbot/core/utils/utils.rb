@@ -487,11 +487,13 @@ module ::Irc
       h_p_css = ar.join("|")
       debug "css search: #{h_p_css}"
 
+      pre_h = pars = by_span = nil
+
       while true
         debug "Minimum number of spaces: #{min_spaces}"
 
         # Initial attempt: <p> that follows <h\d>
-        pre_h = doc/h_p_css
+        pre_h = doc/h_p_css if pre_h.nil?
         debug "Hx: found: #{pre_h.pretty_inspect}"
         pre_h.each { |p|
           debug p
@@ -504,7 +506,7 @@ module ::Irc
         return txt unless txt.empty? or txt.count(" ") < min_spaces
 
         # Second natural attempt: just get any <p>
-        pars = doc/"p"
+        pars = doc/"p" if pars.nil?
         debug "par: found: #{pars.pretty_inspect}"
         pars.each { |p|
           debug p
@@ -525,14 +527,16 @@ module ::Irc
         # the class match to be partial and case insensitive, we collect
         # the common elements that may have this class and then filter out those
         # we don't need
-        pars = Hpricot::Elements[]
-        pre_pars = doc/"div|span|td|tr|tbody|table"
-        pre_pars.each { |el|
-          pars.push el if el.class =~ /body|message|text/i
-        }
-        debug "other \#1: found: #{pars.pretty_inspect}"
+        if by_span.nil?
+          by_span = Hpricot::Elements[]
+          pre_pars = doc/"div|span|td|tr|tbody|table"
+          pre_pars.each { |el|
+            by_span.push el if el.class =~ /body|message|text/i
+          }
+          debug "other \#1: found: #{by_span.pretty_inspect}"
+        end
 
-        pars.each { |p|
+        by_span.each { |p|
           debug p
           txt = p.to_html.ircify_html
           txt.sub!(strip, '') if strip
