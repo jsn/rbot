@@ -15,9 +15,9 @@
 require 'tempfile'
 require 'set'
 
+# Try to load htmlentities, fall back to an HTML escape table.
 begin
   require 'htmlentities'
-  $we_have_html_entities_decoder = true
 rescue LoadError
   gems = nil
   begin
@@ -28,7 +28,6 @@ rescue LoadError
   if gems
     retry
   else
-    $we_have_html_entities_decoder = false
     module ::Irc
       module Utils
         UNESCAPE_TABLE = {
@@ -396,7 +395,7 @@ module ::Irc
 
 
     def Utils.decode_html_entities(str)
-      if $we_have_html_entities_decoder
+      if defined? ::HTMLEntities
         return HTMLEntities.decode_entities(str)
       else
         str.gsub(/(&(.+?);)/) {

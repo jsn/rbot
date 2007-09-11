@@ -9,8 +9,13 @@ Core requirements
       net/https             (for debian, this will also need libopenssl-ruby)
       socket
       uri
+
+Useful but fallback provided
       ruby-gettext 1.8.0+   http://www.yotabanana.com/hiki/ruby-gettext.html?ruby-gettext
                             optional, if installed rbot can use localized messages     
+      htmlentities          http://htmlentities.rubyforge.org/
+                            optional, if missing rbot will use an internal table to decode
+                            the most common HTML entities
 
 Plugin requirements
 (these are all optional, if you don't have them, the plugins just won't
