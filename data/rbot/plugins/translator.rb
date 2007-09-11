@@ -271,7 +271,8 @@ class TranslatorPlugin < Plugin
     TRANSLATORS.each_pair do |name, c|
       begin
         @translators[name] = c.new(@registry.sub_registry(name))
-        map "#{name} :from :to *phrase", :action => :cmd_translate
+        map "#{name} :from :to *phrase",
+          :action => :cmd_translate, :thread => true
       rescue Exception
         warning _("Translator %{name} cannot be used: %{reason}") %
                {:name => name, :reason => $!}
@@ -343,4 +344,5 @@ class TranslatorPlugin < Plugin
 end
 
 plugin = TranslatorPlugin.new
-plugin.map 'translator :from :to *phrase', :action => :cmd_translator
+plugin.map 'translator :from :to *phrase',
+  :action => :cmd_translator, :thread => true

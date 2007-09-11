@@ -110,8 +110,8 @@ plugin = BabelPlugin.new
 
 plugin.default_auth('cache', false)
 
-plugin.map 'translate to :tolang *phrase'
-plugin.map 'translate from :fromlang *phrase'
+plugin.map 'translate to :tolang *phrase', :thread => true
+plugin.map 'translate from :fromlang *phrase', :thread => true
 plugin.map 'translate cache :cmd', :action => :cache_mgmt, :auth_path => 'cache!', :requirements => { :cmd => /view|clear/ }
-plugin.map 'translate :fromlang :tolang *phrase'
+plugin.map 'translate :fromlang :tolang *phrase', :thread => true
 
