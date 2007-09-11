@@ -209,7 +209,7 @@ class BabelfishTranslator < Translator
 
   def initialize(cache)
     require 'mechanize'
-    
+
     @form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
             forms.name('frmTrText').first
     @lang_list = @form.fields.name('lp')
@@ -272,7 +272,7 @@ class TranslatorPlugin < Plugin
       begin
         @translators[name] = c.new(@registry.sub_registry(name))
         map "#{name} :from :to *phrase", :action => :cmd_translate
-      rescue
+      rescue Exception
         warning _("Translator %{name} cannot be used: %{reason}") %
                {:name => name, :reason => $!}
       end
