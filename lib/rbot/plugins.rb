@@ -12,17 +12,24 @@ module Irc
 module Plugins
   require 'rbot/messagemapper'
 
-=begin
-  base class for all rbot plugins
-  certain methods will be called if they are provided, if you define one of
-  the following methods, it will be called as appropriate:
+=begin rdoc
+  BotModule is the base class for the modules that enhance the rbot
+  functionality. Rather than subclassing BotModule, however, one should
+  subclass either CoreBotModule (reserved for system modules) or Plugin
+  (for user plugins).
+  
+  A BotModule interacts with Irc events by defining one or more of the following
+  methods, which get called as appropriate when the corresponding Irc event
+  happens.
 
   map(template, options)::
   map!(template, options)::
-     map is the new, cleaner way to respond to specific message formats
-     without littering your plugin code with regexps. The difference
-     between map and map! is that map! will not register the new command
-     as an alternative name for the plugin.
+     map is the new, cleaner way to respond to specific message formats without
+     littering your plugin code with regexps, and should be used instead of
+     #register() and #privmsg() (see below) when possible.
+     
+     The difference between map and map! is that map! will not register the new
+     command as an alternative name for the plugin.
 
      Examples:
 
@@ -54,9 +61,11 @@ module Plugins
        plugin.map 'karmastats', :auth => 'karma'
 
        # maps can be restricted to public or private message:
-       plugin.map 'karmastats', :private false,
-       plugin.map 'karmastats', :public false,
-     end
+       plugin.map 'karmastats', :private => false
+       plugin.map 'karmastats', :public => false
+
+     See MessageMapper#map for more information on the template format and the
+     allowed options.
 
   listen(UserMessage)::
                          Called for all messages of any type. To
@@ -74,7 +83,7 @@ module Plugins
 
   privmsg(PrivMessage)::
                          Called for a PRIVMSG if the first word matches one
-                         the plugin register()d for. Use m.plugin to get
+                         the plugin #register()ed for. Use m.plugin to get
                          that word and m.params for the rest of the message,
                          if applicable.
 
@@ -100,7 +109,7 @@ module Plugins
                          Called when a user (or the bot) changes a channel
                          topic
 
-  connect()::            Called when a server is joined successfully, but
+  connect::              Called when a server is joined successfully, but
                          before autojoin channels are joined (no params)
 
   set_language(String)::
@@ -118,8 +127,25 @@ module Plugins
   class BotModule
     attr_reader :bot   # the associated bot
 
-    # initialise your bot module. Always call super if you override this method,
-    # as important variables are set up for you
+    # Initialise your bot module. Always call super if you override this method,
+    # as important variables are set up for you:
+    #
+    # @bot::
+    #   the rbot instance
+    # @registry::
+    #   the botmodule's registry, which can be used to store permanent data
+    #   (see BotRegistryAccessor for additional documentation)
+    #
+    # Other instance variables which are defined and should not be overwritten
+    # byt the user, but aren't usually accessed directly, are:
+    #
+    # @manager::
+    #   the plugins manager instance
+    # @botmodule_triggers::
+    #   an Array of words this plugin #register()ed itself for
+    # @handler::
+    #   the MessageMapper that handles this plugin's maps
+    #
     def initialize
       @manager = Plugins::manager
       @bot = @manager.bot
@@ -135,47 +161,71 @@ module Plugins
       end
     end
 
+    # Returns the symbol :BotModule 
     def botmodule_class
       :BotModule
     end
 
+    # Method called to flush the registry, thus ensuring that the botmodule's permanent
+    # data is committed to disk
+    #
     def flush_registry
       # debug "Flushing #{@registry}"
       @registry.flush
     end
 
+    # Method called to cleanup before the plugin is unloaded. If you overload
+    # this method to handle additional cleanup tasks, remember to call super()
+    # so that the default cleanup actions are taken care of as well.
+    #
     def cleanup
       # debug "Closing #{@registry}"
       @registry.close
     end
 
+    # Handle an Irc::PrivMessage for which this BotModule has a map. The method
+    # is called automatically and there is usually no need to call it
+    # explicitly.
+    #
     def handle(m)
       @handler.handle(m)
     end
 
+    # Signal to other BotModules that an even happened.
+    #
     def call_event(ev, *args)
       @bot.plugins.delegate('event_' + ev.to_s.gsub(/[^\w\?!]+/, '_'), *args)
     end
 
+    # call-seq: map(template, options)
+    #
+    # This is the preferred way to register the BotModule so that it
+    # responds to appropriately-formed messages on Irc.
+    #
     def map(*args)
       @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
       self.register name, :auth => nil
       unless self.respond_to?('privmsg')
-        def self.privmsg(m)
+        def self.privmsg(m) #:nodoc:
           handle(m)
         end
       end
     end
 
+    # call-seq: map!(template, options)
+    #
+    # This is the same as map but doesn't register the new command
+    # as an alternative name for the plugin.
+    #
     def map!(*args)
       @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
       self.register name, :auth => nil, :hidden => true
       unless self.respond_to?('privmsg')
-        def self.privmsg(m)
+        def self.privmsg(m) #:nodoc:
           handle(m)
         end
       end
@@ -200,23 +250,23 @@ module Plugins
       [name, cmd].compact.join("::")
     end
 
-    # return an identifier for this plugin, defaults to a list of the message
+    # Return an identifier for this plugin, defaults to a list of the message
     # prefixes handled (used for error messages etc)
     def name
       self.class.to_s.downcase.sub(/^#<module:.*?>::/,"").sub(/(plugin|module)?$/,"")
     end
 
-    # just calls name
+    # Just calls name
     def to_s
       name
     end
 
-    # intern the name
+    # Intern the name
     def to_sym
       self.name.to_sym
     end
 
-    # return a help string for your module. for complex modules, you may wish
+    # Return a help string for your module. For complex modules, you may wish
     # to break your help into topics, and return a list of available topics if
     # +topic+ is nil. +plugin+ is passed containing the matching prefix for
     # this message - if your plugin handles multiple prefixes, make sure you
@@ -225,9 +275,14 @@ module Plugins
       "no help"
     end
 
-    # register the plugin as a handler for messages prefixed +name+
-    # this can be called multiple times for a plugin to handle multiple
-    # message prefixes
+    # Register the plugin as a handler for messages prefixed _cmd_.
+    #
+    # This can be called multiple times for a plugin to handle multiple message
+    # prefixes.
+    #
+    # This command is now superceded by the #map() command, which should be used
+    # instead whenever possible.
+    # 
     def register(cmd, opts={})
       raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
       who = @manager.who_handles?(cmd)
@@ -243,20 +298,33 @@ module Plugins
       @botmodule_triggers << cmd unless opts.fetch(:hidden, false)
     end
 
-    # default usage method provided as a utility for simple plugins. The
+    # Default usage method provided as a utility for simple plugins. The
     # MessageMapper uses 'usage' as its default fallback method.
+    #
     def usage(m, params = {})
       m.reply(_("incorrect usage, ask for help using '%{command}'") % {:command => "#{@bot.nick}: help #{m.plugin}"})
     end
 
   end
 
+  # A CoreBotModule is a BotModule that provides core functionality.
+  #
+  # This class should not be used by user plugins, as it's reserved for system
+  # plugins such as the ones that handle authentication, configuration and basic
+  # functionality.
+  #
   class CoreBotModule < BotModule
     def botmodule_class
       :CoreBotModule
     end
   end
 
+  # A Plugin is a BotModule that provides additional functionality.
+  #
+  # A user-defined plugin should subclass this, and then define any of the
+  # methods described in the documentation for BotModule to handle interaction
+  # with Irc events.
+  #
   class Plugin < BotModule
     def botmodule_class
       :Plugin
