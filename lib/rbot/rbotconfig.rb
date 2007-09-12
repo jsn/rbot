@@ -1,4 +1,5 @@
 module Irc
+class Bot
   module Config
     unless defined?(@@datadir)
       @@datadir = nil
@@ -65,4 +66,5 @@ module Irc
       @@coredir
     end
   end
+end
 end

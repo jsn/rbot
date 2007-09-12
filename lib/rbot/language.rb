@@ -8,6 +8,7 @@
 # .lang file etc.
 
 module Irc
+class Bot
   class Language
 
     # This constant hash holds the mapping
@@ -54,8 +55,8 @@ module Irc
       return 'english'
     end
 
-    BotConfig.register BotConfigEnumValue.new('core.language', 
-      :default => Irc::Language.from_locale, :wizard => true,
+    Config.register Config::EnumValue.new('core.language', 
+      :default => Irc::Bot::Language.from_locale, :wizard => true,
       :values => Proc.new{|bot|
             Dir.new(Config::datadir + "/languages").collect {|f|
               f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
@@ -140,4 +141,5 @@ module Irc
     end
   end
 
+end
 end

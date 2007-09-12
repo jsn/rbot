@@ -376,19 +376,19 @@ class Imdb
 end
 
 class ImdbPlugin < Plugin
-  BotConfig.register BotConfigBooleanValue.new('imdb.aka',
+  Config.register Config::BooleanValue.new('imdb.aka',
     :default => true,
     :desc => "Look for IMDB matches also in translated titles and other 'also known as' information")
-  BotConfig.register BotConfigBooleanValue.new('imdb.popular',
+  Config.register Config::BooleanValue.new('imdb.popular',
     :default => true,
     :desc => "Display info on popular IMDB entries matching the request closely")
-  BotConfig.register BotConfigBooleanValue.new('imdb.exact',
+  Config.register Config::BooleanValue.new('imdb.exact',
     :default => true,
     :desc => "Display info on IMDB entries matching the request exactly")
-  BotConfig.register BotConfigBooleanValue.new('imdb.fix_article',
+  Config.register Config::BooleanValue.new('imdb.fix_article',
     :default => false,
     :desc => "Try to detect an article placed at the end and move it in front of the title")
-  BotConfig.register BotConfigBooleanValue.new('imdb.tv_series_in_movies',
+  Config.register Config::BooleanValue.new('imdb.tv_series_in_movies',
     :default => false,
     :desc => "Whether searching movies by person/year should also return TV series")
 

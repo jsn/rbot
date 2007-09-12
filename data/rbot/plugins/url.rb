@@ -13,22 +13,22 @@ class UrlPlugin < Plugin
   LINK_INFO = "[Link Info]"
   OUR_UNSAFE = Regexp.new("[^#{URI::PATTERN::UNRESERVED}#{URI::PATTERN::RESERVED}%# ]", false, 'N')
 
-  BotConfig.register BotConfigIntegerValue.new('url.max_urls',
+  Config.register Config::IntegerValue.new('url.max_urls',
     :default => 100, :validate => Proc.new{|v| v > 0},
     :desc => "Maximum number of urls to store. New urls replace oldest ones.")
-  BotConfig.register BotConfigIntegerValue.new('url.display_link_info',
+  Config.register Config::IntegerValue.new('url.display_link_info',
     :default => 0,
     :desc => "Get the title of links pasted to the channel and display it (also tells if the link is broken or the site is down). Do it for at most this many links per line (set to 0 to disable)")
-  BotConfig.register BotConfigBooleanValue.new('url.titles_only',
+  Config.register Config::BooleanValue.new('url.titles_only',
     :default => false,
     :desc => "Only show info for links that have <title> tags (in other words, don't display info for jpegs, mpegs, etc.)")
-  BotConfig.register BotConfigBooleanValue.new('url.first_par',
+  Config.register Config::BooleanValue.new('url.first_par',
     :default => false,
     :desc => "Also try to get the first paragraph of a web page")
-  BotConfig.register BotConfigBooleanValue.new('url.info_on_list',
+  Config.register Config::BooleanValue.new('url.info_on_list',
     :default => false,
     :desc => "Show link info when listing/searching for urls")
-  BotConfig.register BotConfigArrayValue.new('url.no_info_hosts',
+  Config.register Config::ArrayValue.new('url.no_info_hosts',
     :default => ['localhost', '^192\.168\.', '^10\.', '^127\.', '^172\.(1[6-9]|2\d|31)\.'],
     :on_change => Proc.new { |bot, v| bot.plugins['url'].reset_no_info_hosts },
     :desc => "A list of regular expressions matching hosts for which no info should be provided")

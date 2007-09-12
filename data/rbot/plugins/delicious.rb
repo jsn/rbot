@@ -18,13 +18,13 @@ class DeliciousPlugin < Plugin
 
   attr_accessor :last_error
 
-  BotConfig.register BotConfigStringValue.new('delicious.user',
+  Config.register Config::StringValue.new('delicious.user',
     :default => '', :desc => "Username on del.icio.us")
-  BotConfig.register BotConfigStringValue.new('delicious.password',
+  Config.register Config::StringValue.new('delicious.password',
     :default => '', :desc => "Password on del.icio.us")
-  BotConfig.register BotConfigStringValue.new('delicious.user_fmt',
+  Config.register Config::StringValue.new('delicious.user_fmt',
     :default => 'user:%s', :desc => "How to convert users to tags?")
-  BotConfig.register BotConfigStringValue.new('delicious.channel_fmt',
+  Config.register Config::StringValue.new('delicious.channel_fmt',
     :default => 'channel:%s', :desc => "How to convert channels to tags?")
 
   def help(plugin, topic="")

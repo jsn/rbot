@@ -4,20 +4,27 @@
 # :title: IRC message datastructures
 
 module Irc
-  BotConfig.register BotConfigArrayValue.new('core.address_prefix',
-    :default => [], :wizard => true,
-    :desc => "what non nick-matching prefixes should the bot respond to as if addressed (e.g !, so that '!foo' is treated like 'rbot: foo')"
-  )
 
-  BotConfig.register BotConfigBooleanValue.new('core.reply_with_nick',
-    :default => false, :wizard => true,
-    :desc => "if true, the bot will prepend the nick to what he has to say when replying (e.g. 'markey: you can't do that!')"
-  )
 
-  BotConfig.register BotConfigStringValue.new('core.nick_postfix',
-    :default => ':', :wizard => true,
-    :desc => "when replying with nick put this character after the nick of the user the bot is replying to"
-  )
+  class Bot
+    module Config
+      Config.register ArrayValue.new('core.address_prefix',
+        :default => [], :wizard => true,
+        :desc => "what non nick-matching prefixes should the bot respond to as if addressed (e.g !, so that '!foo' is treated like 'rbot: foo')"
+      )
+
+      Config.register BooleanValue.new('core.reply_with_nick',
+        :default => false, :wizard => true,
+        :desc => "if true, the bot will prepend the nick to what he has to say when replying (e.g. 'markey: you can't do that!')"
+      )
+
+      Config.register StringValue.new('core.nick_postfix',
+        :default => ':', :wizard => true,
+        :desc => "when replying with nick put this character after the nick of the user the bot is replying to"
+      )
+    end
+  end
+
 
   # Define standard IRC attriubtes (not so standard actually,
   # but the closest thing we have ...)

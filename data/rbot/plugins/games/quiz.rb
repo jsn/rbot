@@ -156,11 +156,11 @@ end
 # CLASS QuizPlugin
 #######################################################################
 class QuizPlugin < Plugin
-  BotConfig.register BotConfigBooleanValue.new('quiz.dotted_nicks',
+  Config.register Config::BooleanValue.new('quiz.dotted_nicks',
     :default => true,
     :desc => "When true, nicks in the top X scores will be camouflaged to prevent IRC hilighting")
 
-  BotConfig.register BotConfigArrayValue.new('quiz.sources',
+  Config.register Config::ArrayValue.new('quiz.sources',
     :default => ['quiz.rbot'],
     :desc => "List of files and URLs that will be used to retrieve quiz questions")
 

@@ -57,7 +57,7 @@ end
 
 class BashPlugin < Plugin
 
-  BotConfig.register BotConfigEnumValue.new('bash.access',
+  Config.register Config::EnumValue.new('bash.access',
     :values => ['xml', 'html'], :default => 'html',
     :desc => "Which method the bot should use to access bash.org quotes: xml files or standard webpages")
 

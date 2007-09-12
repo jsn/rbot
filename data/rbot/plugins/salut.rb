@@ -14,12 +14,12 @@
 # TODO:: *REMEMBER* to set @changed to true after edit or changes won't be saved
 
 class SalutPlugin < Plugin
-  BotConfig.register BotConfigBooleanValue.new('salut.all_languages',
+  Config.register Config::BooleanValue.new('salut.all_languages',
     :default => true, 
     :desc => "Check for a salutation in all languages and not just in the one defined by core.language",
     :on_change => Proc.new {|bot, v| bot.plugins['salut'].reload}
   )
-  BotConfig.register BotConfigBooleanValue.new('salut.address_only',
+  Config.register Config::BooleanValue.new('salut.address_only',
     :default => true, 
     :desc => "When set to true, the bot will only reply to salutations directed at him",
     :on_change => Proc.new {|bot, v| bot.plugins['salut'].reload}

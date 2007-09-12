@@ -1,13 +1,13 @@
 define_structure :RouletteHistory, :games, :shots, :deaths, :misses, :wins
 
 class RoulettePlugin < Plugin
-  BotConfig.register BotConfigBooleanValue.new('roulette.autospin',
+  Config.register Config::BooleanValue.new('roulette.autospin',
     :default => true, 
     :desc => "Automatically spins the roulette at the butlast shot")
-  BotConfig.register BotConfigBooleanValue.new('roulette.kick',
+  Config.register Config::BooleanValue.new('roulette.kick',
     :default => false, 
     :desc => "Kicks shot players from the channel")
-  BotConfig.register BotConfigBooleanValue.new('roulette.twice_in_a_row',
+  Config.register Config::BooleanValue.new('roulette.twice_in_a_row',
     :default => false, 
     :desc => "Allow players to go twice in a row")
 

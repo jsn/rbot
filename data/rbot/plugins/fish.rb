@@ -1,10 +1,10 @@
 class BabelPlugin < Plugin
   LANGS = %w{en fr de it pt es nl ru zh zt el ja ko}
 
-  BotConfig.register BotConfigEnumValue.new('translate.default_from',
+  Config.register Config::EnumValue.new('translate.default_from',
     :values => LANGS, :default => 'en',
     :desc => "Default language to translate from")
-  BotConfig.register BotConfigEnumValue.new('translate.default_to',
+  Config.register Config::EnumValue.new('translate.default_to',
     :values => LANGS, :default => 'en',
     :desc => "Default language to translate to")
 

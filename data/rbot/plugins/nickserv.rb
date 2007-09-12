@@ -21,30 +21,30 @@
 
 class NickServPlugin < Plugin
   
-  BotConfig.register BotConfigStringValue.new('nickserv.name',
+  Config.register Config::StringValue.new('nickserv.name',
     :default => "nickserv", :requires_restart => false,
     :desc => "Name of the nick server (all lowercase)")
 
-  BotConfig.register BotConfigStringValue.new('nickserv.ident_request',
+  Config.register Config::StringValue.new('nickserv.ident_request',
     :default => "IDENTIFY", :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
     :desc => "String to look for to see if the nick server is asking us to identify")
-  BotConfig.register BotConfigStringValue.new('nickserv.nick_avail',
+  Config.register Config::StringValue.new('nickserv.nick_avail',
     :default => "not (currently )?online|killed|recovered|disconnesso|libero",
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_nick_avail", v },
     :desc => "String to look for to see if the nick server is informing us that our nick is now available")
-  BotConfig.register BotConfigStringValue.new('nickserv.identified_string',
+  Config.register Config::StringValue.new('nickserv.identified_string',
     :default => "(Password|Contrase|Mot de passe).+(acce[pt]t|r[ie]cog?n).+(identif|r[ie]cog?n)",
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_identified_string", v },
     :desc => "String to look for to see if the nick server is informing us that we have identified successfully")
 
-  BotConfig.register BotConfigBooleanValue.new('nickserv.wants_nick',
+  Config.register Config::BooleanValue.new('nickserv.wants_nick',
     :default => false, :requires_restart => false,
     :desc => "Set to false if the nick server doesn't expect the nick as a parameter in the identify command")
 
-  BotConfig.register BotConfigIntegerValue.new('nickserv.wait',
+  Config.register Config::IntegerValue.new('nickserv.wait',
     :default => 30, :validate => Proc.new { |v| v > 0 }, :requires_restart => false,
     :desc => "Seconds to wait after sending a message to nickserv, e.g. after ghosting")
 
@@ -64,7 +64,7 @@ class NickServPlugin < Plugin
   end
   
   def genpasswd
-    return Irc::Auth.random_password
+    return Irc::Bot::Auth.random_password
   end
 
   def set_ident_request(val)

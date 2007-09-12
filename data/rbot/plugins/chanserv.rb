@@ -15,7 +15,7 @@
 
 class ChanServPlugin < Plugin
 
-  BotConfig.register BotConfigStringValue.new('chanserv.name',
+  Config.register Config::StringValue.new('chanserv.name',
     :default => "chanserv", :requires_restart => false,
     :desc => "Name of the chan server (all lowercase)")
 

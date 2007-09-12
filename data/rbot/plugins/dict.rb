@@ -22,10 +22,10 @@ DEMAURO_LEMMA = /<anchor>(.*?)(?: - (.*?))<go href="lemma.php\?ID=(\d+)"\/><\/an
 CHAMBERS_LEMMA = /<p><span class="hwd">(.*?)<\/span> <span class="psa">(.*?)<\/span>(.*?)<\/p>/
 
 class DictPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('dict.hits',
+  Config.register Config::IntegerValue.new('dict.hits',
     :default => 3,
     :desc => "Number of hits to return from a dictionary lookup")
-  BotConfig.register BotConfigIntegerValue.new('dict.first_par',
+  Config.register Config::IntegerValue.new('dict.first_par',
     :default => 0,
     :desc => "When set to n > 0, the bot will return the first paragraph from the first n dictionary hits")
 

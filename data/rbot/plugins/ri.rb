@@ -16,7 +16,7 @@ class RiPlugin < Plugin
 
   RI_COMMAND = %w{ri -f simple -T}
 
-  BotConfig.register BotConfigIntegerValue.new('ri.max_length',
+  Config.register Config::IntegerValue.new('ri.max_length',
     :default => 512,
     :desc => "Maximum length of ri entry (in bytes) which is ok to be sent to channels or other users")
 

@@ -107,7 +107,7 @@ class ConfigModule < CoreBotModule
       m.reply _("no such config key %{key}") % {:key => key}
       return
     end
-    unless @bot.config.items[key].kind_of?(BotConfigArrayValue)
+    unless @bot.config.items[key].kind_of?(Config::ArrayValue)
       m.reply _("config key %{key} is not an array") % {:key => key}
       return
     end
@@ -130,7 +130,7 @@ class ConfigModule < CoreBotModule
       m.reply _("no such config key %{key}") % {:key => key}
       return
     end
-    unless @bot.config.items[key].kind_of?(BotConfigArrayValue)
+    unless @bot.config.items[key].kind_of?(Config::ArrayValue)
       m.reply _("config key %{key} is not an array") % {:key => key}
       return
     end
@@ -240,7 +240,7 @@ conf.map 'config list :module',
   :auth_path => 'show'
 # TODO this one is presently a security risk, since the bot
 # stores the master password in the config. Do we need auth levels
-# on the BotConfig keys too?
+# on the Bot::Config keys too?
 conf.map 'config get :key',
   :action => 'handle_get',
   :auth_path => 'show'
@@ -299,7 +299,7 @@ conf.map 'config help :topic',
 conf.default_auth('*', false)
 conf.default_auth('show::status', true)
 # TODO these shouldn't be set here, we need a way to let the default
-# permission be specified together with the BotConfigValue
+# permission be specified together with the ConfigValue
 conf.default_auth('key', true)
 conf.default_auth('key::auth::password', false)
 

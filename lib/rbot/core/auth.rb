@@ -11,6 +11,15 @@ class AuthModule < CoreBotModule
 
   def initialize
     super
+
+    # The namespace migration causes each Irc::Auth::PermissionSet to be
+    # unrecoverable, and we have to rename their class name to
+    # Irc::Bot::Auth::PermissionSet
+    @registry.recovery = Proc.new { |val|
+      patched = val.sub("o:\035Irc::Auth::PermissionSet", "o:\042Irc::Bot::Auth::PermissionSet")
+      Marshal.restore(patched)
+    }
+
     load_array(:default, true)
     debug "initialized auth. Botusers: #{@bot.auth.save_array.pretty_inspect}"
   end

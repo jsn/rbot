@@ -22,11 +22,11 @@
 # servers to make this even easier.
 
 class LinkBot < Plugin
-  BotConfig.register BotConfigArrayValue.new('linkbot.nicks',
+  Config.register Config::ArrayValue.new('linkbot.nicks',
     :default => [],
     :desc => "Nick(s) of the bots that act as channel links across networks")
 
-  BotConfig.register BotConfigArrayValue.new('linkbot.message_patterns',
+  Config.register Config::ArrayValue.new('linkbot.message_patterns',
     :default => ['^<(\S+?)@(\S+?)>\s+(.*)$', '^\((\S+?)@(\S+?)\)\s+(.*)$'],
     :desc => "List of regexp which match linkbot messages; each regexp needs to have three captures, which in order are the nickname of the original speaker, network, and original message")
   # TODO use template strings instead of regexp for user friendliness

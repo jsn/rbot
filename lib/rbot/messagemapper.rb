@@ -18,6 +18,7 @@ class Regexp
 end
 
 module Irc
+class Bot
 
   # MessageMapper is a class designed to reduce the amount of regexps and
   # string parsing plugins and bot modules need to do, in order to process
@@ -585,4 +586,5 @@ module Irc
       end
     end
   end
+end
 end

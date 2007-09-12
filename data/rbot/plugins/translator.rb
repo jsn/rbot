@@ -252,7 +252,7 @@ class WorldlingoTranslator < Translator
 end
 
 class TranslatorPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('translator.timeout',
+  Config.register Config::IntegerValue.new('translator.timeout',
     :default => 30, :validate => Proc.new{|v| v > 0},
     :desc => _("Number of seconds to wait for the translation service before timeout"))
 
@@ -279,7 +279,7 @@ class TranslatorPlugin < Plugin
       end
     end
 
-    BotConfig.register BotConfigArrayValue.new('translator.default_list',
+    Config.register Config::ArrayValue.new('translator.default_list',
       :default => TRANSLATORS.keys,
       :validate => Proc.new {|l| l.all? {|t| TRANSLATORS.has_key?(t)}},
       :desc => _("List of translators to try in order when translator name not specified"),

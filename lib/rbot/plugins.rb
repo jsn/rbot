@@ -6,7 +6,8 @@
 require 'singleton'
 
 module Irc
-    BotConfig.register BotConfigArrayValue.new('plugins.blacklist',
+class Bot
+    Config.register Config::ArrayValue.new('plugins.blacklist',
       :default => [], :wizard => false, :requires_rescan => true,
       :desc => "Plugins that should not be loaded")
 module Plugins
@@ -17,7 +18,7 @@ module Plugins
   functionality. Rather than subclassing BotModule, however, one should
   subclass either CoreBotModule (reserved for system modules) or Plugin
   (for user plugins).
-  
+
   A BotModule interacts with Irc events by defining one or more of the following
   methods, which get called as appropriate when the corresponding Irc event
   happens.
@@ -27,7 +28,7 @@ module Plugins
      map is the new, cleaner way to respond to specific message formats without
      littering your plugin code with regexps, and should be used instead of
      #register() and #privmsg() (see below) when possible.
-     
+
      The difference between map and map! is that map! will not register the new
      command as an alternative name for the plugin.
 
@@ -134,7 +135,7 @@ module Plugins
     #   the rbot instance
     # @registry::
     #   the botmodule's registry, which can be used to store permanent data
-    #   (see BotRegistryAccessor for additional documentation)
+    #   (see Registry::Accessor for additional documentation)
     #
     # Other instance variables which are defined and should not be overwritten
     # byt the user, but aren't usually accessed directly, are:
@@ -153,7 +154,7 @@ module Plugins
       @botmodule_triggers = Array.new
 
       @handler = MessageMapper.new(self)
-      @registry = BotRegistryAccessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
+      @registry = Registry::Accessor.new(@bot, self.class.to_s.gsub(/^.*::/, ""))
 
       @manager.add_botmodule(self)
       if self.respond_to?('set_language')
@@ -683,9 +684,9 @@ module Plugins
         key = $1
         params = $2
 
-	# Let's see if we can match a plugin by the given name
+        # Let's see if we can match a plugin by the given name
         (core_modules + plugins).each { |p|
-	  next unless p.name == key
+          next unless p.name == key
           begin
             return p.help(key, params)
           rescue Exception => err
@@ -694,7 +695,7 @@ module Plugins
           end
         }
 
-	# Nope, let's see if it's a command, and ask for help at the corresponding botmodule
+        # Nope, let's see if it's a command, and ask for help at the corresponding botmodule
         k = key.to_sym
         if commands.has_key?(k)
           p = commands[k][:botmodule]
@@ -790,5 +791,6 @@ module Plugins
     return PluginManagerClass.instance
   end
 
+end
 end
 end

@@ -36,10 +36,10 @@ class ::LastFmEvent
 end
 
 class LastFmPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('lastfm.max_events',
+  Config.register Config::IntegerValue.new('lastfm.max_events',
     :default => 25, :validate => Proc.new{|v| v > 1},
     :desc => "Maximum number of events to display.")
-  BotConfig.register BotConfigIntegerValue.new('lastfm.default_events',
+  Config.register Config::IntegerValue.new('lastfm.default_events',
     :default => 3, :validate => Proc.new{|v| v > 1},
     :desc => "Default number of events to display.")
 

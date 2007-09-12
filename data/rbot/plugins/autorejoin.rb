@@ -1,5 +1,5 @@
 class AutoRejoinPlugin < Plugin
-  BotConfig.register BotConfigBooleanValue.new('rejoin.insult',
+  Config.register Config::BooleanValue.new('rejoin.insult',
     :default => true,
     :desc => "Determines if the bot will insult whoever kicked it, after rejoin")
 

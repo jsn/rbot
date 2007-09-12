@@ -127,7 +127,7 @@ class Bot
   # the bot's Auth data
   attr_reader :auth
 
-  # the bot's BotConfig data
+  # the bot's Config data
   attr_reader :config
 
   # the botclass for this bot (determines configdir among other things)
@@ -179,58 +179,58 @@ class Bot
 
   # create a new Bot with botclass +botclass+
   def initialize(botclass, params = {})
-    # BotConfig for the core bot
+    # Config for the core bot
     # TODO should we split socket stuff into ircsocket, etc?
-    BotConfig.register BotConfigArrayValue.new('server.list',
+    Config.register Config::ArrayValue.new('server.list',
       :default => ['irc://localhost'], :wizard => true,
       :requires_restart => true,
       :desc => "List of irc servers rbot should try to connect to. Use comma to separate values. Servers are in format 'server.doma.in:port'. If port is not specified, default value (6667) is used.")
-    BotConfig.register BotConfigBooleanValue.new('server.ssl',
+    Config.register Config::BooleanValue.new('server.ssl',
       :default => false, :requires_restart => true, :wizard => true,
       :desc => "Use SSL to connect to this server?")
-    BotConfig.register BotConfigStringValue.new('server.password',
+    Config.register Config::StringValue.new('server.password',
       :default => false, :requires_restart => true,
       :desc => "Password for connecting to this server (if required)",
       :wizard => true)
-    BotConfig.register BotConfigStringValue.new('server.bindhost',
+    Config.register Config::StringValue.new('server.bindhost',
       :default => false, :requires_restart => true,
       :desc => "Specific local host or IP for the bot to bind to (if required)",
       :wizard => true)
-    BotConfig.register BotConfigIntegerValue.new('server.reconnect_wait',
+    Config.register Config::IntegerValue.new('server.reconnect_wait',
       :default => 5, :validate => Proc.new{|v| v >= 0},
       :desc => "Seconds to wait before attempting to reconnect, on disconnect")
-    BotConfig.register BotConfigFloatValue.new('server.sendq_delay',
+    Config.register Config::FloatValue.new('server.sendq_delay',
       :default => 2.0, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) the delay between sending messages to the server (in seconds)",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_delay = v })
-    BotConfig.register BotConfigIntegerValue.new('server.sendq_burst',
+    Config.register Config::IntegerValue.new('server.sendq_burst',
       :default => 4, :validate => Proc.new{|v| v >= 0},
       :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines",
       :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
-    BotConfig.register BotConfigIntegerValue.new('server.ping_timeout',
+    Config.register Config::IntegerValue.new('server.ping_timeout',
       :default => 30, :validate => Proc.new{|v| v >= 0},
       :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
 
-    BotConfig.register BotConfigStringValue.new('irc.nick', :default => "rbot",
+    Config.register Config::StringValue.new('irc.nick', :default => "rbot",
       :desc => "IRC nickname the bot should attempt to use", :wizard => true,
       :on_change => Proc.new{|bot, v| bot.sendq "NICK #{v}" })
-    BotConfig.register BotConfigStringValue.new('irc.name',
+    Config.register Config::StringValue.new('irc.name',
       :default => "Ruby bot", :requires_restart => true,
       :desc => "IRC realname the bot should use")
-    BotConfig.register BotConfigBooleanValue.new('irc.name_copyright',
+    Config.register Config::BooleanValue.new('irc.name_copyright',
       :default => true, :requires_restart => true,
       :desc => "Append copyright notice to bot realname? (please don't disable unless it's really necessary)")
-    BotConfig.register BotConfigStringValue.new('irc.user', :default => "rbot",
+    Config.register Config::StringValue.new('irc.user', :default => "rbot",
       :requires_restart => true,
       :desc => "local user the bot should appear to be", :wizard => true)
-    BotConfig.register BotConfigArrayValue.new('irc.join_channels',
+    Config.register Config::ArrayValue.new('irc.join_channels',
       :default => [], :wizard => true,
       :desc => "What channels the bot should always join at startup. List multiple channels using commas to separate. If a channel requires a password, use a space after the channel name. e.g: '#chan1, #chan2, #secretchan secritpass, #chan3'")
-    BotConfig.register BotConfigArrayValue.new('irc.ignore_users',
+    Config.register Config::ArrayValue.new('irc.ignore_users',
       :default => [],
       :desc => "Which users to ignore input from. This is mainly to avoid bot-wars triggered by creative people")
 
-    BotConfig.register BotConfigIntegerValue.new('core.save_every',
+    Config.register Config::IntegerValue.new('core.save_every',
       :default => 60, :validate => Proc.new{|v| v >= 0},
       :on_change => Proc.new { |bot, v|
         if @save_timer
@@ -249,73 +249,73 @@ class Bot
       },
       :desc => "How often the bot should persist all configuration to disk (in case of a server crash, for example)")
 
-    BotConfig.register BotConfigBooleanValue.new('core.run_as_daemon',
+    Config.register Config::BooleanValue.new('core.run_as_daemon',
       :default => false, :requires_restart => true,
       :desc => "Should the bot run as a daemon?")
 
-    BotConfig.register BotConfigStringValue.new('log.file',
+    Config.register Config::StringValue.new('log.file',
       :default => false, :requires_restart => true,
       :desc => "Name of the logfile to which console messages will be redirected when the bot is run as a daemon")
-    BotConfig.register BotConfigIntegerValue.new('log.level',
+    Config.register Config::IntegerValue.new('log.level',
       :default => 1, :requires_restart => false,
       :validate => Proc.new { |v| (0..5).include?(v) },
       :on_change => Proc.new { |bot, v|
         $logger.level = v
       },
       :desc => "The minimum logging level (0=DEBUG,1=INFO,2=WARN,3=ERROR,4=FATAL) for console messages")
-    BotConfig.register BotConfigIntegerValue.new('log.keep',
+    Config.register Config::IntegerValue.new('log.keep',
       :default => 1, :requires_restart => true,
       :validate => Proc.new { |v| v >= 0 },
       :desc => "How many old console messages logfiles to keep")
-    BotConfig.register BotConfigIntegerValue.new('log.max_size',
+    Config.register Config::IntegerValue.new('log.max_size',
       :default => 10, :requires_restart => true,
       :validate => Proc.new { |v| v > 0 },
       :desc => "Maximum console messages logfile size (in megabytes)")
 
-    BotConfig.register BotConfigArrayValue.new('plugins.path',
+    Config.register Config::ArrayValue.new('plugins.path',
       :wizard => true, :default => ['(default)', '(default)/games', '(default)/contrib'],
       :requires_restart => false,
       :on_change => Proc.new { |bot, v| bot.setup_plugins_path },
       :desc => "Where the bot should look for plugins. List multiple directories using commas to separate. Use '(default)' for default prepackaged plugins collection, '(default)/contrib' for prepackaged unsupported plugins collection")
 
-    BotConfig.register BotConfigEnumValue.new('send.newlines',
+    Config.register Config::EnumValue.new('send.newlines',
       :values => ['split', 'join'], :default => 'split',
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :newlines => v.to_sym
       },
       :desc => "When set to split, messages with embedded newlines will be sent as separate lines. When set to join, newlines will be replaced by the value of join_with")
-    BotConfig.register BotConfigStringValue.new('send.join_with',
+    Config.register Config::StringValue.new('send.join_with',
       :default => ' ',
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :join_with => v.dup
       },
       :desc => "String used to replace newlines when send.newlines is set to join")
-    BotConfig.register BotConfigIntegerValue.new('send.max_lines',
+    Config.register Config::IntegerValue.new('send.max_lines',
       :default => 5,
       :validate => Proc.new { |v| v >= 0 },
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :max_lines => v
       },
       :desc => "Maximum number of IRC lines to send for each message (set to 0 for no limit)")
-    BotConfig.register BotConfigEnumValue.new('send.overlong',
+    Config.register Config::EnumValue.new('send.overlong',
       :values => ['split', 'truncate'], :default => 'split',
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :overlong => v.to_sym
       },
       :desc => "When set to split, messages which are too long to fit in a single IRC line are split into multiple lines. When set to truncate, long messages are truncated to fit the IRC line length")
-    BotConfig.register BotConfigStringValue.new('send.split_at',
+    Config.register Config::StringValue.new('send.split_at',
       :default => '\s+',
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :split_at => Regexp.new(v)
       },
       :desc => "A regular expression that should match the split points for overlong messages (see send.overlong)")
-    BotConfig.register BotConfigBooleanValue.new('send.purge_split',
+    Config.register Config::BooleanValue.new('send.purge_split',
       :default => true,
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :purge_split => v
       },
       :desc => "Set to true if the splitting boundary (set in send.split_at) should be removed when splitting overlong messages (see send.overlong)")
-    BotConfig.register BotConfigStringValue.new('send.truncate_text',
+    Config.register Config::StringValue.new('send.truncate_text',
       :default => "#{Reverse}...#{Reverse}",
       :on_change => Proc.new { |bot, v|
         bot.set_default_send_options :truncate_text => v.dup
@@ -376,7 +376,7 @@ class Bot
     @startup_time = Time.new
 
     begin
-      @config = BotConfig.configmanager
+      @config = Config.manager
       @config.bot_associate(self)
     rescue Exception => e
       fatal e
@@ -443,7 +443,7 @@ class Bot
       pf << "#{$$}\n"
     end
 
-    @registry = BotRegistry.new self
+    @registry = Registry.new self
 
     @timer = Timer.new
     @save_mutex = Mutex.new

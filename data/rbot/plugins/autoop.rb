@@ -1,5 +1,5 @@
 class AutoOP < Plugin
-  BotConfig.register BotConfigBooleanValue.new('autoop.on_nick',
+  Config.register Config::BooleanValue.new('autoop.on_nick',
     :default => true,
     :desc => "Determines if the bot should auto-op when someone changes nick and the new nick matches a listed netmask")
 

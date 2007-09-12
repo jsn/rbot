@@ -18,12 +18,12 @@ require 'jcode'
 require 'iconv'
 
 class UnicodePlugin < Plugin
-    BotConfig.register BotConfigBooleanValue.new(
+    Config.register Config::BooleanValue.new(
     'encoding.enable', :default => true,
     :desc => "Support for non-ascii charsets",
     :on_change => Proc.new { |bot, v| reconfigure_filter(bot) })
 
-    BotConfig.register BotConfigArrayValue.new(
+    Config.register Config::ArrayValue.new(
     'encoding.charsets', :default => ['utf-8', 'cp1252', 'iso-8859-15'],
     :desc => "Ordered list of iconv(3) charsets the bot should try",
     :on_change => Proc.new { |bot, v| reconfigure_filter(bot) })

@@ -1,10 +1,11 @@
 require 'rbot/dbhash'
 
 module Irc
+class Bot
 
-  # this class is now used purely for upgrading from prior versions of rbot
+  # This class is now used purely for upgrading from prior versions of rbot
   # the new registry is split into multiple DBHash objects, one per plugin
-  class BotRegistry
+  class Registry
     def initialize(bot)
       @bot = bot
       upgrade_data
@@ -71,7 +72,6 @@ module Irc
         env.close
       end
     end
-  end
 
 
   # This class provides persistent storage for plugins via a hash interface.
@@ -94,7 +94,7 @@ module Irc
   # in object store mode, don't make the mistake of treating it like a live
   # object, e.g. (using the example above)
   #   @registry[:blah][:foo] = "flump"
-  # will NOT modify the object in the registry - remember that BotRegistry#[]
+  # will NOT modify the object in the registry - remember that Registry#[]
   # returns a Marshal.restore'd object, the object you just modified in place
   # will disappear. You would need to:
   #   blah = @registry[:blah]
@@ -117,11 +117,11 @@ module Irc
   # Your plugins section of the registry is private, it has its own namespace
   # (derived from the plugin's class name, so change it and lose your data).
   # Calls to registry.each etc, will only iterate over your namespace.
-  class BotRegistryAccessor
+  class Accessor
 
     attr_accessor :recovery
 
-    # plugins don't call this - a BotRegistryAccessor is created for them and
+    # plugins don't call this - a Registry::Accessor is created for them and
     # is accessible via @registry.
     def initialize(bot, name)
       @bot = bot
@@ -315,7 +315,7 @@ module Irc
     end
 
     def sub_registry(prefix)
-      return BotRegistryAccessor.new(@bot, @name + "/" + prefix.to_s)
+      return Accessor.new(@bot, @name + "/" + prefix.to_s)
     end
 
     # returns the number of keys in your registry namespace
@@ -326,4 +326,6 @@ module Irc
 
   end
 
+  end
+end
 end

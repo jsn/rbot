@@ -676,4 +676,4 @@ module ::Irc
   end
 end
 
-Irc::Utils.bot = Irc::Plugins.manager.bot
+Irc::Utils.bot = Irc::Bot::Plugins.manager.bot

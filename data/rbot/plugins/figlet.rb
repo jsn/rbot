@@ -2,7 +2,7 @@ class FigletPlugin < Plugin
   DEFAULT_FONTS = ['rectangles', 'smslant']
   MAX_WIDTH=68
 
-  BotConfig.register BotConfigStringValue.new('figlet.path',
+  Config.register Config::StringValue.new('figlet.path',
      :default => '/usr/bin/figlet',
      :desc => _('Path to the figlet program'))
 

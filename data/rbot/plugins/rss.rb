@@ -242,19 +242,19 @@ class ::RssBlob
 end
 
 class RSSFeedsPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('rss.head_max',
+  Config.register Config::IntegerValue.new('rss.head_max',
     :default => 100, :validate => Proc.new{|v| v > 0 && v < 200},
     :desc => "How many characters to use of a RSS item header")
 
-  BotConfig.register BotConfigIntegerValue.new('rss.text_max',
+  Config.register Config::IntegerValue.new('rss.text_max',
     :default => 200, :validate => Proc.new{|v| v > 0 && v < 400},
     :desc => "How many characters to use of a RSS item text")
 
-  BotConfig.register BotConfigIntegerValue.new('rss.thread_sleep',
+  Config.register Config::IntegerValue.new('rss.thread_sleep',
     :default => 300, :validate => Proc.new{|v| v > 30},
     :desc => "How many seconds to sleep before checking RSS feeds again")
 
-  BotConfig.register BotConfigBooleanValue.new('rss.show_updated',
+  Config.register Config::BooleanValue.new('rss.show_updated',
     :default => true,
     :desc => "Whether feed items for which the description was changed should be shown as new")
 

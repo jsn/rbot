@@ -22,16 +22,16 @@ GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif(?: alt=
 GOOGLE_DEF_RESULT = %r{<p> (Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
 
 class SearchPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('google.hits',
+  Config.register Config::IntegerValue.new('google.hits',
     :default => 3,
     :desc => "Number of hits to return from Google searches")
-  BotConfig.register BotConfigIntegerValue.new('google.first_par',
+  Config.register Config::IntegerValue.new('google.first_par',
     :default => 0,
     :desc => "When set to n > 0, the bot will return the first paragraph from the first n search hits")
-  BotConfig.register BotConfigIntegerValue.new('wikipedia.hits',
+  Config.register Config::IntegerValue.new('wikipedia.hits',
     :default => 3,
     :desc => "Number of hits to return from Wikipedia searches")
-  BotConfig.register BotConfigIntegerValue.new('wikipedia.first_par',
+  Config.register Config::IntegerValue.new('wikipedia.first_par',
     :default => 1,
     :desc => "When set to n > 0, the bot will return the first paragraph from the first n wikipedia search hits")
 

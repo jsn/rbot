@@ -22,7 +22,7 @@ begin
 
   include GetText
 
-  add_default_locale_path(File.join(Irc::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo"))
+  add_default_locale_path(File.join(Irc::Bot::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo"))
 
   bindtextdomain 'rbot'
 

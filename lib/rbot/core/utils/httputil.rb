@@ -137,35 +137,35 @@ module Utils
 # this class can check the bot proxy configuration to determine if a proxy
 # needs to be used, which includes support for per-url proxy configuration.
 class HttpUtil
-    BotConfig.register BotConfigBooleanValue.new('http.use_proxy',
+    Bot::Config.register Bot::Config::BooleanValue.new('http.use_proxy',
       :default => false, :desc => "should a proxy be used for HTTP requests?")
-    BotConfig.register BotConfigStringValue.new('http.proxy_uri', :default => false,
+    Bot::Config.register Bot::Config::StringValue.new('http.proxy_uri', :default => false,
       :desc => "Proxy server to use for HTTP requests (URI, e.g http://proxy.host:port)")
-    BotConfig.register BotConfigStringValue.new('http.proxy_user',
+    Bot::Config.register Bot::Config::StringValue.new('http.proxy_user',
       :default => nil,
       :desc => "User for authenticating with the http proxy (if required)")
-    BotConfig.register BotConfigStringValue.new('http.proxy_pass',
+    Bot::Config.register Bot::Config::StringValue.new('http.proxy_pass',
       :default => nil,
       :desc => "Password for authenticating with the http proxy (if required)")
-    BotConfig.register BotConfigArrayValue.new('http.proxy_include',
+    Bot::Config.register Bot::Config::ArrayValue.new('http.proxy_include',
       :default => [],
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use the proxy to access this URI. All URIs are proxied by default if the proxy is set, so this is only required to re-include URIs that might have been excluded by the exclude list. e.g. exclude /.*\.foo\.com/, include bar\.foo\.com")
-    BotConfig.register BotConfigArrayValue.new('http.proxy_exclude',
+    Bot::Config.register Bot::Config::ArrayValue.new('http.proxy_exclude',
       :default => [],
       :desc => "List of regexps to check against a URI's hostname/ip to see if we should use avoid the proxy to access this URI and access it directly")
-    BotConfig.register BotConfigIntegerValue.new('http.max_redir',
+    Bot::Config.register Bot::Config::IntegerValue.new('http.max_redir',
       :default => 5,
       :desc => "Maximum number of redirections to be used when getting a document")
-    BotConfig.register BotConfigIntegerValue.new('http.expire_time',
+    Bot::Config.register Bot::Config::IntegerValue.new('http.expire_time',
       :default => 60,
       :desc => "After how many minutes since last use a cached document is considered to be expired")
-    BotConfig.register BotConfigIntegerValue.new('http.max_cache_time',
+    Bot::Config.register Bot::Config::IntegerValue.new('http.max_cache_time',
       :default => 60*24,
       :desc => "After how many minutes since first use a cached document is considered to be expired")
-    BotConfig.register BotConfigIntegerValue.new('http.no_expire_cache',
+    Bot::Config.register Bot::Config::IntegerValue.new('http.no_expire_cache',
       :default => false,
       :desc => "Set this to true if you want the bot to never expire the cached pages")
-    BotConfig.register BotConfigIntegerValue.new('http.info_bytes',
+    Bot::Config.register Bot::Config::IntegerValue.new('http.info_bytes',
       :default => 8192,
       :desc => "How many bytes to download from a web page to find some information. Set to 0 to let the bot download the whole page.")
 

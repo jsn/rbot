@@ -79,13 +79,13 @@ end
 # handle it, checks for a keyword command or lookup, otherwise the message
 # is delegated to plugins
 class Keywords < Plugin
-  BotConfig.register BotConfigBooleanValue.new('keyword.listen',
+  Config.register Config::BooleanValue.new('keyword.listen',
     :default => false,
     :desc => "Should the bot listen to all chat and attempt to automatically detect keywords? (e.g. by spotting someone say 'foo is bar')")
-  BotConfig.register BotConfigBooleanValue.new('keyword.address',
+  Config.register Config::BooleanValue.new('keyword.address',
     :default => true,
     :desc => "Should the bot require that keyword lookups are addressed to it? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
-  BotConfig.register BotConfigIntegerValue.new('keyword.search_results',
+  Config.register Config::IntegerValue.new('keyword.search_results',
     :default => 3,
     :desc => "How many search results to display at a time")
 

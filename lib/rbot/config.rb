@@ -1,20 +1,23 @@
 require 'singleton'
 
+require 'yaml'
+
+unless YAML.respond_to?(:load_file)
+  def YAML.load_file( filepath )
+    File.open( filepath ) do |f|
+      YAML::load( f )
+    end
+  end
+end
+
+
 module Irc
 
-  require 'yaml'
-
-  unless YAML.respond_to?(:load_file)
-      def YAML.load_file( filepath )
-        File.open( filepath ) do |f|
-          YAML::load( f )
-        end
-      end
-  end
-
-  class BotConfigValue
+class Bot
+module Config
+  class Value
     # allow the definition order to be preserved so that sorting by
-    # definition order is possible. The BotConfigWizard does this to allow
+    # definition order is possible. The Wizard does this to allow
     # the :wizard questions to be in a sensible order.
     @@order = 0
     attr_reader :type
@@ -27,7 +30,7 @@ module Irc
     attr_reader :manager
     attr_reader :auth_path
     def initialize(key, params)
-      @manager = BotConfig::configmanager
+      @manager = Config.manager
       # Keys must be in the form 'module.name'.
       # They will be internally passed around as symbols,
       # but we accept them both in string and symbol form.
@@ -107,10 +110,10 @@ module Irc
     end
   end
 
-  class BotConfigStringValue < BotConfigValue
+  class StringValue < Value
   end
 
-  class BotConfigBooleanValue < BotConfigValue
+  class BooleanValue < Value
     def parse(string)
       return true if string == "true"
       return false if string == "false"
@@ -129,7 +132,7 @@ module Irc
     end
   end
 
-  class BotConfigIntegerValue < BotConfigValue
+  class IntegerValue < Value
     def parse(string)
       return 1 if string == "true"
       return 0 if string == "false"
@@ -146,14 +149,14 @@ module Irc
     end
   end
 
-  class BotConfigFloatValue < BotConfigValue
+  class FloatValue < Value
     def parse(string)
       raise ArgumentError, "not a float #{string}" unless string =~ /^-?[\d.]+$/
       string.to_f
     end
   end
 
-  class BotConfigArrayValue < BotConfigValue
+  class ArrayValue < Value
     def parse(string)
       string.split(/,\s+/)
     end
@@ -171,7 +174,7 @@ module Irc
     end
   end
 
-  class BotConfigEnumValue < BotConfigValue
+  class EnumValue < Value
     def initialize(key, params)
       super
       @values = params[:values]
@@ -195,7 +198,7 @@ module Irc
   end
 
   # container for bot configuration
-  class BotConfigManagerClass
+  class ManagerClass
 
     include Singleton
 
@@ -232,15 +235,15 @@ module Irc
         end
       end
       # if we got here, we need to run the first-run wizard
-      BotConfigWizard.new(@bot).run
+      Wizard.new(@bot).run
       # save newly created config
       @changed = true
       save
     end
 
     def register(item)
-      unless item.kind_of?(BotConfigValue)
-        raise ArgumentError,"item must be a BotConfigValue"
+      unless item.kind_of?(Value)
+        raise ArgumentError,"item must be an Irc::Bot::Config::Value"
       end
       @items[item.key] = item
     end
@@ -265,7 +268,7 @@ module Irc
       return false
     end
 
-    # TODO should I implement this via BotConfigValue or leave it direct?
+    # TODO should I implement this via Value or leave it direct?
     #    def []=(key, value)
     #    end
 
@@ -301,23 +304,21 @@ module Irc
     end
   end
 
-  module BotConfig
-    # Returns the only BotConfigManagerClass
-    #
-    def BotConfig.configmanager
-      return BotConfigManagerClass.instance
-    end
-
-    # Register a config value
-    def BotConfig.register(item)
-      BotConfig.configmanager.register(item)
-    end
+  # Returns the only Irc::Bot::Config::ManagerClass
+  #
+  def Config.manager
+    return ManagerClass.instance
   end
 
-  class BotConfigWizard
+  # Register a config value
+  def Config.register(item)
+    Config.manager.register(item)
+  end
+
+  class Wizard
     def initialize(bot)
       @bot = bot
-      @manager = BotConfig::configmanager
+      @manager = Config.manager
       @questions = @manager.items.values.find_all {|i| i.wizard }
     end
 
@@ -349,4 +350,6 @@ module Irc
     end
   end
 
+end
+end
 end

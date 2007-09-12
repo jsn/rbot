@@ -34,7 +34,7 @@ class DiceDisplay
 end
 
 class DicePlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('dice.max_dices',
+  Config.register Config::IntegerValue.new('dice.max_dices',
       :default => 100, :validate => Proc.new{|v| v > 0},
       :desc => "Maximum number of dices to throw.")
 

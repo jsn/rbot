@@ -15,6 +15,7 @@
 require 'drb/drb'
 
 module ::Irc
+class Bot
 
   module Auth
 
@@ -192,8 +193,6 @@ module ::Irc
 
   end
 
-  class Bot
-
     # The Irc::Bot::RemoteObject class represents and object that will take care
     # of interfacing with remote clients
     #
@@ -260,8 +259,6 @@ module ::Irc
       end
     end
 
-  end
-
   module Plugins
 
     # We create a new Ruby module that can be included by BotModules that want to
@@ -309,22 +306,23 @@ module ::Irc
   end
 
 end
+end
 
 class RemoteModule < CoreBotModule
 
   include RemoteCoreBotModule
 
-  BotConfig.register BotConfigBooleanValue.new('remote.autostart',
+  Config.register Config::BooleanValue.new('remote.autostart',
     :default => true,
     :requires_rescan => true,
     :desc => "Whether the remote service provider should be started automatically")
 
-  BotConfig.register BotConfigIntegerValue.new('remote.port',
+  Config.register Config::IntegerValue.new('remote.port',
     :default => 7268, # that's 'rbot'
     :requires_rescan => true,
     :desc => "Port on which the remote interface will be presented")
 
-  BotConfig.register BotConfigStringValue.new('remote.host',
+  Config.register Config::StringValue.new('remote.host',
     :default => '',
     :requires_rescan => true,
     :desc => "Port on which the remote interface will be presented")

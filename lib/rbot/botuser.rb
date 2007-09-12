@@ -19,7 +19,7 @@ require 'set'
 #     class_eval {
 #       define_method(m) { |*a|
 #         r = super(*a)
-#         Irc::Auth.authmanager.set_changed
+#         Irc::Bot::Auth.authmanager.set_changed
 #         r
 #       }
 #     }
@@ -28,26 +28,27 @@ require 'set'
 # 
 
 module Irc
+class Bot
 
 
   # This module contains the actual Authentication stuff
   #
   module Auth
 
-    BotConfig.register BotConfigStringValue.new( 'auth.password',
+    Config.register Config::StringValue.new( 'auth.password',
       :default => 'rbotauth', :wizard => true,
       :on_change => Proc.new {|bot, v| bot.auth.botowner.password = v},
       :desc => _('Password for the bot owner'))
-    BotConfig.register BotConfigBooleanValue.new( 'auth.login_by_mask',
+    Config.register Config::BooleanValue.new( 'auth.login_by_mask',
       :default => 'true',
       :desc => _('Set false to prevent new botusers from logging in without a password when the user netmask is known'))
-    BotConfig.register BotConfigBooleanValue.new( 'auth.autologin',
+    Config.register Config::BooleanValue.new( 'auth.autologin',
       :default => 'true',
       :desc => _('Set false to prevent new botusers from recognizing IRC users without a need to manually login'))
-    BotConfig.register BotConfigBooleanValue.new( 'auth.autouser',
+    Config.register Config::BooleanValue.new( 'auth.autouser',
       :default => 'false',
       :desc => _('Set true to allow new botusers to be created automatically'))
-    # BotConfig.register BotConfigIntegerValue.new( 'auth.default_level',
+    # Config.register Config::IntegerValue.new( 'auth.default_level',
     #   :default => 10, :wizard => true,
     #   :desc => 'The default level for new/unknown users' )
 
@@ -62,7 +63,7 @@ module Irc
     end
 
 
-    # An Irc::Auth::Command defines a command by its "path":
+    # An Irc::Bot::Auth::Command defines a command by its "path":
     #
     #   base::command::subcommand::subsubcommand::subsubsubcommand
     #
@@ -110,13 +111,14 @@ module Irc
   end
 
 end
+end
 
 
 class String
 
-  # Returns an Irc::Auth::Comand from the receiver
+  # Returns an Irc::Bot::Auth::Comand from the receiver
   def to_irc_auth_command
-    Irc::Auth::Command.new(self)
+    Irc::Bot::Auth::Command.new(self)
   end
 
 end
@@ -124,15 +126,16 @@ end
 
 class Symbol
 
-  # Returns an Irc::Auth::Comand from the receiver
+  # Returns an Irc::Bot::Auth::Comand from the receiver
   def to_irc_auth_command
-    Irc::Auth::Command.new(self)
+    Irc::Bot::Auth::Command.new(self)
   end
 
 end
 
 
 module Irc
+class Bot
 
 
   module Auth
@@ -830,6 +833,7 @@ module Irc
     end
 
   end
+end
 
   class User
 
@@ -837,7 +841,7 @@ module Irc
     # associated with the receiver
     #
     def botuser
-      Irc::Auth.authmanager.irc_to_botuser(self)
+      Irc::Bot::Auth.authmanager.irc_to_botuser(self)
     end
 
     # Bot-specific data can be stored with Irc::Users. This is
@@ -863,7 +867,7 @@ module Irc
     def set_bot_data(key,value=nil,&block)
       if not block_given?
         self.botuser.data[key]=value
-        Irc::Auth.authmanager.set_changed
+        Irc::Bot::Auth.authmanager.set_changed
         return value
       end
       if value and not bot_data.has_key?(key)
@@ -873,7 +877,7 @@ module Irc
       begin
         r = yield bot_data(key)
       ensure
-        Irc::Auth.authmanager.set_changed
+        Irc::Bot::Auth.authmanager.set_changed
       end
       return r
     end

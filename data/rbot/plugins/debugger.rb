@@ -8,13 +8,13 @@
 # License:: GPL v2
 
 class DebugPlugin < Plugin
-  BotConfig.register BotConfigIntegerValue.new('debug.interval',
+  Config.register Config::IntegerValue.new('debug.interval',
     :default => 10, :validate => Proc.new{|v| v > 0},
     :desc => "Number of seconds between memory profile dumps")
-  BotConfig.register BotConfigBooleanValue.new('debug.dump_strings',
+  Config.register Config::BooleanValue.new('debug.dump_strings',
     :default => false,
     :desc => "Set to true if you want the profiler to dump strings, false otherwise")
-  BotConfig.register BotConfigStringValue.new('debug.logdir',
+  Config.register Config::StringValue.new('debug.logdir',
     :default => "",
     :desc => "Directory where profile/string dumps are to be stored")
 

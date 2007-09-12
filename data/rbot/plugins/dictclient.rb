@@ -52,25 +52,25 @@ class ::Definition
 end
 
 class DictClientPlugin < Plugin
-  BotConfig.register BotConfigStringValue.new('dictclient.server',
+  Config.register Config::StringValue.new('dictclient.server',
     :default => 'dict.org',
     :desc => _('Hostname or hostname:port of the DICT server used to lookup words'))
-  BotConfig.register BotConfigIntegerValue.new('dictclient.max_defs_before_collapse',
+  Config.register Config::IntegerValue.new('dictclient.max_defs_before_collapse',
     :default => 4,
     :desc => _('When multiple databases reply a number of definitions that above this limit, only the database names will be listed. Otherwise, the full definitions from each database are replied'))
-  BotConfig.register BotConfigIntegerValue.new('dictclient.max_length_per_def',
+  Config.register Config::IntegerValue.new('dictclient.max_length_per_def',
     :default => 200,
     :desc => _('Each definition is truncated to this length'))
-  BotConfig.register BotConfigStringValue.new('dictclient.headword_format',
+  Config.register Config::StringValue.new('dictclient.headword_format',
     :default => "#{Bold}<headword>#{Bold}",
     :desc => _('Format of headwords; <word> will be replaced with the actual word'))
-  BotConfig.register BotConfigStringValue.new('dictclient.database_format',
+  Config.register Config::StringValue.new('dictclient.database_format',
     :default => "#{Underline}<database>#{Underline}",
     :desc => _('Format of database names; <database> will be replaced with the database name'))
-  BotConfig.register BotConfigStringValue.new('dictclient.definition_format',
+  Config.register Config::StringValue.new('dictclient.definition_format',
     :default => '<headword>: <definition> -<database>',
     :desc => _('Format of definitions. <word> will be replaced with the formatted headword, <def> will be replaced with the truncated definition, and <database> with the formatted database name'))
-  BotConfig.register BotConfigStringValue.new('dictclient.match_format',
+  Config.register Config::StringValue.new('dictclient.match_format',
     :default => '<matches>––<database>',
     :desc => _('Format of match results. <matches> will be replaced with the formatted headwords, <database> with the formatted database name'))
   

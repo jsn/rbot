@@ -4,7 +4,7 @@
 # :title: Fortune plugin
 
 class FortunePlugin < Plugin
-  BotConfig.register BotConfigStringValue.new('fortune.path',
+  Config.register Config::StringValue.new('fortune.path',
     :default => '',
     :desc => "Full path to the fortune executable")
 
