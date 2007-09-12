@@ -212,7 +212,7 @@ module Irc
 
   # wrapped TCPSocket for communication with the server.
   # emulates a subset of TCPSocket functionality
-  class IrcSocket
+  class Socket
 
     MAX_IRC_SEND_PENALTY = 10
 
@@ -262,7 +262,7 @@ module Irc
 
     # server_list:: list of servers to connect to
     # host::   optional local host to bind to (ruby 1.7+ required)
-    # create a new IrcSocket
+    # create a new Irc::Socket
     def initialize(server_list, host, sendq_delay=2, sendq_burst=4, opts={})
       @server_list = server_list.dup
       @server_uri = nil

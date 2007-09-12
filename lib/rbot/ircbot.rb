@@ -486,7 +486,7 @@ class Bot
         debug "server.list is now #{@config['server.list'].inspect}"
     end
 
-    @socket = IrcSocket.new(@config['server.list'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
+    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
     @client = Client.new
 
     @plugins.scan
