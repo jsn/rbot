@@ -102,6 +102,7 @@ $interrupted = 0
 require 'rbot/rbotconfig'
 require 'rbot/load-gettext'
 require 'rbot/config'
+require 'rbot/config-compat'
 # require 'rbot/utils'
 
 require 'rbot/irc'
