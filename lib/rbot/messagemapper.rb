@@ -19,7 +19,7 @@ end
 
 module Irc
 
-  # +MessageMapper+ is a class designed to reduce the amount of regexps and
+  # MessageMapper is a class designed to reduce the amount of regexps and
   # string parsing plugins and bot modules need to do, in order to process
   # and respond to messages.
   #
@@ -32,7 +32,7 @@ module Irc
   # A template such as "foo :option :otheroption" will match the string "foo
   # bar baz" and, by default, result in method +foo+ being called, if
   # present, in the parent class. It will receive two parameters, the
-  # Message (derived from BasicUserMessage) and a Hash containing
+  # message (derived from BasicUserMessage) and a Hash containing
   #   {:option => "bar", :otheroption => "baz"}
   # See the #map method for more details.
   class MessageMapper
@@ -40,9 +40,9 @@ module Irc
     # The default fallback is a method called "usage".
     attr_writer :fallback
 
-    # parent::   parent class which will receive mapped messages
+    # _parent_::   parent class which will receive mapped messages
     #
-    # create a new MessageMapper with parent class +parent+. This class will
+    # Create a new MessageMapper with parent class _parent_. This class will
     # receive messages from the mapper via the handle() method.
     def initialize(parent)
       @parent = parent
@@ -50,64 +50,104 @@ module Irc
       @fallback = :usage
     end
 
-    # args:: hash format containing arguments for this template
+    # call-seq: map(botmodule, template, options)
     #
-    # map a template string to an action. example:
-    #   map 'myplugin :parameter1 :parameter2'
-    # (other examples follow). By default, maps a matched string to an
-    # action with the name of the first word in the template. The action is
-    # a method which takes a message and a parameter hash for arguments.
+    # _botmodule_:: the BotModule which will handle this map
+    # _template_::  a String describing the messages to be matched
+    # _options_::   a Hash holding variouns options
     #
-    # The :action => 'method_name' option can be used to override this
-    # default behaviour. Example:
-    #   map 'myplugin :parameter1 :parameter2', :action => 'mymethod'
+    # This method is used to register a new MessageTemplate that will map any
+    # BasicUserMessage matching the given _template_ to a corresponding action.
+    # A simple example:
+    #   plugin.map 'myplugin :parameter'
+    # (other examples follow).
     #
-    # By default whether a handler is fired depends on an auth check. The
-    # first component of the string is used for the auth check, unless
-    # overridden via the :auth => 'auth_name' option.
+    # By default, the action to which the messages are mapped is a method named
+    # like the first word of the template. The
+    #   :action => 'method_name'
+    # option can be used to override this default behaviour. Example:
+    #   plugin.map 'myplugin :parameter', :action => 'mymethod'
+    #
+    # By default whether a handler is fired depends on an auth check. In rbot
+    # versions up to 0.9.10, the first component of the string was used for the
+    # auth check, unless overridden via the :auth => 'auth_name' option. Since
+    # version 0.9.11, a new auth method has been implemented. TODO document.
     #
     # Static parameters (not prefixed with ':' or '*') must match the
     # respective component of the message exactly. Example:
-    #   map 'myplugin :foo is :bar'
+    #   plugin.map 'myplugin :foo is :bar'
     # will only match messages of the form "myplugin something is
     # somethingelse"
     #
     # Dynamic parameters can be specified by a colon ':' to match a single
-    # component (whitespace seperated), or a * to suck up all following
+    # component (whitespace separated), or a * to suck up all following
     # parameters into an array. Example:
-    #   map 'myplugin :parameter1 *rest'
+    #   plugin.map 'myplugin :parameter1 *rest'
     #
     # You can provide defaults for dynamic components using the :defaults
     # parameter. If a component has a default, then it is optional. e.g:
-    #   map 'myplugin :foo :bar', :defaults => {:bar => 'qux'}
+    #   plugin.map 'myplugin :foo :bar', :defaults => {:bar => 'qux'}
     # would match 'myplugin param param2' and also 'myplugin param'. In the
     # latter case, :bar would be provided from the default.
     #
+    # Static and dynamic parameters can also be made optional by wrapping them
+    # in square brackets []. For example
+    #   plugin.map 'myplugin :foo [is] :bar'
+    # will match both 'myplugin something is somethingelse' and 'myplugin
+    # something somethingelse'.
+    #
     # Components can be validated before being allowed to match, for
     # example if you need a component to be a number:
-    #   map 'myplugin :param', :requirements => {:param => /^\d+$/}
+    #   plugin.map 'myplugin :param', :requirements => {:param => /^\d+$/}
     # will only match strings of the form 'myplugin 1234' or some other
     # number.
     #
     # Templates can be set not to match public or private messages using the
     # :public or :private boolean options.
     #
+    # Summary of recognized options:
+    #
+    # action::
+    #   method to call when the template is matched
+    # auth_path::
+    #   TODO document
+    # requirements::
+    #   a Hash whose keys are names of dynamic parameters and whose values are
+    #   regular expressions that the parameters must match
+    # defaults::
+    #   a Hash whose keys are names of dynamic parameters and whose values are
+    #   the values to be assigned to those parameters when they are missing from
+    #   the message. Any dynamic parameter appearing in the :defaults Hash is
+    #   therefore optional
+    # public::
+    #   a boolean (defaults to true) that determines whether the template should
+    #   match public (in channel) messages.
+    # private::
+    #   a boolean (defaults to true) that determines whether the template should
+    #   match private (not in channel) messages.
+    # threaded::
+    #   a boolean (defaults to false) that determines whether the action should be
+    #   called in a separate thread.
+    #   
+    #
     # Further examples:
     #
     #   # match 'karmastats' and call my stats() method
-    #   map 'karmastats', :action => 'stats'
+    #   plugin.map 'karmastats', :action => 'stats'
     #   # match 'karma' with an optional 'key' and call my karma() method
-    #   map 'karma :key', :defaults => {:key => false}
+    #   plugin.map 'karma :key', :defaults => {:key => false}
     #   # match 'karma for something' and call my karma() method
-    #   map 'karma for :key'
+    #   plugin.map 'karma for :key'
     #
     #   # two matches, one for public messages in a channel, one for
     #   # private messages which therefore require a channel argument
-    #   map 'urls search :channel :limit :string', :action => 'search',
+    #   plugin.map 'urls search :channel :limit :string',
+    #             :action => 'search',
     #             :defaults => {:limit => 4},
     #             :requirements => {:limit => /^\d+$/},
     #             :public => false
-    #   plugin.map 'urls search :limit :string', :action => 'search',
+    #   plugin.map 'urls search :limit :string',
+    #             :action => 'search',
     #             :defaults => {:limit => 4},
     #             :requirements => {:limit => /^\d+$/},
     #             :private => false
@@ -116,21 +156,23 @@ module Irc
       @templates << MessageTemplate.new(botmodule, *args)
     end
 
+    # Iterate over each MessageTemplate handled.
     def each
       @templates.each {|tmpl| yield tmpl}
     end
 
+    # Return the last added MessageTemplate
     def last
       @templates.last
     end
 
-    # m::  derived from BasicUserMessage
+    # _m_::  derived from BasicUserMessage
     #
-    # examine the message +m+, comparing it with each map()'d template to
+    # Examine the message _m_, comparing it with each map()'d template to
     # find and process a match. Templates are examined in the order they
     # were map()'d - first match wins.
     #
-    # returns +true+ if a match is found including fallbacks, +false+
+    # Returns +true+ if a match is found including fallbacks, +false+
     # otherwise.
     def handle(m)
       return false if @templates.empty?
@@ -178,9 +220,9 @@ module Irc
 
   end
 
-  # +MessageParameter+ is a class that collects all the necessary information
-  # about a message parameter (the :param or *param that can be found in a
-  # #map).
+  # MessageParameter is a class that collects all the necessary information
+  # about a message (dynamic) parameter (the :param or *param that can be found
+  # in a #map).
   #
   # It has a +name+ attribute, +multi+ and +optional+ booleans that tell if the
   # parameter collects more than one word, and if it's optional (respectively).
@@ -276,14 +318,22 @@ module Irc
     end
   end
 
+  # MessageTemplate is the class that holds the actual message template map()'d
+  # by a BotModule and handled by a MessageMapper
+  #
   class MessageTemplate
-    attr_reader :defaults # The defaults hash
-    attr_reader :options  # The options hash
-    attr_reader :template
-    attr_reader :items
-    attr_reader :regexp
-    attr_reader :botmodule
+    attr_reader :defaults  # the defaults hash
+    attr_reader :options   # the options hash
+    attr_reader :template  # the actual template string
+    attr_reader :items     # the collection of dynamic and static items in the template
+    attr_reader :regexp    # the Regexp corresponding to the template
+    attr_reader :botmodule # the BotModule that map()'d this MessageTemplate
 
+    # call-seq: initialize(botmodule, template, opts={})
+    #
+    # Create a new MessageTemplate associated to BotModule _botmodule_, with
+    # template _template_ and options _opts_
+    #
     def initialize(botmodule, template, hash={})
       raise ArgumentError, "Third argument must be a hash!" unless hash.kind_of?(Hash)
       @defaults = hash[:defaults].kind_of?(Hash) ? hash.delete(:defaults) : {}
