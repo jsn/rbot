@@ -17,11 +17,20 @@ require "uri"
 class ShortenURLs < Plugin
   include WWW
 
+  Config.register Config::ArrayValue.new('shortenurls.services_blacklist',
+    :default => ['rubyurl', 'shorterlink'],
+    :requires_rescan => true,
+    :desc => "List of nonfunctioning shorturl services")
+
   attr_accessor :services
   def initialize
     super
+    @blacklist = @bot.config['shortenurls.services_blacklist'].map { |s| s.intern }
     # Instead of catering for all the services, we only pick the ones with 'link' or 'url' in the name
-    @services = ShortURL.valid_services.select { |service| service.to_s =~ /(?:link|url)/ } << :shorturl
+    @services = ShortURL.valid_services.select { |service| service.to_s =~ /(?:link|url)/ } - @blacklist
+    if @services.include?(:rubyurl)
+      @services << :shorturl
+    end
   end
 
   # return a help string when the bot is asked for help on this plugin
@@ -46,7 +55,7 @@ class ShortenURLs < Plugin
       return nil
     end
 
-    service = params[:service] || m.plugin.to_sym
+    service = params[:service].to_sym || m.plugin.to_sym
     service = :rubyurl if service == :shorturl
 
     tried = []
@@ -54,6 +63,7 @@ class ShortenURLs < Plugin
 
     begin
       tried << service
+      raise WWW::InvalidService, "#{service} blacklisted" if @blacklist.include?(service)
       short = WWW::ShortURL.shorten(url, service)
       raise WWW::InvalidService, "#{service} returned an empty string for #{url}" unless short and not short.empty?
     rescue WWW::InvalidService
