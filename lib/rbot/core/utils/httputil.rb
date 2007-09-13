@@ -258,6 +258,8 @@ class HttpUtil
     end
   end
 
+  # Create the HttpUtil instance, associating it with Bot _bot_
+  #
   def initialize(bot)
     @bot = bot
     @cache = Hash.new
@@ -273,15 +275,18 @@ class HttpUtil
     }
   end
 
+  # Clean up on HttpUtil unloading, by stopping the cache cleanup timer.
   def cleanup
     debug 'stopping http cache cleanup timer'
     @bot.timer.remove(@timer)
   end
 
-  # if http_proxy_include or http_proxy_exclude are set, then examine the
-  # uri to see if this is a proxied uri
-  # the in/excludes are a list of regexps, and each regexp is checked against
-  # the server name, and its IP addresses
+  # This method checks if a proxy is required to access _uri_, by looking at
+  # the values of config values +http.proxy_include+ and +http.proxy_exclude+.
+  #
+  # Each of these config values, if set, should be a Regexp the server name and
+  # IP address should be checked against.
+  #
   def proxy_required(uri)
     use_proxy = true
     if @bot.config["http.proxy_exclude"].empty? && @bot.config["http.proxy_include"].empty?
@@ -321,13 +326,11 @@ class HttpUtil
     return use_proxy
   end
 
-  # uri:: Uri to create a proxy for
+  # _uri_:: URI to create a proxy for
   #
-  # return a net/http Proxy object, which is configured correctly for
-  # proxying based on the bot's proxy configuration.
-  # This will include per-url proxy configuration based on the bot config
-  # +http_proxy_include/exclude+ options.
-
+  # Return a net/http Proxy object, configured for proxying based on the
+  # bot's proxy configuration. See proxy_required for more details on this.
+  #
   def get_proxy(uri, options = {})
     opts = {
       :read_timeout => 10,
@@ -366,7 +369,14 @@ class HttpUtil
     return h
   end
 
-  def handle_response(uri, resp, opts, &block)
+  # Internal method used to hanlde response _resp_ received when making a
+  # request for URI _uri_.
+  #
+  # It follows redirects, optionally yielding them if option :yield is :all.
+  #
+  # Also yields and returns the final _resp_.
+  #
+  def handle_response(uri, resp, opts, &block) # :yields: resp
     if Net::HTTPRedirection === resp && opts[:max_redir] >= 0
       if resp.key?('location')
         raise 'Too many redirections' if opts[:max_redir] <= 0
@@ -398,27 +408,28 @@ class HttpUtil
     return resp
   end
 
-  # uri::         uri to query (Uri object or String)
-  # opts::        options. Currently used:
-  # :method::     request method [:get (default), :post or :head]
-  # :open_timeout::     open timeout for the proxy
-  # :read_timeout::     read timeout for the proxy
-  # :cache::            should we cache results?
-  # :yield::      if :final [default], call &block for the response object
-  #               if :all, call &block for all intermediate redirects, too
-  # :max_redir::  how many redirects to follow before raising the exception
-  #               if -1, don't follow redirects, just return them
-  # :range::      make a ranged request (usually GET). accepts a string
-  #               for HTTP/1.1 "Range:" header (i.e. "bytes=0-1000")
-  # :body::       request body (usually for POST requests)
+  # _uri_::     uri to query (URI object or String)
   #
-  # Generic http transaction method
-  #
-  # It will return a Net::HTTPResponse object or raise an exception
+  # Generic http transaction method. It will return a Net::HTTPResponse
+  # object or raise an exception
   #
   # If a block is given, it will yield the response (see :yield option)
-
-  def get_response(uri_or_s, options = {}, &block)
+  #
+  # Currently supported _options_:
+  #
+  # method::     request method [:get (default), :post or :head]
+  # open_timeout::     open timeout for the proxy
+  # read_timeout::     read timeout for the proxy
+  # cache::            should we cache results?
+  # yield::      if :final [default], calls the block for the response object;
+  #              if :all, call the block for all intermediate redirects, too
+  # max_redir::  how many redirects to follow before raising the exception
+  #              if -1, don't follow redirects, just return them
+  # range::      make a ranged request (usually GET). accepts a string
+  #              for HTTP/1.1 "Range:" header (i.e. "bytes=0-1000")
+  # body::       request body (usually for POST requests)
+  #
+  def get_response(uri_or_s, options = {}, &block) # :yields: resp
     uri = uri_or_s.kind_of?(URI) ? uri_or_s : URI.parse(uri_or_s.to_s)
     opts = {
       :max_redir => @bot.config['http.max_redir'],
@@ -515,13 +526,15 @@ class HttpUtil
     end
   end
 
-  # uri::         uri to query (Uri object)
+  # _uri_::     uri to query (URI object or String)
   #
-  # simple get request, returns (if possible) response body following redirs
-  # and caching if requested
-  def get(uri, opts = {}, &block)
+  # Simple GET request, returns (if possible) response body following redirs
+  # and caching if requested, yielding the actual response(s) to the optional
+  # block. See get_response for details on the supported _options_
+  #
+  def get(uri, options = {}, &block) # :yields: resp
     begin
-      resp = get_response(uri, opts, &block)
+      resp = get_response(uri, options, &block)
       raise "http error: #{resp}" unless Net::HTTPOK === resp ||
         Net::HTTPPartialContent === resp
       return resp.body
@@ -531,7 +544,13 @@ class HttpUtil
     return nil
   end
 
-  def head(uri, options = {}, &block)
+  # _uri_::     uri to query (URI object or String)
+  #
+  # Simple HEAD request, returns (if possible) response head following redirs
+  # and caching if requested, yielding the actual response(s) to the optional
+  # block. See get_response for details on the supported _options_
+  #
+  def head(uri, options = {}, &block) # :yields: resp
     opts = {:method => :head}.merge(options)
     begin
       resp = get_response(uri, opts, &block)
@@ -544,7 +563,14 @@ class HttpUtil
     return nil
   end
 
-  def post(uri, data, options = {}, &block)
+  # _uri_::     uri to query (URI object or String)
+  # _data_::    body of the POST
+  #
+  # Simple POST request, returns (if possible) response following redirs and
+  # caching if requested, yielding the response(s) to the optional block. See
+  # get_response for details on the supported _options_
+  #
+  def post(uri, data, options = {}, &block) # :yields: resp
     opts = {:method => :post, :body => data, :cache => false}.merge(options)
     begin
       resp = get_response(uri, opts, &block)
@@ -556,7 +582,15 @@ class HttpUtil
     return nil
   end
 
-  def get_partial(uri, nbytes = @bot.config['http.info_bytes'], options = {}, &block)
+  # _uri_::     uri to query (URI object or String)
+  # _nbytes_::  number of bytes to get
+  #
+  # Partia GET request, returns (if possible) the first _nbytes_ bytes of the
+  # response body, following redirs and caching if requested, yielding the
+  # actual response(s) to the optional block. See get_response for details on
+  # the supported _options_
+  #
+  def get_partial(uri, nbytes = @bot.config['http.info_bytes'], options = {}, &block) # :yields: resp
     opts = {:range => "bytes=0-#{nbytes}"}.merge(options)
     return get(uri, opts, &block)
   end
