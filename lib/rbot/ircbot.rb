@@ -338,9 +338,9 @@ class Bot
 
     unless botclass and not botclass.empty?
       # We want to find a sensible default.
-      #  * On POSIX systems we prefer ~/.rbot for the effective uid of the process
-      #  * On Windows (at least the NT versions) we want to put our stuff in the
-      #    Application Data folder.
+      # * On POSIX systems we prefer ~/.rbot for the effective uid of the process
+      # * On Windows (at least the NT versions) we want to put our stuff in the
+      #   Application Data folder.
       # We don't use any particular O/S detection magic, exploiting the fact that
       # Etc.getpwuid is nil on Windows
       if Etc.getpwuid(Process::Sys.geteuid)

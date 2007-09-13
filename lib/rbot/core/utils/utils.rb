@@ -317,7 +317,7 @@ rescue LoadError
   else
     module ::Irc
       module Utils
-        # define some regular expressions to be used for first_html_par
+        # Define some regular expressions to be used by first_html_par
 
         # H1, H2, etc
         HX_REGEX = /<h(\d)(?:\s+[^>]*)?>(.*?)<\/h\1>/im
@@ -337,15 +337,17 @@ end
 
 module ::Irc
 
-  # miscellaneous useful functions
+  # Miscellaneous useful functions
   module Utils
     @@bot = nil unless defined? @@bot
     @@safe_save_dir = nil unless defined?(@@safe_save_dir)
 
+    # The bot instance
     def Utils.bot
       @@bot
     end
 
+    # Set up some Utils routines which depend on the associated bot.
     def Utils.bot=(b)
       debug "initializing utils"
       @@bot = b
@@ -353,12 +355,18 @@ module ::Irc
     end
 
 
+    # Seconds per minute
     SEC_PER_MIN = 60
+    # Seconds per hour
     SEC_PER_HR = SEC_PER_MIN * 60
+    # Seconds per day
     SEC_PER_DAY = SEC_PER_HR * 24
+    # Seconds per (30-day) month
     SEC_PER_MNTH = SEC_PER_DAY * 30
+    # Second per (30*12 = 360 day) year
     SEC_PER_YR = SEC_PER_MNTH * 12
 
+    # Auxiliary method needed by Utils.secs_to_string
     def Utils.secs_to_string_case(array, var, string, plural)
       case var
       when 1
@@ -368,8 +376,8 @@ module ::Irc
       end
     end
 
-    # turn a number of seconds into a human readable string, e.g
-    # 2 days, 3 hours, 18 minutes, 10 seconds
+    # Turn a number of seconds into a human readable string, e.g
+    # 2 days, 3 hours, 18 minutes and 10 seconds
     def Utils.secs_to_string(secs)
       ret = []
       years, secs = secs.divmod SEC_PER_YR
@@ -395,9 +403,12 @@ module ::Irc
     end
 
 
+    # Execute an external program, returning a String obtained by redirecting
+    # the program's standards errors and output 
+    #
     def Utils.safe_exec(command, *args)
-      IO.popen("-") {|p|
-        if(p)
+      IO.popen("-") { |p|
+        if p
           return p.readlines.join("\n")
         else
           begin
@@ -414,6 +425,11 @@ module ::Irc
     end
 
 
+    # Safely (atomically) save to _file_, by passing a tempfile to the block
+    # and then moving the tempfile to its final location when done.
+    #
+    # call-seq: Utils.safe_save(file, &block)
+    #
     def Utils.safe_save(file)
       raise 'No safe save directory defined!' if @@safe_save_dir.nil?
       basename = File.basename(file)
@@ -425,6 +441,9 @@ module ::Irc
     end
 
 
+    # Decode HTML entities in the String _str_, using HTMLEntities if the
+    # package was found, or UNESCAPE_TABLE otherwise.
+    #
     def Utils.decode_html_entities(str)
       if defined? ::HTMLEntities
         return HTMLEntities.decode_entities(str)
@@ -447,9 +466,9 @@ module ::Irc
     #
     # It is possible to pass some options to determine how the stripping
     # occurs. Currently supported options are
-    #   * :strip => Regex or String to strip at the beginning of the obtained
-    #               text
-    #   * :min_spaces => Minimum number of spaces a paragraph should have
+    # strip:: Regex or String to strip at the beginning of the obtained
+    #         text
+    # min_spaces:: minimum number of spaces a paragraph should have
     #
     def Utils.ircify_first_html_par(xml_org, opts={})
       if defined? ::Hpricot
@@ -459,7 +478,7 @@ module ::Irc
       end
     end
 
-    # with hpricot
+    # HTML first par grabber using hpricot
     def Utils.ircify_first_html_par_wh(xml_org, opts={})
       doc = Hpricot(xml_org)
 
@@ -556,7 +575,7 @@ module ::Irc
       end
     end
 
-    # without hpricot
+    # HTML first par grabber without hpricot
     def Utils.ircify_first_html_par_woh(xml_org, opts={})
       xml = xml_org.gsub(/<!--.*?-->/m, '').gsub(/<script(?:\s+[^>]*)?>.*?<\/script>/im, "").gsub(/<style(?:\s+[^>]*)?>.*?<\/style>/im, "")
 

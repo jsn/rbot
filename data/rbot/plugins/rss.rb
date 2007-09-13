@@ -283,15 +283,15 @@ class RSSFeedsPlugin < Plugin
       # the restore to work.
       #
       # This is actually pretty safe for a number of reasons:
-      #  * the code is only called if standard marshalling fails
-      #  * the string we look for is quite unlikely to appear randomly
-      #  * if the string appears somewhere and the patched string isn't recoverable
-      #    either, we'll get another (unrecoverable) error, which makes the rss
-      #    plugin unsable, just like it was if no recovery was attempted
-      #  * if the string appears somewhere and the patched string is recoverable,
-      #    we may get a b0rked feed, which is eventually overwritten by a clean
-      #    one, so the worst thing that can happen is that a feed update spams
-      #    the watchers once
+      # * the code is only called if standard marshalling fails
+      # * the string we look for is quite unlikely to appear randomly
+      # * if the string appears somewhere and the patched string isn't recoverable
+      #   either, we'll get another (unrecoverable) error, which makes the rss
+      #   plugin unsable, just like it was if no recovery was attempted
+      # * if the string appears somewhere and the patched string is recoverable,
+      #   we may get a b0rked feed, which is eventually overwritten by a clean
+      #   one, so the worst thing that can happen is that a feed update spams
+      #   the watchers once
       @registry.recovery = Proc.new { |val|
         patched = val.sub(":\v@mutexo:\nMutex", ":\v@mutexo:\vObject")
         ret = Marshal.restore(patched)

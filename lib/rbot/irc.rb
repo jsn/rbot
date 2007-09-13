@@ -503,9 +503,9 @@ class Regexp
   # Irc::User nicks and users and Irc::Channel names
   #
   # For each of them we define two versions of the regular expression:
-  #  * a generic one, which should match for any server but may turn out to
-  #    match more than a specific server would accept
-  #  * an RFC-compliant matcher
+  # * a generic one, which should match for any server but may turn out to
+  #   match more than a specific server would accept
+  # * an RFC-compliant matcher
   #
   module Irc
 
