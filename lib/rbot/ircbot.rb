@@ -461,7 +461,7 @@ class Bot
     @lang = Language.new(self, @config['core.language'])
 
     begin
-      @auth = Auth::authmanager
+      @auth = Auth::manager
       @auth.bot_associate(self)
       # @auth.load("#{botclass}/botusers.yaml")
     rescue Exception => e

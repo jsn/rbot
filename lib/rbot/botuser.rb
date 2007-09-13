@@ -19,7 +19,7 @@ require 'set'
 #     class_eval {
 #       define_method(m) { |*a|
 #         r = super(*a)
-#         Irc::Bot::Auth.authmanager.set_changed
+#         Irc::Bot::Auth.manager.set_changed
 #         r
 #       }
 #     }
@@ -236,7 +236,7 @@ class Bot
       attr_reader :password
       attr_reader :netmasks
       attr_reader :perm
-      # Please remember to #set_changed() the authmanager
+      # Please remember to #set_changed() the Auth.manager
       # when modifying data
       attr_reader :data
       attr_writer :login_by_mask
@@ -344,13 +344,13 @@ class Bot
       # Reset the login-by-mask option
       #
       def reset_login_by_mask
-        @login_by_mask = Auth.authmanager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
+        @login_by_mask = Auth.manager.bot.config['auth.login_by_mask'] unless defined?(@login_by_mask)
       end
 
       # Reset the autologin option
       #
       def reset_autologin
-        @autologin = Auth.authmanager.bot.config['auth.autologin'] unless defined?(@autologin)
+        @autologin = Auth.manager.bot.config['auth.autologin'] unless defined?(@autologin)
       end
 
       # Do we allow automatic logging in?
@@ -601,10 +601,10 @@ class Bot
     end
 
 
-    # This is the AuthManagerClass singleton, used to manage User/BotUser connections and
-    # everything
+    # This is the ManagerClass singleton, used to manage
+    # Irc::User/Irc::Bot::Auth::BotUser connections and everything
     #
-    class AuthManagerClass
+    class ManagerClass
 
       include Singleton
 
@@ -826,10 +826,10 @@ class Bot
 
     end
 
-    # Returns the only instance of AuthManagerClass
+    # Returns the only instance of ManagerClass
     #
-    def Auth.authmanager
-      return AuthManagerClass.instance
+    def Auth.manager
+      return ManagerClass.instance
     end
 
   end
@@ -841,7 +841,7 @@ end
     # associated with the receiver
     #
     def botuser
-      Irc::Bot::Auth.authmanager.irc_to_botuser(self)
+      Irc::Bot::Auth.manager.irc_to_botuser(self)
     end
 
     # Bot-specific data can be stored with Irc::Users. This is
@@ -867,7 +867,7 @@ end
     def set_bot_data(key,value=nil,&block)
       if not block_given?
         self.botuser.data[key]=value
-        Irc::Bot::Auth.authmanager.set_changed
+        Irc::Bot::Auth.manager.set_changed
         return value
       end
       if value and not bot_data.has_key?(key)
@@ -877,7 +877,7 @@ end
       begin
         r = yield bot_data(key)
       ensure
-        Irc::Bot::Auth.authmanager.set_changed
+        Irc::Bot::Auth.manager.set_changed
       end
       return r
     end

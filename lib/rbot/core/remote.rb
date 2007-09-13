@@ -36,9 +36,9 @@ class Bot
       end
     end
 
-    # We extend the AuthManagerClass to handle remote logins
+    # We extend the ManagerClass to handle remote logins
     #
-    class AuthManagerClass
+    class ManagerClass
 
       MAX_SESSION_ID = 2**128 - 1
 
