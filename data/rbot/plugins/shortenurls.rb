@@ -35,7 +35,7 @@ class ShortenURLs < Plugin
     url = params[:url]
     if url == "help"
       m.reply help(m.plugin) unless params[:called]
-      return
+      return nil
     end
     begin
       to_uri = URI.parse(url)
@@ -43,19 +43,33 @@ class ShortenURLs < Plugin
       raise URI::InvalidURIError if to_uri.class == URI::Generic
     rescue URI::InvalidURIError
       m.reply "#{url} doesn't look like an URL to me ..." unless params[:called]
-      return
+      return nil
     end
 
     service = params[:service] || m.plugin.to_sym
     service = :rubyurl if service == :shorturl
 
-    short = WWW::ShortURL.shorten(url, service)
+    tried = []
+    short = nil
 
-    if params[:called]
-      return short
-    else
-      m.reply "#{url} shortened to #{short}"
+    begin
+      tried << service
+      short = WWW::ShortURL.shorten(url, service)
+      raise WWW::InvalidService, "#{service} returned an empty string for #{url}" unless short and not short.empty?
+    rescue WWW::InvalidService
+      pool = services - tried
+      if pool.empty?
+        m.reply "#{service} failed, and I don't know what else to try next" unless params[:called]
+        return nil
+      else
+        service = pool.pick_one
+        m.reply "#{tried.last} failed, I'll try #{service} instead" unless params[:called]
+        retry
+      end
     end
+
+    m.reply "#{url} shortened to #{short}" unless params[:called]
+    return short
   end
 
 end
