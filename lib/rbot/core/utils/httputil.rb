@@ -389,6 +389,11 @@ class HttpUtil
         when :post, :"net::http::post"
           new_opts[:method] = :get
         end
+        if resp['set-cookie']
+          debug "setting cookie #{resp['set-cookie']}"
+          new_opts[:headers] ||= Hash.new
+          new_opts[:headers]['Cookie'] = resp['set-cookie']
+        end
         debug "following the redirect to #{new_loc}"
         return get_response(new_loc, new_opts, &block)
       else
