@@ -12,6 +12,7 @@
 # twitter whenever
 
 require 'rexml/rexml'
+require 'cgi'
 
 class TwitterPlugin < Plugin
   def initialize
@@ -86,7 +87,7 @@ class TwitterPlugin < Plugin
       
     uri = "http://#{URI.escape(@registry[m.sourcenick + "_username"])}:#{URI.escape(@registry[m.sourcenick + "_password"])}@twitter.com/statuses/update.xml"
     
-    response = @bot.httputil.post(uri, "status=#{URI.escape(params[:status].to_s)}")
+    response = @bot.httputil.post(uri, "status=#{CGI.escape(params[:status].to_s)}")
     debug response
     
     if response.class == Net::HTTPOK
