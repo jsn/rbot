@@ -17,7 +17,7 @@ require 'cgi'
 class TwitterPlugin < Plugin
   def initialize
     super
-    
+
     class << @registry
       def store(val)
         val
@@ -31,30 +31,31 @@ class TwitterPlugin < Plugin
       'X-Twitter-Client' => 'rbot twitter plugin'
     }
   end
-  
+
   # return a help string when the bot is asked for help on this plugin
   def help(plugin, topic="")
     return "twitter status [status] => updates your status on twitter | twitter identify [username] [password] => ties your nick to your twitter username and password"
   end
-  
+
   # update the status on twitter
   def get_status(m, params)
-  
+
     nick = params[:nick] || @registry[m.sourcenick + "_username"]
 
     if not nick
       m.reply "you should specify the username of the twitter touse, or identify using 'twitter identify [username] [password]'"
       return false
     end
-      
+
+
     # TODO configurable count
     uri = "http://twitter.com/statuses/user_timeline/#{URI.escape(nick)}.xml?count=3"
-    
+
     response = @bot.httputil.get(uri, :headers => @header, :cache => false)
     debug response
 
     texts = []
-    
+
     if response
       begin
         rex = REXML::Document.new(response)
@@ -79,28 +80,28 @@ class TwitterPlugin < Plugin
       return false
     end
   end
-  
+
   # update the status on twitter
   def update_status(m, params)
-  
+
 
     unless @registry.has_key?(m.sourcenick + "_password") && @registry.has_key?(m.sourcenick + "_username")
       m.reply "you must identify using 'twitter identify [username] [password]'"
       return false
     end
-      
+
     uri = "http://#{URI.escape(@registry[m.sourcenick + "_username"])}:#{URI.escape(@registry[m.sourcenick + "_password"])}@twitter.com/statuses/update.xml"
-    
+
     response = @bot.httputil.post(uri, "status=#{CGI.escape(params[:status].to_s)}", :headers => @header)
     debug response
-    
+
     if response.class == Net::HTTPOK
       m.reply "status updated"
     else
       m.reply "could not update status"
     end
   end
-  
+
   # ties a nickname to a twitter username and password
   def identify(m, params)
     @registry[m.sourcenick + "_username"] = params[:username].to_s
