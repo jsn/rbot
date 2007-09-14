@@ -26,6 +26,10 @@ class TwitterPlugin < Plugin
         val
       end
     end
+
+    @header = {
+      'X-Twitter-Client' => 'rbot twitter plugin'
+    }
   end
   
   # return a help string when the bot is asked for help on this plugin
@@ -46,7 +50,7 @@ class TwitterPlugin < Plugin
     # TODO configurable count
     uri = "http://twitter.com/statuses/user_timeline/#{URI.escape(nick)}.xml?count=3"
     
-    response = @bot.httputil.get(uri, :cache => false)
+    response = @bot.httputil.get(uri, :headers => @header, :cache => false)
     debug response
 
     texts = []
@@ -87,7 +91,7 @@ class TwitterPlugin < Plugin
       
     uri = "http://#{URI.escape(@registry[m.sourcenick + "_username"])}:#{URI.escape(@registry[m.sourcenick + "_password"])}@twitter.com/statuses/update.xml"
     
-    response = @bot.httputil.post(uri, "status=#{CGI.escape(params[:status].to_s)}")
+    response = @bot.httputil.post(uri, "status=#{CGI.escape(params[:status].to_s)}", :headers => @header)
     debug response
     
     if response.class == Net::HTTPOK
