@@ -45,7 +45,7 @@ class TwitterPlugin < Plugin
     # TODO configurable count
     uri = "http://twitter.com/statuses/user_timeline/#{URI.escape(nick)}.xml?count=3"
     
-    response = @bot.httputil.get(uri)
+    response = @bot.httputil.get(uri, :cache => false)
     debug response
 
     texts = []
