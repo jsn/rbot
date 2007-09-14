@@ -433,6 +433,8 @@ class HttpUtil
   # range::      make a ranged request (usually GET). accepts a string
   #              for HTTP/1.1 "Range:" header (i.e. "bytes=0-1000")
   # body::       request body (usually for POST requests)
+  # headers::    additional headers to be set for the request. Its value must
+  #              be a Hash in the form { 'Header' => 'value' }
   #
   def get_response(uri_or_s, options = {}, &block) # :yields: resp
     uri = uri_or_s.kind_of?(URI) ? uri_or_s : URI.parse(uri_or_s.to_s)
