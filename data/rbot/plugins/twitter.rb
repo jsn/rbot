@@ -47,9 +47,10 @@ class TwitterPlugin < Plugin
       return false
     end
 
+    user = URI.escape(nick)
 
     # TODO configurable count
-    uri = "http://twitter.com/statuses/user_timeline/#{URI.escape(nick)}.xml?count=3"
+    uri = "http://twitter.com/statuses/user_timeline/#{user}.xml?count=3"
 
     response = @bot.httputil.get(uri, :headers => @header, :cache => false)
     debug response
@@ -90,9 +91,13 @@ class TwitterPlugin < Plugin
       return false
     end
 
-    uri = "http://#{URI.escape(@registry[m.sourcenick + "_username"])}:#{URI.escape(@registry[m.sourcenick + "_password"])}@twitter.com/statuses/update.xml"
+    user = URI.escape(@registry[m.sourcenick + "_username"])
+    pass = URI.escape(@registry[m.sourcenick + "_password"])
+    uri = "http://#{user}:#{pass}@twitter.com/statuses/update.xml"
 
-    response = @bot.httputil.post(uri, "status=#{CGI.escape(params[:status].to_s)}", :headers => @header)
+    body = "status=#{CGI.escape(params[:status].to_s)}"
+
+    response = @bot.httputil.post(uri, body, :headers => @header)
     debug response
 
     if response.class == Net::HTTPOK
