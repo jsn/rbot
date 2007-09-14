@@ -219,6 +219,10 @@ class ConfigModule < CoreBotModule
       # else
       #   "no help for config #{topic}"
       end
+    when "nick"
+      _("nick <newnick> => change the bot nick to <newnick>, if possible")
+    when "status"
+      _("status => display some information on the bot's status")
     when "save"
       _("save => save current dynamic data and configuration")
     when "rescan"
@@ -226,7 +230,7 @@ class ConfigModule < CoreBotModule
     when "version"
       _("version => describes software version")
     else
-      _("config-related tasks: config, save, rescan, version")
+      _("config-related tasks: config, save, rescan, version, nick, status")
     end
   end
 
