@@ -146,7 +146,7 @@ class LastFmPlugin < Plugin
         end
 
         wiki = "This artist doesn't have a description yet. You can help by writing it: #{url}/+wiki?action=edit"
-        if page.match(/<div class="wikiAbstract">(.*?)<\/div>/m)
+        if page.match(/<div (?:class|id)="wikiAbstract">(.*?)<\/div>/m)
           wiki = $1.ircify_html
         end
 
