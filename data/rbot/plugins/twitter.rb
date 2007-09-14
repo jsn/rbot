@@ -54,7 +54,12 @@ class TwitterPlugin < Plugin
       begin
         rex = REXML::Document.new(response)
         rex.root.elements.each("status") { |st|
-          msg = st.elements['text'].to_s + " (#{st.elements['created_at'].to_s} via #{st.elements['source'].to_s})"
+          month, day, hour, min, sec, year = st.elements['created_at'].text.match(/\w+ (\w+) (\d+) (\d+):(\d+):(\d+) \S+ (\d+)/)[1..6]
+          debug [year, month, day, hour, min, sec].inspect
+          time = Time.local(year.to_i, month, day.to_i, hour.to_i, min.to_i, sec.to_i)
+          now = Time.now
+          delta = now - time
+          msg = st.elements['text'].to_s + " (#{Utils.secs_to_string(delta.to_i)} ago via #{st.elements['source'].to_s})"
           texts << Utils.decode_html_entities(msg).ircify_html
         }
       rescue
