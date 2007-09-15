@@ -815,9 +815,18 @@ class RSSFeedsPlugin < Plugin
       end
     end
 
-    title = "#{Bold}#{item.title.ircify_html :limit => @bot.config['rss.head_max']}#{Bold}" if item.title
+    tit_opt = {}
+    # Twitters don't need a cap on the title length since they have a hard
+    # limit to 160 characters, and most of them are under 140 characters
+    tit_opt[:limit] = @bot.config['rss.head_max'] unless feed.type == 'twitter'
 
-    desc = item.description.ircify_html(:limit => @bot.config['rss.text_max'], :a_href => :link_out) if item.description
+    title = "#{Bold}#{item.title.ircify_html(tit_opt)}#{Bold}" if item.title
+
+    desc_opt = {
+      :limit => @bot.config['rss.text_max'],
+      :a_href => :link_out
+    }
+    desc = item.description.ircify_html(desc_opt) if item.description
 
     link = item.link.chomp if item.link
 
