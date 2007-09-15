@@ -15,6 +15,10 @@ require 'rexml/rexml'
 require 'cgi'
 
 class TwitterPlugin < Plugin
+  Config.register Config::IntegerValue.new('twitter.status_count',
+    :default => 1, :validate => Proc.new { |v| v > 0 && v <= 10},
+    :desc => "Maximum number of status updates shown by 'twitter status'")
+
   def initialize
     super
 
@@ -49,8 +53,8 @@ class TwitterPlugin < Plugin
 
     user = URI.escape(nick)
 
-    # TODO configurable count
-    uri = "http://twitter.com/statuses/user_timeline/#{user}.xml?count=3"
+    count = @bot.config['twitter.status_count']
+    uri = "http://twitter.com/statuses/user_timeline/#{user}.xml?count=#{count}"
 
     response = @bot.httputil.get(uri, :headers => @header, :cache => false)
     debug response
