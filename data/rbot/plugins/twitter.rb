@@ -99,7 +99,18 @@ class TwitterPlugin < Plugin
     pass = URI.escape(@registry[m.sourcenick + "_password"])
     uri = "http://#{user}:#{pass}@twitter.com/statuses/update.xml"
 
-    body = "status=#{CGI.escape(params[:status].to_s)}"
+    msg = params[:status].to_s
+
+    if msg.length > 160
+      m.reply "your status message update is too long, please keep it under 140 characters if possible, 160 characters maximum"
+      return
+    end
+
+    if msg.length > 140
+      m.reply "your status message is longer than 140 characters, which is not optimal, but I'm going to update anyway"
+    end
+
+    body = "status=#{CGI.escape(msg)}"
 
     response = @bot.httputil.post(uri, body, :headers => @header)
     debug response
