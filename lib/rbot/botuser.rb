@@ -757,13 +757,21 @@ class Bot
       end
 
       # Creates a new transient BotUser associated with Irc::User _user_,
-      # automatically logging him in
+      # automatically logging him in. Note that transient botuser creation can
+      # fail, typically if we don't have the complete user netmask (e.g. for
+      # messages coming in from a linkbot)
       #
       def create_transient_botuser(user)
         ircuser = user.to_irc_user
-        bu = BotUser.new(ircuser, :transient => true, :masks => ircuser)
-        bu.login(ircuser)
-        @transients << bu
+        bu = everyone
+        begin
+          bu = BotUser.new(ircuser, :transient => true, :masks => ircuser)
+          bu.login(ircuser)
+          @transients << bu
+        rescue
+          warning "failed to create transient for #{user}"
+          error $!
+        end
         return bu
       end
 
