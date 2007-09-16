@@ -7,6 +7,7 @@
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 #
 # Copyright:: (C) 2007 Carter Parks
+# Copyright:: (C) 2007 Giuseppe Bilotta
 #
 # Users can setup their twitter username and password and then begin updating
 # twitter whenever
@@ -110,7 +111,9 @@ class TwitterPlugin < Plugin
       m.reply "your status message is longer than 140 characters, which is not optimal, but I'm going to update anyway"
     end
 
-    body = "status=#{CGI.escape(msg)}"
+    source = "source=rbot"
+    msg = "status=#{CGI.escape(msg)}"
+    body = [source,msg].join("&")
 
     response = @bot.httputil.post(uri, body, :headers => @header)
     debug response
