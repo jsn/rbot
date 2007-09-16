@@ -57,7 +57,7 @@ class UrlPlugin < Plugin
     $1.ircify_html
   end
 
-  def get_title_for_url(uri_str, nick = nil, channel = nil, ircline = nil)
+  def get_title_for_url(uri_str, opts = {})
 
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
@@ -66,10 +66,7 @@ class UrlPlugin < Plugin
       return "Sorry, info retrieval for #{url.host} is disabled"
     end
 
-    logopts = Hash.new
-    logopts[:nick] = nick if nick
-    logopts[:channel] = channel if channel
-    logopts[:ircline] = ircline if ircline
+    logopts = opts.dup
 
     title = nil
     extra = String.new
@@ -171,7 +168,10 @@ class UrlPlugin < Plugin
         Thread.start do
           debug "Getting title for #{urlstr}..."
           begin
-            title = get_title_for_url urlstr, m.source.nick, m.channel, m.message
+            title = get_title_for_url(urlstr,
+                                      :nick => m.source.nick,
+                                      :channel => m.channel,
+                                      :ircline => m.message)
             if title
               m.reply "#{LINK_INFO} #{title}", :overlong => :truncate
               debug "Title found!"
@@ -225,7 +225,9 @@ class UrlPlugin < Plugin
     list[0..(max-1)].each do |url|
       disp = "[#{url.time.strftime('%Y/%m/%d %H:%M:%S')}] <#{url.nick}> #{url.url}"
       if @bot.config['url.info_on_list']
-        title = url.info || get_title_for_url(url.url, url.nick, channel) rescue nil
+        title = url.info ||
+          get_title_for_url(url.url,
+                            :nick => url.nick, :channel => channel) rescue nil
         # If the url info was missing and we now have some, try to upgrade it
         if channel and title and not url.info
           ll = @registry[channel]
