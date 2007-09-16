@@ -49,7 +49,7 @@ class UrlPlugin < Plugin
   end
 
   def help(plugin, topic="")
-    "urls [<max>=4] => list <max> last urls mentioned in current channel, urls search [<max>=4] <regexp> => search for matching urls. In a private message, you must specify the channel to query, eg. urls <channel> [max], urls search <channel> [max] <regexp>"
+    "url info <url> => display link info for <url> (set url.display_link_info > 0 if you want the bot to do it automatically when someone writes an url), urls [<max>=4] => list <max> last urls mentioned in current channel, urls search [<max>=4] <regexp> => search for matching urls. In a private message, you must specify the channel to query, eg. urls <channel> [max], urls search <channel> [max] <regexp>"
   end
 
   def get_title_from_html(pagedata)
@@ -275,6 +275,7 @@ end
 
 plugin = UrlPlugin.new
 plugin.map 'urls info *urls', :action => 'info'
+plugin.map 'url info *urls', :action => 'info'
 plugin.map 'urls search :channel :limit :string', :action => 'search',
                           :defaults => {:limit => 4},
                           :requirements => {:limit => /^\d+$/},
