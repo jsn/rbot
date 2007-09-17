@@ -136,7 +136,7 @@ class Bot
       }
       @registry = nil
       @default = nil
-      @recover = nil
+      @recovery = nil
       # debug "initializing registry accessor with name #{@name}"
     end
 
