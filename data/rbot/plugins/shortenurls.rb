@@ -55,7 +55,7 @@ class ShortenURLs < Plugin
       return nil
     end
 
-    service = params[:service].to_sym || m.plugin.to_sym
+    service = (params[:service] || m.plugin).to_sym
     service = :rubyurl if service == :shorturl
 
     tried = []
