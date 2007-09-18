@@ -757,8 +757,6 @@ module ::Irc
         url = urls.shift
         idx += 1
 
-        # FIXME what happens if some big file is returned? We should share
-        # code with the url plugin to only retrieve partial file content!
         begin
           info = Utils.get_html_info(URI.parse(url), opts)
 
