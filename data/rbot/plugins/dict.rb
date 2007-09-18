@@ -93,7 +93,7 @@ class DictPlugin < Plugin
     return unless first_pars > 0
 
     Utils.get_first_pars urls, first_pars, :message => m,
-      :strip => /^\S+\s+-\s+/
+      :strip => /^.+?\s+-\s+/
 
   end
 
