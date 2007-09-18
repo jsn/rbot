@@ -137,6 +137,10 @@ class ::String
     txt.gsub!(/<sub>(.*?)<\/sub>/, '_{\1}')
     txt.gsub!(/(^|_)\{(.)\}/, '\1\2')
 
+    # List items are converted to *). We don't have special support for
+    # nested or ordered lists.
+    txt.gsub!(/<li>/, ' *) ')
+
     # All other tags are just removed
     txt.gsub!(/<[^>]+>/, '')
 
