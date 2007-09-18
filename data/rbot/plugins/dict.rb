@@ -73,7 +73,7 @@ class DictPlugin < Plugin
     entries = xml.scan(DEMAURO_LEMMA)
     text = word
     urls = []
-    if !entries.assoc(word) and !entries.assoc(word.upcase)
+    if not entries.transpose.first.grep(/\b#{word}\b/)
       return false if justcheck
       text += " not found. Similar words"
     end
