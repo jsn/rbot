@@ -108,6 +108,9 @@ class DictPlugin < Plugin
     word = params[:word].join
     [word, word + "_1"].each { |check|
       url = @oxurl % CGI.escape(check)
+      if params[:british]
+        url << "?view=uk"
+      end
       h = @bot.httputil.head(url, :max_redir => 5)
       if h
         m.reply("#{word} found: #{url}") unless justcheck
@@ -119,7 +122,7 @@ class DictPlugin < Plugin
   end
 
   def is_british?(word)
-    return oxford(nil, :word => word, :justcheck => true)
+    return oxford(nil, :word => word, :justcheck => true, :british => true)
   end
 
 
