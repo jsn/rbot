@@ -304,7 +304,7 @@ rescue LoadError
 end
 
 begin
-  require 'htmlentities'
+  require 'hpricot'
 rescue LoadError
   gems = nil
   begin
