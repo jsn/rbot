@@ -757,25 +757,20 @@ module ::Irc
 
         # FIXME what happens if some big file is returned? We should share
         # code with the url plugin to only retrieve partial file content!
-        xml = self.bot.httputil.get(url)
-        if xml.nil?
-          debug "Unable to retrieve #{url}"
+        begin
+          info = Utils.get_html_info(URI.parse(url), opts)
+
+          par = info[:content]
+          retval.push(par)
+
+          if par
+            msg.reply "[#{idx}] #{par}", :overlong => :truncate if msg
+            count -=1
+          end
+        rescue
+          debug "Unable to retrieve #{url}: #{$!}"
           next
         end
-        par = Utils.ircify_first_html_par(xml, opts)
-        if par.empty?
-          debug "No first par found\n#{xml}"
-          # FIXME only do this if the 'url' plugin is loaded
-          # TODO even better, put the code here
-          # par = @bot.plugins['url'].get_title_from_html(xml)
-          if par.empty?
-            retval.push(nil)
-            next
-          end
-        end
-        msg.reply "[#{idx}] #{par}", :overlong => :truncate if msg
-        count -=1
-        retval.push(par)
       end
       return retval
     end
