@@ -553,7 +553,7 @@ module ::Irc
           by_span = Hpricot::Elements[]
           pre_pars = doc/"div|span|td|tr|tbody|table"
           pre_pars.each { |el|
-            by_span.push el if el.class =~ /body|message|text/i
+            by_span.push el if el[:class] =~ /body|message|text/i
           }
           debug "other \#1: found: #{by_span.pretty_inspect}"
         end
