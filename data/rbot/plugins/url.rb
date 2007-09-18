@@ -83,13 +83,13 @@ class UrlPlugin < Plugin
         extra << "#{Bold}type#{Bold}: #{resp['content-type']}" unless title
         if enc = resp['content-encoding']
           logopts[:extra] << ", encoding: #{enc}"
-          extra << "#{Bold}encoding#{Bold}: #{enc}"
+          extra << "#{Bold}encoding#{Bold}: #{enc}" if @bot.config['url.first_par'] or not title
         end
 
         size = resp['content-length'].first.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
         if size
           logopts[:extra] << ", size: #{size} bytes"
-          extra << "#{Bold}size#{Bold}: #{size} bytes"
+          extra << "#{Bold}size#{Bold}: #{size} bytes" if @bot.config['url.first_par'] or not title
         end
       end
     rescue Exception => e
