@@ -502,6 +502,7 @@ class HttpUtil
     req.body = opts[:body] if req_class == Net::HTTP::Post
     debug "prepared request: #{req.to_hash.inspect}"
 
+    begin
     get_proxy(uri, opts).start do |http|
       http.request(req) do |resp|
         resp['x-rbot-location'] = uri.to_s
@@ -530,6 +531,10 @@ class HttpUtil
         end
         return handle_response(uri, resp, opts, &block)
       end
+    end
+    rescue Exception => e
+      error e
+      raise e.message
     end
   end
 
