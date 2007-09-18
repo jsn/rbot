@@ -305,6 +305,12 @@ end
 
 begin
   require 'hpricot'
+  module ::Irc
+    module Utils
+      AFTER_PAR_PATH = /^(?:div|span|td|tr|tbody|table)$/
+      AFTER_PAR_CLASS = /body|message|text/i
+    end
+  end
 rescue LoadError
   gems = nil
   begin
@@ -553,7 +559,7 @@ module ::Irc
         if by_span.nil?
           by_span = Hpricot::Elements[]
           doc.root.search("*") { |el|
-            by_span.push el if el.pathname =~ /^(?:div|span|td|tr|tbody|table)$/ and el[:class] =~ /body|message|text/i
+            by_span.push el if el.pathname =~ AFTER_PAR_PATH and (el[:class] =~ AFTER_PAR_CLASS or el[:id] =~ AFTER_PAR_CLASS)
           }
           debug "other \#1: found: #{by_span.pretty_inspect}"
         end
