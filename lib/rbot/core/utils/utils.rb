@@ -317,7 +317,10 @@ rescue LoadError
   else
     module ::Irc
       module Utils
-        # Define some regular expressions to be used by first_html_par
+        # Some regular expressions to manage HTML data
+
+        # Title
+        TITLE_REGEX = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
 
         # H1, H2, etc
         HX_REGEX = /<h(\d)(?:\s+[^>]*)?>(.*?)<\/h\1>/im

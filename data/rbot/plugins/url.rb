@@ -9,7 +9,6 @@ class ::UrlLinkError < RuntimeError
 end
 
 class UrlPlugin < Plugin
-  TITLE_RE = /<\s*?title\s*?>(.+?)<\s*?\/title\s*?>/im
   LINK_INFO = "[Link Info]"
   OUR_UNSAFE = Regexp.new("[^#{URI::PATTERN::UNRESERVED}#{URI::PATTERN::RESERVED}%# ]", false, 'N')
 
@@ -53,8 +52,7 @@ class UrlPlugin < Plugin
   end
 
   def get_title_from_html(pagedata)
-    return unless TITLE_RE.match(pagedata)
-    $1.ircify_html
+    return pagedata.ircify_html_title
   end
 
   def get_title_for_url(uri_str, opts = {})

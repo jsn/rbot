@@ -178,6 +178,20 @@ class ::String
   def riphtml
     self.gsub(/<[^>]+>/, '').gsub(/&amp;/,'&').gsub(/&quot;/,'"').gsub(/&lt;/,'<').gsub(/&gt;/,'>').gsub(/&ellip;/,'...').gsub(/&apos;/, "'").gsub("\n",'')
   end
+
+  # This method tries to find an HTML title in the string,
+  # and returns it if found
+  def get_html_title
+    return unless Irc::Utils::TITLE_REGEX.match(self)
+    $1
+  end
+
+  # This method returns the IRC-formatted version of an
+  # HTML title found in the string
+  def ircify_html_title
+    return unless Irc::Utils::TITLE_REGEX.match(self)
+    $1.ircify_html
+  end
 end
 
 
