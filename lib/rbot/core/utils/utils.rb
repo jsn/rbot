@@ -498,25 +498,26 @@ module ::Irc
 
       txt = String.new
 
-      h = %w{h1 h2 h3 h4 h5 h6}
-      p = %w{p}
-      ar = []
-      h.each { |hx|
-        p.each { |px|
-          ar << "#{hx}~#{px}"
-        }
-      }
-      h_p_css = ar.join("|")
-      debug "css search: #{h_p_css}"
-
       pre_h = pars = by_span = nil
 
       while true
         debug "Minimum number of spaces: #{min_spaces}"
 
         # Initial attempt: <p> that follows <h\d>
-        pre_h = doc/h_p_css if pre_h.nil?
-        debug "Hx: found: #{pre_h.pretty_inspect}"
+        if pre_h.nil?
+          pre_h = Hpricot::Elements[]
+          found_h = false
+          doc.root.search("*") { |e|
+            case e.pathname
+            when /^h\d/
+              found_h = true
+            when 'p'
+              pre_h << e if found_h
+            end
+          }
+          debug "Hx: found: #{pre_h.pretty_inspect}"
+        end
+
         pre_h.each { |p|
           debug p
           txt = p.to_html.ircify_html
@@ -551,9 +552,8 @@ module ::Irc
         # we don't need
         if by_span.nil?
           by_span = Hpricot::Elements[]
-          pre_pars = doc/"div|span|td|tr|tbody|table"
-          pre_pars.each { |el|
-            by_span.push el if el[:class] =~ /body|message|text/i
+          doc.root.each("*") { |el|
+            by_span.push el if el.pathname =~ /^(?:div|span|td|tr|tbody|table)$/ and el[:class] =~ /body|message|text/i
           }
           debug "other \#1: found: #{by_span.pretty_inspect}"
         end
