@@ -182,15 +182,18 @@ class ::String
   # This method tries to find an HTML title in the string,
   # and returns it if found
   def get_html_title
-    return unless Irc::Utils::TITLE_REGEX.match(self)
-    $1
+    if defined? ::Hpricot
+      Hpricot(self).at("title").inner_html
+    else
+      return unless Irc::Utils::TITLE_REGEX.match(self)
+      $1
+    end
   end
 
   # This method returns the IRC-formatted version of an
   # HTML title found in the string
   def ircify_html_title
-    return unless Irc::Utils::TITLE_REGEX.match(self)
-    $1.ircify_html
+    self.get_html_title.ircify_html rescue nil
   end
 end
 
