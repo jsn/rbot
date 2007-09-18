@@ -307,7 +307,8 @@ begin
   require 'hpricot'
   module ::Irc
     module Utils
-      AFTER_PAR_PATH = /^(?:div|span|td|tr|tbody|table)$/
+      AFTER_PAR_PATH = /^(?:div|span)$/
+      AFTER_PAR_EX = /^(?:td|tr|tbody|table)$/
       AFTER_PAR_CLASS = /body|message|text/i
     end
   end
@@ -556,13 +557,23 @@ module ::Irc
         # 'message' or 'text' in their class to mark actual text. Since we want
         # the class match to be partial and case insensitive, we collect
         # the common elements that may have this class and then filter out those
-        # we don't need
+        # we don't need. If no divs or spans are found, we'll accept additional
+        # elements too (td, tr, tbody, table).
         if by_span.nil?
           by_span = Hpricot::Elements[]
+          extra = Hpricot::Elements[]
           doc.search("*") { |el|
             next if el.bogusetag?
-            by_span.push el if el.pathname =~ AFTER_PAR_PATH and (el[:class] =~ AFTER_PAR_CLASS or el[:id] =~ AFTER_PAR_CLASS)
+            case el.pathname
+            when AFTER_PAR_PATH
+              by_span.push el if el[:class] =~ AFTER_PAR_CLASS or el[:id] =~ AFTER_PAR_CLASS
+            when AFTER_PAR_EX
+              extra.push el if el[:class] =~ AFTER_PAR_CLASS or el[:id] =~ AFTER_PAR_CLASS
+            end
           }
+          if by_span.empty? and not extra.empty?
+            by_span.concat extra
+          end
           debug "other \#1: found: #{by_span.pretty_inspect}"
         end
 
