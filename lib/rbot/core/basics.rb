@@ -106,7 +106,7 @@ class BasicsModule < CoreBotModule
     when "restart"
       _("restart => completely stop and restart the bot (including reconnect)")
     when "join"
-      _("join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{myself} also responds to invites if you have the required access level")
+      _("join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{@bot.myself} also responds to invites if you have the required access level")
     when "part"
       _("part <channel> => part channel <channel>")
     when "hide"
@@ -126,9 +126,9 @@ class BasicsModule < CoreBotModule
     when "mode"
       _("mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> to <mode>")
     #     when "botsnack"
-    #       return "botsnack => reward #{myself} for being good"
+    #       return "botsnack => reward #{@bot.myself} for being good"
     #     when "hello"
-    #       return "hello|hi|hey|yo [#{myself}] => greet the bot"
+    #       return "hello|hi|hey|yo [#{@bot.myself}] => greet the bot"
     else
       _("%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk, ping, mode") % {:name=>name}
       #, botsnack, hello
