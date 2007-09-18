@@ -488,7 +488,7 @@ module ::Irc
       # Strip styles and scripts
       (doc/"style|script").remove
 
-      debug doc.inspect
+      debug doc
 
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
@@ -552,7 +552,7 @@ module ::Irc
         # we don't need
         if by_span.nil?
           by_span = Hpricot::Elements[]
-          doc.root.each("*") { |el|
+          doc.root.search("*") { |el|
             by_span.push el if el.pathname =~ /^(?:div|span|td|tr|tbody|table)$/ and el[:class] =~ /body|message|text/i
           }
           debug "other \#1: found: #{by_span.pretty_inspect}"
