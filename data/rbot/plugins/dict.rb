@@ -115,7 +115,7 @@ class DictPlugin < Plugin
       if h and h.match(%r!<h2>#{word}(?:<sup>1</sup>)?</h2>!)
         m.reply("#{word} : #{url}") unless justcheck
         defn = $'
-        m.reply("#{Bold}%s#{Bold}: %s" % [word, defn.ircify_html], :overlong => :truncate)
+        m.reply("#{Bold}%s#{Bold}: %s" % [word, defn.ircify_html(:nbsp => :space)], :overlong => :truncate)
         return true
       end
     }

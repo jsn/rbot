@@ -144,6 +144,14 @@ class ::String
     # such as &nbsp;
     txt = Utils.decode_html_entities(txt)
 
+    # Keep unbreakable spaces or conver them to plain spaces?
+    case val = opts[:nbsp]
+    when :space, ' '
+      txt.gsub!([160].pack('U'), ' ')
+    else
+      warning "unknown :nbsp option #{val} passed to ircify_html" if val
+    end
+
     # Remove double formatting options, since they only waste bytes
     txt.gsub!(/#{Bold}(\s*)#{Bold}/, '\1')
     txt.gsub!(/#{Underline}(\s*)#{Underline}/, '\1')
