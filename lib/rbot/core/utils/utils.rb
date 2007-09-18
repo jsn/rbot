@@ -513,7 +513,8 @@ module ::Irc
         if pre_h.nil?
           pre_h = Hpricot::Elements[]
           found_h = false
-          doc.root.search("*") { |e|
+          doc.search("*") { |e|
+            next if e.bogusetag?
             case e.pathname
             when /^h\d/
               found_h = true
@@ -558,7 +559,8 @@ module ::Irc
         # we don't need
         if by_span.nil?
           by_span = Hpricot::Elements[]
-          doc.root.search("*") { |el|
+          doc.search("*") { |el|
+            next if el.bogusetag?
             by_span.push el if el.pathname =~ AFTER_PAR_PATH and (el[:class] =~ AFTER_PAR_CLASS or el[:id] =~ AFTER_PAR_CLASS)
           }
           debug "other \#1: found: #{by_span.pretty_inspect}"
