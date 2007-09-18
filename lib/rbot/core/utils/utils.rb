@@ -736,7 +736,9 @@ module ::Irc
         fragreg = /.*?<a\s+[^>]*name=["']?#{frag}["']?.*?>/im
         txt.sub!(fragreg,'')
       end
-      content = Utils.ircify_first_html_par(txt, :strip => title)
+      c_opts = opts.dup
+      c_opts[:strip] ||= title
+      content = Utils.ircify_first_html_par(txt, c_opts)
       content = nil if content.empty?
       return {:title => title, :content => content}
     end
