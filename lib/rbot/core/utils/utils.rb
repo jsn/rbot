@@ -656,6 +656,91 @@ module ::Irc
       end
     end
 
+    # This method extracts title, content (first par) and extra
+    # information from the given document _doc_.
+    #
+    # _doc_ can be an URI, a Net::HTTPResponse or a String.
+    #
+    # If _doc_ is a String, only title and content information
+    # are retrieved (if possible), using standard methods.
+    #
+    # If _doc_ is an URI or a Net::HTTPResponse, additional
+    # information is retrieved, and special title/summary
+    # extraction routines are used if possible.
+    #
+    def Utils.get_html_info(doc, opts={})
+      case doc
+      when String
+        Utils.get_string_html_info(doc, opts)
+      when Net::HTTPResponse
+        Utils.get_resp_html_info(doc, opts)
+      when URI
+        if doc.fragment and not doc.fragment.empty?
+          opts[:uri_fragment] ||= doc.fragment
+        end
+        ret = Hash.new
+        @@bot.httputil.get_response(doc) { |resp|
+          ret = Utils.get_resp_html_info(resp, opts)
+        }
+        return ret
+      else
+        raise
+      end
+    end
+
+    class ::UrlLinkError < RuntimeError
+    end
+
+    # This method extracts title, content (first par) and extra
+    # information from the given Net::HTTPResponse _resp_.
+    #
+    # Currently, the only accepted option (in _opts_) is
+    # uri_fragment:: the URI fragment of the original request
+    #
+    # Returns a Hash with the following keys:
+    # title:: the title of the document (if any)
+    # content:: the first paragraph of the document (if any)
+    # headers::
+    #   the headers of the Net::HTTPResponse. The value is
+    #   a Hash whose keys are lowercase forms of the HTTP
+    #   header fields, and whose values are Arrays.
+    #
+    def Utils.get_resp_html_info(resp, opts={})
+      ret = Hash.new
+      case resp
+      when Net::HTTPSuccess
+        ret[:headers] = resp.to_hash
+
+        if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
+          partial = resp.partial_body(@@bot.config['http.info_bytes'])
+          ret.merge!(Utils.get_string_html_info(partial, opts))
+        end
+        return ret
+      else
+        raise UrlLinkError, "getting link (#{resp.code} - #{resp.message})"
+      end
+    end
+
+    # This method extracts title and content (first par)
+    # from the given HTML or XML document _text_, using
+    # standard methods (String#ircify_html_title,
+    # Utils.ircify_first_html_par)
+    #
+    # Currently, the only accepted option (in _opts_) is
+    # uri_fragment:: the URI fragment of the original request
+    #
+    def Utils.get_string_html_info(text, opts={})
+      txt = text.dup
+      title = txt.ircify_html_title
+      if frag = opts[:uri_fragment] and not frag.empty?
+        fragreg = /.*?<a\s+[^>]*name=["']?#{frag}["']?.*?>/im
+        txt.sub!(fragreg,'')
+      end
+      content = Utils.ircify_first_html_par(txt, :strip => title)
+      content = nil if content.empty?
+      return {:title => title, :content => content}
+    end
+
     # Get the first pars of the first _count_ _urls_.
     # The pages are downloaded using the bot httputil service.
     # Returns an array of the first paragraphs fetched.

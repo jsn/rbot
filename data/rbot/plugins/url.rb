@@ -5,9 +5,6 @@
 
 define_structure :Url, :channel, :nick, :time, :url, :info
 
-class ::UrlLinkError < RuntimeError
-end
-
 class UrlPlugin < Plugin
   LINK_INFO = "[Link Info]"
   OUR_UNSAFE = Regexp.new("[^#{URI::PATTERN::UNRESERVED}#{URI::PATTERN::RESERVED}%# ]", false, 'N')
@@ -67,75 +64,34 @@ class UrlPlugin < Plugin
     logopts = opts.dup
 
     title = nil
-    extra = String.new
+    extra = []
 
     begin
-      debug "+ getting #{url.request_uri}"
-      @bot.httputil.get_response(url) { |resp|
-        case resp
-        when Net::HTTPSuccess
+      debug "+ getting info for #{url.request_uri}"
+      info = Utils.get_html_info(url)
+      debug info
+      resp = info[:headers]
 
-          debug resp.to_hash
+      logopts[:title] = title = info[:title]
 
-          if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
-            # The page is text or HTML, so we can try finding a title and, if
-            # requested, the first par.
-            #
-            # We act differently depending on whether we want the first par or
-            # not: in the first case we download the initial part and the parse
-            # it; in the second case we only download as much as we need to find
-            # the title
-            #
-            if @bot.config['url.first_par']
-              partial = resp.partial_body(@bot.config['http.info_bytes'])
-              logopts[:title] = title = get_title_from_html(partial)
-              if url.fragment and not url.fragment.empty?
-                fragreg = /.*?<a\s+[^>]*name=["']?#{url.fragment}["']?.*?>/im
-                partial.sub!(fragreg,'')
-              end
-              first_par = Utils.ircify_first_html_par(partial, :strip => title)
-              unless first_par.empty?
-                logopts[:extra] = first_par
-                extra << ", #{Bold}text#{Bold}: #{first_par}"
-              end
-              call_event(:url_added, url.to_s, logopts)
-              return "#{Bold}title#{Bold}: #{title}#{extra}" if title
-            else
-              resp.partial_body(@bot.config['http.info_bytes']) { |part|
-                logopts[:title] = title = get_title_from_html(part)
-                call_event(:url_added, url.to_s, logopts)
-                return "#{Bold}title#{Bold}: #{title}" if title
-              }
-            end
-          # if nothing was found, provide more basic info, as for non-html pages
-          else
-            resp.no_cache = true
-          end
-
-          enc = resp['content-encoding']
-          logopts[:extra] = String.new
-          logopts[:extra] << "Content Type: #{resp['content-type']}"
-          if enc
-            logopts[:extra] << ", encoding: #{enc}"
-            extra << ", #{Bold}encoding#{Bold}: #{enc}"
-          end
-
-          unless @bot.config['url.titles_only']
-            # content doesn't have title, just display info.
-            size = resp['content-length'].gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
-            if size
-              logopts[:extra] << ", size: #{size} bytes"
-              size = ", #{Bold}size#{Bold}: #{size} bytes"
-            end
-            call_event(:url_added, url.to_s, logopts)
-            return "#{Bold}type#{Bold}: #{resp['content-type']}#{size}#{extra}"
-          end
-          call_event(:url_added, url.to_s, logopts)
-        else
-          raise UrlLinkError, "getting link (#{resp.code} - #{resp.message})"
+      if info[:content]
+        logopts[:extra] = info[:content]
+        extra << "#{Bold}text#{Bold}: #{info[:content]}" if @bot.config['url.first_par']
+      else
+        logopts[:extra] = String.new
+        logopts[:extra] << "Content Type: #{resp['content-type']}"
+        extra << "#{Bold}type#{Bold}: #{resp['content-type']}" unless title
+        if enc = resp['content-encoding']
+          logopts[:extra] << ", encoding: #{enc}"
+          extra << "#{Bold}encoding#{Bold}: #{enc}"
         end
-      }
-      return nil
+
+        size = resp['content-length'].first.gsub(/(\d)(?=\d{3}+(?:\.|$))(\d{3}\..*)?/,'\1,\2') rescue nil
+        if size
+          logopts[:extra] << ", size: #{size} bytes"
+          extra << "#{Bold}size#{Bold}: #{size} bytes"
+        end
+      end
     rescue Exception => e
       case e
       when UrlLinkError
@@ -145,6 +101,12 @@ class UrlPlugin < Plugin
         raise "connecting to site/processing information (#{e.message})"
       end
     end
+
+    call_event(:url_added, url.to_s, logopts)
+    if title
+      extra.unshift("#{Bold}title#{Bold}: #{title}")
+    end
+    return extra.join(", ") if title or not @bot.config['url.titles_only']
   end
 
   def handle_urls(m, urls, display_info=@bot.config['url.display_link_info'])
