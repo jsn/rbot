@@ -146,8 +146,21 @@ class ReactionPlugin < Plugin
     m.__send__(*args)
   end
 
+  def find_reaction(trigger)
+    @reactions.find { |react|
+      react.raw_trigger == trigger
+    }
+  end
+
   def handle_add(m, params)
-    reaction = Reaction.new(params[:trigger].to_s, params[:reply].to_s, m.sourcenick, Time.now, m.channel)
+    trigger = params[:trigger].to_s
+    reply = params[:reply].to_s
+    if find_reaction(trigger)
+      m.reply "there's already a reaction to #{trigger}"
+      return
+    end
+
+    reaction = Reaction.new(trigger, reply, m.sourcenick, Time.now, m.channel)
     @reactions << reaction
     m.reply "added reaction to #{reaction.trigger.last} with #{reaction.reply.last}"
   end
@@ -155,9 +168,7 @@ class ReactionPlugin < Plugin
   def handle_rm(m, params)
     trigger = params[:trigger].to_s
     debug trigger.inspect
-    found = @reactions.find { |react|
-      react.raw_trigger == trigger
-    }
+    found = find_reaction(trigger)
     if found
       @reactions.delete(found)
       m.reply "removed reaction to #{found.trigger.last} with #{found.reply.last}"
