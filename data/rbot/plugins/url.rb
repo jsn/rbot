@@ -164,6 +164,7 @@ class UrlPlugin < Plugin
 
     escaped = URI.escape(m.message, OUR_UNSAFE)
     urls = URI.extract(escaped, ['http', 'https'])
+    return if urls.empty?
     Thread.new { handle_urls(m, urls) }
   end
 
