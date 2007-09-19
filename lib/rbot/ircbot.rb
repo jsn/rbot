@@ -622,7 +622,7 @@ class Bot
 
       @plugins.delegate("listen", m)
       @plugins.delegate("join", m)
-      sendq "WHO #{data[:channel]}", data[:channel], 2
+      sendq("WHO #{data[:channel]}", data[:channel], 2) if m.address?
     }
     @client[:part] = proc {|data|
       m = PartMessage.new(self, server, data[:source], data[:channel], data[:message])
