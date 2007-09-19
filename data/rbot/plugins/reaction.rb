@@ -121,7 +121,7 @@ class ReactionPlugin < Plugin
     end
   end
 
-  def listen(m)
+  def unreplied(m)
     return unless PrivMessage === m
     debug "testing #{m} for reactions"
     return if @reactions.empty?
