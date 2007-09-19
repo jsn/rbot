@@ -64,6 +64,12 @@ end
 
 class ReactionPlugin < Plugin
 
+  ADD_SYNTAX = 'react to *trigger with *reply'
+
+  def add_syntax
+    return ADD_SYNTAX
+  end
+
   attr :reactions
 
   def initialize
@@ -92,13 +98,14 @@ class ReactionPlugin < Plugin
   end
 
   def help(plugin, topic="")
+    if plugin.to_sym == :react
+      return "react to <trigger> with <reply> => create a new reaction to expression <trigger> to which the bot will reply <reply>, seek help for reaction trigger and reaction reply for more details"
+    end
     case (topic.to_sym rescue nil)
-    when :add
-      "reaction add <trigger> <reply> => create a new reaction to expression <trigger> to which the bot will reply <reply>"
     when :remove, :delete, :rm, :del
       "reaction #{topic} <trigger> => removes the reaction to expression <trigger>"
     when :trigger, :triggers
-      "reaction triggers can have one of the format: single_word /regular_expression/ !regular_expression!. " + 
+      "reaction triggers can have one of the format: single_word 'multiple words' \"multiple words \" /regular_expression/ !regular_expression!. " + 
       "If prefixed by 'act:' (e.g. act:/(order|command)s/) the bot will only respond if a CTCP ACTION matches the trigger"
     when :reply, :replies
       "reaction replies are simply messages that the bot will reply when a trigger is matched. " +
@@ -108,7 +115,7 @@ class ReactionPlugin < Plugin
       "target (the first word following the trigger), what (whatever follows target), " +
       "stuff (everything that follows the trigger), match (the actual matched text)"
     when :list
-      "lists all the programmed reactions"
+      "reaction list [n]: lists the n-the page of programmed reactions (30 reactions are listed per page)"
     else
       "reaction topics: add, remove, delete, rm, del, triggers, replies, list"
     end
@@ -178,11 +185,15 @@ end
 
 plugin = ReactionPlugin.new
 
-plugin.map 'reaction add *trigger *reply', :action => 'handle_add',
+plugin.map plugin.add_syntax, :action => 'handle_add',
   :requirements => { :trigger => /^(?:act:)?!.*?!/ }
-plugin.map 'reaction add *trigger *reply', :action => 'handle_add',
+plugin.map plugin.add_syntax, :action => 'handle_add',
   :requirements => { :trigger => /^(?:act:)?\/.*?\// }
-plugin.map 'reaction add :trigger *reply', :action => 'handle_add'
+plugin.map plugin.add_syntax, :action => 'handle_add',
+  :requirements => { :trigger => /^(?:act:)?".*?"/ }
+plugin.map plugin.add_syntax, :action => 'handle_add',
+  :requirements => { :trigger => /^(?:act:)?'.*?'/ }
+plugin.map plugin.add_syntax.sub('*', ':'), :action => 'handle_add'
 
 plugin.map 'reaction list [:page]', :action => 'handle_list',
   :requirements => { :page => /^\d+$/ }
