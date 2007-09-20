@@ -216,7 +216,7 @@ class ReactionPlugin < Plugin
     reply = params[:reply].to_s
 
     pct = params[:chance] || "1"
-    if pct.sub(/%$/,'')
+    if pct.sub!(/%$/,'')
       pct = (pct.to_f/100).clip(0,1)
     else
       pct = pct.to_f.clip(0,1)
