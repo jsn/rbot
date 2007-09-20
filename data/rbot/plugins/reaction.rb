@@ -136,9 +136,14 @@ end
 class ReactionPlugin < Plugin
 
   ADD_SYNTAX = 'react to *trigger with *reply [at :chance chance]'
+  MOVE_SYNTAX = 'reaction move *source to *dest'
 
   def add_syntax
     return ADD_SYNTAX
+  end
+
+  def move_syntax
+    return MOVE_SYNTAX
   end
 
   attr :reactions
@@ -264,6 +269,22 @@ class ReactionPlugin < Plugin
     m.reply "I'll react to #{reaction.raw_trigger} with #{reaction.raw_replies.last} (#{(reaction.replies.last.pct * 100).to_i}%)"
   end
 
+  def handle_move(m, params)
+    source = params[:source].to_s
+    dest = params[:dest].to_s
+    found = find_reaction(source)
+    if not found
+      m.reply "I don't react to #{source}"
+      return
+    end
+    if find_reaction(dest)
+      m.reply "I already react to #{dest}, so I won't move #{source} to #{dest}"
+      return
+    end
+    found.trigger=dest
+    m.reply "Ok, I'll react to #{found.raw_trigger} now"
+  end
+
   def handle_rm(m, params)
     trigger = params[:trigger].to_s
     debug trigger.inspect
@@ -327,6 +348,17 @@ plugin.map 'reaction list [:page]', :action => 'handle_list',
   :requirements => { :page => /^\d+$/ }
 
 plugin.map 'reaction show *trigger', :action => 'handle_show'
+
+plugin.map plugin.move_syntax, :action => 'handle_move',
+  :requirements => { :source => /^(?:act:)?!.*?!/ }
+plugin.map plugin.move_syntax, :action => 'handle_move',
+  :requirements => { :source => /^(?:act:)?\/.*?\// }
+plugin.map plugin.move_syntax, :action => 'handle_move',
+  :requirements => { :source => /^(?:act:)?".*?"/ }
+plugin.map plugin.move_syntax, :action => 'handle_move',
+  :requirements => { :source => /^(?:act:)?'.*?'/ }
+plugin.map plugin.move_syntax.sub('*', ':'), :action => 'handle_move'
+
 
 plugin.map 'reaction del[ete] *trigger', :action => 'handle_rm'
 plugin.map 'reaction delete *trigger', :action => 'handle_rm'
