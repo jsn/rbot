@@ -16,16 +16,32 @@ class ::Reaction
   attr_reader :raw_trigger, :raw_replies
 
   class ::Reply
-    attr_accessor :act, :reply, :pct, :range
-    attr_accessor :author, :date, :channel
-    def initialize(act, expr, pct, author, date, channel, range=nil)
+    attr_reader :act, :reply, :pct, :range
+    attr_reader :author, :date, :channel
+    attr_writer :date
+
+    def pct=(val)
+      @pct = val
+      @reaction.make_ranges
+    end
+
+    def author=(name)
+      @author = name.to_s
+    end
+
+    def channel=(name)
+      @channel = name.to_s
+    end
+
+    def initialize(reaction, act, expr, pct, author, date, channel)
+      @reaction = reaction
       @act = act
       @reply = expr
-      @pct = pct
-      @author = author.to_s
+      self.pct = pct
+      self.author = author
       @date = date
-      @channel = channel.to_s
-      @range = range
+      self.channel = channel
+      debug self
     end
 
     def to_s
@@ -63,8 +79,13 @@ class ::Reaction
     if rex.sub!(/^act:/,'')
       act = true
     end
-    @replies << Reply.new(act ? :act : :reply, rex, *args)
-    make_ranges
+    @replies << Reply.new(self, act ? :act : :reply, rex, *args)
+    debug @replies.last
+    return @replies.last
+  end
+
+  def find_reply(expr)
+    @replies[@raw_replies.index(expr)] rescue nil
   end
 
   def make_ranges
@@ -232,7 +253,15 @@ class ReactionPlugin < Plugin
       @reactions << reaction
       m.reply "Ok, I'll start reacting to #{reaction.raw_trigger}"
     end
-    reaction.add_reply(reply, pct, m.sourcenick, Time.now, m.channel)
+    found = reaction.find_reply(reply)
+    if found
+      found.pct = pct
+      found.author = m.sourcenick
+      found.date = Time.now
+      found.channel = m.channel
+    else
+      found = reaction.add_reply(reply, pct, m.sourcenick, Time.now, m.channel)
+    end
     m.reply "I'll react to #{reaction.raw_trigger} with #{reaction.raw_replies.last} (#{(reaction.replies.last.pct * 100).to_i}%)"
   end
 
