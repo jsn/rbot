@@ -14,19 +14,26 @@
 class ::Reaction
   attr_reader :trigger, :replies
   attr_reader :raw_trigger, :raw_replies
-  attr_accessor :author, :date, :channel
 
   class ::Reply
     attr_accessor :act, :reply, :pct, :range
-    def initialize(act, expr, pct, range=nil)
+    attr_accessor :author, :date, :channel
+    def initialize(act, expr, pct, author, date, channel, range=nil)
       @act = act
       @reply = expr
       @pct = pct
+      @author = author.to_s
+      @date = date
+      @channel = channel.to_s
       @range = range
     end
 
     def to_s
-      "#{act} #{reply} #{pct}" + ( @range ? " (#{@range})" : "")
+      [
+        "#{act} #{reply} (#{pct} chance)",
+        @range ? "(#{@range})" : "",
+        "(#{author}, #{channel}, #{date})"
+      ].join(" ")
     end
 
     def apply(subs={})
@@ -49,14 +56,14 @@ class ::Reaction
     end
   end
 
-  def add_reply(expr, pct)
+  def add_reply(expr, *args)
     @raw_replies << expr.dup
     act = false
     rex = expr.dup
     if rex.sub!(/^act:/,'')
       act = true
     end
-    @replies << Reply.new(act ? :act : :reply, rex, pct)
+    @replies << Reply.new(act ? :act : :reply, rex, *args)
     make_ranges
   end
 
@@ -94,17 +101,14 @@ class ::Reaction
     return message.message.match(@trigger.last)
   end
 
-  def initialize(trig, auth, dt, chan)
+  def initialize(trig)
     self.trigger=trig
-    self.author=auth.to_s
-    self.date=dt
-    self.channel=chan.to_s
     @raw_replies = []
     @replies = []
   end
 
   def to_s
-    "trigger #{raw_trigger} (#{author}, #{channel}, #{date})"
+    raw_trigger
   end
 
 end
@@ -220,11 +224,11 @@ class ReactionPlugin < Plugin
 
     reaction = find_reaction(trigger)
     if not reaction
-      reaction = Reaction.new(trigger, m.sourcenick, Time.now, m.channel)
+      reaction = Reaction.new(trigger)
       @reactions << reaction
       m.reply "Ok, I'll start reacting to #{reaction.raw_trigger}"
     end
-    reaction.add_reply(reply, pct)
+    reaction.add_reply(reply, pct, m.sourcenick, Time.now, m.channel)
     m.reply "I'll react to #{reaction.raw_trigger} with #{reaction.raw_replies.last} (#{(reaction.replies.last.pct * 100).to_i}%)"
   end
 
@@ -255,6 +259,24 @@ class ReactionPlugin < Plugin
     m.reply "Programmed reactions (page #{page}/#{pages}): #{str}"
   end
 
+  def handle_show(m, params)
+    if @reactions.empty?
+      m.reply "no reactions programmed"
+      return
+    end
+
+    trigger = params[:trigger].to_s
+
+    found = find_reaction(trigger)
+
+    unless found
+      m.reply "I'm not reacting to #{trigger}"
+      return
+    end
+
+    m.reply found.replies.join(", ")
+  end
+
 end
 
 plugin = ReactionPlugin.new
@@ -271,6 +293,8 @@ plugin.map plugin.add_syntax.sub('*', ':'), :action => 'handle_add'
 
 plugin.map 'reaction list [:page]', :action => 'handle_list',
   :requirements => { :page => /^\d+$/ }
+
+plugin.map 'reaction show *trigger', :action => 'handle_show'
 
 plugin.map 'reaction del[ete] *trigger', :action => 'handle_rm'
 plugin.map 'reaction delete *trigger', :action => 'handle_rm'
