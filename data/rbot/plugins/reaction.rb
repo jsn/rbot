@@ -12,9 +12,27 @@
 # Very alpha stage, so beware of sudden reaction syntax changes
 
 class ::Reaction
-  attr_reader :trigger, :reply
-  attr_reader :raw_trigger, :raw_reply
+  attr_reader :trigger, :replies
+  attr_reader :raw_trigger, :raw_replies
   attr_accessor :author, :date, :channel
+
+  class ::Reply
+    attr_accessor :act, :reply, :pct, :range
+    def initialize(act, expr, pct, range=nil)
+      @act = act
+      @reply = expr
+      @pct = pct
+      @range = range
+    end
+
+    def to_s
+      "#{act} #{reply} #{pct}" + ( @range ? " (#{@range})" : "")
+    end
+
+    def apply(subs={})
+      [act, reply % subs]
+    end
+  end
 
   def trigger=(expr)
     @raw_trigger = expr.dup
@@ -25,22 +43,50 @@ class ::Reaction
     end
     @trigger = [act]
     if rex.sub!(%r@^([/!])(.*)\1$@, '\2')
-      debug rex
       @trigger << Regexp.new(rex)
     else
       @trigger << Regexp.new(/\b#{Regexp.escape(rex)}\b/u)
     end
   end
 
-  def reply=(expr)
-    @raw_reply = expr.dup
+  def add_reply(expr, pct)
+    @raw_replies << expr.dup
     act = false
     rex = expr.dup
     if rex.sub!(/^act:/,'')
       act = true
     end
-    @reply = [act ? :act : :reply]
-    @reply << rex
+    @replies << Reply.new(act ? :act : :reply, rex, pct)
+    make_ranges
+  end
+
+  def make_ranges
+    totals = 0
+    pcts = @replies.map { |rep|
+      totals += rep.pct
+      rep.pct
+    }
+    pcts.map! { |p|
+      p/totals
+    } if totals > 1
+    debug "percentages: #{pcts.inspect}"
+
+    last = 0
+    @replies.each_with_index { |r, i|
+      p = pcts[i]
+      r.range = last..(last+p)
+      last+=p
+    }
+    debug "ranges: #{@replies.map { |r| r.range}.inspect}"
+  end
+
+  def pick_reply
+    pick = rand()
+    debug "#{pick} in #{@replies.map { |r| r.range}.inspect}"
+    @replies.each { |r|
+      return r if r.range and r.range === pick
+    }
+    return nil
   end
 
   def ===(message)
@@ -48,12 +94,13 @@ class ::Reaction
     return message.message.match(@trigger.last)
   end
 
-  def initialize(trig, msg , auth, dt, chan)
+  def initialize(trig, auth, dt, chan)
     self.trigger=trig
-    self.reply=msg
     self.author=auth.to_s
     self.date=dt
     self.channel=chan.to_s
+    @raw_replies = []
+    @replies = []
   end
 
   def to_s
@@ -64,7 +111,7 @@ end
 
 class ReactionPlugin < Plugin
 
-  ADD_SYNTAX = 'react to *trigger with *reply'
+  ADD_SYNTAX = 'react to *trigger with *reply at :chance chance'
 
   def add_syntax
     return ADD_SYNTAX
@@ -99,11 +146,17 @@ class ReactionPlugin < Plugin
 
   def help(plugin, topic="")
     if plugin.to_sym == :react
-      return "react to <trigger> with <reply> => create a new reaction to expression <trigger> to which the bot will reply <reply>, seek help for reaction trigger and reaction reply for more details"
+      return "react to <trigger> with <reply> [at <chance> chance] => " +
+      "create a new reaction to expression <trigger> to which the bot will reply <reply>, optionally at chance <chance>, " +
+      "seek help for reaction trigger, reaction reply and reaction chance for more details"
     end
     case (topic.to_sym rescue nil)
     when :remove, :delete, :rm, :del
       "reaction #{topic} <trigger> => removes the reaction to expression <trigger>"
+    when :chance, :chances
+      "reaction chances are expressed either in terms of percentage (like 30%) or in terms of floating point numbers (like 0.3), and are clipped to be " +
+      "between 0 and 1 (i.e. 0% and 100%). A reaction can have multiple replies, each with a different chance; if the total of the chances is less than one, " +
+      "there is a chance that the trigger will not actually cause a reply. Otherwise, the chances express the relative frequency of the replies."
     when :trigger, :triggers
       "reaction triggers can have one of the format: single_word 'multiple words' \"multiple words \" /regular_expression/ !regular_expression!. " + 
       "If prefixed by 'act:' (e.g. act:/(order|command)s/) the bot will only respond if a CTCP ACTION matches the trigger"
@@ -141,8 +194,10 @@ class ReactionPlugin < Plugin
       :stuff => stuff
     }
     subs = @subs.dup.merge extra
-    args = [wanted.reply.first]
-    args << wanted.reply.last % extra
+    reply = wanted.pick_reply
+    debug "picked #{reply}"
+    return unless reply
+    args = reply.apply(subs)
     m.__send__(*args)
   end
 
@@ -155,14 +210,22 @@ class ReactionPlugin < Plugin
   def handle_add(m, params)
     trigger = params[:trigger].to_s
     reply = params[:reply].to_s
-    if find_reaction(trigger)
-      m.reply "there's already a reaction to #{trigger}"
-      return
+
+    pct = params[:chance] || "1"
+    if pct.sub(/%$/,'')
+      pct = (pct.to_f/100).clip(0,1)
+    else
+      pct = pct.to_f.clip(0,1)
     end
 
-    reaction = Reaction.new(trigger, reply, m.sourcenick, Time.now, m.channel)
-    @reactions << reaction
-    m.reply "added reaction to #{reaction.trigger.last} with #{reaction.reply.last}"
+    reaction = find_reaction(trigger)
+    if not reaction
+      reaction = Reaction.new(trigger, m.sourcenick, Time.now, m.channel)
+      @reactions << reaction
+      m.reply "Ok, I'll start reacting to #{reaction.raw_trigger}"
+    end
+    reaction.add_reply(reply, pct)
+    m.reply "I'll react to #{reaction.raw_trigger} with #{reaction.raw_replies.last} (#{(reaction.replies.last.pct * 100).to_i}%)"
   end
 
   def handle_rm(m, params)
@@ -171,7 +234,7 @@ class ReactionPlugin < Plugin
     found = find_reaction(trigger)
     if found
       @reactions.delete(found)
-      m.reply "removed reaction to #{found.trigger.last} with #{found.reply.last}"
+      m.reply "I won't react to #{found.raw_trigger} anymore"
     else
       m.reply "no reaction programmed for #{trigger}"
     end
