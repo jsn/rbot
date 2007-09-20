@@ -155,6 +155,8 @@ class ReactionPlugin < Plugin
       "seek help for reaction trigger, reaction reply and reaction chance for more details"
     end
     case (topic.to_sym rescue nil)
+    when :add
+      help(:react)
     when :remove, :delete, :rm, :del
       "reaction #{topic} <trigger> => removes the reaction to expression <trigger>"
     when :chance, :chances
@@ -173,8 +175,10 @@ class ReactionPlugin < Plugin
       "stuff (everything that follows the trigger), match (the actual matched text)"
     when :list
       "reaction list [n]: lists the n-the page of programmed reactions (30 reactions are listed per page)"
+    when :show
+      "reaction show <trigger>: list the programmed replies to trigger <trigger>"
     else
-      "reaction topics: add, remove, delete, rm, del, triggers, replies, list"
+      "reaction topics: add, remove, delete, rm, del, triggers, replies, chance, list, show"
     end
   end
 
