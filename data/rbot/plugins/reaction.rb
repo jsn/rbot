@@ -135,7 +135,7 @@ end
 
 class ReactionPlugin < Plugin
 
-  ADD_SYNTAX = 'react to *trigger with *reply at :chance chance'
+  ADD_SYNTAX = 'react to *trigger with *reply [at :chance chance]'
 
   def add_syntax
     return ADD_SYNTAX
