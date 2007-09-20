@@ -41,7 +41,6 @@ class ::Reaction
       self.author = author
       @date = date
       self.channel = channel
-      debug self
     end
 
     def to_s
@@ -80,7 +79,7 @@ class ::Reaction
       act = true
     end
     @replies << Reply.new(self, act ? :act : :reply, rex, *args)
-    debug @replies.last
+    make_ranges
     return @replies.last
   end
 
