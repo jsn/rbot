@@ -68,6 +68,7 @@ class ::Reaction
     if rex.sub!(%r@^([/!])(.*)\1$@, '\2')
       @trigger << Regexp.new(rex, true)
     else
+      rex.sub!(/^(["'])(.*)\1$/, '\2')
       @trigger << Regexp.new(/\b#{Regexp.escape(rex)}\b/ui)
     end
   end
