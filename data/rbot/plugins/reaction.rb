@@ -196,7 +196,7 @@ class ReactionPlugin < Plugin
     when :reply, :replies
       "reaction replies are simply messages that the bot will reply when a trigger is matched. " +
       "Replies can be prefixed by 'act:' (e.g. act:goes shopping) to signify that the bot should act instead of saying the message. " +
-      "Replies can use the %%{key} syntax to access one of the following keys: " +
+      "Replies can use the %{key} syntax to access one of the following keys: " +
       "who (the user that said the trigger), bot (the bot's own nick), " +
       "target (the first word following the trigger), what (whatever follows target), " +
       "stuff (everything that follows the trigger), match (the actual matched text), " +
