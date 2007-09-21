@@ -111,7 +111,7 @@ class ::Reaction
     pick = rand()
     debug "#{pick} in #{@replies.map { |r| r.range}.inspect}"
     @replies.each { |r|
-      return r if (!r.range) or r.range === pick
+      return r if r.range and r.range === pick
     }
     return nil
   end
