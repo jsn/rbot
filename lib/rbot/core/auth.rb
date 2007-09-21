@@ -238,12 +238,21 @@ class AuthModule < CoreBotModule
   end
 
   def auth_whoami(m, params)
-    rep = ""
-    # if m.public?
-    #   rep << m.source.nick << ", "
-    # end
     m.reply _("you are %{who}") % {
       :who => get_botusername_for(m.source).gsub(
+                /^everyone$/, _("no one that I know")).gsub(
+                /^owner$/, _("my boss"))
+    }
+  end
+
+  def auth_whois(m, params)
+    return auth_whoami(m, params) if !m.public?
+    u = m.channel.users[params[:user]]
+
+    return m.reply "I don't see anyone named '#{params[:user]}' here" unless u
+
+    m.reply _("#{params[:user]} is %{who}") % {
+      :who => get_botusername_for(u).gsub(
                 /^everyone$/, _("no one that I know")).gsub(
                 /^owner$/, _("my boss"))
     }
@@ -834,6 +843,10 @@ auth.default_auth("edit::other", false)
 
 auth.map "whoami",
   :action => 'auth_whoami',
+  :auth_path => '!*!'
+
+auth.map "who is :user",
+  :action => 'auth_whois',
   :auth_path => '!*!'
 
 auth.map "auth :password",
