@@ -223,14 +223,16 @@ class ReactionPlugin < Plugin
       m1.first[0].length <=> m2.first[0].length
     }.last
     matched = match[0]
-    stuff = match.post_match.strip
-    target, what = stuff.split(/\s+/, 2)
+    before = match.pre_match.strip
+    after = match.post_match.strip
+    target, what = after.split(/\s+/, 2)
     extra = {
       :who => m.sourcenick,
       :match => matched,
       :target => target,
       :what => what,
-      :stuff => stuff
+      :before => before,
+      :after => after
     }
     match.to_a.each_with_index { |d, i|
       extra[:"match#{i}"] = d
