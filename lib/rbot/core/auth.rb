@@ -359,8 +359,8 @@ class AuthModule < CoreBotModule
     case cmd.to_sym
 
     when :show
-      return _("you can't see the properties of %{user}") %
-             {:user => butarget.username} if botuser != butarget &&
+      return m.reply(_("you can't see the properties of %{user}") %
+             {:user => butarget.username}) if botuser != butarget &&
                                                !botuser.permit?("auth::show::other")
 
       case splits[1]
