@@ -213,11 +213,14 @@ class ReactionPlugin < Plugin
     return unless PrivMessage === m
     debug "testing #{m} for reactions"
     return if @reactions.empty?
-    wanted = @reactions.find { |react|
-      react === m
-    }
-    return unless wanted
-    match = wanted === m
+    candidates = @reactions.map { |react|
+      blob = react === m
+      blob ? [blob, react] : nil
+    }.compact
+    return if candidates.empty?
+    match, wanted = candidates.sort { |m1, m2|
+      m1.first[0].length <=> m2.first[0].length
+    }.last
     matched = match[0]
     stuff = match.post_match.strip
     target, what = stuff.split(/\s+/, 2)
