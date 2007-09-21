@@ -66,9 +66,9 @@ class ::Reaction
     end
     @trigger = [act]
     if rex.sub!(%r@^([/!])(.*)\1$@, '\2')
-      @trigger << Regexp.new(rex)
+      @trigger << Regexp.new(rex, true)
     else
-      @trigger << Regexp.new(/\b#{Regexp.escape(rex)}\b/u)
+      @trigger << Regexp.new(/\b#{Regexp.escape(rex)}\b/ui)
     end
   end
 
@@ -241,7 +241,7 @@ class ReactionPlugin < Plugin
 
   def find_reaction(trigger)
     @reactions.find { |react|
-      react.raw_trigger == trigger
+      react.raw_trigger.downcase == trigger.downcase
     }
   end
 
