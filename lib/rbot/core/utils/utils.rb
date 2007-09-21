@@ -466,7 +466,7 @@ module ::Irc
           end
 
           # output the symbol's irc-translated character, or a * if it's unknown
-          UNESCAPE_TABLE[symbol] || [symbol[/\d+/].to_i].pack("U") rescue '*'
+          UNESCAPE_TABLE[symbol] || (symbol.match(/^\d+$/) ? [$0.to_i].pack("U") : '*')
         }
       end
     end
