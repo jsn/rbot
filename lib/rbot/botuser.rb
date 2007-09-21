@@ -9,6 +9,7 @@
 
 require 'singleton'
 require 'set'
+require 'rbot/maskdb'
 
 # This would be a good idea if it was failproof, but the truth
 # is that other methods can indirectly modify the hash. *sigh*
@@ -240,8 +241,17 @@ class Bot
       # when modifying data
       attr_reader :data
       attr_writer :login_by_mask
-      attr_writer :autologin
       attr_writer :transient
+
+      def autologin=(vnew)
+        vold = @autologin
+        @autologin = vnew
+        if vold && !vnew
+          @netmasks.each { |n| Auth.manager.maskdb.remove(self, n) }
+        elsif vnew && !vold
+          @netmasks.each { |n| Auth.manager.maskdb.add(self, n) }
+        end
+      end
 
       # Checks if the BotUser is transient
       def transient?
@@ -250,7 +260,7 @@ class Bot
 
       # Checks if the BotUser is permanent (not transient)
       def permanent?
-        !@permanent
+        !@transient
       end
 
       # Sets if the BotUser is permanent or not
@@ -363,10 +373,13 @@ class Bot
       def from_hash(h)
         @username = h[:username] if h.has_key?(:username)
         @password = h[:password] if h.has_key?(:password)
-        @netmasks = h[:netmasks] if h.has_key?(:netmasks)
-        @perm = h[:perm] if h.has_key?(:perm)
         @login_by_mask = h[:login_by_mask] if h.has_key?(:login_by_mask)
         @autologin = h[:autologin] if h.has_key?(:autologin)
+        if h.has_key?(:netmasks)
+          @netmasks = h[:netmasks]
+          @netmasks.each { |n| Auth.manager.maskdb.add(self, n) } if @autologin
+        end
+        @perm = h[:perm] if h.has_key?(:perm)
         @data.replace(h[:data]) if h.has_key?(:data)
       end
 
@@ -427,7 +440,12 @@ class Bot
       # Adds a Netmask
       #
       def add_netmask(mask)
-        @netmasks << mask.to_irc_netmask
+        m = mask.to_irc_netmask
+        @netmasks << m
+        if self.autologin?
+          Auth.manager.maskdb.add(self, m)
+          Auth.manager.logout_transients(m) if self.permanent?
+        end
       end
 
       # Removes a Netmask
@@ -435,26 +453,14 @@ class Bot
       def delete_netmask(mask)
         m = mask.to_irc_netmask
         @netmasks.delete(m)
-      end
-
-      # Removes all <code>Netmask</code>s
-      #
-      def reset_netmasks
-        @netmasks = NetmaskList.new
+        Auth.manager.maskdb.remove(self, m) if self.autologin?
       end
 
       # This method checks if BotUser has a Netmask that matches _user_
       #
       def knows?(usr)
         user = usr.to_irc_user
-        known = false
-        @netmasks.each { |n|
-          if user.matches?(n)
-            known = true
-            break
-          end
-        }
-        return known
+        !!@netmasks.find { |n| user.matches? n }
       end
 
       # This method gets called when User _user_ wants to log in.
@@ -550,12 +556,6 @@ class Bot
         return true
       end
 
-      # Resets the NetmaskList
-      def reset_netmasks
-        super
-        add_netmask("*!*@*")
-      end
-
       # DefaultBotUser will check the default_perm after checking
       # the global ones
       # or on all channels if _chan_ is nil
@@ -608,6 +608,7 @@ class Bot
 
       include Singleton
 
+      attr_reader :maskdb
       attr_reader :everyone
       attr_reader :botowner
       attr_reader :bot
@@ -649,10 +650,11 @@ class Bot
       # resets the hashes
       def reset_hashes
         @botusers = Hash.new
+        @maskdb = NetmaskDb.new
         @allbotusers = Hash.new
-        [everyone, botowner].each { |x|
+        [everyone, botowner].each do |x|
           @allbotusers[x.username.to_sym] = x
-        }
+        end
         @transients = Set.new
       end
 
@@ -740,17 +742,17 @@ class Bot
         ircuser = user.to_irc_user
         debug "Trying to autologin #{ircuser}"
         return @botusers[ircuser] if @botusers.has_key?(ircuser)
-        @allbotusers.each { |n, bu|
-          debug "Checking with #{n}"
-          return bu if bu.autologin? and login(ircuser, n)
-        }
-        # Check with transient users
-        @transients.each { |bu|
-          return bu if bu.login(ircuser)
-        }
+        bu = maskdb.find(ircuser)
+        if bu
+          debug "trying #{bu}"
+          bu.login(ircuser) or raise '...what?!'
+          @botusers[ircuser] = bu
+          return bu
+        end
         # Finally, create a transient if we're set to allow it
         if @bot.config['auth.autouser']
           bu = create_transient_botuser(ircuser)
+          @botusers[ircuser] = bu
           return bu
         end
         return everyone
@@ -773,6 +775,17 @@ class Bot
           error $!
         end
         return bu
+      end
+
+      def logout_transients(m)
+        debug "to check: #{@botusers.keys.join ' '}"
+        @botusers.keys.each do |iu|
+          debug "checking #{iu.fullform} agains #{m.fullform}"
+          bu = @botusers[iu]
+          bu.transient? or next
+          iu.matches?(m) or next
+          @botusers.delete(iu).autologin = false
+        end
       end
 
       # Checks if User _user_ can do _cmd_ on _chan_.
