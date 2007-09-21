@@ -16,7 +16,8 @@ class ::Reaction
   attr_reader :raw_trigger, :raw_replies
 
   class ::Reply
-    attr_reader :act, :reply, :pct, :range
+    attr_reader :act, :reply, :pct
+    attr_accessor :range
     attr_reader :author, :date, :channel
     attr_writer :date
 
