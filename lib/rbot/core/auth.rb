@@ -343,10 +343,12 @@ class AuthModule < CoreBotModule
     butarget = botuser
 
     has_for = splits[-2] == "for"
-    butarget = @bot.auth.get_botuser(splits[-1]) if has_for
-    return m.reply(_("you can't mess with %{user}") % {:user => butarget.username}) \
-           if butarget == @bot.auth.botowner && botuser != butarget
-    splits.slice!(-2,2) if has_for
+    if has_for
+      butarget = @bot.auth.get_botuser(splits[-1]) rescue nil
+      return m.reply(_("no such bot user %{user}") % {:user => splits[-1]}) unless butarget
+      splits.slice!(-2,2)
+    end
+    return m.reply(_("you can't mess with %{user}") % {:user => butarget.username}) if butarget == @bot.auth.botowner && botuser != butarget
 
     bools = [:autologin, :"login-by-mask"]
     can_set = [:password]
