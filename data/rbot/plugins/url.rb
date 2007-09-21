@@ -120,19 +120,21 @@ class UrlPlugin < Plugin
       next unless urlstr =~ /^https?:/
       title = nil
       debug "Getting title for #{urlstr}..."
+      reply = nil
       begin
         title = get_title_for_url(urlstr,
                                   :nick => m.source.nick,
                                   :channel => m.channel,
                                   :ircline => m.message)
         debug "Title #{title ? '' : 'not '} found"
+        reply = "#{LINK_INFO} #{title}" if title
       rescue => e
-        m.reply "Error #{e.message}"
+        reply = "Error #{e.message}"
       end
 
       if display_info > urls_displayed
-        if title
-          m.reply("#{LINK_INFO} #{title}", :overlong => :truncate)
+        if reply
+          m.reply(reply, :overlong => :truncate)
           urls_displayed += 1
         end
       end
