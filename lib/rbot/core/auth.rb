@@ -495,7 +495,9 @@ class AuthModule < CoreBotModule
       splits[2..-1].each { |mask|
         begin
           butarget.send(method, mask.to_irc_netmask(:server => @bot.server))
-        rescue
+        rescue => e
+          debug "failed with #{e.message}"
+          debug e.backtrace.join "\n"
           failed << mask
         end
       }
