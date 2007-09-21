@@ -31,24 +31,19 @@ rescue LoadError
     module ::Irc
       module Utils
         UNESCAPE_TABLE = {
-    'laquo' => '<<',
-    'raquo' => '>>',
+    'laquo' => '«',
+    'raquo' => '»',
     'quot' => '"',
     'apos' => '\'',
-    'micro' => 'u',
-    'copy' => '(c)',
-    'trade' => '(tm)',
-    'reg' => '(R)',
-    '#174' => '(R)',
-    '#8220' => '"',
-    '#8221' => '"',
-    '#8212' => '--',
-    '#39' => '\'',
+    'micro' => 'µ',
+    'copy' => '©',
+    'trade' => '™',
+    'reg' => '®',
     'amp' => '&',
     'lt' => '<',
     'gt' => '>',
-    'hellip' => '...',
-    'nbsp' => ' ',
+    'hellip' => '…',
+    'nbsp' => ' ',
 =begin
     # extras codes, for future use...
     'zwnj' => '&#8204;',
