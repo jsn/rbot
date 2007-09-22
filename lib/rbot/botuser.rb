@@ -275,6 +275,10 @@ class Bot
         @transient = false
         reset_autologin
         reset_password # or not?
+        @netmasks.dup.each do |m|
+          delete_netmask(m)
+          add_netmask(m.generalize)
+        end
       end
 
       # Create a new BotUser with given username
@@ -664,7 +668,6 @@ class Bot
         [everyone, botowner].each do |x|
           @allbotusers[x.username.to_sym] = x
         end
-        @transients = Set.new
       end
 
       def load_array(ary, forced)
@@ -778,7 +781,6 @@ class Bot
         begin
           bu = BotUser.new(ircuser, :transient => true, :masks => ircuser)
           bu.login(ircuser)
-          @transients << bu
         rescue
           warning "failed to create transient for #{user}"
           error $!
@@ -792,7 +794,7 @@ class Bot
       def logout_transients(m)
         debug "to check: #{@botusers.keys.join ' '}"
         @botusers.keys.each do |iu|
-          debug "checking #{iu.fullform} agains #{m.fullform}"
+          debug "checking #{iu.fullform} against #{m.fullform}"
           bu = @botusers[iu]
           bu.transient? or next
           iu.matches?(m) or next
@@ -820,7 +822,6 @@ class Bot
         return nil unless tuser
         raise TypeError, "#{tuser} is not transient" unless tuser.transient?
 
-        @transients.delete(tuser)
         tuser.make_permanent(name)
         @allbotusers[tuser.username.to_sym] = tuser
 
