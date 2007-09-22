@@ -374,7 +374,6 @@ plugin.map plugin.move_syntax, :action => 'handle_move',
 plugin.map plugin.move_syntax.sub('*', ':'), :action => 'handle_move'
 
 
-plugin.map 'reaction del[ete] *trigger', :action => 'handle_rm'
-plugin.map 'reaction delete *trigger', :action => 'handle_rm'
-plugin.map 'reaction remove *trigger', :action => 'handle_rm'
-plugin.map 'reaction rm *trigger', :action => 'handle_rm'
+plugin.map 'reaction del[ete] *trigger', :action => 'handle_rm', :auth_path => 'del!'
+plugin.map 'reaction remove *trigger', :action => 'handle_rm', :auth_path => 'del!'
+plugin.map 'reaction rm *trigger', :action => 'handle_rm', :auth_path => 'del!'
