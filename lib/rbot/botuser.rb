@@ -777,6 +777,9 @@ class Bot
         return bu
       end
 
+      # Logs out any Irc::User matching Irc::Netmask _m_ and logged in
+      # to a transient BotUser
+      #
       def logout_transients(m)
         debug "to check: #{@botusers.keys.join ' '}"
         @botusers.keys.each do |iu|
