@@ -126,7 +126,8 @@ class Bot
     def initialize(bot, name)
       @bot = bot
       @name = name.downcase
-      dirs = File.dirname("#{@bot.botclass}/registry/#{@name}").split("/")
+      @filename = "#{@bot.botclass}/registry/#{@name}"
+      dirs = File.dirname(@filename).split("/")
       dirs.length.times { |i|
         dir = dirs[0,i+1].join("/")+"/"
         unless File.exist?(dir)
@@ -134,6 +135,7 @@ class Bot
           Dir.mkdir(dir)
         end
       }
+      @filename << ".db"
       @registry = nil
       @default = nil
       @recovery = nil
@@ -203,6 +205,7 @@ class Bot
 
     # lookup a key in the registry
     def [](key)
+      return nil unless File.exist?(@filename)
       if registry.has_key?(key)
         return restore(registry[key])
       elsif @default != nil
@@ -225,6 +228,7 @@ class Bot
 
     # just like Hash#each
     def each(&block)
+      return nil unless File.exist?(@filename)
       registry.each {|key,value|
         block.call(key, restore(value))
       }
@@ -232,6 +236,7 @@ class Bot
 
     # just like Hash#each_key
     def each_key(&block)
+      return nil unless File.exist?(@filename)
       registry.each {|key, value|
         block.call(key)
       }
@@ -239,6 +244,7 @@ class Bot
 
     # just like Hash#each_value
     def each_value(&block)
+      return nil unless File.exist?(@filename)
       registry.each {|key, value|
         block.call(restore(value))
       }
@@ -246,23 +252,28 @@ class Bot
 
     # just like Hash#has_key?
     def has_key?(key)
+      return false unless File.exist?(@filename)
       return registry.has_key?(key)
     end
     alias include? has_key?
     alias member? has_key?
+    alias key? has_key?
 
     # just like Hash#has_both?
     def has_both?(key, value)
+      return false unless File.exist?(@filename)
       return registry.has_both?(key, store(value))
     end
 
     # just like Hash#has_value?
     def has_value?(value)
+      return false unless File.exist?(@filename)
       return registry.has_value?(store(value))
     end
 
     # just like Hash#index?
     def index(value)
+      return nil unless File.exist?(@filename)
       ind = registry.index(store(value))
       if ind
         return ind
@@ -273,16 +284,19 @@ class Bot
 
     # delete a key from the registry
     def delete(key)
+      return nil unless File.exist?(@filename)
       return registry.delete(key)
     end
 
     # returns a list of your keys
     def keys
+      return [] unless File.exist?(@filename)
       return registry.keys
     end
 
     # Return an array of all associations [key, value] in your namespace
     def to_a
+      return [] unless File.exist?(@filename)
       ret = Array.new
       registry.each {|key, value|
         ret << [key, restore(value)]
@@ -292,6 +306,7 @@ class Bot
 
     # Return an hash of all associations {key => value} in your namespace
     def to_hash
+      return {} unless File.exist?(@filename)
       ret = Hash.new
       registry.each {|key, value|
         ret[key] = restore(value)
@@ -301,12 +316,14 @@ class Bot
 
     # empties the registry (restricted to your namespace)
     def clear
+      return true unless File.exist?(@filename)
       registry.clear
     end
     alias truncate clear
 
     # returns an array of the values in your namespace of the registry
     def values
+      return [] unless File.exist?(@filename)
       ret = Array.new
       self.each {|k,v|
         ret << restore(v)
