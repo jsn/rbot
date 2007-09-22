@@ -268,6 +268,15 @@ class Bot
         @transient=!bool
       end
 
+      # Make the BotUser permanent
+      def make_permanent(name)
+        raise TypError, "permanent already" if permanent?
+        @username = BotUser.sanitize_username(name)
+        @transient = false
+        reset_autologin
+        reset_password # or not?
+      end
+
       # Create a new BotUser with given username
       def initialize(username, options={})
         opts = {:transient => false}.merge(options)
@@ -789,6 +798,33 @@ class Bot
           iu.matches?(m) or next
           @botusers.delete(iu).autologin = false
         end
+      end
+
+      # Makes transient BotUser _user_ into a permanent BotUser
+      # named _name_; if _user_ is an Irc::User, act on the transient
+      # BotUser (if any) it's logged in as
+      #
+      def make_permanent(user, name)
+        # TODO merge BotUser instead?
+        raise "there's already a BotUser called #{name}" if include?(name)
+
+        tuser = nil
+        case user
+        when String, Irc::User
+          tuser = irc_to_botuser(user)
+        when BotUser
+          tuser = user
+        else
+          raise TypeError, "sorry, don't know how to make #{user.class} into a permanent BotUser"
+        end
+        return nil unless tuser
+        raise TypeError, "#{tuser} is not transient" unless tuser.transient?
+
+        @transients.delete(tuser)
+        tuser.make_permanent(name)
+        @allbotusers[tuser.username.to_sym] = tuser
+
+        return tuser
       end
 
       # Checks if User _user_ can do _cmd_ on _chan_.
