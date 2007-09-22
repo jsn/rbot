@@ -751,6 +751,26 @@ module Irc
       return @nick.has_irc_glob? || @user.has_irc_glob? || @host.has_irc_glob?
     end
 
+    def generalize
+      u = user.dup
+      unless u.has_irc_glob?
+        u.sub!(/^[in]=/, '=') or u.sub!(/^\W(\w+)/, '\1')
+        u = '*' + u
+      end
+
+      h = host.dup
+      unless h.has_irc_glob?
+        if h.include? '/'
+          h.sub!(/x-\w+$/, 'x-*')
+        else
+          h.match(/^[^\.]+\.[^\.]+$/) or
+          h.sub!(/^(\d+\.\d+\.\d+\.)\d+$/, '\1*') or
+          h.sub!(/^[^\.]+\./, '*.')
+        end
+      end
+      return Netmask.new("*!#{u}@#{h}", server_and_casemap)
+    end
+
     # This method is used to match the current Netmask against another one
     #
     # The method returns true if each component of the receiver matches the
