@@ -220,7 +220,10 @@ class ReactionPlugin < Plugin
     }.compact
     return if candidates.empty?
     match, wanted = candidates.sort { |m1, m2|
-      m1.first[0].length <=> m2.first[0].length
+      # Order by longest matching text first,
+      # and by number of captures second
+      longer = m1.first[0].length <=> m2.first[0].length
+      longer == 0 ? m1.first.length <=> m2.first.length : longer
     }.last
     matched = match[0]
     before = match.pre_match.strip
