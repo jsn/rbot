@@ -13,9 +13,10 @@ module ::Irc
     # intended for data retrieval only. See #set_bot_data() if you
     # need to alter User data.
     #
-    def bot_data(key=nil)
+    def botdata(key=nil)
       Irc::Utils.bot.plugins['userdata'].get_data(self,key)
     end
+    alias :get_botdata :botdata
 
     # This method is used to store Bot data associated with the
     # receiver. If no block is passed, _value_ is stored for the key
@@ -24,9 +25,10 @@ module ::Irc
     # the new value. If _value_ is present in the block form, it will
     # be used to initialize _key_ if it's missing
     # 
-    def set_bot_data(key, value=nil, &block)
+    def set_botdata(key, value=nil, &block)
       Irc::Utils.bot.plugins['userdata'].set_data(self, key, value, &block)
     end
+
   end
 end
 
