@@ -48,7 +48,7 @@ class UserDataModule < CoreBotModule
 
     ih = @ircuser[iu.nick] || {}
 
-    if bu.transient? or bu == Irc::Bot::Auth.defaultbotuser
+    if bu.transient? or bu.default?
       return ih
     else
       bh = @botuser[bu.username] || {}
@@ -82,7 +82,7 @@ class UserDataModule < CoreBotModule
     iu = user.to_irc_user
     bu = iu.botuser
 
-    if bu.transient? or bu == Irc::Bot::Auth.defaultbotuser
+    if bu.transient? or bu.default?
       @ircuser[iu.nick] = h
     else
       @botuser[bu.username] = h

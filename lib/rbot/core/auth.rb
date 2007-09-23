@@ -110,7 +110,7 @@ class AuthModule < CoreBotModule
     rescue
       return m.reply(_("couldn't find botuser %{name}") % {:name => splits[-1]})
     end
-    return m.reply(_("you can't change permissions for %{username}") % {:username => user.username}) if user == @bot.auth.botowner
+    return m.reply(_("you can't change permissions for %{username}") % {:username => user.username}) if user.owner?
     splits.slice!(-2,2) if has_for
 
     cmds, locs, warns = parse_args(splits, setting)
@@ -156,10 +156,10 @@ class AuthModule < CoreBotModule
     begin
       if params[:user].nil?
         user = get_botusername_for(m.source)
-        return m.reply(_("you are owner, you can do anything")) if user == @bot.auth.botwoner
+        return m.reply(_("you are owner, you can do anything")) if user.owner?
       else
         user = @bot.auth.get_botuser(params[:user].sub(/^all$/,"everyone"))
-        return m.reply(_("owner can do anything")) if user.username == "owner"
+        return m.reply(_("owner can do anything")) if user.owner?
       end
     rescue
       return m.reply(_("couldn't find botuser %{name}") % {:name => params[:user]})
@@ -225,8 +225,7 @@ class AuthModule < CoreBotModule
 
   def auth_autologin(m, params)
     u = do_autologin(m.source)
-    case u.username
-    when 'everyone'
+    if u.default?
       m.reply _("I couldn't find anything to let you login automatically")
     else
       m.reply welcome(m.source)
@@ -348,7 +347,7 @@ class AuthModule < CoreBotModule
       return m.reply(_("no such bot user %{user}") % {:user => splits[-1]}) unless butarget
       splits.slice!(-2,2)
     end
-    return m.reply(_("you can't mess with %{user}") % {:user => butarget.username}) if butarget == @bot.auth.botowner && botuser != butarget
+    return m.reply(_("you can't mess with %{user}") % {:user => butarget.username}) if butarget.owner? && botuser != butarget
 
     bools = [:autologin, :"login-by-mask"]
     can_set = [:password]
@@ -401,7 +400,7 @@ class AuthModule < CoreBotModule
       return m.reply("#{butarget.username} #{str.join('; ')}")
 
     when :enable, :disable
-      return m.reply(_("you can't change the default user")) if butarget == @bot.auth.everyone && !botuser.permit?("auth::edit::other::default")
+      return m.reply(_("you can't change the default user")) if butarget.default? && !botuser.permit?("auth::edit::other::default")
       return m.reply(_("you can't edit %{user}") % {:user => butarget.username}) if butarget != botuser && !botuser.permit?("auth::edit::other")
 
       return m.reply(need_args(cmd)) unless splits[1]
@@ -429,7 +428,7 @@ class AuthModule < CoreBotModule
 
     when :set
       return m.reply(_("you can't change the default user")) if
-             butarget == @bot.auth.everyone && !botuser.permit?("auth::edit::default")
+             butarget.default? && !botuser.permit?("auth::edit::default")
       return m.reply(_("you can't edit %{user}") % {:user=>butarget.username}) if
              butarget != botuser && !botuser.permit?("auth::edit::other")
 
@@ -447,7 +446,7 @@ class AuthModule < CoreBotModule
 
     when :reset
       return m.reply(_("you can't change the default user")) if
-             butarget == @bot.auth.everyone && !botuser.permit?("auth::edit::default")
+             butarget.default? && !botuser.permit?("auth::edit::default")
       return m.reply(_("you can't edit %{user}") % {:user=>butarget.username}) if
              butarget != botuser && !botuser.permit?("auth::edit::other")
 
@@ -479,7 +478,7 @@ class AuthModule < CoreBotModule
 
     when :add, :rm, :remove, :del, :delete
       return m.reply(_("you can't change the default user")) if
-             butarget == @bot.auth.everyone && !botuser.permit?("auth::edit::default")
+             butarget.default? && !botuser.permit?("auth::edit::default")
       return m.reply(_("you can't edit %{user}") % {:user => butarget.username}) if
              butarget != botuser && !botuser.permit?("auth::edit::other")
 
@@ -541,7 +540,7 @@ class AuthModule < CoreBotModule
 
   def auth_list_users(m, params)
     # TODO name regexp to filter results
-    list = @bot.auth.save_array.inject([]) { |list, x| list << x[:username] } - ['everyone', 'owner']
+    list = @bot.auth.save_array.inject([]) { |list, x| list << x[:username] unless x.default? or x.owner? }
     if defined?(@destroy_q)
       list.map! { |x|
         @destroy_q.include?(x) ? x + _(" (queued for destruction)") : x
