@@ -23,10 +23,21 @@ module ::Irc
     # _key_; if a block is passed, it will be called with the previous
     # _key_ value as parameter, and its return value will be stored as
     # the new value. If _value_ is present in the block form, it will
-    # be used to initialize _key_ if it's missing
+    # be used to initialize _key_ if it's missing.
+    #
+    # If you have to do large-scale editing of the Bot data Hash,
+    # please use with_botdata.
     # 
     def set_botdata(key, value=nil, &block)
       Irc::Utils.bot.plugins['userdata'].set_data(self, key, value, &block)
+    end
+
+    # This method yields the entire Bot data Hash to the block,
+    # and stores any changes done to it, returning a copy
+    # of the (changed) Hash.
+    #
+    def with_botdata(&block)
+      Irc::Utils.bot.plugins['userdata'].with_data(self, &block)
     end
 
   end
@@ -90,6 +101,22 @@ class UserDataModule < CoreBotModule
       @botuser[bu.username] = h
     end
     return ret
+  end
+
+  def with_data(user, &block)
+    h = get_data_hash(user)
+    debug h
+    yield h
+
+    iu = user.to_irc_user
+    bu = iu.botuser
+
+    if bu.transient? or bu.default?
+      @ircuser[iu.nick] = h
+    else
+      @botuser[bu.username] = h
+    end
+    return h
   end
 
   def handle_get(m, params)
