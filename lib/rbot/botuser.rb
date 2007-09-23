@@ -601,6 +601,19 @@ class Bot
     end
 
 
+    class BotUser
+      # Check if the current BotUser is the default one
+      def default?
+        return DefaultBotUserClass === self
+      end
+
+      # Check if the current BotUser is the owner
+      def owner?
+        return BotOwnerClass === self
+      end
+    end
+
+
     # This is the ManagerClass singleton, used to manage
     # Irc::User/Irc::Bot::Auth::BotUser connections and everything
     #
