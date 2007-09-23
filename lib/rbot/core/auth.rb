@@ -263,6 +263,8 @@ class AuthModule < CoreBotModule
       return _("login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with password <pass>. When using the full form, you must contact the bot in private. <pass> can be omitted if <botuser> allows login-by-mask and your netmask is among the known ones. if <botuser> is omitted too autologin will be attempted")
     when "whoami"
       return _("whoami: names the botuser you're linked to")
+    when "who"
+      return _("who is <user>: names the botuser <user> is linked to")
     when /^permission/
       case topic
       when "syntax"
@@ -300,7 +302,7 @@ class AuthModule < CoreBotModule
     when "auth"
       return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user")
     else
-      return _("auth commands: auth, login, whoami, permission[s], user")
+      return _("auth commands: auth, login, whoami, who, permission[s], user")
     end
   end
 
