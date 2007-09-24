@@ -76,6 +76,17 @@ class UserDataModule < CoreBotModule
     return h[key]
   end
 
+  def set_data_hash(user, h)
+    iu = user.to_irc_user
+    bu = iu.botuser
+
+    if bu.transient? or bu.default?
+      @ircuser[iu.nick] = h
+    else
+      @botuser[bu.username] = h
+    end
+  end
+
   def set_data(user, key, value=nil, &block)
     h = get_data_hash(user)
     debug h
@@ -92,14 +103,8 @@ class UserDataModule < CoreBotModule
     end
     debug ret
 
-    iu = user.to_irc_user
-    bu = iu.botuser
+    set_data_hash(user, h)
 
-    if bu.transient? or bu.default?
-      @ircuser[iu.nick] = h
-    else
-      @botuser[bu.username] = h
-    end
     return ret
   end
 
@@ -108,14 +113,8 @@ class UserDataModule < CoreBotModule
     debug h
     yield h
 
-    iu = user.to_irc_user
-    bu = iu.botuser
+    set_data_hash(user, h)
 
-    if bu.transient? or bu.default?
-      @ircuser[iu.nick] = h
-    else
-      @botuser[bu.username] = h
-    end
     return h
   end
 
