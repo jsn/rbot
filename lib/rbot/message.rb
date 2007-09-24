@@ -122,6 +122,9 @@ module Irc
     # contents of the message
     attr_accessor :message
 
+    # contents of the message (for logging purposes)
+    attr_accessor :logmessage
+
     # has the message been replied to/handled by a plugin?
     attr_accessor :replied
 
@@ -152,6 +155,7 @@ module Irc
           warning "Message does not have identification"
         end
       end
+      @logmessage = @message.dup
 
       if target && target == @bot.myself
         @address = true

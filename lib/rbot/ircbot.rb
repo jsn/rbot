@@ -1203,15 +1203,15 @@ class Bot
   def irclogprivmsg(m)
     if(m.action?)
       if(m.private?)
-        irclog "* [#{m.source}(#{m.sourceaddress})] #{m.message}", m.source
+        irclog "* [#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
       else
-        irclog "* #{m.source} #{m.message}", m.target
+        irclog "* #{m.source} #{m.logmessage}", m.target
       end
     else
       if(m.public?)
-        irclog "<#{m.source}> #{m.message}", m.target
+        irclog "<#{m.source}> #{m.logmessage}", m.target
       else
-        irclog "[#{m.source}(#{m.sourceaddress})] #{m.message}", m.source
+        irclog "[#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
       end
     end
   end
@@ -1248,18 +1248,18 @@ class Bot
   def irclogpart(m)
     if(m.address?)
       debug "left channel #{m.channel}"
-      irclog "@ Left channel #{m.channel} (#{m.message})", m.channel
+      irclog "@ Left channel #{m.channel} (#{m.logmessage})", m.channel
     else
-      irclog "@ #{m.source} left channel #{m.channel} (#{m.message})", m.channel
+      irclog "@ #{m.source} left channel #{m.channel} (#{m.logmessage})", m.channel
     end
   end
 
   def irclogkick(m)
     if(m.address?)
       debug "kicked from channel #{m.channel}"
-      irclog "@ You have been kicked from #{m.channel} by #{m.source} (#{m.message})", m.channel
+      irclog "@ You have been kicked from #{m.channel} by #{m.source} (#{m.logmessage})", m.channel
     else
-      irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.source} (#{m.message})", m.channel
+      irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.source} (#{m.logmessage})", m.channel
     end
   end
 
