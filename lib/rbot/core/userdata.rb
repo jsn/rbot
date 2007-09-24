@@ -52,6 +52,7 @@ class UserDataModule < CoreBotModule
   def initialize
     super
     @ircuser = @registry.sub_registry('ircuser')
+    @transient = @registry.sub_registry('transient')
     @botuser = @registry.sub_registry('botuser')
   end
 
@@ -61,12 +62,14 @@ class UserDataModule < CoreBotModule
 
     ih = @ircuser[iu.nick] || {}
 
-    if bu.transient? or bu.default?
+    if bu.default?
       return ih
+    elsif bu.transient?
+      bh = @transient[bu.netmasks.first.fullform] || {}
     else
       bh = @botuser[bu.username] || {}
-      return ih.merge! bh
     end
+    return ih.merge! bh
   end
 
   def get_data(user, key=nil)
@@ -81,9 +84,14 @@ class UserDataModule < CoreBotModule
     bu = iu.botuser
 
     @ircuser[iu.nick] = h
-    unless bu.transient? or bu.default?
+    return h if bu.default?
+
+    if bu.transient?
+      @transient[bu.netmasks.first.fullform] = h
+    else
       @botuser[bu.username] = h
     end
+    return h
   end
 
   def set_data(user, key, value=nil, &block)
