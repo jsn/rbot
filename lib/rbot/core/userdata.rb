@@ -80,9 +80,8 @@ class UserDataModule < CoreBotModule
     iu = user.to_irc_user
     bu = iu.botuser
 
-    if bu.transient? or bu.default?
-      @ircuser[iu.nick] = h
-    else
+    @ircuser[iu.nick] = h
+    unless bu.transient? or bu.default?
       @botuser[bu.username] = h
     end
   end
