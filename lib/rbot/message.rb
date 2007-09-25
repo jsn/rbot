@@ -287,6 +287,7 @@ module Irc
         @message = $3 || String.new
         @action = @ctcp == 'ACTION'
         debug "Received CTCP command #{@ctcp} with options #{@message} (action? #{@action})"
+        @logmessage = @message.dup
       end
 
       # free splitting for plugins
