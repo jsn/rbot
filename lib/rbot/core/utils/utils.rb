@@ -541,8 +541,8 @@ module ::Irc
       when Net::HTTPSuccess
         ret[:headers] = resp.to_hash
 
+        partial = resp.partial_body(@@bot.config['http.info_bytes'])
         if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
-          partial = resp.partial_body(@@bot.config['http.info_bytes'])
           ret.merge!(Utils.get_string_html_info(partial, opts))
         end
         return ret
