@@ -198,8 +198,6 @@ class ConfigModule < CoreBotModule
     case plugin
     when "config"
       case topic
-      when ""
-      _("config-related tasks: config topics, save, rescan")
       when "list"
       _("config list => list configuration modules, config list <module> => list configuration keys for module <module>")
       when "get"
