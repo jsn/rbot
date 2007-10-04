@@ -542,7 +542,7 @@ class AuthModule < CoreBotModule
 
   def auth_list_users(m, params)
     # TODO name regexp to filter results
-    list = @bot.auth.save_array.inject([]) { |list, x| list << x[:username] unless x.default? or x.owner? }
+    list = @bot.auth.save_array.inject([]) { |list, x| ['everyone', 'owner'].include?(x[:username]) ? list : list << x[:username] }
     if defined?(@destroy_q)
       list.map! { |x|
         @destroy_q.include?(x) ? x + _(" (queued for destruction)") : x
