@@ -706,7 +706,7 @@ class QuizPlugin < Plugin
       score = player[1].score
       ar << "#{i + 1}. #{unhilight_nick( nick )} (#{score})"
     end
-    m.reply ar.join(" | ")
+    m.reply ar.join(" | "), :split_at => /\s+\|\s+/
   end
 
 
