@@ -181,7 +181,16 @@ class DictClientPlugin < Plugin
   end
     
   def help(plugin, topic='')
-    _("define <phrase> [from <database>] => Show definition of a phrase; match <phrase> [using <strategy>] [from <database>] => Show matching phrases; dictclient databases => List databases; dictclient strategies => List strategies")
+    case topic
+    when 'define'
+      _('define <phrase> [from <database>] => Show definition of a phrase')
+    when 'match'
+      _('match <phrase> [using <strategy>] [from <database>] => Show phrases matching the given pattern')
+    when 'server information'
+      _('dictclient databases => List databases; dictclient strategies => List strategies')
+    else
+      _('look up phrases on the configured DICT server. topics: define, match, server information')
+    end
   end
 end
 
