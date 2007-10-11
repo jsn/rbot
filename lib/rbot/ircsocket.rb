@@ -310,26 +310,26 @@ module Irc
 
       if(@host)
         begin
-          @sock=TCPSocket.new(@server_uri.host, @server_uri.port, @host)
+          sock=TCPSocket.new(@server_uri.host, @server_uri.port, @host)
         rescue ArgumentError => e
           error "Your version of ruby does not support binding to a "
           error "specific local address, please upgrade if you wish "
           error "to use HOST = foo"
           error "(this option has been disabled in order to continue)"
-          @sock=TCPSocket.new(@server_uri.host, @server_uri.port)
+          sock=TCPSocket.new(@server_uri.host, @server_uri.port)
         end
       else
-        @sock=TCPSocket.new(@server_uri.host, @server_uri.port)
+        sock=TCPSocket.new(@server_uri.host, @server_uri.port)
       end
       if(@ssl)
         require 'openssl'
         ssl_context = OpenSSL::SSL::SSLContext.new()
         ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        @rawsock = @sock
-        @sock = OpenSSL::SSL::SSLSocket.new(@rawsock, ssl_context)
-        @sock.sync_close = true
-        @sock.connect
+        sock = OpenSSL::SSL::SSLSocket.new(sock, ssl_context)
+        sock.sync_close = true
+        sock.connect
       end
+      @sock = sock
       @last_send = Time.new - @sendq_delay
       @flood_send = Time.new
       @last_throttle = Time.new
@@ -404,7 +404,6 @@ module Irc
       rescue Exception => e
         error "error while shutting down: #{e.pretty_inspect}"
       end
-      @rawsock = nil if @ssl
       @sock = nil
       @burst = 0
       @sendq.clear
