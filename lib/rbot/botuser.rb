@@ -182,6 +182,9 @@ class Bot
       #
       def permit?(str)
         cmd = str.to_irc_auth_command
+        # TODO user-configurable list of always-allowed commands,
+        # for admins that want to set permissions -* for everybody
+        return true if cmd.command == :login
         allow = nil
         cmd.path.reverse.each { |k|
           if @perm.has_key?(k)
