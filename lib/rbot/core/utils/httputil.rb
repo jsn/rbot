@@ -39,7 +39,7 @@ module ::Net
 
       charsets = ['latin1'] # should be in config
 
-      if self['content-type'].match(/charset=["']?([^\s"']+)["']?/i)
+      if ctype.match(/charset=["']?([^\s"']+)["']?/i)
         charsets << $1
         debug "charset #{charsets.last} added from header"
       end
