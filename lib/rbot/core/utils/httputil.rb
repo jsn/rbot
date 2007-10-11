@@ -404,6 +404,22 @@ class HttpUtil
       undef_method :body
       alias :body :cooked_body
     end
+    unless resp['content-type']
+      debug "No content type, guessing"
+      resp['content-type'] =
+        case resp['x-rbot-location']
+        when /.html?$/i
+          'text/html'
+        when /.xml$/i
+          'application/xml'
+        when /.xhtml$/i
+          'application/xml+xhtml'
+        when /.(gif|png|jpe?g|jp2|tiff?)$/i
+          "image/#{$1.sub(/^jpg$/,'jpeg').sub(/^tif$/,'tiff')}"
+        else
+          'application/octetstream'
+        end
+    end
     if block_given?
       yield(resp)
     else
