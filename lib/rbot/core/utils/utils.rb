@@ -505,9 +505,6 @@ module ::Irc
       when Net::HTTPResponse
         Utils.get_resp_html_info(doc, opts)
       when URI
-        if doc.fragment and not doc.fragment.empty?
-          opts[:uri_fragment] ||= doc.fragment
-        end
         ret = Hash.new
         @@bot.httputil.get_response(doc) { |resp|
           ret = Utils.get_resp_html_info(resp, opts)
@@ -543,6 +540,10 @@ module ::Irc
 
         partial = resp.partial_body(@@bot.config['http.info_bytes'])
         if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
+          loc = URI.parse(resp['x-rbot-location'] || resp['location']) rescue nil
+          if loc and loc.fragment and not loc.fragment.empty?
+            opts[:uri_fragment] ||= loc.fragment
+          end
           ret.merge!(Utils.get_string_html_info(partial, opts))
         end
         return ret
