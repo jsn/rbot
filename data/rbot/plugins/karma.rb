@@ -25,7 +25,6 @@ class KarmaPlugin < Plugin
       end
       File.delete("#{@bot.botclass}/karma.rbot")
     end
-
   end
 
   def stats(m, params)
@@ -49,11 +48,17 @@ class KarmaPlugin < Plugin
       m.reply "#{thing} has neutral karma"
     end
   end
-  
+
+  def setkarma(m, params)
+    thing = (params[:key] || m.sourcenick).to_s
+    @registry[thing] = params[:val].to_i
+    karma(m, params)
+  end
   
   def help(plugin, topic="")
     "karma module: Listens to everyone's chat. <thing>++/<thing>-- => increase/decrease karma for <thing>, karma for <thing>? => show karma for <thing>, karmastats => show stats. Karma is a community rating system - only in-channel messages can affect karma and you cannot adjust your own."
   end
+
   def listen(m)
     return unless m.kind_of?(PrivMessage) && m.public?
     # in channel message, the kind we are interested in
@@ -84,6 +89,10 @@ class KarmaPlugin < Plugin
 end
 
 plugin = KarmaPlugin.new
+
+plugin.default_auth( 'edit', false )
+
 plugin.map 'karmastats', :action => 'stats'
 plugin.map 'karma :key', :defaults => {:key => false}
+plugin.map 'setkarma :key :val', :defaults => {:key => false}, :requirements => {:val => /^-?\d+$/}, :auth_path => 'edit::set!'
 plugin.map 'karma for :key'
