@@ -248,7 +248,7 @@ class AuthModule < CoreBotModule
     return auth_whoami(m, params) if !m.public?
     u = m.channel.users[params[:user]]
 
-    return m.reply "I don't see anyone named '#{params[:user]}' here" unless u
+    return m.reply("I don't see anyone named '#{params[:user]}' here") unless u
 
     m.reply _("#{params[:user]} is %{who}") % {
       :who => get_botusername_for(u).gsub(
@@ -498,7 +498,7 @@ class AuthModule < CoreBotModule
           butarget.send(method, mask.to_irc_netmask(:server => @bot.server))
         rescue => e
           debug "failed with #{e.message}"
-          debug e.backtrace.join "\n"
+          debug e.backtrace.join("\n")
           failed << mask
         end
       }

@@ -69,7 +69,7 @@ class UserDataModule < CoreBotModule
     else
       bh = @botuser[bu.username] || {}
     end
-    return ih.merge! bh
+    return ih.merge!(bh)
   end
 
   def get_data(user, key=nil)
@@ -130,13 +130,13 @@ class UserDataModule < CoreBotModule
     key = params[:key].intern
     data = get_data(user, key)
     if data
-      m.reply (_("%{key} data for %{user}: %{data}") % {
+      m.reply(_("%{key} data for %{user}: %{data}") % {
         :key => key,
         :user => user.nick,
         :data => data
       })
     else
-      m.reply (_("sorry, no %{key} data for %{user}") % {
+      m.reply(_("sorry, no %{key} data for %{user}") % {
         :key => key,
         :user => user.nick,
       })
