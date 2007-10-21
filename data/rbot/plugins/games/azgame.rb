@@ -232,7 +232,7 @@ class AzGamePlugin < Plugin
     else
       f_tr = @games[k].total_failed
       if f_tr > 0
-        tr_msg = _(" (after %{total_tries} and %{invalid_tries}") %
+        tr_msg = _(" (after %{total_tries} and %{invalid_tries})") %
            { :total_tries => n_("%{count} try", "%{count} tries", tr) %
                              {:count => tr},
              :invalid_tries => n_("%{count} invalid try", "%{count} invalid tries", tr) %
