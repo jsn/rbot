@@ -53,7 +53,7 @@ class AzGame
     return [:in, @range]
   end
 
-# TODO scoring: base score is t = ceil(100*exp(-(n-1)^2/50))+p for n attempts
+# TODO scoring: base score is t = ceil(100*exp(-((n-1)^2)/(50^2)))+p for n attempts
 #               done by p players; players that didn't win but contributed
 #               with a attempts will get t*a/n points
 
@@ -62,7 +62,7 @@ class AzGame
   def score
     n = @total_tries
     p = @tries.keys.length
-    t = (100*exp(-(n-1)**2/50**2)).ceil + p
+    t = (100*exp(-((n-1)**2)/(50.0**2))).ceil + p
     debug "Total score: #{t}"
     ret = Hash.new
     @tries.each { |k, a|
