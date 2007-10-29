@@ -101,6 +101,18 @@ module ::Net
           end
           return ret
         end
+      when 'deflate'
+        debug "inflating body"
+        # From http://www.koders.com/ruby/fid927B4382397E5115AC0ABE21181AB5C1CBDD5C17.aspx?s=thread: 
+        # -MAX_WBITS stops zlib from looking for a zlib header
+        inflater = Zlib::Inflate.new(-Zlib::MAX_WBITS)
+        begin
+          return inflater.inflate(str)
+        rescue Zlib::Error => e
+          raise e
+          # TODO
+          # debug "full inflation failed (#{e}), trying to recover as much as possible"
+        end
       else
         raise "Unhandled content encoding #{method}"
       end
