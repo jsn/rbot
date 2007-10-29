@@ -45,12 +45,14 @@ class AzGame
     return [:ignore, @range] if w == @range.first or w == @range.last
     return [:noexist, @range] unless @plugin.send("is_#{@lang}?", w)
     debug "we like it"
-    if w < @word
+    if w < @word and w > @range.first
       @range.first.replace(w)
-    else
+      return [:in, @range]
+    elsif w > @word and w < @range.last
       @range.last.replace(w)
+      return [:in, @range]
     end
-    return [:in, @range]
+    return [:out, @range]
   end
 
 # TODO scoring: base score is t = ceil(100*exp(-((n-1)^2)/(50^2)))+p for n attempts
@@ -147,33 +149,36 @@ class AzGamePlugin < Plugin
   end
 
   def word_check(m, k, word)
-    isit = @games[k].check(word)
-    case isit.first
-    when :bingo
-      m.reply _("%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, %{bold}%{player}%{bold}!") % {:bold => Bold, :underline => Underline, :word => word, :player => m.sourcenick}
-      @games[k].total_tries += 1
-      @games[k].tries[m.source] += 1
-      @games[k].winner = m.source
-      ar = @games[k].score.inject([]) { |res, kv|
-        res.push("%s: %d (%s)" % kv.flatten)
-      }
-      m.reply _("The game was won after %{tries} tries. Scores for this game:    %{scores}") % {:tries => @games[k].total_tries, :scores => ar.join('; ')}
-      @games.delete(k)
-    when :out
-      m.reply _("%{word} is not in the range %{bold}%{range}%{bold}") % {:word => word, :bold => Bold, :range => isit.last} if m.address?
-    when :noexist
-      m.reply _("%{word} doesn't exist or is not acceptable for the game") % {:word => word}
-      @games[k].total_failed += 1
-      @games[k].failed[m.source] += 1
-    when :in
-      m.reply _("close, but no cigar. New range: %{bold}%{range}%{bold}") % {:bold => Bold, :range => isit.last}
-      @games[k].total_tries += 1
-      @games[k].tries[m.source] += 1
-    when :ignore
-      m.reply _("%{word} is already one of the range extrema: %{range}") % {:word => word, :range => isit.last} if m.address?
-    else
-      m.reply _("hm, something went wrong while verifying %{word}")
-    end
+    # Not really safe ... what happens
+    Thread.new {
+      isit = @games[k].check(word)
+      case isit.first
+      when :bingo
+        m.reply _("%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, %{bold}%{player}%{bold}!") % {:bold => Bold, :underline => Underline, :word => word, :player => m.sourcenick}
+        @games[k].total_tries += 1
+        @games[k].tries[m.source] += 1
+        @games[k].winner = m.source
+        ar = @games[k].score.inject([]) { |res, kv|
+          res.push("%s: %d (%s)" % kv.flatten)
+        }
+        m.reply _("The game was won after %{tries} tries. Scores for this game:    %{scores}") % {:tries => @games[k].total_tries, :scores => ar.join('; ')}
+        @games.delete(k)
+      when :out
+        m.reply _("%{word} is not in the range %{bold}%{range}%{bold}") % {:word => word, :bold => Bold, :range => isit.last} if m.address?
+      when :noexist
+        m.reply _("%{word} doesn't exist or is not acceptable for the game") % {:word => word}
+        @games[k].total_failed += 1
+        @games[k].failed[m.source] += 1
+      when :in
+        m.reply _("close, but no cigar. New range: %{bold}%{range}%{bold}") % {:bold => Bold, :range => isit.last}
+        @games[k].total_tries += 1
+        @games[k].tries[m.source] += 1
+      when :ignore
+        m.reply _("%{word} is already one of the range extrema: %{range}") % {:word => word, :range => isit.last} if m.address?
+      else
+        m.reply _("hm, something went wrong while verifying %{word}")
+      end
+    }
   end
 
   def manual_word_check(m, params)
