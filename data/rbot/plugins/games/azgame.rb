@@ -356,7 +356,7 @@ class AzGamePlugin < Plugin
     wc = @wordcache[:italian]
     return true if wc.key?(word.to_sym)
     rules = @rules[:italian]
-    p = @bot.httputil.get(rules[:wapurl] % word)
+    p = @bot.httputil.get(rules[:wapurl] % word, :open_timeout => 60, :read_timeout => 60)
     if not p
       error "could not connect!"
       return false
