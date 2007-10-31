@@ -75,12 +75,14 @@ class ::Reaction
 
   def add_reply(expr, *args)
     @raw_replies << expr.dup
-    act = false
+    act = :reply
     rex = expr.dup
     if rex.sub!(/^act:/,'')
-      act = true
+      act = :act
+    elsif rex.sub!(/^(?:cmd|command):/,'')
+      act = :cmd
     end
-    @replies << Reply.new(self, act ? :act : :reply, rex, *args)
+    @replies << Reply.new(self, act, rex, *args)
     make_ranges
     return @replies.last
   end
@@ -209,6 +211,7 @@ class ReactionPlugin < Plugin
     when :reply, :replies
       "reaction replies are simply messages that the bot will reply when a trigger is matched. " +
       "Replies can be prefixed by 'act:' (e.g. act:goes shopping) to signify that the bot should act instead of saying the message. " +
+      "Replies can be prefixed by 'cmd:' or 'command:' (e.g. cmd:lart %{who}) to issue a command to the bot. " +
       "Replies can use the %{key} syntax to access one of the following keys: " +
       "who (the user that said the trigger), bot (the bot's own nick), " +
       "target (the first word following the trigger), what (whatever follows target), " +
@@ -258,7 +261,13 @@ class ReactionPlugin < Plugin
     debug "picked #{reply}"
     return unless reply
     args = reply.apply(subs)
-    m.__send__(*args)
+    if args[0] == :cmd
+      new_m = PrivMessage.new(@bot, m.server, m.source, m.target, @bot.nick+": "+args[1])
+      @bot.plugins.delegate "listen", new_m
+      @bot.plugins.privmsg(new_m) if new_m.address?
+    else
+      m.__send__(*args)
+    end
   end
 
   def find_reaction(trigger)
