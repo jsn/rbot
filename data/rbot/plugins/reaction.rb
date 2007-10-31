@@ -139,6 +139,10 @@ class ReactionPlugin < Plugin
 
   ADD_SYNTAX = 'react to *trigger with *reply [at :chance chance]'
   MOVE_SYNTAX = 'reaction move *source to *dest'
+  # We'd like to use backreferences for the trigger syntax
+  # but we can't because it will be merged with the Plugin#map()
+  # regexp
+  TRIGGER_SYNTAX = /^(?:act:)?(?:!.*?!|\/.*?\/|".*?"|'.*?')/
 
   def add_syntax
     return ADD_SYNTAX
@@ -146,6 +150,10 @@ class ReactionPlugin < Plugin
 
   def move_syntax
     return MOVE_SYNTAX
+  end
+
+  def trigger_syntax
+    return TRIGGER_SYNTAX
   end
 
   attr :reactions
@@ -349,13 +357,7 @@ end
 plugin = ReactionPlugin.new
 
 plugin.map plugin.add_syntax, :action => 'handle_add',
-  :requirements => { :trigger => /^(?:act:)?!.*?!/ }
-plugin.map plugin.add_syntax, :action => 'handle_add',
-  :requirements => { :trigger => /^(?:act:)?\/.*?\// }
-plugin.map plugin.add_syntax, :action => 'handle_add',
-  :requirements => { :trigger => /^(?:act:)?".*?"/ }
-plugin.map plugin.add_syntax, :action => 'handle_add',
-  :requirements => { :trigger => /^(?:act:)?'.*?'/ }
+  :requirements => { :trigger => plugin.trigger_syntax }
 plugin.map plugin.add_syntax.sub('*', ':'), :action => 'handle_add'
 
 plugin.map 'reaction list [:page]', :action => 'handle_list',
@@ -364,13 +366,10 @@ plugin.map 'reaction list [:page]', :action => 'handle_list',
 plugin.map 'reaction show *trigger', :action => 'handle_show'
 
 plugin.map plugin.move_syntax, :action => 'handle_move',
-  :requirements => { :source => /^(?:act:)?!.*?!/ }
-plugin.map plugin.move_syntax, :action => 'handle_move',
-  :requirements => { :source => /^(?:act:)?\/.*?\// }
-plugin.map plugin.move_syntax, :action => 'handle_move',
-  :requirements => { :source => /^(?:act:)?".*?"/ }
-plugin.map plugin.move_syntax, :action => 'handle_move',
-  :requirements => { :source => /^(?:act:)?'.*?'/ }
+  :requirements => {
+    :source => plugin.trigger_syntax,
+    :dest => plugin.trigger_syntax
+  }
 plugin.map plugin.move_syntax.sub('*', ':'), :action => 'handle_move'
 
 
