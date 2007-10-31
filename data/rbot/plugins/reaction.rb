@@ -85,6 +85,11 @@ class ::Reaction
     return @replies.last
   end
 
+  def rm_reply(num)
+    @replies.delete_at(num-1)
+    return @raw_replies.delete_at(num-1)
+  end
+
   def find_reply(expr)
     @replies[@raw_replies.index(expr)] rescue nil
   end
@@ -193,7 +198,7 @@ class ReactionPlugin < Plugin
     when :add
       help(:react)
     when :remove, :delete, :rm, :del
-      "reaction #{topic} <trigger> => removes the reaction to expression <trigger>"
+      "reaction #{topic} <trigger> [<n>] => removes reactions to expression <trigger>. If <n> (a positive integer) is specified, only remove the n-th reaction, otherwise remove the trigger completely"
     when :chance, :chances
       "reaction chances are expressed either in terms of percentage (like 30%) or in terms of floating point numbers (like 0.3), and are clipped to be " +
       "between 0 and 1 (i.e. 0% and 100%). A reaction can have multiple replies, each with a different chance; if the total of the chances is less than one, " +
@@ -309,11 +314,27 @@ class ReactionPlugin < Plugin
 
   def handle_rm(m, params)
     trigger = params[:trigger].to_s
+    n = params[:n].to_i rescue nil
     debug trigger.inspect
     found = find_reaction(trigger)
+    purged = nil
     if found
-      @reactions.delete(found)
-      m.reply "I won't react to #{found.raw_trigger} anymore"
+      if n
+        if n < 1 or n > found.replies.length
+          m.reply "Please specify an index between 1 and #{found.replies.length}"
+          return
+        end
+        purged = found.rm_reply(n)
+        if found.replies.length == 0
+          @reactions.delete(found)
+          purged = nil
+        else
+          purged = " with #{purged}"
+        end
+      else
+        @reactions.delete(found)
+      end
+      m.reply "I won't react to #{found.raw_trigger}#{purged} anymore"
     else
       m.reply "no reaction programmed for #{trigger}"
     end
@@ -373,6 +394,9 @@ plugin.map plugin.move_syntax, :action => 'handle_move',
 plugin.map plugin.move_syntax.sub('*', ':'), :action => 'handle_move'
 
 
-plugin.map 'reaction del[ete] *trigger', :action => 'handle_rm', :auth_path => 'del!'
-plugin.map 'reaction remove *trigger', :action => 'handle_rm', :auth_path => 'del!'
-plugin.map 'reaction rm *trigger', :action => 'handle_rm', :auth_path => 'del!'
+plugin.map 'reaction del[ete] *trigger [:n]', :action => 'handle_rm', :auth_path => 'del!',
+  :requirements => { :trigger => plugin.trigger_syntax, :n => /^\d+$/ }
+plugin.map 'reaction remove *trigger [:n]', :action => 'handle_rm', :auth_path => 'del!',
+  :requirements => { :trigger => plugin.trigger_syntax, :n => /^\d+$/ }
+plugin.map 'reaction rm *trigger [:n]', :action => 'handle_rm', :auth_path => 'del!',
+  :requirements => { :trigger => plugin.trigger_syntax, :n => /^\d+$/ }
