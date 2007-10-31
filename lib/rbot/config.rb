@@ -96,16 +96,18 @@ module Config
       get.to_s
     end
 
-    private
-    def validate(value)
-      return true unless @validate
-      if @validate.instance_of?(Proc)
-        return @validate.call(value)
-      elsif @validate.instance_of?(Regexp)
-        raise ArgumentError, "validation via Regexp only supported for strings!" unless value.instance_of? String
-        return @validate.match(value)
+    protected
+    def validate(val, validator  = @validate)
+      case validator
+      when false, nil
+        return true
+      when Proc
+        return validator.call(val)
+      when Regexp
+        raise ArgumentError, "validation via Regexp only supported for strings!" unless String === val
+        return validator.match(val)
       else
-        raise ArgumentError, "validation type #{@validate.class} not supported"
+        raise ArgumentError, "validation type #{validator.class} not supported"
       end
     end
   end
@@ -157,6 +159,18 @@ module Config
   end
 
   class ArrayValue < Value
+    def initialize(key, params)
+      super
+      @validate_item = params[:validate_item]
+      @validate ||= Proc.new do |v|
+        !v.find { |i| !validate_item(i) }
+      end
+    end
+
+    def validate_item(item)
+      validate(item, @validate_item)
+    end
+
     def parse(string)
       string.split(/,\s+/)
     end
@@ -164,8 +178,13 @@ module Config
       get.join(", ")
     end
     def add(val)
-      curval = self.get
-      set(curval + [val]) unless curval.include?(val)
+      newval = self.get.dup
+      unless newval.include? val
+        newval << val
+        validate_item(val) or raise ArgumentError, "invalid item: #{val}"
+        validate(newval) or raise ArgumentError, "invalid value: #{newval.to_s}"
+        set(newval)
+      end
     end
     def rm(val)
       curval = self.get
