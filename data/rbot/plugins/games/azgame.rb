@@ -243,7 +243,7 @@ class AzGamePlugin < Plugin
              :invalid_tries => n_("%{count} invalid try", "%{count} invalid tries", tr) %
                                {:count => f_tr} }
       else
-        tr_msg = _(" (after %{total_tries}") %
+        tr_msg = _(" (after %{total_tries})") %
                  { :total_tries => n_("%{count} try", "%{count} tries", tr) %
                              {:count => tr}}
       end
