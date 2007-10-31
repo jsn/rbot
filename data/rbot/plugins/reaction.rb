@@ -323,7 +323,8 @@ class ReactionPlugin < Plugin
 
   def handle_rm(m, params)
     trigger = params[:trigger].to_s
-    n = params[:n].to_i rescue nil
+    n = params[:n]
+    n = n.to_i if n
     debug trigger.inspect
     found = find_reaction(trigger)
     purged = nil
