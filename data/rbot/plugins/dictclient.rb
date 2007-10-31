@@ -198,12 +198,14 @@ plugin = DictClientPlugin.new
 
 plugin.map 'define *phrase [from :database]',
            :action => 'cmd_define',
-           :defaults => {:database => DICT::ALL_DATABASES}
+           :defaults => {:database => DICT::ALL_DATABASES},
+           :threaded => true
 
 plugin.map 'match *phrase [using :strategy] [from :database]',
            :action => 'cmd_match',
            :defaults => {:database => DICT::ALL_DATABASES,
-                         :strategy => DICT::DEFAULT_MATCH_STRATEGY }
+                         :strategy => DICT::DEFAULT_MATCH_STRATEGY },
+           :threaded => true
 
-plugin.map 'dictclient databases', :action => 'cmd_databases'
-plugin.map 'dictclient strategies', :action => 'cmd_strategies'
+plugin.map 'dictclient databases', :action => 'cmd_databases', :thread => true
+plugin.map 'dictclient strategies', :action => 'cmd_strategies', :thread => true
