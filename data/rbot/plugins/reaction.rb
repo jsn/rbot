@@ -199,8 +199,8 @@ class ReactionPlugin < Plugin
       "Replies can use the %{key} syntax to access one of the following keys: " +
       "who (the user that said the trigger), bot (the bot's own nick), " +
       "target (the first word following the trigger), what (whatever follows target), " +
-      "stuff (everything that follows the trigger), match (the actual matched text), " +
-      "match1, match2, ... (the i-th capture)"
+      "before (everything that precedes the trigger), after, (everything that follows the trigger), " +
+      "match (the actual matched text), match1, match2, ... (the i-th capture)"
     when :list
       "reaction list [n]: lists the n-the page of programmed reactions (30 reactions are listed per page)"
     when :show
