@@ -17,7 +17,7 @@ class UserModesPlugin < Plugin
     "handles automatic usermode settings on connect. See the config variable irc.usermodes"
   end
 
-  def connect(m)
+  def connect
     modes = @bot.config['irc.usermodes']
     @bot.mode(@bot.nick, modes, '') unless modes.empty?
   end
