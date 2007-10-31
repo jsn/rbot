@@ -48,7 +48,8 @@ class LinkBot < Plugin
     return unless m.kind_of?(PrivMessage)
     # Now we know that _m_ is a PRIVMSG from a linkbot. Let's split it
     # in nick, network, message
-    if @message_patterns.any? {|p| m.message.match p}
+    message = BasicUserMessage.stripcolour m.message
+    if @message_patterns.any? {|p| message =~ p}
       # if the regexp doesn't contain all parts, the default values get used
       new_nick = $1 || 'unknown_nick'
       network = $2 || 'unknown_network'
