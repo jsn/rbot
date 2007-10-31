@@ -149,7 +149,7 @@ class ReactionPlugin < Plugin
   # We'd like to use backreferences for the trigger syntax
   # but we can't because it will be merged with the Plugin#map()
   # regexp
-  TRIGGER_SYNTAX = /^(?:act:)?(?:!.*?!|\/.*?\/|".*?"|'.*?')/
+  TRIGGER_SYNTAX = /^(?:act:)?(?:!.*?!|\/.*?\/|".*?"|'.*?'|\S+)/
 
   def add_syntax
     return ADD_SYNTAX
@@ -388,7 +388,6 @@ plugin = ReactionPlugin.new
 
 plugin.map plugin.add_syntax, :action => 'handle_add',
   :requirements => { :trigger => plugin.trigger_syntax }
-plugin.map plugin.add_syntax.sub('*', ':'), :action => 'handle_add'
 
 plugin.map 'reaction list [:page]', :action => 'handle_list',
   :requirements => { :page => /^\d+$/ }
@@ -400,8 +399,6 @@ plugin.map plugin.move_syntax, :action => 'handle_move',
     :source => plugin.trigger_syntax,
     :dest => plugin.trigger_syntax
   }
-plugin.map plugin.move_syntax.sub('*', ':'), :action => 'handle_move'
-
 
 plugin.map 'reaction del[ete] *trigger [:n]', :action => 'handle_rm', :auth_path => 'del!',
   :requirements => { :trigger => plugin.trigger_syntax, :n => /^\d+$/ }
