@@ -136,6 +136,16 @@ class LartPlugin < Plugin
     m.okay
   end
 
+  def handle_listlart(m, params)
+    rx = Regexp.new(params[:lart].to_s, true)
+    list = @larts.grep(rx)
+    if list
+      m.reply list.join(" | "), :split_at => /\s+\|\s+/
+    else
+      m.reply "no lart found matching #{params[:lart]}"
+    end
+  end
+
   def handle_addpraise(m, params)
     @praises << params[:praise].to_s
     @changed = true
@@ -146,6 +156,16 @@ class LartPlugin < Plugin
     @praises.delete params[:praise].to_s
     @changed = true
     m.okay
+  end
+
+  def handle_listpraise(m, params)
+    rx = Regexp.new(params[:praise].to_s, true)
+    list = @praises.grep(rx)
+    if list
+      m.reply list.join(" | "), :split_at => /\s+\|\s+/
+    else
+      m.reply "no praise found matching #{params[:praise]}"
+    end
   end
 
   #  The following are utils for larts/praises
@@ -169,3 +189,6 @@ plugin.map "addpraise *praise", :action => :handle_addpraise
 
 plugin.map "rmlart *lart", :action => :handle_rmlart
 plugin.map "rmpraise *praise", :action => :handle_rmpraise
+
+plugin.map "listlart *lart", :action => :handle_listlart
+plugin.map "listpraise *praise", :action => :handle_listpraise
