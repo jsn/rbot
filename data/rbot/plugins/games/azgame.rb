@@ -40,11 +40,18 @@ class AzGame
   def check(word)
     w = word.downcase
     debug "checking #{w} for #{@word} in #{@range}"
+    # Since we're called threaded, bail out early if a winner
+    # was assigned already
+    return [:ignore, nil] if @winner
     return [:bingo, nil] if w == @word
     return [:out, @range] if w < @range.first or w > @range.last
     return [:ignore, @range] if w == @range.first or w == @range.last
+    # This is potentially slow (for languages that check online)
     return [:noexist, @range] unless @plugin.send("is_#{@lang}?", w)
     debug "we like it"
+    # Check again if there was a winner in the mean time,
+    # and bail out if there was
+    return [:ignore, nil] if @winner
     if w < @word and w > @range.first
       @range.first.replace(w)
       return [:in, @range]
@@ -166,10 +173,14 @@ class AzGamePlugin < Plugin
       when :out
         m.reply _("%{word} is not in the range %{bold}%{range}%{bold}") % {:word => word, :bold => Bold, :range => isit.last} if m.address?
       when :noexist
+        # bail out early if the game was won in the mean time
+        return if !@games[k] or @games[k].winner
         m.reply _("%{word} doesn't exist or is not acceptable for the game") % {:word => word}
         @games[k].total_failed += 1
         @games[k].failed[m.source] += 1
       when :in
+        # bail out early if the game was won in the mean time
+        return if !@games[k] or @games[k].winner
         m.reply _("close, but no cigar. New range: %{bold}%{range}%{bold}") % {:bold => Bold, :range => isit.last}
         @games[k].total_tries += 1
         @games[k].tries[m.source] += 1
