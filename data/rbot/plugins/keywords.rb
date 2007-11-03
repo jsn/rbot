@@ -496,7 +496,7 @@ end
 
 plugin = Keywords.new
 plugin.register 'keyword'
-plugin.register 'forget'
-plugin.register 'tell'
-plugin.register 'learn'
+plugin.register 'forget' rescue nil
+plugin.register 'tell' rescue nil
+plugin.register 'learn' rescue nil
 
