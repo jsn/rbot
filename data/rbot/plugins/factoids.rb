@@ -171,12 +171,27 @@ class FactoidsPlugin < Plugin
   end
 
   def forget(m, params)
-    factoid = params[:stuff].to_s
-    if @factoids.delete(factoid)
-      @changed = true
-      m.okay
+    if params[:index]
+      idx = params[:index].scan(/\d+/).first.to_i
+      total = @factoids.length
+      if idx <= 0 or idx > total
+        m.reply _("please select a fact number between 1 and %{total}" % { :total => total })
+        return
+      end
+      if factoid = @factoids.delete_at(idx-1)
+        m.reply _("I forgot that %{factoid}" % { :factoid => factoid })
+        @changed = true
+      else
+        m.reply _("I couldn't delete factoid %{idx}" % { :idx => idx })
+      end
     else
-      m.reply _("I didn't know that %{factoid}" % { :factoid => factoid })
+      factoid = params[:stuff].to_s
+      if @factoids.delete(factoid)
+        @changed = true
+        m.okay
+      else
+        m.reply _("I didn't know that %{factoid}" % { :factoid => factoid })
+      end
     end
   end
 
@@ -321,6 +336,7 @@ plugin.default_auth('import', false)
 
 plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff', :auth_path => 'edit'
+plugin.map 'forget fact :index', :requirements => { :index => /^#?\d+$/ }, :auth_path => 'edit'
 plugin.map 'facts [about *words]'
 plugin.map 'fact [about *words]'
 plugin.map 'fact :index', :requirements => { :index => /^#?\d+$/ }
