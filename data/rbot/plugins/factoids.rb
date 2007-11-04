@@ -69,13 +69,29 @@ class FactoidsPlugin < Plugin
     @dir = File.join(@bot.botclass,"factoids")
     @filename = "factoids.rbot"
     @factoids = FactoidList.new
-    read_factfile
+    begin
+      read_factfile
+    rescue
+      debug $!
+    end
     @changed = false
   end
 
   def read_factfile(name=@filename,dir=@dir)
     fname = File.join(dir,name)
+
+    expf = File.expand_path(fname)
+    expd = File.expand_path(dir)
+    raise ArgumentError, _("%{name} (%{fname}) must be under %{dir}" % {
+      :name => name,
+      :fname => expf,
+      :dir => dir
+    }) unless expf.index(expd) == 0
+
     if File.exist?(fname)
+      raise ArgumentError, _("%{name} is not a file" % {
+        :name => name
+      }) unless File.file?(fname)
       factoids = File.readlines(fname)
       return if factoids.empty?
       firstline = factoids.shift
@@ -87,12 +103,17 @@ class FactoidsPlugin < Plugin
         }
       else
         pattern.map! { |p| p.intern }
-        raise ArgumentError, "fact must be the last field" unless pattern.last == :fact
+        raise ArgumentError, _("fact must be the last field") unless pattern.last == :fact
         factoids.each { |f|
           ar = f.chomp.split(" | ", pattern.length)
           @factoids << Factoid.new(Hash[*([pattern, ar].transpose.flatten)])
         }
       end
+    else
+      raise ArgumentError, _("%{name} (%{fname}) doesn't exist" % {
+        :name => name,
+        :fname => fname
+      })
     end
   end
 
@@ -245,11 +266,29 @@ class FactoidsPlugin < Plugin
     m.okay
   end
 
+  def import(m, params)
+    fname = params[:filename].to_s
+    oldlen = @factoids.length
+    begin
+      read_factfile(fname)
+    rescue
+      m.reply _("failed to import facts from %{fname}: %{err}" % {
+        :fname => fname,
+        :err => $!
+      })
+    end
+    m.reply _("%{len} facts loaded from %{fname}" % {
+      :fname => fname,
+      :len => @factoids.length - oldlen
+    })
+  end
+
 end
 
 plugin = FactoidsPlugin.new
 
 plugin.default_auth('edit', false)
+plugin.default_auth('import', false)
 
 plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff', :auth_path => 'edit'
@@ -260,3 +299,5 @@ plugin.map 'fact :index', :requirements => { :index => /^#?\d+$/ }
 plugin.map 'fact :index :learn from *who', :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
 plugin.map 'fact :index :learn on *when',  :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
 plugin.map 'fact :index :learn in *where', :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
+
+plugin.map 'facts import [from] *filename', :action => :import, :auth_path => 'import'
