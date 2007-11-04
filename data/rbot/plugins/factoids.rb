@@ -149,9 +149,35 @@ class FactoidsPlugin < Plugin
     end
   end
 
+  def fact(m, params)
+    known = nil
+    if params[:words].empty?
+      if @factoids.empty?
+        m.reply _("I know nothing")
+        return
+      end
+      known = @factoids
+    else
+      rx = Regexp.new(params[:words].to_s, true)
+      known = @factoids.grep(rx)
+      if known.empty?
+        m.reply _("I know nothing about %{words}" % params)
+        return
+      end
+    end
+    fact = known.pick_one
+    idx = @factoids.index(fact)+1
+    m.reply _("fact %{idx}/%{total}: %{fact}" % {
+      :idx => idx,
+      :total => @factoids.length,
+      :fact => fact
+    })
+  end
+
 end
 
 plugin = FactoidsPlugin.new
 plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff'
 plugin.map 'facts [about *words]'
+plugin.map 'fact [about *words]'

@@ -43,7 +43,7 @@ class ChuckNorrisPlugin < Plugin
   
   # HELP!
   def help(plugin, topic="chuck")
-    "fact|chuck|norris|chucknorris [min_rating] => \"fact\" shows a random Chuck Norris fact (optional minimum rating from 1-10, default=6.0)."
+    "chuck|norris|chucknorris [min_rating] => show a random Chuck Norris fact (optional minimum rating from 1-10, default=6.0)."
     #\"fact [person]\" shows a fact about someone in the channel. 
   end
 
@@ -67,7 +67,7 @@ end
 
 plugin = ChuckNorrisPlugin.new
 
-plugin.map 'fact :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
+# plugin.map 'fact :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
 plugin.map 'chucknorris :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
 plugin.map 'chuck :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
 plugin.map 'norris :minrating', :action => 'fact', :defaults => {:minrating=>MIN_RATING}
