@@ -445,7 +445,9 @@ class Keywords < Plugin
   def keyword_forget(m, key)
     if(@keywords.has_key?(key))
       @keywords.delete(key)
-      @bot.okay m.replyto
+      m.okay
+    else
+      m.reply _("couldn't find keyword %{key}" % { :key => key })
     end
   end
 
