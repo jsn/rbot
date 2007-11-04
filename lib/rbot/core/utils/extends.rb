@@ -49,6 +49,14 @@ class ::Array
     return nil if self.empty?
     self[rand(self.length)]
   end
+
+  # This method returns a random element from the array, deleting it from the
+  # array itself. The method returns nil if the array is empty
+  #
+  def delete_one
+    return nil if self.empty?
+    self.delete_at(rand(self.length))
+  end
 end
 
 # Extensions to the Range class
