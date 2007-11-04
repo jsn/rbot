@@ -38,7 +38,7 @@ class FactoidsPlugin < Plugin
         metadata << _("in %{where}" % @hash)
       end
       unless metadata.empty?
-        meta << _(" [learnt %{data}]" % {:data => metadata.join(" ")})
+        meta << _(" [%{data}]" % {:data => metadata.join(" ")})
       end
       return fact+meta
     end
