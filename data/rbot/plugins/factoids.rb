@@ -20,8 +20,27 @@ class FactoidsPlugin < Plugin
       end
     end
 
-    def to_s
-      @hash[:fact]
+    def to_s(opts={})
+      show_meta = opts[:meta]
+      fact = @hash[:fact]
+      if !show_meta
+        return fact
+      end
+      meta = ""
+      metadata = []
+      if fact[:who]
+        metadata << _("from %{who}" % fact.to_hash)
+      end
+      if fact[:when]
+        metadata << _("on %{when}" % fact.to_hash)
+      end
+      if fact[:where]
+        metadata << _("in %{where}" % fact.to_hash)
+      end
+      unless metadata.empty?
+        meta << _(" [learnt %{data}]" % {:data => metadata.join(" ")})
+      end
+      return fact+meta
     end
 
     def [](*args)
@@ -217,25 +236,10 @@ class FactoidsPlugin < Plugin
       fact = known.pick_one
       idx = @factoids.index(fact)+1
     end
-    meta = nil
-    metadata = []
-    if fact[:who]
-      metadata << _("from %{who}" % fact.to_hash)
-    end
-    if fact[:when]
-      metadata << _("on %{when}" % fact.to_hash)
-    end
-    if fact[:where]
-      metadata << _("in %{where}" % fact.to_hash)
-    end
-    unless metadata.empty?
-      meta = _(" [learnt %{data}]" % {:data => metadata.join(" ")})
-    end
-    m.reply _("fact #%{idx} of %{total}: %{fact}%{meta}" % {
+    m.reply _("fact #%{idx} of %{total}: %{fact}" % {
       :idx => idx,
       :total => total,
-      :fact => fact,
-      :meta => meta
+      :fact => fact.to_s(:meta => true)
     })
   end
 
