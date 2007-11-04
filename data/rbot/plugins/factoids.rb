@@ -180,6 +180,15 @@ class FactoidsPlugin < Plugin
     end
   end
 
+  def long_fact(fact,index=nil,total=@factoids.length)
+    idx = index || @factoids.index(fact)+1
+    _("fact #%{idx} of %{total}: %{fact}" % {
+      :idx => idx,
+      :total => total,
+      :fact => fact.to_s(:meta => true)
+    })
+  end
+
   def facts(m, params)
     total = @factoids.length
     if params[:words].empty?
@@ -187,11 +196,12 @@ class FactoidsPlugin < Plugin
     else
       rx = Regexp.new(params[:words].to_s, true)
       known = @factoids.grep(rx)
+      reply = []
       if known.empty?
-        m.reply _("I know nothing about %{words}" % params)
+        reply << _("I know nothing about %{words}" % params)
       else
         # TODO config
-        max_facts = 3
+        max_facts = 5
         len = known.length
         if len > max_facts
           m.reply _("%{len} out of %{total} facts refer to %{words}, I'll only show %{max}" % {
@@ -200,9 +210,15 @@ class FactoidsPlugin < Plugin
             :words => params[:words].to_s,
             :max => max_facts
           })
+          while known.length > max_facts
+            known.delete_one
+          end
         end
-        [max_facts, len].min.times { m.reply known.delete_one }
+        known.each { |f|
+          reply << long_fact(f)
+        }
       end
+      m.reply reply.join(" -- ")
     end
   end
 
@@ -236,11 +252,7 @@ class FactoidsPlugin < Plugin
       fact = known.pick_one
       idx = @factoids.index(fact)+1
     end
-    m.reply _("fact #%{idx} of %{total}: %{fact}" % {
-      :idx => idx,
-      :total => total,
-      :fact => fact.to_s(:meta => true)
-    })
+    m.reply long_fact(fact, idx, total)
   end
 
   def edit_fact(m, params)
