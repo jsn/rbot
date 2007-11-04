@@ -219,14 +219,21 @@ class FactoidsPlugin < Plugin
     begin
       if params[:who]
         who = params[:who].to_s.sub(/^me$/, m.source.fullform)
-        debug who
         fact[:who] = who
+        @changed = true
       end
       if params[:when]
-        fact[:when] = Time.parse(params[:when].to_s)
+        dstr = params[:when].to_s
+        begin
+          fact[:when] = Time.parse(dstr, "")
+          @changed = true
+        rescue
+          raise ArgumentError, _("not a date '%{dstr}'" % { :dstr => dstr })
+        end
       end
       if params[:where]
         fact[:where] = params[:where].to_s
+        @changed = true
       end
     rescue Exception
       m.reply _("couldn't change learn data for fact %{fact}: %{err}" % {
@@ -249,6 +256,7 @@ plugin.map 'forget that *stuff', :auth_path => 'edit'
 plugin.map 'facts [about *words]'
 plugin.map 'fact [about *words]'
 plugin.map 'fact :index', :requirements => { :index => /^#?\d+$/ }
+
 plugin.map 'fact :index :learn from *who', :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
 plugin.map 'fact :index :learn on *when',  :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
 plugin.map 'fact :index :learn in *where', :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
