@@ -155,7 +155,7 @@ class FactoidsPlugin < Plugin
     idx = 0
     total = @factoids.length
     if params[:index]
-      idx = params[:index].to_i
+      idx = params[:index].scan(/\d+/).first.to_i
       if idx <= 0 or idx > total
         m.reply _("please select a fact number between 1 and %{total}" % { :total => total })
         return
@@ -194,7 +194,7 @@ class FactoidsPlugin < Plugin
     unless metadata.empty?
       meta = _(" [learnt %{data}]" % {:data => metadata.join(" ")})
     end
-    m.reply _("fact %{idx}/%{total}: %{fact}%{meta}" % {
+    m.reply _("fact #%{idx} of %{total}: %{fact}%{meta}" % {
       :idx => idx,
       :total => total,
       :fact => fact,
@@ -212,4 +212,4 @@ plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff', :auth_path => 'edit'
 plugin.map 'facts [about *words]'
 plugin.map 'fact [about *words]'
-plugin.map 'fact :index', :requirements => { :index => /\d+/ }
+plugin.map 'fact :index', :requirements => { :index => /#?\d+/ }
