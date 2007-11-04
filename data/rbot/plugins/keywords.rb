@@ -450,6 +450,18 @@ class Keywords < Plugin
     end
   end
 
+  # low-level keyword wipe command for when forget doesn't work
+  def keyword_wipe(m, key)
+    reg = @keywords.registry
+    reg.env.begin(reg) { |t, b|
+      b.delete_if { |k, v|
+        (k == key) && (m.reply "wiping keyword #{key} with stored value #{Marshal.restore(v)}")
+      }
+      t.commit
+    }
+    m.reply "done"
+  end
+
   # export keywords to factoids file
   def keyword_factoids_export
     ar = Array.new
@@ -489,6 +501,8 @@ class Keywords < Plugin
         keyword_command(m, $1, $2, $3) if @bot.auth.allow?('keycmd', m.source, m.replyto)
       when /^forget\s+(.+)$/
         keyword_forget(m, $1) if @bot.auth.allow?('keycmd', m.source, m.replyto)
+      when /^wipe\s(.+)$/ # note that only one space is stripped, allowing removal of space-prefixed keywords
+        keyword_wipe(m, $1) if @bot.auth.allow?('keycmd', m.source, m.replyto)
       when /^lookup\s+(.+)$/
         keyword_lookup(m, $1) if @bot.auth.allow?('keyword', m.source, m.replyto)
       when /^stats\s*$/
