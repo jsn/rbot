@@ -31,6 +31,7 @@ class FactoidsPlugin < Plugin
     def to_hsh
       return @hash
     end
+    alias :to_hash :to_hsh
   end
 
   class FactoidList < ArrayOf
@@ -179,10 +180,25 @@ class FactoidsPlugin < Plugin
       fact = known.pick_one
       idx = @factoids.index(fact)+1
     end
-    m.reply _("fact %{idx}/%{total}: %{fact}" % {
+    meta = nil
+    metadata = []
+    if fact[:who]
+      metadata << _("from %{who}" % fact.to_hash)
+    end
+    if fact[:when]
+      metadata << _("on %{when}" % fact.to_hash)
+    end
+    if fact[:where]
+      metadata << _("in %{where}" % fact.to_hash)
+    end
+    unless metadata.empty?
+      meta = _(" [learnt %{data}]" % {:data => metadata.join(" ")})
+    end
+    m.reply _("fact %{idx}/%{total}: %{fact}%{meta}" % {
       :idx => idx,
       :total => total,
-      :fact => fact
+      :fact => fact,
+      :meta => meta
     })
   end
 
