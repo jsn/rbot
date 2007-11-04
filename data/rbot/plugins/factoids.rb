@@ -281,6 +281,7 @@ class FactoidsPlugin < Plugin
       :fname => fname,
       :len => @factoids.length - oldlen
     })
+    @changed = true
   end
 
 end
