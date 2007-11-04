@@ -150,26 +150,38 @@ class FactoidsPlugin < Plugin
   end
 
   def fact(m, params)
-    known = nil
-    if params[:words].empty?
-      if @factoids.empty?
-        m.reply _("I know nothing")
+    fact = nil
+    idx = 0
+    total = @factoids.length
+    if params[:index]
+      idx = params[:index].to_i
+      if idx <= 0 or idx > total
+        m.reply _("please select a fact number between 1 and %{total}" % { :total => total })
         return
       end
-      known = @factoids
+      fact = @factoids[idx-1]
     else
-      rx = Regexp.new(params[:words].to_s, true)
-      known = @factoids.grep(rx)
-      if known.empty?
-        m.reply _("I know nothing about %{words}" % params)
-        return
+      known = nil
+      if params[:words].empty?
+        if @factoids.empty?
+          m.reply _("I know nothing")
+          return
+        end
+        known = @factoids
+      else
+        rx = Regexp.new(params[:words].to_s, true)
+        known = @factoids.grep(rx)
+        if known.empty?
+          m.reply _("I know nothing about %{words}" % params)
+          return
+        end
       end
+      fact = known.pick_one
+      idx = @factoids.index(fact)+1
     end
-    fact = known.pick_one
-    idx = @factoids.index(fact)+1
     m.reply _("fact %{idx}/%{total}: %{fact}" % {
       :idx => idx,
-      :total => @factoids.length,
+      :total => total,
       :fact => fact
     })
   end
@@ -184,3 +196,4 @@ plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff', :auth_path => 'edit'
 plugin.map 'facts [about *words]'
 plugin.map 'fact [about *words]'
+plugin.map 'fact :index', :requirements => { :index => /\d+/ }
