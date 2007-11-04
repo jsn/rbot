@@ -162,15 +162,27 @@ class FactoidsPlugin < Plugin
   end
 
   def facts(m, params)
+    total = @factoids.length
     if params[:words].empty?
-      m.reply _("I know %{count} facts" % { :count => @factoids.length })
+      m.reply _("I know %{total} facts" % { :total => total })
     else
       rx = Regexp.new(params[:words].to_s, true)
       known = @factoids.grep(rx)
       if known.empty?
         m.reply _("I know nothing about %{words}" % params)
       else
-        m.reply known.join(" | "), :split_at => /\s+\|\s+/
+        # TODO config
+        max_facts = 3
+        len = known.length
+        if len > max_facts
+          m.reply _("%{len} out of %{total} facts refer to %{words}, I'll only show %{max}" % {
+            :len => len,
+            :total => total,
+            :words => params[:words].to_s,
+            :max => max_facts
+          })
+        end
+        [max_facts, len].min.times { m.reply known.delete_one }
       end
     end
   end
