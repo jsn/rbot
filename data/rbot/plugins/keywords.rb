@@ -33,7 +33,10 @@ class Keyword
     ar = Array.new
     @values.each { |val|
       debug "key #{key}, value #{val}"
-      ar << "%s %s %s" % [key, @type, val]
+      vals = val.split(" or ")
+      vals.each { |v|
+        ar << "%s %s %s" % [key, @type, v]
+      }
     }
     return ar
   end
