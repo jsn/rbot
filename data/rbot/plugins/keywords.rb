@@ -443,8 +443,7 @@ class Keywords < Plugin
 
   # forget one of the dynamic keywords
   def keyword_forget(m, key)
-    if(@keywords.has_key?(key))
-      @keywords.delete(key)
+    if @keywords.delete(key)
       m.okay
     else
       m.reply _("couldn't find keyword %{key}" % { :key => key })
