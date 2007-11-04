@@ -28,6 +28,10 @@ class FactoidsPlugin < Plugin
       @hash[*args]
     end
 
+    def []=(*args)
+      @hash.send(:[]=,*args)
+    end
+
     def to_hsh
       return @hash
     end
@@ -202,6 +206,38 @@ class FactoidsPlugin < Plugin
     })
   end
 
+  def edit_fact(m, params)
+    fact = nil
+    idx = 0
+    total = @factoids.length
+    idx = params[:index].scan(/\d+/).first.to_i
+    if idx <= 0 or idx > total
+      m.reply _("please select a fact number between 1 and %{total}" % { :total => total })
+      return
+    end
+    fact = @factoids[idx-1]
+    begin
+      if params[:who]
+        who = params[:who].to_s.sub(/^me$/, m.source.fullform)
+        debug who
+        fact[:who] = who
+      end
+      if params[:when]
+        fact[:when] = Time.parse(params[:when].to_s)
+      end
+      if params[:where]
+        fact[:where] = params[:where].to_s
+      end
+    rescue Exception
+      m.reply _("couldn't change learn data for fact %{fact}: %{err}" % {
+        :fact => fact,
+        :err => $!
+      })
+      return
+    end
+    m.okay
+  end
+
 end
 
 plugin = FactoidsPlugin.new
@@ -212,4 +248,7 @@ plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff', :auth_path => 'edit'
 plugin.map 'facts [about *words]'
 plugin.map 'fact [about *words]'
-plugin.map 'fact :index', :requirements => { :index => /#?\d+/ }
+plugin.map 'fact :index', :requirements => { :index => /^#?\d+$/ }
+plugin.map 'fact :index :learn from *who', :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
+plugin.map 'fact :index :learn on *when',  :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
+plugin.map 'fact :index :learn in *where', :action => :edit_fact, :requirements => { :learn => /^((?:is|was)\s+)?learn(ed|t)$/, :index => /^#?\d+$/ }, :auth_path => 'edit'
