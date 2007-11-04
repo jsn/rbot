@@ -28,14 +28,14 @@ class FactoidsPlugin < Plugin
       end
       meta = ""
       metadata = []
-      if fact[:who]
-        metadata << _("from %{who}" % fact.to_hash)
+      if @hash[:who]
+        metadata << _("from %{who}" % @hash)
       end
-      if fact[:when]
-        metadata << _("on %{when}" % fact.to_hash)
+      if @hash[:when]
+        metadata << _("on %{when}" % @hash)
       end
-      if fact[:where]
-        metadata << _("in %{where}" % fact.to_hash)
+      if @hash[:where]
+        metadata << _("in %{where}" % @hash)
       end
       unless metadata.empty?
         meta << _(" [learnt %{data}]" % {:data => metadata.join(" ")})
