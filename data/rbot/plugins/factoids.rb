@@ -177,7 +177,10 @@ class FactoidsPlugin < Plugin
 end
 
 plugin = FactoidsPlugin.new
+
+plugin.default_auth('edit', false)
+
 plugin.map 'learn that *stuff'
-plugin.map 'forget that *stuff'
+plugin.map 'forget that *stuff', :auth_path => 'edit'
 plugin.map 'facts [about *words]'
 plugin.map 'fact [about *words]'
