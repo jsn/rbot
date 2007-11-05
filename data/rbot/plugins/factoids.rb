@@ -161,8 +161,11 @@ class FactoidsPlugin < Plugin
       :who => m.source.fullform,
       :where => m.channel.to_s
     )
-    if @factoids.index(factoid)
-      m.reply _("I already know that %{factoid}" % { :factoid => factoid })
+    if idx = @factoids.index(factoid)
+      m.reply _("I already know that %{factoid} [#%{idx}]" % {
+        :factoid => factoid,
+        :idx => idx
+      })
     else
       @factoids << factoid
       @changed = true
