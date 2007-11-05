@@ -8,6 +8,11 @@
 # License:: GPLv2
 #
 # This plugin allows using rbot to translate text on a few translation services
+#
+# TODO
+#
+# * Configuration for whether to show translation engine
+# * Optionally sync default translators with karma.rb ranking
 
 require 'set'
 require 'timeout'
@@ -311,7 +316,7 @@ class TranslatorPlugin < Plugin
     from, to = params[:from], params[:to]
     translator = @default_translators.find {|t| @translators[t].support?(from, to)}
     if translator
-      cmd_translate m, params.merge({:translator => translator})
+      cmd_translate m, params.merge({:translator => translator, :show_provider => true})
     else
       m.reply _('None of the default translators (translator.default_list) supports translating from %{source} to %{target}') % {:source => from, :target => to}
     end
@@ -327,7 +332,13 @@ class TranslatorPlugin < Plugin
         translation = Timeout.timeout(@bot.config['translator.timeout']) do
           translator.translate(phrase, from, to)
         end
-        m.reply translation
+        m.reply(if params[:show_provider]
+                  _('%{translation} (provided by %{translator})') %
+                    {:translation => translation, :translator => tname}
+                else
+                  translation
+                end)
+
       rescue Translator::UnsupportedDirectionError
         m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
                 {:translator => tname, :source => from, :target => to}
@@ -345,4 +356,4 @@ end
 
 plugin = TranslatorPlugin.new
 plugin.map 'translator :from :to *phrase',
-  :action => :cmd_translator, :thread => true
+           :action => :cmd_translator, :thread => true
