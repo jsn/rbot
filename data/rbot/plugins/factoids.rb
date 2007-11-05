@@ -170,6 +170,7 @@ class FactoidsPlugin < Plugin
       @factoids << factoid
       @changed = true
       m.okay
+      fact(m, :index => @factoids.length.to_s)
     end
   end
 
