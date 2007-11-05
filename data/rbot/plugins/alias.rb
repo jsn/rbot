@@ -154,7 +154,15 @@ class AliasPlugin < Plugin
   def help(plugin, topic='')
     case topic
     when ''
-      _('Create and use aliases for commands. Topics: create, commands')
+      if plugin == 'alias' # FIXME find out plugin name programmatically
+        _('Create and use aliases for commands. Topics: create, commands')
+      else
+        # show definition of all aliases whose first word is the parameter of the help
+        # command
+        @aliases.keys.select {|a| a[/\A(\w+)/, 1] == plugin}.map do |a|
+          "#{a} => #{@aliases[a]}"
+        end.join ' | '
+      end
     when 'create'
       _('"alias <text> => <command>" => add text as an alias of command. Text can contain placeholders marked with : or * for :words and *multiword arguments. The command can contain placeholders enclosed with < > which will be substituded with argument values. For example: alias googlerbot *terms => google site:linuxbrit.co.uk/rbot/ <terms>')
     when 'commands'
