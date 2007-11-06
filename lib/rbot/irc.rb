@@ -1533,6 +1533,22 @@ module Irc
       @capabilities = {}
     end
 
+    # Convert a mode (o, v, h, ...) to the corresponding
+    # prefix (@, +, %, ...). See also mode_for_prefix
+    def prefix_for_mode(mode)
+      return @supports[:prefix][:prefixes][
+        @supports[:prefix][:modes].index(mode.to_sym)
+      ]
+    end
+
+    # Convert a prefix (@, +, %, ...) to the corresponding
+    # mode (o, v, h, ...). See also prefix_for_mode
+    def mode_for_prefix(pfx)
+      return @supports[:prefix][:modes][
+        @supports[:prefix][:prefixes].index(pfx.to_sym)
+      ]
+    end
+
     # Resets the Channel and User list
     #
     def reset_lists

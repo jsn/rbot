@@ -1178,8 +1178,7 @@ module Irc
             chan.add_user(u, :silent => true)
             debug "Adding user #{u}"
             if ar[1]
-              m = @server.supports[:prefix][:prefixes].index(ar[1].to_sym)
-              ms = @server.supports[:prefix][:modes][m]
+              ms = @server.mode_for_prefix(ar[1].to_sym)
               debug "\twith mode #{ar[1]} (#{ms})"
               chan.mode[ms].set(u)
             end
