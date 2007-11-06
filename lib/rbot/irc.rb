@@ -30,6 +30,10 @@ class Object
     return true if self.respond_to? :empty and self.empty?
     return false
   end
+
+  # We alias the to_s method to __to_s__ to make
+  # it accessible in all classes
+  alias :__to_s__ :to_s 
 end
 
 # The Irc module is used to keep all IRC-related classes
@@ -89,7 +93,7 @@ module Irc
     # A Casemap is represented by its lower/upper mappings
     #
     def inspect
-      "#<#{self.class}:#{'0x%x'% self.object_id}: #{upper.inspect} ~(#{self})~ #{lower.inspect}>"
+      self.__to_s__[0..-2] + " #{upper.inspect} ~(#{self})~ #{lower.inspect}>"
     end
 
     # As a String we return our name
@@ -355,7 +359,7 @@ class ArrayOf < Array
   end
 
   def inspect
-    "#<#{self.class}[#{@element_class}]:#{'0x%x' % self.object_id}: #{super}>"
+    self.__to_s__[0..-2].sub(/:[^:]+$/,"[#{@element_class}]\\0") + " #{super}>"
   end
 
   # Private method to check the validity of the elements passed to it
@@ -688,7 +692,7 @@ module Irc
     # one), its casemap and the nick, user and host part
     #
     def inspect
-      str = "<#{self.class}:#{'0x%x' % self.object_id}:"
+      str = self.__to_s__[0..-2]
       str << " @server=#{@server}" if defined?(@server) and @server
       str << " @nick=#{@nick.inspect} @user=#{@user.inspect}"
       str << " @host=#{@host.inspect} casemap=#{casemap.inspect}"
@@ -1278,7 +1282,7 @@ module Irc
     alias :to_s :name
 
     def inspect
-      str = "<#{self.class}:#{'0x%x' % self.object_id}:"
+      str = self.__to_s__[0..-2]
       str << " on server #{server}" if server
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
       str << " @users=[#{user_nicks.sort.join(', ')}]"
@@ -1477,7 +1481,7 @@ module Irc
         }
       }
 
-      str = "<#{self.class}:#{'0x%x' % self.object_id}:"
+      str = self.__to_s__[0..-2]
       str << " @hostname=#{hostname}"
       str << " @channels=#{chans}"
       str << " @users=#{users}"

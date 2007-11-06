@@ -321,7 +321,7 @@ class Bot
 
       # Inspection
       def inspect
-        str = "<#{self.class}:#{'0x%08x' % self.object_id}"
+        str = self.__to_s__[0..-2]
         str << " (transient)" if @transient
         str << ":"
         str << " @username=#{@username.inspect}"

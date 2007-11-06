@@ -178,6 +178,38 @@ class Bot
     myself.nick
   end
 
+  # bot inspection
+  # TODO multiserver
+  def inspect
+    ret = self.to_s[0..-2]
+    ret << ' version=' << $version.inspect
+    ret << ' botclass=' << botclass.inspect
+    ret << ' lang="' << lang.language
+    if defined?(GetText)
+      ret << '/' << locale
+    end
+    ret << '"'
+    ret << ' nick=' << nick.inspect
+    ret << ' server='
+    if server
+      ret << (server.to_s + (socket ?
+        ' [' << socket.server_uri.to_s << ']' : '')).inspect
+      unless server.channels.empty?
+        ret << " channels="
+        ret << server.channels.map { |c|
+          "%s%s" % [c.modes_of(nick).map { |m|
+            server.prefix_for_mode(m)
+          }, c.name]
+        }.inspect
+      end
+    else
+      ret << '(none)'
+    end
+    ret << ' plugins=' << plugins.inspect
+    ret << ">"
+  end
+
+
   # create a new Bot with botclass +botclass+
   def initialize(botclass, params = {})
     # Config for the core bot

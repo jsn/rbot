@@ -369,6 +369,19 @@ module Plugins
       bot_associate(nil)
     end
 
+    def inspect
+      ret = self.to_s[0..-2]
+      ret << ' corebotmodules='
+      ret << @botmodules[:CoreBotModule].map { |m|
+        m.name
+      }.inspect
+      ret << ' plugins='
+      ret << @botmodules[:Plugin].map { |m|
+        m.name
+      }.inspect
+      ret << ">"
+    end
+
     # Reset lists of botmodules
     def reset_botmodule_lists
       @botmodules[:CoreBotModule].clear
