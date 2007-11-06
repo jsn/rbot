@@ -1335,7 +1335,7 @@ module Irc
 
       @name = name
 
-      @topic = (topic.to_irc_channel_topic rescue Channel::Topic.new)
+      @topic = topic ? topic.to_irc_channel_topic : Channel::Topic.new
 
       @users = UserList.new
 
