@@ -64,7 +64,7 @@ class AliasPlugin < Plugin
   end 
 
   def save 
-    FileUtils.mkdir_p(@data_path)
+    FileUtils.mkdir_p(@data_path) unless FileTest.directory?(@data_path)
     Utils.safe_save(@data_file) {|f| f.write @aliases.to_yaml}
   end
 
