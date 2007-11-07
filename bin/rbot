@@ -91,7 +91,7 @@ opts = GetoptLong.new(
   ["--version", "-v", GetoptLong::NO_ARGUMENT]
 )
 
-$debug = false
+$debug = $DEBUG
 $daemonize = false
 
 opts.each {|opt, arg|
