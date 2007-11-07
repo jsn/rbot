@@ -139,7 +139,7 @@ class LartPlugin < Plugin
   def handle_listlart(m, params)
     rx = Regexp.new(params[:lart].to_s, true)
     list = @larts.grep(rx)
-    if list
+    unless list.empty?
       m.reply list.join(" | "), :split_at => /\s+\|\s+/
     else
       m.reply "no lart found matching #{params[:lart]}"
@@ -161,7 +161,7 @@ class LartPlugin < Plugin
   def handle_listpraise(m, params)
     rx = Regexp.new(params[:praise].to_s, true)
     list = @praises.grep(rx)
-    if list
+    unless list.empty?
       m.reply list.join(" | "), :split_at => /\s+\|\s+/
     else
       m.reply "no praise found matching #{params[:praise]}"
