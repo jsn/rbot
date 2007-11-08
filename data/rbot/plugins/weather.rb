@@ -192,7 +192,7 @@ class WeatherPlugin < Plugin
         m.reply "couldn't retrieve weather information, sorry"
       when /City Not Found/
         m.reply "no such location found (#{where})"
-      when /<table/
+      when /Current<\/a>/
         data = ""
         xml.scan(/<table border.*?>(.*?)<\/table>/m).each do |match|
           data += wu_weather_filter(match.first)
