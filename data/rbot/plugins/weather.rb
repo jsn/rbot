@@ -202,9 +202,8 @@ class WeatherPlugin < Plugin
         else
           m.reply "couldn't parse weather data from #{where}"
         end
-      when /<a href="\/global\/stations\//
-        stations = xml.scan(/<a href="\/global\/stations\/(.*?)\.html">/)
-        m.reply "multiple stations available, use 'weather station <code>' where code is one of " + stations.join(", ")
+      when /<a href="\/(?:global\/stations|US\/\w\w)\//
+        wu_weather_multi(m, xml)
       else
         debug xml
         m.reply "something went wrong with the data from #{where}..."
@@ -224,6 +223,19 @@ class WeatherPlugin < Plugin
     txt.gsub!(/<img\s*[^<>]*?>/,'')
     txt.gsub!(/<br\s?\/?>/,'')
     txt
+  end
+
+  def wu_weather_multi(m, xml)
+    stations = xml.scan(/<td>\s*<a href="\/(?:global\/stations|US\/(\w\w))\/(.*?)\.html">(.*?)<\/a>\s*:\s*(.*?)<\/td>/m)
+    m.reply "multiple stations available, use 'weather station <code>' or 'weather <city, state>' as appropriate, for one of the following (current temp shown):"
+    stations.map! { |ar|
+      if ar.first # US state
+        "%s, %s (%s): %s" % [ar[1], ar[0], ar[2], wu_clean(ar[3])]
+      else # non-US station
+        "station %s (%s): %s" % [ar[1], ar[2], wu_clean(ar[3])]
+      end
+    }
+    m.reply stations.join("; ")
   end
 
   def wu_weather_filter(stuff)
