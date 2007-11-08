@@ -190,13 +190,18 @@ class WeatherPlugin < Plugin
       case xml
       when nil
         m.reply "couldn't retrieve weather information, sorry"
-        return
       when /City Not Found/
         m.reply "no such location found (#{where})"
-        return
-      when /<table border.*?>(.*?)<\/table>/m
-        data = $1
-        m.reply wu_weather_filter(data)
+      when /<table/
+        data = ""
+        xml.scan(/<table border.*?>(.*?)<\/table>/m).each do |match|
+          data += wu_weather_filter(match.first)
+        end
+        if data.length > 0
+          m.reply data
+        else
+          m.reply "couldn't parse weather data from #{where}"
+        end
       when /<a href="\/global\/stations\//
         stations = xml.scan(/<a href="\/global\/stations\/(.*?)\.html">/)
         m.reply "multiple stations available, use 'weather station <code>' where code is one of " + stations.join(", ")
