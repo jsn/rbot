@@ -214,16 +214,20 @@ class WeatherPlugin < Plugin
     end
   end
 
-  def wu_weather_filter(stuff)
+  def wu_clean(stuff)
     txt = stuff
     txt.gsub!(/[\n\s]+/,' ')
-    data = Hash.new
     txt.gsub!(/&nbsp;/, ' ')
     txt.gsub!(/&#176;/, ' ') # degree sign
     txt.gsub!(/<\/?b>/,'')
     txt.gsub!(/<\/?span[^<>]*?>/,'')
     txt.gsub!(/<img\s*[^<>]*?>/,'')
     txt.gsub!(/<br\s?\/?>/,'')
+    txt
+  end
+
+  def wu_weather_filter(stuff)
+    txt = wu_clean(stuff)
 
     result = Array.new
     if txt.match(/<\/a>\s*Updated:\s*(.*?)\s*Observed at\s*(.*?)\s*<\/td>/)
