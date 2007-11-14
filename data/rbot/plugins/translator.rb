@@ -293,8 +293,8 @@ class TranslatorPlugin < Plugin
   end
 
   def help(plugin, topic=nil)
-    if @translators.has_key?(topic)
-      translator = @translators[topic]
+    if @translators.has_key?(plugin)
+      translator = @translators[plugin]
       _('%{info}, supported directions of translation: %{directions}') % {
         :info => translator.class::INFO,
         :directions => translator.directions.map do |source, targets|
@@ -303,7 +303,7 @@ class TranslatorPlugin < Plugin
                        end.join(' | ')
       }
     else
-      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. If "translator" is used in place of the translator name, the first translator in translator.default_list which supports the specified direction will be picked automatically. Use "help translator <translator>" to look up supported from and to languages') %
+      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. If "translator" is used in place of the translator name, the first translator in translator.default_list which supports the specified direction will be picked automatically. Use "help <translator>" to look up supported from and to languages') %
         {:translators => @translators.keys.join(', ')}
     end
   end
