@@ -295,7 +295,8 @@ class TranslatorPlugin < Plugin
   def help(plugin, topic=nil)
     if @translators.has_key?(plugin)
       translator = @translators[plugin]
-      _('%{info}, supported directions of translation: %{directions}') % {
+      _('%{translator} <from> <to> <phrase> => Look up phrase using %{info}, supported from -> to languages: %{directions}') % {
+        :translator => plugin,
         :info => translator.class::INFO,
         :directions => translator.directions.map do |source, targets|
                          _('%{source} -> %{targets}') %
