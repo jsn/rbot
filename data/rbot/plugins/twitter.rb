@@ -39,7 +39,7 @@ class TwitterPlugin < Plugin
 
   # return a help string when the bot is asked for help on this plugin
   def help(plugin, topic="")
-    return "twitter status [status] => updates your status on twitter | twitter identify [username] [password] => ties your nick to your twitter username and password"
+    return "twitter status [nick] => show nick's (or your) status | twitter update [status] => updates your status on twitter | twitter identify [username] [password] => ties your nick to your twitter username and password"
   end
 
   # update the status on twitter
