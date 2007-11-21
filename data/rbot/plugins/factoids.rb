@@ -91,6 +91,9 @@ class FactoidsPlugin < Plugin
     ],
     :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_triggers },
     :desc => "A list of regular expressions matching factoids where keywords can be identified. append ':n' if the keyword is defined by the n-th group instead of the first")
+  Config.register Config::BooleanValue.new('factoids.address',
+    :default => true,
+    :desc => "Should the bot reply with relevant factoids only when addressed with a direct question? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
 
   def initialize
     super
@@ -302,6 +305,7 @@ class FactoidsPlugin < Plugin
   end
 
   def unreplied(m)
+    return if @bot.config['factoids.address'] and !m.address?
     return if @factoids.empty?
     return if @triggers.empty?
     return unless m.message =~ /^(.*)\?\s*$/
