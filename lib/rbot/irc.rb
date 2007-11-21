@@ -109,12 +109,16 @@ module Irc
       return self.upper == other.upper && self.lower == other.lower
     end
 
-    # Raise an error if _arg_ and self are not the same Casemap
+    # Give a warning if _arg_ and self are not the same Casemap
     #
     def must_be(arg)
       other = arg.to_irc_casemap
-      raise "Casemap mismatch (#{self.inspect} != #{other.inspect})" unless self == other
-      return true
+      if self == other
+        return true
+      else
+        warn "Casemap mismatch (#{self.inspect} != #{other.inspect})"
+        return false
+      end
     end
 
   end
