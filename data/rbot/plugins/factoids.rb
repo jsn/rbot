@@ -90,7 +90,7 @@ class FactoidsPlugin < Plugin
       "(.*?)\\s+(is|are)\\s+.*",
     ],
     :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_triggers },
-    :desc => "A list of regular expressions matching factoids where keywords can be identified. append ':n' if the keyword is defined by the n-th group instead of the first")
+    :desc => "A list of regular expressions matching factoids where keywords can be identified. append ':n' if the keyword is defined by the n-th group instead of the first. if the list is empty, any word will be considered a keyword")
   Config.register Config::BooleanValue.new('factoids.address',
     :default => true,
     :desc => "Should the bot reply with relevant factoids only when addressed with a direct question? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
@@ -167,6 +167,7 @@ class FactoidsPlugin < Plugin
   end
 
   def trigger_patterns_to_rx
+    return [] if @bot.config['factoids.trigger_pattern'].empty?
     @bot.config['factoids.trigger_pattern'].inject([]) { |list, str|
       s = str.dup
       if s =~ /:(\d+)$/
@@ -185,19 +186,24 @@ class FactoidsPlugin < Plugin
     else
       regs = rx
     end
-    regs.inject([]) { |list, a|
-      r = a.first
-      i = a.last
-      m = r.match(f.to_s)
-      if m
-        list << m[i].downcase
-      else
-        list
-      end
-    }
+    if regs.empty?
+      f.to_s.scan(/\w+/u)
+    else
+      regs.inject([]) { |list, a|
+        r = a.first
+        i = a.last
+        m = r.match(f.to_s)
+        if m
+          list << m[i].downcase
+        else
+          list
+        end
+      }
+    end
   end
 
   def reset_triggers
+    return unless @factoids
     start_time = Time.now
     rx = trigger_patterns_to_rx
     triggers = @factoids.inject(Set.new) { |set, f|
