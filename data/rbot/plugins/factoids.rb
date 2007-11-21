@@ -187,7 +187,7 @@ class FactoidsPlugin < Plugin
       i = a.last
       m = r.match(f.to_s)
       if m
-        list << m[i]
+        list << m[i].downcase
       else
         list
       end
@@ -298,6 +298,16 @@ class FactoidsPlugin < Plugin
         }
       end
       m.reply reply.join(" -- ")
+    end
+  end
+
+  def unreplied(m)
+    return if @factoids.empty?
+    return if @triggers.empty?
+    return unless m.message =~ /^(.*)\?\s*$/
+    query = $1.strip.downcase
+    if @triggers.include?(query)
+      facts(m, :words => query)
     end
   end
 
