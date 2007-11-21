@@ -94,6 +94,9 @@ class FactoidsPlugin < Plugin
   Config.register Config::BooleanValue.new('factoids.address',
     :default => true,
     :desc => "Should the bot reply with relevant factoids only when addressed with a direct question? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
+  Config.register Config::IntegerValue.new('factoids.search_results',
+    :default => 5,
+    :desc => "How many factoids to display at a time")
 
   def initialize
     super
@@ -288,8 +291,7 @@ class FactoidsPlugin < Plugin
       if known.empty?
         reply << _("I know nothing about %{words}" % params)
       else
-        # TODO config
-        max_facts = 5
+        max_facts = @bot.config['factoids.search_results']
         len = known.length
         if len > max_facts
           m.reply _("%{len} out of %{total} facts refer to %{words}, I'll only show %{max}" % {
