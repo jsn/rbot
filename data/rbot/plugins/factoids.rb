@@ -81,6 +81,17 @@ class FactoidsPlugin < Plugin
     end
   end
 
+  # TODO default should be language-specific
+  Config.register Config::ArrayValue.new('factoids.trigger_pattern',
+    :default => [
+      "(this|that|a|the|an|all|both)\\s+(.*)\\s+(is|are)\\s+.*:2",
+      "(this|that|a|the|an|all|both)\\s+(.*?)\\s+(is|are)\\s+.*:2",
+      "(.*)\\s+(is|are)\\s+.*",
+      "(.*?)\\s+(is|are)\\s+.*",
+    ],
+    :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_triggers },
+    :desc => "A list of regular expressions matching factoids where keywords can be identified. append ':n' if the keyword is defined by the n-th group instead of the first")
+
   def initialize
     super
 
@@ -88,6 +99,7 @@ class FactoidsPlugin < Plugin
     @dir = File.join(@bot.botclass,"factoids")
     @filename = "factoids.rbot"
     @factoids = FactoidList.new
+    @triggers = Set.new
     begin
       read_factfile
     rescue
@@ -134,6 +146,7 @@ class FactoidsPlugin < Plugin
         :fname => fname
       })
     end
+    reset_triggers
   end
 
   def save
@@ -148,6 +161,52 @@ class FactoidsPlugin < Plugin
       file.puts ar
     end
     @changed = false
+  end
+
+  def trigger_patterns_to_rx
+    @bot.config['factoids.trigger_pattern'].inject([]) { |list, str|
+      s = str.dup
+      if s =~ /:(\d+)$/
+        idx = $1.to_i
+        s.sub!(/:\d+$/,'')
+      else
+        idx = 1
+      end
+      list << [/^#{s}$/iu, idx]
+    }
+  end
+
+  def parse_for_trigger(f, rx=nil)
+    if !rx
+      regs = trigger_patterns_to_rx
+    else
+      regs = rx
+    end
+    regs.inject([]) { |list, a|
+      r = a.first
+      i = a.last
+      m = r.match(f.to_s)
+      if m
+        list << m[i]
+      else
+        list
+      end
+    }
+  end
+
+  def reset_triggers
+    start_time = Time.now
+    rx = trigger_patterns_to_rx
+    triggers = @factoids.inject(Set.new) { |set, f|
+      found = parse_for_trigger(f, rx)
+      if found.empty?
+        set
+      else
+        set | found
+      end
+    }
+    debug "Triggers done in #{Time.now - start_time}"
+    @triggers.replace(triggers)
   end
 
   def help(plugin, topic="")
@@ -171,6 +230,7 @@ class FactoidsPlugin < Plugin
       @changed = true
       m.okay
       fact(m, :index => @factoids.length.to_s)
+      parse_for_trigger(factoid)
     end
   end
 
