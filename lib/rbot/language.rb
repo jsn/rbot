@@ -27,6 +27,8 @@ class Bot
       :traditional_chinese => 'zh_TW',
       :simplified_chinese => 'zh_CN'
     }
+    # On WIN32 it appears necessary to have ".UTF-8" explicitly for gettext to use UTF-8
+    Lang2Locale.each_value {|v| v.replace(v + '.UTF-8')}
 
     # Return the shortest language for the current
     # GetText locale
