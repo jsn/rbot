@@ -15,6 +15,10 @@
 # playing several games, each per channel. A game can be turn-based, where only new
 # players can interrupt a turn to join, or a free mode where anyone can speak at any
 # time.
+#
+# In Japanese mode, if present, the plugin can use normalize-japanese 
+# <http://neruchan.mine.nu:60880/normalize-japanese.rb> to allow
+# katakana words be used like hiragana.
 # 
 # TODO
 # * a system to describe settings, so they can be displayed, changed and saved
@@ -367,7 +371,13 @@ class ShiritoriPlugin < Plugin
         :listen => /\A\S+\Z/u,
         :overlap_lengths => 1..4,
         :desc => 'Use Japanese words in hiragana; 1-4 kana at the beginning of the next word must overlap with those at the end of the previous word.',
-        # Optionally use a module to normalize Japanese words, enabling input in multiple writing systems
+        :normalize =>
+          begin
+            require 'normalize-japanese'
+            lambda {|w| w.to_hiragana}
+          rescue LoadError
+            lambda {|w| w}
+          end
       }
     }
   end
