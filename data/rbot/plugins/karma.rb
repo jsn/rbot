@@ -61,29 +61,40 @@ class KarmaPlugin < Plugin
 
   def listen(m)
     return unless m.kind_of?(PrivMessage) && m.public?
-    # in channel message, the kind we are interested in
-    if(m.message =~ /(\+\+|--)/)
-      string = m.message.sub(/\W(--|\+\+)(\(.*?\)|[^(++)(\-\-)\s]+)/, "\2\1")
-      seen = Hash.new
-      while(string.sub!(/(\(.*?\)|[^(++)(\-\-)\s]+)(\+\+|--)/, ""))
-        key = $1
-        change = $2
-        next if seen[key]
-        seen[key] = true
-
-        key.sub!(/^\((.*)\)$/, "\1")
-        key.gsub!(/\s+/, " ")
-        next unless(key.length > 0)
-        next if(key.downcase == m.sourcenick.downcase)
-        if(change == "++")
-          @registry[key] += 1
-          if key =~ /^#{@bot.nick}$/i
-            @bot.say m.replyto, @bot.lang.get("thanks")
+    arg = nil
+    op = nil
+    ac = Hash.new
+    m.message.split.each_with_index do |tok, i|
+      tok.sub!(/[:,]$/, '') if i == 0
+      catch :me_if_you_can do
+        if m.channel.users[tok].nil?
+          if (tok =~ /^(?:--)(.*[^-].*)$/) || (tok =~ /^(.*[^-].*)(?:--)$/)
+            op, arg = '--', $1
+            next
+          elsif (tok =~ /^(?:\+\+)(.*[^+].*)$/) || (tok =~ /^(.*[^+].*)(?:\+\+)$/)
+            op, arg = '++', $1
+            next
           end
-        elsif(change == "--")
-          @registry[key] -= 1
         end
+
+        if (tok =~ /^--+$/) || (tok =~ /^\+\++$/)
+          op = tok.slice(0, 2)
+        else
+          arg = tok
+        end
+      end # catch
+
+      if op && arg
+        ac[arg] ||= 0
+        ac[arg] += (op == '--' ? -1 : 1)
+        op = arg = nil
       end
+    end
+
+    ac.each do |k, v|
+      next if v == 0
+      @registry[k] += (v > 0 ? 1 : -1)
+      m.reply @bot.lang.get("thanks") if k == @bot.nick
     end
   end
 end
