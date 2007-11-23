@@ -71,7 +71,7 @@ class KarmaPlugin < Plugin
           if (tok =~ /^(?:--)(.*[^-].*)$/) || (tok =~ /^(.*[^-].*)(?:--)$/)
             op, arg = '--', $1
             next
-          elsif (tok =~ /^(?:\+\+)(.*[^+].*)$/) || (tok =~ /^(.*[^+].*)(?:\+\+)$/)
+          elsif (tok =~ /^(?:\+\+)(.*[^+].*)$/)||(tok =~ /^(.*[^+].*)(?:\+\+)$/)
             op, arg = '++', $1
             next
           end
@@ -94,7 +94,7 @@ class KarmaPlugin < Plugin
     ac.each do |k, v|
       next if v == 0
       @registry[k] += (v > 0 ? 1 : -1)
-      m.reply @bot.lang.get("thanks") if k == @bot.nick
+      m.reply @bot.lang.get("thanks") if k == @bot.nick && v > 0
     end
   end
 end
