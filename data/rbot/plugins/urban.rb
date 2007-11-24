@@ -13,7 +13,7 @@ class UrbanPlugin < Plugin
 
   def get_def(m, word, n = nil)
     n = n ? n.to_i : 1
-    u = URBAN + CGI.escape(word)
+    u = URBAN + URI.escape(word)
     u += '&skip=' + n.to_s if n
     s = @bot.httputil.get(u)
 
