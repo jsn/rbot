@@ -5,42 +5,44 @@ class UrbanPlugin < Plugin
     "urban [word] [n]: give the [n]th definition of [word] from urbandictionary.com. urbanday: give the word-of-the-day at urban"
   end
 
+  def format_definition(total, num, word, desc, ex)
+    "#{Bold}#{word} (#{num}/#{total})#{Bold}: " +
+    desc.ircify_html(:limit => 300) + " " +
+    "<i>#{ex}</i>".ircify_html(:limit => 100)
+  end
+
   def get_def(m, word, n = nil)
-    n = n.to_i if n
+    n = n ? n.to_i : 1
     u = URBAN + CGI.escape(word)
     u += '&skip=' + n.to_s if n
     s = @bot.httputil.get(u)
 
     notfound = s.match %r{<div style="color: #669FCE"><i>.*?</i> isn't defined}
 
+    total = nil
     if s.sub!(%r{<div class="pager"><b>(\d+)</b>\s*definition.*$}m, '')
       total = $1.to_i
-    else
-      total = 1
     end
-
-    n = total if n && n > total
 
     rv = Array.new
 
-    s.scan(%r{<td class="def_number"[^>]*>(\d+)\.</td>.*?<td class="def_word">(?:<a.*?>)?([^>]+)(?:</a>)?</td>.*?<div class="def_p">.*?<p>(.+?)</p>.*?<p style=".*?>(.+?)</p>}m) do |a1, a2, a3, a4|
-      rv << (
-        "#{Bold}#{a2} (#{a1}/#{total})#{Bold}: " +
-        a3.ircify_html(:limit => 300) + " " +
-        "<i>#{a4}</i>".ircify_html(:limit => 100)
-      ) unless (n && n != a1.to_i) || rv.size >= 3
+    s.scan(%r{<td class="def_number"[^>]*>(\d+)\.</td>.*?<td class="def_word">(?:<a.*?>)?([^>]+)(?:</a>)?</td>.*?<div class="def_p">.*?<p>(.+?)</p>.*?<p style=".*?>(.+?)</p>}m) do |num, wrd, desc, ex|
+      rv << [num.to_i, wrd, desc, ex]
     end
 
+    total ||= rv.size
+
+    return m.reply "#{Bold}#{word}#{Bold} not found" if rv.empty?
+
     if notfound
-      if rv.empty?
-        m.reply "#{word} not found"
-      else
-        m.reply "#{word} not found. maybe you mean:"
-        rv.each { |s| m.reply s }
-      end
-    else
-      rv.each { |s| m.reply s }
+      suggestions = rv.map { |s| "#{Underline}#{s[1]}#{Underline}" }.join(', ')
+      m.reply "#{Bold}#{word}#{Bold} not found. maybe you mean #{suggestions}?"
+      return
     end
+
+    answer = rv.find { |a| a[0] == n }
+    answer ||= (n > total ? rv.last : rv.first)
+    m.reply format_definition(total, *answer)
   end
 
   def urban(m, params)
