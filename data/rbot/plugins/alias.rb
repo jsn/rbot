@@ -128,6 +128,7 @@ class AliasPlugin < Plugin
 
   def method_missing(name, *args, &block)
     if name.to_s =~ /\Aalias_handle<(.+)>\Z/
+      text = $1
       m, params = args
       # messages created by alias handler will have a depth method, which returns the 
       # depth of "recursion" caused by the message
@@ -137,11 +138,11 @@ class AliasPlugin < Plugin
         return
       end
 
-      command = @aliases[$1]
+      command = @aliases[text]
       if command
         # create a fake message containing the intended command
         new_msg = PrivMessage.new(@bot, m.server, m.server.user(m.source), m.target,
-                                    command.gsub(/<(\w+)>/) {|arg| params[:"#{$1}"].to_s})
+                  command.gsub(/<(\w+)>/) {|arg| params[:"#{$1}"].to_s})
         # tag incremented depth on the message
         class << new_msg
           self
@@ -149,7 +150,8 @@ class AliasPlugin < Plugin
 
         @bot.plugins.privmsg(new_msg)
       else
-        m.reply _("Error handling the alias, the command is not defined")
+        m.reply(_("Error handling the alias, The alias %{text} is not defined or has beeen removed. I will stop responding to it after rescan,") %
+                {:text => text})
       end
     else
       super(name, *args, &block)
