@@ -109,12 +109,17 @@ class AliasPlugin < Plugin
     # each alias is implemented by adding a message map, whose handler creates a message
     # containing the aliased command
 
-    command.grep(/<(\w+)>/) {$1}.to_set ==
-      text.grep(/(?:^|\s)[:*](\w+)(?:\s|$)/) {$1}.to_set or
+    command.scan(/<(\w+)>/).flatten.to_set ==
+      text.split.grep(/\A[:*](\w+)\Z/) {$1}.to_set or
       raise AliasDefinitionError.new(_('The arguments in alias must match the substitutions in command, and vice versa'))
     
+    begin
+      map text, :action => :"alias_handle<#{text}>", :auth_path => 'run'
+    rescue
+      raise AliasDefinitionError.new(_('Error mapping %{text} as command: %{error}') %
+                                     {:text => text, :error => $!})
+    end
     @aliases[text] = command
-    map text, :action => :"alias_handle<#{text}>", :auth_path => 'run'
   end
 
   def respond_to?(name, include_private=false)
