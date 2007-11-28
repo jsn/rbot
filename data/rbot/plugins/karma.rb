@@ -60,7 +60,7 @@ class KarmaPlugin < Plugin
   end
 
   def listen(m)
-    return unless m.kind_of?(PrivMessage) && m.public?
+    return unless m.kind_of?(PrivMessage) && m.public? && m.message.match(/\+\+|--/)
     arg = nil
     op = nil
     ac = Hash.new
