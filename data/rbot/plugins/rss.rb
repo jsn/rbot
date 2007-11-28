@@ -789,6 +789,7 @@ class RSSFeedsPlugin < Plugin
   end
 
   def printFormattedRss(feed, item, opts=nil)
+    debug item
     places = feed.watchers
     handle = "::#{feed.handle}:: "
     date = String.new
@@ -796,13 +797,25 @@ class RSSFeedsPlugin < Plugin
       places = opts[:places] if opts.key?(:places)
       handle = opts[:handle].to_s if opts.key?(:handle)
       if opts.key?(:date) && opts[:date]
-        if item.respond_to?(:pubDate) 
+        if item.respond_to?(:updated)
+          if item.updated.content.class <= Time
+            date = item.updated.content.strftime("%Y/%m/%d %H:%M")
+          else
+            date = item.updated.content.to_s
+          end
+        elsif item.respond_to?(:source) and item.source.respond_to?(:updated)
+          if item.source.updated.content.class <= Time
+            date = item.source.updated.content.strftime("%Y/%m/%d %H:%M")
+          else
+            date = item.source.updated.content.to_s
+          end
+        elsif item.respond_to?(:pubDate) 
           if item.pubDate.class <= Time
             date = item.pubDate.strftime("%Y/%m/%d %H:%M")
           else
             date = item.pubDate.to_s
           end
-        elsif  item.respond_to?(:date)
+        elsif item.respond_to?(:date)
           if item.date.class <= Time
             date = item.date.strftime("%Y/%m/%d %H:%M")
           else
@@ -820,26 +833,38 @@ class RSSFeedsPlugin < Plugin
     # limit to 160 characters, and most of them are under 140 characters
     tit_opt[:limit] = @bot.config['rss.head_max'] unless feed.type == 'twitter'
 
-    title = "#{Bold}#{item.title.ircify_html(tit_opt)}#{Bold}" if item.title
+    title = "#{Bold}#{item.title.to_s.ircify_html(tit_opt)}#{Bold}" if item.title
 
     desc_opt = {
       :limit => @bot.config['rss.text_max'],
       :a_href => :link_out
     }
-    desc = item.description.ircify_html(desc_opt) if item.description
 
-    link = item.link.chomp if item.link
+    if item.respond_to? :description
+      desc = item.description.ircify_html(desc_opt) if item.description
+    else
+      if item.content.type == "html"
+        desc = item.content.content.ircify_html(desc_opt)
+      else
+        desc = item.content.content
+        if desc.size > desc_opt[:limit]
+          desc = desc.slice(0, desc_opt[:limit]) + "#{Reverse}...#{Reverse}"
+        end
+      end
+    end
 
-    debug item.inspect
-    category = item.dc_subject rescue item.category.content rescue nil
+    link = item.link.href rescue item.link.chomp rescue nil
+
+    category = item.category.content rescue item.dc_subject rescue nil
     category = nil if category and category.empty?
-    author = item.dc_creator rescue item.author rescue nil
+    author = item.author.name.content rescue item.dc_creator rescue item.author rescue nil
     author = nil if author and author.empty?
 
     line1 = nil
     line2 = nil
 
     at = ((item.title && item.link) ? ' @ ' : '')
+
     case feed.type
     when 'blog'
       author << " " if author
@@ -936,8 +961,12 @@ class RSSFeedsPlugin < Plugin
           report_problem("bah! something went wrong =(", e, m)
           return nil
         end
-        rss.channel.title ||= "Unknown"
-        title = rss.channel.title
+        if rss.respond_to? :channel
+          rss.channel.title ||= "Unknown"
+          title = rss.channel.title
+        else
+          title = rss.title.content
+        end
         rss.items.each do |item|
           item.title ||= "Unknown"
           items << item
