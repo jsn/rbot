@@ -387,10 +387,12 @@ class RSSFeedsPlugin < Plugin
       "rss watch #{Bold}handle#{Bold} [#{Bold}url#{Bold} [#{Bold}type#{Bold}]]  [in #{Bold}chan#{Bold}]: watch rss #{Bold}handle#{Bold} for changes (in channel #{Bold}chan#{Bold}); when the other parameters are present, the feed will be created if it doesn't exist yet"
     when /(un|rm)watch/
       "rss unwatch|rmwatch #{Bold}handle#{Bold} [in #{Bold}chan#{Bold}]: stop watching rss #{Bold}handle#{Bold} (in channel #{Bold}chan#{Bold}) for changes"
+    when  /who(?: watche?s?)?/
+      "rss who watches #{Bold}handle#{Bold}: lists watches for rss #{Bold}handle#{Bold}"
     when "rewatch"
       "rss rewatch : restart threads that watch for changes in watched rss"
     else
-      "manage RSS feeds: rss show|list|watched|add|change|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch"
+      "manage RSS feeds: rss show|list|watched|add|change|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch|who watches"
     end
   end
 
