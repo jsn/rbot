@@ -162,17 +162,10 @@ end
 
 
 class ::RssBlob
-  attr_accessor :url
-  attr_accessor :handle
-  attr_accessor :type
-  attr :watchers
-  attr_accessor :refresh_rate
-  attr_accessor :xml
-  attr_accessor :title
-  attr_accessor :items
-  attr_accessor :mutex
+  attr_accessor :url, :handle, :type, :refresh_rate, :xml, :title, :items,
+    :mutex, :watchers, :last_fetched
 
-  def initialize(url,handle=nil,type=nil,watchers=[], xml=nil)
+  def initialize(url,handle=nil,type=nil,watchers=[], xml=nil, lf = nil)
     @url = url
     if handle
       @handle = handle
@@ -186,6 +179,7 @@ class ::RssBlob
     @title = nil
     @items = nil
     @mutex = Mutex.new
+    @last_fetched = lf
     sanitize_watchers(watchers)
   end
 
@@ -195,7 +189,8 @@ class ::RssBlob
                      @handle,
                      @type ? @type.dup : nil,
                      @watchers.dup,
-                     @xml ? @xml.dup : nil)
+                     @xml ? @xml.dup : nil,
+                     @last_fetched)
     end
   end
 
@@ -698,13 +693,18 @@ class RSSFeedsPlugin < Plugin
     end
     status = Hash.new
     status[:failures] = 0
-    status[:first_run] = true
-    @watch[feed.handle] = @bot.timer.add(0) {
-      debug "watcher for #{feed} started"
+    tmout = 0
+    if feed.last_fetched
+      tmout = feed.last_fetched + calculate_timeout(feed) - Time.now
+      tmout = 0 if tmout < 0
+    end
+    debug "scheduling a watcher for #{feed} in #{tmout} seconds"
+    @watch[feed.handle] = @bot.timer.add(tmout) {
+      debug "watcher for #{feed} wakes up"
       failures = status[:failures]
-      first_run = status.delete(:first_run)
       begin
         debug "fetching #{feed}"
+        first_run = !feed.last_fetched
         oldxml = feed.xml ? feed.xml.dup : nil
         unless fetchRss(feed)
           failures += 1
@@ -781,18 +781,25 @@ class RSSFeedsPlugin < Plugin
 
       status[:failures] = failures
 
-      timer = nil
+      seconds = calculate_timeout(feed, failures)
+      debug "watcher for #{feed} going to sleep #{seconds} seconds.."
+      begin
+        @bot.timer.reschedule(@watch[feed.handle], seconds)
+      rescue
+        warning "watcher for #{feed} failed to reschedule: #{$!.inspect}"
+      end
+    }
+    debug "watcher for #{feed} added"
+  end
+
+  def calculate_timeout(feed, failures = 0)
       seconds = @bot.config['rss.thread_sleep']
       feed.mutex.synchronize do
-        timer = @watch[feed.handle]
         seconds = feed.refresh_rate if feed.refresh_rate
       end
       seconds *= failures + 1
       seconds += seconds * (rand(100)-50)/100
-      debug "watcher for #{feed} going to sleep #{seconds} seconds.."
-      @bot.timer.reschedule(timer, seconds) rescue warning "watcher for #{feed} failed to reschedule: #{$!.inspect}"
-    }
-    debug "watcher for #{feed} added"
+      return seconds
   end
 
   def printFormattedRss(feed, item, opts=nil)
@@ -905,6 +912,7 @@ class RSSFeedsPlugin < Plugin
   end
 
   def fetchRss(feed, m=nil, cache=true)
+    feed.last_fetched = Time.now
     begin
       # Use 60 sec timeout, cause the default is too low
       xml = @bot.httputil.get(feed.url,
