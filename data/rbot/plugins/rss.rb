@@ -993,6 +993,9 @@ end
 
 plugin = RSSFeedsPlugin.new
 
+plugin.default_auth( 'edit', false )
+plugin.default_auth( 'edit:add', true)
+
 plugin.map 'rss show :handle :limit',
   :action => 'show_rss',
   :requirements => {:limit => /^\d+(?:\.\.\d+)?$/},
@@ -1008,23 +1011,31 @@ plugin.map 'rss who watches :handle',
   :defaults => {:handle => nil}
 plugin.map 'rss add :handle :url :type',
   :action => 'add_rss',
+  :auth_path => 'edit',
   :defaults => {:type => nil}
 plugin.map 'rss change :what of :handle to :new',
   :action => 'change_rss',
+  :auth_path => 'edit',
   :requirements => { :what => /handle|url|format|type|refresh/ }
 plugin.map 'rss change :what for :handle to :new',
   :action => 'change_rss',
+  :auth_path => 'edit',
   :requirements => { :what => /handle|url|format|type|refesh/ }
 plugin.map 'rss del :handle',
+  :auth_path => 'edit:rm!',
   :action => 'del_rss'
 plugin.map 'rss delete :handle',
+  :auth_path => 'edit:rm!',
   :action => 'del_rss'
 plugin.map 'rss rm :handle',
+  :auth_path => 'edit:rm!',
   :action => 'del_rss'
 plugin.map 'rss replace :handle :url :type',
+  :auth_path => 'edit',
   :action => 'replace_rss',
   :defaults => {:type => nil}
 plugin.map 'rss forcereplace :handle :url :type',
+  :auth_path => 'edit',
   :action => 'forcereplace_rss',
   :defaults => {:type => nil}
 plugin.map 'rss watch :handle [in :chan]',
@@ -1039,4 +1050,3 @@ plugin.map 'rss rmwatch :handle [in :chan]',
   :action => 'unwatch_rss'
 plugin.map 'rss rewatch',
   :action => 'rewatch_rss'
-
