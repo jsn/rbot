@@ -24,8 +24,13 @@ module ::RSS
   #
   def RSS.item_uid_for_bot(item, opts={})
     options = { :show_updated => true}.merge(opts)
-    desc = options[:show_updated] ? item.description : nil
-    [item.title, item.link, desc].hash
+    desc = nil
+    if options[:show_updated]
+      desc = item.content.content rescue item.description rescue nil
+    end
+    [(item.title.content rescue item.title rescue nil),
+     (item.link.href rescue item.link),
+     desc].hash
   end
 
   # Add support for Slashdot namespace in RDF. The code is just an adaptation
