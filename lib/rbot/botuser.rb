@@ -810,8 +810,9 @@ class Bot
       # BotUser (if any) it's logged in as
       #
       def make_permanent(user, name)
+        buname = BotUser.sanitize_username(name)
         # TODO merge BotUser instead?
-        raise "there's already a BotUser called #{name}" if include?(name)
+        raise "there's already a BotUser called #{name}" if include?(buname)
 
         tuser = nil
         case user
@@ -825,7 +826,7 @@ class Bot
         return nil unless tuser
         raise TypeError, "#{tuser} is not transient" unless tuser.transient?
 
-        tuser.make_permanent(name)
+        tuser.make_permanent(buname)
         @allbotusers[tuser.username.to_sym] = tuser
 
         return tuser
