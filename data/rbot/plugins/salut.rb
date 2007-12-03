@@ -91,7 +91,7 @@ class SalutPlugin < Plugin
     @match_langs.uniq!
   end
 
-  def listen(m)
+  def unreplied(m)
     return if @match.empty?
     return unless m.kind_of?(PrivMessage)
     return if m.address? and m.plugin == 'config'
