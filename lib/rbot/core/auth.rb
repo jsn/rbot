@@ -357,6 +357,7 @@ class AuthModule < CoreBotModule
     can_reset = bools + can_set + can_addrm
     can_show = can_reset + ["perms"]
 
+    begin
     case cmd.to_sym
 
     when :show
@@ -508,6 +509,9 @@ class AuthModule < CoreBotModule
 
     else
       m.reply _("sorry, I don't know how to %{request}") % {:request => m.message}
+    end
+    rescue => e
+      m.reply _("couldn't %{cmd}: %{exception}") % {:cmd => cmd, :exception => e}
     end
   end
 
