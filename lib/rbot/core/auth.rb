@@ -300,9 +300,13 @@ class AuthModule < CoreBotModule
         return _("user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy")
       end
     when "auth"
-      return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user")
+      return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user, meet, hello")
+    when "meet"
+      return _("meet <nick> [as <user>]: creates a bot user for nick, calling it user (defaults to the nick itself)")
+    when "hello"
+      return _("hello: creates a bot user for the person issuing the command")
     else
-      return _("auth commands: auth, login, whoami, who, permission[s], user")
+      return _("auth commands: auth, login, whoami, who, permission[s], user, meet, hello")
     end
   end
 
@@ -512,6 +516,42 @@ class AuthModule < CoreBotModule
     end
     rescue => e
       m.reply _("couldn't %{cmd}: %{exception}") % {:cmd => cmd, :exception => e}
+    end
+  end
+
+  def auth_meet(m, params)
+    nick = params[:nick]
+    if !nick
+      # we are actually responding to a 'hello' command
+      unless m.botuser.transient?
+        m.reply @bot.lang.get('hello_X') % m.botuser
+        return
+      end
+      nick = m.sourcenick
+      irc_user = m.source
+    else
+      # m.channel is always an Irc::Channel because the command is either
+      # public-only 'meet' or private/public 'hello' which was handled by
+      # the !nick case, so this shouldn't fail
+      irc_user = m.channel.users[nick]
+      return m.reply("I don't see anyone named '#{nick}' here") unless irc_user
+    end
+    # BotUser name
+    buname = params[:user] || nick
+    begin
+      met = @bot.auth.make_permanent(irc_user, buname)
+      @bot.auth.set_changed
+      m.reply @bot.lang.get('hello_X') % met
+      @bot.say nick, _("you are now registered as %{buname}. I created a random password for you : %{pass} and you can change it at any time by telling me 'user set password <password>' in private" % {
+        :buname => buname,
+        :pass => met.password
+      })
+    rescue RuntimeError
+      # or can this happen for other cases too?
+      # TODO autologin if forced
+      m.reply _("but I already know %{buname}" % {:buname => buname})
+    rescue => e
+      m.reply _("I had problems meeting %{nick}: %{e}" % { :nick => nick, :e => e })
     end
   end
 
@@ -834,7 +874,16 @@ auth.map "user rename :source [to] :dest",
   :action => 'auth_copy_ren_user',
   :auth_path => ':manage:'
 
+auth.map "meet :nick [as :user]",
+  :action => 'auth_meet',
+  :auth_path => 'user::manage', :private => false
+
+auth.map "hello",
+  :action => 'auth_meet',
+  :auth_path => 'user::manage::meet'
+
 auth.default_auth("user::manage", false)
+auth.default_auth("user::manage::meet::hello", true)
 
 auth.map "user tell :user the password for :botuser",
   :action => 'auth_tell_password',
