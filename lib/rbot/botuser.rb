@@ -270,7 +270,7 @@ class Bot
 
       # Make the BotUser permanent
       def make_permanent(name)
-        raise TypError, "permanent already" if permanent?
+        raise TypeError, "permanent already" if permanent?
         @username = BotUser.sanitize_username(name)
         @transient = false
         reset_autologin
