@@ -295,7 +295,7 @@ class AuthModule < CoreBotModule
       when "list"
         return _("user list : lists all the botusers")
       when "destroy"
-        return _("user destroy <botuser> <password> : destroys <botuser>; this function %{highlight}must%{highlight} be called in two steps. On the first call, no password must be specified: <botuser> is then queued for destruction. On the second call, you must specify the correct password for <botuser>, and it will be destroyed. If you want to cancel the destruction, issue the command +user cancel destroy <botuser>+") % {:highlight => Bold}
+        return _("user destroy <botuser> : destroys <botuser>. This function %{highlight}must%{highlight} be called in two steps. On the first call <botuser> is queued for destruction. On the second call, which must be in the form 'user confirm destroy <botuser>', the botuser will be destroyed. If you want to cancel the destruction, issue the command 'user cancel destroy <botuser>'") % {:highlight => Bold}
       else
         return _("user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy")
       end
@@ -604,8 +604,7 @@ class AuthModule < CoreBotModule
     buname = params[:name]
     return m.reply(_("You can't destroy %{user}") % {:user => buname}) if
            ["everyone", "owner"].include?(buname)
-    cancel = m.message.split[1] == 'cancel'
-    password = params[:password]
+    mod = params[:modifier].to_sym rescue nil
 
     buser_array = @bot.auth.save_array
     buser_hash = buser_array.inject({}) { |h, u|
@@ -616,7 +615,8 @@ class AuthModule < CoreBotModule
     return m.reply(_("no such botuser %{user}") % {:user=>buname}) unless
            buser_hash.keys.include?(buname)
 
-    if cancel
+    case mod
+    when :cancel
       if @destroy_q.include?(buname)
         @destroy_q.delete(buname)
         m.reply(_("%{user} removed from the destruction queue") % {:user=>buname})
@@ -624,21 +624,17 @@ class AuthModule < CoreBotModule
         m.reply(_("%{user} was not queued for destruction") % {:user=>buname})
       end
       return
-    end
-
-    if password.nil?
+    when nil
       if @destroy_q.include?(buname)
-        return m.reply(_("%{user} already queued for destruction, use %{highlight}user destroy %{user} <password>%{highlight} to destroy it") % {:user=>buname, :highlight=>Bold})
+        return m.reply(_("%{user} already queued for destruction, use %{highlight}user confirm destroy %{user}%{highlight} to destroy it") % {:user=>buname, :highlight=>Bold})
       else
         @destroy_q << buname
-        return m.reply(_("%{user} queued for destruction, use %{highlight}user destroy %{user} <password>%{highlight} to destroy it") % {:user=>buname, :highlight=>Bold})
+        return m.reply(_("%{user} queued for destruction, use %{highlight}user confirm destroy %{user}%{highlight} to destroy it") % {:user=>buname, :highlight=>Bold})
       end
-    else
+    when :confirm
       begin
         return m.reply(_("%{user} is not queued for destruction yet") %
                {:user=>buname}) unless @destroy_q.include?(buname)
-        return m.reply(_("wrong password for %{user}") %
-               {:user=>buname}) unless buser_hash[buname][:password] == password
         buser_array.delete_if { |u|
           u[:username] == buname
         }
@@ -650,7 +646,6 @@ class AuthModule < CoreBotModule
       end
       return m.reply(_("botuser %{user} destroyed") % {:user => buname})
     end
-
   end
 
   def auth_copy_ren_user(m, params)
@@ -867,10 +862,11 @@ auth.map "user create :name :password",
   :defaults => {:password => nil},
   :auth_path => ':manage:'
 
-auth.map "user [cancel] destroy :name :password",
+auth.map "user [:modifier] destroy :name",
   :action => 'auth_destroy_user',
-  :defaults => { :password => nil },
-  :auth_path => ':manage::destroy:'
+  :requirements => { :modifier => /^(cancel|confirm)?$/ },
+  :defaults => { :modifier => '' },
+  :auth_path => ':manage::destroy!'
 
 auth.map "user copy :source [to] :dest",
   :action => 'auth_copy_ren_user',
