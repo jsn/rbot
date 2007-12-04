@@ -683,13 +683,17 @@ class AuthModule < CoreBotModule
 
       @bot.auth.load_array(buser_array, true)
       @bot.auth.set_changed
+      call_event(:botuser, copying ? :copy : :rename, :source => source, :dest => dest)
     rescue => e
       return m.reply(_("failed: %{exception}") % {:exception=>e})
     end
-    return m.reply(_("botuser %{source} copied to %{dest}") %
-           {:source=>source, :dest=>dest}) if copying
-    return m.reply(_("botuser %{source} renamed to %{dest}") %
+    if copying
+      m.reply(_("botuser %{source} copied to %{dest}") %
            {:source=>source, :dest=>dest})
+    else
+      m.reply(_("botuser %{source} renamed to %{dest}") %
+           {:source=>source, :dest=>dest})
+    end
 
   end
 

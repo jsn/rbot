@@ -152,6 +152,15 @@ class UserDataModule < CoreBotModule
   #   data = params[:data].to_s
   # end
 
+  def event_botuser(action, opts={})
+    return unless [:copy, :rename].include?(action)
+    source = opts[:source]
+    return unless @botuser.key?(source)
+    dest = opts[:dest]
+    @botuser[dest] = @botuser[source].dup
+    @botuser.delete(source) if action == :rename
+  end
+
 end
 
 plugin = UserDataModule.new
