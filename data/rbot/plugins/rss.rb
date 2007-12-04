@@ -903,6 +903,7 @@ class RSSFeedsPlugin < Plugin
       line1 = "#{handle}#{date}#{dept}#{title}#{at}#{link} (posted by #{author}#{sec})"
     else
       line1 = "#{handle}#{date}#{title}#{at}#{link}"
+      line1 << " (by #{author})" if author
     end
     places.each { |loc|
       @bot.say loc, line1, :overlong => :truncate
