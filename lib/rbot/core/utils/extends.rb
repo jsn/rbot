@@ -38,6 +38,50 @@ class ::Module
 end
 
 
+# DottedIndex mixin: extend a Hash or Array class with this module
+# to achieve [] and []= methods that automatically split indices
+# at dots (indices are automatically converted to symbols, too)
+#
+# You have to define the single_retrieve(_key_) and
+# single_assign(_key_,_value_) methods (usually aliased at the
+# original :[] and :[]= methods)
+#
+module ::DottedIndex
+  def rbot_index_split(*ar)
+    keys = ([] << ar).flatten
+    keys.map! { |k|
+      k.to_s.split('.').map { |kk| kk.to_sym rescue nil }.compact
+    }.flatten
+  end
+
+  def [](*ar)
+    keys = self.rbot_index_split(ar)
+    return self.single_retrieve(keys.first) if keys.length == 1
+    h = self
+    while keys.length > 1
+      k = keys.shift
+      h[k] ||= self.class.new
+      h = h[k]
+    end
+    h[keys.last]
+  end
+
+  def []=(*arr)
+    val = arr.last
+    ar = arr[0..-2]
+    keys = self.rbot_index_split(ar)
+    return self.single_assign(keys.first, val) if keys.length == 1
+    h = self
+    while keys.length > 1
+      k = keys.shift
+      h[k] ||= self.class.new
+      h = h[k]
+    end
+    h[keys.last] = val
+  end
+end
+
+
 # Extensions to the Array class
 #
 class ::Array
