@@ -69,7 +69,15 @@ class UserDataModule < CoreBotModule
     else
       bh = @botuser[bu.username] || {}
     end
-    return ih.merge!(bh)
+    ih.merge!(bh)
+
+    class << ih
+      alias :single_retrieve :[]
+      alias :single_assign :[]=
+      include DottedIndex
+    end
+
+    return ih
   end
 
   def get_data(user, key=nil)
