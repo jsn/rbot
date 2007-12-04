@@ -153,12 +153,25 @@ class UserDataModule < CoreBotModule
   # end
 
   def event_botuser(action, opts={})
-    return unless [:copy, :rename].include?(action)
-    source = opts[:source]
-    return unless @botuser.key?(source)
-    dest = opts[:dest]
-    @botuser[dest] = @botuser[source].dup
-    @botuser.delete(source) if action == :rename
+    case action
+    when :copy, :rename
+      source = opts[:source]
+      return unless @botuser.key?(source)
+      dest = opts[:dest]
+      @botuser[dest] = @botuser[source].dup
+      @botuser.delete(source) if action == :rename
+    when :pre_perm
+      @permification ||= {}
+      k = [opts[:irc_user], opts[:bot_user]]
+      @permification[k] = get_data_hash(opts[:irc_user])
+    when :post_perm
+      @permification ||= {}
+      k = [opts[:irc_user], opts[:bot_user]]
+      if @permification.has_key?(k)
+        @botuser[opts[:bot_user]] = @permification[k]
+        @permification.delete(k)
+      end
+    end
   end
 
 end
