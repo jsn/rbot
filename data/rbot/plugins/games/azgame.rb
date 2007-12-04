@@ -121,7 +121,7 @@ class AzGamePlugin < Plugin
       :listener => /^[a-z]+$/
     },
     }
-    
+
     japanese_wordlist = "#{@bot.botclass}/azgame/wordlist-japanese"
     if File.exist?(japanese_wordlist)
       words = File.readlines(japanese_wordlist) \
@@ -339,12 +339,12 @@ class AzGamePlugin < Plugin
   def is_japanese?(word)
     @rules[:japanese][:list].include?(word)
   end
-  
+
   # return integer between min and max, inclusive
   def rand_between(min, max)
     rand(max - min + 1) + min
   end
-  
+
   def random_pick_japanese(min=nil, max=nil)
     rules = @rules[:japanese]
     min = rules[:first] if min.nil_or_empty?
