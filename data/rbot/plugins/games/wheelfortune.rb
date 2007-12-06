@@ -80,6 +80,7 @@ end
 # Wheel-of-Fortune game
 class WoFGame
   attr_reader :manager, :single, :max, :pending
+  attr_writer :running
   def initialize(manager, single, max)
     @manager = manager
     @single = single.to_i
@@ -87,20 +88,20 @@ class WoFGame
     @pending = nil
     @qas = []
     @curr_idx = nil
-    @last_replied = nil
+    @running = false
     @scores = Hash.new
   end
 
-  def waiting?
-    !@curr_idx || (@last_replied == @curr_idx)
+  def running?
+    @running
   end
 
   def round
-    @curr_idx+1
+    @curr_idx+1 rescue 0
   end
 
   def mark_winner(user)
-    @last_replied = @curr_idx
+    @running = false
     k = user.botuser
     if @scores.key?(k)
       @scores[k][:nick] = user.nick
@@ -228,7 +229,7 @@ class WheelOfFortune < Plugin
         str = _("there's no pending clue for %{chan}!")
       end
       m.reply _(str) % { :chan => p[:chan], :catclue => qa ? qa.catclue : nil, :ans => qa ? qa.answer : nil}
-      announce(m, p.merge({ :next => true }) ) if game.waiting?
+      announce(m, p.merge({ :next => true }) ) unless game.running?
     else
       m.reply _("something went wrong, I can't seem to understand what you're trying to set up")
     end
@@ -252,13 +253,14 @@ class WheelOfFortune < Plugin
     end
 
     @bot.say chan, qa.announcement
+    game.running = true
   end
 
   def score_table(chan, game, opts={})
     limit = opts[:limit] || -1
     table = game.score_table[0..limit]
     nick_wd = table.map { |a| a.first.length }.max
-    score_wd = table.first.to_s.length
+    score_wd = table.first.last.to_s.length
     table.each { |t|
       @bot.say chan, "%*s : %*u" % [nick_wd, t.first, score_wd, t.last]
     }
@@ -268,7 +270,7 @@ class WheelOfFortune < Plugin
     return unless m.kind_of?(PrivMessage) and not m.address?
     ch = m.channel.irc_downcase(m.server.casemap).intern
     return unless game = @games[ch]
-    return if game.waiting?
+    return unless game.running?
     check = game.check(m.message)
     debug "check: #{check.inspect}"
     case check
@@ -293,18 +295,13 @@ class WheelOfFortune < Plugin
       }
       if want_more == :done
         # max score reached
-
         m.reply _("%{who} wins the game after %{count} rounds!") % {
-          :who => table.first.first,
+          :who => m.sourcenick,
           :count => game.round
         }
         score_table(m.channel, game)
         @games.delete(ch)
       else :more
-        table = game.score_table
-        nick_wd = table.map { |a| a.first.length }.max
-        score_wd = table.first.to_s.length
-        m.reply _("Score after %{count} rounds") % { :count => game.round }
         score_table(m.channel, game)
         announce(m, :next => true)
       end
