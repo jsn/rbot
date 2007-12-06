@@ -79,9 +79,10 @@ end
 
 # Wheel-of-Fortune game
 class WoFGame
-  attr_reader :manager, :single, :max, :pending
+  attr_reader :name, :manager, :single, :max, :pending
   attr_writer :running
-  def initialize(manager, single, max)
+  def initialize(name, manager, single, max)
+    @name = name.dup
     @manager = manager
     @single = single.to_i
     @max = max.to_i
@@ -162,6 +163,10 @@ class WoFGame
 end
 
 class WheelOfFortune < Plugin
+  Config.register Config::StringValue.new('wheelfortune.game_name',
+    :default => 'Wheel Of Fortune',
+    :desc => "default name of the Wheel Of Fortune game")
+
   def initialize
     super
     # TODO load/save running games?
@@ -176,15 +181,19 @@ class WheelOfFortune < Plugin
     end
     ch = chan.irc_downcase(m.server.casemap).intern
 
-    if @games.key?(ch)
-      m.reply _("there's already a Wheel-of-Fortune game on %{chan}, managed by %{who}") % {
+    if game = @games[ch]
+      m.reply _("there's already a %{name} game on %{chan}, managed by %{who}") % {
+        :name => game.name,
         :chan => chan,
-        :who => @games[ch].manager
+        :who => game.manager
       }
       return
     end
-    @games[ch] = game = WoFGame.new(m.botuser, p[:single], p[:max])
-    @bot.say chan, _("%{who} just created a new Wheel-of-Fortune game to %{max} points (%{single} per question)") % {
+    name = p[:name].to_s
+    name = @bot.config['wheelfortune.game_name'] if name.empty?
+    @games[ch] = game = WoFGame.new(name, m.botuser, p[:single], p[:max])
+    @bot.say chan, _("%{who} just created a new %{name} game to %{max} points (%{single} per question)") % {
+      :name => game.name,
       :who => game.manager,
       :max => game.max,
       :single => game.single
@@ -197,7 +206,8 @@ class WheelOfFortune < Plugin
   def setup_qa(m, p)
     ch = p[:chan].irc_downcase(m.server.casemap).intern
     if !@games.key?(ch)
-      m.reply _("there's no Wheel-of-Fortune game running on %{chan}") % {
+      m.reply _("there's no %{name} game running on %{chan}") % {
+        :name => @bot.config['wheelfortune.game_name'],
         :chan => p[:chan]
       }
       return
@@ -239,13 +249,17 @@ class WheelOfFortune < Plugin
     chan = p[:chan] || m.channel
     ch = chan.irc_downcase(m.server.casemap).intern
     if !@games.key?(ch)
-      m.reply _("there's no Wheel-of-Fortune game running on %{chan}") % { :chan => p[:chan] }
+      m.reply _("there's no %{name} game running on %{chan}") % {
+        :name => @bot.config['wheelfortune.game_name'],
+        :chan => chan
+      }
       return
     end
     game = @games[ch]
     qa = p[:next] ? game.next : game.current
     if !qa
-      m.reply _("there are no Wheel-of-Fortune questions for %{chan}, I'm waiting for %{who} to add them") % {
+      m.reply _("there are no %{name} questions for %{chan}, I'm waiting for %{who} to add them") % {
+        :name => game.name,
         :chan => chan,
         :who => game.manager
       }
@@ -314,7 +328,8 @@ class WheelOfFortune < Plugin
   def cancel(m, p)
     ch = m.channel.irc_downcase(m.server.casemap).intern
     if !@games.key?(ch)
-      m.reply _("there's no Wheel-of-Fortune game running on %{chan}") % {
+      m.reply _("there's no %{name} game running on %{chan}") % {
+        :name => @bot.config['wheelfortune.game_name'],
         :chan => m.channel
       }
       return
@@ -325,7 +340,8 @@ class WheelOfFortune < Plugin
   def do_cancel(ch)
     game = @games.delete(ch)
     chan = ch.to_s
-    @bot.say chan, _("Wheel-of-Fortune game cancelled after %{count} rounds. Partial score:") % {
+    @bot.say chan, _("%{name} game cancelled after %{count} rounds. Partial score:") % {
+      :name => game.name,
       :count => game.round
     }
     score_table(chan, game)
@@ -341,6 +357,6 @@ plugin = WheelOfFortune.new
 
 plugin.map "wof", :action => 'announce', :private => false
 plugin.map "wof cancel", :action => 'cancel', :private => false
-plugin.map "wof [:chan] play for :single [points] to :max [points]", :action => 'setup_game'
+plugin.map "wof [:chan] play [*name] for :single [points] to :max [points]", :action => 'setup_game'
 plugin.map "wof :chan [category: *cat,] clue: *clue[, answer: *ans]", :action => 'setup_qa', :public => false
 plugin.map "wof :chan answer: *ans", :action => 'setup_qa', :public => false
