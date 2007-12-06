@@ -56,7 +56,8 @@ class UserDataModule < CoreBotModule
     @botuser = @registry.sub_registry('botuser')
   end
 
-  def get_data_hash(user)
+  def get_data_hash(user, opts={})
+    plain = opts[:plain]
     iu = user.to_irc_user
     bu = iu.botuser
 
@@ -71,10 +72,12 @@ class UserDataModule < CoreBotModule
     end
     ih.merge!(bh)
 
-    class << ih
-      alias :single_retrieve :[]
-      alias :single_assign :[]=
-      include DottedIndex
+    unless plain
+      class << ih
+        alias :single_retrieve :[]
+        alias :single_assign :[]=
+          include DottedIndex
+      end
     end
 
     return ih
@@ -171,7 +174,7 @@ class UserDataModule < CoreBotModule
     when :pre_perm
       @permification ||= {}
       k = [opts[:irc_user], opts[:bot_user]]
-      @permification[k] = get_data_hash(opts[:irc_user])
+      @permification[k] = get_data_hash(opts[:irc_user], :plain => true)
     when :post_perm
       @permification ||= {}
       k = [opts[:irc_user], opts[:bot_user]]
