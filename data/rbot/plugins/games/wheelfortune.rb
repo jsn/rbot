@@ -173,7 +173,7 @@ class WheelOfFortune < Plugin
       m.reply _("you must specify a channel")
       return
     end
-    ch = p[:chan].irc_downcase(m.server.casemap).intern
+    ch = chan.irc_downcase(m.server.casemap).intern
 
     if @games.key?(ch)
       m.reply _("there's already a Wheel-of-Fortune game on %{chan}, managed by %{who}") % {
