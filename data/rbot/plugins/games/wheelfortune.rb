@@ -325,7 +325,9 @@ class WheelOfFortune < Plugin
   def do_cancel(ch)
     game = @games.delete(ch)
     chan = ch.to_s
-    @bot.say chan, _("Wheel-of-Fortune game cancelled after %{count} rounds. Partial score:")
+    @bot.say chan, _("Wheel-of-Fortune game cancelled after %{count} rounds. Partial score:") % {
+      :count => game.round
+    }
     score_table(chan, game)
   end
 
