@@ -449,7 +449,7 @@ class AuthModule < CoreBotModule
       end
       set_prop(butarget, arg, argarg)
       @bot.auth.set_changed
-      auth_manage_user(m, {:data => ["show", arg, "for", butarget.username] })
+      auth_manage_user(m, {:data => ["show", arg.to_s, "for", butarget.username] })
 
     when :reset
       return m.reply(_("you can't change the default user")) if
