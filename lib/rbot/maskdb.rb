@@ -124,7 +124,7 @@ module Irc
 
     def add(user, *masks)
       masks.each do |m|
-        debug "adding user #{user} with mask #{m}"
+        debug "adding user #{user} with mask #{m.fullform}"
         @tree.add([user, m], *mask2keys(m))
       end
     end

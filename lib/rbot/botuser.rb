@@ -381,7 +381,9 @@ class Bot
         @autologin = h[:autologin] if h.has_key?(:autologin)
         if h.has_key?(:netmasks)
           @netmasks = h[:netmasks]
+          debug @netmasks
           @netmasks.each { |n| Auth.manager.maskdb.add(self, n) } if @autologin
+          debug @netmasks
         end
         @perm = h[:perm] if h.has_key?(:perm)
       end
