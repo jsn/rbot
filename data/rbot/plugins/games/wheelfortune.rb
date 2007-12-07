@@ -266,7 +266,14 @@ class WheelOfFortune < Plugin
       return
     end
 
-    @bot.say chan, qa.announcement
+    @bot.say chan, _("%{bold}%{color}%{name}%{bold}, round %{count}:%{nocolor} %{qa}") % {
+      :bold => Bold,
+      :color => Irc.color(:green),
+      :name => game.name,
+      :count => game.round,
+      :nocolor => Irc.color(),
+      :qa => qa.announcement,
+    }
     game.running = true
   end
 
@@ -313,13 +320,24 @@ class WheelOfFortune < Plugin
       }
       if want_more == :done
         # max score reached
-        m.reply _("%{who} wins the game after %{count} rounds!") % {
+        m.reply _("%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %{count} rounds!\nThe final score is") % {
+          :bold => Bold,
+          :color => Irc.color(:green),
           :who => m.sourcenick,
-          :count => game.round
+          :name => game.name,
+          :count => game.round,
+          :nocolor => Irc.color()
         }
         score_table(m.channel, game)
         @games.delete(ch)
       else :more
+        m.reply _("%{bold}%{color}%{name}%{bold}, round %{count}%{nocolor} -- score so far:") % {
+          :bold => Bold,
+          :color => Irc.color(:green),
+          :name => game.name,
+          :count => game.round,
+          :nocolor => Irc.color()
+        }
         score_table(m.channel, game)
         announce(m, :next => true)
       end
