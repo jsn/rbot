@@ -90,9 +90,13 @@ class UserDataModule < CoreBotModule
     return h[key]
   end
 
-  def set_data_hash(user, h)
+  def set_data_hash(user, hh)
     iu = user.to_irc_user
     bu = iu.botuser
+
+    # we .dup the hash to remove singleton methods
+    # and make it dump-able
+    h = hh.dup
 
     @ircuser[iu.nick] = h
     return h if bu.default?
