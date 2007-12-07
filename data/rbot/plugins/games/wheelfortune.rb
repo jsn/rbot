@@ -81,6 +81,7 @@ end
 class WoFGame
   attr_reader :name, :manager, :single, :max, :pending
   attr_writer :running
+  attr_accessor :must_buy, :price
   def initialize(name, manager, single, max)
     @name = name.dup
     @manager = manager
@@ -91,6 +92,14 @@ class WoFGame
     @curr_idx = nil
     @running = false
     @scores = Hash.new
+
+    # the default is to make vowels usable only
+    # after paying a price in points which is
+    # a fraction of the single round score equal
+    # to the number of rounds needed to win the game
+    # TODO customize
+    @must_buy = %w{a e i o u y}
+    @price = @single*@single/@max
   end
 
   def running?
@@ -99,6 +108,25 @@ class WoFGame
 
   def round
     @curr_idx+1 rescue 0
+  end
+
+  def buy(user)
+    k = user.botuser
+    if @scores.key?(k) and @scores[k][:score] >= @price
+      @scores[k][:score] -= @price
+      return true
+    else
+      return false
+    end
+  end
+
+  def score(user)
+    k = user.botuser
+    if @scores.key?(k)
+      @scores[k][:score]
+    else
+      0
+    end
   end
 
   def mark_winner(user)
@@ -141,9 +169,12 @@ class WoFGame
     return current
   end
 
-  def check(whatever)
+  def check(whatever, o={})
     cur = self.current
     return nil unless cur
+    if @must_buy.include?(whatever) and not o[:buy]
+      return whatever
+    end
     return cur.check(whatever)
   end
 
@@ -192,11 +223,12 @@ class WheelOfFortune < Plugin
     name = p[:name].to_s
     name = @bot.config['wheelfortune.game_name'] if name.empty?
     @games[ch] = game = WoFGame.new(name, m.botuser, p[:single], p[:max])
-    @bot.say chan, _("%{who} just created a new %{name} game to %{max} points (%{single} per question)") % {
+    @bot.say chan, _("%{who} just created a new %{name} game to %{max} points (%{single} per question, %{price} per vowel)") % {
       :name => game.name,
       :who => game.manager,
       :max => game.max,
-      :single => game.single
+      :single => game.single,
+      :price => game.price
     }
     @bot.say m.source, _("ok, the game has been created. now add clues and answers with \"wof %{chan} [category: <category>,] clue: <clue>, answer: <ans>\". if the clue and answer don't fit in one line, add the answer separately with \"wof %{chan} answer <answer>\"") % {
       :chan => chan
@@ -291,12 +323,7 @@ class WheelOfFortune < Plugin
     }
   end
 
-  def listen(m)
-    return unless m.kind_of?(PrivMessage) and not m.address?
-    ch = m.channel.irc_downcase(m.server.casemap).intern
-    return unless game = @games[ch]
-    return unless game.running?
-    check = game.check(m.message)
+  def react_on_check(m, ch, game, check)
     debug "check: #{check.inspect}"
     case check
     when nil
@@ -306,6 +333,10 @@ class WheelOfFortune < Plugin
     when :used
       # m.reply "STUPID! YOU SO STUPID!"
       return
+    when *game.must_buy
+      m.nickreply _("You must buy the %{vowel}") % {
+        :vowel => check
+      }
     when :wrong
       return
     when Numeric, :missing
@@ -347,6 +378,53 @@ class WheelOfFortune < Plugin
     end
   end
 
+  def listen(m)
+    return unless m.kind_of?(PrivMessage) and not m.address?
+    ch = m.channel.irc_downcase(m.server.casemap).intern
+    return unless game = @games[ch]
+    return unless game.running?
+    check = game.check(m.message, :buy => false)
+    react_on_check(m, ch, game, check)
+  end
+
+  def buy(m, p)
+    ch = m.channel.irc_downcase(m.server.casemap).intern
+    game = @games[ch]
+    if not game
+      m.reply _("there's no %{name} game running on %{chan}") % {
+        :name => @bot.config['wheelfortune.game_name'],
+        :chan => m.channel
+      }
+      return
+    elsif !game.running?
+      m.reply _("there are no %{name} questions for %{chan}, I'm waiting for %{who} to add them") % {
+        :name => game.name,
+        :chan => chan,
+        :who => game.manager
+      }
+      return
+    else
+      vowel = p[:vowel]
+      bought = game.buy(m.source)
+      if bought
+        m.reply _("%{who} buys a %{vowel} for %{price} points") % {
+          :who => m.source,
+          :vowel => vowel,
+          :price => game.price
+        }
+        check = game.check(vowel, :buy => true)
+        react_on_check(m, ch, game, check)
+      else
+        m.reply _("you can't buy a %{vowel}, %{who}: it costs %{price} points and you only have %{score}") % {
+          :who => m.source,
+          :vowel => vowel,
+          :price => game.price,
+          :score => game.score(m.source)
+        }
+      end
+    end
+  end
+
   def cancel(m, p)
     ch = m.channel.irc_downcase(m.server.casemap).intern
     if !@games.key?(ch)
@@ -382,3 +460,4 @@ plugin.map "wof cancel", :action => 'cancel', :private => false
 plugin.map "wof [:chan] play [*name] for :single [points] to :max [points]", :action => 'setup_game'
 plugin.map "wof :chan [category: *cat,] clue: *clue[, answer: *ans]", :action => 'setup_qa', :public => false
 plugin.map "wof :chan answer: *ans", :action => 'setup_qa', :public => false
+plugin.map "wof buy :vowel", :action => 'buy', :requirements => { :vowel => /./u }
