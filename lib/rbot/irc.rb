@@ -772,6 +772,7 @@ module Irc
           h.sub!(/x-\w+$/, 'x-*')
         else
           h.match(/^[^\.]+\.[^\.]+$/) or
+          h.sub!(/azzurra[=-][0-9a-f]+/i, '*') or # hello, azzurra, you suck!
           h.sub!(/^(\d+\.\d+\.\d+\.)\d+$/, '\1*') or
           h.sub!(/^[^\.]+\./, '*.')
         end
