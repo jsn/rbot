@@ -249,6 +249,14 @@ class WheelOfFortune < Plugin
       return
     end
     game = @games[ch]
+
+    if m.botuser != game.manager and !m.botuser.permit?('wheelfortune::manage::other::add')
+      m.reply _("you can't add questions to the %{name} game on %{chan}") % {
+        :name => game.name,
+        :chan => p[:chan]
+      }
+    end
+
     cat = p[:cat].to_s
     clue = p[:clue].to_s
     ans = p[:ans].to_s
@@ -438,7 +446,12 @@ class WheelOfFortune < Plugin
       }
       return
     end
-    do_cancel(ch)
+    # is the botuser the manager or allowed to cancel someone else's game?
+    if m.botuser == game.manager or m.botuser.permit?('wheelfortune::manage::other::cancel')
+      do_cancel(ch)
+    else
+      m.reply _("you can't cancel the current game")
+    end
   end
 
   def do_cancel(ch)
