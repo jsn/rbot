@@ -11,7 +11,7 @@ module Irc
 
       def add(val, *prefs)
         str = prefs.shift or raise 'empty prefs'
-        @pre = str if @chi.empty?
+        @pre = str.dup if @chi.empty?
 
         n = 0
         @pre.size.times do
