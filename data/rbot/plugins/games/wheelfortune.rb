@@ -273,6 +273,10 @@ class WheelOfFortune < Plugin
   def score_table(chan, game, opts={})
     limit = opts[:limit] || -1
     table = game.score_table[0..limit]
+    if table.length == 0
+      @bot.say chan, _("no scores")
+      return
+    end
     nick_wd = table.map { |a| a.first.length }.max
     score_wd = table.first.last.to_s.length
     table.each { |t|
