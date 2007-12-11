@@ -121,6 +121,14 @@ class WoFGame
     @qas.length
   end
 
+  def qa(round)
+    if @pending and round == self.length + 1
+      @pending
+    else
+      @qas[round-1]
+    end
+  end
+
   def buy(user)
     k = user.botuser
     if @scores.key?(k) and @scores[k][:score] >= @price
@@ -311,6 +319,74 @@ class WheelOfFortune < Plugin
     end
   end
 
+  def replace_qa(m, p)
+    ch = p[:chan].irc_downcase(m.server.casemap).intern
+    if !@games.key?(ch)
+      m.reply _("there's no %{name} game running on %{chan}") % {
+        :name => @bot.config['wheelfortune.game_name'],
+        :chan => p[:chan]
+      }
+      return
+    end
+    game = @games[ch]
+
+    if m.botuser != game.manager and !m.botuser.permit?('wheelfortune::manage::other::add')
+      m.reply _("you can't replace questions to the %{name} game on %{chan}") % {
+        :name => game.name,
+        :chan => p[:chan]
+      }
+    end
+
+    round = p[:round].to_i
+
+    min = game.round
+    max = game.length
+    max += 1 if game.pending
+    if round <= min or round > max
+      if min == max
+        m.reply _("there are no questions in the %{name} game on %{chan} which can be replaced") % {
+          :name => game.name,
+          :chan => p[:chan]
+        }
+      else
+        m.reply _("you can only replace questions between rounds %{min} and %{max} in the %{name} game on %{chan}") % {
+          :name => game.name,
+          :min => min,
+          :max => max,
+          :chan => p[:chan]
+        }
+      end
+    end
+
+    cat = p[:cat].to_s
+    clue = p[:clue].to_s
+    ans = p[:ans].to_s
+    if ans.include?('*')
+      m.reply _("sorry, the answer cannot contain the '*' character")
+      return
+    end
+
+    qa = game.qa(round)
+    qa.cat = cat unless cat.empty?
+    qa.clue = clue unless clue.empty?
+    unless ans.empty?
+      if game.pending and round == max
+        game.finish_add_qa(ans)
+      else
+        qa.answer = ans
+      end
+    end
+
+    str = _("ok, replaced QA for %{name} round %{count} on %{chan}: %{catclue} => %{ans}")
+    m.reply str % {
+      :chan => p[:chan],
+      :catclue => qa ? qa.catclue : nil,
+      :ans => qa ? qa.answer : nil,
+      :name => game.name,
+      :count => round
+    }
+  end
+
   def announce(m, p={})
     chan = p[:chan] || m.channel
     ch = chan.irc_downcase(m.server.casemap).intern
@@ -499,4 +575,7 @@ plugin.map "wof cancel", :action => 'cancel', :private => false
 plugin.map "wof [:chan] play [*name] for :single [points] to :max [points]", :action => 'setup_game'
 plugin.map "wof :chan [category: *cat,] clue: *clue[, answer: *ans]", :action => 'setup_qa', :public => false
 plugin.map "wof :chan answer: *ans", :action => 'setup_qa', :public => false
+plugin.map "wof :chan replace :round [category: *cat,] clue: *clue[, answer: *ans]", :action => 'replace_qa', :public => false
+plugin.map "wof :chan replace :round [category: *cat,] answer: *ans", :action => 'replace_qa', :public => false
+plugin.map "wof :chan replace :round category: *cat[, clue: *clue[, answer: *ans]]", :action => 'replace_qa', :public => false
 plugin.map "wof buy :vowel", :action => 'buy', :requirements => { :vowel => /./u }
