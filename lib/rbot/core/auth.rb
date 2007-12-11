@@ -889,7 +889,7 @@ auth.default_auth("user::manage::meet::hello", true)
 
 auth.map "user tell :user the password for :botuser",
   :action => 'auth_tell_password',
-  :auth_path => '::'
+  :auth_path => ':manage:'
 
 auth.map "user list",
   :action => 'auth_list_users',
