@@ -117,6 +117,10 @@ class WoFGame
     @curr_idx+1 rescue 0
   end
 
+  def length
+    @qas.length
+  end
+
   def buy(user)
     k = user.botuser
     if @scores.key?(k) and @scores[k][:score] >= @price
@@ -275,24 +279,35 @@ class WheelOfFortune < Plugin
     if !clue.empty?
       worked, qa = game.start_add_qa(cat, clue)
       if worked
-        str = ans.empty? ?  _("ok, new clue added for %{chan}: %{catclue}") : nil
+        str = ans.empty? ?  _("ok, clue added for %{name} round %{count} on %{chan}: %{catclue}") : nil
       else
-        str = _("there's already a pending clue for %{chan}: %{catclue}")
+        str = _("there's already a pending clue for %{name} round %{count} on %{chan}: %{catclue}")
       end
-      m.reply _(str) % { :chan => p[:chan], :catclue => qa.catclue } if str
-      return unless worked or !ans.empty?
+      m.reply _(str) % {
+        :chan => p[:chan],
+        :catclue => qa.catclue,
+        :name => game.name,
+        :count => game.length+1
+      } if str
+      return unless worked and !ans.empty?
     end
     if !ans.empty?
       qa = game.finish_add_qa(ans)
       if qa
-        str = _("ok, new QA added for %{chan}: %{catclue} => %{ans}")
+        str = _("ok, QA added for %{name} round %{count} on %{chan}: %{catclue} => %{ans}")
       else
-        str = _("there's no pending clue for %{chan}!")
+        str = _("there's no pending clue for %{name} on %{chan}!")
       end
-      m.reply _(str) % { :chan => p[:chan], :catclue => qa ? qa.catclue : nil, :ans => qa ? qa.answer : nil}
+      m.reply _(str) % {
+        :chan => p[:chan],
+        :catclue => qa ? qa.catclue : nil,
+        :ans => qa ? qa.answer : nil,
+        :name => game.name,
+        :count => game.length
+      }
       announce(m, p.merge({ :next => true }) ) unless game.running?
     else
-      m.reply _("something went wrong, I can't seem to understand what you're trying to set up")
+      m.reply _("something went wrong, I can't seem to understand what you're trying to set up") if clue.empty?
     end
   end
 
