@@ -42,8 +42,15 @@ class WoFQA
   end
 
   def announcement
-    ret = self.catclue << "\n"
-    ret << _("Letters called so far: ") << @used.join(" ") << "\n" unless @used.empty?
+    ret = self.catclue
+    if !@used.empty?
+      ret << _(" [Letters called so far: %{red}%{letters}%{nocolor}]") % {
+        :red => Irc.color(:red),
+        :letters => @used.join(" "),
+        :nocolor => Irc.color()
+      }
+    end
+    ret << "\n"
     ret << @hint.join
   end
 
