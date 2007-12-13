@@ -220,8 +220,10 @@ module Plugins
     def do_map(silent, *args)
       @handler.map(self, *args)
       # register this map
-      name = @handler.last.items[0]
+      map = @handler.last
+      name = map.items[0]
       self.register name, :auth => nil, :hidden => silent
+      @manager.register_map(self, map)
       unless self.respond_to?('privmsg')
         def self.privmsg(m) #:nodoc:
           handle(m)
@@ -335,6 +337,7 @@ module Plugins
     include Singleton
     attr_reader :bot
     attr_reader :botmodules
+    attr_reader :maps
 
     # This is the list of patterns commonly delegated to plugins.
     # A fast delegation lookup is enabled for them.
@@ -354,6 +357,7 @@ module Plugins
 
       @names_hash = Hash.new
       @commandmappers = Hash.new
+      @maps = Hash.new
       @delegate_list = Hash.new { |h, k|
         h[k] = Array.new
       }
@@ -385,6 +389,7 @@ module Plugins
       @botmodules[:Plugin].clear
       @names_hash.clear
       @commandmappers.clear
+      @maps.clear
       @failures_shown = false
     end
 
@@ -409,6 +414,19 @@ module Plugins
     def register(botmodule, cmd, auth_path)
       raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.kind_of?(BotModule)
       @commandmappers[cmd.to_sym] = {:botmodule => botmodule, :auth => auth_path}
+    end
+
+    # Registers botmodule _botmodule_ with map _map_. This adds the map to the #maps hash
+    # which has three keys:
+    #
+    # botmodule:: the associated botmodule
+    # auth:: an array of auth keys checked by the map; the first is the full_auth_path of the map
+    # map:: the actual MessageTemplate object
+    #
+    #
+    def register_map(botmodule, map)
+      raise TypeError, "First argument #{botmodule.inspect} is not of class BotModule" unless botmodule.kind_of?(BotModule)
+      @maps[map.template] = { :botmodule => botmodule, :auth => [map.options[:full_auth_path]], :map => map }
     end
 
     def add_botmodule(botmodule)
