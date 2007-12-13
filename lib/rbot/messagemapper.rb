@@ -413,6 +413,7 @@ class Bot
           end
           pre = nil if extra.sub!(/^!/, "")
           post = nil if extra.sub!(/!$/, "")
+          extra = nil if extra.empty?
         else
           extra = nil
         end
