@@ -26,7 +26,6 @@ end
 me = RemoteCtlPlugin.new
 
 me.remote_map 'dispatch *string',
-    :action => 'remote_command',
-    :action_path => 'dispatch'
+    :action => 'remote_command'
 
 me.default_auth('*', false)
