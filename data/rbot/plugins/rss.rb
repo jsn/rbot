@@ -676,13 +676,23 @@ class RSSFeedsPlugin < Plugin
   end
 
   def rewatch_rss(m=nil, params=nil)
-    stop_watches
+    if params and handle = params[:handle]
+      feed = @feeds.fetch(handle.downcase, nil)
+      if feed
+        @bot.timer.reschedule(@watch[feed.handle], 0)
+        m.okay if m
+      else
+        m.reply _("no such feed %{handle}") % { :handle => handle } if m
+      end
+    else
+      stop_watches
 
-    # Read watches from list.
-    watchlist.each{ |handle, feed|
-      watchRss(feed, m)
-    }
-    m.okay if m
+      # Read watches from list.
+      watchlist.each{ |handle, feed|
+        watchRss(feed, m)
+      }
+      m.okay if m
+    end
   end
 
   private
@@ -1057,5 +1067,5 @@ plugin.map 'rss unwatch :handle [in :chan]',
   :action => 'unwatch_rss'
 plugin.map 'rss rmwatch :handle [in :chan]',
   :action => 'unwatch_rss'
-plugin.map 'rss rewatch',
+plugin.map 'rss rewatch [:handle]',
   :action => 'rewatch_rss'
