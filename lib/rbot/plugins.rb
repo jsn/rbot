@@ -204,15 +204,7 @@ module Plugins
     # responds to appropriately-formed messages on Irc.
     #
     def map(*args)
-      @handler.map(self, *args)
-      # register this map
-      name = @handler.last.items[0]
-      self.register name, :auth => nil
-      unless self.respond_to?('privmsg')
-        def self.privmsg(m) #:nodoc:
-          handle(m)
-        end
-      end
+      do_map(false, *args)
     end
 
     # call-seq: map!(template, options)
@@ -221,10 +213,15 @@ module Plugins
     # as an alternative name for the plugin.
     #
     def map!(*args)
+      do_map(true, *args)
+    end
+
+    # Auxiliary method called by #map and #map!
+    def do_map(silent, *args)
       @handler.map(self, *args)
       # register this map
       name = @handler.last.items[0]
-      self.register name, :auth => nil, :hidden => true
+      self.register name, :auth => nil, :hidden => silent
       unless self.respond_to?('privmsg')
         def self.privmsg(m) #:nodoc:
           handle(m)
