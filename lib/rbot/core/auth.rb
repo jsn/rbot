@@ -191,6 +191,24 @@ class AuthModule < CoreBotModule
     end
   end
 
+  def auth_search_perm(m, p)
+    pattern = Regexp.new(p[:pattern].to_s)
+    results = @bot.plugins.maps.select { |k, v| k.match(pattern) }
+    count = results.length
+    max = @bot.config['send.max_lines']
+    extra = (count > max ? _(". only %{max} will be shown") : "") % { :max => max }
+    m.reply _("%{count} commands found matching %{pattern}%{extra}") % {
+      :count => count, :pattern => pattern, :extra => extra
+    }
+    return if count == 0
+    results[0,max].each { |cmd, hash|
+      m.reply _("%{cmd}: %{perms}") % {
+        :cmd => cmd,
+        :perms => hash[:auth].join(", ")
+      }
+    }
+  end
+
   def get_botuser_for(user)
     @bot.auth.irc_to_botuser(user)
   end
@@ -273,8 +291,10 @@ class AuthModule < CoreBotModule
         return _("permissions [re]set <permission> [in <channel>] for <user>: sets or resets the permissions for botuser <user> in channel <channel> (use ? to change the permissions for private addressing)")
       when "view"
         return _("permissions view [for <user>]: display the permissions for user <user>")
+      when "searc"
+        return _("permissions search <pattern>: display the permissions associated with the commands matching <pattern>")
       else
-        return _("permission topics: syntax, (re)set, view")
+        return _("permission topics: syntax, (re)set, view, search")
       end
     when "user"
       case topic
@@ -939,6 +959,9 @@ auth.map "permissions reset *args",
 auth.map "permissions view [for :user]",
   :action => 'auth_view_perm',
   :auth_path => '::'
+
+auth.map "permissions search *pattern",
+  :action => 'auth_search_perm'
 
 auth.default_auth('*', false)
 
