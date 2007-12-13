@@ -954,14 +954,15 @@ auth.map "permissions set *args",
 
 auth.map "permissions reset *args",
   :action => 'auth_edit_perm',
-  :auth_path => ':edit::reset:'
+  :auth_path => ':edit::set:'
 
 auth.map "permissions view [for :user]",
   :action => 'auth_view_perm',
   :auth_path => '::'
 
 auth.map "permissions search *pattern",
-  :action => 'auth_search_perm'
+  :action => 'auth_search_perm',
+  :auth_path => '::'
 
 auth.default_auth('*', false)
 
