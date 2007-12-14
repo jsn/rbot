@@ -191,17 +191,16 @@ class Bot
             debug ee
           end
         end
-        return @default
+        return default
       end
     end
 
     # lookup a key in the registry
     def [](key)
-      return @default unless File.exist?(@filename)
-      if registry.has_key?(key)
+      if File.exist?(@filename) && registry.has_key?(key)
         return restore(registry[key])
       else
-        return @default
+        return default
       end
     end
 
@@ -214,6 +213,10 @@ class Bot
     # found, the default will be returned. The default default (har) is nil.
     def set_default (default)
       @default = default
+    end
+
+    def default
+      @default && (@default.dup rescue default)
     end
 
     # just like Hash#each
@@ -274,7 +277,7 @@ class Bot
 
     # delete a key from the registry
     def delete(key)
-      return @default unless File.exist?(@filename)
+      return default unless File.exist?(@filename)
       return registry.delete(key)
     end
 
