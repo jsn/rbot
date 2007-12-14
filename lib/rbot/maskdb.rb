@@ -119,7 +119,8 @@ module Irc
     end
 
     def mask2keys(m)
-      [m.host, m.user, m.nick].map { |c| cook_component(c) }
+      md = m.downcased
+      [md.host, md.user, md.nick].map { |c| cook_component(c) }
     end
 
     def add(user, *masks)
@@ -147,7 +148,8 @@ module Irc
 
     def find(iu)
       debug "find(#{iu.fullform})"
-      matches = @tree.find(iu.host, iu.user, iu.nick).uniq.map do |val|
+      iud = iu.downcased
+      matches = @tree.find(iud.host, iud.user, iud.nick).uniq.map do |val|
         m = metric(iu, *val)
         m ? [val[0], m] : nil
       end.compact.sort { |a, b| a[1] <=> a[1] }

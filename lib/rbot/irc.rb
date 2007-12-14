@@ -671,6 +671,12 @@ module Irc
       self.full_irc_downcase
     end
 
+    # This method returns a new Netmask which is the fully downcased version
+    # of the receiver
+    def downcased
+      return self.full_downcase.to_irc_netmask(server_and_casemap)
+    end
+
     # Converts the receiver into a Netmask with the given (optional)
     # server/casemap association. We return self unless a conversion
     # is needed (different casemap/server)
