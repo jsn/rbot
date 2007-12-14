@@ -191,27 +191,17 @@ class Bot
             debug ee
           end
         end
-        unless @default.nil?
-          begin
-            return Marshal.restore(@default)
-          rescue
-            return nil
-          end
-        else
-          return nil
-        end
+        return @default
       end
     end
 
     # lookup a key in the registry
     def [](key)
-      return nil unless File.exist?(@filename)
+      return @default unless File.exist?(@filename)
       if registry.has_key?(key)
         return restore(registry[key])
-      elsif @default != nil
-        return restore(@default)
       else
-        return nil
+        return @default
       end
     end
 
@@ -223,7 +213,7 @@ class Bot
     # set the default value for registry lookups, if the key sought is not
     # found, the default will be returned. The default default (har) is nil.
     def set_default (default)
-      @default = store(default)
+      @default = default
     end
 
     # just like Hash#each
@@ -284,7 +274,7 @@ class Bot
 
     # delete a key from the registry
     def delete(key)
-      return nil unless File.exist?(@filename)
+      return @default unless File.exist?(@filename)
       return registry.delete(key)
     end
 
