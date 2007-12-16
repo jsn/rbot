@@ -545,7 +545,7 @@ class WheelOfFortune < Plugin
       return
     end
     # is the botuser the manager or allowed to cancel someone else's game?
-    if m.botuser == game.manager or m.botuser.permit?('wheelfortune::manage::other::cancel')
+    if m.botuser == @games[ch].manager or m.botuser.permit?('wheelfortune::manage::other::cancel')
       do_cancel(ch)
     else
       m.reply _("you can't cancel the current game")
