@@ -216,7 +216,7 @@ class Bot
     end
 
     def default
-      @default && (@default.dup rescue default)
+      @default && (@default.dup rescue @default)
     end
 
     # just like Hash#each
