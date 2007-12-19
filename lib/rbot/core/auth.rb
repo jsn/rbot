@@ -70,7 +70,7 @@ class AuthModule < CoreBotModule
         if "+-".include?(x[0])
           warns << ArgumentError.new(_("please do not use + or - in front of command %{command} when resetting") % {:command => x}) unless setting
         else
-          warns << ArgumentError.new(_("+ or - expected in front of %{string}") % {:string => command}) if setting
+          warns << ArgumentError.new(_("+ or - expected in front of %{string}") % {:string => x}) if setting
         end
         cmds << x
       else # parse locations
