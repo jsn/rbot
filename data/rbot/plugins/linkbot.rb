@@ -28,13 +28,17 @@ class LinkBot < Plugin
 
   Config.register Config::ArrayValue.new('linkbot.message_patterns',
     :default => ['^<(\S+?)@(\S+?)>\s+(.*)$', '^\((\S+?)@(\S+?)\)\s+(.*)$'],
-    :desc => "List of regexp which match linkbot messages; each regexp needs to have three captures, which in order are the nickname of the original speaker, network, and original message")
+    :desc => "List of regexp which match linkbot messages; each regexp needs to have three captures, which in order are the nickname of the original speaker, network, and original message",
+    :on_change => proc {|bot, v| bot.plugins['linkbot'].update_patterns})
   # TODO use template strings instead of regexp for user friendliness
   
   # Initialize the plugin
   def initialize
     super
-    
+    update_patterns
+  end
+
+  def update_patterns
     @message_patterns = @bot.config['linkbot.message_patterns'].map {|p|
       Regexp.new(p)
     }
@@ -48,13 +52,15 @@ class LinkBot < Plugin
     return unless m.kind_of?(PrivMessage)
     # Now we know that _m_ is a PRIVMSG from a linkbot. Let's split it
     # in nick, network, message
-    message = BasicUserMessage.stripcolour m.message
-    if @message_patterns.any? {|p| message =~ p}
+    if @message_patterns.any? {|p| m.message =~ p}
       # if the regexp doesn't contain all parts, the default values get used
       new_nick = $1 || 'unknown_nick'
       network = $2 || 'unknown_network'
       message = $3 || 'unknown_message'
-
+      # strip any formatting codes in the new_nick. some people configure their linkbots
+      # to embed these codes in nicknames (such as to\B\Bm), to avoid triggering the
+      # person's highlight
+      new_nick.gsub! /[#{Bold}#{Underline}#{Reverse}#{Italic}#{NormalText}]/, ''
       debug "#{m.sourcenick} reports that #{new_nick} said #{message.inspect} on #{network}"
       # One way to pass the new message back to the bot is to create a PrivMessage
       # and delegate it to the plugins
