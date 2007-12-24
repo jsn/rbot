@@ -280,12 +280,23 @@ class FactoidsPlugin < Plugin
     })
   end
 
+  def words2rx(words)
+    # When looking for words we separate them with
+    # arbitrary whitespace, not whatever they came with
+    pre = words.map { |w| Regexp.escape(w)}.join("\\s+")
+    return Regexp.new("\\b#{pre}\\b", true)
+  end
+
   def facts(m, params)
     total = @factoids.length
-    if params[:words].empty?
+    if params[:words].empty? and params[:rx].empty?
       m.reply _("I know %{total} facts" % { :total => total })
     else
-      rx = Regexp.new(params[:words].to_s, true)
+      if params[:words].empty?
+        rx = Regexp.new(params[:rx].to_s, true)
+      else
+        rx = words2rx(params[:words])
+      end
       known = @factoids.grep(rx)
       reply = []
       if known.empty?
@@ -319,7 +330,7 @@ class FactoidsPlugin < Plugin
     return unless m.message =~ /^(.*)\?\s*$/
     query = $1.strip.downcase
     if @triggers.include?(query)
-      facts(m, :words => query)
+      facts(m, :words => query.split)
     end
   end
 
@@ -343,7 +354,7 @@ class FactoidsPlugin < Plugin
         end
         known = @factoids
       else
-        rx = Regexp.new(params[:words].to_s, true)
+        rx = words2rx(params[:words])
         known = @factoids.grep(rx)
         if known.empty?
           m.reply _("I know nothing about %{words}" % params)
@@ -424,6 +435,7 @@ plugin.map 'learn that *stuff'
 plugin.map 'forget that *stuff', :auth_path => 'edit'
 plugin.map 'forget fact :index', :requirements => { :index => /^#?\d+$/ }, :auth_path => 'edit'
 plugin.map 'facts [about *words]'
+plugin.map 'facts search *rx'
 plugin.map 'fact [about *words]'
 plugin.map 'fact :index', :requirements => { :index => /^#?\d+$/ }
 
