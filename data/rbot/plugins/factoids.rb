@@ -319,7 +319,7 @@ class FactoidsPlugin < Plugin
           reply << long_fact(f)
         }
       end
-      m.reply reply.join(" -- ")
+      m.reply reply.join(" -- "), :split_at => /\s+--\s+/
     end
   end
 
