@@ -12,9 +12,13 @@
 # License:: GPL v2
 
 class ::LastFmEvent
+  SELECTOR = /<tr class="vevent.*?<\/tr>/m
   # matches are:
   # 1. day 2. moth 3. year 4. url_who 5. who 6. url_where 7. where 8. how_many
-  REGEXP = /<tr class="vevent\s+\w+\s+\S+?-(\d\d)-(\d\d)-(\d\d\d\d)\s*">.*?<a class="url summary" href="(\/event\/\d+)">(.*?)<\/a>.*?<a href="(\/venue\/\d+)">(.*?)<\/a>.*?<td class="attendance">(.*?)<\/td>\s+<\/tr>/m
+  # TODO festival have TWO dates  -------+
+  # TODO event type -------------+       |
+  #                              V       V
+  MATCHER = /<tr class="vevent\s+\w+\s+(?:\S+\s+)?\S+?-(\d\d)-(\d\d)-(\d\d\d\d)\s*">.*?<a class="url summary" href="(\/event\/\d+)">(.*?)<\/a>.*?<a href="(\/venue\/\d+)">(.*?)<\/a>.*?<td>(?:(.*?) attending\s+)?.*?<\/td>\s+<\/tr>/m
   attr_accessor :url, :date, :artist, :location, :attendance
   def initialize(url, date, artist, location, attendance)
     @url = url
@@ -76,7 +80,7 @@ class LastFmPlugin < Plugin
         events = Array.new
         disp_events = Array.new
 
-        pre_events = page.scan(LastFmEvent::REGEXP)
+        pre_events = page.scan(LastFmEvent::SELECTOR)
         # debug pre_events.inspect
         if pre_events.empty?
           # We may not find any even because the page gives a list
@@ -85,14 +89,16 @@ class LastFmPlugin < Plugin
           if page.match(/<a href="(\/events\/\?l=[^"]+)">/)
             debug "Rechecking with #{$1}"
             page = @bot.httputil.get(LASTFM+$1)
-            pre_events = page.scan(LastFmEvent::REGEXP) if page
+            debug page
+            pre_events = page.scan(LastFmEvent::SELECTOR) if page
+            debug pre_events
           end
           if pre_events.empty?
             m.reply "No events found #{spec}, sorry"
             return
           end
         end
-        pre_events.each { |day, month, year, url_who, who, url_where, where, how_many|
+        pre_events.each { |s| s.scan(LastFmEvent::MATCHER) { |day, month, year, url_who, who, url_where, where, how_many|
           date = Time.utc(year.to_i, month.to_i, day.to_i)
           url = LASTFM + url_who
           if who.match(/<strong>(.*?)<\/strong>(.+)?/)
@@ -109,9 +115,9 @@ class LastFmPlugin < Plugin
             debug where.inspect
             loc = where.ircify_html
           end
-          attendance = how_many.ircify_html
+          attendance = how_many ? how_many.ircify_html : ''
           events << LastFmEvent.new(url, date, artist, loc, attendance)
-        }
+        } }
         # debug events.inspect
 
         events[0...num].each { |event|
