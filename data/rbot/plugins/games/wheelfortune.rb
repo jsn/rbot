@@ -223,6 +223,23 @@ class WheelOfFortune < Plugin
     @games = Hash.new
   end
 
+  def help(plugin, topic="")
+    case topic
+    when 'play'
+      _("wof [<channel>] play [<name>] for <single> to <max> => starts a wheel-of-fortune game on channel <channel> (default: current channel), named <name> (default: wheelfortune.game_name config setting, or the last game name used by the user), with <single> points per round. the game is won when a player reachers <max> points. vowerls cost <single>*<single>/<max> points. The user that starts the game is the game manager and must set up the clues and answers in private. All the other users have to learn the answer to each clue by saying single consonants or the whole sentence. Every time a consonant is guessed, the bot will reveal the partial answer, showing the missing letters as * (asterisks).")
+    when 'category', 'clue', 'answer'
+      _("wof <channel> [category: <cat>,] clue: <clue>, answer: <ans> => set up a new question for the wheel-of-fortune game being played on channel <channel>. This command must be sent in private by the game manager. The category <cat> can be omitted. If you make mistakes, you can use 'wof replace' (see help) before the question gets asked")
+    when 'replace'
+      _("wof <channel> replace <round> [category: <cat>,] [clue: <clue>,] [answer: <ans>] => fix the question for round <round> of the wheel-of-fortune game being played on <channel> by replacing the category and/or clue and/or answer")
+    when 'cancel'
+      _("wof cancel => cancels the wheel-of-fortune being played on the current channel")
+    when 'buy'
+      _("wof buy <vowel> => buy the vowel <vowel>: the user buying the vowel will lose points equal to the vowel price, and the corresponding vowel will be revealed in the answer (if present)")
+    else
+      _("wof: wheel-of-fortune plugin. topics: play, category, clue, answer, replace, cancel, buy")
+    end
+  end
+
   def setup_game(m, p)
     chan = p[:chan] || m.channel
     if !chan
