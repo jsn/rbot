@@ -57,8 +57,19 @@ class UrlPlugin < Plugin
     url = uri_str.kind_of?(URI) ? uri_str : URI.parse(uri_str)
     return if url.scheme !~ /https?/
 
-    if url.host =~ @no_info_hosts
-      return "Sorry, info retrieval for #{url.host} is disabled"
+    # also check the ip, the canonical name and the aliases
+    begin
+      checks = TCPSocket.gethostbyname(url.host)
+      checks.delete_at(-2)
+    rescue => e
+      return "Unable to retrieve info for #{url.host}: #{e.message}"
+    end
+
+    checks << url.host
+    checks.flatten!
+
+    unless checks.grep(@no_info_hosts).empty?
+      return "Sorry, info retrieval for #{url.host} (#{checks.first}) is disabled"
     end
 
     logopts = opts.dup
