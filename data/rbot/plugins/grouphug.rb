@@ -23,7 +23,7 @@ class GrouphugPlugin < Plugin
     begin
       data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
 
-      reg = Regexp.new('(<td class="conf-text")(.*?)(<p>)(.*?)(</p>)',
+      reg = Regexp.new('(<div class="content")(.*?)(<p>)(.*?)(</p>)',
                        Regexp::MULTILINE)
       confession = reg.match( data )[4].ircify_html
       confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
