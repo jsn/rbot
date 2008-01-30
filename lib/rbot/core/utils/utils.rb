@@ -272,12 +272,12 @@ module ::Irc
         str.gsub(/(&(.+?);)/) {
           symbol = $2
           # remove the 0-paddng from unicode integers
-          if symbol =~ /#(.+)/
-            symbol = "##{$1.to_i.to_s}"
+          if symbol =~ /^#(\d+)$/
+            symbol = $1.to_i.to_s
           end
 
           # output the symbol's irc-translated character, or a * if it's unknown
-          UNESCAPE_TABLE[symbol] || (symbol.match(/^\d+$/) ? [$0.to_i].pack("U") : '*')
+          UNESCAPE_TABLE[symbol] || (symbol.match(/^\d+$/) ? [symbol.to_i].pack("U") : '*')
         }
       end
     end
