@@ -461,6 +461,15 @@ class Bot
         Auth.manager.maskdb.remove(self, m) if self.autologin?
       end
 
+      # Reset Netmasks, clearing @netmasks
+      #
+      def reset_netmasks
+        @netmasks.each { |m|
+          Auth.manager.maskdb.remove(self, m) if self.autologin?
+        }
+        @netmasks.clear
+      end
+
       # This method checks if BotUser has a Netmask that matches _user_
       #
       def knows?(usr)
