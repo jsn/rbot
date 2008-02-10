@@ -895,12 +895,12 @@ class RSSFeedsPlugin < Plugin
 
     case feed.type
     when 'blog'
-      author << " " if author
+      author += " " if author
       abt = category ? "about #{category} " : ""
       line1 = "#{handle}#{date}#{author}blogged #{abt}at #{link}"
       line2 = "#{handle}#{title} - #{desc}"
     when 'git'
-      author << " " if author
+      author += " " if author
       line1 = "#{handle}#{date}#{author}commited #{title} @ #{link}"
     when 'forum'
       line1 = "#{handle}#{date}#{title}#{at}#{link}"
