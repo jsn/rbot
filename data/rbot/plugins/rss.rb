@@ -812,6 +812,12 @@ class RSSFeedsPlugin < Plugin
       return seconds
   end
 
+  def select_nonempty(*ar)
+    debug ar
+    ret = ar.map { |i| (i && i.empty?) ? nil : i }.compact.first
+    (ret && ret.empty?) ? nil : ret
+  end
+
   def printFormattedRss(feed, item, opts=nil)
     debug item
     places = feed.watchers
@@ -879,10 +885,8 @@ class RSSFeedsPlugin < Plugin
 
     link = item.link.href rescue item.link.chomp rescue nil
 
-    category = item.category.content rescue item.dc_subject rescue nil
-    category = nil if category and category.empty?
-    author = item.author.name.content rescue item.dc_creator rescue item.author rescue nil
-    author = nil if author and author.empty?
+    category = select_nonempty((item.category.content rescue nil), (idem.dc_subject rescue nil))
+    author = select_nonempty((item.author.name.content rescue nil), (item.dc_creator rescue nil), (item.author rescue nil))
 
     line1 = nil
     line2 = nil
