@@ -895,6 +895,8 @@ class RSSFeedsPlugin < Plugin
       abt = category ? "about #{category} " : ""
       line1 = "#{handle}#{date}#{author}blogged #{abt}at #{link}"
       line2 = "#{handle}#{title} - #{desc}"
+    when 'git'
+      line1 = "#{handle}#{date}#{author}commited #{title} @ #{link}"
     when 'forum'
       line1 = "#{handle}#{date}#{title}#{at}#{link}"
     when 'wiki'
