@@ -38,6 +38,10 @@ class DicePlugin < Plugin
       :default => 100, :validate => Proc.new{|v| v > 0},
       :desc => "Maximum number of dices to throw.")
 
+  Config.register Config::IntegerValue.new('dice.max_sides',
+      :default => 100, :validate => Proc.new{|v| v > 0},
+      :desc => "Maximum number of sides per dice.")
+
   def help(plugin, topic="")
     plugin + " <string> (where <string> is something like: d6 or 2d6 or 2d6+4 or 2d6+1d20 or 2d6+1d5+4d7-3d4-6) => Rolls that set of virtual dice"
   end
@@ -87,11 +91,17 @@ class DicePlugin < Plugin
     # Extract the actual dice request from the message parameters, splitting it
     # into dice and modifiers
     a = m.params.gsub(/\s+/,'').scan(/^[0-9]*d[0-9]+|[+-][0-9]*d[0-9]+|[+-][0-9]+/)
-    # check nr of total dices
+    # check nr of total dices and sides per dice
     nr = 0
     a.each { |dice|
+      dc, ds = dice.split(/d/)
+      # check sides
+      if ds.to_i > @bot.config['dice.max_sides']
+       m.reply "sorry, don't have any dices with more than %u sides" % @bot.config['dice.max_sides']
+       return
+      end
       # We use .max with 1 so that specs such as d6 count as 1 and not as 0
-      nr += [dice.split(/d/)[0].to_i, 1].max
+      nr += [dc.to_i, 1].max
     }
     if nr > @bot.config['dice.max_dices']
       m.reply "can't handle more than %u dices" % @bot.config['dice.max_dices']
