@@ -1,11 +1,14 @@
-##################
-# Filename: dice.rb
-# Description: Rbot plugin. Rolls rpg style dice
-# Author: David Dorward (http://david.us-lot.org/ - you might find a more up to date version of this plugin there)
-# Version: 0.3.2
-# Date: Sat 6 Apr 2002
+#-- vim:sw=2:et
+#++
 #
-# You can get rbot from: http://www.linuxbrit.co.uk/rbot/
+# :title: dice plugin for rbot
+#
+# Author:: David Dorward (http://david.us-lot.org/ - you might find a more up to date version of this plugin there)
+# Author:: Moritz Augsburger <moritz@augsburger.name>
+#
+# Description:: Rolls rpg style dice
+# Version:: 0.4
+# Date:: Mon 8 Feb 2008
 #
 # Changelog
 # 0.1 - Initial release
@@ -14,11 +17,11 @@
 #       - Return results of each roll
 # 0.3.1 - Minor documentation update
 # 0.3.2 - Bug fix, could not subtract numbers (String can't be coerced into Fixnum)
+# 0.4 - Limit number of dices and number of sides per dice
 #
-# TODO: Test! Test! Test!
-#       Comment!
-#       Fumble/Critical counter (1's and x's where x is sides on dice)
-####################################################
+# TODO:: Test! Test! Test!
+#        Comment!
+#        Fumble/Critical counter (1's and x's where x is sides on dice)
 
 class DiceDisplay
   attr_reader :total, :view, :dice
