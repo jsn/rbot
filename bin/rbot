@@ -48,15 +48,22 @@ if $version =~ /svn/
     git_out = `git status`
 
     git_out.match(/^# On branch (.*)\n/)
-    branch = $1.dup || "unknown"
-    changed = git_out.match(/^# Change(.*)\n/)
-    rev = "revision "
-    git_out = `git log -1 --pretty=format:"%h%n%b"`.split("\n")
-    rev << git_out.first
-    if git_out.last.match(/^git-svn-id: \S+@(\d+)/)
-      rev << "(svn #{$1})"
+    if $1 # git 1.5.x
+      branch = $1.dup || "unknown"
+      changed = git_out.match(/^# Change(.*)\n/)
+      rev = "revision "
+      git_out = `git log -1 --pretty=format:"%h%n%b"`.split("\n")
+      rev << git_out.first
+      if git_out.last.match(/^git-svn-id: \S+@(\d+)/)
+        rev << "(svn #{$1})"
+      end
+      rev << ", local changes" if changed
+    else # older gits
+      git_out = `git branch`
+      git_out.match(/^\* (.*)\n/)
+      branch = $1.dup rescue "unknown"
+      rev = "revision " + `git rev-parse HEAD`[0,6]
     end
-    rev << ", local changes" if changed
 
     $version << " (#{branch} branch, #{rev})"
   else
