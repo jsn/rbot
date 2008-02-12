@@ -289,7 +289,7 @@ class FactoidsPlugin < Plugin
 
   def facts(m, params)
     total = @factoids.length
-    if params[:words].empty? and params[:rx].empty?
+    if params[:words].nil_or_empty? and params[:rx].nil_or_empty?
       m.reply _("I know %{total} facts" % { :total => total })
     else
       if params[:words].empty?
