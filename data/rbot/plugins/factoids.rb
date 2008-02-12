@@ -271,6 +271,15 @@ class FactoidsPlugin < Plugin
     end
   end
 
+  def short_fact(fact,index=nil,total=@factoids.length)
+    idx = index || @factoids.index(fact)+1
+    _("[%{idx}/%{total}] %{fact}" % {
+      :idx => idx,
+      :total => total,
+      :fact => fact.to_s(:meta => false)
+    })
+  end
+
   def long_fact(fact,index=nil,total=@factoids.length)
     idx = index || @factoids.index(fact)+1
     _("fact #%{idx} of %{total}: %{fact}" % {
@@ -316,10 +325,10 @@ class FactoidsPlugin < Plugin
           end
         end
         known.each { |f|
-          reply << long_fact(f)
+          reply << short_fact(f)
         }
       end
-      m.reply reply.join(" -- "), :split_at => /\s+--\s+/
+      m.reply reply.join(". "), :split_at => /\s+--\s+/
     end
   end
 
