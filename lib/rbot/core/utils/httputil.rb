@@ -149,6 +149,10 @@ module Utils
 # this class can check the bot proxy configuration to determine if a proxy
 # needs to be used, which includes support for per-url proxy configuration.
 class HttpUtil
+    Bot::Config.register Bot::Config::IntegerValue.new('http.read_timeout',
+      :default => 10, :desc => "Default read timeout for HTTP connections")
+    Bot::Config.register Bot::Config::IntegerValue.new('http.open_timeout',
+      :default => 20, :desc => "Default open timeout for HTTP connections")
     Bot::Config.register Bot::Config::BooleanValue.new('http.use_proxy',
       :default => false, :desc => "should a proxy be used for HTTP requests?")
     Bot::Config.register Bot::Config::StringValue.new('http.proxy_uri', :default => false,
@@ -345,8 +349,8 @@ class HttpUtil
   #
   def get_proxy(uri, options = {})
     opts = {
-      :read_timeout => 10,
-      :open_timeout => 20
+      :read_timeout => @bot.config["http.read_timeout"],
+      :open_timeout => @bot.config["http.open_timeout"]
     }.merge(options)
 
     proxy = nil
