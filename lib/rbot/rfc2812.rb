@@ -954,7 +954,7 @@ module Irc
     # Create a new Client instance
     def initialize
       @server = Server.new         # The Server
-      @user = @server.user("")     # The User representing the client on this Server
+      @user = @server.user("*!*@*")     # The User representing the client on this Server
 
       @handlers = Hash.new
 
