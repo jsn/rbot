@@ -84,10 +84,10 @@ class FactoidsPlugin < Plugin
   # TODO default should be language-specific
   Config.register Config::ArrayValue.new('factoids.trigger_pattern',
     :default => [
-      "(this|that|a|the|an|all|both)\\s+(.*)\\s+(is|are)\\s+.*:2",
-      "(this|that|a|the|an|all|both)\\s+(.*?)\\s+(is|are)\\s+.*:2",
-      "(.*)\\s+(is|are)\\s+.*",
-      "(.*?)\\s+(is|are)\\s+.*",
+      "(this|that|a|the|an|all|both)\\s+(.*)\\s+(is|are|has|have|does|do)\\s+.*:2",
+      "(this|that|a|the|an|all|both)\\s+(.*?)\\s+(is|are|has|have|does|do)\\s+.*:2",
+      "(.*)\\s+(is|are|has|have|does|do)\\s+.*",
+      "(.*?)\\s+(is|are|has|have|does|do)\\s+.*",
     ],
     :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_triggers },
     :desc => "A list of regular expressions matching factoids where keywords can be identified. append ':n' if the keyword is defined by the n-th group instead of the first. if the list is empty, any word will be considered a keyword")
