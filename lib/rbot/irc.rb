@@ -27,7 +27,7 @@ class Object
   # checks if the receiver is nil or empty
   def nil_or_empty?
     return true unless self
-    return true if self.respond_to? :empty and self.empty?
+    return true if self.respond_to? :empty? and self.empty?
     return false
   end
 
