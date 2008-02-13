@@ -91,6 +91,12 @@ class FactoidsPlugin < Plugin
     ],
     :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_triggers },
     :desc => "A list of regular expressions matching factoids where keywords can be identified. append ':n' if the keyword is defined by the n-th group instead of the first. if the list is empty, any word will be considered a keyword")
+  Config.register Config::ArrayValue.new('factoids.not_triggers',
+    :default => [
+      "this","that","the","a","right","who","what","why"
+    ],
+    :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_triggers },
+    :desc => "A list of words that won't be set as keywords")
   Config.register Config::BooleanValue.new('factoids.address',
     :default => true,
     :desc => "Should the bot reply with relevant factoids only when addressed with a direct question? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
@@ -246,7 +252,7 @@ class FactoidsPlugin < Plugin
       end
     }
     debug "Triggers done in #{Time.now - start_time}"
-    @triggers.replace(triggers)
+    @triggers.replace(triggers - @bot.config['factoids.not_triggers'])
   end
 
   def reset_learn_patterns
