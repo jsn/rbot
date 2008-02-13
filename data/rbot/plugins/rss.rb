@@ -863,7 +863,14 @@ class RSSFeedsPlugin < Plugin
     # limit to 160 characters, and most of them are under 140 characters
     tit_opt[:limit] = @bot.config['rss.head_max'] unless feed.type == 'twitter'
 
-    title = "#{Bold}#{item.title.to_s.ircify_html(tit_opt)}#{Bold}" if item.title
+    if item.title
+      base_title = item.title.to_s.dup
+      # git changesets are SHA1 hashes (40 hex digits), way too long, get rid of them, as they are
+      # visible in the URL anyway
+      # TODO make this optional?
+      base_title.sub!(/^Changeset \[([\da-f]{40})\]/) { |c| "Changeset [...]"} if feed.type = 'trac'
+      title = "#{Bold}#{base_title.ircify_html(tit_opt)}#{Bold}"
+    end
 
     desc_opt = {
       :limit => @bot.config['rss.text_max'],
@@ -910,7 +917,7 @@ class RSSFeedsPlugin < Plugin
       line1 = "#{handle}#{date}Message #{title} sent by #{author}. #{desc}"
     when 'trac'
       line1 = "#{handle}#{date}#{title} @ #{link}"
-      unless item.title =~ /^Changeset \[(\d+)\]/
+      unless item.title =~ /^Changeset \[(?:[\da-f]+|\.\.\.)\]/
         line2 = "#{handle}#{date}#{desc}"
       end
     when '/.'
