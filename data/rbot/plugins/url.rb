@@ -150,7 +150,7 @@ class UrlPlugin < Plugin
 
       if display_info > urls_displayed
         if reply
-          m.reply(reply, :overlong => :truncate)
+          m.plainreply(reply, :overlong => :truncate)
           urls_displayed += 1
         end
       end
