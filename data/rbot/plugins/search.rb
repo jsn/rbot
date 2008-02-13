@@ -18,7 +18,7 @@
 GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
 GOOGLE_WAP_SEARCH = "http://www.google.com/wml/search?hl=en&q="
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
-GOOGLE_CALC_RESULT = %r{<p><table><tr><td><img src=/images/calc_img\.gif(?: alt="")?></td><td>&nbsp;</td><td nowrap>(?:<h2 class=r>)?<font size=\+1><b>(.+)</b>(?:</h2>)?</td></tr><tr><td>}
+GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?></td><td>&nbsp;</td><td nowrap>(?:<h2 class=r>)?<font size=\+1><b>(.+)</b>(?:</h2>)?</td>}
 GOOGLE_DEF_RESULT = %r{<p> (Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
 
 class SearchPlugin < Plugin
