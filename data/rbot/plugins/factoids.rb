@@ -103,6 +103,9 @@ class FactoidsPlugin < Plugin
   Config.register Config::BooleanValue.new('factoids.listen_and_learn',
     :default => false,
     :desc => "Should the bot learn factoids from what is being said in chat? if true, phrases matching patterns in factoids.learn_pattern will tell the bot when a phrase can be learned")
+  Config.register Config::BooleanValue.new('factoids.silent_listen_and_learn',
+    :default => true,
+    :desc => "Should the bot be silent about the factoids he learns from the chat? If true, the bot will not declare what he learned every time he learns something from factoids.listen_and_learn being true")
   Config.register Config::IntegerValue.new('factoids.search_results',
     :default => 5,
     :desc => "How many factoids to display at a time")
@@ -269,7 +272,7 @@ class FactoidsPlugin < Plugin
     else
       @factoids << factoid
       @changed = true
-      m.reply _("okay, learned fact #%{num}: %{fact}" % { :num => @factoids.length, :fact => @factoids.last}) 
+      m.reply _("okay, learned fact #%{num}: %{fact}" % { :num => @factoids.length, :fact => @factoids.last}) unless params[:silent]
       trigs = parse_for_trigger(factoid)
       @triggers |= trigs unless trigs.empty?
     end
@@ -376,7 +379,7 @@ class FactoidsPlugin < Plugin
       @learn_patterns.each do |pat, i|
         g = pat.match(m.message)
         if g and g[i]
-          learn(m, :stuff => g[i], :silent => true)
+          learn(m, :stuff => g[i], :silent => @bot.config['factoids.silent_listen_and_learn'])
           break
         end
       end
