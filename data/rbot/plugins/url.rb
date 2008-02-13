@@ -140,6 +140,11 @@ class UrlPlugin < Plugin
         debug "Title #{title ? '' : 'not '} found"
         reply = "#{LINK_INFO} #{title}" if title
       rescue => e
+        if e.message =~ /\(404 - Not Found\)/i
+          # see if we failed to find the thing because of trailing punctuation
+          # but check that we still have 'something' in the URL
+          retry if urlstr.chop! and urlstr =~ /^https?:\/\/./
+        end
         reply = "Error #{e.message}"
       end
 
