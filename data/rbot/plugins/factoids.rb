@@ -270,7 +270,8 @@ class FactoidsPlugin < Plugin
       @factoids << factoid
       @changed = true
       m.reply _("okay, learned fact #%{num}: %{fact}" % { :num => @factoids.length, :fact => @factoids.last}) 
-      parse_for_trigger(factoid)
+      trigs = parse_for_trigger(factoid)
+      @triggers |= trigs unless trigs.empty?
     end
   end
 
