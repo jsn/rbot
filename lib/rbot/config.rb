@@ -63,7 +63,7 @@ module Config
     end
     def get
       return @manager.config[@key] if @manager.config.has_key?(@key)
-      return @default
+      return default
     end
     alias :value :get
     def set(value, on_change = true)
