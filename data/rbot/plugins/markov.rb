@@ -1,3 +1,14 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Markov plugin
+#
+# Author:: Tom Gilbert <tom@linuxbrit.co.uk>
+# Copyright:: (C) 2005 Tom Gilbert
+#
+# Contribute to chat with random phrases built from word sequences learned
+# by listening to chat
+
 class MarkovPlugin < Plugin
   def initialize
     super
