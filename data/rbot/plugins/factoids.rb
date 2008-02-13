@@ -94,6 +94,15 @@ class FactoidsPlugin < Plugin
   Config.register Config::BooleanValue.new('factoids.address',
     :default => true,
     :desc => "Should the bot reply with relevant factoids only when addressed with a direct question? If not, the bot will attempt to lookup foo if someone says 'foo?' in channel")
+  Config.register Config::ArrayValue.new('factoids.learn_pattern',
+    :default => [
+      ".*\\s+(is|are|has|have)\\s+.*"
+    ],
+    :on_change => Proc.new { |bot, v| bot.plugins['factoids'].reset_learn_patterns },
+    :desc => "A list of regular expressions matching factoids that the bot can learn. append ':n' if the factoid is defined by the n-th group instead of the whole match.")
+  Config.register Config::BooleanValue.new('factoids.listen_and_learn',
+    :default => false,
+    :desc => "Should the bot learn factoids from what is being said in chat? if true, phrases matching patterns in factoids.learn_pattern will tell the bot when a phrase can be learned")
   Config.register Config::IntegerValue.new('factoids.search_results',
     :default => 5,
     :desc => "How many factoids to display at a time")
@@ -106,6 +115,8 @@ class FactoidsPlugin < Plugin
     @filename = "factoids.rbot"
     @factoids = FactoidList.new
     @triggers = Set.new
+    @learn_patterns = []
+    reset_learn_patterns
     begin
       read_factfile
     rescue
@@ -183,6 +194,20 @@ class FactoidsPlugin < Plugin
     }
   end
 
+  def learn_patterns_to_rx
+    return [] if @bot.config['factoids.learn_pattern'].empty?
+    @bot.config['factoids.learn_pattern'].inject([]) { |list, str|
+      s = str.dup
+      if s =~ /:(\d+)$/
+        idx = $1.to_i
+        s.sub!(/:\d+$/,'')
+      else
+        idx = 0
+      end
+      list << [/^#{s}$/iu, idx]
+    }
+  end
+
   def parse_for_trigger(f, rx=nil)
     if !rx
       regs = trigger_patterns_to_rx
@@ -221,6 +246,10 @@ class FactoidsPlugin < Plugin
     @triggers.replace(triggers)
   end
 
+  def reset_learn_patterns
+    @learn_patterns.replace(learn_patterns_to_rx)
+  end
+
   def help(plugin, topic="")
     _("factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>")
   end
@@ -236,7 +265,7 @@ class FactoidsPlugin < Plugin
       m.reply _("I already know that %{factoid} [#%{idx}]" % {
         :factoid => factoid,
         :idx => idx
-      })
+      }) unless params[:silent]
     else
       @factoids << factoid
       @changed = true
@@ -332,13 +361,24 @@ class FactoidsPlugin < Plugin
   end
 
   def unreplied(m)
-    return if @bot.config['factoids.address'] and !m.address?
-    return if @factoids.empty?
-    return if @triggers.empty?
-    return unless m.message =~ /^(.*)\?\s*$/
-    query = $1.strip.downcase
-    if @triggers.include?(query)
-      facts(m, :words => query.split)
+    if m.message =~ /^(.*)\?\s*$/
+      return if @bot.config['factoids.address'] and !m.address?
+      return if @factoids.empty?
+      return if @triggers.empty?
+      query = $1.strip.downcase
+      if @triggers.include?(query)
+        facts(m, :words => query.split)
+      end
+    else
+      return if m.address? # we don't learn stuff directed at us which is not an explicit learn command
+      return if !@bot.config['factoids.listen_and_learn'] or @learn_patterns.empty?
+      @learn_patterns.each do |pat, i|
+        g = pat.match(m.message)
+        if g and g[i]
+          learn(m, :stuff => g[i], :silent => true)
+          break
+        end
+      end
     end
   end
 
