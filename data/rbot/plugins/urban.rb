@@ -32,7 +32,7 @@ class UrbanPlugin < Plugin
 
     total ||= rv.size
 
-    return m.reply "#{Bold}#{word}#{Bold} not found" if rv.empty?
+    return m.reply("#{Bold}#{word}#{Bold} not found") if rv.empty?
 
     if notfound
       suggestions = rv.map { |s| Underline + s[1] + Underline }.uniq.join ', '

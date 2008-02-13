@@ -60,7 +60,7 @@ class LinkBot < Plugin
       # strip any formatting codes in the new_nick. some people configure their linkbots
       # to embed these codes in nicknames (such as to\B\Bm), to avoid triggering the
       # person's highlight
-      new_nick.gsub! /[#{Bold}#{Underline}#{Reverse}#{Italic}#{NormalText}]/, ''
+      new_nick.gsub!(/[#{Bold}#{Underline}#{Reverse}#{Italic}#{NormalText}]/, '')
       debug "#{m.sourcenick} reports that #{new_nick} said #{message.inspect} on #{network}"
       # One way to pass the new message back to the bot is to create a PrivMessage
       # and delegate it to the plugins
