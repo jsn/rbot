@@ -70,11 +70,13 @@ module Config
       @manager.config[@key] = value
       @manager.changed = true
       @on_change.call(@manager.bot, value) if on_change && @on_change
+      return self
     end
     def unset
       @manager.config.delete(@key)
       @manager.changed = true
       @on_change.call(@manager.bot, value) if @on_change
+      return self
     end
 
     # set string will raise ArgumentErrors on failed parse/validate
@@ -287,9 +289,13 @@ module Config
       return false
     end
 
-    # TODO should I implement this via Value or leave it direct?
-    #    def []=(key, value)
-    #    end
+    def []=(key, value)
+      return @items[key.to_sym].set(value) if @items.has_key?(key.to_sym)
+      if @config.has_key?(key.to_sym)
+        warning _("Unregistered lookup #{key.to_sym.inspect}")
+        return @config[key.to_sym] = value
+      end
+    end
 
     # pass everything else through to the hash
     def method_missing(method, *args, &block)
