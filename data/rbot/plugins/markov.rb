@@ -10,10 +10,28 @@
 # by listening to chat
 
 class MarkovPlugin < Plugin
+  Config.register Config::BooleanValue.new('markov.enabled',
+    :default => false,
+    :desc => "Enable and disable the plugin")
+  Config.register Config::IntegerValue.new('markov.probability',
+    :default => 25,
+    :validate => Proc.new { |v| (0..100).include? v },
+    :desc => "Percentage chance of markov plugin chipping in")
+  Config.register Config::ArrayValue.new('markov.ignore_users',
+    :default => [],
+    :desc => "Hostmasks of users to be ignored")
+
   def initialize
     super
     @registry.set_default([])
-    @registry['enabled'] = false unless @registry.has_key?('enabled')
+    if @registry.has_key?('enabled')
+      @bot.config['markov.enabled'] = @registry['enabled']
+      @registry.delete('enabled')
+    end
+    if @registry.has_key?('probability')
+      @bot.config['markov.probability'] = @registry['probability']
+      @registry.delete('probability')
+    end
     @lastline = false
   end
 
@@ -53,16 +71,11 @@ class MarkovPlugin < Plugin
   end
 
   def probability?
-    prob = @registry['probability']
-    prob = 25 if prob.kind_of? Array;
-    prob = 0 if prob < 0
-    prob = 100 if prob > 100
-    return prob
+    return @bot.config['markov.probability']
   end
 
   def status(m,params)
-    enabled = @registry['enabled']
-    if (enabled)
+    if @bot.config['markov.enabled']
       m.reply "markov is currently enabled, #{probability?}% chance of chipping in"
     else
       m.reply "markov is currently disabled"
@@ -71,54 +84,51 @@ class MarkovPlugin < Plugin
 
   def ignore?(user=nil)
     return false unless user
-    @registry['ignore_users'].each do |mask|
+    @bot.config['markov.ignore_users'].each do |mask|
       return true if user.matches?(mask)
     end
     return false
   end
 
   def ignore(m, params)
-    if @registry['ignore_users'].nil?
-      @registry['ignore_users'] = []
-    end
     action = params[:action]
     user = params[:option]
     case action
     when 'remove':
-      if @registry['ignore_users'].include? user
-        s = @registry['ignore_users']
+      if @bot.config['markov.ignore_users'].include? user
+        s = @bot.config['markov.ignore_users']
         s.delete user
-        @registry['ignore_users'] = s
+        @bot.config['ignore_users'] = s
         m.reply "#{user} removed"
       else
         m.reply "not found in list"
       end
     when 'add':
       if user
-        if @registry['ignore_users'].include?(user)
+        if @bot.config['markov.ignore_users'].include?(user)
           m.reply "#{user} already in list"
         else
-          @registry['ignore_users'] = @registry['ignore_users'].push user 
+          @bot.config['markov.ignore_users'] = @bot.config['markov.ignore_users'].push user
           m.reply "#{user} added to markov ignore list"
         end
       else
         m.reply "give the name of a person to ignore"
       end
     when 'list':
-      m.reply "I'm ignoring #{@registry['ignore_users'].join(", ")}"
+      m.reply "I'm ignoring #{@bot.config['markov.ignore_users'].join(", ")}"
     else
       m.reply "have markov ignore the input from a hostmask.  usage: markov ignore add <mask>; markov ignore remove <mask>; markov ignore list"
     end
   end
 
   def enable(m, params)
-    @registry['enabled'] = true
+    @bot.config['markov.enabled'] = true
     m.okay
   end
 
   def probability(m, params)
     if params[:probability]
-      @registry['probability'] = params[:probability].to_i
+      @bot.config['probability'] = params[:probability].to_i
       m.okay
     else
       m.reply _("markov has a %{prob}% chance of chipping in") % { :prob => probability? }
@@ -126,12 +136,12 @@ class MarkovPlugin < Plugin
   end
 
   def disable(m, params)
-    @registry['enabled'] = false
+    @bot.config['markov.enabled'] = false
     m.okay
   end
 
   def should_talk
-    return false unless @registry['enabled']
+    return false unless @bot.config['markov.enabled']
     prob = probability?
     return true if prob > rand(100)
     return false
