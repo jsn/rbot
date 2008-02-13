@@ -106,8 +106,12 @@ class MarkovPlugin < Plugin
   end
 
   def probability(m, params)
-    @registry['probability'] = params[:probability].to_i
-    m.okay
+    if params[:probability]
+      @registry['probability'] = params[:probability].to_i
+      m.okay
+    else
+      m.reply _("markov has a %{prob}% chance of chipping in") % { :prob => probability? }
+    end
   end
 
   def disable(m, params)
@@ -202,5 +206,5 @@ plugin.map 'markov disable', :action => "disable"
 plugin.map 'markov status', :action => "status"
 plugin.map 'chat about :seed1 :seed2', :action => "chat"
 plugin.map 'chat', :action => "rand_chat"
-plugin.map 'markov probability :probability', :action => "probability",
+plugin.map 'markov probability [:probability]', :action => "probability",
            :requirements => {:probability => /^\d+%?$/}
