@@ -868,7 +868,7 @@ class RSSFeedsPlugin < Plugin
       # git changesets are SHA1 hashes (40 hex digits), way too long, get rid of them, as they are
       # visible in the URL anyway
       # TODO make this optional?
-      base_title.sub!(/^Changeset \[([\da-f]{40})\]/) { |c| "Changeset [...]"} if feed.type = 'trac'
+      base_title.sub!(/^Changeset \[([\da-f]{40})\]:/) { |c| "(git commit)"} if feed.type = 'trac'
       title = "#{Bold}#{base_title.ircify_html(tit_opt)}#{Bold}"
     end
 
@@ -917,7 +917,7 @@ class RSSFeedsPlugin < Plugin
       line1 = "#{handle}#{date}Message #{title} sent by #{author}. #{desc}"
     when 'trac'
       line1 = "#{handle}#{date}#{title} @ #{link}"
-      unless item.title =~ /^Changeset \[(?:[\da-f]+|\.\.\.)\]/
+      unless item.title =~ /^(?:Changeset \[(?:[\da-f]+)\]|\(git commit\))/
         line2 = "#{handle}#{date}#{desc}"
       end
     when '/.'
