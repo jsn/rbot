@@ -128,7 +128,7 @@ class MarkovPlugin < Plugin
 
   def probability(m, params)
     if params[:probability]
-      @bot.config['probability'] = params[:probability].to_i
+      @bot.config['markov.probability'] = params[:probability].to_i
       m.okay
     else
       m.reply _("markov has a %{prob}% chance of chipping in") % { :prob => probability? }
