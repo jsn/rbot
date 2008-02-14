@@ -62,6 +62,20 @@ class ConfigModule < CoreBotModule
     m.reply "#{key}: #{@bot.config.items[key].desc}"
   end
 
+  def handle_search(m, params)
+    rx = Regexp.new(params[:rx].to_s, true)
+    cfs = []
+    @bot.config.items.each do |k, v|
+      cfs << v if k.to_s.match(rx) or (v.desc.match(rx) rescue false)
+    end
+    if cfs.empty?
+      m.reply _("no config key found matching %{r}") % { :r => params[:rx].to_s}
+    else
+      m.reply _("possible keys: %{kl}") % { :kl => cfs.map { |c| c.key}.join(', ') }
+      m.reply cfs.map { |c| [c.key, c.desc].join(': ') }.join("\n")
+    end
+  end
+
   def handle_unset(m, params)
     key = params[:key].to_s.intern
     unless @bot.config.items.has_key?(key)
@@ -252,6 +266,9 @@ conf.map 'config desc :key',
 conf.map 'config describe :key',
   :action => 'handle_desc',
   :auth_path => 'show'
+conf.map 'config search *rx',
+  :action => 'handle_search',
+  :autho_path => 'show'
 
 conf.map "save",
   :action => 'bot_save'
