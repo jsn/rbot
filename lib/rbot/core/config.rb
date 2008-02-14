@@ -265,10 +265,10 @@ conf.map 'config desc :key',
   :auth_path => 'show'
 conf.map 'config describe :key',
   :action => 'handle_desc',
-  :auth_path => 'show'
+  :auth_path => 'show::desc!'
 conf.map 'config search *rx',
   :action => 'handle_search',
-  :autho_path => 'show'
+  :auth_path => 'show'
 
 conf.map "save",
   :action => 'bot_save'
@@ -316,7 +316,8 @@ conf.map 'config help :topic',
   :auth_path => '!help!'
 
 conf.default_auth('*', false)
-conf.default_auth('show::status', true)
+conf.default_auth('show', true)
+conf.default_auth('show::get', false)
 # TODO these shouldn't be set here, we need a way to let the default
 # permission be specified together with the ConfigValue
 conf.default_auth('key', true)
