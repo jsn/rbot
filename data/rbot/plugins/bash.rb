@@ -98,6 +98,11 @@ class BashPlugin < Plugin
       end
     end
 
+    if not html
+      m.reply "unable to retrieve quotes"
+      return
+    end
+
     html_quotes = html.split(/<p class="quote">/)
     html_quotes.each { |htqt|
       # debug htqt.inspect
