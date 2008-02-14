@@ -9,7 +9,8 @@
 
 # Wheel-of-Fortune Question/Answer
 class WoFQA
-  attr_accessor :cat, :clue, :answer, :hint
+  attr_accessor :cat, :clue, :hint
+  attr_reader :answer
   def initialize(cat, clue, ans=nil)
     @cat = cat # category
     @clue = clue # clue phrase
@@ -488,7 +489,7 @@ class WheelOfFortune < Plugin
         }
         score_table(m.channel, game)
         @games.delete(ch)
-      else :more
+      else
         m.reply _("%{bold}%{color}%{name}%{bold}, round %{count}%{nocolor} -- score so far:") % {
           :bold => Bold,
           :color => Irc.color(:green),
