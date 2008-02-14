@@ -95,6 +95,9 @@ class LartPlugin < Plugin
     end
     who = params[:who].to_s
     reason = params[:why]
+    if who == "me"
+      who = m.sourcenick
+    end
     if who == @bot.nick
       who = m.sourcenick
       reason = "for trying to make me lart myself"
@@ -113,7 +116,8 @@ class LartPlugin < Plugin
     end
     who = params[:who].to_s
     reason = params[:why]
-    if who == m.sourcenick
+    if who == m.sourcenick || who == "me"
+      params[:who] = m.sourcenick
       params[:why] = "for praising himself"
       handle_lart(m, params)
       return
