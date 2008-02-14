@@ -26,7 +26,7 @@ spec = Gem::Specification.new do |s|
 
   s.author = 'Tom Gilbert'
   s.email = 'tom@linuxbrit.co.uk'
-  s.homepage = 'http://linuxbrit.co.uk/rbot/'
+  s.homepage = 'http://ruby-rbot.org'
   s.rubyforge_project = 'rbot'
 end
 

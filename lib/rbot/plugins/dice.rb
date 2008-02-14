@@ -5,7 +5,7 @@
 # Version: 0.3.2
 # Date: Sat 6 Apr 2002
 #
-# You can get rbot from: http://www.linuxbrit.co.uk/rbot/
+# You can get rbot from: http://ruby-rbot.org
 #
 # Changelog
 # 0.1 - Initial release
