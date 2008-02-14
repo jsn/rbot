@@ -325,7 +325,7 @@ class RemoteModule < CoreBotModule
   Config.register Config::StringValue.new('remote.host',
     :default => '',
     :requires_rescan => true,
-    :desc => "Port on which the remote interface will be presented")
+    :desc => "Host on which the remote interface will be presented")
 
   def initialize
     super
