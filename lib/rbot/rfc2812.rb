@@ -966,7 +966,7 @@ module Irc
     # Clear the server and reset the user
     def reset
       @server.clear
-      @user = @server.user("")
+      @user = @server.user("*!*@*")
     end
 
     # key::   server event to handle
