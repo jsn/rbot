@@ -366,7 +366,7 @@ class FactoidsPlugin < Plugin
           reply << short_fact(f)
         }
       end
-      m.reply reply.join(". "), :split_at => /\s+--\s+/
+      m.reply reply.join(". "), :split_at => /\[\d+\/\d+\] /, :purge_split => false
     end
   end
 
