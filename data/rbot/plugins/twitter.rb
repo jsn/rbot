@@ -136,10 +136,11 @@ class TwitterPlugin < Plugin
     response = @bot.httputil.post(uri, body, :headers => @header)
     debug response
 
+    reply_method = params[:notify] ? :notify : :reply
     if response.class == Net::HTTPOK
-      m.reply "status updated"
+      m.__send__(reply_method, "status updated")
     else
-      m.reply "could not update status"
+      m.__send__(reply_method, "could not update status")
     end
   end
 
@@ -154,7 +155,7 @@ class TwitterPlugin < Plugin
   def ctcp_listen(m)
     return unless m.action?
     return unless @registry[m.sourcenick + "_actions"]
-    update_status(m, :status => m.message)
+    update_status(m, :status => m.message, :notify => true)
   end
 
   # show or toggle action twitting
