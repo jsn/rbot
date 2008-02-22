@@ -42,7 +42,7 @@ class TwitterPlugin < Plugin
 
   # return a help string when the bot is asked for help on this plugin
   def help(plugin, topic="")
-    return "twitter status [nick] => show nick's (or your) status, use 'twitter friends status [nick]' to also show the friends' timeline | twitter update [status] => updates your status on twitter | twitter identify [username] [password] => ties your nick to your twitter username and password"
+    return "twitter status [nick] => show nick's (or your) status, use 'twitter friends status [nick]' to also show the friends' timeline | twitter update [status] => updates your status on twitter | twitter identify [username] [password] => ties your nick to your twitter username and password | twitter actions [on|off] => enable/disable twitting of actions (/me does ...)"
   end
 
   # update the status on twitter
@@ -149,6 +149,31 @@ class TwitterPlugin < Plugin
     @registry[m.sourcenick + "_password"] = params[:password].to_s
     m.reply "you're all setup!"
   end
+
+  # update on ACTION if the user has enabled the option
+  def ctcp_listen(m)
+    return unless m.action?
+    return unless @registry[m.sourcenick + "_actions"]
+    update_status(m, :status => m.message)
+  end
+
+  # show or toggle action twitting
+  def actions(m, params)
+    case params[:toggle]
+    when 'on'
+      @registry[m.sourcenick + "_actions"] = true
+      m.okay
+    when 'off'
+      @registry[m.sourcenick + "_actions"] = false
+      m.okay
+    else
+      if @registry[m.sourcenick + "_actions"]
+        m.reply _("actions will be twitted")
+      else
+        m.reply _("actions will not be twitted")
+      end
+    end
+  end
 end
 
 # create an instance of our plugin class and register for the "length" command
@@ -156,5 +181,6 @@ plugin = TwitterPlugin.new
 plugin.map 'twitter identify :username :password', :action => "identify", :public => false
 plugin.map 'twitter update *status', :action => "update_status", :threaded => true
 plugin.map 'twitter status [:nick]', :action => "get_status", :threaded => true
+plugin.map 'twitter actions [:toggle]', :action => "actions", :requirements => { :toggle => /^on|off$/ }
 plugin.map 'twitter :friends [status] [:nick]', :action => "get_status", :requirements => { :friends => /^friends?$/ }, :threaded => true
 
