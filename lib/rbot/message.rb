@@ -382,6 +382,12 @@ module Irc
       plainokay
     end
 
+    # send a NOTICE to the message source
+    #
+    def notify(msg,opts={})
+      @bot.notice(sourcenick, msg, opts)
+    end
+
   end
 
   # class to manage IRC PRIVMSGs
