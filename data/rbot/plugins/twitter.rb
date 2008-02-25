@@ -165,7 +165,7 @@ class TwitterPlugin < Plugin
       @registry[m.sourcenick + "_actions"] = true
       m.okay
     when 'off'
-      @registry[m.sourcenick + "_actions"] = false
+      @registry.delete(m.sourcenick + "_actions")
       m.okay
     else
       if @registry[m.sourcenick + "_actions"]
