@@ -265,6 +265,10 @@ class RSSFeedsPlugin < Plugin
     :default => true,
     :desc => "Whether feed items for which the description was changed should be shown as new")
 
+  Config.register Config::BooleanValue.new('rss.show_links',
+    :default => true,
+    :desc => "Whether to display links from the text of a feed item.")
+
   # We used to save the Mutex with the RssBlob, which was idiotic. And
   # since Mutexes dumped in one version might not be resotrable in another,
   # we need a few tricks to be able to restore data from other versions of Ruby
@@ -879,10 +883,9 @@ class RSSFeedsPlugin < Plugin
       title = "#{Bold}#{base_title.ircify_html(tit_opt)}#{Bold}"
     end
 
-    desc_opt = {
-      :limit => @bot.config['rss.text_max'],
-      :a_href => :link_out
-    }
+    desc_opt = {}
+    desc_opt[:limit] = @bot.config['rss.text_max']
+    desc_opt[:a_href] = :link_out if @bot.config['rss.show_links']
 
     # We prefer content_encoded here as it tends to provide more html formatting 
     # for use with ircify_html.
