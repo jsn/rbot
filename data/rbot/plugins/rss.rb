@@ -920,6 +920,14 @@ class RSSFeedsPlugin < Plugin
       abt = category ? "about #{category} " : ""
       line1 = "#{handle}#{date}#{author}blogged #{abt}at #{link}"
       line2 = "#{handle}#{title} - #{desc}"
+    when 'photoblog'
+      author += " " if author
+      abt = category ? "under #{category} " : ""
+      line1 = "#{handle}#{date}#{author}added an image #{abt}at #{link}"
+      line2 = "#{handle}#{title} - #{desc}"
+    when 'news'
+      line1 = "#{handle}#{date}#{title} @ #{link}"
+      line2 = line2 = "#{handle}#{date}#{desc}"
     when 'git'
       author += " " if author
       line1 = "#{handle}#{date}#{author}commited #{title} @ #{link}"
