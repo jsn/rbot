@@ -16,6 +16,13 @@
 
 require 'rss'
 
+# Try to load rss/content/2.0 so we can access the data in <content:encoded> 
+# tags.
+begin
+  require 'rss/content/2.0'
+rescue LoadError
+end
+
 module ::RSS
 
   # Make an  'unique' ID for a given item, based on appropriate bot options
@@ -877,8 +884,12 @@ class RSSFeedsPlugin < Plugin
       :a_href => :link_out
     }
 
-    if item.respond_to? :description
-      desc = item.description.ircify_html(desc_opt) if item.description
+    # We prefer content_encoded here as it tends to provide more html formatting 
+    # for use with ircify_html.
+    if item.respond_to?(:content_encoded) && item.content_encoded
+      desc = item.content_encoded.ircify_html(desc_opt)
+    elsif item.respond_to?(:description) && item.description
+      desc = item.description.ircify_html(desc_opt)
     else
       if item.content.type == "html"
         desc = item.content.content.ircify_html(desc_opt)
