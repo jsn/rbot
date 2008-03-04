@@ -101,6 +101,9 @@ class Keywords < Plugin
   Config.register Config::IntegerValue.new('keyword.search_results',
     :default => 3,
     :desc => "How many search results to display at a time")
+  Config.register Config::ArrayValue.new('keyword.ignore_words',
+    :default => ["how", "that", "these", "they", "this", "what", "when", "where", "who", "why", "you"],
+    :desc => "A list of words that the bot should passively ignore.")
 
   # create a new KeywordPlugin instance, associated to bot +bot+
   def initialize
@@ -544,10 +547,10 @@ class Keywords < Plugin
     # TODO option to do if(m.message =~ /^(.*)$/, ie try any line as a
     # keyword lookup.
     if m.message =~ /^(.*\S)\s*\?\s*$/ and (m.address? or not @bot.config["keyword.address"])
-      keyword_lookup m, $1, true if @bot.auth.allow?("keyword", m.source)
+      keyword_lookup m, $1, true if !ignored_word?($1) && @bot.auth.allow?("keyword", m.source)
     elsif @bot.config["keyword.listen"] && (m.message =~ /^(.*?)\s+(is|are)\s+(.*)$/)
       # TODO MUCH more selective on what's allowed here
-      keyword_command m, $1, $2, $3, true if @bot.auth.allow?("keycmd", m.source)
+      keyword_command m, $1, $2, $3, true if !ignored_word?($1) && @bot.auth.allow?("keycmd", m.source)
     end
   end
 end
