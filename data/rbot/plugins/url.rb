@@ -140,9 +140,13 @@ class UrlPlugin < Plugin
         debug "Title #{title ? '' : 'not '} found"
         reply = "#{LINK_INFO} #{title}" if title
       rescue => e
-        if e.message =~ /\(404 - Not Found\)/i
-          # see if we failed to find the thing because of trailing punctuation
-          # but check that we still have 'something' in the URL
+        debug e
+        # we might get a 404 because of trailing punctuation, so we try again
+        # with the last character stripped. this might generate invalid URIs
+        # (e.g. because "some.url" gets chopped to some.url%2, so catch that too
+        if e.message =~ /\(404 - Not Found\)/i or e.kind_of?(URI::InvalidURIError)
+          # chop off last character, and retry if we still have enough string to
+          # look like a minimal URL
           retry if urlstr.chop! and urlstr =~ /^https?:\/\/./
         end
         reply = "Error #{e.message}"
