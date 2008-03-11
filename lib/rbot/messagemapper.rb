@@ -193,7 +193,14 @@ class Bot
           if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
             if tmpl.options[:thread] || tmpl.options[:threaded]
-              Thread.new { @parent.send(action, m, options) }
+              Thread.new do
+                begin
+                  @parent.send(action, m, options)
+                rescue Exception => e
+                  error "In threaded action: #{e.message}"
+                  debug e.backtrace.join("\n")
+                end
+              end
             else
               @parent.send(action, m, options)
             end
