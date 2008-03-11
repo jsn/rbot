@@ -1042,12 +1042,16 @@ class Bot
   def disconnect(message=nil)
     message = @lang.get("quit") if (!message || message.empty?)
     if @socket.connected?
-      debug "Clearing socket"
-      @socket.clearq
-      debug "Sending quit message"
-      @socket.emergency_puts "QUIT :#{message}"
-      debug "Flushing socket"
-      @socket.flush
+      begin
+        debug "Clearing socket"
+        @socket.clearq
+        debug "Sending quit message"
+        @socket.emergency_puts "QUIT :#{message}"
+        debug "Flushing socket"
+        @socket.flush
+      rescue SocketError => e
+        error "error while disconnecting socket: #{e.pretty_inspect}"
+      end
       debug "Shutting down socket"
       @socket.shutdown
     end
