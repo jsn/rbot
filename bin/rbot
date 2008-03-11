@@ -1,5 +1,41 @@
 #!/usr/bin/env ruby
 
+=begin rdoc
+
+= rbot main executable
+
+Usage:
+
+  % rbot [options] [config directory]
+
+== Options
+
+[-h, --help]
+    display a help message and exit
+[-v, --version]
+    display version information and exit
+[-d, --debug]
+    enable debug messages
+[-l, --loglevel _level_]
+    sets the minimum log level verbosity
+[-b, --background]
+    background (daemonize) the bot
+[-p, --pidfile _filename_]
+    write the bot pid to _filename_
+
+The default config directory is <tt>~/.rbot</tt>.
+
+The default pidfile is <tt><i>botdir</i>/rbot.pid</tt>.
+
+The logfile is located at <tt><i>botdir</i>/<i>botname</i>.log</tt>, and
+the default loglevel is 1 (INFO messages). Possible values for the loglevel
+are 0 (DEBUG), 1 (INFO), 2 (WARN), 3 (ERROR), 4 (FATAL).
+
+Please note that the logfile doesn't contain IRC logs (which are located at
+<tt><i>botdir</i>/logs/*</tt>, but only rbot diagnostic messages.
+
+=end
+
 # Copyright (C) 2002 Tom Gilbert.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -143,8 +179,9 @@ if ($opts["help"])
   puts "  -h, --help         this message"
   puts "  -v, --version      version information"
   puts "  -d, --debug        enable debug messages"
+  puts "  -l, --loglevel     sets the log level verbosity"
   puts "  -b, --background   background (daemonize) the bot"
-  puts "  -p, --pidfile      write the bot pid to this file"
+  puts "  -p, --pidfile      write the bot pid to file"
   puts "config directory defaults to ~/.rbot"
   exit 0
 end

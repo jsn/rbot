@@ -1,38 +1,36 @@
-rbot README
-===========
+= rbot - The Ruby IRC bot
 
 rbot is a ruby IRC bot. Think of him as a ruby bot framework with a highly
 modular design based around plugins.
 
-rbot features
-=============
+== rbot features
 
 * Runtime configuration via irc chat
 * User authentication and access levels for using different bot features
-* Built in infobot-style keywords. See example session below.
+* Built in infobot-style keywords.
 * Support for underlying fact database (infobot fact files), which can
   be overridden or supplemented by runtime keyword controls
-* Multi-language support - comes with english, dutch and german definitions
-  so far - more translations welcome
+* Multi-language support - comes with english, dutch, german, french, italian
+  japanese, chinese and russian definitions so far - more translations welcome
 * Powerful plugin architecture, comes with plugins for:
-  o DNS queries
-  o Babelfish translation
-  o Google searching
-  o Excuse generation
-  o Insult generation
-  o Karma
-  o Checking the weather
-  o Querying slashdot
-  o Doing Math
-  o Per-channel quote storage, searching and retrieval
-  o Reminders
-  o rot13 translation
-  o Check the spelling of a word
-  o Webserver Server: header examination
-  o RPG dice rolling
-  o larting people
-  o conversation stats
-  o more... 
+  - DNS queries
+  - Babelfish translation
+  - Google searching
+  - Excuse generation
+  - Insult generation
+  - Karma
+  - Checking the weather
+  - Querying slashdot
+  - Doing Math
+  - Per-channel quote storage, searching and retrieval
+  - Reminders
+  - rot13 translation
+  - Check the spelling of a word
+  - Webserver Server: header examination
+  - RPG dice rolling
+  - larting people
+  - conversation stats
+  - more... 
 
 Thanks are owed to the infobot developers - several of rbot's features are
 inspired by infobot and so are some of the default plugins. Thanks are also

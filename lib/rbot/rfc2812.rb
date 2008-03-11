@@ -4,7 +4,7 @@
 # :title: RFC 2821 Client Protocol module
 #
 # This module defines the Irc::Client class, a class that can handle and
-# dispatch messages based on RFC 2821i (Internet Relay Chat: Client Protocol)
+# dispatch messages based on RFC 2821 (Internet Relay Chat: Client Protocol)
 
 module Irc
   # - The server sends Replies 001 to 004 to a user upon
