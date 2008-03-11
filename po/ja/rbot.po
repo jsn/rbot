@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2007-10-22 01:22+0200\n"
+"POT-Creation-Date: 2008-03-11 01:34+0100\n"
 "PO-Revision-Date: 2007-07-09 01:36-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Japanese\n"
@@ -35,23 +35,23 @@ msgstr ""
 msgid "Set true to allow new botusers to be created automatically"
 msgstr ""
 
-#: lib/rbot/botuser.rb:885
+#: lib/rbot/botuser.rb:897
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr ""
 
-#: lib/rbot/config.rb:196
+#: lib/rbot/config.rb:217
 msgid "%{desc} [valid values are: %{values}]"
 msgstr ""
 
-#: lib/rbot/config.rb:326
+#: lib/rbot/config.rb:351
 msgid "First time rbot configuration wizard"
 msgstr ""
 
-#: lib/rbot/config.rb:329
+#: lib/rbot/config.rb:354
 msgid "This wizard will ask you a few questions to get you started."
 msgstr ""
 
-#: lib/rbot/config.rb:330
+#: lib/rbot/config.rb:355
 msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
@@ -113,35 +113,47 @@ msgstr ""
 msgid "permissions for %{user}:: %{permissions}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:203
-msgid "welcome, %{user}"
+#: lib/rbot/core/auth.rb:199
+msgid ". only %{max} will be shown"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:218
-msgid "sorry, can't do"
+#: lib/rbot/core/auth.rb:200
+msgid "%{count} commands found matching %{pattern}%{extra}"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:205
+msgid "%{cmd}: %{perms}"
 msgstr ""
 
 #: lib/rbot/core/auth.rb:221
+msgid "welcome, %{user}"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:236
+msgid "sorry, can't do"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:239
 msgid "couldn't login: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:229
+#: lib/rbot/core/auth.rb:247
 msgid "I couldn't find anything to let you login automatically"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:240
+#: lib/rbot/core/auth.rb:258
 msgid "you are %{who}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:242 lib/rbot/core/auth.rb:255
+#: lib/rbot/core/auth.rb:260 lib/rbot/core/auth.rb:273
 msgid "no one that I know"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:243 lib/rbot/core/auth.rb:256
+#: lib/rbot/core/auth.rb:261 lib/rbot/core/auth.rb:274
 msgid "my boss"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:263
+#: lib/rbot/core/auth.rb:281
 msgid ""
 "login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with "
 "password <pass>. When using the full form, you must contact the bot in "
@@ -150,62 +162,68 @@ msgid ""
 "be attempted"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:265
+#: lib/rbot/core/auth.rb:283
 msgid "whoami: names the botuser you're linked to"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:267
+#: lib/rbot/core/auth.rb:285
 msgid "who is <user>: names the botuser <user> is linked to"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:271
+#: lib/rbot/core/auth.rb:289
 msgid ""
 "a permission is specified as module::path::to::cmd; when you want to enable "
 "it, prefix it with +; when you want to disable it, prefix it with -; when "
 "using the +reset+ command, do not use any prefix"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:273
+#: lib/rbot/core/auth.rb:291
 msgid ""
 "permissions [re]set <permission> [in <channel>] for <user>: sets or resets "
 "the permissions for botuser <user> in channel <channel> (use ? to change the "
 "permissions for private addressing)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:275
+#: lib/rbot/core/auth.rb:293
 msgid "permissions view [for <user>]: display the permissions for user <user>"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:277
-msgid "permission topics: syntax, (re)set, view"
+#: lib/rbot/core/auth.rb:295
+msgid ""
+"permissions search <pattern>: display the permissions associated with the "
+"commands matching <pattern>"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:282
+#: lib/rbot/core/auth.rb:297
+msgid "permission topics: syntax, (re)set, view, search"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:302
 msgid ""
 "user show <what> : shows info about the user; <what> can be any of "
 "autologin, login-by-mask, netmasks"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:284
+#: lib/rbot/core/auth.rb:304
 msgid ""
 "user enable|disable <what> : turns on or off <what> (autologin, login-by-"
 "mask)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:286
+#: lib/rbot/core/auth.rb:306
 msgid ""
 "user set password <blah> : sets the user password to <blah>; passwords can "
 "only contain upper and lowercase letters and numbers, and must be at least 4 "
 "characters long"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:288
+#: lib/rbot/core/auth.rb:308
 msgid ""
 "user add|rm netmask <mask> : adds/removes netmask <mask> from the list of "
 "netmasks known to the botuser you're linked to"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:290
+#: lib/rbot/core/auth.rb:310
 msgid ""
 "user reset <what> : resets <what> to the default values. <what> can be "
 "+netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will "
@@ -213,13 +231,13 @@ msgid ""
 "and you'll be told in private)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:292
+#: lib/rbot/core/auth.rb:312
 msgid ""
 "user tell <who> the password for <botuser> : contacts <who> in private to "
 "tell him/her the password for <botuser>"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:294
+#: lib/rbot/core/auth.rb:314
 msgid ""
 "user create <name> <password> : create botuser named <name> with password "
 "<password>. The password can be omitted, in which case a random one will be "
@@ -227,270 +245,296 @@ msgid ""
 "underscore (_)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:296
+#: lib/rbot/core/auth.rb:316
 msgid "user list : lists all the botusers"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:298
+#: lib/rbot/core/auth.rb:318
 msgid ""
-"user destroy <botuser> <password> : destroys <botuser>; this function %"
-"{highlight}must%{highlight} be called in two steps. On the first call, no "
-"password must be specified: <botuser> is then queued for destruction. On the "
-"second call, you must specify the correct password for <botuser>, and it "
-"will be destroyed. If you want to cancel the destruction, issue the command "
-"+user cancel destroy <botuser>+"
+"user destroy <botuser> : destroys <botuser>. This function %{highlight}must%"
+"{highlight} be called in two steps. On the first call <botuser> is queued "
+"for destruction. On the second call, which must be in the form 'user confirm "
+"destroy <botuser>', the botuser will be destroyed. If you want to cancel the "
+"destruction, issue the command 'user cancel destroy <botuser>'"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:300
+#: lib/rbot/core/auth.rb:320
 msgid ""
 "user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, "
 "list, destroy"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:303
+#: lib/rbot/core/auth.rb:323
 msgid ""
 "auth <masterpassword>: log in as the bot owner; other commands: login, "
-"whoami, permission syntax, permissions [re]set, permissions view, user"
+"whoami, permission syntax, permissions [re]set, permissions view, user, "
+"meet, hello"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:305
-msgid "auth commands: auth, login, whoami, who, permission[s], user"
+#: lib/rbot/core/auth.rb:325
+msgid ""
+"meet <nick> [as <user>]: creates a bot user for nick, calling it user "
+"(defaults to the nick itself)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:310
+#: lib/rbot/core/auth.rb:327
+msgid "hello: creates a bot user for the person issuing the command"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:329
+msgid ""
+"auth commands: auth, login, whoami, who, permission[s], user, meet, hello"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:334
 msgid "sorry, I need more arguments to %{command}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:314
+#: lib/rbot/core/auth.rb:338
 msgid "I can only %{command} these: %{arguments}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:349
+#: lib/rbot/core/auth.rb:373
 msgid "no such bot user %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:352
+#: lib/rbot/core/auth.rb:376
 msgid "you can't mess with %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:363
+#: lib/rbot/core/auth.rb:388
 msgid "you can't see the properties of %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:372
+#: lib/rbot/core/auth.rb:397
 msgid "no way I'm telling you the master password!"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:373
+#: lib/rbot/core/auth.rb:398
 msgid "you can't ask for someone else's password"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:375
+#: lib/rbot/core/auth.rb:400
 msgid ""
 "c'mon, you can't be asking me seriously to tell you the password in public!"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:376
+#: lib/rbot/core/auth.rb:401
 msgid "the password for %{user} is %{password}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:390
+#: lib/rbot/core/auth.rb:415
 msgid "can %{action}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:392
+#: lib/rbot/core/auth.rb:417
 msgid "can not %{action}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:396
+#: lib/rbot/core/auth.rb:421
 msgid "knows no netmasks"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:398
+#: lib/rbot/core/auth.rb:423
 msgid "knows %{netmasks}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:405 lib/rbot/core/auth.rb:432
-#: lib/rbot/core/auth.rb:450 lib/rbot/core/auth.rb:482
+#: lib/rbot/core/auth.rb:430 lib/rbot/core/auth.rb:457
+#: lib/rbot/core/auth.rb:475 lib/rbot/core/auth.rb:507
 msgid "you can't change the default user"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:406 lib/rbot/core/auth.rb:434
-#: lib/rbot/core/auth.rb:452 lib/rbot/core/auth.rb:484
+#: lib/rbot/core/auth.rb:431 lib/rbot/core/auth.rb:459
+#: lib/rbot/core/auth.rb:477 lib/rbot/core/auth.rb:509
 msgid "you can't edit %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:421 lib/rbot/core/auth.rb:468
+#: lib/rbot/core/auth.rb:446 lib/rbot/core/auth.rb:493
 msgid "I ignored %{things} because %{reason}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:425 lib/rbot/core/auth.rb:472
+#: lib/rbot/core/auth.rb:450 lib/rbot/core/auth.rb:497
 msgid "I haven't changed anything"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:443
+#: lib/rbot/core/auth.rb:468
 msgid "is that a joke? setting the password in public?"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:475
+#: lib/rbot/core/auth.rb:500
 msgid "the password for %{user} is now %{password}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:489
+#: lib/rbot/core/auth.rb:514
 msgid ""
 "I can only add/remove netmasks. See +help user add+ for more instructions"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:510
+#: lib/rbot/core/auth.rb:535
 msgid "sorry, I don't know how to %{request}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:519
+#: lib/rbot/core/auth.rb:538
+msgid "couldn't %{cmd}: %{exception}"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:567
+msgid ""
+"you are now registered as %{buname}. I created a random password for you : %"
+"{pass} and you can change it at any time by telling me 'user set password "
+"<password>' in private"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:574
+msgid "but I already know %{buname}"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:576
+msgid "I had problems meeting %{nick}: %{e}"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:585
 msgid "couldn't find botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:521
+#: lib/rbot/core/auth.rb:587
 msgid "I'm not telling the master password to anyway, pal"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:522
+#: lib/rbot/core/auth.rb:588
 msgid "the password for botuser %{user} is %{password}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:525
+#: lib/rbot/core/auth.rb:591
 msgid "I told %{user} that %{message}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:531
+#: lib/rbot/core/auth.rb:597
 msgid "are you nuts, creating a botuser with a publicly known password?"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:536
+#: lib/rbot/core/auth.rb:602
 msgid "failed to create %{user}: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:540
+#: lib/rbot/core/auth.rb:606
 msgid "created botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:548
+#: lib/rbot/core/auth.rb:614
 msgid " (queued for destruction)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:551
+#: lib/rbot/core/auth.rb:617
 msgid "I have no botusers other than the default ones"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:552
+#: lib/rbot/core/auth.rb:618
 msgid "botuser: %{list}"
 msgid_plural "botusers: %{list}"
 msgstr[0] ""
 
-#: lib/rbot/core/auth.rb:559
+#: lib/rbot/core/auth.rb:625
 msgid "You can't destroy %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:570
+#: lib/rbot/core/auth.rb:635
 msgid "no such botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:576
+#: lib/rbot/core/auth.rb:642
 msgid "%{user} removed from the destruction queue"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:578
+#: lib/rbot/core/auth.rb:644
 msgid "%{user} was not queued for destruction"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:585
+#: lib/rbot/core/auth.rb:649
 msgid ""
-"%{user} already queued for destruction, use %{highlight}user destroy %{user} "
-"<password>%{highlight} to destroy it"
+"%{user} already queued for destruction, use %{highlight}user confirm destroy "
+"%{user}%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:588
+#: lib/rbot/core/auth.rb:652
 msgid ""
-"%{user} queued for destruction, use %{highlight}user destroy %{user} "
-"<password>%{highlight} to destroy it"
+"%{user} queued for destruction, use %{highlight}user confirm destroy %{user}%"
+"{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:592
+#: lib/rbot/core/auth.rb:656
 msgid "%{user} is not queued for destruction yet"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:594
-msgid "wrong password for %{user}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:603 lib/rbot/core/auth.rb:643
+#: lib/rbot/core/auth.rb:665 lib/rbot/core/auth.rb:705
 msgid "failed: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:605
+#: lib/rbot/core/auth.rb:667
 msgid "botuser %{user} destroyed"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:613
+#: lib/rbot/core/auth.rb:674
 msgid "please don't touch the default users"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:622
+#: lib/rbot/core/auth.rb:683
 msgid "no such botuser %{source}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:624
+#: lib/rbot/core/auth.rb:685
 msgid "botuser %{dest} exists already"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:645
+#: lib/rbot/core/auth.rb:708
 msgid "botuser %{source} copied to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:647
+#: lib/rbot/core/auth.rb:711
 msgid "botuser %{source} renamed to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:666
+#: lib/rbot/core/auth.rb:731
 msgid "selecting data to export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:682
+#: lib/rbot/core/auth.rb:747
 msgid "preparing data for export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:705
+#: lib/rbot/core/auth.rb:770
 msgid "failed to prepare data: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:710
+#: lib/rbot/core/auth.rb:775
 msgid "exporting to %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:717
+#: lib/rbot/core/auth.rb:782
 msgid "failed to export users: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:721 lib/rbot/core/auth.rb:799
+#: lib/rbot/core/auth.rb:786 lib/rbot/core/auth.rb:864
 msgid "done"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:738
+#: lib/rbot/core/auth.rb:803
 msgid "reading %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:742
+#: lib/rbot/core/auth.rb:807
 msgid "failed to import from: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:749
+#: lib/rbot/core/auth.rb:814
 msgid "selecting data to import ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:759
+#: lib/rbot/core/auth.rb:824
 msgid "parsing data from import ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:779
+#: lib/rbot/core/auth.rb:844
 msgid "failed to parse data: %{exception}"
 msgstr ""
 
@@ -565,112 +609,129 @@ msgid "no such module %{module}"
 msgstr ""
 
 #: lib/rbot/core/config.rb:49 lib/rbot/core/config.rb:60
-#: lib/rbot/core/config.rb:68 lib/rbot/core/config.rb:81
-#: lib/rbot/core/config.rb:107 lib/rbot/core/config.rb:130
+#: lib/rbot/core/config.rb:82 lib/rbot/core/config.rb:95
+#: lib/rbot/core/config.rb:121 lib/rbot/core/config.rb:144
 msgid "no such config key %{key}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:73 lib/rbot/core/config.rb:92
-#: lib/rbot/core/config.rb:122 lib/rbot/core/config.rb:145
+#: lib/rbot/core/config.rb:72
+msgid "no config key found matching %{r}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:74
+msgid "possible keys: %{kl}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:87 lib/rbot/core/config.rb:106
+#: lib/rbot/core/config.rb:136 lib/rbot/core/config.rb:159
 msgid "this config change will take effect on the next restart"
 msgstr ""
 
-#: lib/rbot/core/config.rb:74 lib/rbot/core/config.rb:95
-#: lib/rbot/core/config.rb:123 lib/rbot/core/config.rb:146
+#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:109
+#: lib/rbot/core/config.rb:137 lib/rbot/core/config.rb:160
 msgid "this config change will take effect on the next rescan"
 msgstr ""
 
-#: lib/rbot/core/config.rb:88
+#: lib/rbot/core/config.rb:102
 msgid "failed to set %{key}: %{error}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:111 lib/rbot/core/config.rb:134
+#: lib/rbot/core/config.rb:125 lib/rbot/core/config.rb:148
 msgid "config key %{key} is not an array"
 msgstr ""
 
-#: lib/rbot/core/config.rb:118
+#: lib/rbot/core/config.rb:132
 msgid "failed to add %{value} to %{key}: %{error}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:141
+#: lib/rbot/core/config.rb:155
 msgid "failed to remove %{value} from %{key}: %{error}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:155
+#: lib/rbot/core/config.rb:169
 msgid "saving ..."
 msgstr ""
 
-#: lib/rbot/core/config.rb:157
+#: lib/rbot/core/config.rb:171
 msgid "rescanning ..."
 msgstr ""
 
-#: lib/rbot/core/config.rb:159
+#: lib/rbot/core/config.rb:173
 msgid "done. %{plugin_status}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:202
+#: lib/rbot/core/config.rb:216
 msgid ""
 "config list => list configuration modules, config list <module> => list "
 "configuration keys for module <module>"
 msgstr ""
 
-#: lib/rbot/core/config.rb:204
+#: lib/rbot/core/config.rb:218
 msgid "config get <key> => get configuration value for key <key>"
 msgstr ""
 
-#: lib/rbot/core/config.rb:206
+#: lib/rbot/core/config.rb:220
 msgid "reset key <key> to the default"
 msgstr ""
 
-#: lib/rbot/core/config.rb:208
+#: lib/rbot/core/config.rb:222
 msgid ""
 "config set <key> <value> => set configuration value for key <key> to <value>"
 msgstr ""
 
-#: lib/rbot/core/config.rb:210
+#: lib/rbot/core/config.rb:224
 msgid "config desc <key> => describe what key <key> configures"
 msgstr ""
 
-#: lib/rbot/core/config.rb:212
+#: lib/rbot/core/config.rb:226
 msgid ""
 "config add <value> to <key> => add value <value> to key <key> if <key> is an "
 "array"
 msgstr ""
 
-#: lib/rbot/core/config.rb:214
+#: lib/rbot/core/config.rb:228
 msgid ""
 "config rm <value> from <key> => remove value <value> from key <key> if <key> "
 "is an array"
 msgstr ""
 
-#: lib/rbot/core/config.rb:216
+#: lib/rbot/core/config.rb:230
 msgid ""
 "config module - bot configuration. usage: list, desc, get, set, unset, add, "
 "rm"
 msgstr ""
 
-#: lib/rbot/core/config.rb:221
+#: lib/rbot/core/config.rb:235
 msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
 msgstr ""
 
-#: lib/rbot/core/config.rb:223
+#: lib/rbot/core/config.rb:237
 msgid "status => display some information on the bot's status"
 msgstr ""
 
-#: lib/rbot/core/config.rb:225
+#: lib/rbot/core/config.rb:239
 msgid "save => save current dynamic data and configuration"
 msgstr ""
 
-#: lib/rbot/core/config.rb:227
+#: lib/rbot/core/config.rb:241
 msgid "rescan => reload modules and static facts"
 msgstr ""
 
-#: lib/rbot/core/config.rb:229
+#: lib/rbot/core/config.rb:243
 msgid "version => describes software version"
 msgstr ""
 
-#: lib/rbot/core/config.rb:231
+#: lib/rbot/core/config.rb:245
 msgid "config-related tasks: config, save, rescan, version, nick, status"
+msgstr ""
+
+#: lib/rbot/core/userdata.rb:148
+#, fuzzy
+msgid "%{key} data for %{user}: %{data}"
+msgstr "「{word}」は %{user} さんに%{date}に教えてもらいました"
+
+#: lib/rbot/core/userdata.rb:154
+msgid "sorry, no %{key} data for %{user}"
 msgstr ""
 
 #: lib/rbot/core/utils/utils.rb:205
@@ -725,66 +786,57 @@ msgstr ""
 msgid " and "
 msgstr ""
 
-#: lib/rbot/core/userdata.rb:133
-#, fuzzy
-msgid "%{key} data for %{user}: %{data}"
-msgstr "「{word}」は %{user} さんに%{date}に教えてもらいました"
-
-#: lib/rbot/core/userdata.rb:139
-msgid "sorry, no %{key} data for %{user}"
-msgstr ""
-
-#: lib/rbot/ircbot.rb:1148
+#: lib/rbot/ircbot.rb:1180
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1150
+#: lib/rbot/ircbot.rb:1182
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1153
+#: lib/rbot/ircbot.rb:1185
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1164
+#: lib/rbot/ircbot.rb:1196
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 
-#: lib/rbot/plugins.rb:306
+#: lib/rbot/plugins.rb:305
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr ""
 
-#: lib/rbot/plugins.rb:578
+#: lib/rbot/plugins.rb:606
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "コアモジュール%{count}個をロードしました"
 
-#: lib/rbot/plugins.rb:581
+#: lib/rbot/plugins.rb:609
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "コアモジュール%{count}個：%{list}"
 
-#: lib/rbot/plugins.rb:587
+#: lib/rbot/plugins.rb:615
 msgid "no core botmodules loaded"
 msgstr "コアモジュールロードしていません"
 
-#: lib/rbot/plugins.rb:592
+#: lib/rbot/plugins.rb:620
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "プラグインを%{count}個ロードしました"
 
-#: lib/rbot/plugins.rb:595
+#: lib/rbot/plugins.rb:623
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "プラグイン%{count}個：%{list}"
 
-#: lib/rbot/plugins.rb:606
+#: lib/rbot/plugins.rb:634
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:611
+#: lib/rbot/plugins.rb:639
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -793,12 +845,12 @@ msgid_plural ""
 "{bold} to see why"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:621
+#: lib/rbot/plugins.rb:649
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:626
+#: lib/rbot/plugins.rb:654
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -807,25 +859,25 @@ msgid_plural ""
 "{command}%{bold} to see why"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:656
+#: lib/rbot/plugins.rb:684
 msgid "no plugins failed to load"
 msgstr ""
 
-#: lib/rbot/plugins.rb:658
+#: lib/rbot/plugins.rb:686
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:662
+#: lib/rbot/plugins.rb:690
 msgid "at %{backtrace}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:668
+#: lib/rbot/plugins.rb:696
 msgid "no plugins were ignored"
 msgstr ""
 
-#: lib/rbot/plugins.rb:672
+#: lib/rbot/plugins.rb:700
 msgid "overruled by previous"
 msgstr ""
 
@@ -874,30 +926,36 @@ msgid ""
 "versa"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:131
+#: data/rbot/plugins/alias.rb:119
+msgid "Error mapping %{text} as command: %{error}"
+msgstr ""
+
+#: data/rbot/plugins/alias.rb:137
 msgid ""
 "The alias seems to have caused infinite recursion. Please examine your alias "
 "definitions"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:147
-msgid "Error handling the alias, the command is not defined"
+#: data/rbot/plugins/alias.rb:153
+msgid ""
+"Error handling the alias, The alias %{text} is not defined or has beeen "
+"removed. I will stop responding to it after rescan,"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:157
+#: data/rbot/plugins/alias.rb:165
 msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:159
+#: data/rbot/plugins/alias.rb:174
 msgid ""
 "\"alias <text> => <command>\" => add text as an alias of command. Text can "
 "contain placeholders marked with : or * for :words and *multiword arguments. "
 "The command can contain placeholders enclosed with < > which will be "
 "substituded with argument values. For example: alias googlerbot *terms => "
-"google site:linuxbrit.co.uk/rbot/ <terms>"
+"google site:ruby-rbot.org <terms>"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:161
+#: data/rbot/plugins/alias.rb:176
 msgid ""
 "alias list => list defined aliases | alias whatis <alias> => show definition "
 "of the alias | alias remove <alias> => remove defined alias | see the "
@@ -999,21 +1057,114 @@ msgid ""
 "information"
 msgstr ""
 
+#: data/rbot/plugins/factoids.rb:32
+msgid "from %{who}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:35
+msgid "on %{when}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:38
+msgid "in %{where}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:41
+msgid " [%{data}]"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:142
+msgid "%{name} (%{fname}) must be under %{dir}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:149
+msgid "%{name} is not a file"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:163
+msgid "fact must be the last field"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:170
+msgid "%{name} (%{fname}) doesn't exist"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:263
+msgid ""
+"factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
+"<words>"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:402
+#: data/rbot/plugins/factoids.rb:434
+msgid "please select a fact number between 1 and %{total}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:296
+msgid "I forgot that %{factoid}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:299
+msgid "I couldn't delete factoid %{idx}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:307
+#, fuzzy
+msgid "I didn't know that %{factoid}"
+msgstr "%{lang} の言葉「%{word}」知っていません。"
+
+#: data/rbot/plugins/factoids.rb:314
+msgid "[%{idx}/%{total}] %{fact}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:340
+msgid "I know %{total} facts"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:350 data/rbot/plugins/factoids.rb:418
+#, fuzzy
+msgid "I know nothing about %{words}"
+msgstr "%{lang} の言葉「%{word}」はもう知っています。"
+
+#: data/rbot/plugins/factoids.rb:355
+msgid "%{len} out of %{total} facts refer to %{words}, I'll only show %{max}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:410
+msgid "I know nothing"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:450
+msgid "not a date '%{dstr}'"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:458
+msgid "couldn't change learn data for fact %{fact}: %{err}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:473
+msgid "failed to import facts from %{fname}: %{err}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:478
+msgid "%{len} facts loaded from %{fname}"
+msgstr ""
+
 #: data/rbot/plugins/figlet.rb:7
 msgid "Path to the figlet program"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:69 data/rbot/plugins/games/azgame.rb:236
-#: data/rbot/plugins/games/azgame.rb:242
+#: data/rbot/plugins/games/azgame.rb:78 data/rbot/plugins/games/azgame.rb:252
+#: data/rbot/plugins/games/azgame.rb:258
 msgid "%{count} try"
 msgid_plural "%{count} tries"
 msgstr[0] "%{count}つのトライ"
 
-#: data/rbot/plugins/games/azgame.rb:74
+#: data/rbot/plugins/games/azgame.rb:83
 msgid "winner, %{tries}"
 msgstr "（勝者）%{tries}"
 
-#: data/rbot/plugins/games/azgame.rb:153
+#: data/rbot/plugins/games/azgame.rb:164
 msgid ""
 "%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, "
 "%{bold}%{player}%{bold}!"
@@ -1021,50 +1172,50 @@ msgstr ""
 "%{bold}ビンゴー!%{bold} 秘密の言葉は %{underline}%{word}%{underline} でした。"
 "おめでとうございます、%{bold}%{player}%{bold} さん！"
 
-#: data/rbot/plugins/games/azgame.rb:160
+#: data/rbot/plugins/games/azgame.rb:171
 msgid ""
 "The game was won after %{tries} tries. Scores for this game:    %{scores}"
 msgstr ""
 "このゲームが%{tries}つのトライの後勝ちました。スコアは：    %{scores} でし"
 "た。"
 
-#: data/rbot/plugins/games/azgame.rb:163
+#: data/rbot/plugins/games/azgame.rb:174
 msgid "%{word} is not in the range %{bold}%{range}%{bold}"
 msgstr "%{word}は%{bold}%{range}%{bold}のレンジ外です。"
 
-#: data/rbot/plugins/games/azgame.rb:165
+#: data/rbot/plugins/games/azgame.rb:178
 msgid "%{word} doesn't exist or is not acceptable for the game"
 msgstr ""
 "「%{word}」って言葉は存在しませんか、このゲームに入れることができません。"
 
-#: data/rbot/plugins/games/azgame.rb:169
+#: data/rbot/plugins/games/azgame.rb:184
 msgid "close, but no cigar. New range: %{bold}%{range}%{bold}"
 msgstr ""
 "レーンジを小さくしました。もっと頑張ってくださいね！新しいレーンジは：%"
 "{bold}%{range}%{bold}"
 
-#: data/rbot/plugins/games/azgame.rb:173
+#: data/rbot/plugins/games/azgame.rb:188
 msgid "%{word} is already one of the range extrema: %{range}"
 msgstr "%{word}はいまのレーンジの外れの一つです：%{range}"
 
-#: data/rbot/plugins/games/azgame.rb:175
+#: data/rbot/plugins/games/azgame.rb:190
 msgid "hm, something went wrong while verifying %{word}"
 msgstr "%{word}をチェックしたとき何かエラーが発生しました。"
 
-#: data/rbot/plugins/games/azgame.rb:183
+#: data/rbot/plugins/games/azgame.rb:199
 msgid "no A-Z game running here, can't check if %{word} is valid, can I?"
 msgstr "今A-Zのゲームをしていませんから、「%{word}」のチェックができません。"
 
-#: data/rbot/plugins/games/azgame.rb:187
+#: data/rbot/plugins/games/azgame.rb:203
 msgid "I only accept single words composed by letters only, sorry"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:197
+#: data/rbot/plugins/games/azgame.rb:213
 msgid "the word in %{bold}%{range}%{bold} was:   %{bold}%{word}%{bold}"
 msgstr ""
 "%{bold}%{range}%{bold}の以内の秘密の言葉は「%{bold}%{word}%{bold}」でした。"
 
-#: data/rbot/plugins/games/azgame.rb:201
+#: data/rbot/plugins/games/azgame.rb:217
 msgid ""
 "The game was cancelled after %{tries} tries. Scores for this game would have "
 "been:    %{scores}"
@@ -1072,125 +1223,126 @@ msgstr ""
 "このゲームは%{tries}回のトライの後キャンセルされました。いままでのスコアは %"
 "{scores} でした。"
 
-#: data/rbot/plugins/games/azgame.rb:204
+#: data/rbot/plugins/games/azgame.rb:220
 msgid "no A-Z game running in this channel ..."
 msgstr "このチャンネルにはA-Zのゲームを遊んでいません。"
 
-#: data/rbot/plugins/games/azgame.rb:214
+#: data/rbot/plugins/games/azgame.rb:230
 msgid "let me think ..."
 msgstr "秘密の言葉を考えています・・・"
 
-#: data/rbot/plugins/games/azgame.rb:218
+#: data/rbot/plugins/games/azgame.rb:234
 msgid "couldn't think of anything ..."
 msgstr "考えられませんでした・・・"
 
-#: data/rbot/plugins/games/azgame.rb:222
+#: data/rbot/plugins/games/azgame.rb:238
 msgid "I can't play A-Z in %{lang}, sorry"
 msgstr "申し訳ありませんが、%{lang}の言語でA-Zのゲームができません"
 
-#: data/rbot/plugins/games/azgame.rb:225
+#: data/rbot/plugins/games/azgame.rb:241
 msgid "got it!"
 msgstr "わかりました！"
 
-#: data/rbot/plugins/games/azgame.rb:235
+#: data/rbot/plugins/games/azgame.rb:251
 #, fuzzy
 msgid " (after %{total_tries} and %{invalid_tries})"
 msgstr " (%{total_tries}と%{invalid_tries}の後"
 
-#: data/rbot/plugins/games/azgame.rb:238
+#: data/rbot/plugins/games/azgame.rb:254
 msgid "%{count} invalid try"
 msgid_plural "%{count} invalid tries"
 msgstr[0] "%{count}つの間違えたトライ"
 
-#: data/rbot/plugins/games/azgame.rb:241
-msgid " (after %{total_tries}"
+#: data/rbot/plugins/games/azgame.rb:257
+#, fuzzy
+msgid " (after %{total_tries})"
 msgstr " (%{total_tries}の後"
 
-#: data/rbot/plugins/games/azgame.rb:247
+#: data/rbot/plugins/games/azgame.rb:263
 msgid "A-Z: %{bold}%{range}%{bold}"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:258
+#: data/rbot/plugins/games/azgame.rb:274
 msgid "I have %{count} %{lang} word in my cache"
 msgid_plural "I have %{count} %{lang} words in my cache"
 msgstr[0] "キャッシュには、%{lang}の言葉は%{count}本あります。"
 
-#: data/rbot/plugins/games/azgame.rb:261
+#: data/rbot/plugins/games/azgame.rb:277
 msgid "provide a regexp to match"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:273
+#: data/rbot/plugins/games/azgame.rb:289
 msgid "no %{lang} word I know match %{pattern}"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:275
+#: data/rbot/plugins/games/azgame.rb:291
 msgid ""
 "more than 25 %{lang} words I know match %{pattern}, try a stricter matching"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:281 data/rbot/plugins/games/azgame.rb:297
-#: data/rbot/plugins/games/azgame.rb:309
+#: data/rbot/plugins/games/azgame.rb:297 data/rbot/plugins/games/azgame.rb:313
+#: data/rbot/plugins/games/azgame.rb:325
 msgid "provide a word"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:286 data/rbot/plugins/games/azgame.rb:302
+#: data/rbot/plugins/games/azgame.rb:302 data/rbot/plugins/games/azgame.rb:318
 msgid "I don't know any %{lang} word %{word}"
 msgstr "%{lang} の言葉「%{word}」知っていません。"
 
-#: data/rbot/plugins/games/azgame.rb:290
+#: data/rbot/plugins/games/azgame.rb:306
 msgid "%{word} learned from %{user} on %{date}"
 msgstr "「{word}」は %{user} さんに%{date}に教えてもらいました"
 
-#: data/rbot/plugins/games/azgame.rb:292
+#: data/rbot/plugins/games/azgame.rb:308
 msgid "%{word} learned from %{user}"
 msgstr "「{word}」は %{user} さんに教えてもらいました"
 
-#: data/rbot/plugins/games/azgame.rb:314
+#: data/rbot/plugins/games/azgame.rb:330
 msgid "I already know the %{lang} word %{word}"
 msgstr "%{lang} の言葉「%{word}」はもう知っています。"
 
-#: data/rbot/plugins/games/azgame.rb:530
+#: data/rbot/plugins/games/azgame.rb:546
 msgid ""
 "az [lang] word [count|list|add|delete] => manage the az wordlist for "
 "language lang (defaults to current bot language)"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:532
+#: data/rbot/plugins/games/azgame.rb:548
 msgid "az cancel => abort current game"
 msgstr "az cancel => いま遊んでいるゲームを終了します"
 
-#: data/rbot/plugins/games/azgame.rb:534
+#: data/rbot/plugins/games/azgame.rb:550
 msgid "az check <word> => checks <word> against current game"
 msgstr ""
 "az check <word> => いま遊んでいるゲームのルールで、<word> をチェックします"
 
-#: data/rbot/plugins/games/azgame.rb:536
+#: data/rbot/plugins/games/azgame.rb:552
 msgid ""
 "try to guess the word the bot is thinking of; if you guess wrong, the bot "
 "will use the new word to restrict the range of allowed words: eventually, "
 "the range will be so small around the correct word that you can't miss it"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:538
+#: data/rbot/plugins/games/azgame.rb:554
 msgid ""
 "az => start a game if none is running, show the current word range "
 "otherwise; you can say 'az <language>' if you want to play in a language "
 "different from the current bot default"
 msgstr ""
 
-#: data/rbot/plugins/games/azgame.rb:540
+#: data/rbot/plugins/games/azgame.rb:556
 msgid "az topics: play, rules, cancel, manage, check"
 msgstr ""
 
-#: data/rbot/plugins/games/shiritori.rb:203
+#: data/rbot/plugins/games/shiritori.rb:207
 msgid "%{current_player}, it's your turn. %{previous_word} -> %{current_word}"
 msgstr "%{current_player} さんの番です。%{previous_word} -> %{current_word}"
 
-#: data/rbot/plugins/games/shiritori.rb:207
+#: data/rbot/plugins/games/shiritori.rb:211
 msgid "No one has given the first word yet. Say the first word to start."
 msgstr "しりとりの始めの言葉を教えてください。"
 
-#: data/rbot/plugins/games/shiritori.rb:209
+#: data/rbot/plugins/games/shiritori.rb:213
 msgid ""
 "Poor %{current_player} is playing alone! Anyone care to join? %"
 "{previous_word} -> %{current_word}"
@@ -1198,34 +1350,34 @@ msgstr ""
 "%{current_player} さんは一人で寂しいでしょう。他の人もしりとりしませんか？%"
 "{previous_word} -> %{current_word}"
 
-#: data/rbot/plugins/games/shiritori.rb:240
+#: data/rbot/plugins/games/shiritori.rb:244
 msgid "%{player} took too long and is out of the game. Try again next game!"
 msgstr ""
 "残念ですが %{player} さんはタイムアウトで負けです。今度のゲームがんばってね！"
 
-#: data/rbot/plugins/games/shiritori.rb:245
+#: data/rbot/plugins/games/shiritori.rb:249
 msgid "%{player} is the last remaining player and the winner! Congratulations!"
 msgstr "%{player} さんは勝者です！おめでとうございます！"
 
-#: data/rbot/plugins/games/shiritori.rb:253
+#: data/rbot/plugins/games/shiritori.rb:257
 msgid "%{player} took too long and skipped the turn."
 msgstr "%{player} さんはタイムアウトで、番を飛びました。"
 
-#: data/rbot/plugins/games/shiritori.rb:281
+#: data/rbot/plugins/games/shiritori.rb:285
 msgid "%{player} has given the first word: %{word}"
 msgstr "%{player} さんは始めの言葉を決めました：%{word}"
 
-#: data/rbot/plugins/games/shiritori.rb:287
+#: data/rbot/plugins/games/shiritori.rb:291
 msgid "Welcome to shiritori, %{player}."
 msgstr "しりとりへようこそ、%{player} さん"
 
-#: data/rbot/plugins/games/shiritori.rb:292
+#: data/rbot/plugins/games/shiritori.rb:296
 msgid "The word %{used_word} has been used. Retry from %{word}"
 msgstr ""
 "「%{used_word}」はもう使った言葉なのでダメです。もう一度「%{word}」から続けて"
 "ください。"
 
-#: data/rbot/plugins/games/shiritori.rb:297
+#: data/rbot/plugins/games/shiritori.rb:301
 msgid ""
 "It's impossible to continue the chain from %{word}. The game has ended. "
 "Thanks a lot, %{player}! :("
@@ -1233,20 +1385,20 @@ msgstr ""
 "%{player} さんが使った言葉「%{word}」からしりとりが続けられないので、ゲームが"
 "終わってしまいました。"
 
-#: data/rbot/plugins/games/shiritori.rb:301
+#: data/rbot/plugins/games/shiritori.rb:305
 msgid ""
 "It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
 msgstr ""
 "「%{bad_word}」からしりとりが続けられないのでダメです。もう一度「%{word}」か"
 "ら続けてください。"
 
-#: data/rbot/plugins/games/shiritori.rb:306
+#: data/rbot/plugins/games/shiritori.rb:310
 msgid ""
 "It's impossible to continue the chain from %{word}. Start with another word."
 msgstr ""
 "「%{word}」ではしりごりを始められないのです。他の言葉で始めてください。"
 
-#: data/rbot/plugins/games/shiritori.rb:327
+#: data/rbot/plugins/games/shiritori.rb:331
 msgid ""
 "A game in which each player must continue the previous player's word, by "
 "using its last one or few characters/letters of the word to start a new "
@@ -1257,81 +1409,301 @@ msgstr ""
 "ます。使えるルールセットは%{rulesets}です。shiritori stop => 今のゲームを止め"
 "ます。"
 
-#: data/rbot/plugins/games/shiritori.rb:398
+#: data/rbot/plugins/games/shiritori.rb:408
 msgid "Already playing shiritori here"
 msgstr "もうすでにしりとりを遊んでいます"
 
-#: data/rbot/plugins/games/shiritori.rb:409
+#: data/rbot/plugins/games/shiritori.rb:419
 msgid "Shiritori has started. Please say the first word"
 msgstr "しりとりが始まりました。始めの言葉を言ってください"
 
-#: data/rbot/plugins/games/shiritori.rb:411
+#: data/rbot/plugins/games/shiritori.rb:421
 msgid "couldn't start %{ruleset} shiritori: %{error}"
 msgstr "%{ruleset}のしりとりを始められませんでした。理由は： %{error}"
 
-#: data/rbot/plugins/games/shiritori.rb:415
+#: data/rbot/plugins/games/shiritori.rb:425
 msgid "There is no ruleset named %{ruleset}"
 msgstr "「%{ruleset}」というルールセットは知りません。"
 
-#: data/rbot/plugins/games/shiritori.rb:433
+#: data/rbot/plugins/games/shiritori.rb:443
 msgid "Shiritori has stopped. Hope you had fun!"
 msgstr "しりとりのゲームが中止になりました。"
 
-#: data/rbot/plugins/games/shiritori.rb:436
+#: data/rbot/plugins/games/shiritori.rb:446
 msgid "No game to stop here, because no game is being played."
 msgstr "しりとりのゲームをしていません。"
 
-#: data/rbot/plugins/translator.rb:47
+#: data/rbot/plugins/games/wheelfortune.rb:48
+msgid " [Letters called so far: %{red}%{letters}%{nocolor}]"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:230
+msgid ""
+"wof [<channel>] play [<name>] for <single> to <max> => starts a wheel-of-"
+"fortune game on channel <channel> (default: current channel), named <name> "
+"(default: wheelfortune.game_name config setting, or the last game name used "
+"by the user), with <single> points per round. the game is won when a player "
+"reachers <max> points. vowerls cost <single>*<single>/<max> points. The user "
+"that starts the game is the game manager and must set up the clues and "
+"answers in private. All the other users have to learn the answer to each "
+"clue by saying single consonants or the whole sentence. Every time a "
+"consonant is guessed, the bot will reveal the partial answer, showing the "
+"missing letters as * (asterisks)."
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:232
+msgid ""
+"wof <channel> [category: <cat>,] clue: <clue>, answer: <ans> => set up a new "
+"question for the wheel-of-fortune game being played on channel <channel>. "
+"This command must be sent in private by the game manager. The category <cat> "
+"can be omitted. If you make mistakes, you can use 'wof replace' (see help) "
+"before the question gets asked"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:234
+msgid ""
+"wof <channel> replace <round> [category: <cat>,] [clue: <clue>,] [answer: "
+"<ans>] => fix the question for round <round> of the wheel-of-fortune game "
+"being played on <channel> by replacing the category and/or clue and/or answer"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:236
+msgid ""
+"wof cancel => cancels the wheel-of-fortune being played on the current "
+"channel"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:238
+msgid ""
+"wof buy <vowel> => buy the vowel <vowel>: the user buying the vowel will "
+"lose points equal to the vowel price, and the corresponding vowel will be "
+"revealed in the answer (if present)"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:240
+msgid ""
+"wof: wheel-of-fortune plugin. topics: play, category, clue, answer, replace, "
+"cancel, buy"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:247
+msgid "you must specify a channel"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:253
+msgid "there's already a %{name} game on %{chan}, managed by %{who}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:267
+msgid ""
+"%{who} just created a new %{name} game to %{max} points (%{single} per "
+"question, %{price} per vowel)"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:274
+msgid ""
+"ok, the game has been created. now add clues and answers with \"wof %{chan} "
+"[category: <category>,] clue: <clue>, answer: <ans>\". if the clue and "
+"answer don't fit in one line, add the answer separately with \"wof %{chan} "
+"answer <answer>\""
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:282
+#: data/rbot/plugins/games/wheelfortune.rb:343
+#: data/rbot/plugins/games/wheelfortune.rb:412
+#: data/rbot/plugins/games/wheelfortune.rb:522
+#: data/rbot/plugins/games/wheelfortune.rb:559
+msgid "there's no %{name} game running on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:291
+msgid "you can't add questions to the %{name} game on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:301
+#: data/rbot/plugins/games/wheelfortune.rb:383
+msgid "sorry, the answer cannot contain the '*' character"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:308
+msgid "ok, clue added for %{name} round %{count} on %{chan}: %{catclue}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:310
+msgid ""
+"there's already a pending clue for %{name} round %{count} on %{chan}: %"
+"{catclue}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:323
+msgid ""
+"ok, QA added for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:325
+msgid "there's no pending clue for %{name} on %{chan}!"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:336
+msgid ""
+"something went wrong, I can't seem to understand what you're trying to set up"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:352
+msgid "you can't replace questions to the %{name} game on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:365
+msgid ""
+"there are no questions in the %{name} game on %{chan} which can be replaced"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:370
+msgid ""
+"you can only replace questions between rounds %{min} and %{max} in the %"
+"{name} game on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:398
+msgid ""
+"ok, replaced QA for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:421
+#: data/rbot/plugins/games/wheelfortune.rb:528
+msgid ""
+"there are no %{name} questions for %{chan}, I'm waiting for %{who} to add "
+"them"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:429
+msgid "%{bold}%{color}%{name}%{bold}, round %{count}:%{nocolor} %{qa}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:444
+msgid "no scores"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:465
+msgid "You must buy the %{vowel}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:476
+msgid "%{who} got it! The answer was: %{ans}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:482
+msgid ""
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %"
+"{count} rounds!\n"
+"The final score is"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:493
+msgid ""
+"%{bold}%{color}%{name}%{bold}, round %{count}%{nocolor} -- score so far:"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:538
+msgid "%{who} buys a %{vowel} for %{price} points"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:546
+msgid ""
+"you can't buy a %{vowel}, %{who}: it costs %{price} points and you only have "
+"%{score}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:569
+#, fuzzy
+msgid "you can't cancel the current game"
+msgstr "az cancel => いま遊んでいるゲームを終了します"
+
+#: data/rbot/plugins/games/wheelfortune.rb:576
+msgid "%{name} game cancelled after %{count} rounds. Partial score:"
+msgstr ""
+
+#: data/rbot/plugins/keywords.rb:452
+msgid "couldn't find keyword %{key}"
+msgstr ""
+
+#: data/rbot/plugins/keywords.rb:501
+msgid "failed to export keywords as factoids (%{err})"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:134
+msgid "markov has a %{prob}% chance of chipping in"
+msgstr ""
+
+#: data/rbot/plugins/rss.rb:696
+msgid "no such feed %{handle}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:52
 msgid "Cannot translate empty string"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:257
+#: data/rbot/plugins/translator.rb:262
 msgid "Number of seconds to wait for the translation service before timeout"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:277
+#: data/rbot/plugins/translator.rb:282
 msgid "Translator %{name} cannot be used: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:285
+#: data/rbot/plugins/translator.rb:290
 msgid "List of translators to try in order when translator name not specified"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:293
-msgid "%{info}, supported directions of translation: %{directions}"
+#: data/rbot/plugins/translator.rb:298
+msgid ""
+"%{translator} <from> <to> <phrase> => Look up phrase using %{info}, "
+"supported from -> to languages: %{directions}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:296
+#: data/rbot/plugins/translator.rb:302
 msgid "%{source} -> %{targets}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:301
+#: data/rbot/plugins/translator.rb:307
 msgid ""
 "Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
 "{translators}. If \"translator\" is used in place of the translator name, "
 "the first translator in translator.default_list which supports the specified "
-"direction will be picked automatically. Use \"help translator <translator>\" "
-"to look up supported from and to languages"
+"direction will be picked automatically. Use \"help <translator>\" to look up "
+"supported from and to languages"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:316
+#: data/rbot/plugins/translator.rb:322
 msgid ""
 "None of the default translators (translator.default_list) supports "
 "translating from %{source} to %{target}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:332
+#: data/rbot/plugins/translator.rb:337
+msgid "%{translation} (provided by %{translator})"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:344
 msgid "%{translator} doesn't support translating from %{source} to %{target}"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:335
+#: data/rbot/plugins/translator.rb:347
 msgid "%{translator} failed to provide a translation"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:338
+#: data/rbot/plugins/translator.rb:350
 msgid "The translator timed out"
 msgstr ""
 
-#: data/rbot/plugins/translator.rb:341
+#: data/rbot/plugins/translator.rb:353
 msgid "No translator called %{name}"
+msgstr ""
+
+#: data/rbot/plugins/twitter.rb:172
+msgid "actions will be twitted"
+msgstr ""
+
+#: data/rbot/plugins/twitter.rb:174
+msgid "actions will not be twitted"
 msgstr ""
