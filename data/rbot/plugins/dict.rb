@@ -168,7 +168,7 @@ class DictPlugin < Plugin
 end
 
 plugin = DictPlugin.new
-plugin.map 'demauro :word', :action => 'demauro'
-plugin.map 'oxford *word', :action => 'oxford'
-plugin.map 'chambers *word', :action => 'chambers'
+plugin.map 'demauro :word', :action => 'demauro', :thread => true
+plugin.map 'oxford *word', :action => 'oxford', :thread => true
+plugin.map 'chambers *word', :action => 'chambers', :thread => true
 
