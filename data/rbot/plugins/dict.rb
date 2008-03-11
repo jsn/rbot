@@ -12,9 +12,11 @@
 #   * the Oxford dictionary for (British) English
 #   * the De Mauro/Paravia dictionary for Italian
 #   * the Chambers dictionary for English (accepts both US and UK)
+#   * the Littré dictionary for French
 #
 # Other plugins can use this one to check if a given word is valid in italian
-# or english by using the is_italian?/is_british?/is_english? methods
+# or english or french by using the is_italian?, is_british?, is_english?,
+# is_french? methods
 #
 # TODO: cache results and reuse them if get_cached returns a cache copy
 
@@ -36,6 +38,7 @@ class DictPlugin < Plugin
     @dmwaplemma = "http://wap.demauroparavia.it/lemma.php?ID=%s"
     @oxurl = "http://www.askoxford.com/concise_oed/%s"
     @chambersurl = "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
+    @littreurl = "http://francois.gannaz.free.fr/Littre/xmlittre.php?requete=%s"
   end
 
 
@@ -47,8 +50,10 @@ class DictPlugin < Plugin
       return "oxford <word> => provides a link to the definition of <word> (it can also be an expression) from the Concise Oxford dictionary"
     when "chambers"
       return "chambers <word> => provides a link to the definition of <word> (it can also be an expression) from the Chambers 21st Century Dictionary"
+    when "littre"
+      return "littre <word> => provides a link to the definition of <word> (it can also be an expression) from the Littré online dictionary"
     end
-    return "<dictionary> <word>: check for <word> on <dictionary> where <dictionary> can be one of: demauro, oxford, chambers"
+    return "<dictionary> <word>: check for <word> on <dictionary> where <dictionary> can be one of: demauro, oxford, chambers, littre"
   end
 
   def demauro(m, params)
@@ -165,10 +170,51 @@ class DictPlugin < Plugin
     return chambers(nil, :word => word, :justcheck => true)
   end
 
+  def littre(m, params)
+    justcheck = params[:justcheck]
+
+    word = params[:word].to_s.downcase
+    url = @littreurl % CGI.escape(word)
+    xml = nil
+    info = @bot.httputil.get_response(url) rescue nil
+    xml = info.body if info
+    head ||= xml.match(/<div class="entree">(.*?)<\/div>/)[1] rescue nil
+    case xml
+    when nil
+      info = info ? " (#{info.code} - #{info.message})" : ""
+      return false if justcheck
+      m.reply "An error occurred while looking for #{word}#{info}"
+      return
+    when /Erreur : le mot <STRONG>.*?<\/STRONG> n'a pas./
+      return false if justcheck
+      if head
+        m.reply "Nothing found for #{word}, I'll assume you meant #{head}"
+      else
+        m.reply "Nothing found for #{word}"
+        return
+      end
+    end
+    return true if justcheck
+    entete = xml.match(/<div class="entete">(.*?)<\/div>/m)[1] rescue nil
+    m.reply "#{head}: #{url} : #{entete.ircify_html rescue nil}"
+    entries = xml.scan(/<span class="variante">(.*?)<\!--variante-->/m)
+    hits = @bot.config['dict.hits']
+    n = 0
+    entries[0...hits].map { |ar|
+      n += 1
+      m.reply(("#{Bold}#{n}#{Bold} %s" % ar).ircify_html, :overlong => :truncate)
+    }
+  end
+
+  def is_french?(word)
+    return littre(nil, :word => word, :justcheck => true)
+  end
+
 end
 
 plugin = DictPlugin.new
 plugin.map 'demauro :word', :action => 'demauro', :thread => true
 plugin.map 'oxford *word', :action => 'oxford', :thread => true
 plugin.map 'chambers *word', :action => 'chambers', :thread => true
+plugin.map 'littre *word', :action => 'littre', :thread => true
 
