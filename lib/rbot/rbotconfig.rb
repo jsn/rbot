@@ -28,7 +28,7 @@ class Bot
         debug "trying to load rubygems"
         require 'rubygems'
         debug "loaded rubygems, looking for rbot-#$version"
-        if $version =~ /(.*)-svn\Z/
+        if $version =~ /(.*)-(svn|git)\Z/
           version = $1
         else
           version = $version

@@ -553,7 +553,7 @@ module FileOperations
   end
 
   REJECT_DIRS = %w(
-    CVS SCCS RCS CVS.adm .svn
+    CVS SCCS RCS CVS.adm .svn .git
   )
 
   def all_dirs_in(dirname)

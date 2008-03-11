@@ -3,18 +3,18 @@
 # Load rbot from this directory. (No need to install it with setup.rb)
 #
 
-SVN_DIR = File.expand_path(File.dirname('__FILE__'))
-puts "Running from #{SVN_DIR}"
+SCM_DIR = File.expand_path(File.dirname('__FILE__'))
+puts "Running from #{SCM_DIR}"
 
-$:.unshift File.join(SVN_DIR, 'lib')
+$:.unshift File.join(SCM_DIR, 'lib')
 
 module Irc
 class Bot
   module Config
-    @@datadir = File.join SVN_DIR, 'data/rbot'
-    @@coredir = File.join SVN_DIR, 'lib/rbot/core'
+    @@datadir = File.join SCM_DIR, 'data/rbot'
+    @@coredir = File.join SCM_DIR, 'lib/rbot/core'
   end
 end
 end
 
-load File.join(SVN_DIR, 'bin/rbot')
+load File.join(SCM_DIR, 'bin/rbot')

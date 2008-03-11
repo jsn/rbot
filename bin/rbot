@@ -74,13 +74,11 @@ require 'etc'
 require 'getoptlong'
 require 'fileutils'
 
-$version="0.9.11-svn"
+$version="0.9.11-git"
 $opts = Hash.new
 
-if $version =~ /svn/
-  if defined?(SVN_DIR) and File.exists?(File.join(SVN_DIR, '.git'))
-    $version.sub!('svn', 'git')
-
+if $version =~ /git/
+  if defined?(SCM_DIR) and File.exists?(File.join(SCM_DIR, '.git'))
     git_out = `git status`
 
     git_out.match(/^# On branch (.*)\n/)
