@@ -938,7 +938,8 @@ class RSSFeedsPlugin < Plugin
     when 'gmane'
       line1 = "#{handle}#{date}Message #{title} sent by #{author}. #{desc}"
     when 'trac'
-      line1 = "#{handle}#{date}#{title} @ #{link}"
+      author = author.sub(/@\S+?\s*>/, "@...>") + ": " if author
+      line1 = "#{handle}#{date}#{author}#{title} @ #{link}"
       unless item.title =~ /^(?:Changeset \[(?:[\da-f]+)\]|\(git commit\))/
         line2 = "#{handle}#{date}#{desc}"
       end
