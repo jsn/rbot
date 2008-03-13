@@ -91,16 +91,34 @@ module ::Irc
     end
 
     # This method is used to register a new filter
-    def register_filter(name, &block)
+    def register_filter(name, group=nil, &block)
       raise "No block provided" unless block_given?
       @filters ||= {}
-      @filters[name.to_sym] = DataFilter.new &block
+      tlkey = ( group ? "#{group}.#{name}" : name.to_s ).intern
+      key = name.to_sym
+      if @filters.key?(tlkey)
+        debug "Overwriting filter #{tlkey}"
+      end
+      @filters[tlkey] = DataFilter.new &block
+      if group
+        gkey = group.to_sym
+        @filter_group ||= {}
+        @filter_group[gkey] ||= {}
+        if @filter_group[gkey].key?(key)
+          debug "Overwriting filter #{key} in group #{gkey}"
+        end
+        @filter_group[gkey][key] = @filters[tlkey]
+      end
     end
 
     # This method clears the filter list and installs the identity filter
     def clear_filters
       @filters ||= {}
       @filters.clear
+
+      @filter_group ||= {}
+      @filter_group.clear
+
       register_filter(:identity) { |stream| stream }
     end
   end
