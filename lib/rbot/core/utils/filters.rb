@@ -96,13 +96,19 @@ module ::Irc
       (group ? "#{group}.#{name}" : name.to_s).intern
     end
 
+    # This method checks if the bot has a filter named _name_ (in group
+    # _group_)
+    def has_filter?(name, group=nil)
+      @filters.key?(global_filter_name(name, group))
+    end
+
     # This method is used to register a new filter
     def register_filter(name, group=nil, &block)
       raise "No block provided" unless block_given?
       @filters ||= {}
       tlkey = global_filter_name(name, group)
       key = name.to_sym
-      if @filters.key?(tlkey)
+      if has_filter?(tlkey)
         debug "Overwriting filter #{tlkey}"
       end
       @filters[tlkey] = DataFilter.new &block
