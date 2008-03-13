@@ -90,11 +90,17 @@ module ::Irc
       fs.inject(ds) { |mid, f| mid = f.call(mid) }
     end
 
+    # This method returns the global filter name for filter _name_
+    # in group _group_
+    def global_filter_name(name, group=nil)
+      (group ? "#{group}.#{name}" : name.to_s).intern
+    end
+
     # This method is used to register a new filter
     def register_filter(name, group=nil, &block)
       raise "No block provided" unless block_given?
       @filters ||= {}
-      tlkey = ( group ? "#{group}.#{name}" : name.to_s ).intern
+      tlkey = global_filter_name(name, group)
       key = name.to_sym
       if @filters.key?(tlkey)
         debug "Overwriting filter #{tlkey}"
