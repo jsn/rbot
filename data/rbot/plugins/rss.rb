@@ -356,6 +356,13 @@ class RSSFeedsPlugin < Plugin
     }
   end
 
+  # Display the known rss types
+  def rss_types(m, params)
+    ar = @bot.filter_names(@outkey)
+    ar.delete(:default)
+    m.reply ar.map { |k| k.to_s }.sort!.join(", ")
+  end
+
   attr_reader :feeds
 
   def initialize
@@ -477,8 +484,10 @@ class RSSFeedsPlugin < Plugin
       "rss who watches #{Bold}handle#{Bold}: lists watches for rss #{Bold}handle#{Bold}"
     when "rewatch"
       "rss rewatch : restart threads that watch for changes in watched rss"
+    when "types"
+      "rss types : show the rss types for which an output format existi (all other types will use the default one)"
     else
-      "manage RSS feeds: rss show|list|watched|add|change|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch|who watches"
+      "manage RSS feeds: rss types|show|list|watched|add|change|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch|who watches"
     end
   end
 
@@ -1150,3 +1159,5 @@ plugin.map 'rss rmwatch :handle [in :chan]',
   :action => 'unwatch_rss'
 plugin.map 'rss rewatch [:handle]',
   :action => 'rewatch_rss'
+plugin.map 'rss types',
+  :action => 'rss_types'
