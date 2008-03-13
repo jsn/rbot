@@ -80,19 +80,20 @@ class MathPlugin < Plugin
     expr.gsub!(/\bover /, "/ ")
     expr.gsub!(/\bsquared/, "**2 ")
     expr.gsub!(/\bcubed/, "**3 ")
-    expr.gsub!(/\bto\s+(\d+)(r?st|nd|rd|th)?( power)?/, "**\1 ")
+    expr.gsub!(/\bto\s+(\d+)(r?st|nd|rd|th)?( power)?/, '**\1 ')
     expr.gsub!(/\bpercent of/, "*0.01*")
     expr.gsub!(/\bpercent/, "*0.01")
     expr.gsub!(/\% of\b/, "*0.01*")
     expr.gsub!(/\%/, "*0.01")
-    expr.gsub!(/\bsquare root of (\d+)/, "\1 ** 0.5 ")
-    expr.gsub!(/\bcubed? root of (\d+)/, "\1 **(1.0/3.0) ")
+    expr.gsub!(/\bsquare root of (\d+)/, '\1 ** 0.5 ')
+    expr.gsub!(/\bcubed? root of (\d+)/, '\1 **(1.0/3.0) ')
     expr.gsub!(/ of /, " * ")
     expr.gsub!(/(bit(-| )?)?xor(\'?e?d( with))?/, "^")
     expr.gsub!(/(bit(-| )?)?or(\'?e?d( with))?/, "|")
     expr.gsub!(/bit(-| )?and(\'?e?d( with))?/, "& ")
     expr.gsub!(/(plus|and)/, "+")
 
+    debug expr
     if (expr =~ /^\s*[-\d*+\s()\/^\.\|\&\*\!]+\s*$/ &&
        expr !~ /^\s*\(?\d+\.?\d*\)?\s*$/ &&
        expr !~ /^\s*$/ &&
