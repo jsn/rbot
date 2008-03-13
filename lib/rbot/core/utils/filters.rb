@@ -18,8 +18,15 @@ module ::Irc
     # converting to String
     class DataStream < Hash
 
-      def initialize(hsh={})
-        self.replace(hsh)
+      # call-seq: new(text, hash)
+      #
+      # Create a new DataStream with text _text_ and attributes held by _hash_.
+      # Either parameter can be missing; if _text_ is missing, the text can be
+      # be defined in the _hash_ with a :text key.
+      #
+      def initialize(*args)
+        self.replace(args.pop) if Hash === args.last
+        self[:text] = args.first if args.length > 0
       end
 
       # Returns the :text key
