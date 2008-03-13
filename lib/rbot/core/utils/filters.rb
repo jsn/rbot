@@ -51,15 +51,37 @@ module ::Irc
       alias :filter :call
     end
 
-    # This method processes the DataStream _stream_ with the filters _name_.
-    # _name_ can be either a single Symbol (filter name), or an Array of
-    # Symbols, in which case the output of each filter will be used as input
-    # for the next
+    # call-seq:
+    #   filter(filter1, filter2, ..., filterN, stream) -> stream
+    #   filter(filter1, filter2, ..., filterN, text, hash) -> stream
+    #   filter(filter1, filter2, ..., filterN, hash) -> stream
     #
-    def filter(name, stream={})
+    # This method processes the DataStream _stream_ with the filters <i>filter1</i>,
+    # <i>filter2</i>, ..., _filterN_, in sequence (the output of each filter is used
+    # as input for the next one.
+    # _stream_ can be provided either as a DataStream or as a String and a Hash
+    # (see DataStream.new).
+    #
+    def filter(*args)
       @filters ||= {}
-      names = (Symbol === name ? [name] : name.dup)
-      ds = (DataStream === stream ? stream : DataStream.new(stream))
+      case args.last
+      when DataStream
+        # the stream is an actual DataStream
+        ds = args.pop
+      when String
+        # the stream is just plain text
+        ds = DataStream.new(args.pop)
+      when Hash
+        # the stream is a Hash, check if the previous element is a String
+        if String === args[-2]
+          ds = DataStream.new(*args.slice!(-2, 2))
+        else
+          ds = DataStream.new(args.pop)
+        end
+      else
+        raise "Unknown DataStream class #{args.last.class}"
+      end
+      names = args.dup
       return ds if names.empty?
       # check if filters exist
       missing = names - @filters.keys
