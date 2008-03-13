@@ -284,10 +284,85 @@ class RSSFeedsPlugin < Plugin
     end
   end
 
+  # Auxiliary method used to collect two lines for rss output filters,
+  # running substitutions against DataStream _s_ optionally joined
+  # with hash _h_
+  def make_stream(line1, line2, s, h)
+    DataStream.new([line1, line2].compact.join("\n") % s.merge(h))
+  end
+
+  # Define default RSS filters
+  #
+  # TODO: load personal ones
+  def define_filters
+    @outkey = :"rss.out"
+    @bot.register_filter(:blog, @outkey) { |s|
+      author = s[:author] ? (s[:author] + " ") : ""
+      abt = s[:category] ? "about #{s[:category]} " : ""
+      line1 = "%{handle}%{date}%{author}blogged %{abt}at %{link}"
+      line2 = "%{handle}%{title} - %{desc}"
+      make_stream(line1, line2, s, :author => author, :abt => abt)
+    }
+    @bot.register_filter(:photoblog, @outkey) { |s|
+      author = s[:author] ? (s[:author] + " ") : ""
+      abt = s[:category] ? "under #{s[:category]} " : ""
+      line1 = "%{handle}%{date}%{author}added an image %{abt}at %{link}"
+      line2 = "%{handle}%{title} - %{desc}"
+      make_stream(line1, line2, s, :author => author, :abt => abt)
+    }
+    @bot.register_filter(:news, @outkey) { |s|
+      line1 = "%{handle}%{date}%{title} @ %{link}" % s
+      line2 = "%{handle}%{date}%{desc}" % s
+      make_stream(line1, line2, s)
+    }
+    @bot.register_filter(:git, @outkey) { |s|
+      author = s[:author] ? (s[:author] + " ") : ""
+      line1 = "%{handle}%{date}%{author}committed %{title} @ %{link}"
+      make_stream(line1, nil, s, :author => author)
+    }
+    @bot.register_filter(:forum, @outkey) { |s|
+      line1 = "%{handle}%{date}%{title}%{at}%{link}"
+      make_stream(line1, nil, s)
+    }
+    @bot.register_filter(:wiki, @outkey) { |s|
+      line1 = "%{handle}%{date}%{title}%{at}%{link}"
+      line1 << "has been edited by %{author}. %{desc}"
+      make_stream(line1, nil, s)
+    }
+    @bot.register_filter(:gmane, @outkey) { |s|
+      line1 = "%{handle}%{date}Message %{title} sent by %{author}. %{desc}"
+      make_stream(line1, nil, s)
+    }
+    @bot.register_filter(:trac, @outkey) { |s|
+      author = s[:author].sub(/@\S+?\s*>/, "@...>") + ": " if s[:author]
+      line1 = "%{handle}%{date}%{author}%{title} @ %{link}"
+      line2 = nil
+      unless s[:item].title =~ /^(?:Changeset \[(?:[\da-f]+)\]|\(git commit\))/
+        line2 = "%{handle}%{date}%{desc}"
+      end
+      make_stream(line1, line2, s, :author => author)
+    }
+    @bot.register_filter(:"/.", @outkey) { |s|
+      dept = "(from the #{s[:item].slash_department} dept) " rescue nil
+      sec = " in section #{s[:item].slash_section}" rescue nil
+      line1 = "%{handle}%{date}%{dept}%{title}%{at}%{link} "
+      line1 << "(posted by %{author}%{sec})"
+      make_stream(line1, nil, s, :dept => dept, :sec => sec)
+    }
+    @bot.register_filter(:default, @outkey) { |s|
+      line1 = "%{handle}%{date}%{title}%{at}%{link}"
+      line1 << " (by %{author})" if s[:author]
+      make_stream(line1, nil, s)
+    }
+  end
+
   attr_reader :feeds
 
   def initialize
     super
+
+    define_filters
+
     if @registry.has_key?(:feeds)
       # When migrating from Ruby 1.8.5 to 1.8.6, dumped Mutexes may render the
       # data unrestorable. If this happens, we patch the data, thus allowing
@@ -914,48 +989,17 @@ class RSSFeedsPlugin < Plugin
 
     at = ((item.title && item.link) ? ' @ ' : '')
 
-    case feed.type
-    when 'blog'
-      author += " " if author
-      abt = category ? "about #{category} " : ""
-      line1 = "#{handle}#{date}#{author}blogged #{abt}at #{link}"
-      line2 = "#{handle}#{title} - #{desc}"
-    when 'photoblog'
-      author += " " if author
-      abt = category ? "under #{category} " : ""
-      line1 = "#{handle}#{date}#{author}added an image #{abt}at #{link}"
-      line2 = "#{handle}#{title} - #{desc}"
-    when 'news'
-      line1 = "#{handle}#{date}#{title} @ #{link}"
-      line2 = line2 = "#{handle}#{date}#{desc}"
-    when 'git'
-      author += " " if author
-      line1 = "#{handle}#{date}#{author}commited #{title} @ #{link}"
-    when 'forum'
-      line1 = "#{handle}#{date}#{title}#{at}#{link}"
-    when 'wiki'
-      line1 = "#{handle}#{date}#{title}#{at}#{link} has been edited by #{author}. #{desc}"
-    when 'gmane'
-      line1 = "#{handle}#{date}Message #{title} sent by #{author}. #{desc}"
-    when 'trac'
-      author = author.sub(/@\S+?\s*>/, "@...>") + ": " if author
-      line1 = "#{handle}#{date}#{author}#{title} @ #{link}"
-      unless item.title =~ /^(?:Changeset \[(?:[\da-f]+)\]|\(git commit\))/
-        line2 = "#{handle}#{date}#{desc}"
-      end
-    when '/.'
-      dept = "(from the #{item.slash_department} dept) " rescue nil
-      sec = " in section #{item.slash_section}" rescue nil
+    key = @bot.global_filter_name(feed.type, @outkey)
+    key = @bot.global_filter_name(:default, @outkey) unless @bot.has_filter?(key)
 
-      line1 = "#{handle}#{date}#{dept}#{title}#{at}#{link} (posted by #{author}#{sec})"
-    else
-      line1 = "#{handle}#{date}#{title}#{at}#{link}"
-      line1 << " (by #{author})" if author
-    end
+    output = @bot.filter(key, :item => item, :handle => handle, :date => date,
+                         :title => title, :desc => desc, :link => link,
+                         :category => category, :author => author, :at => at)
+
     places.each { |loc|
-      @bot.say loc, line1, :overlong => :truncate
-      next unless line2
-      @bot.say loc, line2, :overlong => :truncate
+      output.to_s.each_line { |line|
+        @bot.say loc, line, :overlong => :truncate
+      }
     }
   end
 
