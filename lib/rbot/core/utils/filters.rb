@@ -111,6 +111,18 @@ module ::Irc
       end
     end
 
+    # This method is used to retrieve the filter names (in a given group)
+    def filter_names(group=nil)
+      if group
+        gkey = group.to_sym
+        return [] unless defined? @filter_group and @filter_group.key?(gkey)
+        return @filter_group[gkey].keys
+      else
+        return [] unless defined? @filters
+        return @filters.keys
+      end
+    end
+
     # This method clears the filter list and installs the identity filter
     def clear_filters
       @filters ||= {}
