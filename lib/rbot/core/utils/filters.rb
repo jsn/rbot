@@ -64,22 +64,16 @@ module ::Irc
     #
     def filter(*args)
       @filters ||= {}
-      case args.last
-      when DataStream
-        # the stream is an actual DataStream
-        ds = args.pop
-      when String
-        # the stream is just plain text
-        ds = DataStream.new(args.pop)
-      when Hash
-        # the stream is a Hash, check if the previous element is a String
-        if String === args[-2]
-          ds = DataStream.new(*args.slice!(-2, 2))
-        else
+      if Hash === args.last
+        # the stream is a Hash, check if the previous element is not a Symbol
+        if Symbol === args[-2]
           ds = DataStream.new(args.pop)
+        else
+          ds = DataStream.new(*args.slice!(-2, 2))
         end
       else
-        raise "Unknown DataStream class #{args.last.class}"
+        # the stream is just whatever else
+        ds = DataStream.new(args.pop)
       end
       names = args.dup
       return ds if names.empty?
