@@ -31,14 +31,37 @@ class DictPlugin < Plugin
     :default => 0,
     :desc => "When set to n > 0, the bot will return the first paragraph from the first n dictionary hits")
 
+  def demauro_filter(s)
+    # check if it's a page we can handle
+    loc = Utils.check_location(s, @dmurlrx)
+    # the location might be not good, but we might still be able to handle the
+    # page
+    if !loc and s[:text] !~ /<!-- Il dizionario della lingua italiana Paravia: /
+      debug "not our business"
+      return
+    end
+    # we want to grab the content from the WAP page, since it's in a much
+    # cleaner HTML, so first try to get the word ID
+    if s[:text] !~ %r{<li><a href="(\d+)" title="vai al lemma precedente" accesskey="p">lemma precedente</a></li>}
+      return
+    end
+    id = $1.to_i + 1
+    title = s[:text].ircify_html_title
+    content = @bot.filter(:htmlinfo, URI.parse(@dmwaplemma % id))[:content]
+    return {:title => title, :content => content.sub(/^\S+\s+-\s+/,'')}
+  end
+
   def initialize
     super
     @dmurl = "http://www.demauroparavia.it/"
+    @dmurlrx = %r{http://(?:www\.)?demauroparavia\.it/(\d+)}
     @dmwapurl = "http://wap.demauroparavia.it/index.php?lemma=%s"
     @dmwaplemma = "http://wap.demauroparavia.it/lemma.php?ID=%s"
     @oxurl = "http://www.askoxford.com/concise_oed/%s"
     @chambersurl = "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
     @littreurl = "http://francois.gannaz.free.fr/Littre/xmlittre.php?requete=%s"
+
+    @bot.register_filter(:demauro, :htmlinfo) { |s| demauro_filter(s) }
   end
 
 
