@@ -1080,13 +1080,13 @@ class RSSFeedsPlugin < Plugin
           return nil
         end
         if rss.respond_to? :channel
-          rss.channel.title ||= "Unknown"
+          rss.channel.title ||= "(?)"
           title = rss.channel.title
         else
           title = rss.title.content
         end
         rss.items.each do |item|
-          item.title ||= "Unknown"
+          item.title ||= "(?)"
           items << item
         end
       end
