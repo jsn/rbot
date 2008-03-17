@@ -581,6 +581,18 @@ module ::Irc
       return ds.merge(cur) if cur
     end
 
+    # HTML info filters often need to check if the webpage location
+    # of a passed DataStream _ds_ matches a given Regexp.
+    def Utils.check_location(ds, rx)
+      debug ds[:headers]
+      if h = ds[:headers]
+        loc = [h['x-rbot-location'],h['location']].flatten.grep(rx)
+      end
+      loc ||= []
+      debug loc
+      return !loc.empty?
+    end
+
     # This method extracts title and content (first par)
     # from the given HTML or XML document _text_, using
     # standard methods (String#ircify_html_title,
