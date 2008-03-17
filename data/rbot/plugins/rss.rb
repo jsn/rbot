@@ -287,7 +287,7 @@ class RSSFeedsPlugin < Plugin
   # Auxiliary method used to collect two lines for rss output filters,
   # running substitutions against DataStream _s_ optionally joined
   # with hash _h_
-  def make_stream(line1, line2, s, h)
+  def make_stream(line1, line2, s, h={})
     DataStream.new([line1, line2].compact.join("\n") % s.merge(h))
   end
 
