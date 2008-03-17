@@ -32,6 +32,10 @@ class ::BashQuote
     "http://www.bash.org/?#{@num}"
   end
 
+  def to_s
+    "#%d (%d): %s" % [self.num, self.vote, self.irc_text]
+  end
+
   private
   def mk_irc_text
     cur_nick = nil
@@ -66,6 +70,28 @@ class BashPlugin < Plugin
     "bash => print a random quote from bash.org, bash quote_id => print that quote id from bash.org, bash latest => print the latest quote from bash.org (currently broken, need to get josh@bash.org to fix the xml)"
   end
 
+  def bash_filter(s)
+    # check if we like the location of the page
+    loc = Utils.check_location(s, %r{http://(?:www\.)?bash\.org/\?})
+    return unless loc
+    # check if there are any quotes
+    quotes = get_html_quotes(s[:text])
+    return if quotes.empty?
+    title = s[:text].ircify_html_title
+    # return the first quote
+    return {
+          :title => title,
+          :content => quotes.first.to_s,
+          :bash_quotes => quotes
+    }
+  end
+
+  def initialize
+    super
+
+    @bot.register_filter(:bash, :htmlinfo) { |s| bash_filter(s) }
+  end
+
   def bash(m, params)
     id = params[:id]
     case @bot.config['bash.access'].intern
@@ -82,9 +108,23 @@ class BashPlugin < Plugin
     html_bash(m, :html => html)
   end
 
-  def html_bash(m, opts={})
+  def get_html_quotes(html)
     quotes = []
 
+    html_quotes = html.split(/<p class="quote">/)
+    html_quotes.each { |htqt|
+      # debug htqt.inspect
+      if htqt.match(/<a href="\?(\d+)"[^>]*>.*?\((-?\d+)\).*?<p class="qt">(.*)<\/p>\s+(?:<\/td>.*)?\z/m)
+        num = $1
+        vote = $2
+        text = $3
+        quotes << BashQuote.new(num, text, vote)
+      end
+    }
+    return quotes
+  end
+
+  def html_bash(m, opts={})
     html = opts[:html]
     if not html
       id = opts[:id]
@@ -103,16 +143,7 @@ class BashPlugin < Plugin
       return
     end
 
-    html_quotes = html.split(/<p class="quote">/)
-    html_quotes.each { |htqt|
-      # debug htqt.inspect
-      if htqt.match(/<a href="\?(\d+)"[^>]*>.*?\((-?\d+)\).*?<p class="qt">(.*)<\/p>\s+(?:<\/td>.*)?\z/m)
-        num = $1
-        vote = $2
-        text = $3
-        quotes << BashQuote.new(num, text, vote)
-      end
-    }
+    quotes = get_html_quotes(html)
 
     case quotes.length
     when 0
@@ -125,7 +156,7 @@ class BashPlugin < Plugin
       # may want to echo more than one for latest/random
       quote = quotes.first
     end
-    m.reply "#%d (%d): %s" % [quote.num, quote.vote, quote.irc_text]
+    m.reply quote.to_s
   end
 
   def xml_bash(m, id=nil)
