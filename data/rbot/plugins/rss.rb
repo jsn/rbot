@@ -977,7 +977,7 @@ class RSSFeedsPlugin < Plugin
       desc = item.content_encoded.ircify_html(desc_opt)
     elsif item.respond_to?(:description) && item.description
       desc = item.description.ircify_html(desc_opt)
-    else
+    elsif item.respond_to?(:content) && item.content
       if item.content.type == "html"
         desc = item.content.content.ircify_html(desc_opt)
       else
@@ -986,6 +986,8 @@ class RSSFeedsPlugin < Plugin
           desc = desc.slice(0, desc_opt[:limit]) + "#{Reverse}...#{Reverse}"
         end
       end
+    else
+      desc = "(?)"
     end
 
     link = item.link.href rescue item.link.chomp rescue nil
