@@ -505,9 +505,9 @@ module ::Irc
       when Net::HTTPResponse
         Utils.get_resp_html_info(doc, opts)
       when URI
-        ret = Hash.new
+        ret = DataStream.new
         @@bot.httputil.get_response(doc) { |resp|
-          ret = Utils.get_resp_html_info(resp, opts)
+          ret.replace Utils.get_resp_html_info(resp, opts)
         }
         return ret
       else
@@ -521,10 +521,13 @@ module ::Irc
     # This method extracts title, content (first par) and extra
     # information from the given Net::HTTPResponse _resp_.
     #
-    # Currently, the only accepted option (in _opts_) is
+    # Currently, the only accepted options (in _opts_) are
     # uri_fragment:: the URI fragment of the original request
+    # full_body::    get the whole body instead of
+    #                @@bot.config['http.info_bytes'] bytes only
     #
-    # Returns a Hash with the following keys:
+    # Returns a DataStream with the following keys:
+    # text:: the (partial) body
     # title:: the title of the document (if any)
     # content:: the first paragraph of the document (if any)
     # headers::
@@ -533,23 +536,49 @@ module ::Irc
     #   header fields, and whose values are Arrays.
     #
     def Utils.get_resp_html_info(resp, opts={})
-      ret = Hash.new
       case resp
       when Net::HTTPSuccess
+        loc = URI.parse(resp['x-rbot-location'] || resp['location']) rescue nil
+        if loc and loc.fragment and not loc.fragment.empty?
+          opts[:uri_fragment] ||= loc.fragment
+        end
+        ret = DataStream.new(opts.dup)
         ret[:headers] = resp.to_hash
+        ret[:text] = partial = opts[:full_body] ? resp.body : resp.partial_body(@@bot.config['http.info_bytes'])
 
-        partial = resp.partial_body(@@bot.config['http.info_bytes'])
-        if resp['content-type'] =~ /^text\/|(?:x|ht)ml/
-          loc = URI.parse(resp['x-rbot-location'] || resp['location']) rescue nil
-          if loc and loc.fragment and not loc.fragment.empty?
-            opts[:uri_fragment] ||= loc.fragment
-          end
+        filtered = Utils.try_htmlinfo_filters(ret)
+
+        if filtered
+          return filtered
+        elsif resp['content-type'] =~ /^text\/|(?:x|ht)ml/
           ret.merge!(Utils.get_string_html_info(partial, opts))
         end
         return ret
       else
         raise UrlLinkError, "getting link (#{resp.code} - #{resp.message})"
       end
+    end
+
+    # This method runs an appropriately-crafted DataStream _ds_ through the
+    # filters in the :htmlinfo filter group, in order. If one of the filters
+    # returns non-nil, its results are merged in _ds_ and returned. Otherwise
+    # nil is returned.
+    #
+    # The input DataStream shuold have the downloaded HTML as primary key
+    # (:text) and possibly a :headers key holding the resonse headers.
+    #
+    def Utils.try_htmlinfo_filters(ds)
+      filters = @@bot.filter_names(:htmlinfo)
+      return nil if filters.empty?
+      cur = nil
+      # TODO filter priority
+      filters.each { |n|
+        debug "testing filter #{n}"
+        cur = @@bot.filter(@@bot.global_filter_name(n, :htmlinfo), ds)
+        debug "returned #{cur.pretty_inspect}"
+        break if cur
+      }
+      return ds.merge(cur) if cur
     end
 
     # This method extracts title and content (first par)

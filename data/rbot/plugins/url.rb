@@ -79,7 +79,7 @@ class UrlPlugin < Plugin
 
     begin
       debug "+ getting info for #{url.request_uri}"
-      info = Utils.get_html_info(url)
+      info = @bot.filter(:htmlinfo, url)
       debug info
       resp = info[:headers]
 

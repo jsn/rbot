@@ -12,6 +12,7 @@ class FiltersModule < CoreBotModule
   def initialize
     super
     @bot.clear_filters
+    @bot.register_filter(:htmlinfo) { |s| Utils.get_html_info(s.to_s, s) }
   end
 
   def help(plugin, topic="")
