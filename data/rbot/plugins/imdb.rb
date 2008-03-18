@@ -159,7 +159,7 @@ class Imdb
 
       if opts[:characters]
         info << resp.body.scan(CREDIT_NAME_MATCH).map { |url, name, role|
-          "%s: %s" % [name, role]
+          "%s: %s" % [name, role.ircify_html]
         }.join('; ')
         return info
       end
