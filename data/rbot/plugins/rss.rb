@@ -287,8 +287,9 @@ class RSSFeedsPlugin < Plugin
   # Auxiliary method used to collect two lines for rss output filters,
   # running substitutions against DataStream _s_ optionally joined
   # with hash _h_
-  def make_stream(line1, line2, s, h)
-    DataStream.new([line1, line2].compact.join("\n") % s.merge(h))
+  def make_stream(line1, line2, s, h={})
+    ss = s.merge(h)
+    DataStream.new([line1, line2].compact.join("\n") % ss, ss)
   end
 
   # Define default RSS filters
@@ -354,6 +355,27 @@ class RSSFeedsPlugin < Plugin
       line1 << " (by %{author})" if s[:author]
       make_stream(line1, nil, s)
     }
+
+    # Define an HTML info filter too
+    @bot.register_filter(:rss, :htmlinfo) { |s| htmlinfo_filter(s) }
+
+    # This is the output format used by the input filter
+    @bot.register_filter(:htmlinfo, @outkey) { |s|
+      line1 = "%{title}%{at}%{link}"
+      make_stream(line1, nil, s)
+    }
+  end
+
+  def htmlinfo_filter(s)
+    return nil unless s[:headers] and s[:headers]['x-rbot-location']
+    blob = RssBlob.new(s[:headers]['x-rbot-location'],"", :htmlinfo)
+    return nil unless fetchRss(blob, nil)
+    return nil unless parseRss(blob, nil)
+    output = []
+    blob.items.each { |it|
+      output << printFormattedRss(blob, it)[:text]
+    }
+    return {:title => blob.title, :content => output.join(" | ")}
   end
 
   # Display the known rss types
@@ -916,7 +938,7 @@ class RSSFeedsPlugin < Plugin
   def printFormattedRss(feed, item, opts=nil)
     debug item
     places = feed.watchers
-    handle = "::#{feed.handle}:: "
+    handle = feed.handle.empty? ? "" : "::#{feed.handle}:: "
     date = String.new
     if opts
       places = opts[:places] if opts.key?(:places)
@@ -977,7 +999,7 @@ class RSSFeedsPlugin < Plugin
       desc = item.content_encoded.ircify_html(desc_opt)
     elsif item.respond_to?(:description) && item.description
       desc = item.description.ircify_html(desc_opt)
-    else
+    elsif item.respond_to?(:content) && item.content
       if item.content.type == "html"
         desc = item.content.content.ircify_html(desc_opt)
       else
@@ -986,6 +1008,8 @@ class RSSFeedsPlugin < Plugin
           desc = desc.slice(0, desc_opt[:limit]) + "#{Reverse}...#{Reverse}"
         end
       end
+    else
+      desc = "(?)"
     end
 
     link = item.link.href rescue item.link.chomp rescue nil
@@ -1004,6 +1028,8 @@ class RSSFeedsPlugin < Plugin
     output = @bot.filter(key, :item => item, :handle => handle, :date => date,
                          :title => title, :desc => desc, :link => link,
                          :category => category, :author => author, :at => at)
+
+    return output if places.empty?
 
     places.each { |loc|
       output.to_s.each_line { |line|
@@ -1078,13 +1104,13 @@ class RSSFeedsPlugin < Plugin
           return nil
         end
         if rss.respond_to? :channel
-          rss.channel.title ||= "Unknown"
+          rss.channel.title ||= "(?)"
           title = rss.channel.title
         else
           title = rss.title.content
         end
         rss.items.each do |item|
-          item.title ||= "Unknown"
+          item.title ||= "(?)"
           items << item
         end
       end
