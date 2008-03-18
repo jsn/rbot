@@ -113,7 +113,7 @@ class ScriptPlugin < Plugin
     command = Command.new( code, nick, created, channel )
     @commands[name] = command
 
-    m.reply( "done" )
+    m.okay
   end
 
 
@@ -129,7 +129,7 @@ class ScriptPlugin < Plugin
     end
 
     @commands.delete( name )
-    m.reply( "done" )
+    m.okay
   end
 
 
