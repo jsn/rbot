@@ -70,29 +70,29 @@ class ScriptPlugin < Plugin
 
   def handle_eval( m, params )
     code = params[:code].to_s.dup.untaint
-      Thread.start {
-        # TODO allow different safe levels for different botusers
-        begin
-          eval( code )
-        rescue Exception => e
-          m.reply( "Script '#{name}' crapped out :(" )
-          m.reply( e.inspect )
-        end
-      }
+    Thread.start {
+      # TODO allow different safe levels for different botusers
+      begin
+        eval( code )
+      rescue Exception => e
+        m.reply( "Script '#{name}' crapped out :(" )
+        m.reply( e.inspect )
+      end
+    }
   end
 
 
   def handle_echo( m, params )
     code = params[:code].to_s.dup.untaint
-      Thread.start {
-        # TODO allow different safe levels for different botusers
-        begin
-          m.reply eval( code ).to_s
-        rescue Exception => e
-          m.reply( "Script '#{name}' crapped out :(" )
-          m.reply( e.inspect )
-        end
-      }
+    Thread.start {
+      # TODO allow different safe levels for different botusers
+      begin
+        m.reply eval( code ).to_s
+      rescue Exception => e
+        m.reply( "Script '#{name}' crapped out :(" )
+        m.reply( e.inspect )
+      end
+    }
   end
 
 
