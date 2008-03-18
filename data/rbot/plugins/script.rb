@@ -79,6 +79,7 @@ class ScriptPlugin < Plugin
         m.reply( e.inspect )
       end
     }
+    m.replied = true
   end
 
 
@@ -93,6 +94,7 @@ class ScriptPlugin < Plugin
         m.reply( e.inspect )
       end
     }
+    m.replied = true
   end
 
 
