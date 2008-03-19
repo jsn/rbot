@@ -153,7 +153,7 @@ class Imdb
         country = data.ircify_html.gsub(' / ','/')
       end
 
-      info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, opts[:nourl] ? nil : ": http://us.imdb.com#{sr}"].compact.join(" ")
+      info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, opts[:nourl] ? nil : ": http://www.imdb.com#{sr}"].compact.join(" ")
 
       return info if opts[:title_only]
 
@@ -206,7 +206,7 @@ class Imdb
       name = m[1]
 
       info << "#{name}"
-      info << " : http://us.imdb.com#{sr}" unless opts[:nourl]
+      info << " : http://www.imdb.com#{sr}" unless opts[:nourl]
 
       return info if opts[:name_only]
 
