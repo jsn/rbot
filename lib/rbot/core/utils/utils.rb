@@ -590,7 +590,7 @@ module ::Irc
       end
       loc ||= []
       debug loc
-      return !loc.empty?
+      return loc.empty? ? nil : loc
     end
 
     # This method extracts title and content (first par)

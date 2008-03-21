@@ -1,9 +1,48 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Slashdot plugin for rbot
+
 require 'rexml/document'
 
 class SlashdotPlugin < Plugin
   include REXML
   def help(plugin, topic="")
     "slashdot search <string> [<max>=4] => search slashdot for <string>, slashdot [<max>=4] => return up to <max> slashdot headlines (use negative max to return that many headlines, but all on one line.)"
+  end
+
+  # This method defines a filter for /. pages. It's needed because the generic
+  # summarization grabs a comment, not the actual article.
+  #
+  # This filter relies on Hpricot being available, since REXML isn't too
+  # happy with the /. pages
+  def slashdot_filter(s)
+    return nil unless defined? Hpricot
+    loc = Utils.check_location(s, /slashdot\.org/)
+    return nil unless loc
+    h = Hpricot(s[:text])
+    title = (h/"head/title").first.to_html.ircify_html
+    arts = (h/"div.article")
+    if arts.length > 1
+      tits = []
+      arts.each { |el|
+        artitle = (el/"div.generaltitle").first.to_html.ircify_html
+        tits << artitle
+      }
+      content = tits.join(" | ")
+    else
+      det = (arts.first/"div.details").first.to_html.ircify_html
+      body = (arts.first/"div.body").first.to_html.ircify_html
+      content = [det, body].join(' ')
+    end
+    return {:title => title, :content => content}
+  end
+
+  def initialize
+    super
+    if defined? Hpricot
+      @bot.register_filter(:slashdot, :htmlinfo) { |s| slashdot_filter(s) }
+    end
   end
   
   def search_slashdot(m, params)

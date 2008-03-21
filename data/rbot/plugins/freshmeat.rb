@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Freshmeat plugin for rbot
+
 require 'rexml/document'
 
 class FreshmeatPlugin < Plugin
@@ -5,7 +10,36 @@ class FreshmeatPlugin < Plugin
   def help(plugin, topic="")
     "freshmeat search [<max>=4] <string> => search freshmeat for <string>, freshmeat [<max>=4] => return up to <max> freshmeat headlines"
   end
-  
+
+  REL_ENTRY = %r{<a href="/(release)s/(\d+)/"><font color="#000000">(.*?)</font></a>}
+  PRJ_ENTRY = %r{<a href="/(project)s/(\S+?)/"><b>(.*?)</b></a>}
+
+  # This method defines a filter for fm pages. It's needed because the generic
+  # summarization grabs a comment, not the actual article.
+  #
+  def freshmeat_filter(s)
+    loc = Utils.check_location(s, /freshmeat\.net/)
+    return nil unless loc
+    entries = []
+    s[:text].scan(/#{REL_ENTRY}|#{PRJ_ENTRY}/) { |m|
+      entry = {
+        :type => ($1 || $4).dup,
+        :code => ($2 || $5).dup,
+        :name => ($3 || $6).dup
+      }
+      entries << entry
+    }
+    return nil if entries.empty?
+    title = s[:text].ircify_html_title
+    content = entries.inject([]) { |l, e| l << e[:name] }.join(" | ")
+    return {:title => title, :content => content}
+  end
+
+  def initialize
+    super
+    @bot.register_filter(:freshmeat, :htmlinfo) { |s| freshmeat_filter(s) }
+  end
+
   def search_freshmeat(m, params)
     max = params[:limit].to_i
     search = params[:search].to_s

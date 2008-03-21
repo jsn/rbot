@@ -153,13 +153,13 @@ class Imdb
         country = data.ircify_html.gsub(' / ','/')
       end
 
-      info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, ": http://us.imdb.com#{sr}"].compact.join(" ")
+      info << [title, "(#{country}, #{date})", extra, dir ? "[#{dir}]" : nil, opts[:nourl] ? nil : ": http://www.imdb.com#{sr}"].compact.join(" ")
 
       return info if opts[:title_only]
 
       if opts[:characters]
         info << resp.body.scan(CREDIT_NAME_MATCH).map { |url, name, role|
-          "%s: %s" % [name, role]
+          "%s: %s" % [name, role.ircify_html]
         }.join('; ')
         return info
       end
@@ -205,7 +205,8 @@ class Imdb
       return nil if !m
       name = m[1]
 
-      info << "#{name} : http://us.imdb.com#{sr}"
+      info << "#{name}"
+      info << " : http://www.imdb.com#{sr}" unless opts[:nourl]
 
       return info if opts[:name_only]
 
@@ -405,9 +406,41 @@ class ImdbPlugin < Plugin
 
   attr_reader :i
 
+  TITLE_URL = %r{^http://(?:[^.]+\.)?imdb.com(/title/tt\d+/)}
+  NAME_URL = %r{^http://(?:[^.]+\.)?imdb.com(/name/nm\d+/)}
+  def imdb_filter(s)
+    loc = Utils.check_location(s, TITLE_URL)
+    if loc
+      sr = loc.first.match(TITLE_URL)[1]
+      extra = $2 # nothign for the time being, could be fullcredits or whatever
+      res = i.info_title(sr, :nourl => true, :characters => (extra == 'fullcredits'))
+      debug res
+      if res
+        return {:title => res.first, :content => res.last}
+      else
+        return nil
+      end
+    end
+    loc = Utils.check_location(s, NAME_URL)
+    if loc
+      sr = loc.first.match(NAME_URL)[1]
+      extra = $2 # nothing for the time being, could be filmoyear or whatever
+      res = i.info_name(sr, :nourl => true, :movies_by_year => (extra == 'filmoyear'))
+      debug res
+      if res
+        name = res.shift
+        return {:title => name, :content => res.join(". ")}
+      else
+        return nil
+      end
+    end
+    return nil
+  end
+
   def initialize
     super
     @i = Imdb.new(@bot)
+    @bot.register_filter(:imdb, :htmlinfo) { |s| imdb_filter(s) }
   end
 
   # Find a person or movie on IMDB. A :type (name/title, default both) can be
