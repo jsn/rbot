@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-03-11 01:34+0100\n"
+"POT-Creation-Date: 2008-03-21 11:48-0400\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -787,19 +787,39 @@ msgstr ""
 msgid " and "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1180
+#: lib/rbot/core/filters_ui.rb:27
+msgid "no filters in group %{g}"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:29
+msgid "no known filters"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:32
+msgid "known filters: "
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:42
+msgid "no filters match %{pat}"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:44
+msgid "filters matching %{pat}: "
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1184
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1182
+#: lib/rbot/ircbot.rb:1186
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1185
+#: lib/rbot/ircbot.rb:1189
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1196
+#: lib/rbot/ircbot.rb:1200
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
@@ -1618,7 +1638,7 @@ msgstr ""
 msgid "markov has a %{prob}% chance of chipping in"
 msgstr ""
 
-#: data/rbot/plugins/rss.rb:696
+#: data/rbot/plugins/rss.rb:802
 msgid "no such feed %{handle}"
 msgstr ""
 
