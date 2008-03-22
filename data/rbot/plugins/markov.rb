@@ -32,7 +32,6 @@ class MarkovPlugin < Plugin
       @bot.config['markov.probability'] = @registry['probability']
       @registry.delete('probability')
     end
-    @lastline = false
   end
 
   def generate_string(word1, word2)
@@ -205,7 +204,6 @@ class MarkovPlugin < Plugin
     
     wordlist = message.split(/\s+/)
     return unless wordlist.length >= 2
-    @lastline = message
     word1, word2 = :nonword, :nonword
     wordlist.each do |word3|
       @registry["#{word1} #{word2}"] = @registry["#{word1} #{word2}"].push(word3)
