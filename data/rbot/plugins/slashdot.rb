@@ -21,8 +21,12 @@ class SlashdotPlugin < Plugin
     loc = Utils.check_location(s, /slashdot\.org/)
     return nil unless loc
     h = Hpricot(s[:text])
+    # If we have no title tag in a head tag, return as this is not
+    # a /. page (it's probably a Slashdot RSS
+    return nil if h/"head/title".empty?
     title = (h/"head/title").first.to_html.ircify_html
     arts = (h/"div.article")
+    return nil if arts.empty?
     if arts.length > 1
       tits = []
       arts.each { |el|
