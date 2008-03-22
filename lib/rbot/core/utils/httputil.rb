@@ -126,14 +126,21 @@ module ::Net
     # the partial text at each chunk. Return the partial body.
     def partial_body(size=0, &block)
 
-      self.no_cache = true
       partial = String.new
 
-      self.read_body { |chunk|
-        partial << chunk
+      if @read
+        debug "using body() as partial"
+        partial = self.body
         yield self.body_to_utf(self.decompress_body(partial)) if block_given?
-        break if size and size > 0 and partial.length >= size
-      }
+      else
+        debug "disabling cache"
+        self.no_cache = true
+        self.read_body { |chunk|
+          partial << chunk
+          yield self.body_to_utf(self.decompress_body(partial)) if block_given?
+          break if size and size > 0 and partial.length >= size
+        }
+      end
 
       return self.body_to_utf(self.decompress_body(partial))
     end
@@ -629,7 +636,7 @@ class HttpUtil
   # _uri_::     uri to query (URI object or String)
   # _nbytes_::  number of bytes to get
   #
-  # Partia GET request, returns (if possible) the first _nbytes_ bytes of the
+  # Partial GET request, returns (if possible) the first _nbytes_ bytes of the
   # response body, following redirs and caching if requested, yielding the
   # actual response(s) to the optional block. See get_response for details on
   # the supported _options_
