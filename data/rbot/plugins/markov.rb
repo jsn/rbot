@@ -204,17 +204,18 @@ class MarkovPlugin < Plugin
     
     wordlist = message.split(/\s+/)
     return unless wordlist.length >= 2
-    word1, word2 = :nonword, :nonword
-    wordlist.each do |word3|
+    Thread.new do
+      word1, word2 = :nonword, :nonword
+      wordlist.each do |word3|
+        k = "#{word1} #{word2}"
+        @registry[k] = @registry[k].push(word3)
+        word1, word2 = word2, word3
+      end
       k = "#{word1} #{word2}"
-      @registry[k] = @registry[k].push(word3)
-      word1, word2 = word2, word3
-    end
-    k = "#{word1} #{word2}"
-    @registry[k] = @registry[k].push(:nonword)
+      @registry[k] = @registry[k].push(:nonword)
 
-    return if m.replied?
-    random_markov(m, message)
+      random_markov(m, message) unless m.replied?
+    end
   end
 end
 
