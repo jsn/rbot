@@ -206,10 +206,12 @@ class MarkovPlugin < Plugin
     return unless wordlist.length >= 2
     word1, word2 = :nonword, :nonword
     wordlist.each do |word3|
-      @registry["#{word1} #{word2}"] = @registry["#{word1} #{word2}"].push(word3)
+      k = "#{word1} #{word2}"
+      @registry[k] = @registry[k].push(word3)
       word1, word2 = word2, word3
     end
-    @registry["#{word1} #{word2}"] = @registry["#{word1} #{word2}"].push(:nonword)
+    k = "#{word1} #{word2}"
+    @registry[k] = @registry[k].push(:nonword)
 
     return if m.replied?
     random_markov(m, message)
