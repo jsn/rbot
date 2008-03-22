@@ -191,11 +191,11 @@ end
 
 plugin = SearchPlugin.new
 
-plugin.map "search *words", :action => 'google'
-plugin.map "google *words", :action => 'google'
-plugin.map "gcalc *words", :action => 'gcalc'
-plugin.map "gdef *words", :action => 'gdef'
-plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }
-plugin.map "wp *words", :action => 'wikipedia'
-plugin.map "unpedia *words", :action => 'unpedia'
+plugin.map "search *words", :action => 'google', :threaded => true
+plugin.map "google *words", :action => 'google', :threaded => true
+plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
+plugin.map "gdef *words", :action => 'gdef', :threaded => true
+plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
+plugin.map "wp *words", :action => 'wikipedia', :threaded => true
+plugin.map "unpedia *words", :action => 'unpedia', :threaded => true
 
