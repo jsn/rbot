@@ -366,7 +366,7 @@ class RSSFeedsPlugin < Plugin
     }
   end
 
-  FEED_NS = %r{xmlns.*http://(purl\.org/rss|www.w3c.org/199/02/22-rdf)}
+  FEED_NS = %r{xmlns.*http://(purl\.org/rss|www.w3c.org/1999/02/22-rdf)}
   def htmlinfo_filter(s)
     return nil unless s[:headers] and s[:headers]['x-rbot-location']
     return nil unless s[:headers]['content-type'].first.match(/xml|rss|atom|rdf/i) or
