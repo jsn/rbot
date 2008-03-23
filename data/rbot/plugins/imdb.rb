@@ -206,7 +206,7 @@ class Imdb
       name = m[1]
 
       info << "#{name}"
-      info << " : http://www.imdb.com#{sr}" unless opts[:nourl]
+      info.last << " : http://www.imdb.com#{sr}" unless opts[:nourl]
 
       return info if opts[:name_only]
 
