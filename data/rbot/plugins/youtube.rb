@@ -10,6 +10,7 @@
 
 class YouTubePlugin < Plugin
   YOUTUBE_SEARCH = "http://gdata.youtube.com/feeds/api/videos?vq=%{words}&orderby=relevance"
+  YOUTUBE_VIDEO = "http://gdata.youtube.com/feeds/api/videos/%{code}"
 
   Config.register Config::IntegerValue.new('youtube.hits',
     :default => 3,
@@ -39,6 +40,45 @@ class YouTubePlugin < Plugin
     return {:title => s[:text].ircify_html_title, :content => content}
   end
 
+  def youtube_apivideo_filter(s)
+    # This filter can be used either
+    e = s[:rexml] || REXML::Document.new(s[:text]).elements["entry"]
+    # TODO precomputing mg doesn't work on my REXML, despite what the doc
+    # says?
+    #   mg = e.elements["media:group"]
+    #   :title => mg["media:title"].text
+    # fails because "media:title" is not an Integer. Bah
+    vid = {
+      :author => (e.elements["author/name"].text rescue nil),
+      :title =>  (e.elements["media:group/media:title"].text rescue nil),
+      :desc =>   (e.elements["media:group/media:description"].text rescue nil),
+      :cat => (e.elements["media:group/media:category"].text rescue nil),
+      :seconds => (e.elements["media:group/yt:duration/@seconds"].value.to_i rescue nil),
+      :url => (e.elements["media:group/media:player/@url"].value rescue nil),
+      :rating => (("%s/%s" % [e.elements["media:group/gd:rating/@average"].value, e.elements["media:group/gd:rating/@max"].value]) rescue nil),
+      :views => (e.elements["media:group/yt:statistics/@viewCount"].value rescue nil),
+      :faves => (e.elements["media:group/yt:statistics/@favoriteCount"].value rescue nil)
+    }
+    if vid[:desc]
+      vid[:desc].gsub!(/\s+/m, " ")
+    end
+    if secs = vid[:seconds]
+      mins, secs = secs.divmod 60
+      hours, mins = mins.divmod 60
+      if hours > 0
+        vid[:duration] = "%s:%s:%s" % [hours, mins, secs]
+      elsif mins > 0
+        vid[:duration] = "%s'%s\"" % [mins, secs]
+      else
+        vid[:duration] = "%ss" % [secs]
+      end
+    else
+      vid[:duration] = _("unknown duration")
+    end
+    debug vid
+    return vid
+  end
+
   def youtube_apisearch_filter(s)
     vids = []
     title = nil
@@ -46,39 +86,7 @@ class YouTubePlugin < Plugin
       doc = REXML::Document.new(s[:text])
       title = doc.elements["feed/title"].text
       doc.elements.each("*/entry") { |e|
-        # TODO precomputing mg doesn't work on my REXML, despite what the doc
-        # says
-        #   mg = e.elements["media:group"]
-        #   :title => mg["media:title"].text
-        # fails because "media:title" is not an Integer. Bah
-        vid = {
-          :author => (e.elements["author/name"].text rescue nil),
-          :title =>  (e.elements["media:group/media:title"].text rescue nil),
-          :desc =>   (e.elements["media:group/media:description"].text rescue nil),
-          :cat => (e.elements["media:group/media:category"].text rescue nil),
-          :seconds => (e.elements["media:group/yt:duration/@seconds"].value.to_i rescue nil),
-          :url => (e.elements["media:group/media:player/@url"].value rescue nil),
-          :rating => (("%s/%s" % [e.elements["media:group/gd:rating/@average"].value, e.elements["media:group/gd:rating/@max"].value]) rescue nil),
-          :views => (e.elements["media:group/yt:statistics/@viewCount"].value rescue nil),
-          :faves => (e.elements["media:group/yt:statistics/@favoriteCount"].value rescue nil)
-        }
-        if vid[:desc]
-          vid[:desc].gsub!(/\s+/m, " ")
-        end
-        if secs = vid[:seconds]
-          mins, secs = secs.divmod 60
-          hours, mins = mins.divmod 60
-          if hours > 0
-            vid[:duration] = "%s:%s:%s" % [hours, mins, secs]
-          elsif mins > 0
-            vid[:duration] = "%s'%s\"" % [mins, secs]
-          else
-            vid[:duration] = "%ss" % [secs]
-          end
-        else
-          vid[:duration] = _("unknown duration")
-        end
-        vids << vid
+        vids << @bot.filter(:"youtube.apivideo", :rexml => e)
       }
       debug vids
     rescue => e
@@ -102,11 +110,49 @@ class YouTubePlugin < Plugin
     super
     @bot.register_filter(:youtube, :htmlinfo) { |s| youtube_filter(s) }
     @bot.register_filter(:apisearch, :youtube) { |s| youtube_apisearch_filter(s) }
+    @bot.register_filter(:apivideo, :youtube) { |s| youtube_apivideo_filter(s) }
     @bot.register_filter(:search, :youtube) { |s| youtube_search_filter(s) }
     @bot.register_filter(:video, :youtube) { |s| youtube_video_filter(s) }
   end
 
-  def youtube(m, params)
+  def info(m, params)
+    movie = params[:movie]
+    code = ""
+    case movie
+    when %r{youtube.com/watch\?v=(.*?)(&.*)?$}
+      code = $1.dup
+    when %r{youtube.com/v/(.*)$}
+      code = $1.dup
+    when /^[A-Za-z0-9]+$/
+      code = movie.dup
+    end
+    if code.empty?
+      m.reply _("What movie was that, again?")
+      return
+    end
+
+    url = YOUTUBE_VIDEO % {:code => code}
+    resp, xml = @bot.httputil.get_response(url)
+    unless Net::HTTPSuccess === resp
+      m.reply(_("error looking for movie %{code} on youtube: %{e}") % {:code => code, :e => xml})
+      return
+    end
+    debug "filtering XML"
+    debug xml
+    begin
+      vid = @bot.filter(:"youtube.apivideo", DataStream.new(xml, params))
+    rescue => e
+      debug e
+    end
+    if vid
+      m.reply(_("Video: %{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times.\nDescription: %{desc}") %
+              {:bold => Bold}.merge(vid))
+    else
+      m.reply(_("couldn't retrieve infos on video code %{code}") % {:code => code})
+    end
+  end
+
+  def search(m, params)
     what = params[:words].to_s
     searchfor = CGI.escape what
     url = YOUTUBE_SEARCH % {:words => searchfor}
@@ -145,4 +191,5 @@ end
 
 plugin = YouTubePlugin.new
 
-plugin.map "youtube *words", :action => 'youtube', :threaded => true
+plugin.map "youtube info :movie", :action => 'info', :threaded => true
+plugin.map "youtube [search] *words", :action => 'search', :threaded => true
