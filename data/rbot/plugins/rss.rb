@@ -370,7 +370,8 @@ class RSSFeedsPlugin < Plugin
   def htmlinfo_filter(s)
     return nil unless s[:headers] and s[:headers]['x-rbot-location']
     return nil unless s[:headers]['content-type'].first.match(/xml|rss|atom|rdf/i) or
-      s[:text].include?("<rdf:RDF") or s[:text].include?("<rss") or s[:text].include?("<feed") or
+      (s[:text].include?("<rdf:RDF") and s[:text].include?("<channel")) or
+      s[:text].include?("<rss") or s[:text].include?("<feed") or
       s[:text].match(FEED_NS)
     blob = RssBlob.new(s[:headers]['x-rbot-location'],"", :htmlinfo)
     unless (fetchRss(blob, nil) and parseRss(blob, nil) rescue nil)
