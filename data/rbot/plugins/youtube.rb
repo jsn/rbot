@@ -10,7 +10,9 @@
 
 class YouTubePlugin < Plugin
   YOUTUBE_SEARCH = "http://gdata.youtube.com/feeds/api/videos?vq=%{words}&orderby=relevance"
-  YOUTUBE_VIDEO = "http://gdata.youtube.com/feeds/api/videos/%{code}"
+  YOUTUBE_VIDEO = "http://gdata.youtube.com/feeds/api/videos/%{id}"
+
+  YOUTUBE_VIDEO_URLS = %r{youtube.com/(?:watch\?v=|v/)(.*?)(&.*)?$}
 
   Config.register Config::IntegerValue.new('youtube.hits',
     :default => 3,
@@ -23,8 +25,10 @@ class YouTubePlugin < Plugin
     loc = Utils.check_location(s, /youtube\.com/)
     return nil unless loc
     if s[:text].include? '<div id="vidTitle">'
-      video_info = @bot.filter(:"youtube.video", s)
-      return nil # TODO
+      vid = @bot.filter(:"youtube.video", s)
+      return nil unless vid
+      content = _("Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %{duration}. %{views} views, faved %{faves} times. %{desc}") % vid
+      return vid.merge(:content => content)
     elsif s[:text].include? '<!-- start search results -->'
       vids = @bot.filter(:"youtube.search", s)[:videos]
       if !vids.empty?
@@ -102,8 +106,31 @@ class YouTubePlugin < Plugin
     return []
   end
 
+  # Filter a YouTube video URL
   def youtube_video_filter(s)
-    # TODO
+    id = s[:youtube_video_id]
+    if not id
+      url = s.key?(:headers) ? s[:headers]['x-rbot-location'].first : s[:url]
+      debug url
+      id = YOUTUBE_VIDEO_URLS.match(url).captures.first rescue nil
+    end
+    return nil unless id
+
+    debug id
+
+    url = YOUTUBE_VIDEO % {:id => id}
+    resp, xml = @bot.httputil.get_response(url)
+    unless Net::HTTPSuccess === resp
+      debug("error looking for movie %{id} on youtube: %{e}" % {:id => id, :e => xml})
+      return nil
+    end
+    debug xml
+    begin
+      return @bot.filter(:"youtube.apivideo", DataStream.new(xml, s))
+    rescue => e
+      debug e
+      return nil
+    end
   end
 
   def initialize
@@ -117,38 +144,17 @@ class YouTubePlugin < Plugin
 
   def info(m, params)
     movie = params[:movie]
-    code = ""
-    case movie
-    when %r{youtube.com/watch\?v=(.*?)(&.*)?$}
-      code = $1.dup
-    when %r{youtube.com/v/(.*)$}
-      code = $1.dup
-    when /^[A-Za-z0-9]+$/
-      code = movie.dup
-    end
-    if code.empty?
-      m.reply _("What movie was that, again?")
-      return
+    id = nil
+    if movie =~ /^[A-Za-z0-9]+$/
+      id = movie.dup
     end
 
-    url = YOUTUBE_VIDEO % {:code => code}
-    resp, xml = @bot.httputil.get_response(url)
-    unless Net::HTTPSuccess === resp
-      m.reply(_("error looking for movie %{code} on youtube: %{e}") % {:code => code, :e => xml})
-      return
-    end
-    debug "filtering XML"
-    debug xml
-    begin
-      vid = @bot.filter(:"youtube.apivideo", DataStream.new(xml, params))
-    rescue => e
-      debug e
-    end
+    vid = @bot.filter(:"youtube.video", :url => movie, :youtube_video_id => id)
     if vid
       m.reply(_("%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times. %{desc}") %
               {:bold => Bold}.merge(vid))
     else
-      m.reply(_("couldn't retrieve infos on video code %{code}") % {:code => code})
+      m.reply(_("couldn't retrieve video info") % {:id => id})
     end
   end
 
