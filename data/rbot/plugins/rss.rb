@@ -366,11 +366,17 @@ class RSSFeedsPlugin < Plugin
     }
   end
 
+  FEED_NS = %r{xmlns.*http://(purl\.org/rss|www.w3c.org/199/02/22-rdf)}
   def htmlinfo_filter(s)
     return nil unless s[:headers] and s[:headers]['x-rbot-location']
+    return nil unless s[:headers]['content-type'].first.match(/xml|rss|atom|rdf/i) or
+      s[:text].include?("<rdf:RDF") or s[:text].include?("<rss") or s[:text].include?("<feed") or
+      s[:text].match(FEED_NS)
     blob = RssBlob.new(s[:headers]['x-rbot-location'],"", :htmlinfo)
-    return nil unless fetchRss(blob, nil)
-    return nil unless parseRss(blob, nil)
+    unless fetchRss(blob, nil) and parseRss(blob, nil)
+      debug "tried to filter #{s.inspect} which is not an RSS feed"
+      return nil
+    end
     output = []
     blob.items.each { |it|
       output << printFormattedRss(blob, it)[:text]
