@@ -55,9 +55,9 @@ class YouTubePlugin < Plugin
       :cat => (e.elements["media:group/media:category"].text rescue nil),
       :seconds => (e.elements["media:group/yt:duration/@seconds"].value.to_i rescue nil),
       :url => (e.elements["media:group/media:player/@url"].value rescue nil),
-      :rating => (("%s/%s" % [e.elements["media:group/gd:rating/@average"].value, e.elements["media:group/gd:rating/@max"].value]) rescue nil),
-      :views => (e.elements["media:group/yt:statistics/@viewCount"].value rescue nil),
-      :faves => (e.elements["media:group/yt:statistics/@favoriteCount"].value rescue nil)
+      :rating => (("%s/%s" % [e.elements["gd:rating/@average"].value, e.elements["gd:rating/@max"].value]) rescue nil),
+      :views => (e.elements["yt:statistics/@viewCount"].value rescue nil),
+      :faves => (e.elements["yt:statistics/@favoriteCount"].value rescue nil)
     }
     if vid[:desc]
       vid[:desc].gsub!(/\s+/m, " ")
