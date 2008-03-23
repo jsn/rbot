@@ -145,7 +145,7 @@ class YouTubePlugin < Plugin
       debug e
     end
     if vid
-      m.reply(_("Video: %{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times.\nDescription: %{desc}") %
+      m.reply(_("%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times. %{desc}") %
               {:bold => Bold}.merge(vid))
     else
       m.reply(_("couldn't retrieve infos on video code %{code}") % {:code => code})
