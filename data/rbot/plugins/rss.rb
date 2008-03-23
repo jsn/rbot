@@ -373,8 +373,8 @@ class RSSFeedsPlugin < Plugin
       s[:text].include?("<rdf:RDF") or s[:text].include?("<rss") or s[:text].include?("<feed") or
       s[:text].match(FEED_NS)
     blob = RssBlob.new(s[:headers]['x-rbot-location'],"", :htmlinfo)
-    unless fetchRss(blob, nil) and parseRss(blob, nil)
-      debug "tried to filter #{s.inspect} which is not an RSS feed"
+    unless (fetchRss(blob, nil) and parseRss(blob, nil) rescue nil)
+      debug "#{s.pretty_inspect} is not an RSS feed, despite the appearances"
       return nil
     end
     output = []
