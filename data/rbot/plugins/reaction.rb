@@ -89,6 +89,7 @@ class ::Reaction
 
   def rm_reply(num)
     @replies.delete_at(num-1)
+    make_ranges
     return @raw_replies.delete_at(num-1)
   end
 
