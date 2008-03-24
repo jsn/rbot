@@ -20,6 +20,9 @@ class YouTubePlugin < Plugin
   Config.register Config::IntegerValue.new('youtube.descs',
     :default => 3,
     :desc => "When set to n > 0, the bot will return the description of the first n videos found")
+  Config.register Config::BooleanValue.new('youtube.formats',
+    :default => true,
+    :desc => "Should the bot display alternative URLs (swf, rstp) for YouTube videos?")
 
   def youtube_filter(s)
     loc = Utils.check_location(s, /youtube\.com/)
@@ -85,7 +88,7 @@ class YouTubePlugin < Plugin
         type = c.elements["@type"].value rescue nil
         medium = c.elements["@medium"].value rescue nil
         expression = c.elements["@expression"].value rescue nil
-        duration = c.elements["@duration"].value rescue nil
+        seconds = c.elements["@duration"].value.to_i rescue nil
         fmt = case num_fmt = (c.elements["@yt:format"].value rescue nil)
               when "1"
                 "h263+amr"
@@ -101,10 +104,23 @@ class YouTubePlugin < Plugin
         vid[:formats] << {
           :url => url, :type => type,
           :medium => medium, :expression => expression,
-          :duration => duration,
+          :seconds => seconds,
           :numeric_format => num_fmt,
           :format => fmt
         }.delete_if { |k, v| v.nil? }
+        if seconds
+          mins, secs = seconds.divmod 60
+          hours, mins = mins.divmod 60
+          if hours > 0
+            vid[:formats].last[:duration] = "%s:%s:%s" % [hours, mins, secs]
+          elsif mins > 0
+            vid[:formats].last[:duration] = "%s'%s\"" % [mins, secs]
+          else
+            vid[:formats].last[:duration] = "%ss" % [secs]
+          end
+        else
+          vid[:formats].last[:duration] = _("unknown duration")
+        end
       end
     }
     debug vid
@@ -179,8 +195,15 @@ class YouTubePlugin < Plugin
 
     vid = @bot.filter(:"youtube.video", :url => movie, :youtube_video_id => id)
     if vid
-      m.reply(_("%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times. %{desc}") %
-              {:bold => Bold}.merge(vid))
+      str = _("%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times. %{desc}") %
+        {:bold => Bold}.merge(vid)
+      if @bot.config['youtube.formats'] and not vid[:formats].empty?
+        str << _("\n -- also available at: ")
+        str << vid[:formats].inject([]) { |list, fmt|
+          list << ("%{url} %{type} %{format} (%{duration} %{expression} %{medium})" % fmt)
+        }.join(', ')
+      end
+      m.reply str
     else
       m.reply(_("couldn't retrieve video info") % {:id => id})
     end
