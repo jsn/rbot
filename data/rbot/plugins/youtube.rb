@@ -53,6 +53,7 @@ class YouTubePlugin < Plugin
     #   :title => mg["media:title"].text
     # fails because "media:title" is not an Integer. Bah
     vid = {
+      :formats => [],
       :author => (e.elements["author/name"].text rescue nil),
       :title =>  (e.elements["media:group/media:title"].text rescue nil),
       :desc =>   (e.elements["media:group/media:description"].text rescue nil),
@@ -79,6 +80,33 @@ class YouTubePlugin < Plugin
     else
       vid[:duration] = _("unknown duration")
     end
+    e.elements.each("media:group/media:content") { |c|
+      if url = (c.elements["@url"].value rescue nil)
+        type = c.elements["@type"].value rescue nil
+        medium = c.elements["@medium"].value rescue nil
+        expression = c.elements["@expression"].value rescue nil
+        duration = c.elements["@duration"].value rescue nil
+        fmt = case num_fmt = (c.elements["@yt:format"].value rescue nil)
+              when "1"
+                "h263+amr"
+              when "5"
+                "swf"
+              when "6"
+                "mp4+aac"
+              when nil
+                nil
+              else
+                num_fmt
+              end
+        vid[:formats] << {
+          :url => url, :type => type,
+          :medium => medium, :expression => expression,
+          :duration => duration,
+          :numeric_format => num_fmt,
+          :format => fmt
+        }.delete_if { |k, v| v.nil? }
+      end
+    }
     debug vid
     return vid
   end
