@@ -71,15 +71,7 @@ class YouTubePlugin < Plugin
       vid[:desc].gsub!(/\s+/m, " ")
     end
     if secs = vid[:seconds]
-      mins, secs = secs.divmod 60
-      hours, mins = mins.divmod 60
-      if hours > 0
-        vid[:duration] = "%s:%s:%s" % [hours, mins, secs]
-      elsif mins > 0
-        vid[:duration] = "%s'%s\"" % [mins, secs]
-      else
-        vid[:duration] = "%ss" % [secs]
-      end
+      vid[:duration] = Utils.secs_to_short(secs)
     else
       vid[:duration] = _("unknown duration")
     end
@@ -109,15 +101,7 @@ class YouTubePlugin < Plugin
           :format => fmt
         }.delete_if { |k, v| v.nil? }
         if seconds
-          mins, secs = seconds.divmod 60
-          hours, mins = mins.divmod 60
-          if hours > 0
-            vid[:formats].last[:duration] = "%s:%s:%s" % [hours, mins, secs]
-          elsif mins > 0
-            vid[:formats].last[:duration] = "%s'%s\"" % [mins, secs]
-          else
-            vid[:formats].last[:duration] = "%ss" % [secs]
-          end
+          vid[:formats].last[:duration] = Utils.secs_to_short(seconds)
         else
           vid[:formats].last[:duration] = _("unknown duration")
         end

@@ -223,6 +223,22 @@ module ::Irc
       end
     end
 
+    # Turn a number of seconds into a hours:minutes:seconds e.g.
+    # 3:18:10 or 5'12" or 7s
+    #
+    def Utils.secs_to_short(seconds)
+      secs = seconds.to_i # make sure it's an integer
+      mins, secs = secs.divmod 60
+      hours, mins = mins.divmod 60
+      if hours > 0
+        return ("%s:%s:%s" % [hours, mins, secs])
+      elsif mins > 0
+        return ("%s'%s\"" % [mins, secs])
+      else
+        return ("%ss" % [secs])
+      end
+    end
+
 
     # Execute an external program, returning a String obtained by redirecting
     # the program's standards errors and output 
