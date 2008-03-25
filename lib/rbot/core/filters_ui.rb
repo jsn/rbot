@@ -34,6 +34,16 @@ class FiltersModule < CoreBotModule
     m.reply msg
   end
 
+  def do_listgroups(m, params)
+    ar = @bot.filter_groups.map { |s| s.to_s }.sort!
+    if ar.empty?
+      msg = _("no known filter groups")
+    else
+      msg = _("known filter groups: ") << ar.join(", ") 
+    end
+    m.reply msg
+  end
+
   def do_search(m, params)
     l = @bot.filter_names.map { |s| s.to_s }
     pat = params[:pat].to_s
@@ -53,3 +63,4 @@ plugin = FiltersModule.new
 
 plugin.map "filters list [:group]", :action => :do_list
 plugin.map "filters search *pat", :action => :do_search
+plugin.map "filter groups", :action => :do_listgroups

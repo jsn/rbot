@@ -96,6 +96,11 @@ module ::Irc
       @filters.key?(global_filter_name(name, group))
     end
 
+    # This method checks if the bot has a filter group named _name_
+    def has_filter_group?(name)
+      @filter_group.key?(name)
+    end
+
     # This method is used to register a new filter
     def register_filter(name, group=nil, &block)
       raise "No block provided" unless block_given?
@@ -127,6 +132,12 @@ module ::Irc
         return [] unless defined? @filters
         return @filters.keys
       end
+    end
+
+    # This method is used to retrieve the filter group names
+    def filter_groups
+      return [] unless defined? @filter_group
+      return @filter_group.keys
     end
 
     # This method clears the filter list and installs the identity filter
