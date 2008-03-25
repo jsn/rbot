@@ -584,7 +584,7 @@ class AuthModule < CoreBotModule
     rescue
       return m.reply(_("couldn't find botuser %{user}") % {:user => params[:botuser]})
     end
-    m.reply(_("I'm not telling the master password to anyway, pal")) if botuser == @bot.auth.botowner
+    return m.reply(_("I'm not telling the master password to anyone, pal")) if botuser == @bot.auth.botowner
     msg = _("the password for botuser %{user} is %{password}") %
           {:user => botuser.username, :password => botuser.password}
     @bot.say user, msg
