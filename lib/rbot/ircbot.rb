@@ -103,7 +103,6 @@ require 'rbot/rbotconfig'
 require 'rbot/load-gettext'
 require 'rbot/config'
 require 'rbot/config-compat'
-# require 'rbot/utils'
 
 require 'rbot/irc'
 require 'rbot/rfc2812'
@@ -111,12 +110,10 @@ require 'rbot/ircsocket'
 require 'rbot/botuser'
 require 'rbot/timer'
 require 'rbot/plugins'
-# require 'rbot/channel'
 require 'rbot/message'
 require 'rbot/language'
 require 'rbot/dbhash'
 require 'rbot/registry'
-# require 'rbot/httputil'
 
 module Irc
 
