@@ -67,6 +67,10 @@ private
 end
 
 class WeatherPlugin < Plugin
+
+  Config.register Config::BooleanValue.new('weather.advisory',
+    :default => true,
+    :desc => "Should the bot report special weather advisories when any is present?")
   
   def help(plugin, topic="")
     case topic
@@ -265,6 +269,7 @@ class WeatherPlugin < Plugin
   end
 
   def wu_out_special(m, xml)
+    return unless @bot.config['weather.advisory']
     special = wu_check_special(xml).merge(:underline => Underline)
     if special
       if special[:text]
