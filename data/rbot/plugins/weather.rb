@@ -226,13 +226,20 @@ class WeatherPlugin < Plugin
   end
 
   def wu_weather_multi(m, xml)
-    stations = xml.scan(/<td>\s*<a href="\/(?:global\/stations|US\/(\w\w))\/(.*?)\.html">(.*?)<\/a>\s*:\s*(.*?)<\/td>/m)
+    # debug xml
+    stations = xml.scan(/<td>\s*(?:<a href="([^?"]+\?feature=[^"]+)"\s*[^>]*><img [^>]+><\/a>\s*)?<a href="\/(?:global\/stations|US\/(\w\w))\/([^"]*?)\.html">(.*?)<\/a>\s*:\s*(.*?)<\/td>/m)
+    # debug stations
     m.reply "multiple stations available, use 'weather station <code>' or 'weather <city, state>' as appropriate, for one of the following (current temp shown):"
     stations.map! { |ar|
-      if ar.first # US state
-        "%s, %s (%s): %s" % [ar[1], ar[0], ar[2], wu_clean(ar[3])]
+      warning = ar[0]
+      loc = ar[2]
+      state = ar[1]
+      par = ar[3]
+      w = ar[4]
+      if state # US station
+        (warning ? "*" : "") + ("%s, %s (%s): %s" % [loc, state, par, wu_clean(w)])
       else # non-US station
-        "station %s (%s): %s" % [ar[1], ar[2], wu_clean(ar[3])]
+        (warning ? "*" : "") + ("station %s (%s): %s" % [loc, par, wu_clean(w)])
       end
     }
     m.reply stations.join("; ")
