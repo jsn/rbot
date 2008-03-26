@@ -398,7 +398,7 @@ msgid "couldn't find botuser %{user}"
 msgstr ""
 
 #: lib/rbot/core/auth.rb:587
-msgid "I'm not telling the master password to anyway, pal"
+msgid "I'm not telling the master password to anyone, pal"
 msgstr ""
 
 #: lib/rbot/core/auth.rb:588
