@@ -173,8 +173,9 @@ class WeatherPlugin < Plugin
         m.reply "no such station found (#{where})"
         return
       when /<table border.*?>(.*?)<\/table>/m
-        data = $1
+        data = $1.dup
         m.reply wu_weather_filter(data)
+        wu_out_special(m, xml)
       else
         debug xml
         m.reply "something went wrong with the data for #{where}..."
@@ -202,6 +203,7 @@ class WeatherPlugin < Plugin
         else
           m.reply "couldn't parse weather data from #{where}"
         end
+        wu_out_special(m, xml)
       when /<a href="\/(?:global\/stations|US\/\w\w)\//
         wu_weather_multi(m, xml)
       else
@@ -243,6 +245,34 @@ class WeatherPlugin < Plugin
       end
     }
     m.reply stations.join("; ")
+  end
+
+  def wu_check_special(xml)
+    if spec_match = xml.match(%r{<a href="([^"]+\?[^"]*feature=warning[^"]+)"[^>]*>([^<]+)</a>})
+      special = {
+        :url => "http://mobile.wunderground.com"+$1,
+        :special => $2.dup
+      }
+      spec_xml = @bot.httputil.get(special[:url])
+      if spec_xml and spec_td = spec_xml.match(/<tr>\s*<td align="left">\s*(.*?)\s*<\/td>\s*<\/tr>\s*<\/table>/m)
+        return special.merge(:text => $1.ircify_html)
+      else
+        return special
+      end
+    else
+      return nil
+    end
+  end
+
+  def wu_out_special(m, xml)
+    special = wu_check_special(xml).merge(:underline => Underline)
+    if special
+      if special[:text]
+        m.reply("%{underline}%{special}%{underline}: %{text}" % special)
+      else
+        m.reply("%{underline}%{special}%{underline} @ %{url}" % special)
+      end
+    end
   end
 
   def wu_weather_filter(stuff)
