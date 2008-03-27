@@ -419,6 +419,19 @@ module Irc
     end
   end
 
+  # class to manage IRC INVITEs
+  # +address?+ can be used as a shortcut to see if the bot was invited,
+  # which should be true except for server bugs
+  class InviteMessage < BasicUserMessage
+    # channel user was invited to
+    attr_reader :channel
+
+    def initialize(bot, server, source, target, channel, message="")
+      super(bot, server, source, target, message)
+      @channel = channel
+    end
+  end
+
   # class to pass IRC Nick changes in. @message contains the old nickame,
   # @sourcenick contains the new one.
   class NickMessage < BasicUserMessage

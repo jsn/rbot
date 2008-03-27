@@ -668,9 +668,10 @@ class Bot
       @plugins.delegate("kick", m)
     }
     @client[:invite] = proc {|data|
-      if data[:target] == myself
-        join data[:channel] if @auth.allow?("join", data[:source], data[:source].nick)
-      end
+      m = InviteMessage.new(self, server, data[:source], data[:target], data[:channel])
+
+      @plugins.delegate("listen", m)
+      @plugins.delegate("invite", m)
     }
     @client[:changetopic] = proc {|data|
       m = TopicMessage.new(self, server, data[:source], data[:channel], data[:topic])

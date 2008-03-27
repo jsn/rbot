@@ -95,6 +95,9 @@ module Plugins
                          Called when a user (or the bot) is kicked from a
                          channel the bot is in.
 
+  invite(InviteMessage)::
+                         Called when the bot is invited to a channel.
+
   join(JoinMessage)::
                          Called when a user (or the bot) joins a channel
 
