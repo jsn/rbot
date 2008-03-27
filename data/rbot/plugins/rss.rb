@@ -803,7 +803,7 @@ class RSSFeedsPlugin < Plugin
     if params and handle = params[:handle]
       feed = @feeds.fetch(handle.downcase, nil)
       if feed
-        @bot.timer.reschedule(@watch[feed.handle], 0)
+        @bot.timer.reschedule(@watch[feed.handle], (params[:delay] || 0).to_f)
         m.okay if m
       else
         m.reply _("no such feed %{handle}") % { :handle => handle } if m
@@ -1190,7 +1190,7 @@ plugin.map 'rss unwatch :handle [in :chan]',
   :action => 'unwatch_rss'
 plugin.map 'rss rmwatch :handle [in :chan]',
   :action => 'unwatch_rss'
-plugin.map 'rss rewatch [:handle]',
+plugin.map 'rss rewatch [:handle] [:delay]',
   :action => 'rewatch_rss'
 plugin.map 'rss types',
   :action => 'rss_types'
