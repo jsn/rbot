@@ -209,6 +209,82 @@ class AuthModule < CoreBotModule
     }
   end
 
+  def find_auth(pseudo)
+    k = pseudo.plugin.intern
+    cmds = @bot.plugins.commands
+    auth = nil
+    if cmds.has_key?(k)
+      cmds[k][:botmodule].handler.each do |tmpl|
+        options, failure = tmpl.recognize(pseudo)
+        next if options.nil?
+        auth = tmpl.options[:full_auth_path]
+        break
+      end
+    end
+    return auth
+  end
+
+  def auth_allow_deny(m, p)
+    begin
+      botuser = @bot.auth.get_botuser(p[:user].sub(/^all$/,"everyone"))
+    rescue
+      return m.reply(_("couldn't find botuser %{name}") % {:name => params[:user]})
+    end
+
+    if p[:where].to_s.empty?
+      where = :*
+    else
+      where = m.parse_channel_list(p[:where].to_s).first # should only be one anyway
+    end
+
+    # pseudo-message to find the template. The source is ignored, and the
+    # target is set according to where the template should be checked
+    # (public or private)
+    # This might still fail in the case of 'everywhere' for commands there are
+    # really only private
+    case where
+    when :"?"
+      pseudo_target = @bot.myself
+    when :*
+      pseudo_target = m.channel
+    else
+      pseudo_target = m.server.channel(where)
+    end
+
+    pseudo = PrivMessage.new(bot, m.server, m.source, pseudo_target, p[:stuff].to_s)
+
+    auth_path = find_auth(pseudo)
+    debug auth_path
+
+    if auth_path
+      allow = p[:allow]
+      if @bot.auth.permit?(botuser, auth_path, where)
+        return m.reply(_("%{user} can already do that") % {:user => botuser}) if allow
+      else
+        return m.reply(_("%{user} can't do that already") % {:user => botuser}) if !allow
+      end
+      cmd = PrivMessage.new(bot, m.server, m.source, m.target, "permissions set %{sign}%{path} %{where} for %{user}" % {
+        :path => auth_path,
+        :user => p[:user],
+        :sign => (allow ? '+' : '-'),
+        :where => p[:where].to_s
+      })
+      handle(cmd)
+    else
+      m.reply(_("sorry, %{cmd} doesn't look like a valid command. maybe you misspelled it, or you need to specify it should be in private?") % {
+        :cmd => p[:stuff].to_s
+      })
+    end
+  end
+
+  def auth_allow(m, p)
+    auth_allow_deny(m, p.merge(:allow => true))
+  end
+
+  def auth_deny(m, p)
+    auth_allow_deny(m, p.merge(:allow => false))
+  end
+
   def get_botuser_for(user)
     @bot.auth.irc_to_botuser(user)
   end
@@ -320,13 +396,17 @@ class AuthModule < CoreBotModule
         return _("user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy")
       end
     when "auth"
-      return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user, meet, hello")
+      return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user, meet, hello, allow, prevent")
     when "meet"
       return _("meet <nick> [as <user>]: creates a bot user for nick, calling it user (defaults to the nick itself)")
     when "hello"
       return _("hello: creates a bot user for the person issuing the command")
+    when "allow"
+      return _("allow <user> to do <sample command> [<where>]: gives botuser <user> the permissions to execute a command such as the provided sample command (in private or in channel, according to the optional <where>)")
+    when "deny"
+      return _("deny <user> from doing <sample command> [<where>]: removes from botuser <user> the permissions to execute a command such as the provided sample command (in private or in channel, according to the optional <where>)")
     else
-      return _("auth commands: auth, login, whoami, who, permission[s], user, meet, hello")
+      return _("auth commands: auth, login, whoami, who, permission[s], user, meet, hello, allow, deny")
     end
   end
 
@@ -917,6 +997,16 @@ auth.map "user list",
 
 auth.map "user *data",
   :action => 'auth_manage_user'
+
+auth.map "allow :user to do *stuff [*where]",
+  :action => 'auth_allow',
+  :requirements => {:where => /^(?:anywhere|everywhere|[io]n \S+)$/},
+  :auth_path => ':edit::other:'
+
+auth.map "deny :user from doing *stuff [*where]",
+  :action => 'auth_deny',
+  :requirements => {:where => /^(?:anywhere|everywhere|[io]n \S+)$/},
+  :auth_path => ':edit::other:'
 
 auth.default_auth("user", true)
 auth.default_auth("edit::other", false)
