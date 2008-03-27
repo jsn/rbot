@@ -44,7 +44,7 @@ The necessary setup is:
        # remote interface. for example, in this script we want 'say',
        # 'action' and other basic commands to work:
 
-       <you> permissions set +basics::talk::do for remote
+       <you> permissions set +basics::talk::do for rmuser
        <rbot> alright
 
     4) # run the #{$0} and type something. the message should
