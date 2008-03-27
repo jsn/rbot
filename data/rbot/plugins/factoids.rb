@@ -331,7 +331,9 @@ class FactoidsPlugin < Plugin
     # When looking for words we separate them with
     # arbitrary whitespace, not whatever they came with
     pre = words.map { |w| Regexp.escape(w)}.join("\\s+")
-    return Regexp.new("\\b#{pre}\\b", true)
+    pre << '\b' if pre.match(/\b$/)
+    pre = '\b' + pre if pre.match(/^\b/)
+    return Regexp.new(pre, true)
   end
 
   def facts(m, params)
