@@ -29,6 +29,12 @@ class BasicsModule < CoreBotModule
     end
   end
 
+  def invite(m)
+    if @bot.auth.allow?(:"basics::move::join", m.source, m.source)
+      @bot.join m.channel
+    end
+  end
+
   def bot_part(m, param)
     if param[:chan]
       @bot.part param[:chan]
