@@ -12,12 +12,9 @@
 # encoding. The plugin takes care of translation to/from utf-8 on server IO,
 # if necessary (translation charsets are configurable).
 
-# TODO do we actually want this?
-require 'jcode'
-
 require 'iconv'
 
-class UnicodePlugin < Plugin
+class UnicodePlugin < CoreBotModule
     Config.register Config::BooleanValue.new(
     'encoding.enable', :default => true,
     :desc => "Support for non-ascii charsets",
