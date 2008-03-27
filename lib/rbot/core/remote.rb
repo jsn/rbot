@@ -323,7 +323,7 @@ class RemoteModule < CoreBotModule
     :desc => "Port on which the remote interface will be presented")
 
   Config.register Config::StringValue.new('remote.host',
-    :default => '',
+    :default => '127.0.0.1',
     :requires_rescan => true,
     :desc => "Host on which the remote interface will be presented")
 
