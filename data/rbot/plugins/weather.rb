@@ -252,26 +252,29 @@ class WeatherPlugin < Plugin
   end
 
   def wu_check_special(xml)
-    if spec_match = xml.match(%r{<a href="([^"]+\?[^"]*feature=warning[^"]+)"[^>]*>([^<]+)</a>})
+    specials = []
+    # We only scan the first half to prevent getting the advisories twice
+    xml[0,xml.length/2].scan(%r{<a href="([^"]+\?[^"]*feature=warning#([^"]+))"[^>]*>([^<]+)</a>}) do
       special = {
         :url => "http://mobile.wunderground.com"+$1,
-        :special => $2.dup
+        :type => $2.dup,
+        :special => $3.dup
       }
+      spec_rx = Regexp.new("<a name=\"#{special[:type]}\">(?:.+?)<td align=\"left\">\\s+(.+?)\\s+</td>\\s+</tr>\\s+</table>", Regexp::MULTILINE)
       spec_xml = @bot.httputil.get(special[:url])
-      if spec_xml and spec_td = spec_xml.match(/<tr>\s*<td align="left">\s*(.*?)\s*<\/td>\s*<\/tr>\s*<\/table>/m)
-        return special.merge(:text => $1.ircify_html)
-      else
-        return special
+      if spec_xml and spec_td = spec_xml.match(spec_rx)
+        special.merge!(:text => spec_td.captures.first.ircify_html)
       end
-    else
-      return nil
+      specials << special
     end
+    return specials
   end
 
   def wu_out_special(m, xml)
     return unless @bot.config['weather.advisory']
-    special = wu_check_special(xml)
-    if special
+    specials = wu_check_special(xml)
+    debug specials
+    specials.each do |special|
       special.merge!(:underline => Underline)
       if special[:text]
         m.reply("%{underline}%{special}%{underline}: %{text}" % special)
