@@ -270,8 +270,9 @@ class WeatherPlugin < Plugin
 
   def wu_out_special(m, xml)
     return unless @bot.config['weather.advisory']
-    special = wu_check_special(xml).merge(:underline => Underline)
+    special = wu_check_special(xml)
     if special
+      special.merge!(:underline => Underline)
       if special[:text]
         m.reply("%{underline}%{special}%{underline}: %{text}" % special)
       else
