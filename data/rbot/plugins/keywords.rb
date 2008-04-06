@@ -261,6 +261,11 @@ class Keywords < Plugin
     return false
   end
 
+  # is +word+ a passively ignored keyword?
+  def ignored_word?(word)
+    @bot.config["keyword.ignore_words"].include?(word)
+  end
+
   # m::     PrivMessage containing message info
   # key::   key being queried
   # quiet:: optional, if false, complain if +key+ is not found
