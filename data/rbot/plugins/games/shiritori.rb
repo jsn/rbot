@@ -453,8 +453,7 @@ class ShiritoriPlugin < Plugin
   end
   
   # all messages from a channel is sent to its shiritori game if any
-  def listen(m)
-    return unless m.kind_of?(PrivMessage)
+  def message(m)
     return unless @games.has_key?(m.channel)
     # send the message to the game in the channel to handle it
     @games[m.channel].handle_message m

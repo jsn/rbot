@@ -180,8 +180,7 @@ class UrlPlugin < Plugin
     Thread.new { handle_urls(m, urls, params[:urls].length) }
   end
 
-  def listen(m)
-    return unless m.kind_of?(PrivMessage)
+  def message(m)
     return if m.address?
 
     escaped = URI.escape(m.message, OUR_UNSAFE)

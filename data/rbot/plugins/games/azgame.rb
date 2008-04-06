@@ -144,8 +144,7 @@ class AzGamePlugin < Plugin
     @registry[:wordcache] = @wordcache
   end
 
-  def listen(m)
-    return unless m.kind_of?(PrivMessage)
+  def message(m)
     return if m.channel.nil? or m.address?
     k = m.channel.downcase.to_s # to_sym?
     return unless @games.key?(k)

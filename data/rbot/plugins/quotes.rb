@@ -142,9 +142,7 @@ class QuotePlugin < Plugin
     end
   end
 
-  def listen(m)
-    return unless(m.kind_of? PrivMessage)
-
+  def message(m)
     command = m.message.dup
     if(m.address? && m.private?)
       case command

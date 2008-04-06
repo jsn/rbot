@@ -360,9 +360,7 @@ class QuizPlugin < Plugin
 
   # Reimplemented from Plugin
   #
-  def listen( m )
-    return unless m.kind_of?(PrivMessage)
-
+  def message(m)
     chan = m.channel
     return unless @quizzes.has_key?( chan )
     q = @quizzes[chan]

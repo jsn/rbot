@@ -190,8 +190,8 @@ class MarkovPlugin < Plugin
     end
   end
   
-  def listen(m)
-    return unless m.kind_of?(PrivMessage) && m.public?
+  def message(m)
+    return unless m.public?
     return if m.address?
     return if ignore? m.source
 

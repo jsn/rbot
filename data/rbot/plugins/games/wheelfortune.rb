@@ -506,8 +506,8 @@ class WheelOfFortune < Plugin
     end
   end
 
-  def listen(m)
-    return unless m.kind_of?(PrivMessage) and not m.address?
+  def message(m)
+    return if m.address?
     ch = m.channel.irc_downcase(m.server.casemap).intern
     return unless game = @games[ch]
     return unless game.running?

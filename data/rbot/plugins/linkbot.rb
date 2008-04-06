@@ -45,11 +45,10 @@ class LinkBot < Plugin
   end
 
   # Main method
-  def listen(m)
+  def message(m)
     linkbots = @bot.config['linkbot.nicks']
     return if linkbots.empty?
     return unless linkbots.include?(m.sourcenick)
-    return unless m.kind_of?(PrivMessage)
     # Now we know that _m_ is a PRIVMSG from a linkbot. Let's split it
     # in nick, network, message
     if @message_patterns.any? {|p| m.message =~ p}
