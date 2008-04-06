@@ -579,6 +579,7 @@ class Bot
       unless ignored
         @plugins.delegate "listen", m
         @plugins.delegate("ctcp_listen", m) if m.ctcp
+        @plugins.delegate "message", m
         @plugins.privmsg(m) if m.address?
         if not m.replied
           @plugins.delegate "unreplied", m

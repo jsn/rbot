@@ -82,6 +82,11 @@ module Plugins
                          use message.ctcp_reply, which sends a private NOTICE
                          to the sender.
 
+  message(PrivMessage)::
+                         Called for all PRIVMSG. Hook on this method if you
+                         need to handle PRIVMSGs regardless of whether they are
+                         addressed to the bot or not, and regardless of
+
   privmsg(PrivMessage)::
                          Called for a PRIVMSG if the first word matches one
                          the plugin #register()ed for. Use m.plugin to get
