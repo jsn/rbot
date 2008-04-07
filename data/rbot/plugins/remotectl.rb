@@ -19,6 +19,7 @@ class RemoteCtlPlugin < Plugin
         @bot.auth.login(u, m.source.username, m.source.password)
         new_m = PrivMessage.new(@bot, @bot.server, u, @bot.myself, s)
         @bot.plugins.delegate "listen", new_m
+        @bot.plugins.delegate "message", new_m
         @bot.plugins.privmsg(new_m)
     end
 end

@@ -65,6 +65,7 @@ class LinkBot < Plugin
       # and delegate it to the plugins
       new_m = PrivMessage.new(@bot, m.server, m.server.user(new_nick), m.target, message)
       @bot.plugins.delegate "listen", new_m
+      @bot.plugins.delegate "message", new_m
       @bot.plugins.privmsg(new_m) if new_m.address?
 
       ## Another way is to create a data Hash with source, target and message keys
