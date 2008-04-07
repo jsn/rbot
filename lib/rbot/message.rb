@@ -128,6 +128,10 @@ module Irc
     # has the message been replied to/handled by a plugin?
     attr_accessor :replied
 
+    # should the message be ignored?
+    attr_accessor :ignored
+    alias :ignored? :ignored
+
     # instantiate a new Message
     # bot::      associated bot class
     # server::   Server where the message took place
@@ -145,6 +149,7 @@ module Irc
       @message = BasicUserMessage.stripcolour message
       @replied = false
       @server = server
+      @ignored = false
 
       @identified = false
       if @msg_wants_id && @server.capabilities[:"identify-msg"]

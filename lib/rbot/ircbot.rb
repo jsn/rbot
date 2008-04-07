@@ -566,19 +566,15 @@ class Bot
       # debug "Message target is #{data[:target].inspect}"
       # debug "Bot is #{myself.inspect}"
 
-      ignored = false
       @config['irc.ignore_users'].each { |mask|
         if m.source.matches?(server.new_netmask(mask))
-          ignored = true
-          break
+          m.ignored = true
         end
       }
 
       irclogprivmsg(m)
 
-      unless ignored
-        @plugins.irc_delegate('privmsg', m)
-      end
+      @plugins.irc_delegate('privmsg', m) unless m.ignored?
     }
     @client[:notice] = proc { |data|
       message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
