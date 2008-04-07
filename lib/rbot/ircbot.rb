@@ -577,13 +577,7 @@ class Bot
       irclogprivmsg(m)
 
       unless ignored
-        @plugins.delegate "listen", m
-        @plugins.delegate("ctcp_listen", m) if m.ctcp
-        @plugins.delegate "message", m
-        @plugins.privmsg(m) if m.address?
-        if not m.replied
-          @plugins.delegate "unreplied", m
-        end
+        @plugins.irc_delegate('privmsg', m)
       end
     }
     @client[:notice] = proc { |data|
@@ -630,8 +624,7 @@ class Bot
       data[:is_on].each { |ch|
         irclog "@ #{old} is now known as #{new}", ch
       }
-      @plugins.delegate("listen", m)
-      @plugins.delegate("nick", m)
+      @plugins.irc_delegate("nick", m)
     }
     @client[:quit] = proc {|data|
       source = data[:source]
@@ -640,8 +633,7 @@ class Bot
       data[:was_on].each { |ch|
         irclog "@ Quit: #{source}: #{message}", ch
       }
-      @plugins.delegate("listen", m)
-      @plugins.delegate("quit", m)
+      @plugins.irc_delegate("quit", m)
     }
     @client[:mode] = proc {|data|
       irclog "@ Mode #{data[:modestring]} by #{data[:source]}", data[:channel]
@@ -650,36 +642,31 @@ class Bot
       m = JoinMessage.new(self, server, data[:source], data[:channel], data[:message])
       irclogjoin(m)
 
-      @plugins.delegate("listen", m)
-      @plugins.delegate("join", m)
+      @plugins.irc_delegate("join", m)
       sendq("WHO #{data[:channel]}", data[:channel], 2) if m.address?
     }
     @client[:part] = proc {|data|
       m = PartMessage.new(self, server, data[:source], data[:channel], data[:message])
       irclogpart(m)
 
-      @plugins.delegate("listen", m)
-      @plugins.delegate("part", m)
+      @plugins.irc_delegate("part", m)
     }
     @client[:kick] = proc {|data|
       m = KickMessage.new(self, server, data[:source], data[:target], data[:channel],data[:message])
       irclogkick(m)
 
-      @plugins.delegate("listen", m)
-      @plugins.delegate("kick", m)
+      @plugins.irc_delegate("kick", m)
     }
     @client[:invite] = proc {|data|
       m = InviteMessage.new(self, server, data[:source], data[:target], data[:channel])
 
-      @plugins.delegate("listen", m)
-      @plugins.delegate("invite", m)
+      @plugins.irc_delegate("invite", m)
     }
     @client[:changetopic] = proc {|data|
       m = TopicMessage.new(self, server, data[:source], data[:channel], data[:topic])
       irclogtopic(m)
 
-      @plugins.delegate("listen", m)
-      @plugins.delegate("topic", m)
+      @plugins.irc_delegate("topic", m)
     }
     @client[:topic] = proc { |data|
       irclog "@ Topic is \"#{data[:topic]}\"", data[:channel]
@@ -690,8 +677,7 @@ class Bot
       irclog "@ Topic set by #{topic.set_by} on #{topic.set_on}", channel
       m = TopicMessage.new(self, server, data[:source], channel, topic)
 
-      @plugins.delegate("listen", m)
-      @plugins.delegate("topic", m)
+      @plugins.irc_delegate("topic", m)
     }
     @client[:names] = proc { |data|
       @plugins.delegate "names", data[:channel], data[:users]

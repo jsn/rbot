@@ -822,6 +822,21 @@ module Plugins
       return false
       # debug "Finished delegating privmsg with key #{m.plugin.inspect}"
     end
+
+    # delegate IRC messages, by delegating 'listen' first, and the actual method
+    # afterwards. Delegating 'privmsg' also delegates ctcp_listen and message
+    # as appropriate.
+    def irc_delegate(method, m)
+      delegate('listen', m)
+      if method.to_sym == :privmsg
+        delegate('ctcp_listen', m) if m.ctcp
+        delegate('message', m)
+        privmsg(m) if m.address?
+        delegate('unreplied', m) unless m.replied
+      else
+        delegate(method, m)
+      end
+    end
   end
 
   # Returns the only PluginManagerClass instance
