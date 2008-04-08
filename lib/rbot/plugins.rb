@@ -134,9 +134,14 @@ module Plugins
 =end
 
   class BotModule
-    attr_reader :bot   # the associated bot
-    attr_reader :registry # the plugin registry
-    attr_reader :handler # the message map handler
+    # the associated bot
+    attr_reader :bot
+
+    # the plugin registry
+    attr_reader :registry
+
+    # the message map handler
+    attr_reader :handler
 
     # Initialise your bot module. Always call super if you override this method,
     # as important variables are set up for you:
