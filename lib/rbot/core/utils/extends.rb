@@ -366,6 +366,10 @@ module ::Irc
       end
 
       class BotModule
+
+        # The botmodule registry
+        attr_reader :registry
+
         # Sometimes plugins need to create a new fake message based on an existing
         # message: for example, this is done by alias, linkbot, reaction and remotectl.
         #
