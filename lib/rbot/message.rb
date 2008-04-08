@@ -70,7 +70,7 @@ module Irc
 
   # Convert a String or Symbol into a color number
   def Irc.find_color(data)
-    if Integer === data
+    "%02d" % if Integer === data
       data
     else
       f = if String === data
@@ -91,10 +91,10 @@ module Irc
   def Irc.color(fg=nil,bg=nil)
     str = Color.dup
     if fg
-     str << Irc.find_color(fg).to_s
+     str << Irc.find_color(fg)
     end
     if bg
-      str << "," << Irc.find_color(bg).to_s
+      str << "," << Irc.find_color(bg)
     end
     return str
   end
