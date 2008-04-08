@@ -263,9 +263,14 @@ class ReactionPlugin < Plugin
     return unless reply
     args = reply.apply(subs)
     if args[0] == :cmd
-      new_m = PrivMessage.new(@bot, m.server, m.source, m.target, @bot.nick+": "+args[1])
-      @bot.plugins.delegate "listen", new_m
-      @bot.plugins.privmsg(new_m) if new_m.address?
+      begin
+        # Pass the new message back to the bot.
+        # FIXME Maybe we should do it the alias way, only calling
+        # @bot.plugins.privmsg() ?
+        fake_message(@bot.nick+": "+args[1], :from => m)
+      rescue RecurseTooDeep => e
+        error e
+      end
     else
       m.__send__(*args)
     end
