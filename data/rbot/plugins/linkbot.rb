@@ -61,24 +61,12 @@ class LinkBot < Plugin
       # person's highlight
       new_nick.gsub!(/[#{Bold}#{Underline}#{Reverse}#{Italic}#{NormalText}]/, '')
       debug "#{m.sourcenick} reports that #{new_nick} said #{message.inspect} on #{network}"
-      # One way to pass the new message back to the bot is to create a PrivMessage
-      # and delegate it to the plugins
-      new_m = PrivMessage.new(@bot, m.server, m.server.user(new_nick), m.target, message)
-      @bot.plugins.delegate "listen", new_m
-      @bot.plugins.delegate "message", new_m
-      @bot.plugins.privmsg(new_m) if new_m.address?
-
-      ## Another way is to create a data Hash with source, target and message keys
-      ## and then letting the bot client :privmsg handler handle it
-      ## Note that this will also create irclog entries for the fake PRIVMSG
-      ## TODO we could probably add a :no_irc_log entry to the data passed to the
-      ## @bot.client handlers, or something like that
-      # data = {
-      #   :source => m.server.user(new_nick)
-      #   :target => m.target
-      #   :message => message
-      # }
-      # @bot.client[:privmsg].call(data)
+      begin
+        # Pass the new message back to the bot
+        fake_message(message, :from => m, :source => m.server.user(new_nick))
+      rescue RecurseTooDeep => e
+        error e
+      end
     end
   end
 end
