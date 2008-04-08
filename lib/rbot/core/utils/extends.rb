@@ -94,12 +94,20 @@ class ::Array
     self[rand(self.length)]
   end
 
-  # This method returns a random element from the array, deleting it from the
-  # array itself. The method returns nil if the array is empty
+  # This method returns a given element from the array, deleting it from the
+  # array itself. The method returns nil if the element couldn't be found.
   #
-  def delete_one
+  # If nil is specified, a random element is returned and deleted.
+  #
+  def delete_one(val=nil)
     return nil if self.empty?
-    self.delete_at(rand(self.length))
+    if val.nil?
+      index = rand(self.length)
+    else
+      index = self.index(val)
+      return nil unless index
+    end
+    self.delete_at(index)
   end
 end
 
