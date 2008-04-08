@@ -109,6 +109,24 @@ class ::Array
     end
     self.delete_at(index)
   end
+
+  # This method shuffles the items in the array
+  def shuffle!
+    base = self.dup
+    self.clear
+    while item = base.delete_one
+      self << item
+    end
+    self
+  end
+
+  # This method returns a new array with the same items as
+  # the receiver, but shuffled
+  def shuffle
+    ret = self.dup
+    ret.shuffle!
+  end
+
 end
 
 # Extensions to the Range class
