@@ -36,8 +36,6 @@ class AliasPlugin < Plugin
   class AliasDefinitionError < ArgumentError
   end
 
-  MAX_RECURSION_DEPTH = 10
-
   def initialize
     super
     @data_path = "#{@bot.botclass}/alias/"
@@ -130,25 +128,16 @@ class AliasPlugin < Plugin
     if name.to_s =~ /\Aalias_handle<(.+)>\Z/
       text = $1
       m, params = args
-      # messages created by alias handler will have a depth method, which returns the 
-      # depth of "recursion" caused by the message
-      current_depth = if m.respond_to?(:depth) then m.depth else 0 end
-      if current_depth > MAX_RECURSION_DEPTH
-        m.reply _('The alias seems to have caused infinite recursion. Please examine your alias definitions')
-        return
-      end
 
       command = @aliases[text]
       if command
-        # create a fake message containing the intended command
-        new_msg = PrivMessage.new(@bot, m.server, m.server.user(m.source), m.target,
-                  command.gsub(/<(\w+)>/) {|arg| params[:"#{$1}"].to_s})
-        # tag incremented depth on the message
-        class << new_msg
-          self
-        end.send(:define_method, :depth) {current_depth + 1}
-
-        @bot.plugins.privmsg(new_msg)
+        begin
+          # create a fake message containing the intended command
+          @bot.plugins.privmsg fake_message(command.gsub(/<(\w+)>/) {|arg| params[:"#{$1}"].to_s}, :from => m, :delegate => false)
+        rescue RecurseTooDeep
+          m.reply _('The alias seems to have caused infinite recursion. Please examine your alias definitions')
+          return
+        end
       else
         m.reply(_("Error handling the alias, The alias %{text} is not defined or has beeen removed. I will stop responding to it after rescan,") %
                 {:text => text})
