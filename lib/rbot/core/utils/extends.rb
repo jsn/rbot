@@ -339,5 +339,67 @@ module ::Irc
         end
       }.uniq
     end
+
+    # The recurse depth of a message, for fake messages. 0 means an original
+    # message
+    def recurse_depth
+      unless defined? @recurse_depth
+        @recurse_depth = 0
+      end
+      @recurse_depth
+    end
+
+    # Set the recurse depth of a message, for fake messages. 0 should only
+    # be used by original messages
+    def recurse_depth=(val)
+      @recurse_depth = val
+    end
+  end
+
+  class Bot
+    module Plugins
+
+      # Maximum fake message recursion
+      MAX_RECURSE_DEPTH = 10
+
+      class RecurseTooDeep < RuntimeError
+      end
+
+      class BotModule
+        # Sometimes plugins need to create a new fake message based on an existing
+        # message: for example, this is done by alias, linkbot, reaction and remotectl.
+        #
+        # This method simplifies the message creation, including a recursion depth
+        # check.
+        #
+        # In the options you can specify the :bot, the :server, the :source,
+        # the :target, the message :class and whether or not to :delegate. To
+        # initialize these entries from an existing message, you can use :from
+        #
+        # If you don't specify a :from you should specify a :source.
+        #
+        def fake_message(string, opts={})
+          if from = opts[:from]
+            o = {
+              :bot => from.bot, :server => from.server, :source => from.source,
+              :target => from.target, :class => from.class, :delegate => true,
+              :depth => from.recurse_depth + 1
+            }.merge(opts)
+          else
+            o = {
+              :bot => @bot, :server => @bot.server, :target => @bot.myself,
+              :class => PrivMessage, :delegate => true, :depth => 1
+            }.merge(opts)
+          end
+          raise RecurseTooDeep if o[:depth] > MAX_RECURSE_DEPTH
+          new_m = o[:class].new(o[:bot], o[:server], o[:source], o[:target], string)
+          new_m.recurse_depth = o[:depth]
+          return new_m unless o[:delegate]
+          method = o[:class].to_s.gsub(/^Irc::|Message$/,'').downcase
+          method = 'privmsg' if method == 'priv'
+          o[:bot].plugins.irc_delegate(method, new_m)
+        end
+      end
+    end
   end
 end
