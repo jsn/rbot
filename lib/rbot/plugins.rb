@@ -424,6 +424,7 @@ module Plugins
       @commandmappers.clear
       @maps.clear
       @failures_shown = false
+      mark_priorities_dirty
     end
 
     # Associate with bot _bot_
@@ -616,6 +617,7 @@ module Plugins
          @delegate_list[m.intern] << p
        }
       }
+      mark_priorities_dirty
     end
 
     # call the save method for each active plugin
