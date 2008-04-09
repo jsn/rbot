@@ -390,7 +390,9 @@ class UnoGame
       announce _('what color is that?')
       return
     end
-    announce _('color is now %{c}') % { :c => @color.downcase }
+    announce _('color is now %{c}') % {
+      :c => UnoGame.irc_color_bg(@color)+" #{@color} "
+    }
     next_turn
   end
 
