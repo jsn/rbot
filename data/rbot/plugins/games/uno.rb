@@ -476,6 +476,7 @@ class UnoGame
         end
       end
     end
+    picked.sort!
     notify player, _("You picked %{picked}") % { :picked => picked.join(' ') }
     player.cards += picked
     player.cards.sort!
