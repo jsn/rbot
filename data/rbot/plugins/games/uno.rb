@@ -498,11 +498,11 @@ class UnoGame
       :uno => UNO, :p => @players.first
     }
     if @picker > 0
-      p = @player[1]
+      p = @players[1]
       announce _("%{p} has to pick %{b}%{n}%{b} cards!") % {
         :p => p, :n => @picker, :b => Bold
       }
-      deal(@player[1], @picker)
+      deal(p, @picker)
       @picker = 0
     end
     score = @players.inject(0) do |sum, p|
