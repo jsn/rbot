@@ -127,7 +127,7 @@ class UnoGame
       end
     end
     def to_s
-      @user.to_s
+      Bold + @user.to_s + Bold
     end
   end
 
@@ -194,7 +194,7 @@ class UnoGame
     @players.shuffle!
     show_order
     announce _("%{p} deals the first card from the stock") % {
-      :p => @players.first.user
+      :p => @players.first
     }
     card = @stock.shift
     @picker = 0
@@ -228,7 +228,7 @@ class UnoGame
     announce _("%{p} skips a turn!") % {
       # this is first and not last because the actual
       # turn change will be done by the following next_turn
-      :p => @players.first.user
+      :p => @players.first
     }
   end
 
@@ -339,9 +339,7 @@ class UnoGame
           end
           next_turn
         else
-          announce _("%{p}, choose a color with: co r|b|g|y") % {
-            :p => p.user
-          }
+          announce _("%{p}, choose a color with: co r|b|g|y") % { :p => p }
         end
       else
         announce _("you don't have that card")
@@ -407,7 +405,7 @@ class UnoGame
     cards = true
     cards = opts[:cards] if opts.key?(:cards)
     player = @players.first
-    announce _("it's %{player}'s turn") % { :player => player.user }
+    announce _("it's %{player}'s turn") % { :player => player }
     show_user_cards(player) if cards
   end
 
@@ -439,7 +437,7 @@ class UnoGame
 
   def show_all_cards(u=nil)
     announce(@players.inject([]) { |list, p|
-      list << [p.user, p.cards.length].join(': ')
+      list << [p, p.cards.length].join(': ')
     }.join(', '))
     if u
       show_user_cards(u)
@@ -486,7 +484,31 @@ class UnoGame
   end
 
   def end_game
-    announce _('TODO end game')
+    announce _("%{uno} game finished! The winner is %{p}") % {
+      :uno => UNO, :p => @players.first
+    }
+    if @picker > 0
+      p = @player[1]
+      announce _("%{p} has to pick %{b}%{n}%{b} cards!") % {
+        :p => p, :n => @picker, :b => Bold
+      }
+      deal(@player[1], @picker)
+      @picker = 0
+    end
+    score = @players.inject(0) do |sum, p|
+      if p.cards.length > 0
+        announce _("%{p} still had %{cards}") % {
+          :p => p, :cards => p.cards.join(' ')
+        }
+        sum += p.cards.inject(0) do |cs, c|
+          cs += c.score
+        end
+      end
+      sum
+    end
+    announce _("%{p} wins with %{b}%{score}%{b} points!") % {
+        :p => @players.first, :score => score, :b => Bold
+    }
     @plugin.end_game(@channel)
   end
 
