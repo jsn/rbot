@@ -10,6 +10,12 @@
 # License:: GPL v2
 #
 # Uno Game: get rid of the cards you have
+#
+# TODO documentation
+# TODO allow full form card names for play
+# TODO allow color specification with wild
+# TODO allow choice of rules re stacking + and playing Reverse with them
+# TODO highscore table
 
 class UnoGame
   COLORS = %w{Red Green Blue Yellow}
@@ -508,7 +514,8 @@ class UnoGame
   end
 
   def end_game
-    announce _("%{uno} game finished! The winner is %{p}") % {
+    announce _("%{uno} game finished after %{time}! The winner is %{p}") % {
+      :time => Utils.secs_to_string(Time.now-@start_time),
       :uno => UNO, :p => @players.first
     }
     if @picker > 0
