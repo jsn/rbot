@@ -274,6 +274,9 @@ class UnoGame
     # a +something of same or higher something, or a Reverse
     # TODO make optional
     if @picker > 0
+      if card.color and card.color != @color
+        return false
+      end
       if card.value == 'Reverse' or card.picker >= @discard.picker
         return true
       else
