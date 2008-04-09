@@ -328,15 +328,15 @@ class UnoGame
         if shorts.length > 1
           set_discard(p.cards.delete_one(cards.shift))
           announce _("%{p} plays %{card} twice!") % {
-            :p => source,
+            :p => p,
             :card => @discard
           }
         else
-          announce _("%{p} plays %{card}") % { :p => source, :card => @discard }
+          announce _("%{p} plays %{card}") % { :p => p, :card => @discard }
         end
         if p.cards.length == 1
           announce _("%{p} has %{uno}!") % {
-            :p => source, :uno => UNO
+            :p => p, :uno => UNO
           }
         elsif p.cards.length == 0
           end_game
@@ -363,13 +363,13 @@ class UnoGame
     p = get_player(user)
     if @picker > 0
       announce _("%{p} passes turn, and has to pick %{b}%{n}%{b} cards!") % {
-        :p => user, :b => Bold, :n => @picker
+        :p => p, :b => Bold, :n => @picker
       }
       deal(p, @picker)
       @picker = 0
     else
       if @player_has_picked
-        announce _("%{p} passes turn") % { :p => user }
+        announce _("%{p} passes turn") % { :p => p }
       else
         announce _("you need to pick a card first")
         return
