@@ -485,9 +485,17 @@ class UnoGame
   end
 
   def add_player(user)
-    return if get_player(user)
+    if p = get_player(user)
+      announce _("you're already in the game, %{p}") % {
+        :p => p
+      }
+      return
+    end
     p = Player.new(user)
     @players << p
+    announce _("%{p} joins this game of %{uno}") % {
+      :p => p, :uno => UNO
+    }
     deal(p, 7)
     if @join_timer
       @bot.timer.reschedule(@join_timer, 10)
