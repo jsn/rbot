@@ -565,7 +565,7 @@ class UnoPlugin < Plugin
       end
     when :pl # play card
       if g.has_turn?(m.source)
-        g.play_card(m.source, m.params)
+        g.play_card(m.source, m.params.downcase)
       else
         m.reply _("It's not your turn")
       end
