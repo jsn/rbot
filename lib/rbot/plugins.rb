@@ -177,6 +177,12 @@ module Plugins
       end
     end
 
+    # Changing the value of @priority directly will cause problems,
+    # Please use priority=.
+    def priority
+      @priority ||= 1
+    end
+
     # Returns the symbol :BotModule 
     def botmodule_class
       :BotModule
@@ -320,6 +326,14 @@ module Plugins
       m.reply(_("incorrect usage, ask for help using '%{command}'") % {:command => "#{@bot.nick}: help #{m.plugin}"})
     end
 
+    # Define the priority of the module.  During event delegation, lower 
+    # priority modules will be called first.  Default priority is 1
+    def priority=(prio)
+      if @priority != prio
+        @priority = prio
+        @bot.plugins.mark_priorities_dirty
+      end
+    end
   end
 
   # A CoreBotModule is a BotModule that provides core functionality.
@@ -373,6 +387,10 @@ module Plugins
       @names_hash = Hash.new
       @commandmappers = Hash.new
       @maps = Hash.new
+
+      # modules will be sorted on first delegate call
+      @sorted_modules = nil
+
       @delegate_list = Hash.new { |h, k|
         h[k] = Array.new
       }
@@ -473,6 +491,12 @@ module Plugins
     # plugins
     def commands
       @commandmappers
+    end
+
+    # Tells the PluginManager that the next time it delegates an event, it
+    # should sort the modules by priority
+    def mark_priorities_dirty
+      @sorted_modules = nil
     end
 
     # Makes a string of error _err_ by adding text _str_
@@ -753,9 +777,25 @@ module Plugins
       return false
     end
 
+    def sort_modules
+      @sorted_modules = (core_modules + plugins).sort do |a, b| 
+        a.priority <=> b.priority
+      end || []
+
+      @delegate_list.each_value do |list|
+        list.sort! {|a,b| a.priority <=> b.priority}
+      end
+    end
+
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter
     def delegate(method, *args)
+      # if the priorities order of the delegate list is dirty,
+      # meaning some modules have been added or priorities have been
+      # changed, then the delegate list will need to be sorted before
+      # delegation.  This should always be true for the first delegation.
+      sort_modules unless @sorted_modules
+        
       # debug "Delegating #{method.inspect}"
       ret = Array.new
       if method.match(DEFAULT_DELEGATE_PATTERNS)
@@ -774,7 +814,7 @@ module Plugins
         }
       else
         debug "slow-delegating #{method}"
-        (core_modules + plugins).each { |p|
+        @sorted_modules.each { |p|
           if(p.respond_to? method)
             begin
               # debug "#{p.botmodule_class} #{p.name} responds"
