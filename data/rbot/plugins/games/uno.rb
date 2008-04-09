@@ -86,6 +86,16 @@ class UnoGame
     def special?
       SPECIALS.include?(@value)
     end
+
+    def <=>(other)
+      cc = self.color <=> other.color
+      if cc == 0
+        return self.value.to_s <=> other.value.to_s
+      else
+        return cc
+      end
+    end
+    include Comparable
   end
 
   # Wild, Wild +4 cards
@@ -467,6 +477,7 @@ class UnoGame
     end
     notify player, _("You picked %{picked}") % { :picked => picked.join(' ') }
     player.cards += picked
+    player.cards.sort!
   end
 
   def add_player(user)
