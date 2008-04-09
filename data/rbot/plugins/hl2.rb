@@ -24,14 +24,15 @@ class HL2Plugin < Plugin
 
   def a2s_info(addr, port)
     socket = UDPSocket.new()
-    socket.send(A2S_INFO, 0, addr, port.to_i)
-    response = nil
-
     begin
+      socket.send(A2S_INFO, 0, addr, port.to_i)
+      response = nil
+
       timeout(TIMEOUT) do
         response = socket.recvfrom(1400,0)
       end
-    rescue Exception
+    rescue Exception => e
+      error e
     end
 
     socket.close()
@@ -45,7 +46,7 @@ class HL2Plugin < Plugin
   def hl2(m, params)
     addr, port = params[:conn_str].split(':')
     info = a2s_info(addr, port)
-    if info != nil
+    if info
       m.reply "#{info[3]} is online with #{info[8]}/#{info[9]} players."
     else
       m.reply "Couldn't connect to #{params[:conn_str]}"
