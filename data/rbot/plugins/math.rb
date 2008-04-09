@@ -112,7 +112,7 @@ class MathPlugin < Plugin
          end
          m.reply answer
        rescue Exception => e
-         error "couldn't evaluate expression \"#{m.params}\": #{e.inspect}"
+         error e
          m.reply "illegal expression \"#{m.params}\""
          return
        end
