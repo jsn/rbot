@@ -557,8 +557,10 @@ class UnoPlugin < Plugin
     g = @games[m.channel]
     case m.plugin.intern
     when :jo # join game
+      return if m.params
       g.add_player(m.source)
     when :pe # pick card
+      return if m.params
       if g.has_turn?(m.source)
         if g.player_has_picked
           m.reply _("you already picked a card")
@@ -571,6 +573,7 @@ class UnoPlugin < Plugin
         m.reply _("It's not your turn")
       end
     when :pa # pass turn
+      return if m.params
       if g.has_turn?(m.source)
         g.pass(m.source)
       else
@@ -589,17 +592,22 @@ class UnoPlugin < Plugin
         m.reply _("It's not your turn")
       end
     when :ca # show current cards
+      return if m.params
       g.show_all_cards(m.source)
     when :cd # show current discard
+      return if m.params
       g.show_discard
     # TODO
     # when :ch
     #   g.challenge
     when :od # show playing order
+      return if m.params
       g.show_order
     when :ti # show play time
+      return if m.params
       g.show_time
     when :tu # show whose turn is it
+      return if m.params
       if g.has_turn?(m.source)
         m.nickreply _("it's your turn, sleepyhead")
       else
