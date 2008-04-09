@@ -253,8 +253,6 @@ class UnoGame
     end
     if card.picker > 0
       @picker += card.picker
-    else
-      @picker = 0
     end
     if card.special?
       @special = true
