@@ -126,14 +126,14 @@ class UnoGame
       @cards = []
     end
     def has_card?(short)
-      cards = []
+      has = []
       @cards.each { |c|
-        cards << c if c.shortform == short
+        has << c if c.shortform == short
       }
-      if cards.empty?
+      if has.empty?
         return false
       else
-        return cards
+        return has
       end
     end
     def to_s
@@ -352,8 +352,10 @@ class UnoGame
           announce _("%{p}, choose a color with: co r|b|g|y") % { :p => p }
         end
       else
-        announce _("you don't have that card")
+        announce _("you don't have two cards of that kind")
       end
+    else
+      announce _("you don't have that card")
     end
   end
 
