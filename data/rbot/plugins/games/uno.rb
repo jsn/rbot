@@ -279,13 +279,11 @@ class UnoGame
 
   def can_play(card)
     # When a +something is online, you can only play
-    # a +something of same or higher something, or a Reverse
+    # a +something of same or higher something, or a Reverse of
+    # the correct color
     # TODO make optional
     if @picker > 0
-      if card.color and card.color != @color
-        return false
-      end
-      if card.value == 'Reverse' or card.picker >= @discard.picker
+      if (card.value == 'Reverse' and card.color == @color) or card.picker >= @discard.picker
         return true
       else
         return false
