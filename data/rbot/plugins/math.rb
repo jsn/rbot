@@ -110,7 +110,7 @@ class MathPlugin < Plugin
              answer = "a number with >30 digits..."
            end
          end
-         m.reply answer
+         m.reply answer.to_s
        rescue Exception => e
          error e
          m.reply "illegal expression \"#{m.params}\""
