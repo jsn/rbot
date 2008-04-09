@@ -263,6 +263,7 @@ class UnoGame
     end
     if card.picker > 0
       @picker += card.picker
+      @last_picker = @discard.picker
     end
     if card.special?
       @special = true
@@ -283,7 +284,7 @@ class UnoGame
     # the correct color
     # TODO make optional
     if @picker > 0
-      if (card.value == 'Reverse' and card.color == @color) or card.picker >= @discard.picker
+      if (card.value == 'Reverse' and card.color == @color) or card.picker >= @last_picker
         return true
       else
         return false
