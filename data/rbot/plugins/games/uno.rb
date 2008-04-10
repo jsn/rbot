@@ -313,25 +313,35 @@ class UnoGame
   def play_card(source, cards)
     debug "Playing card #{cards}"
     p = get_player(source)
-    shorts = cards.scan(/[rbgy]\s*(?:\+?\d|[rs])|w\s*(?:\+4)?/)
+    shorts = cards.gsub(/\s+/,'').match(/^(?:([rbgy]\d){1,2}|([rbgy](?:\+\d|[rs]))|(w(?:\+4)?)([rbgy])?)$/).to_a
     debug shorts.inspect
-    if shorts.length > 2 or shorts.length < 1
-      announce _("you can only play one or two cards")
+    if shorts.empty?
+      announce _("what cards were that again?")
       return
     end
-    if shorts.length == 2 and shorts.first != shorts.last
-      announce _("you can only play two cards if they are the same")
-      return
+    full = shorts[0]
+    short = shorts[1] || shorts[2] || shorts[3]
+    jolly = shorts[3]
+    jcolor = shorts[4]
+    if jolly
+      toplay = 1
+    else
+      toplay = (full == short) ? 1 : 2
     end
-    if cards = p.has_card?(shorts.first)
+    debug [full, short, jolly, jcolor, toplay].inspect
+    # r7r7 -> r7r7, r7, nil, nil
+    # r7 -> r7, r7, nil, nil
+    # w -> w, nil, w, nil
+    # wg -> wg, nil, w, g
+    if cards = p.has_card?(short)
       debug cards
       unless can_play(cards.first)
         announce _("you can't play that card")
         return
       end
-      if cards.length >= shorts.length
+      if cards.length >= toplay
         set_discard(p.cards.delete_one(cards.shift))
-        if shorts.length > 1
+        if toplay > 1
           set_discard(p.cards.delete_one(cards.shift))
           announce _("%{p} plays %{card} twice!") % {
             :p => p,
@@ -354,6 +364,8 @@ class UnoGame
             do_special
           end
           next_turn
+        elsif jcolor
+          choose_color(p.user, jcolor)
         else
           announce _("%{p}, choose a color with: co r|b|g|y") % { :p => p }
         end
