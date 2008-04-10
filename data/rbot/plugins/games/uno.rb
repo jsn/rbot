@@ -565,20 +565,33 @@ class UnoPlugin < Plugin
   end
 
   def help(plugin, topic="")
-    (_("%{uno} game. !uno to start a game. in-game commands (no prefix): ") % {
-      :uno => UnoGame::UNO
-    }) + [
+    case topic
+    when 'commands'
+      [
       _("'jo' to join in"),
-      _("'pl <card>' to play <card>"),
+      _("'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play Red Reverse"),
       _("'pe' to pick a card"),
       _("'pa' to pass your turn"),
-      _("'co <color>' to pick a color"),
+      _("'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select Green (or 'pl w+4 g' to select the color when playing the Wild)"),
       _("'ca' to show current cards"),
       _("'cd' to show the current discard"),
       _("'od' to show the playing order"),
       _("'ti' to show play time"),
       _("'tu' to show whose turn it is")
     ].join(" ; ")
+    when 'rules'
+      _("play all your cards, one at a time, by matching either the color or the value of the currently discarded card. ") +
+      _("cards with special effects: Skip (next player skips a turn), Reverse (reverses the playing order), +2 (next player has to take 2 cards). ") +
+      _("Wilds can be played on any card, and you must specify the color for the next card. ") +
+      _("Wild +4 also forces the next player to take 4 cards, but it can only be played if you can't play a color card. ") +
+      _("you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing the first player who can't play one to pick the cumulative sum of all cards. ") +
+      _("you can also play a Reverse on a +2 or +4, bouncing the effect back to the previous player (that now comes next). ")
+    else
+      (_("%{uno} game. !uno to start a game. see help uno rules for the rules. commands: %{cmds}") % {
+        :uno => UnoGame::UNO,
+        :cmds => help(plugin, 'commands')
+      })
+    end
   end
 
   def message(m)
