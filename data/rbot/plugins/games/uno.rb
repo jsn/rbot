@@ -533,11 +533,19 @@ class UnoGame
   end
 
   def end_game
-    announce _("%{uno} game finished after %{time}! The winner is %{p}") % {
-      :time => Utils.secs_to_string(Time.now-@start_time),
-      :uno => UNO, :p => @players.first
-    }
-    if @picker > 0
+    halted = @players.first.cards.length != 0
+    if halted
+      announce _("%{uno} game halted after %{time}") % {
+        :time => Utils.secs_to_string(Time.now-@start_time),
+        :uno => UNO
+      }
+    else
+      announce _("%{uno} game finished after %{time}! The winner is %{p}") % {
+        :time => Utils.secs_to_string(Time.now-@start_time),
+        :uno => UNO, :p => @players.first
+      }
+    end
+    if @picker > 0 and not halted
       p = @players[1]
       announce _("%{p} has to pick %{b}%{n}%{b} cards!") % {
         :p => p, :n => @picker, :b => Bold
@@ -556,10 +564,12 @@ class UnoGame
       end
       sum
     end
-    announce _("%{p} wins with %{b}%{score}%{b} points!") % {
+    if not halted
+      announce _("%{p} wins with %{b}%{score}%{b} points!") % {
         :p => @players.first, :score => score, :b => Bold
-    }
-    @plugin.end_game(@channel)
+      }
+    end
+    @plugin.do_end_game(@channel)
   end
 
 end
@@ -677,7 +687,15 @@ class UnoPlugin < Plugin
     }
   end
 
-  def end_game(channel)
+  def end_game(m, p)
+    unless @games.key?(m.channel)
+      m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
+      return
+    end
+    @games[m.channel].end_game
+  end
+
+  def do_end_game(channel)
     @games.delete(channel)
   end
 
@@ -697,5 +715,8 @@ end
 pg = UnoPlugin.new
 
 pg.map 'uno', :private => false, :action => :create_game
+pg.map 'uno end', :private => false, :action => :end_game
 pg.map 'uno stock', :private => false, :action => :print_stock
+
 pg.default_auth('stock', false)
+pg.default_auth('end', false)
