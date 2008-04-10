@@ -836,7 +836,7 @@ module Plugins
     # see if we have a plugin that wants to handle this message, if so, pass
     # it to the plugin and return true, otherwise false
     def privmsg(m)
-      # debug "Delegating privmsg #{m.message.inspect} from #{m.source} to #{m.replyto} with pluginkey #{m.plugin.inspect}"
+      debug "Delegating privmsg #{m.inspect} with pluginkey #{m.plugin.inspect}"
       return unless m.plugin
       k = m.plugin.to_sym
       if commands.has_key?(k)
@@ -844,30 +844,30 @@ module Plugins
         a = commands[k][:auth]
         # We check here for things that don't check themselves
         # (e.g. mapped things)
-        # debug "Checking auth ..."
+        debug "Checking auth ..."
         if a.nil? || @bot.auth.allow?(a, m.source, m.replyto)
-          # debug "Checking response ..."
+          debug "Checking response ..."
           if p.respond_to?("privmsg")
             begin
-              # debug "#{p.botmodule_class} #{p.name} responds"
+              debug "#{p.botmodule_class} #{p.name} responds"
               p.privmsg(m)
             rescue Exception => err
               raise if err.kind_of?(SystemExit)
               error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
               raise if err.kind_of?(BDB::Fatal)
             end
-            # debug "Successfully delegated #{m.message}"
+            debug "Successfully delegated #{m.inspect}"
             return true
           else
-            # debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
+            debug "#{p.botmodule_class} #{p.name} is registered, but it doesn't respond to privmsg()"
           end
         else
-          # debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
+          debug "#{p.botmodule_class} #{p.name} is registered, but #{m.source} isn't allowed to call #{m.plugin.inspect} on #{m.replyto}"
         end
+      else
+        debug "Command #{k} isn't handled"
       end
-      # debug "Finished delegating privmsg with key #{m.plugin.inspect}" + ( pl.empty? ? "" : " to #{pl.values.first[:botmodule].botmodule_class}s" )
       return false
-      # debug "Finished delegating privmsg with key #{m.plugin.inspect}"
     end
 
     # delegate IRC messages, by delegating 'listen' first, and the actual method
