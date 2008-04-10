@@ -682,7 +682,7 @@ class UnoPlugin < Plugin
         if g.player_has_picked
           m.reply _("you already picked a card")
         elsif g.picker > 0
-          m.reply _("you can't pick a card")
+          g.pass(m.source)
         else
           g.pick_card(m.source)
         end
