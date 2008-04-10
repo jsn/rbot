@@ -4,6 +4,7 @@ require 'test/unit'
 require 'rbot/config'
 require 'rbot/plugins'
 
+require 'pp'
 
 include Irc::Bot::Plugins
 
@@ -65,6 +66,7 @@ class PluginsPriorityTest < Test::Unit::TestCase
     # We add the modules to the lists in the wrong order 
     # on purpose to make sure the sort is working
     @@manager.plugins.clear
+    @@manager.core_modules.clear
     @@manager.plugins << @mock1
     @@manager.plugins << @mock4
     @@manager.plugins << @mock3
@@ -161,7 +163,13 @@ class PluginsPriorityTest < Test::Unit::TestCase
     assert @mock3.connect_called_at.first < @mock4.connect_called_at.first
     assert @mock4.connect_called_at.first < @mock5.connect_called_at.first
   end
+
+  def test_add_botmodule
+    @@manager.sort_modules
+    mock_n1 = MockModule.new(-1)
+    @@manager.add_botmodule mock_n1
+    @@manager.delegate('test')
+    assert mock_n1.test_called_at.first < @mock1.test_called_at.first
+  end
 end
-
-
 
