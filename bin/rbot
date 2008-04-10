@@ -75,8 +75,9 @@ if $version =~ /git/
         branch = $1.dup || "unknown"
         changed = git_out.match(/^# Change(.*)\n/)
         rev = "revision "
-        git_out = `git log -1 --pretty=format:"%h%n%b%n%cr"`.split("\n")
-        rev << git_out.first << ' [' << git_out.last << ']'
+        git_out = `git log -1 --pretty=format:"%h%n%b%n%ct"`.split("\n")
+        rev << git_out.first
+        $version_timestamp = git_out.last.to_i
         if git_out[1].match(/^git-svn-id: \S+@(\d+)/)
           rev << "(svn #{$1})"
         end

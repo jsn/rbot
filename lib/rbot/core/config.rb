@@ -10,8 +10,16 @@
 class ConfigModule < CoreBotModule
 
   def version_string
-    _("I'm a v. %{version} rubybot%{copyright}%{url}") % {
+    if $version_timestamp.to_i > 0
+      ago = String.new ' ['
+      ago << Utils.secs_to_string(Time.now.to_i - $version_timestamp.to_i)
+      ago << ' ago]'
+    else
+      ago = ''
+    end
+    _("I'm a v. %{version}%{ago} rubybot%{copyright}%{url}") % {
       :version => $version,
+      :ago => ago,
       :copyright => ", #{Irc::Bot::COPYRIGHT_NOTICE}",
       :url => " - #{Irc::Bot::SOURCE_URL}"
     }
