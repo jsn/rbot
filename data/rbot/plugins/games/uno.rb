@@ -159,6 +159,7 @@ class UnoGame
     @plugin = plugin
     @bot = plugin.bot
     @players = []
+    @dropouts = []
     @discard = nil
     make_base_stock
     @stock = []
@@ -509,6 +510,14 @@ class UnoGame
       }
       return
     end
+    @dropouts.each do |dp|
+      if dp.user == user
+        announce _("you dropped from the game, %{p}, you can't get back in") % {
+          :p => dp
+        }
+        return
+      end
+    end
     cards = 7
     if @start_time
       cards = @players.inject(0) do |s, pl|
@@ -532,8 +541,32 @@ class UnoGame
     end
   end
 
-  def end_game
-    halted = @players.first.cards.length != 0
+  def drop_player(user)
+    unless p = get_player(user)
+      announce _("%{p} isn't playing %{uno}") % {
+        :p => p, :uno => UNO
+      }
+      return
+    end
+    announce _("%{p} gives up this game of %{uno}") % {
+      :p => p, :uno => UNO
+    }
+    if @players.length == 2
+      if p == @players.first
+        next_turn
+      end
+      end_game
+      return
+    end
+    debug @stock.length
+    while p.cards.length > 0
+      @stock.insert(rand(@stock.length), p.cards.shift)
+    end
+    debug @stock.length
+    @dropouts << @players.delete_one(p)
+  end
+
+  def end_game(halted = false)
     if halted
       announce _("%{uno} game halted after %{time}") % {
         :time => Utils.secs_to_string(Time.now-@start_time),
@@ -692,11 +725,20 @@ class UnoPlugin < Plugin
       m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
       return
     end
-    @games[m.channel].end_game
+    @games[m.channel].end_game(true)
   end
 
   def do_end_game(channel)
     @games.delete(channel)
+  end
+
+  def drop_player(m, p)
+    unless @games.key?(m.channel)
+      m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
+      return
+    end
+    who = p[:nick] ? m.channel.get_user(p[:nick]) : m.source
+    @games[m.channel].drop_player(who)
   end
 
   def print_stock(m, p)
@@ -716,7 +758,11 @@ pg = UnoPlugin.new
 
 pg.map 'uno', :private => false, :action => :create_game
 pg.map 'uno end', :private => false, :action => :end_game
+pg.map 'uno drop', :private => false, :action => :drop_player
+pg.map 'uno giveup', :private => false, :action => :drop_player
+pg.map 'uno drop :nick', :private => false, :action => :drop_player, :auth_path => ':other'
 pg.map 'uno stock', :private => false, :action => :print_stock
 
 pg.default_auth('stock', false)
 pg.default_auth('end', false)
+pg.default_auth('drop::other', false)
