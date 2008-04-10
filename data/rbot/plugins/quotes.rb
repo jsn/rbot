@@ -142,222 +142,131 @@ class QuotePlugin < Plugin
     end
   end
 
-  def message(m)
-    command = m.message.dup
-    if(m.address? && m.private?)
-      case command
-        when (/^addquote\s+(#\S+)\s+(.*)/)
-          channel = $1
-          quote = $2
-          if(@bot.auth.allow?("quote::other::add", m.source, m.replyto))
-            if(channel =~ /^#/)
-              num = addquote(m.source, channel, quote)
-              m.reply "added the quote (##{num})"
-            end
-          end
-        when (/^getquote\s+(#\S+)$/)
-          channel = $1
-          if(@bot.auth.allow?("quote::other::get", m.source, m.replyto))
-            quote, total = getquote(m.source, channel)
-            if(quote)
-              m.reply "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^getquote\s+(#\S+)\s+(\d+)$/)
-          channel = $1
-          num = $2.to_i
-          if(@bot.auth.allow?("quote::other::get", m.source, m.replyto))
-            quote, total = getquote(m.source, channel, num)
-            if(quote)
-              m.reply "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^whoquote\s+(#\S+)\s+(\d+)$/)
-          channel = $1
-          num = $2.to_i
-          if(@bot.auth.allow?("quote::other::get", m.source, m.replyto))
-            quote, total = getquote(m.source, channel, num)
-            if(quote)
-              m.reply "quote #{quote.num} added by #{quote.source}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^whenquote\s+(#\S+)\s+(\d+)$/)
-          channel = $1
-          num = $2.to_i
-          if(@bot.auth.allow?("quote::other::get", m.source, m.replyto))
-            quote, total = getquote(m.source, channel, num)
-            if(quote)
-              m.reply "quote #{quote.num} added on #{quote.date}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^topicquote\s+(#\S+)$/)
-          channel = $1
-          if(@bot.auth.allow?("quote::other::topic", m.source, m.replyto))
-            quote, total = getquote(m.source, channel)
-            if(quote)
-              @bot.topic channel, "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^topicquote\s+(#\S+)\s+(\d+)$/)
-          channel = $1
-          num = $2.to_i
-          if(@bot.auth.allow?("quote::other::topic", m.source, m.replyto))
-            quote, total = getquote(m.source, channel, num)
-            if(quote)
-              @bot.topic channel, "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^delquote\s+(#\S+)\s+(\d+)$/)
-          channel = $1
-          num = $2.to_i
-          if(@bot.auth.allow?("quote::other::del", m.source, m.replyto))
-            if(delquote(channel, num))
-              m.okay
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^searchquote\s+(#\S+)\s+(.*)$/)
-          channel = $1
-          reg = $2
-          if(@bot.auth.allow?("quote::other::get", m.source, m.replyto))
-            quote, total = searchquote(m.source, channel, reg)
-            if(quote)
-              m.reply "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^countquote$/)
-          if(@bot.auth.allow?("quote::get::count", m.source, m.replyto))
-            total = countquote(m.source)
-            m.reply "#{total} quotes"
-          end
-        when (/^countquote\s+(#\S+)\s*(.*)$/)
-          channel = $1
-          reg = $2
-          if(@bot.auth.allow?("quote::other::get::count", m.source, m.replyto))
-            total = countquote(m.source, channel, reg)
-            if(reg.length > 0)
-              m.reply "#{total} quotes match: #{reg}"
-            else
-              m.reply "#{total} quotes"
-            end
-          end
-      end
-    elsif (m.address? || (@bot.config["QUOTE_LISTEN"] && command.gsub!(/^!/, "")))
-      case command
-        when (/^addquote\s+(.+)/)
-          if(@bot.auth.allow?("quote::add", m.source, m.replyto))
-            num = addquote(m.source, m.target.to_s, $1)
-            m.reply "added the quote (##{num})"
-          end
-        when (/^getquote$/)
-          if(@bot.auth.allow?("quote::get", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target.to_s)
-            if(quote)
-              m.reply "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "no quotes found!"
-            end
-          end
-        when (/^getquote\s+(\d+)$/)
-          num = $1.to_i
-          if(@bot.auth.allow?("quote::get", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target.to_s, num)
-            if(quote)
-              m.reply "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^whenquote\s+(\d+)$/)
-          num = $1.to_i
-          if(@bot.auth.allow?("quote::get", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target.to_s, num)
-            if(quote)
-              m.reply "quote #{quote.num} added on #{quote.date}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^whoquote\s+(\d+)$/)
-          num = $1.to_i
-          if(@bot.auth.allow?("quote::get", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target.to_s, num)
-            if(quote)
-              m.reply "quote #{quote.num} added by #{quote.source}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^topicquote$/)
-          if(@bot.auth.allow?("quote::topic", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target.to_s)
-            if(quote)
-              @bot.topic m.target, "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "no quotes found!"
-            end
-          end
-        when (/^topicquote\s+(\d+)$/)
-          num = $1.to_i
-          if(@bot.auth.allow?("quote::topic", m.source, m.replyto))
-            quote, total = getquote(m.source, m.target.to_s, num)
-            if(quote)
-              @bot.topic m.target, "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^delquote\s+(\d+)$/)
-          num = $1.to_i
-          if(@bot.auth.allow?("quote::del", m.source, m.replyto))
-            if(delquote(m.target.to_s, num))
-              m.okay
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^searchquote\s+(.*)$/)
-          reg = $1
-          if(@bot.auth.allow?("quote::get", m.source, m.replyto))
-            quote, total = searchquote(m.source, m.target.to_s, reg)
-            if(quote)
-              m.reply "[#{quote.num}] #{quote.quote}"
-            else
-              m.reply "quote not found!"
-            end
-          end
-        when (/^countquote(?:\s+(.*))?$/)
-          reg = $1
-          if(@bot.auth.allow?("quote::get::count", m.source, m.replyto))
-            total = countquote(m.source, m.target.to_s, reg)
-            if(reg && reg.length > 0)
-              m.reply "#{total} quotes match: #{reg}"
-            else
-              m.reply "#{total} quotes"
-            end
-          end
-      end
+  def cmd_addquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    quote = p[:quote].to_s
+    num = addquote(m.source, channel, quote)
+    m.reply _("added the quote (#%{num})") % { :num => num }
+  end
+
+  def cmd_delquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    num = p[:num].to_i
+    if delquote(channel, num)
+      m.okay
+    else
+      m.reply "quote not found!"
+    end
+  end
+
+  def cmd_getquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    num = p[:num] ? p[:num].to_i : nil
+    quote, total = getquote(m.source, channel, num)
+    if quote
+      m.reply _("[%{num}] %{quote}") % {
+        :num => quote.num,
+        :quote => quote.quote
+      }
+    else
+      m.reply _("quote not found!")
+    end
+  end
+
+  def cmd_whoquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    num = p[:num] ? p[:num].to_i : nil
+    quote, total = getquote(m.source, channel, num)
+    if quote
+      m.reply _("quote %{num} added by %{source}") % {
+        :num => quote.num,
+        :source => quote.source
+      }
+    else
+      m.reply _("quote not found!")
+    end
+  end
+
+  def cmd_whenquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    num = p[:num] ? p[:num].to_i : nil
+    quote, total = getquote(m.source, channel, num)
+    if quote
+      m.reply _("quote %{num} added on %{date}") % {
+        :num => quote.num,
+        :date => quote.date
+      }
+    else
+      m.reply _("quote not found!")
+    end
+  end
+
+  def cmd_searchquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    reg = p[:reg].to_s
+    quote, total = searchquote(m.source, channel, reg)
+    if quote
+      m.reply _("[%{num}] %{quote}") % {
+        :num => quote.num,
+        :quote => quote.quote
+      }
+    else
+      m.reply _("quote not found!")
+    end
+  end
+
+  def cmd_countquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    reg = p[:reg] ? p[:reg].to_s : nil
+    total = countquote(m.source, channel, reg)
+    if reg.length > 0
+      m.reply _("%{total} quotes matching %{reg}") % {
+        :total => total,
+        :reg => reg
+      }
+    else
+      m.reply _("%{total} quotes") % { :total => total }
+    end
+  end
+
+  def cmd_topicquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    num = p[:num] ? p[:num].to_i : nil
+    quote, total = getquote(m.source, channel, num)
+    if quote
+      @bot.topic channel, _("[%{num}] %{quote}") % {
+        :num => quote.num,
+        :quote => quote.quote
+      }
+    else
+      m.reply _("quote not found!")
     end
   end
 end
 
 plugin = QuotePlugin.new
 plugin.register("quotes")
-plugin.default_auth('other', false) # Prevent random people from editing other channels quote lists by default
-plugin.default_auth('other::get', true) # But allow them to view them
-plugin.default_auth('del', false) # Prevent random people from removing quotes
+
+plugin.default_auth('edit', false) # Prevent random people from removing quotes
+plugin.default_auth('edit::add', true) # But allow them to add them
+
+plugin.map "addquote *quote", :action => :cmd_addquote, :private => false, :auth_path => '!quote::edit::add!'
+plugin.map "delquote :num", :action => :cmd_delquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::edit::del!'
+plugin.map "getquote [:num]", :action => :cmd_getquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::view::get!'
+plugin.map "whoquote :num", :action => :cmd_whoquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::view::who!'
+plugin.map "whenquote :num", :action => :cmd_whenquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::view::when!'
+plugin.map "searchquote *reg", :action => :cmd_searchquote, :private => false, :auth_path => '!quote::view::search!'
+plugin.map "countquote [*reg]", :action => :cmd_countquote, :private => false, :auth_path => '!quote::view::count!'
+plugin.map "topicquote [:num]", :action => :cmd_topicquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::topic!'
+
+plugin.default_auth('other::edit', false) # Prevent random people from editing other channels quote lists by default
+plugin.default_auth('other::view', true) # But allow them to view them
+
+plugin.map "addquote :channel *quote", :action => :cmd_addquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::edit::add!'
+plugin.map "delquote :channel :num", :action => :cmd_delquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::edit::del!'
+plugin.map "getquote :channel [:num]", :action => :cmd_getquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::get!'
+plugin.map "whoquote :channel :num", :action => :cmd_whoquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::who!'
+plugin.map "whenquote :channel :num", :action => :cmd_whenquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::when!'
+plugin.map "searchquote :channel *reg", :action => :cmd_searchquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::search!'
+plugin.map "countquote [:channel] [*reg]", :action => :cmd_countquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::count!'
+plugin.map "topicquote :channel [:num]", :action => :cmd_topicquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::topic!'
