@@ -509,12 +509,19 @@ class UnoGame
       }
       return
     end
+    cards = 7
+    if @start_time
+      cards = @players.inject(0) do |s, pl|
+        s +=pl.cards.length
+      end/@players.length
+    end
     p = Player.new(user)
     @players << p
     announce _("%{p} joins this game of %{uno}") % {
       :p => p, :uno => UNO
     }
-    deal(p, 7)
+    deal(p, cards)
+    return if @start_time
     if @join_timer
       @bot.timer.reschedule(@join_timer, 10)
     elsif @players.length > 1
