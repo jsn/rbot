@@ -644,7 +644,7 @@ class UnoPlugin < Plugin
     when 'commands'
       [
       _("'jo' to join in"),
-      _("'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play Red Reverse"),
+      _("'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play Red Reverse, or 'pl y2y2' to play both Yellow 2 cards"),
       _("'pe' to pick a card"),
       _("'pa' to pass your turn"),
       _("'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select Green (or 'pl w+4 g' to select the color when playing the Wild)"),
