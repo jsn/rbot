@@ -126,7 +126,7 @@ class UnoGame
 
   class Player
     attr_accessor :cards
-    attr_reader :user
+    attr_accessor :user
     def initialize(user)
       @user = user
       @cards = []
@@ -566,6 +566,31 @@ class UnoGame
     @dropouts << @players.delete_one(p)
   end
 
+  def replace_player(old, new)
+    # The new user
+    user = channel.get_user(new)
+    if p = get_player(user)
+      announce _("%{p} is already playing %{uno} here") % {
+        :p => p, :uno => UNO
+      }
+      return
+    end
+    # We scan the player list of the player with the old nick, instead
+    # of using get_player, in case of IRC drops etc
+    @players.each do |p|
+      if p.user.nick == old
+        p.user = user
+        announce _("%{p} takes %{b}%{old}%{b}'s place at %{uno}") % {
+          :p => p, :b => Bold, :old => old, :uno => UNO
+        }
+        return
+      end
+    end
+    announce _("%{b}%{old}%{b} isn't playing %{uno} here") % {
+      :uno => UNO, :b => Bold, :old => old
+    }
+  end
+
   def end_game(halted = false)
     if halted
       announce _("%{uno} game halted after %{time}") % {
@@ -732,6 +757,14 @@ class UnoPlugin < Plugin
     @games.delete(channel)
   end
 
+  def replace_player(m, p)
+    unless @games.key?(m.channel)
+      m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
+      return
+    end
+    @games[m.channel].replace_player(p[:old], p[:new])
+  end
+
   def drop_player(m, p)
     unless @games.key?(m.channel)
       m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
@@ -761,8 +794,10 @@ pg.map 'uno end', :private => false, :action => :end_game
 pg.map 'uno drop', :private => false, :action => :drop_player
 pg.map 'uno giveup', :private => false, :action => :drop_player
 pg.map 'uno drop :nick', :private => false, :action => :drop_player, :auth_path => ':other'
+pg.map 'uno replace :old [with] :new', :private => false, :action => :replace_player
 pg.map 'uno stock', :private => false, :action => :print_stock
 
 pg.default_auth('stock', false)
 pg.default_auth('end', false)
 pg.default_auth('drop::other', false)
+pg.default_auth('replace', false)
