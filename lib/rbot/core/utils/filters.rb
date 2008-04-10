@@ -110,7 +110,7 @@ module ::Irc
       if has_filter?(tlkey)
         debug "Overwriting filter #{tlkey}"
       end
-      @filters[tlkey] = DataFilter.new &block
+      @filters[tlkey] = DataFilter.new(&block)
       if group
         gkey = group.to_sym
         @filter_group ||= {}
