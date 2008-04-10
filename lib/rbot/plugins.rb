@@ -476,6 +476,7 @@ module Plugins
       end
       @botmodules[kl] << botmodule
       @names_hash[botmodule.to_sym] = botmodule
+      mark_priorities_dirty
     end
 
     # Returns an array of the loaded plugins
