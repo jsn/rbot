@@ -183,7 +183,18 @@ class UnoGame
   end
 
   def get_player(user)
-    @players.each { |p| return p if p.user == user }
+    case user
+    when User
+      @players.each do |p|
+        return p if p.user == user
+      end
+    when String
+      @players.each do |p|
+        return p if p.user.irc_downcase == user.irc_downcase(channel.casemap)
+      end
+    else
+      get_player(user.to_s)
+    end
     return nil
   end
 
@@ -630,8 +641,10 @@ class UnoGame
     end
   end
 
-  def drop_player(user)
-    unless p = get_player(user)
+  def drop_player(nick)
+    # A nick is passed because the original player might have left
+    # the channel or IRC
+    unless p = get_player(nick)
       announce _("%{p} isn't playing %{uno}") % {
         :p => p, :uno => UNO
       }
@@ -882,8 +895,7 @@ class UnoPlugin < Plugin
       m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
       return
     end
-    who = p[:nick] ? m.channel.get_user(p[:nick]) : m.source
-    @games[m.channel].drop_player(who)
+    @games[m.channel].drop_player(p[:nick] || m.source.nick)
   end
 
   def print_stock(m, p)
