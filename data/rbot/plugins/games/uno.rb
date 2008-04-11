@@ -263,11 +263,19 @@ class UnoGame
   end
 
   def reverse_turn
+    # if there are two players, the Reverse acts like a Skip, unless
+    # there's a @picker running, in which case the Reverse should bounce the
+    # pick on the other player
     if @players.length > 2
       @players.reverse!
       # put the current player back in its place
       @players.unshift @players.pop
       announce _("Playing order was reversed!")
+    elsif @picker > 0
+      announce _("%{cp} bounces the pick to %{np}") % {
+        :cp => @players.first,
+        :np => @players.last
+      }
     else
       skip_turn
     end
