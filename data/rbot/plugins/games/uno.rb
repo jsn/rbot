@@ -377,12 +377,23 @@ class UnoGame
       end
       if cards.length >= toplay
         # if the played card is a W+4 not played during a stacking +x
+        # TODO if A plays an illegal W+4, B plays a W+4, should the next
+        # player be able to challenge A? For the time being we say no,
+        # but I think he should, and in case A's move was illegal
+        # game would have to go back, A would get the penalty and replay,
+        # while if it was legal the challenger would get 50% more cards,
+        # i.e. 12 cards (or more if the stacked +4 were more). This would
+        # only be possible if the first W+4 was illegal, so it wouldn't
+        # apply for a W+4 played on a +2 anyway.
+        #
         if @picker == 0 and Wild === cards.first and cards.first.value 
           # save the previous discard in case of challenge
           @last_discard = @discard.dup
           # save the color too, in case it was a Wild
           @last_color = @color.dup
         else
+          # mark the move as not challengeable
+          @last_discard = nil
           @last_color = nil
         end
         set_discard(p.cards.delete_one(cards.shift))
