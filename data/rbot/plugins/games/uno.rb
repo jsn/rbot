@@ -161,11 +161,15 @@ class UnoGame
     @players = []
     @dropouts = []
     @discard = nil
+    @value = nil
+    @color = nil
     make_base_stock
     @stock = []
     make_stock
     @start_time = nil
     @join_timer = nil
+    @picker = 0
+    @last_picker = 0
   end
 
   def get_player(user)
@@ -227,6 +231,14 @@ class UnoGame
     end
     next_turn
     @start_time = Time.now
+  end
+
+  def elapsed_time
+    if @start_time
+      Utils.secs_to_string(Time.now-@start_time)
+    else
+      _("no time")
+    end
   end
 
   def reverse_turn
@@ -421,7 +433,7 @@ class UnoGame
     if @start_time
       announce _("This %{uno} game has been going on for %{time}") % {
         :uno => UNO,
-        :time => Utils.secs_to_string(Time.now - @start_time)
+        :time => elapsed_time
       }
     else
       announce _("The game hasn't started yet")
@@ -551,11 +563,15 @@ class UnoGame
     announce _("%{p} gives up this game of %{uno}") % {
       :p => p, :uno => UNO
     }
-    if @players.length == 2
+    case @players.length
+    when 2
       if p == @players.first
         next_turn
       end
       end_game
+      return
+    when 1
+      end_game(true)
       return
     end
     debug @stock.length
@@ -593,13 +609,19 @@ class UnoGame
 
   def end_game(halted = false)
     if halted
-      announce _("%{uno} game halted after %{time}") % {
-        :time => Utils.secs_to_string(Time.now-@start_time),
-        :uno => UNO
-      }
+      if @start_time
+        announce _("%{uno} game halted after %{time}") % {
+          :time => elapsed_time,
+          :uno => UNO
+        }
+      else
+        announce _("%{uno} game halted before it could start") % {
+          :uno => UNO
+        }
+      end
     else
       announce _("%{uno} game finished after %{time}! The winner is %{p}") % {
-        :time => Utils.secs_to_string(Time.now-@start_time),
+        :time => elapsed_time,
         :uno => UNO, :p => @players.first
       }
     end
