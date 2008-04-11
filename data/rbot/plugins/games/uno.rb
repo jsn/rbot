@@ -331,16 +331,14 @@ class UnoGame
     # if play is forced, check against the only allowed cards
     return false if @must_play and not @must_play.include?(card)
 
-    # When a +something is online, you can only play
-    # a +something of same or higher something, or a Reverse of
-    # the correct color
+    # When a +something is online, you can only play a +something of same or
+    # higher something, or a Reverse of the correct color, or a Reverse on
+    # a Reverse
     # TODO make optional
     if @picker > 0
-      if (card.value == 'Reverse' and card.color == @color) or card.picker >= @last_picker
-        return true
-      else
-        return false
-      end
+      return true if card.picker >= @last_picker
+      return true if card.value == 'Reverse' and (card.color == @color or @discard.value == card.value)
+      return false
     else
       # You can always play a Wild
       return true if Wild === card
