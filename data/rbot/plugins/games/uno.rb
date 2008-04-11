@@ -147,11 +147,19 @@ class UnoGame
     end
   end
 
+  # cards in stock
   attr_reader :stock
+  # current discard
   attr_reader :discard
+  # previous discard, in case of challenge
+  attr_reader :last_discard
+  # channel the game is played in
   attr_reader :channel
+  # list of players
   attr :players
+  # true if the player picked a card (and can thus pass turn)
   attr_reader :player_has_picked
+  # number of cards to be picked if the player can't play an appropriate card
   attr_reader :picker
 
   def initialize(plugin, channel)
@@ -161,6 +169,7 @@ class UnoGame
     @players = []
     @dropouts = []
     @discard = nil
+    @last_discard = nil
     @value = nil
     @color = nil
     make_base_stock
@@ -170,6 +179,7 @@ class UnoGame
     @join_timer = nil
     @picker = 0
     @last_picker = 0
+    @must_play = nil
   end
 
   def get_player(user)
@@ -289,6 +299,7 @@ class UnoGame
     else
       @special = false
     end
+    @must_play = nil
   end
 
   def next_turn(opts={})
@@ -298,6 +309,9 @@ class UnoGame
   end
 
   def can_play(card)
+    # if play is forced, check against the only allowed cards
+    return false if @must_play and not @must_play.include?(card)
+
     # When a +something is online, you can only play
     # a +something of same or higher something, or a Reverse of
     # the correct color
@@ -310,8 +324,6 @@ class UnoGame
       end
     else
       # You can always play a Wild
-      # FIXME W+4 can only be played if you don't have a proper card
-      # TODO make it playable anyway, and allow players to challenge
       return true if Wild === card
       # On a Wild, you must match the color
       if Wild === @discard
@@ -353,6 +365,15 @@ class UnoGame
         return
       end
       if cards.length >= toplay
+        # if the played card is a W+4 not played during a stacking +x
+        if @picker == 0 and Wild === cards.first and cards.first.value 
+          # save the previous discard in case of challenge
+          @last_discard = @discard.dup
+          # save the color too, in case it was a Wild
+          @last_color = @color.dup
+        else
+          @last_color = nil
+        end
         set_discard(p.cards.delete_one(cards.shift))
         if toplay > 1
           set_discard(p.cards.delete_one(cards.shift))
@@ -387,6 +408,62 @@ class UnoGame
       end
     else
       announce _("you don't have that card")
+    end
+  end
+
+  def challenge
+    return unless @last_discard
+    # current player
+    cp = @players.first
+    # previous player
+    lp = @players.last
+    announce _("%{cp} challenges %{lp}'s %{card}!") % {
+      :cp => cp, :lp => lp, :card => @discard
+    }
+    # show the cards of the previous player to the current player
+    notify cp, _("%{p} has %{cards}") % {
+      :p => lp, :cards => lp.cards.join(' ')
+    }
+    # check if the previous player had a non-special card of the correct color
+    legal = true
+    lp.cards.each do |c|
+      if c.color == @last_color and not c.special?
+        legal = false
+      end
+    end
+    if legal
+      @picker += 2
+      announce _("%{lp}'s move was legal, %{cp} must pick %{b}%{n}%{b} cards!") % {
+        :cp => cp, :lp => lp, :b => Bold, :n => @picker
+      }
+      @last_color = nil
+      @last_discard = nil
+      deal(cp, @picker)
+      @picker = 0
+      next_turn
+    else
+      announce _("%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and play again!") % {
+        :cp => cp, :lp => lp, :b => Bold, :n => @picker
+      }
+      lp.cards << @discard # put the W+4 back in place
+
+      # reset the discard
+      @color = @last_color.dup
+      @discard = @last_discard.dup
+      @special = false
+      @value = @discard.value.dup rescue @discard.value
+      @last_color = nil
+      @last_discard = nil
+
+      # force the player to play the current cards
+      @must_play = lp.cards.dup
+
+      # give him the penalty cards
+      deal(lp, @picker)
+      @picker = 0
+
+      # and restore the turn
+      @players.unshift @players.pop
     end
   end
 
@@ -672,10 +749,16 @@ class UnoPlugin < Plugin
       _("'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select Green (or 'pl w+4 g' to select the color when playing the Wild)"),
       _("'ca' to show current cards"),
       _("'cd' to show the current discard"),
+      _("'ch' to challenge a Wild +4"),
       _("'od' to show the playing order"),
       _("'ti' to show play time"),
       _("'tu' to show whose turn it is")
     ].join(" ; ")
+    when 'challenge'
+      _("A Wild +4 can only be played legally if you don't have normal (not special) cards of the current color. ") +
+      _("The next player can challenge a W+4 by using the 'ch' command. ") +
+      _("If the W+4 play was illegal, the player who played it must pick the W+4, pick 4 cards from the stock, and play a legal card. ") +
+      _("If the W+4 play was legal, the challenger must pick 6 cards instead of 4.")
     when 'rules'
       _("play all your cards, one at a time, by matching either the color or the value of the currently discarded card. ") +
       _("cards with special effects: Skip (next player skips a turn), Reverse (reverses the playing order), +2 (next player has to take 2 cards). ") +
@@ -736,9 +819,16 @@ class UnoPlugin < Plugin
     when :cd # show current discard
       return if m.params
       g.show_discard
-    # TODO
-    # when :ch
-    #   g.challenge
+    when :ch
+      if g.has_turn?(m.source)
+        if g.last_discard
+          g.challenge
+        else
+          m.reply _("previous move cannot be challenged")
+        end
+      else
+        m.reply _("It's not your turn")
+      end
     when :od # show playing order
       return if m.params
       g.show_order
