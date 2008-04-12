@@ -792,9 +792,27 @@ module Plugins
 
     # see if each plugin handles +method+, and if so, call it, passing
     # +message+ as a parameter.  botmodules are called in order of priority
-    # from lowest to highest.  +DEPRECATED+ please use delegate_event.
+    # from lowest to highest.
+    #
+    # If the passed +message+ is marked as +#ignored?+, it will only be
+    # delegated to plugins with negative priority. Conversely, if it's
+    # a fake message  (see BotModule#fake_message), it will only be
+    # delegated to plugins with positive priority.
+    #
+    # For delegation with more extensive options, see delegate_event
+    #
     def delegate(method, *args)
-      delegate_event(method, :args => args)
+      opts = {:args => args}
+      m = args.first
+      if BasicUserMessage === m
+        # ignored messages should not be delegated
+        # to plugins with positive priority
+        opts[:below] = 0 if m.ignored?
+        # fake messages should not be delegated
+        # to plugins with negative priority
+        opts[:above] = 0 if m.recurse_depth > 0
+      end
+      delegate_event(method, opts)
     end
 
     # see if each plugin handles +method+, and if so, call it, passing
