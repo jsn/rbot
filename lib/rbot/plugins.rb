@@ -791,14 +791,32 @@ module Plugins
     end
 
     # see if each plugin handles +method+, and if so, call it, passing
-    # +message+ as a parameter
+    # +message+ as a parameter.  botmodules are called in order of priority
+    # from lowest to highest.  +DEPRECATED+ please use delegate_event.
     def delegate(method, *args)
+      delegate_event(method, :args => args)
+    end
+
+    # see if each plugin handles +method+, and if so, call it, passing
+    # +opts[:args]+ as a parameter.  +opts[:above]+ and +opts[:below]+
+    # are used for a threshold of botmodule priorities that will be called.
+    # If :above is defined, only botmodules with a priority above the value
+    # will be called, for example.  botmodules are called in order of
+    # priority from lowest to hightest.
+    def delegate_event(method, o={})
       # if the priorities order of the delegate list is dirty,
       # meaning some modules have been added or priorities have been
       # changed, then the delegate list will need to be sorted before
       # delegation.  This should always be true for the first delegation.
       sort_modules unless @sorted_modules
-        
+
+      # set defaults
+      opts = {:args => []}.merge(o)
+
+      above = opts[:above]
+      below = opts[:below]
+      args = opts[:args]
+
       # debug "Delegating #{method.inspect}"
       ret = Array.new
       if method.match(DEFAULT_DELEGATE_PATTERNS)
@@ -808,7 +826,10 @@ module Plugins
         return [] unless @delegate_list.has_key?(m)
         @delegate_list[m].each { |p|
           begin
-            ret.push p.send(method, *args)
+            prio = p.priority
+            unless (above and above >= prio) or (below and below <= prio)
+              ret.push p.send(method, *(args||[]))
+            end
           rescue Exception => err
             raise if err.kind_of?(SystemExit)
             error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
@@ -821,7 +842,10 @@ module Plugins
           if(p.respond_to? method)
             begin
               # debug "#{p.botmodule_class} #{p.name} responds"
-              ret.push p.send(method, *args)
+              prio = p.priority
+              unless (above and above >= prio) or (below and below <= prio)
+                ret.push p.send(method, *(args||[]))
+              end
             rescue Exception => err
               raise if err.kind_of?(SystemExit)
               error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
