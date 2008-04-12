@@ -691,7 +691,9 @@ class Bot
     }
     @client[:unknown] = proc { |data|
       #debug "UNKNOWN: #{data[:serverstring]}"
+      m = UnknownMessage.new(self, server, server, nil, data[:serverstring])
       irclog data[:serverstring], ".unknown"
+      @plugins.delegate "unknown_message", m
     }
 
     set_default_send_options :newlines => @config['send.newlines'].to_sym,

@@ -519,4 +519,7 @@ module Irc
   # same as a join, but can have a message too
   class PartMessage < JoinMessage
   end
+
+  class UnknownMessage < BasicUserMessage
+  end
 end
