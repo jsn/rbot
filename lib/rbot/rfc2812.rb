@@ -1426,26 +1426,22 @@ module Irc
           argv[1..-1].each { |arg|
             setting = arg[0].chr
             if "+-".include?(setting)
+              setting = setting == "+" ? :set : :reset
               arg[1..-1].each_byte { |b|
-                m = b.chr
-                case m.to_sym
+                m = b.chr.intern
+                data[:modes] << [setting, m]
+                case m
                 when *@server.supports[:chanmodes][:typea]
-                  data[:modes] << [setting + m]
                   who_wants_params << data[:modes].length - 1
                 when *@server.supports[:chanmodes][:typeb]
-                  data[:modes] << [setting + m]
                   who_wants_params << data[:modes].length - 1
                 when *@server.supports[:chanmodes][:typec]
-                  if setting == "+"
-                    data[:modes] << [setting + m]
+                  if setting == :set
                     who_wants_params << data[:modes].length - 1
-                  else
-                    data[:modes] << setting + m
                   end
                 when *@server.supports[:chanmodes][:typed]
-                  data[:modes] << setting + m
+                  # Nothing to do
                 when *@server.supports[:prefix][:modes]
-                  data[:modes] << [setting + m]
                   who_wants_params << data[:modes].length - 1
                 else
                   warning "Unknown mode #{m} in #{serverstring.inspect}"
@@ -1463,15 +1459,10 @@ module Irc
         end
 
         data[:modes].each { |mode|
-          case mode
-          when Array
-            set = mode[0][0].chr == "+" ? :set : :reset
-            key = mode[0][1].chr.to_sym
-            val = mode[1]
+          set, key, val = mode
+          if val
             data[:channel].mode[key].send(set, val)
           else
-            set = mode[0].chr == "+" ? :set : :reset
-            key = mode[1].chr.to_sym
             data[:channel].mode[key].send(set)
           end
         } if data[:modes]
