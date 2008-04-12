@@ -1057,6 +1057,66 @@ class UnoPlugin < Plugin
       :stock => stock.join(' ')
     }, :split_at => /#{NormalText}\s*/)
   end
+
+  def do_top(m, p)
+    pstats = chan_pstats(m.channel)
+    scores = []
+    wins = []
+    pstats.each do |k, v|
+      wins << [v.won.length, k]
+      scores << [v.won.inject(0) { |s, w| s+=w.score }, k]
+    end
+
+    if n = p[:scorenum]
+      msg = _("%{uno} %{num} highest scores: ") % {
+        :uno => UnoGame::UNO, :num => p[:scorenum]
+      }
+      scores.sort! { |a1, a2| -(a1.first <=> a2.first) }
+      scores = scores[0, n.to_i].compact
+      if scores.length <= 5
+        i = 0
+        list = "\n" + scores.map { |a|
+          i+=1
+          _("%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} points") % {
+            :i => i, :b => Bold, :nick => a.last, :score => a.first
+          }
+        }.join("\n")
+      else
+        list = scores.map { |a|
+          i+=1
+          _("%{i}. %{nick} ( %{score} )") % {
+            :i => i, :nick => a.last, :score => a.first
+          }
+        }.join(" | ")
+      end
+    elsif n = p[:winnum]
+      msg = _("%{uno} %{num} most wins: ") % {
+        :uno => UnoGame::UNO, :num => p[:winnum]
+      }
+      wins.sort! { |a1, a2| -(a1.first <=> a2.first) }
+      wins = wins[0, n.to_i].compact
+      if wins.length <= 5
+        i = 0
+        list = "\n" + wins.map { |a|
+          i+=1
+          _("%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} wins") % {
+            :i => i, :b => Bold, :nick => a.last, :score => a.first
+          }
+        }.join("\n")
+      else
+        list = wins.map { |a|
+          i+=1
+          _("%{i}. %{nick} ( %{score} )") % {
+            :i => i, :nick => a.last, :score => a.first
+          }
+        }.join(" | ")
+      end
+    else
+      msg = _("uh, what kind of score list did you want, again?")
+      list = _(" I can only show the top scores (with top) and the most wins (with topwin)")
+    end
+    m.reply msg + list, :max_lines => (msg+list).count("\n")+1
+  end
 end
 
 pg = UnoPlugin.new
@@ -1070,6 +1130,8 @@ pg.map 'uno replace :old [with] :new', :private => false, :action => :replace_pl
 pg.map 'uno stock', :private => false, :action => :print_stock
 pg.map 'uno chanstats', :private => false, :action => :do_chanstats
 pg.map 'uno stats [:nick]', :private => false, :action => :do_pstats
+pg.map 'uno top :scorenum', :private => false, :action => :do_top, :defaults => { :scorenum => 5 }
+pg.map 'uno topwin :winnum', :private => false, :action => :do_top, :defaults => { :winnum => 5 }
 
 pg.default_auth('stock', false)
 pg.default_auth('end', false)
