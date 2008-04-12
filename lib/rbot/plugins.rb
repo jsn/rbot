@@ -96,6 +96,10 @@ module Plugins
   unreplied(PrivMessage)::
                          Called for a PRIVMSG which has not been replied to.
 
+  notice(NoticeMessage)::
+                         Called for all Notices. Please notice that in general
+                         should not be replied to.
+
   kick(KickMessage)::
                          Called when a user (or the bot) is kicked from a
                          channel the bot is in.

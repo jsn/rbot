@@ -583,6 +583,7 @@ class Bot
       message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
       # pass it off to plugins that want to hear everything
       @plugins.delegate "listen", message
+      @plugins.delegate "notice", message
     }
     @client[:motd] = proc { |data|
       data[:motd].each_line { |line|

@@ -179,8 +179,7 @@ class NickServPlugin < Plugin
     end
   end
 
-  def listen(m)
-    return unless(m.kind_of? NoticeMessage)
+  def notice(m)
     return unless m.source.downcase == ns_nick.downcase
 
     case m.message
