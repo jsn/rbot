@@ -472,6 +472,15 @@ module Irc
     end
   end
 
+  # class to manage NAME replies
+  class NamesMessage < BasicUserMessage
+    attr_accessor :users
+    def initialize(bot, server, source, target, message="")
+      super(bot, server, source, target, message)
+      @users = []
+    end
+  end
+
   class QuitMessage < BasicUserMessage
     def initialize(bot, server, source, target, message="")
       super(bot, server, source, target, message)

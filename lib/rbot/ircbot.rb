@@ -685,7 +685,9 @@ class Bot
       @plugins.irc_delegate("topic", m)
     }
     @client[:names] = proc { |data|
-      @plugins.delegate "names", data[:channel], data[:users]
+      m = NamesMessage.new(self, server, server, data[:channel])
+      m.users = data[:users]
+      @plugins.delegate "names", m
     }
     @client[:unknown] = proc { |data|
       #debug "UNKNOWN: #{data[:serverstring]}"
