@@ -586,9 +586,11 @@ class Bot
       @plugins.delegate "notice", message
     }
     @client[:motd] = proc { |data|
+      m = MotdMessage.new(self, server, data[:source], data[:target], data[:motd])
       data[:motd].each_line { |line|
         irclog "MOTD: #{line}", "server"
       }
+      @plugins.delegate "motd", m
     }
     @client[:nicktaken] = proc { |data|
       new = "#{data[:nick]}_"

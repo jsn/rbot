@@ -126,6 +126,10 @@ module Plugins
                          Called when the welcome message is received on
                          joining a server succesfully.
 
+  motd(MotdMessage)::
+                         Called when the Message Of The Day is fully
+                         recevied from the server.
+
   connect::              Called when a server is joined successfully, but
                          before autojoin channels are joined (no params)
 

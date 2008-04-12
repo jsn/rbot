@@ -219,6 +219,11 @@ module Irc
   class WelcomeMessage < BasicUserMessage
   end
 
+  # class for handling MOTD from the server. Yes, MotdMessage
+  # is somewhat redundant, but it fits with the naming scheme
+  class MotdMessage < BasicUserMessage
+  end
+
   # class for handling IRC user messages. Includes some utilities for handling
   # the message, for example in plugins.
   # The +message+ member will have any bot addressing "^bot: " removed
