@@ -118,6 +118,10 @@ module Plugins
                          Called when a user (or the bot) changes a channel
                          topic
 
+  welcome(WelcomeMessage)::
+                         Called when the welcome message is received on
+                         joining a server succesfully.
+
   connect::              Called when a server is joined successfully, but
                          before autojoin channels are joined (no params)
 

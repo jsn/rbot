@@ -1069,13 +1069,14 @@ module Irc
         num=command.to_i
         case num
         when RPL_WELCOME
+          data[:message] = argv[1]
           # "Welcome to the Internet Relay Network
           # <nick>!<user>@<host>"
           if not_us
             warning "Server thinks client (#{@user.inspect}) has a different nick"
             @user.nick = data[:target]
           end
-          if argv[1] =~ /([^@!\s]+)(?:!([^@!\s]+?))?@(\S+)/
+          if data[:message] =~ /([^@!\s]+)(?:!([^@!\s]+?))?@(\S+)/
             nick = $1
             user = $2
             host = $3

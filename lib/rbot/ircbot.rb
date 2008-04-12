@@ -528,8 +528,11 @@ class Bot
     @quiet = []
 
     @client[:welcome] = proc {|data|
+      m = WelcomeMessage.new(self, server, data[:source], data[:target], data[:message])
+
       irclog "joined server #{@client.server} as #{myself}", "server"
 
+      @plugins.delegate("welcome", m)
       @plugins.delegate("connect")
 
       @config['irc.join_channels'].each { |c|

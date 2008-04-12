@@ -293,8 +293,8 @@ class AuthModule < CoreBotModule
     get_botuser_for(user).username
   end
 
-  def welcome(user)
-    _("welcome, %{user}") % {:user => get_botusername_for(user)}
+  def say_welcome(m)
+    m.reply _("welcome, %{user}") % {:user => get_botusername_for(m.source)}
   end
 
   def auth_auth(m, params)
@@ -306,7 +306,7 @@ class AuthModule < CoreBotModule
     begin
       case @bot.auth.login(m.source, params[:botuser], params[:password])
       when true
-        m.reply welcome(m.source)
+        say_welcome(m)
         @bot.auth.set_changed
       else
         m.reply _("sorry, can't do")
@@ -322,7 +322,7 @@ class AuthModule < CoreBotModule
     if u.default?
       m.reply _("I couldn't find anything to let you login automatically")
     else
-      m.reply welcome(m.source)
+      say_welcome(m)
     end
   end
 

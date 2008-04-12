@@ -215,6 +215,10 @@ module Irc
 
   end
 
+  # class for handling welcome messages from the server
+  class WelcomeMessage < BasicUserMessage
+  end
+
   # class for handling IRC user messages. Includes some utilities for handling
   # the message, for example in plugins.
   # The +message+ member will have any bot addressing "^bot: " removed
