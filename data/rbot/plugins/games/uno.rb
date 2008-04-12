@@ -715,6 +715,7 @@ class UnoGame
   end
 
   def end_game(halted = false)
+    runtime = @start_time ? Time.now -  @start_time : 0
     if halted
       if @start_time
         announce _("%{uno} game halted after %{time}") % {
@@ -751,15 +752,27 @@ class UnoGame
       end
       sum
     end
+
+    closure = { :dropouts => @dropouts, :players => @players, :runtime => runtime }
     if not halted
       announce _("%{p} wins with %{b}%{score}%{b} points!") % {
         :p => @players.first, :score => score, :b => Bold
       }
+      closure.merge!(:winner => @players.first, :score => score,
+        :opponents => @players.length - 1)
     end
-    @plugin.do_end_game(@channel)
+
+    @plugin.do_end_game(@channel, closure)
   end
 
 end
+
+# A won game: store score and number of opponents, so we can calculate
+# an average score per opponent (requested by Squiddhartha)
+define_structure :UnoGameWon, :score, :opponents
+# For each player we store the number of games played, the number of
+# games forfeited, and an UnoGameWon for each won game
+define_structure :UnoPlayerStats, :played, :forfeits, :won
 
 class UnoPlugin < Plugin
   attr :games
@@ -895,8 +908,126 @@ class UnoPlugin < Plugin
     @games[m.channel].end_game(true)
   end
 
-  def do_end_game(channel)
+  def chan_reg(channel)
+    @registry.sub_registry(channel.downcase)
+  end
+
+  def chan_stats(channel)
+    stats = chan_reg(channel).sub_registry('stats')
+    class << stats
+      def store(val)
+        val.to_i
+      end
+      def restore(val)
+        val.to_i
+      end
+    end
+    stats.set_default(0)
+    return stats
+  end
+
+  def chan_pstats(channel)
+    pstats = chan_reg(channel).sub_registry('players')
+    pstats.set_default(UnoPlayerStats.new(0,0,[]))
+    return pstats
+  end
+
+  def do_end_game(channel, closure)
+    reg = chan_reg(channel)
+    stats = chan_stats(channel)
+    stats['played'] += 1
+    stats['played_runtime'] += closure[:runtime]
+    if closure[:winner]
+      stats['finished'] += 1
+      stats['finished_runtime'] += closure[:runtime]
+
+      pstats = chan_pstats(channel)
+
+      closure[:players].each do |pl|
+        k = pl.user.downcase
+        pls = pstats[k]
+        pls.played += 1
+        pstats[k] = pls
+      end
+
+      closure[:dropouts].each do |pl|
+        k = pl.user.downcase
+        pls = pstats[k]
+        pls.played += 1
+        pls.forfeits += 1
+        pstats[k] = pls
+      end
+
+      winner = closure[:winner]
+      won = UnoGameWon.new(closure[:score], closure[:opponents])
+      k = winner.user.downcase
+      pls = pstats[k] # already marked played +1 above
+      pls.won << won
+      pstats[k] = pls
+    end
+
     @games.delete(channel)
+  end
+
+  def do_chanstats(m, p)
+    stats = chan_stats(m.channel)
+    np = stats['played']
+    nf = stats['finished']
+    if np > 0
+      str = _("%{nf} %{uno} games completed over %{np} games played. ") % {
+        :np => np, :uno => UnoGame::UNO, :nf => nf
+      }
+      cgt = stats['finished_runtime']
+      tgt = stats['played_runtime']
+      str << _("%{cgt} game time for completed games") % {
+        :cgt => Utils.secs_to_string(cgt)
+      }
+      if np > nf
+        str << _(" on %{tgt} total game time. ") % {
+          :tgt => Utils.secs_to_string(tgt)
+        }
+      else
+        str << ". "
+      end
+      str << _("%{avg} average game time for completed games") % {
+        :avg => Utils.secs_to_string(cgt/nf)
+      }
+      str << _(", %{tavg} for all games") % {
+        :tavg => Utils.secs_to_string(tgt/np)
+      } if np > nf
+      m.reply str
+    else
+      m.reply _("nobody has played %{uno} on %{chan} yet") % {
+        :uno => UnoGame::UNO, :chan => m.channel
+      }
+    end
+  end
+
+  def do_pstats(m, p)
+    dnick = p[:nick] || m.source # display-nick, don't later case
+    nick = dnick.downcase
+    ps = chan_pstats(m.channel)[nick]
+    if ps.played == 0
+      m.reply _("%{nick} never played %{uno} here") % {
+        :uno => UnoGame::UNO, :nick => dnick
+      }
+      return
+    end
+    np = ps.played
+    nf = ps.forfeits
+    nw = ps.won.length
+    score = ps.won.inject(0) { |sum, w| sum += w.score }
+    str = _("%{nick} played %{np} %{uno} games here, ") % {
+      :nick => dnick, :np => np, :uno => UnoGame::UNO
+    }
+    str << _("forfeited %{nf} games, ") % { :nf => nf } if nf > 0
+    str << _("won %{nw} games") % { :nw => nw}
+    if nw > 0
+      str << _(" with %{score} total points") % { :score => score }
+      avg = ps.won.inject(0) { |sum, w| sum += w.score/w.opponents }/nw
+      str << _(" and an average of %{avg} points per opponent") % { :avg => avg }
+    end
+    m.reply str
   end
 
   def replace_player(m, p)
@@ -937,6 +1068,8 @@ pg.map 'uno giveup', :private => false, :action => :drop_player
 pg.map 'uno drop :nick', :private => false, :action => :drop_player, :auth_path => ':other'
 pg.map 'uno replace :old [with] :new', :private => false, :action => :replace_player
 pg.map 'uno stock', :private => false, :action => :print_stock
+pg.map 'uno chanstats', :private => false, :action => :do_chanstats
+pg.map 'uno stats [:nick]', :private => false, :action => :do_pstats
 
 pg.default_auth('stock', false)
 pg.default_auth('end', false)
