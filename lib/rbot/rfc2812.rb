@@ -1407,18 +1407,40 @@ module Irc
         # be able to consume parameters for all
         # but Type D modes
 
-        data[:channel] = @server.user_or_channel(argv[0])
+        data[:target] = @server.user_or_channel(argv[0])
         data[:modestring] = argv[1..-1].join(" ")
-        case data[:channel]
+        # data[:modes] is an array where each element
+        # is an array with two elements, the first of which
+        # is either :set or :reset, and the second symbol
+        # is the mode letter. An optional third element
+        # is present e.g. for channel modes that need
+        # a parameter
+        data[:modes] = []
+        case data[:target]
         when User
-          # TODO
+          # User modes aren't currently handled internally,
+          # but we still parse them and delegate to the client
           warning "Unhandled user mode message '#{serverstring}'"
+          argv[1..-1].each { |arg|
+            setting = arg[0].chr
+            if "+-".include?(setting)
+              setting = setting == "+" ? :set : :reset
+              arg[1..-1].each_byte { |b|
+                m = b.chr.intern
+                data[:modes] << [setting, m]
+              }
+            else
+              # Although typically User modes don't take an argument,
+              # this is not true for all modes on all servers. Since
+              # we have no knowledge of which modes take parameters
+              # and which don't we just assign it to the last
+              # mode. This is not going to do strange things often,
+              # as usually User modes are only set one at a time
+              warning "Unhandled user mode parameter #{arg} found"
+              data[:modes].last << arg
+            end
+          }
         else
-          # data[:modes] is an array where each element
-          # is either a flag which doesn't need parameters
-          # or an array with a flag which needs parameters
-          # and the corresponding parameter
-          data[:modes] = []
           # array of indices in data[:modes] where parameters
           # are needed
           who_wants_params = []
@@ -1456,16 +1478,16 @@ module Irc
               data[:modes][idx] << arg
             end
           }
-        end
 
-        data[:modes].each { |mode|
-          set, key, val = mode
-          if val
-            data[:channel].mode[key].send(set, val)
-          else
-            data[:channel].mode[key].send(set)
-          end
-        } if data[:modes]
+          data[:modes].each { |mode|
+            set, key, val = mode
+            if val
+              data[:target].mode[key].send(set, val)
+            else
+              data[:target].mode[key].send(set)
+            end
+          }
+        end
 
         handle(:mode, data)
       else

@@ -638,9 +638,9 @@ class Bot
       @plugins.irc_delegate("quit", m)
     }
     @client[:mode] = proc {|data|
-      m = ModeChangeMessage.new(self, server, data[:source], data[:channel], data[:modestring])
+      m = ModeChangeMessage.new(self, server, data[:source], data[:target], data[:modestring])
       m.modes = data[:modes]
-      irclog "@ Mode #{data[:modestring]} by #{data[:source]}", data[:channel]
+      irclog "@ Mode #{data[:modestring]} by #{data[:source]}", data[:target]
       @plugins.delegate "modechange", m
     }
     @client[:join] = proc {|data|
