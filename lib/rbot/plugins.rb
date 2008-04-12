@@ -118,6 +118,8 @@ module Plugins
 
   nick(NickMessage)::
                          Called when a user (or the bot) changes Nick
+  modechange(ModeChangeMessage)::
+                         Called when a User or Channel mode is changed
   topic(TopicMessage)::
                          Called when a user (or the bot) changes a channel
                          topic

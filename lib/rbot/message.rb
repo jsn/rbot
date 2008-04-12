@@ -462,6 +462,16 @@ module Irc
     end
   end
 
+  # class to manage mode changes
+  class ModeChangeMessage < BasicUserMessage
+    attr_accessor :modes
+    def initialize(bot, server, source, channel, message="")
+      super(bot, server, source, channel, message)
+      @address = (source == @bot.myself)
+      @modes = []
+    end
+  end
+
   class QuitMessage < BasicUserMessage
     def initialize(bot, server, source, target, message="")
       super(bot, server, source, target, message)
