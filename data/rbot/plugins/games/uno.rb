@@ -13,9 +13,7 @@
 #
 # TODO documentation
 # TODO allow full form card names for play
-# TODO allow color specification with wild
 # TODO allow choice of rules re stacking + and playing Reverse with them
-# TODO highscore table
 
 class UnoGame
   COLORS = %w{Red Green Blue Yellow}
