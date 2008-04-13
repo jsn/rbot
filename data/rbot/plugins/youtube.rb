@@ -27,7 +27,7 @@ class YouTubePlugin < Plugin
   def youtube_filter(s)
     loc = Utils.check_location(s, /youtube\.com/)
     return nil unless loc
-    if s[:text].include? '<div id="vidTitle">'
+    if s[:text].include? '<div id="watch-vid-title">'
       vid = @bot.filter(:"youtube.video", s)
       return nil unless vid
       content = _("Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %{duration}. %{views} views, faved %{faves} times. %{desc}") % vid
@@ -40,10 +40,11 @@ class YouTubePlugin < Plugin
     end
     # otherwise, just grab the proper div
     if defined? Hpricot
-      content = (Hpricot(s[:text])/"#mainContent").to_html.ircify_html
+      content = (Hpricot(s[:text])/".watch-video-desc").to_html.ircify_html
     end
     # suboptimal, but still better than the default HTML info extractor
-    content ||= /<div id="mainContent"[^>]*>/.match(s[:text]).post_match.ircify_html
+    dm = /<div\s+class="watch-video-desc"[^>]*>/.match(s[:text])
+    content ||= dm ? dm.post_match.ircify_html : '(no description found)'
     return {:title => s[:text].ircify_html_title, :content => content}
   end
 
