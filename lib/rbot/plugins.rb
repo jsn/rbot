@@ -230,7 +230,7 @@ module Plugins
     # Signal to other BotModules that an even happened.
     #
     def call_event(ev, *args)
-      @bot.plugins.delegate('event_' + ev.to_s.gsub(/[^\w\?!]+/, '_'), *args)
+      @bot.plugins.delegate('event_' + ev.to_s.gsub(/[^\w\?!]+/, '_'), *(args.push Hash.new))
     end
 
     # call-seq: map(template, options)
@@ -804,50 +804,55 @@ module Plugins
       end
     end
 
-    # see if each plugin handles +method+, and if so, call it, passing
-    # +message+ as a parameter.  botmodules are called in order of priority
-    # from lowest to highest.
+    # call-seq: delegate</span><span class="method-args">(method, m, opts={})</span>
+    # <span class="method-name">delegate</span><span class="method-args">(method, opts={})
     #
-    # If the passed +message+ is marked as +#ignored?+, it will only be
-    # delegated to plugins with negative priority. Conversely, if it's
-    # a fake message  (see BotModule#fake_message), it will only be
+    # see if each plugin handles _method_, and if so, call it, passing
+    # _m_ as a parameter (if present). BotModules are called in order of
+    # priority from lowest to highest.
+    #
+    # If the passed _m_ is a BasicUserMessage and is marked as #ignored?, it
+    # will only be delegated to plugins with negative priority. Conversely, if
+    # it's a fake message (see BotModule#fake_message), it will only be
     # delegated to plugins with positive priority.
     #
-    # For delegation with more extensive options, see delegate_event
+    # Note that _m_ can also be an exploded Array, but in this case the last
+    # element of it cannot be a Hash, or it will be interpreted as the options
+    # Hash for delegate itself. The last element can be a subclass of a Hash, though.
+    # To be on the safe side, you can add an empty Hash as last parameter for delegate
+    # when calling it with an exploded Array:
+    #   @bot.plugins.delegate(method, *(args.push Hash.new))
+    #
+    # Currently supported options are the following:
+    # :above ::
+    #   if specified, the delegation will only consider plugins with a priority
+    #   higher than the specified value
+    # :below ::
+    #   if specified, the delegation will only consider plugins with a priority
+    #   lower than the specified value
     #
     def delegate(method, *args)
-      opts = {:args => args}
-      m = args.first
-      if BasicUserMessage === m
-        # ignored messages should not be delegated
-        # to plugins with positive priority
-        opts[:below] = 0 if m.ignored?
-        # fake messages should not be delegated
-        # to plugins with negative priority
-        opts[:above] = 0 if m.recurse_depth > 0
-      end
-      delegate_event(method, opts)
-    end
-
-    # see if each plugin handles +method+, and if so, call it, passing
-    # +opts[:args]+ as a parameter.  +opts[:above]+ and +opts[:below]+
-    # are used for a threshold of botmodule priorities that will be called.
-    # If :above is defined, only botmodules with a priority above the value
-    # will be called, for example.  botmodules are called in order of
-    # priority from lowest to hightest.
-    def delegate_event(method, o={})
       # if the priorities order of the delegate list is dirty,
       # meaning some modules have been added or priorities have been
       # changed, then the delegate list will need to be sorted before
       # delegation.  This should always be true for the first delegation.
       sort_modules unless @sorted_modules
 
-      # set defaults
-      opts = {:args => []}.merge(o)
+      opts = {}
+      opts.merge(args.pop) if args.last.class == Hash
+
+      m = args.first
+      if BasicUserMessage === m
+        # ignored messages should not be delegated
+        # to plugins with positive priority
+        opts[:below] ||= 0 if m.ignored?
+        # fake messages should not be delegated
+        # to plugins with negative priority
+        opts[:above] ||= 0 if m.recurse_depth > 0
+      end
 
       above = opts[:above]
       below = opts[:below]
-      args = opts[:args]
 
       # debug "Delegating #{method.inspect}"
       ret = Array.new
@@ -860,7 +865,7 @@ module Plugins
           begin
             prio = p.priority
             unless (above and above >= prio) or (below and below <= prio)
-              ret.push p.send(method, *(args||[]))
+              ret.push p.send(method, *args)
             end
           rescue Exception => err
             raise if err.kind_of?(SystemExit)
@@ -876,7 +881,7 @@ module Plugins
               # debug "#{p.botmodule_class} #{p.name} responds"
               prio = p.priority
               unless (above and above >= prio) or (below and below <= prio)
-                ret.push p.send(method, *(args||[]))
+                ret.push p.send(method, *args)
               end
             rescue Exception => err
               raise if err.kind_of?(SystemExit)
