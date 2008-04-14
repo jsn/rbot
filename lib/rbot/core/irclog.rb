@@ -58,15 +58,45 @@ class IrcLogModule < CoreBotModule
     irclog "joined server #{m.server} as #{m.target}", "server"
   end
 
-  def message(m)
-    if(m.action?)
-      if(m.private?)
-        irclog "* [#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
+  def listen(m)
+    case m
+    when PrivMessage
+      method = 'log_message'
+    else
+      method = 'log_' + m.class.name.downcase.match(/^irc::(\w+)message$/).captures.first
+    end
+    if self.respond_to?(method)
+      self.__send__(method, m)
+    else
+      warning "unhandled logging for #{m.pretty_inspect} (no such method #{method})"
+      unknown_message(m)
+    end
+  end
+
+  def log_message(m)
+    if m.ctcp
+      who = m.private? ? "me" : m.target
+      logtarget = m.private? ? m.source : m.target
+      case m.ctcp.intern
+      when :ACTION
+        if m.public?
+          irclog "* #{m.source} #{m.logmessage}", m.target
+        else
+          irclog "* [#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
+        end
+      when :VERSION
+        irclog "@ #{m.source} asked #{who} about version info", logtarget
+      when :SOURCE
+        irclog "@ #{m.source} asked #{who} about source info", logtarget
+      when :PING
+        irclog "@ #{m.source} pinged #{who}", logtarget
+      when :TIME
+        irclog "@ #{m.source} asked #{who} what time it is", logtarget
       else
-        irclog "* #{m.source} #{m.logmessage}", m.target
+        irclog "@ #{m.source} asked #{who} about #{[m.ctcp, m.message].join(' ')}", logtarget
       end
     else
-      if(m.public?)
+      if m.public? 
         irclog "<#{m.source}> #{m.logmessage}", m.target
       else
         irclog "[#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
@@ -74,7 +104,7 @@ class IrcLogModule < CoreBotModule
     end
   end
 
-  def notice(m)
+  def log_notice(m)
     if m.private?
       irclog "-#{m.source}- #{m.message}", m.source
     else
@@ -88,13 +118,13 @@ class IrcLogModule < CoreBotModule
     }
   end
 
-  def nick(m)
+  def log_nick(m)
     m.is_on.each { |ch|
       irclog "@ #{m.oldnick} is now known as #{m.newnick}", ch
     }
   end
 
-  def quit(m)
+  def log_quit(m)
     m.was_on.each { |ch|
       irclog "@ Quit: #{m.source}: #{m.message}", ch
     }
@@ -104,7 +134,7 @@ class IrcLogModule < CoreBotModule
     irclog "@ Mode #{m.message} by #{m.source}", m.target
   end
 
-  def join(m)
+  def log_join(m)
     if m.address?
       debug "joined channel #{m.channel}"
       irclog "@ Joined channel #{m.channel}", m.channel
@@ -113,7 +143,7 @@ class IrcLogModule < CoreBotModule
     end
   end
 
-  def part(m)
+  def log_part(m)
     if(m.address?)
       debug "left channel #{m.channel}"
       irclog "@ Left channel #{m.channel} (#{m.logmessage})", m.channel
@@ -122,7 +152,7 @@ class IrcLogModule < CoreBotModule
     end
   end
 
-  def kick(m)
+  def log_kick(m)
     if(m.address?)
       debug "kicked from channel #{m.channel}"
       irclog "@ You have been kicked from #{m.channel} by #{m.source} (#{m.logmessage})", m.channel
@@ -131,11 +161,11 @@ class IrcLogModule < CoreBotModule
     end
   end
 
-  # def invite(m)
+  # def log_invite(m)
   #   # TODO
   # end
 
-  def topic(m)
+  def log_topic(m)
     case m.info_or_set
     when :set
       if m.source == @bot.myself

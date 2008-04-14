@@ -14,10 +14,8 @@ class BasicsModule < CoreBotModule
     case m.ctcp.intern
     when :PING
       m.ctcp_reply m.message
-      @bot.irclog "@ #{m.source} pinged #{who}"
     when :TIME
       m.ctcp_reply Time.now.to_s
-      @bot.irclog "@ #{m.source} asked #{who} what time it is"
     end
   end
 
