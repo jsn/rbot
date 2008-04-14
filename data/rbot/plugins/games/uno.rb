@@ -161,7 +161,7 @@ class UnoGame
   attr_reader :picker
 
   # the IRC user that created the game
-  attr_reader :manager
+  attr_accessor :manager
 
   def initialize(plugin, channel, manager)
     @channel = channel
@@ -906,6 +906,26 @@ class UnoPlugin < Plugin
     }
   end
 
+  def transfer_ownership(m, p)
+    unless @games.key?(m.channel)
+      m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
+      return
+    end
+    g = @games[m.channel]
+    old = g.manager
+    new = m.channel.get_user(p[:nick])
+    if new
+      g.manager = new
+      @bot.auth.irc_to_botuser(old).reset_temp_permission('uno::manage', m.channel)
+      @bot.auth.irc_to_botuser(new).set_temp_permission('uno::manage', true, m.channel)
+      m.reply _("%{uno} game ownership transferred from %{old} to %{nick}") % {
+        :uno => UnoGame::UNO, :old => old, :nick => p[:nick]
+      }
+    else
+      m.reply _("who is this %{nick} you want me to transfer game ownership to?") % p
+    end
+  end
+
   def end_game(m, p)
     unless @games.key?(m.channel)
       m.reply _("There is no %{uno} game running here") % { :uno => UnoGame::UNO }
@@ -1139,6 +1159,7 @@ pg.map 'uno drop', :private => false, :action => :drop_player, :auth_path => 'ma
 pg.map 'uno giveup', :private => false, :action => :drop_player, :auth_path => 'manage::drop::self!'
 pg.map 'uno drop :nick', :private => false, :action => :drop_player, :auth_path => 'manage::drop::other!'
 pg.map 'uno replace :old [with] :new', :private => false, :action => :replace_player, :auth_path => 'manage'
+pg.map 'uno transfer [game [ownership]] [to] :nick', :private => false, :action => :transfer_ownership, :auth_path => 'manage'
 pg.map 'uno stock', :private => false, :action => :print_stock
 pg.map 'uno chanstats', :private => false, :action => :do_chanstats
 pg.map 'uno stats [:nick]', :private => false, :action => :do_pstats
