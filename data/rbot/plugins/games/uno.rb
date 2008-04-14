@@ -160,7 +160,10 @@ class UnoGame
   # number of cards to be picked if the player can't play an appropriate card
   attr_reader :picker
 
-  def initialize(plugin, channel)
+  # the IRC user that created the game
+  attr_reader :manager
+
+  def initialize(plugin, channel, manager)
     @channel = channel
     @plugin = plugin
     @bot = plugin.bot
@@ -178,6 +181,7 @@ class UnoGame
     @picker = 0
     @last_picker = 0
     @must_play = nil
+    @manager = manager
   end
 
   def get_player(user)
@@ -888,10 +892,14 @@ class UnoPlugin < Plugin
 
   def create_game(m, p)
     if @games.key?(m.channel)
-      m.reply _("There is already an %{uno} game running here, say 'jo' to join in") % { :uno => UnoGame::UNO }
+      m.reply _("There is already an %{uno} game running here, managed by %{who}. say 'jo' to join in") % {
+        :who => @games[m.channel].manager,
+        :uno => UnoGame::UNO
+      }
       return
     end
-    @games[m.channel] = UnoGame.new(self, m.channel)
+    @games[m.channel] = UnoGame.new(self, m.channel, m.source)
+    @bot.auth.irc_to_botuser(m.source).set_temp_permission('uno::manage', true, m.channel)
     m.reply _("Ok, created %{uno} game on %{channel}, say 'jo' to join in") % {
       :uno => UnoGame::UNO,
       :channel => m.channel
@@ -969,6 +977,7 @@ class UnoPlugin < Plugin
       pstats[k] = pls
     end
 
+    @bot.auth.irc_to_botuser(@games[channel].manager).reset_temp_permission('uno::manage', channel)
     @games.delete(channel)
   end
 
