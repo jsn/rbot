@@ -228,7 +228,7 @@ class AuthModule < CoreBotModule
     begin
       botuser = @bot.auth.get_botuser(p[:user].sub(/^all$/,"everyone"))
     rescue
-      return m.reply(_("couldn't find botuser %{name}") % {:name => params[:user]})
+      return m.reply(_("couldn't find botuser %{name}") % {:name => p[:user]})
     end
 
     if p[:where].to_s.empty?
