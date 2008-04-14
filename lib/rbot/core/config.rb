@@ -205,10 +205,10 @@ class ConfigModule < CoreBotModule
     case m.ctcp.intern
     when :VERSION
       m.ctcp_reply version_string
-      @bot.irclog "@ #{m.source} asked #{who} about version info"
+      # @bot.irclog "@ #{m.source} asked #{who} about version info"
     when :SOURCE
       m.ctcp_reply Irc::Bot::SOURCE_URL
-      @bot.irclog "@ #{m.source} asked #{who} about source info"
+      # @bot.irclog "@ #{m.source} asked #{who} about source info"
     end
   end
 

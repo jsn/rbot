@@ -394,7 +394,6 @@ class Bot
       FileUtils.cp_r Config::datadir+'/templates', botclass
     end
 
-    Dir.mkdir("#{botclass}/logs") unless File.exist?("#{botclass}/logs")
     Dir.mkdir("#{botclass}/registry") unless File.exist?("#{botclass}/registry")
     Dir.mkdir("#{botclass}/safe_save") unless File.exist?("#{botclass}/safe_save")
 
@@ -484,8 +483,6 @@ class Bot
     end
     @quit_mutex = Mutex.new
 
-    @logs = Hash.new
-
     @plugins = nil
     @lang = Language.new(self, @config['core.language'])
 
@@ -530,8 +527,6 @@ class Bot
     @client[:welcome] = proc {|data|
       m = WelcomeMessage.new(self, server, data[:source], data[:target], data[:message])
 
-      irclog "joined server #{@client.server} as #{myself}", "server"
-
       @plugins.delegate("welcome", m)
       @plugins.delegate("connect")
 
@@ -575,9 +570,7 @@ class Bot
         end
       }
 
-      irclogprivmsg(m)
-
-      @plugins.irc_delegate('privmsg', m) unless m.ignored?
+      @plugins.irc_delegate('privmsg', m)
     }
     @client[:notice] = proc { |data|
       message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
@@ -587,9 +580,6 @@ class Bot
     }
     @client[:motd] = proc { |data|
       m = MotdMessage.new(self, server, data[:source], data[:target], data[:motd])
-      data[:motd].each_line { |line|
-        irclog "MOTD: #{line}", "server"
-      }
       @plugins.delegate "motd", m
     }
     @client[:nicktaken] = proc { |data|
@@ -620,68 +610,54 @@ class Bot
       old = data[:oldnick]
       new = data[:newnick]
       m = NickMessage.new(self, server, source, old, new)
+      m.is_on = data[:is_on]
       if source == myself
         debug "my nick is now #{new}"
       end
-      data[:is_on].each { |ch|
-        irclog "@ #{old} is now known as #{new}", ch
-      }
       @plugins.irc_delegate("nick", m)
     }
     @client[:quit] = proc {|data|
       source = data[:source]
       message = data[:message]
       m = QuitMessage.new(self, server, source, source, message)
-      data[:was_on].each { |ch|
-        irclog "@ Quit: #{source}: #{message}", ch
-      }
+      m.was_on = data[:was_on]
       @plugins.irc_delegate("quit", m)
     }
     @client[:mode] = proc {|data|
       m = ModeChangeMessage.new(self, server, data[:source], data[:target], data[:modestring])
       m.modes = data[:modes]
-      irclog "@ Mode #{data[:modestring]} by #{data[:source]}", data[:target]
       @plugins.delegate "modechange", m
     }
     @client[:join] = proc {|data|
       m = JoinMessage.new(self, server, data[:source], data[:channel], data[:message])
-      irclogjoin(m)
-
       @plugins.irc_delegate("join", m)
       sendq("WHO #{data[:channel]}", data[:channel], 2) if m.address?
     }
     @client[:part] = proc {|data|
       m = PartMessage.new(self, server, data[:source], data[:channel], data[:message])
-      irclogpart(m)
-
       @plugins.irc_delegate("part", m)
     }
     @client[:kick] = proc {|data|
       m = KickMessage.new(self, server, data[:source], data[:target], data[:channel],data[:message])
-      irclogkick(m)
-
       @plugins.irc_delegate("kick", m)
     }
     @client[:invite] = proc {|data|
       m = InviteMessage.new(self, server, data[:source], data[:target], data[:channel])
-
       @plugins.irc_delegate("invite", m)
     }
     @client[:changetopic] = proc {|data|
       m = TopicMessage.new(self, server, data[:source], data[:channel], data[:topic])
-      irclogtopic(m)
-
+      m.info_or_set = :set
       @plugins.irc_delegate("topic", m)
     }
-    @client[:topic] = proc { |data|
-      irclog "@ Topic is \"#{data[:topic]}\"", data[:channel]
-    }
+    # @client[:topic] = proc { |data|
+    #   irclog "@ Topic is \"#{data[:topic]}\"", data[:channel]
+    # }
     @client[:topicinfo] = proc { |data|
       channel = data[:channel]
       topic = channel.topic
-      irclog "@ Topic set by #{topic.set_by} on #{topic.set_on}", channel
       m = TopicMessage.new(self, server, data[:source], channel, topic)
-
+      m.info_or_set = :info
       @plugins.irc_delegate("topic", m)
     }
     @client[:names] = proc { |data|
@@ -692,7 +668,6 @@ class Bot
     @client[:unknown] = proc { |data|
       #debug "UNKNOWN: #{data[:serverstring]}"
       m = UnknownMessage.new(self, server, server, nil, data[:serverstring])
-      irclog data[:serverstring], ".unknown"
       @plugins.delegate "unknown_message", m
     }
 
@@ -968,7 +943,7 @@ class Bot
 
     lines.each { |line|
       sendq "#{fixed}#{line}", chan, ring
-      log_sent(type, where, line)
+      delegate_sent(type, where, line)
     }
   end
 
@@ -1010,24 +985,6 @@ class Bot
     say where, @lang.get("okay")
   end
 
-  # log IRC-related message +message+ to a file determined by +where+.
-  # +where+ can be a channel name, or a nick for private message logging
-  def irclog(message, where="server")
-    message = message.chomp
-    stamp = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-    if where.class <= Server
-      where_str = "server"
-    else
-      where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
-    end
-    unless(@logs.has_key?(where_str))
-      @logs[where_str] = File.new("#{@botclass}/logs/#{where_str}", "a")
-      @logs[where_str].sync = true
-    end
-    @logs[where_str].puts "[#{stamp}] #{message}"
-    #debug "[#{stamp}] <#{where}> #{message}"
-  end
-
   # set topic of channel +where+ to +topic+
   def topic(where, topic)
     sendq "TOPIC #{where} :#{topic}", where, 2
@@ -1041,6 +998,8 @@ class Bot
         @socket.clearq
         debug "Sending quit message"
         @socket.emergency_puts "QUIT :#{message}"
+        debug "Logging quits"
+        delegate_sent('QUIT', @bot.myself, message)
         debug "Flushing socket"
         @socket.flush
       rescue SocketError => e
@@ -1049,10 +1008,6 @@ class Bot
       debug "Shutting down socket"
       @socket.shutdown
     end
-    debug "Logging quits"
-    server.channels.each { |ch|
-      irclog "@ quit (#{message})", ch
-    }
     stop_server_pings
     @client.reset
   end
@@ -1230,75 +1185,18 @@ class Bot
 
   private
 
-  def irclogprivmsg(m)
-    if(m.action?)
-      if(m.private?)
-        irclog "* [#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
-      else
-        irclog "* #{m.source} #{m.logmessage}", m.target
-      end
-    else
-      if(m.public?)
-        irclog "<#{m.source}> #{m.logmessage}", m.target
-      else
-        irclog "[#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
-      end
-    end
-  end
-
-  # log a message. Internal use only.
-  def log_sent(type, where, message)
+  # delegate sent messages
+  def delegate_sent(type, where, message)
+    args = [self, server, myself, server.user_or_channel(where.to_s), message]
     case type
       when "NOTICE"
-        case where
-        when Channel
-          irclog "-=#{myself}=- #{message}", where
-        else
-          irclog "[-=#{where}=-] #{message}", where
-        end
+        m = NoticeMessage.new(*args)
       when "PRIVMSG"
-        case where
-        when Channel
-          irclog "<#{myself}> #{message}", where
-        else
-          irclog "[msg(#{where})] #{message}", where
-        end
+        m = PrivMessage.new(*args)
+      when "QUIT"
+        m = QuitMessage.new(*args)
     end
-  end
-
-  def irclogjoin(m)
-    if m.address?
-      debug "joined channel #{m.channel}"
-      irclog "@ Joined channel #{m.channel}", m.channel
-    else
-      irclog "@ #{m.source} joined channel #{m.channel}", m.channel
-    end
-  end
-
-  def irclogpart(m)
-    if(m.address?)
-      debug "left channel #{m.channel}"
-      irclog "@ Left channel #{m.channel} (#{m.logmessage})", m.channel
-    else
-      irclog "@ #{m.source} left channel #{m.channel} (#{m.logmessage})", m.channel
-    end
-  end
-
-  def irclogkick(m)
-    if(m.address?)
-      debug "kicked from channel #{m.channel}"
-      irclog "@ You have been kicked from #{m.channel} by #{m.source} (#{m.logmessage})", m.channel
-    else
-      irclog "@ #{m.target} has been kicked from #{m.channel} by #{m.source} (#{m.logmessage})", m.channel
-    end
-  end
-
-  def irclogtopic(m)
-    if m.source == myself
-      irclog "@ I set topic \"#{m.topic}\"", m.channel
-    else
-      irclog "@ #{m.source} set topic \"#{m.topic}\"", m.channel
-    end
+    @plugins.delegate('sent', m)
   end
 
 end

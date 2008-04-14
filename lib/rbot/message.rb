@@ -449,8 +449,10 @@ module Irc
   # class to pass IRC Nick changes in. @message contains the old nickame,
   # @sourcenick contains the new one.
   class NickMessage < BasicUserMessage
+    attr_accessor :is_on
     def initialize(bot, server, source, oldnick, newnick)
       super(bot, server, source, oldnick, newnick)
+      @is_on = []
     end
 
     def oldnick
@@ -482,8 +484,10 @@ module Irc
   end
 
   class QuitMessage < BasicUserMessage
+    attr_accessor :was_on
     def initialize(bot, server, source, target, message="")
       super(bot, server, source, target, message)
+      @was_on = []
     end
   end
 
@@ -495,11 +499,14 @@ module Irc
     # topic set on channel
     attr_reader :channel
 
+    # :info if topic info, :set if topic set
+    attr_accessor :info_or_set
     def initialize(bot, server, source, channel, topic=ChannelTopic.new)
       super(bot, server, source, channel, topic.text)
       @topic = topic
       @timestamp = topic.set_on
       @channel = channel
+      @info_or_set = nil
     end
   end
 
