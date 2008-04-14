@@ -798,7 +798,7 @@ class UnoPlugin < Plugin
       _("'od' to show the playing order"),
       _("'ti' to show play time"),
       _("'tu' to show whose turn it is")
-    ].join(" ; ")
+    ].join("; ")
     when 'challenge'
       _("A Wild +4 can only be played legally if you don't have normal (not special) cards of the current color. ") +
       _("The next player can challenge a W+4 by using the 'ch' command. ") +
@@ -811,11 +811,33 @@ class UnoPlugin < Plugin
       _("Wild +4 also forces the next player to take 4 cards, but it can only be played if you can't play a color card. ") +
       _("you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing the first player who can't play one to pick the cumulative sum of all cards. ") +
       _("you can also play a Reverse on a +2 or +4, bouncing the effect back to the previous player (that now comes next). ")
+    when /scor(?:e|ing)/, /points?/
+      [
+      _("The points won with a game of %{uno} are totalled from the cards remaining in the hands of the other players."),
+      _("Each normal (not special) card is worth its face value (from 0 to 9 points)."),
+      _("Each colored special card (+2, Reverse, Skip) is worth 20 points."),
+      _("Each Wild and Wild +4 is worth 50 points.")
+      ].join(" ") % { :uno => UnoGame::UNO }
+    when /cards?/
+      [
+      _("There are 108 cards in a standard %{uno} deck."),
+      _("For each color (Blue, Green, Red, Yellow) there are 19 numbered cards (from 0 to 9), with two of each number except for 0."),
+      _("There are also 6 special cards for each color, two each of +2, Reverse, Skip."),
+      _("Finally, there are 4 Wild and 4 Wild +4 cards.")
+      ].join(" ") % { :uno => UnoGame::UNO }
+    when 'admin'
+      _("The game manager (the user that started the game) can execute the following commands to manage it: ") +
+      [
+      _("'uno drop <user>' to drop a user from the game (any user can drop itself using 'uno drop')"),
+      _("'uno replace <old> [with] <new>' to replace a player with someone else (useful in case of disconnects)"),
+      _("'uno transfer [to] <nick>' to transfer game ownership to someone else"),
+      _("'uno end' to end the game before its natural completion")
+      ].join("; ")
     else
-      (_("%{uno} game. !uno to start a game. see help uno rules for the rules. commands: %{cmds}") % {
+      _("%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help uno admin' for admin commands. In-game commands: %{cmds}.") % {
         :uno => UnoGame::UNO,
         :cmds => help(plugin, 'commands')
-      })
+      }
     end
   end
 
