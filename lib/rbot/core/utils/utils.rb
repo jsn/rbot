@@ -618,11 +618,18 @@ module ::Irc
     # uri_fragment:: the URI fragment of the original request
     #
     def Utils.get_string_html_info(text, opts={})
+      debug "getting string html info"
       txt = text.dup
       title = txt.ircify_html_title
+      debug opts
       if frag = opts[:uri_fragment] and not frag.empty?
-        fragreg = /.*?<a\s+[^>]*name=["']?#{frag}["']?.*?>/im
-        txt.sub!(fragreg,'')
+        fragreg = /<a\s+[^>]*name=["']?#{frag}["']?[^>]*>/im
+        debug fragreg
+        debug txt
+        if txt.match(fragreg)
+          # grab the post-match
+          txt = $'
+        end
       end
       c_opts = opts.dup
       c_opts[:strip] ||= title
