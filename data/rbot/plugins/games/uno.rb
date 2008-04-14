@@ -1120,11 +1120,11 @@ end
 pg = UnoPlugin.new
 
 pg.map 'uno', :private => false, :action => :create_game
-pg.map 'uno end', :private => false, :action => :end_game
-pg.map 'uno drop', :private => false, :action => :drop_player
-pg.map 'uno giveup', :private => false, :action => :drop_player
-pg.map 'uno drop :nick', :private => false, :action => :drop_player, :auth_path => ':other'
-pg.map 'uno replace :old [with] :new', :private => false, :action => :replace_player
+pg.map 'uno end', :private => false, :action => :end_game, :auth_path => 'manage'
+pg.map 'uno drop', :private => false, :action => :drop_player, :auth_path => 'manage::drop::self!'
+pg.map 'uno giveup', :private => false, :action => :drop_player, :auth_path => 'manage::drop::self!'
+pg.map 'uno drop :nick', :private => false, :action => :drop_player, :auth_path => 'manage::drop::other!'
+pg.map 'uno replace :old [with] :new', :private => false, :action => :replace_player, :auth_path => 'manage'
 pg.map 'uno stock', :private => false, :action => :print_stock
 pg.map 'uno chanstats', :private => false, :action => :do_chanstats
 pg.map 'uno stats [:nick]', :private => false, :action => :do_pstats
@@ -1132,6 +1132,5 @@ pg.map 'uno top :scorenum', :private => false, :action => :do_top, :defaults => 
 pg.map 'uno topwin :winnum', :private => false, :action => :do_top, :defaults => { :winnum => 5 }
 
 pg.default_auth('stock', false)
-pg.default_auth('end', false)
-pg.default_auth('drop::other', false)
-pg.default_auth('replace', false)
+pg.default_auth('manage', false)
+pg.default_auth('manage::drop::self', true)
