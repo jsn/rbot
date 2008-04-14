@@ -906,6 +906,11 @@ class UnoPlugin < Plugin
     @games[m.channel].end_game(true)
   end
 
+  def cleanup
+    @games.each { |k, g| g.end_game(true) }
+    super
+  end
+
   def chan_reg(channel)
     @registry.sub_registry(channel.downcase)
   end
