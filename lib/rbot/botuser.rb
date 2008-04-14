@@ -240,6 +240,7 @@ class Bot
       attr_reader :password
       attr_reader :netmasks
       attr_reader :perm
+      attr_reader :perm_temp
       attr_writer :login_by_mask
       attr_writer :transient
 
@@ -317,6 +318,7 @@ class Bot
         raise "must provide a usable mask for transient BotUser #{@username}" if @transient and @netmasks.empty?
 
         @perm = {}
+        @perm_temp = {}
       end
 
       # Inspection
@@ -327,6 +329,7 @@ class Bot
         str << " @username=#{@username.inspect}"
         str << " @netmasks=#{@netmasks.inspect}"
         str << " @perm=#{@perm.inspect}"
+        str << " @perm_temp=#{@perm_temp.inspect}" unless @perm_temp.empty?
         str << " @login_by_mask=#{@login_by_mask}"
         str << " @autologin=#{@autologin}"
         str << ">"
@@ -426,6 +429,20 @@ class Bot
         set_permission(cmd, nil, chan)
       end
 
+      # Sets the temporary permission for command _cmd_ to _val_ on channel _chan_
+      #
+      def set_temp_permission(cmd, val, chan="*")
+        k = chan.to_s.to_sym
+        @perm_temp[k] = PermissionSet.new unless @perm_temp.has_key?(k)
+        @perm_temp[k].set_permission(cmd, val)
+      end
+
+      # Resets the temporary permission for command _cmd_ on channel _chan_
+      #
+      def reset_temp_permission(cmd, chan ="*")
+        set_temp_permission(cmd, nil, chan)
+      end
+
       # Checks if BotUser is allowed to do something on channel _chan_,
       # or on all channels if _chan_ is nil
       #
@@ -436,8 +453,9 @@ class Bot
           k = :*
         end
         allow = nil
-        if @perm.has_key?(k)
-          allow = @perm[k].permit?(cmd)
+        pt = @perm.merge @perm_temp
+        if pt.has_key?(k)
+          allow = pt[k].permit?(cmd)
         end
         return allow
       end
