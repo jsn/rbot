@@ -1105,8 +1105,8 @@ class UnoPlugin < Plugin
       }
       scores.sort! { |a1, a2| -(a1.first <=> a2.first) }
       scores = scores[0, n.to_i].compact
+      i = 0
       if scores.length <= 5
-        i = 0
         list = "\n" + scores.map { |a|
           i+=1
           _("%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} points") % {
@@ -1127,8 +1127,8 @@ class UnoPlugin < Plugin
       }
       wins.sort! { |a1, a2| -(a1.first <=> a2.first) }
       wins = wins[0, n.to_i].compact
+      i = 0
       if wins.length <= 5
-        i = 0
         list = "\n" + wins.map { |a|
           i+=1
           _("%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} wins") % {
