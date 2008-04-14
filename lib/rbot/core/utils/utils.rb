@@ -623,13 +623,14 @@ module ::Irc
       title = txt.ircify_html_title
       debug opts
       if frag = opts[:uri_fragment] and not frag.empty?
-        fragreg = /<a\s+[^>]*name=["']?#{frag}["']?[^>]*>/im
+        fragreg = /<a\s+(?:[^>]+\s+)?(?:name|id)=["']?#{frag}["']?[^>]*>/im
         debug fragreg
         debug txt
         if txt.match(fragreg)
           # grab the post-match
           txt = $'
         end
+        debug txt
       end
       c_opts = opts.dup
       c_opts[:strip] ||= title
