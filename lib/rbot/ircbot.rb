@@ -575,8 +575,7 @@ class Bot
     @client[:notice] = proc { |data|
       message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
       # pass it off to plugins that want to hear everything
-      @plugins.delegate "listen", message
-      @plugins.delegate "notice", message
+      @plugins.irc_delegate "notice", message
     }
     @client[:motd] = proc { |data|
       m = MotdMessage.new(self, server, data[:source], data[:target], data[:motd])
@@ -999,7 +998,7 @@ class Bot
         debug "Sending quit message"
         @socket.emergency_puts "QUIT :#{message}"
         debug "Logging quits"
-        delegate_sent('QUIT', @bot.myself, message)
+        delegate_sent('QUIT', myself, message)
         debug "Flushing socket"
         @socket.flush
       rescue SocketError => e
