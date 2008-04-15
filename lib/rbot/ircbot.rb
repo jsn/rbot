@@ -1086,9 +1086,11 @@ class Bot
       # now we re-exec
       # Note, this fails on Windows
       debug "going to exec #{$0} #{@argv.inspect} from #{@run_dir}"
+      log_session_end
       Dir.chdir(@run_dir)
       exec($0, *@argv)
     rescue Errno::ENOENT
+      log_session_end
       exec("ruby", *(@argv.unshift $0))
     rescue Exception => e
       $interrupted += 1
