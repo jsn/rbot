@@ -20,9 +20,9 @@ $logger.level = 0 if $debug
 
 $log_queue = Queue.new
 Thread.new do
-  l = nil
-  while l = $log_queue.pop
-    $logger.add(*l)
+  ls = nil
+  while ls = $log_queue.pop
+    ls.each { |l| $logger.add(*l) }
   end
 end
 
@@ -63,10 +63,12 @@ def rawlog(level, message=nil, who_pos=1)
   else
     str = message.pretty_inspect
   end
+  qmsg = Array.new
   str.each_line { |l|
-    $log_queue.push [level, l.chomp, who]
+    qmsg.push [level, l.chomp, who]
     who = ' ' * who.size
   }
+  $log_queue.push qmsg
 end
 
 def log_session_start
