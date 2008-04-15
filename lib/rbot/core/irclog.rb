@@ -26,8 +26,10 @@ class IrcLogModule < CoreBotModule
       where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
     end
     unless(@logs.has_key?(where_str))
-      @logs[where_str] = File.new("#{@bot.botclass}/logs/#{where_str}", "a")
-      @logs[where_str].sync = true
+      f = File.new("#{@bot.botclass}/logs/#{where_str}", "a")
+      f.sync = true
+      f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
+      @logs[where_str] = f
     end
     @logs[where_str].puts "[#{stamp}] #{message}"
     #debug "[#{stamp}] <#{where}> #{message}"
