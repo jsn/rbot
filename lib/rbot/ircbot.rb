@@ -19,12 +19,7 @@ $logger.level = $cl_loglevel if defined? $cl_loglevel
 $logger.level = 0 if $debug
 
 $log_queue = Queue.new
-Thread.new do
-  ls = nil
-  while ls = $log_queue.pop
-    ls.each { |l| $logger.add(*l) }
-  end
-end
+$log_thread = nil
 
 require 'pp'
 
@@ -71,8 +66,26 @@ def rawlog(level, message=nil, who_pos=1)
   $log_queue.push qmsg
 end
 
+def restart_logger
+  if $log_thread && $log_thread.alive?
+    $log_queue << nil
+    $log_thread.join
+    $log_thread = nil
+  end
+
+  $log_thread = Thread.new do
+    ls = nil
+    while ls = $log_queue.pop
+      ls.each { |l| $logger.add(*l) }
+    end
+  end
+end
+
+restart_logger
+
 def log_session_start
   $logger << "\n\n=== #{botclass} session started on #{Time.now.strftime($dateformat)} ===\n\n"
+  restart_logger
 end
 
 def log_session_end
