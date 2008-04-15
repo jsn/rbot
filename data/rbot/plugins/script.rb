@@ -41,6 +41,12 @@ class ScriptPlugin < Plugin
     end
   end
 
+  def report_error(m, name, e)
+    # ed = e.backtrace.unshift(e.inspect).join(' ')
+    ed = e.inspect
+    m.reply( "Script '#{name}' crapped out :( #{ed}" )
+  end
+
 
   def listen( m )
     name = m.message.split.first
@@ -60,8 +66,7 @@ class ScriptPlugin < Plugin
         begin
           eval( code )
         rescue Exception => e
-          m.reply( "Script '#{name}' crapped out :(" )
-          m.reply( e.inspect )
+          report_error(m, name, e)
         end
       }
       m.replied = true
@@ -76,8 +81,7 @@ class ScriptPlugin < Plugin
       begin
         eval( code )
       rescue Exception => e
-        m.reply( "Script '#{name}' crapped out :(" )
-        m.reply( e.inspect )
+        report_error(m, code, e)
       end
     }
     m.replied = true
@@ -91,8 +95,7 @@ class ScriptPlugin < Plugin
       begin
         m.reply eval( code ).to_s
       rescue Exception => e
-        m.reply( "Script '#{name}' crapped out :(" )
-        m.reply( e.inspect )
+        report_error(m, code, e)
       end
     }
     m.replied = true
