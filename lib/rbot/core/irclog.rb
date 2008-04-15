@@ -36,17 +36,9 @@ class IrcLogModule < CoreBotModule
   def sent(m)
     case m
     when NoticeMessage
-      if m.public?
-        irclog "-=#{m.source}=- #{m.message}", m.target
-      else
-        irclog "[-=#{m.source}=-] #{m.message}", m.target
-      end
+      irclog "-#{m.source}- #{m.message}", m.target
     when PrivMessage
-      if m.public?
-        irclog "<#{m.source}> #{m.message}", m.target
-      else
-        irclog "[msg(#{m.target})] #{m.message}", m.target
-      end
+      irclog "<#{m.source}> #{m.message}", m.target
     when QuitMessage
       m.was_on.each { |ch|
         irclog "@ quit (#{m.message})", ch
@@ -82,7 +74,7 @@ class IrcLogModule < CoreBotModule
         if m.public?
           irclog "* #{m.source} #{m.logmessage}", m.target
         else
-          irclog "* [#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
+          irclog "* #{m.source}(#{m.sourceaddress}) #{m.logmessage}", m.source
         end
       when :VERSION
         irclog "@ #{m.source} asked #{who} about version info", logtarget
@@ -99,16 +91,16 @@ class IrcLogModule < CoreBotModule
       if m.public? 
         irclog "<#{m.source}> #{m.logmessage}", m.target
       else
-        irclog "[#{m.source}(#{m.sourceaddress})] #{m.logmessage}", m.source
+        irclog "<#{m.source}(#{m.sourceaddress})> #{m.logmessage}", m.source
       end
     end
   end
 
   def log_notice(m)
     if m.private?
-      irclog "-#{m.source}- #{m.message}", m.source
+      irclog "-#{m.source}(#{m.sourceaddress})- #{m.logmessage}", m.source
     else
-      irclog "-#{m.source}- #{m.message}", m.target
+      irclog "-#{m.source}- #{m.logmessage}", m.target
     end
   end
 
@@ -126,12 +118,12 @@ class IrcLogModule < CoreBotModule
 
   def log_quit(m)
     m.was_on.each { |ch|
-      irclog "@ Quit: #{m.source}: #{m.message}", ch
+      irclog "@ Quit: #{m.source}: #{m.logmessage}", ch
     }
   end
 
   def modechange(m)
-    irclog "@ Mode #{m.message} by #{m.source}", m.target
+    irclog "@ Mode #{m.logmessage} by #{m.source}", m.target
   end
 
   def log_join(m)
@@ -185,7 +177,7 @@ class IrcLogModule < CoreBotModule
   # end
 
   def unknown_message(m)
-    irclog m.message, ".unknown"
+    irclog m.logmessage, ".unknown"
   end
 end
 
