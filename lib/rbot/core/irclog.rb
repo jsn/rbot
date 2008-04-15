@@ -53,6 +53,10 @@ class IrcLogModule < CoreBotModule
     #debug "[#{stamp}] <#{where}> #{message}"
   end
 
+  def cleanup
+    @logs.keys.each { |w| logfile_close(w, 'rescan or shutdown') }
+  end
+
   def sent(m)
     case m
     when NoticeMessage
