@@ -39,26 +39,29 @@ class Exception
 end
 
 def rawlog(level, message=nil, who_pos=1)
-  call_stack = caller
-  if call_stack.length > who_pos
-    who = call_stack[who_pos].sub(%r{(?:.+)/([^/]+):(\d+)(:in .*)?}) { "#{$1}:#{$2}#{$3}" }
-  else
-    who = "(unknown)"
+  begin
+    call_stack = caller
+    if call_stack.length > who_pos
+      who = call_stack[who_pos].sub(%r{(?:.+)/([^/]+):(\d+)(:in .*)?}) { "#{$1}:#{$2}#{$3}" }
+    else
+      who = "(unknown)"
+    end
+    # Output each line. To distinguish between separate messages and multi-line
+    # messages originating at the same time, we blank #{who} after the first message
+    # is output.
+    # Also, we output strings as-is but for other objects we use pretty_inspect
+    case message
+    when String
+      str = message
+    else
+      str = message.pretty_inspect
+    end
+    str.each_line { |l|
+      $logger.add(level, l.chomp, who)
+      who.gsub!(/./," ")
+    }
+  rescue SecurityError
   end
-  # Output each line. To distinguish between separate messages and multi-line
-  # messages originating at the same time, we blank #{who} after the first message
-  # is output.
-  # Also, we output strings as-is but for other objects we use pretty_inspect
-  case message
-  when String
-    str = message
-  else
-    str = message.pretty_inspect
-  end
-  str.each_line { |l|
-    $logger.add(level, l.chomp, who)
-    who.gsub!(/./," ")
-  }
 end
 
 def log_session_start
