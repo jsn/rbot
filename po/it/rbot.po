@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-04-08 00:11+0200\n"
+"POT-Creation-Date: 2008-04-16 23:57+0200\n"
 "PO-Revision-Date: 2007-08-23 17:49+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -37,9 +37,9 @@ msgstr ""
 
 #: lib/rbot/botuser.rb:51
 msgid "Set true to allow new botusers to be created automatically"
-msgstr ""
+msgstr "Impostare a vero per permettere la creazione automatica di nuovi botuser"
 
-#: lib/rbot/botuser.rb:897
+#: lib/rbot/botuser.rb:915
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr "%{user}, non hai i permessi per '%{command}' qui"
 
@@ -122,11 +122,11 @@ msgstr "permessi per %{user}:: %{permissions}"
 
 #: lib/rbot/core/auth.rb:199
 msgid ". only %{max} will be shown"
-msgstr ""
+msgstr ". solo %{max} verranno mostrati"
 
 #: lib/rbot/core/auth.rb:200
 msgid "%{count} commands found matching %{pattern}%{extra}"
-msgstr ""
+msgstr "%{count} comandi trovati corrispondenti a %{pattern}%{extra}"
 
 #: lib/rbot/core/auth.rb:205
 msgid "%{cmd}: %{perms}"
@@ -134,17 +134,17 @@ msgstr ""
 
 #: lib/rbot/core/auth.rb:262
 msgid "%{user} can already do that"
-msgstr ""
+msgstr "%{user} può già farlo"
 
 #: lib/rbot/core/auth.rb:264
 msgid "%{user} can't do that already"
-msgstr ""
+msgstr "%{user} già non può farlo"
 
 #: lib/rbot/core/auth.rb:274
 msgid ""
 "sorry, %{cmd} doesn't look like a valid command. maybe you misspelled it, or "
 "you need to specify it should be in private?"
-msgstr ""
+msgstr "spiacente, %{cmd} non sembra un comando valido. forse non è scritto correttamente, o devi specificare che dev'essere in privato?"
 
 #: lib/rbot/core/auth.rb:297
 msgid "welcome, %{user}"
@@ -222,16 +222,14 @@ msgid "permissions view [for <user>]: display the permissions for user <user>"
 msgstr "permissions view [for <user>]: mostra i permessi per l'utente <user>"
 
 #: lib/rbot/core/auth.rb:371
-#, fuzzy
 msgid ""
 "permissions search <pattern>: display the permissions associated with the "
 "commands matching <pattern>"
-msgstr "permissions view [for <user>]: mostra i permessi per l'utente <user>"
+msgstr "permissions search <pattern>: mostra i permessi associati ai comandi che corrispondon a <pattern>"
 
 #: lib/rbot/core/auth.rb:373
-#, fuzzy
 msgid "permission topics: syntax, (re)set, view, search"
-msgstr "argomenti di permission: syntax, (re)set, view"
+msgstr "argomenti di permission: syntax, (re)set, view, search"
 
 #: lib/rbot/core/auth.rb:378
 msgid ""
@@ -304,7 +302,6 @@ msgid "user list : lists all the botusers"
 msgstr "user list: elenca i botuser"
 
 #: lib/rbot/core/auth.rb:394
-#, fuzzy
 msgid ""
 "user destroy <botuser> : destroys <botuser>. This function %{highlight}must%"
 "{highlight} be called in two steps. On the first call <botuser> is queued "
@@ -312,12 +309,12 @@ msgid ""
 "destroy <botuser>', the botuser will be destroyed. If you want to cancel the "
 "destruction, issue the command 'user cancel destroy <botuser>'"
 msgstr ""
-"user destroy <botuser> <password>: distrugge l'utente <botuser>; questa "
+"user destroy <botuser> : distrugge l'utente <botuser>; questa "
 "funzione %{highlight}deve%{highlight} essere chiamata in due passi. Nella "
-"prima chiamata la password non deve essere specificata: <botuser> verrà "
-"marcato per la distruzione. Nella seconda chiamata la password di <botuser> "
-"deve essere specificiata correttamente, ed il botuser verrà distrutto. per "
-"annullare la distruzione usa il comando +user cancel destroy <botuser>+"
+"prima chiamata <botuser> verrà "
+"marcato per la distruzione. Nella seconda chiamata, che deve essere nella forma "
+"'user confirm destroy <botuser>', il botuser verrà distrutto. per "
+"annullare la distruzione usa il comando 'user cancel destroy <botuser>'"
 
 #: lib/rbot/core/auth.rb:396
 msgid ""
@@ -328,24 +325,26 @@ msgstr ""
 "create, list, destroy"
 
 #: lib/rbot/core/auth.rb:399
-#, fuzzy
 msgid ""
 "auth <masterpassword>: log in as the bot owner; other commands: login, "
 "whoami, permission syntax, permissions [re]set, permissions view, user, "
 "meet, hello, allow, prevent"
 msgstr ""
 "auth <masterpassword>: ti identifica come il padrone del bot; altri comandi: "
-"login, whoami, permission syntax, permissions [re]set, permissions view, user"
+"login, whoami, permission syntax, permissions [re]set, permissions view, user, "
+"meet, hello, allow, prevent"
 
 #: lib/rbot/core/auth.rb:401
 msgid ""
 "meet <nick> [as <user>]: creates a bot user for nick, calling it user "
 "(defaults to the nick itself)"
 msgstr ""
+"meet <nick> [as <user>]: crea un bot user per il dato nick, chiamandolo user "
+"(predefinito: il nick stesso)"
 
 #: lib/rbot/core/auth.rb:403
 msgid "hello: creates a bot user for the person issuing the command"
-msgstr ""
+msgstr "hello: crea un botuser per la persona che esegue il comando"
 
 #: lib/rbot/core/auth.rb:405
 msgid ""
@@ -362,11 +361,11 @@ msgid ""
 msgstr ""
 
 #: lib/rbot/core/auth.rb:409
-#, fuzzy
 msgid ""
 "auth commands: auth, login, whoami, who, permission[s], user, meet, hello, "
 "allow, deny"
-msgstr "comandi auth: auth, login, whoami, permission[s], user"
+msgstr "comandi auth: auth, login, whoami, permission[s], user, neet, hello, "
+"allow, deny"
 
 #: lib/rbot/core/auth.rb:414
 msgid "sorry, I need more arguments to %{command}"
@@ -632,197 +631,197 @@ msgstr "elaboro i dati da importare ..."
 msgid "failed to parse data: %{exception}"
 msgstr "impossibile elaborare i dati: %{exception}"
 
-#: lib/rbot/core/basics.rb:111
+#: lib/rbot/core/basics.rb:109
 msgid "quit [<message>] => quit IRC with message <message>"
 msgstr "quit [<messaggio>] => esce da IRC con il messaggio <messaggio>"
 
-#: lib/rbot/core/basics.rb:113
+#: lib/rbot/core/basics.rb:111
 msgid "restart => completely stop and restart the bot (including reconnect)"
 msgstr ""
 "restart => ferma il bot completamente e lo riavvia (facendolo anche "
 "ricollegare)"
 
-#: lib/rbot/core/basics.rb:117
+#: lib/rbot/core/basics.rb:115
 msgid "part"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:119
+#: lib/rbot/core/basics.rb:117
 msgid "hide => part all channels"
 msgstr "hide => lascia tutti i canali"
 
-#: lib/rbot/core/basics.rb:121
+#: lib/rbot/core/basics.rb:119
 msgid "nick <nick> => attempt to change nick to <nick>"
 msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
 
-#: lib/rbot/core/basics.rb:123
+#: lib/rbot/core/basics.rb:121
 msgid ""
 "say <channel>|<nick> <message> => say <message> to <channel> or in private "
 "message to <nick>"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:125
+#: lib/rbot/core/basics.rb:123
 msgid ""
 "action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
 "private message to <nick>"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:127
+#: lib/rbot/core/basics.rb:125
 msgid ""
 "quiet [in here|<channel>] => with no arguments, stop speaking in all "
 "channels, if \"in here\", stop speaking in this channel, or stop speaking in "
 "<channel>"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:129
+#: lib/rbot/core/basics.rb:127
 msgid ""
 "talk [in here|<channel>] => with no arguments, resume speaking in all "
 "channels, if \"in here\", resume speaking in this channel, or resume "
 "speaking in <channel>"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:131
+#: lib/rbot/core/basics.rb:129
 msgid "ping => replies with a pong"
 msgstr "ping => risponde con un pong"
 
-#: lib/rbot/core/basics.rb:133
+#: lib/rbot/core/basics.rb:131
 msgid ""
 "mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
 "to <mode>"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:139
+#: lib/rbot/core/basics.rb:137
 msgid ""
 "%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
 "quiet, talk, ping, mode"
 msgstr ""
 
-#: lib/rbot/core/config.rb:13
-msgid "I'm a v. %{version} rubybot%{copyright}%{url}"
+#: lib/rbot/core/config.rb:20
+msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:33
+#: lib/rbot/core/config.rb:41
 msgid "no such module %{module}"
 msgstr "non esiste alcun modulo %{module}"
 
-#: lib/rbot/core/config.rb:49 lib/rbot/core/config.rb:60
-#: lib/rbot/core/config.rb:82 lib/rbot/core/config.rb:95
-#: lib/rbot/core/config.rb:121 lib/rbot/core/config.rb:144
+#: lib/rbot/core/config.rb:57 lib/rbot/core/config.rb:68
+#: lib/rbot/core/config.rb:90 lib/rbot/core/config.rb:103
+#: lib/rbot/core/config.rb:129 lib/rbot/core/config.rb:152
 msgid "no such config key %{key}"
 msgstr "non esiste una chiave di configurazione %{key}"
 
-#: lib/rbot/core/config.rb:72
+#: lib/rbot/core/config.rb:80
 msgid "no config key found matching %{r}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:74
+#: lib/rbot/core/config.rb:82
 msgid "possible keys: %{kl}"
 msgstr ""
 
-#: lib/rbot/core/config.rb:87 lib/rbot/core/config.rb:106
-#: lib/rbot/core/config.rb:136 lib/rbot/core/config.rb:159
+#: lib/rbot/core/config.rb:95 lib/rbot/core/config.rb:114
+#: lib/rbot/core/config.rb:144 lib/rbot/core/config.rb:167
 msgid "this config change will take effect on the next restart"
 msgstr ""
 "questo cambiamente di configurazione richiede un riavvio per diventare "
 "effettivo"
 
-#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:109
-#: lib/rbot/core/config.rb:137 lib/rbot/core/config.rb:160
+#: lib/rbot/core/config.rb:96 lib/rbot/core/config.rb:117
+#: lib/rbot/core/config.rb:145 lib/rbot/core/config.rb:168
 msgid "this config change will take effect on the next rescan"
 msgstr ""
 "questo cambiamente di configurazione richiede un rescan per diventare "
 "effettivo"
 
-#: lib/rbot/core/config.rb:102
+#: lib/rbot/core/config.rb:110
 msgid "failed to set %{key}: %{error}"
 msgstr "impossibile impostare %{key}: %{error}"
 
-#: lib/rbot/core/config.rb:125 lib/rbot/core/config.rb:148
+#: lib/rbot/core/config.rb:133 lib/rbot/core/config.rb:156
 msgid "config key %{key} is not an array"
 msgstr "la chiave di configurazione %{key} non è una lista"
 
-#: lib/rbot/core/config.rb:132
+#: lib/rbot/core/config.rb:140
 msgid "failed to add %{value} to %{key}: %{error}"
 msgstr "impossibile aggiungere %{value} a %{key}: %{error}"
 
-#: lib/rbot/core/config.rb:155
+#: lib/rbot/core/config.rb:163
 msgid "failed to remove %{value} from %{key}: %{error}"
 msgstr "impossibile rimuovere %{value} da %{key}: %{errore}"
 
-#: lib/rbot/core/config.rb:169
+#: lib/rbot/core/config.rb:177
 msgid "saving ..."
 msgstr "salvataggio in corso ..."
 
-#: lib/rbot/core/config.rb:171
+#: lib/rbot/core/config.rb:179
 msgid "rescanning ..."
 msgstr "rescan ..."
 
-#: lib/rbot/core/config.rb:173
+#: lib/rbot/core/config.rb:181
 msgid "done. %{plugin_status}"
 msgstr "fatto. %{plugin_status}"
 
-#: lib/rbot/core/config.rb:216
+#: lib/rbot/core/config.rb:222
 msgid ""
 "config list => list configuration modules, config list <module> => list "
 "configuration keys for module <module>"
 msgstr ""
 
-#: lib/rbot/core/config.rb:218
+#: lib/rbot/core/config.rb:224
 msgid "config get <key> => get configuration value for key <key>"
 msgstr ""
 
-#: lib/rbot/core/config.rb:220
+#: lib/rbot/core/config.rb:226
 msgid "reset key <key> to the default"
 msgstr ""
 
-#: lib/rbot/core/config.rb:222
+#: lib/rbot/core/config.rb:228
 msgid ""
 "config set <key> <value> => set configuration value for key <key> to <value>"
 msgstr ""
 
-#: lib/rbot/core/config.rb:224
+#: lib/rbot/core/config.rb:230
 msgid "config desc <key> => describe what key <key> configures"
 msgstr ""
 
-#: lib/rbot/core/config.rb:226
+#: lib/rbot/core/config.rb:232
 msgid ""
 "config add <value> to <key> => add value <value> to key <key> if <key> is an "
 "array"
 msgstr ""
 
-#: lib/rbot/core/config.rb:228
+#: lib/rbot/core/config.rb:234
 msgid ""
 "config rm <value> from <key> => remove value <value> from key <key> if <key> "
 "is an array"
 msgstr ""
 
-#: lib/rbot/core/config.rb:230
+#: lib/rbot/core/config.rb:236
 msgid ""
 "config module - bot configuration. usage: list, desc, get, set, unset, add, "
 "rm"
 msgstr ""
 
-#: lib/rbot/core/config.rb:235
+#: lib/rbot/core/config.rb:241
 #, fuzzy
 msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
 msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
 
-#: lib/rbot/core/config.rb:237
+#: lib/rbot/core/config.rb:243
 msgid "status => display some information on the bot's status"
 msgstr ""
 
-#: lib/rbot/core/config.rb:239
+#: lib/rbot/core/config.rb:245
 msgid "save => save current dynamic data and configuration"
 msgstr ""
 
-#: lib/rbot/core/config.rb:241
+#: lib/rbot/core/config.rb:247
 msgid "rescan => reload modules and static facts"
 msgstr ""
 
-#: lib/rbot/core/config.rb:243
+#: lib/rbot/core/config.rb:249
 msgid "version => describes software version"
 msgstr "versione => descrive la versione del software"
 
-#: lib/rbot/core/config.rb:245
+#: lib/rbot/core/config.rb:251
 msgid "config-related tasks: config, save, rescan, version, nick, status"
 msgstr ""
 
@@ -914,64 +913,64 @@ msgstr ""
 msgid "filters matching %{pat}: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1165
+#: lib/rbot/ircbot.rb:1158
 msgid "help topics: "
 msgstr "argomenti: "
 
-#: lib/rbot/ircbot.rb:1167
+#: lib/rbot/ircbot.rb:1160
 msgid " (help <topic> for more info)"
 msgstr " (help <argomento> per ulteriori informazioni)"
 
-#: lib/rbot/ircbot.rb:1170
+#: lib/rbot/ircbot.rb:1163
 msgid "no help for topic %{topic}"
 msgstr "nessun aiuto disponibile su %{topic}"
 
-#: lib/rbot/ircbot.rb:1181
+#: lib/rbot/ircbot.rb:1174
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 "Attivo da %{up}, %{plug} plugin attivi, %{sent} righe spedite, %{recv} righe "
 "ricevute."
 
-#: lib/rbot/plugins.rb:315
+#: lib/rbot/plugins.rb:340
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr "uso errato, chiedi aiuto con '%{command}'"
 
-#: lib/rbot/plugins.rb:616
+#: lib/rbot/plugins.rb:662
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "%{count} moduli di base caricati"
 msgstr[1] "%{count} modulo di base caricato"
 
-#: lib/rbot/plugins.rb:619
+#: lib/rbot/plugins.rb:665
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "%{count} moduli di base: %{list}"
 msgstr[1] "%{count} modulo di base: %{list}"
 
-#: lib/rbot/plugins.rb:625
+#: lib/rbot/plugins.rb:671
 msgid "no core botmodules loaded"
 msgstr "nessun modulo di base caricato"
 
-#: lib/rbot/plugins.rb:630
+#: lib/rbot/plugins.rb:676
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "%{count} plugin caricati"
 msgstr[1] "%{count} plugin caricato"
 
-#: lib/rbot/plugins.rb:633
+#: lib/rbot/plugins.rb:679
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "%{count} plugin: %{list}"
 msgstr[1] "%{count} plugin: %{list}"
 
-#: lib/rbot/plugins.rb:644
+#: lib/rbot/plugins.rb:690
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] "%{highlight}%{count} plugin ignorati%{highlight}"
 msgstr[1] "%{highlight}%{count} plugin ignorato%{highlight}"
 
-#: lib/rbot/plugins.rb:649
+#: lib/rbot/plugins.rb:695
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -985,13 +984,13 @@ msgstr[1] ""
 "%{highlight}%{count} plugin ignorato%{highlight}: usa %{bold}%{command}%"
 "{bold} per vedere perché"
 
-#: lib/rbot/plugins.rb:659
+#: lib/rbot/plugins.rb:705
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] "%{highlight}caricamento di %{count} plugin fallito%{highlight}"
 msgstr[1] "%{highlight}caricamento di %{count} plugin fallito%{highlight}"
 
-#: lib/rbot/plugins.rb:664
+#: lib/rbot/plugins.rb:710
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -1005,11 +1004,11 @@ msgstr[1] ""
 "%{highlight}caricamento di %{count} plugin fallito%{highlight}: usa %{bold}%"
 "{command}%{bold} per vedere perché"
 
-#: lib/rbot/plugins.rb:694
+#: lib/rbot/plugins.rb:740
 msgid "no plugins failed to load"
 msgstr "nessun plugin ha fallito il caricamento"
 
-#: lib/rbot/plugins.rb:696
+#: lib/rbot/plugins.rb:742
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
@@ -1017,15 +1016,15 @@ msgstr ""
 "%{highlight}%{plugin}%{highlight} in %{dir} fallito con errore %{exception}: "
 "%{reason}"
 
-#: lib/rbot/plugins.rb:700
+#: lib/rbot/plugins.rb:746
 msgid "at %{backtrace}"
 msgstr "in %{backtrace}"
 
-#: lib/rbot/plugins.rb:706
+#: lib/rbot/plugins.rb:752
 msgid "no plugins were ignored"
 msgstr "nessun plugin ignorato"
 
-#: lib/rbot/plugins.rb:710
+#: lib/rbot/plugins.rb:756
 msgid "overruled by previous"
 msgstr "preceduto da un omonimo"
 
@@ -1048,57 +1047,57 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "recupero dati marshal fallito, tento di usare il valore predefinito"
 
-#: data/rbot/plugins/alias.rb:52
+#: data/rbot/plugins/alias.rb:50
 msgid "Data file is not found or corrupt, reinitializing data"
 msgstr "File di dati non trovato o corrotto, reinizializzo i dati"
 
-#: data/rbot/plugins/alias.rb:60
+#: data/rbot/plugins/alias.rb:58
 msgid "Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:76
+#: data/rbot/plugins/alias.rb:74
 msgid "The definition you provided is invalid: %{reason}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:87 data/rbot/plugins/alias.rb:104
+#: data/rbot/plugins/alias.rb:85 data/rbot/plugins/alias.rb:102
 msgid "No such alias is defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:93
+#: data/rbot/plugins/alias.rb:91
 msgid "No aliases defined"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:102
+#: data/rbot/plugins/alias.rb:100
 msgid "Alias of %{command}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:114
+#: data/rbot/plugins/alias.rb:112
 msgid ""
 "The arguments in alias must match the substitutions in command, and vice "
 "versa"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:119
+#: data/rbot/plugins/alias.rb:117
 msgid "Error mapping %{text} as command: %{error}"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:137
+#: data/rbot/plugins/alias.rb:138
 msgid ""
 "The alias seems to have caused infinite recursion. Please examine your alias "
 "definitions"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:153
+#: data/rbot/plugins/alias.rb:142
 msgid ""
 "Error handling the alias, The alias %{text} is not defined or has beeen "
 "removed. I will stop responding to it after rescan,"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:165
+#: data/rbot/plugins/alias.rb:154
 msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:174
+#: data/rbot/plugins/alias.rb:163
 msgid ""
 "\"alias <text> => <command>\" => add text as an alias of command. Text can "
 "contain placeholders marked with : or * for :words and *multiword arguments. "
@@ -1107,7 +1106,7 @@ msgid ""
 "google site:ruby-rbot.org <terms>"
 msgstr ""
 
-#: data/rbot/plugins/alias.rb:176
+#: data/rbot/plugins/alias.rb:165
 msgid ""
 "alias list => list defined aliases | alias whatis <alias> => show definition "
 "of the alias | alias remove <alias> => remove defined alias | see the "
@@ -1752,6 +1751,501 @@ msgstr "non puoi cambiare l'utente predefinito"
 msgid "%{name} game cancelled after %{count} rounds. Partial score:"
 msgstr ""
 
+#: data/rbot/plugins/games/uno.rb:240
+msgid "%{p} deals the first card from the stock"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:263
+msgid "no time"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:275
+msgid "Playing order was reversed!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:277
+msgid "%{cp} bounces the pick to %{np}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:288
+msgid "%{p} skips a turn!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:363
+msgid "what cards were that again?"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:383
+#, fuzzy
+msgid "you can't play that card"
+msgstr "non puoi cambiare l'utente predefinito"
+
+#: data/rbot/plugins/games/uno.rb:410
+msgid "%{p} plays %{card} twice!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:415
+msgid "%{p} plays %{card}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:418
+msgid "%{p} has %{uno}!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:434
+msgid "%{p}, choose a color with: co r|b|g|y"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:437
+msgid "you don't have two cards of that kind"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:440
+#, fuzzy
+msgid "you don't have that card"
+msgstr "non puoi cambiare l'utente predefinito"
+
+#: data/rbot/plugins/games/uno.rb:450
+msgid "%{cp} challenges %{lp}'s %{card}!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:454
+msgid "%{p} has %{cards}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:466
+msgid "%{lp}'s move was legal, %{cp} must pick %{b}%{n}%{b} cards!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:475
+msgid ""
+"%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and "
+"play again!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:503
+msgid "%{p} passes turn, and has to pick %{b}%{n}%{b} cards!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:510
+msgid "%{p} passes turn"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:512
+msgid "you need to pick a card first"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:530
+msgid "what color is that?"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:533
+msgid "color is now %{c}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:541
+msgid "This %{uno} game has been going on for %{time}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:546
+msgid "The game hasn't started yet"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:551
+#, fuzzy
+msgid "%{uno} playing turn: %{players}"
+msgstr "%{count} plugin: %{list}"
+
+#: data/rbot/plugins/games/uno.rb:560
+msgid "it's %{player}'s turn"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:570
+msgid "next player must respond correctly or pick %{b}%{n}%{b} cards"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:577
+msgid "Current discard: %{card} %{c}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:585
+msgid "Your cards: %{cards}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:601
+msgid "%{player} picks a card"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:611
+msgid "Shuffling discarded cards"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:614
+msgid "No more cards!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:620
+msgid "You picked %{picked}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:627
+msgid "you're already in the game, %{p}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:634
+msgid "you dropped from the game, %{p}, you can't get back in"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:648
+msgid "%{p} joins this game of %{uno}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:656
+msgid "game will start in 20 seconds"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:667
+msgid "%{p} isn't playing %{uno}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:672
+msgid "%{p} gives up this game of %{uno}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:698
+msgid "%{p} is already playing %{uno} here"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:708
+msgid "%{p} takes %{b}%{old}%{b}'s place at %{uno}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:714
+msgid "%{b}%{old}%{b} isn't playing %{uno} here"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:723
+msgid "%{uno} game halted after %{time}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:728
+msgid "%{uno} game halted before it could start"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:733
+msgid "%{uno} game finished after %{time}! The winner is %{p}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:740
+msgid "%{p} has to pick %{b}%{n}%{b} cards!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:748
+msgid "%{p} still had %{cards}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:760
+msgid "%{p} wins with %{b}%{score}%{b} points!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:790
+msgid "'jo' to join in"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:791
+msgid ""
+"'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play "
+"Red Reverse, or 'pl y2y2' to play both Yellow 2 cards"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:792
+msgid "'pe' to pick a card"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:793
+msgid "'pa' to pass your turn"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:794
+msgid ""
+"'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select "
+"Green (or 'pl w+4 g' to select the color when playing the Wild)"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:795
+msgid "'ca' to show current cards"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:796
+msgid "'cd' to show the current discard"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:797
+msgid "'ch' to challenge a Wild +4"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:798
+msgid "'od' to show the playing order"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:799
+msgid "'ti' to show play time"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:800
+msgid "'tu' to show whose turn it is"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:803
+msgid ""
+"A Wild +4 can only be played legally if you don't have normal (not special) "
+"cards of the current color. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:804
+msgid "The next player can challenge a W+4 by using the 'ch' command. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:805
+msgid ""
+"If the W+4 play was illegal, the player who played it must pick the W+4, "
+"pick 4 cards from the stock, and play a legal card. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:806
+msgid ""
+"If the W+4 play was legal, the challenger must pick 6 cards instead of 4."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:808
+msgid ""
+"play all your cards, one at a time, by matching either the color or the "
+"value of the currently discarded card. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:809
+msgid ""
+"cards with special effects: Skip (next player skips a turn), Reverse "
+"(reverses the playing order), +2 (next player has to take 2 cards). "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:810
+msgid ""
+"Wilds can be played on any card, and you must specify the color for the next "
+"card. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:811
+msgid ""
+"Wild +4 also forces the next player to take 4 cards, but it can only be "
+"played if you can't play a color card. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:812
+msgid ""
+"you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing "
+"the first player who can't play one to pick the cumulative sum of all cards. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:813
+msgid ""
+"you can also play a Reverse on a +2 or +4, bouncing the effect back to the "
+"previous player (that now comes next). "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:816
+msgid ""
+"The points won with a game of %{uno} are totalled from the cards remaining "
+"in the hands of the other players."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:817
+msgid ""
+"Each normal (not special) card is worth its face value (from 0 to 9 points)."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:818
+msgid "Each colored special card (+2, Reverse, Skip) is worth 20 points."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:819
+msgid "Each Wild and Wild +4 is worth 50 points."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:823
+msgid "There are 108 cards in a standard %{uno} deck."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:824
+msgid ""
+"For each color (Blue, Green, Red, Yellow) there are 19 numbered cards (from "
+"0 to 9), with two of each number except for 0."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:825
+msgid ""
+"There are also 6 special cards for each color, two each of +2, Reverse, Skip."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:826
+msgid "Finally, there are 4 Wild and 4 Wild +4 cards."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:829
+msgid ""
+"The game manager (the user that started the game) can execute the following "
+"commands to manage it: "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:831
+msgid ""
+"'uno drop <user>' to drop a user from the game (any user can drop itself "
+"using 'uno drop')"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:832
+msgid ""
+"'uno replace <old> [with] <new>' to replace a player with someone else "
+"(useful in case of disconnects)"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:833
+msgid "'uno transfer [to] <nick>' to transfer game ownership to someone else"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:834
+msgid "'uno end' to end the game before its natural completion"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:837
+msgid ""
+"%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help "
+"uno admin' for admin commands. In-game commands: %{cmds}."
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:855
+msgid "you already picked a card"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:862 data/rbot/plugins/games/uno.rb:869
+#: data/rbot/plugins/games/uno.rb:875 data/rbot/plugins/games/uno.rb:881
+#: data/rbot/plugins/games/uno.rb:897
+msgid "It's not your turn"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:894
+msgid "previous move cannot be challenged"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:908
+msgid "it's your turn, sleepyhead"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:917
+msgid ""
+"There is already an %{uno} game running here, managed by %{who}. say 'jo' to "
+"join in"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:925
+msgid "Ok, created %{uno} game on %{channel}, say 'jo' to join in"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:933 data/rbot/plugins/games/uno.rb:953
+#: data/rbot/plugins/games/uno.rb:1089 data/rbot/plugins/games/uno.rb:1097
+#: data/rbot/plugins/games/uno.rb:1105
+msgid "There is no %{uno} game running here"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:943
+msgid "%{uno} game ownership transferred from %{old} to %{nick}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:947
+msgid "who is this %{nick} you want me to transfer game ownership to?"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1031
+msgid "%{nf} %{uno} games completed over %{np} games played. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1036
+msgid "%{cgt} game time for completed games"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1040
+msgid " on %{tgt} total game time. "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1046
+msgid "%{avg} average game time for completed games"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1049
+msgid ", %{tavg} for all games"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1054
+msgid "nobody has played %{uno} on %{chan} yet"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1065
+msgid "%{nick} never played %{uno} here"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1074
+msgid "%{nick} played %{np} %{uno} games here, "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1077
+msgid "forfeited %{nf} games, "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1078
+msgid "won %{nw} games"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1080
+msgid " with %{score} total points"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1082
+msgid " and an average of %{avg} points per opponent"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1109
+msgid "%{num} cards in stock: %{stock}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1125
+msgid "%{uno} %{num} highest scores: "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1134
+msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} points"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1141 data/rbot/plugins/games/uno.rb:1163
+msgid "%{i}. %{nick} ( %{score} )"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1147
+msgid "%{uno} %{num} most wins: "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1156
+msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} wins"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1169
+msgid "uh, what kind of score list did you want, again?"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:1170
+msgid ""
+" I can only show the top scores (with top) and the most wins (with topwin)"
+msgstr ""
+
 #: data/rbot/plugins/keywords.rb:457
 #, fuzzy
 msgid "couldn't find keyword %{key}"
@@ -1764,6 +2258,34 @@ msgstr "impossibile esportare gli utenti: %{exception}"
 
 #: data/rbot/plugins/markov.rb:133
 msgid "markov has a %{prob}% chance of chipping in"
+msgstr ""
+
+#: data/rbot/plugins/quotes.rb:167 data/rbot/plugins/quotes.rb:209
+#: data/rbot/plugins/quotes.rb:237
+msgid "[%{num}] %{quote}"
+msgstr ""
+
+#: data/rbot/plugins/quotes.rb:172 data/rbot/plugins/quotes.rb:186
+#: data/rbot/plugins/quotes.rb:200 data/rbot/plugins/quotes.rb:214
+#: data/rbot/plugins/quotes.rb:242
+msgid "quote not found!"
+msgstr ""
+
+#: data/rbot/plugins/quotes.rb:181
+msgid "quote %{num} added by %{source}"
+msgstr ""
+
+#: data/rbot/plugins/quotes.rb:195
+#, fuzzy
+msgid "quote %{num} added on %{date}"
+msgstr "botuser %{source} rinominato %{dest}"
+
+#: data/rbot/plugins/quotes.rb:223
+msgid "%{total} quotes matching %{reg}"
+msgstr ""
+
+#: data/rbot/plugins/quotes.rb:228
+msgid "%{total} quotes"
 msgstr ""
 
 #: data/rbot/plugins/rss.rb:809
@@ -1846,39 +2368,39 @@ msgid ""
 "{duration}. %{views} views, faved %{faves} times. %{desc}"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:76 data/rbot/plugins/youtube.rb:106
+#: data/rbot/plugins/youtube.rb:77 data/rbot/plugins/youtube.rb:107
 msgid "unknown duration"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:182
+#: data/rbot/plugins/youtube.rb:183
 msgid ""
 "%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%"
 "{duration}). %{views} views, faved %{faves} times. %{desc}"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:185
+#: data/rbot/plugins/youtube.rb:186
 msgid ""
 "\n"
 " -- also available at: "
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:192
+#: data/rbot/plugins/youtube.rb:193
 msgid "couldn't retrieve video info"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:202
+#: data/rbot/plugins/youtube.rb:203
 msgid "error looking for %{what} on youtube: %{e}"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:210
+#: data/rbot/plugins/youtube.rb:211
 msgid "no videos found for %{what}"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:214
+#: data/rbot/plugins/youtube.rb:215
 msgid "One video found for %{what}: %{show}"
 msgstr ""
 
-#: data/rbot/plugins/youtube.rb:221
+#: data/rbot/plugins/youtube.rb:222
 msgid "Videos for %{what}: %{shorts}"
 msgstr ""
 
