@@ -34,7 +34,8 @@ begin
       alias :orig_bound_targets :bound_targets
     end
     def bound_targets(*a)  # :nodoc:
-      orig_bound_targets(*a) rescue orig_bound_targets(Object)
+      bt = orig_bound_targets(*a) rescue []
+      bt.empty? ? orig_bound_targets(Object) : bt
     end
 
     require 'stringio'
