@@ -463,17 +463,20 @@ class Bot
       Dir.chdir botclass
       # File.umask 0000                # Ensure sensible umask. Adjust as needed.
       log "Redirecting standard input/output/error"
-      begin
-        STDIN.reopen "/dev/null"
-      rescue Errno::ENOENT
-        # On Windows, there's not such thing as /dev/null
-        STDIN.reopen "NUL"
+      [$stdin, $stdout, $stderr].each do |fd|
+        begin
+          fd.reopen "/dev/null"
+        rescue Errno::ENOENT
+          # On Windows, there's not such thing as /dev/null
+          fd.reopen "NUL"
+        end
       end
-      def STDOUT.write(str=nil)
+
+      def $stdout.write(str=nil)
         log str, 2
         return str.to_s.size
       end
-      def STDERR.write(str=nil)
+      def $stdout.write(str=nil)
         if str.to_s.match(/:\d+: warning:/)
           warning str, 2
         else
