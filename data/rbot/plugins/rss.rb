@@ -938,8 +938,8 @@ class RSSFeedsPlugin < Plugin
 
   def select_nonempty(*ar)
     debug ar
-    ret = ar.map { |i| (i && i.empty?) ? nil : i }.compact.first
-    (ret && ret.empty?) ? nil : ret
+    ar.each { |i| return i unless i.nil_or_empty? }
+    return nil
   end
 
   def printFormattedRss(feed, item, opts=nil)
