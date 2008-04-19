@@ -12,11 +12,40 @@ class IrcLogModule < CoreBotModule
   Config.register Config::IntegerValue.new('irclog.max_open_files',
     :default => 20, :validate => Proc.new { |v| v > 0 },
     :desc => "Maximum number of irclog files to keep open at any one time.")
-  
+  Config.register Config::ArrayValue.new('irclog.no_log',
+    :default => [], :on_change => Proc.new { |bot, v|
+      bot.plugins.delegate 'event_irclog_list_changed', v, bot.config['irclog.do_log']
+    },
+    :desc => "List of channels and nicks for which logging is disabled. IRC patterns can be used too.")
+  Config.register Config::ArrayValue.new('irclog.do_log',
+    :default => [], :on_change => Proc.new { |bot, v|
+      bot.plugins.delegate 'event_irclog_list_changed', bot.config['irclog.no_log'], v
+    },
+    :desc => "List of channels and nicks for which logging is enabled. IRC patterns can be used too. This can be used to override wide patters in irclog.no_log")
+
+  attr :nolog_rx, :dolog_rx
   def initialize
     super
     @logs = Hash.new
     Dir.mkdir("#{@bot.botclass}/logs") unless File.exist?("#{@bot.botclass}/logs")
+    event_irclog_list_changed(@bot.config['irclog.no_log'], @bot.config['irclog.do_log'])
+  end
+
+  def can_log_on(where)
+    return true if @dolog_rx and where.match @dolog_rx
+    return false if @nolog_rx and where.match @nolog_rx
+    return true
+  end
+
+  def event_irclog_list_changed(nolist, dolist)
+    @nolog_rx = nolist.empty? ? nil : Regexp.union(*(nolist.map { |r| r.to_irc_regexp }))
+    debug "no log: #{@nolog_rx}"
+    @dolog_rx = dolist.empty? ? nil : Regexp.union(*(dolist.map { |r| r.to_irc_regexp }))
+    debug "do log: #{@dolog_rx}"
+    @logs.inject([]) { |ar, kv|
+      ar << kv.first unless can_log_on(kv.first)
+      ar
+    }.each { |w| logfile_close(w, 'logging disabled here') }
   end
 
   def logfile_close(where_str, reason = 'unknown reason')
@@ -37,6 +66,7 @@ class IrcLogModule < CoreBotModule
     else
       where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
     end
+    return unless can_log_on(where_str)
     unless @logs.has_key? where_str
       if @logs.size > @bot.config['irclog.max_open_files']
         @logs.keys.sort do |a, b|
