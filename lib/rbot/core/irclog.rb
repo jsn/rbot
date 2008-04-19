@@ -9,7 +9,9 @@
 
 class IrcLogModule < CoreBotModule
 
-  MAX_OPEN_FILES = 20 # XXX: maybe add a config value
+  Config.register Config::IntegerValue.new('irclog.max_open_files',
+    :default => 20, :validate => Proc.new { |v| v > 0 },
+    :desc => "Maximum number of irclog files to keep open at any one time.")
   
   def initialize
     super
@@ -36,10 +38,10 @@ class IrcLogModule < CoreBotModule
       where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
     end
     unless @logs.has_key? where_str
-      if @logs.size > MAX_OPEN_FILES
+      if @logs.size > @bot.config['irclog.max_open_files']
         @logs.keys.sort do |a, b|
           @logs[a][0] <=> @logs[b][0]
-        end.slice(0, @logs.size - MAX_OPEN_FILES).each do |w|
+        end.slice(0, @logs.size - @bot.config['irclog.max_open_files']).each do |w|
           logfile_close w, "idle since #{@logs[w][0]}"
         end
       end
