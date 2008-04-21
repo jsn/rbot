@@ -517,6 +517,13 @@ class UnoGame
   end
 
   def choose_color(user, color)
+    # you can only pick a color if the current color is unset
+    if @color
+      announce _("you can't pick a color now, %{p}") % {
+        :p => get_player(user)
+      }
+      return
+    end
     case color
     when 'r'
       @color = 'Red'
