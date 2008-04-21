@@ -160,6 +160,9 @@ class UnoGame
   # number of cards to be picked if the player can't play an appropriate card
   attr_reader :picker
 
+  # game start time
+  attr :start_time
+
   # the IRC user that created the game
   attr_accessor :manager
 
@@ -569,7 +572,7 @@ class UnoGame
   end
 
   def has_turn?(source)
-    @players.first.user == source
+    @start_time && (@players.first.user == source)
   end
 
   def show_picker
@@ -869,7 +872,7 @@ class UnoPlugin < Plugin
         m.reply _("It's not your turn")
       end
     when :pa # pass turn
-      return if m.params
+      return if m.params or not g.start_time
       if g.has_turn?(m.source)
         g.pass(m.source)
       else
@@ -891,7 +894,7 @@ class UnoPlugin < Plugin
       return if m.params
       g.show_all_cards(m.source)
     when :cd # show current discard
-      return if m.params
+      return if m.params or not g.start_time
       g.show_discard
     when :ch
       if g.has_turn?(m.source)
