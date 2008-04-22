@@ -4,8 +4,6 @@
 # :title: filters management from IRC
 #
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Copyright:: (C) 2008 Giuseppe Bilotta
-# License:: GPL v2
 
 class FiltersModule < CoreBotModule
 

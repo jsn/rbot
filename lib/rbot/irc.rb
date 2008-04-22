@@ -16,8 +16,6 @@
 # This module defines the fundamental building blocks for IRC
 #
 # Author:: Giuseppe Bilotta (giuseppe.bilotta@gmail.com)
-# Copyright:: Copyright (c) 2006 Giuseppe Bilotta
-# License:: GPLv2
 
 require 'singleton'
 

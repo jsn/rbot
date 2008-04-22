@@ -4,8 +4,6 @@
 # :title: Stream filters
 #
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Copyright:: (C) 2008 Giuseppe Bilotta
-# License:: GPL v2
 #
 # This file collects methods to handle 'stream filters', a generic mechanism
 # to transform text+attributes into other text+attributes

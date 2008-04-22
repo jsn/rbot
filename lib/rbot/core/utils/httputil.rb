@@ -6,10 +6,6 @@
 # Author:: Tom Gilbert <tom@linuxbrit.co.uk>
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 # Author:: Dmitry "jsn" Kim <dmitry point kim at gmail point com>
-#
-# Copyright:: (C) 2002-2005 Tom Gilbert
-# Copyright:: (C) 2006 Tom Gilbert, Giuseppe Bilotta
-# Copyright:: (C) 2007 Giuseppe Bilotta, Dmitry Kim
 
 require 'resolv'
 require 'net/http'

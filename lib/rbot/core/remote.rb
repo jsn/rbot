@@ -4,8 +4,6 @@
 # :title: Remote service provider for rbot
 #
 # Author:: Giuseppe Bilotta (giuseppe.bilotta@gmail.com)
-# Copyright:: Copyright (c) 2006 Giuseppe Bilotta
-# License:: GPLv2
 #
 # From an idea by halorgium <rbot@spork.in>.
 #

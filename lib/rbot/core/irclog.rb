@@ -4,8 +4,6 @@
 # :title: rbot IRC logging facilities
 #
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Copyright:: (C) 2008 Giuseppe Bilotta
-# License:: GPL v2
 
 class IrcLogModule < CoreBotModule
 

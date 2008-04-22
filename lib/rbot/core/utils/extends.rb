@@ -4,8 +4,6 @@
 # :title: Standard classes extensions
 #
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Copyright:: (C) 2006,2007 Giuseppe Bilotta
-# License:: GPL v2
 #
 # This file collects extensions to standard Ruby classes and to some core rbot
 # classes to be used by the various plugins

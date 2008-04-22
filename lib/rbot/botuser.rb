@@ -4,8 +4,6 @@
 #
 # rbot user management
 # Author:: Giuseppe Bilotta (giuseppe.bilotta@gmail.com)
-# Copyright:: Copyright (c) 2006 Giuseppe Bilotta
-# License:: GPLv2
 
 require 'singleton'
 require 'set'

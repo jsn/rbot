@@ -4,8 +4,6 @@
 # :title: Unicode plugin
 #
 # Author:: jsn (Dmitry Kim) <dmitry dot kim at gmail dot org>
-# Copyright:: (C) 2007 Dmitry Kim
-# License:: public domain
 #
 # This plugin adds unicode-awareness to rbot. When it's loaded, all the
 # character strings inside of rbot are assumed to be in proper utf-8
