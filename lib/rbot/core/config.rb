@@ -72,13 +72,13 @@ class ConfigModule < CoreBotModule
     rx = Regexp.new(params[:rx].to_s, true)
     cfs = []
     @bot.config.items.each do |k, v|
-      cfs << v if k.to_s.match(rx) or (v.desc.match(rx) rescue false)
+      cfs << [Bold + k.to_s + Bold, v.desc] if k.to_s.match(rx) or (v.desc.match(rx) rescue false)
     end
     if cfs.empty?
       m.reply _("no config key found matching %{r}") % { :r => params[:rx].to_s}
     else
-      m.reply _("possible keys: %{kl}") % { :kl => cfs.map { |c| c.key}.join(', ') }
-      m.reply cfs.map { |c| [c.key, c.desc].join(': ') }.join("\n")
+      m.reply _("possible keys: %{kl}") % { :kl => cfs.map { |c| c.first}.join(', ') }
+      m.reply cfs.map { |c| c.join(': ') }.join("\n")
     end
   end
 
