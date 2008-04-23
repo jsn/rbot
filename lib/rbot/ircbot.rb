@@ -704,6 +704,8 @@ class Bot
       :split_at => Regexp.new(@config['send.split_at']),
       :purge_split => @config['send.purge_split'],
       :truncate_text => @config['send.truncate_text'].dup
+
+    trap_sigs
   end
 
   def setup_plugins_path
@@ -773,8 +775,8 @@ class Bot
     end
   end
 
-  # connect the bot to IRC
-  def connect
+  # trap signals
+  def trap_sigs
     begin
       trap("SIGINT") { got_sig("SIGINT") }
       trap("SIGTERM") { got_sig("SIGTERM") }
@@ -784,6 +786,10 @@ class Bot
     rescue Exception => e
       debug "failed to trap signals: #{e.pretty_inspect}"
     end
+  end
+
+  # connect the bot to IRC
+  def connect
     begin
       quit if $interrupted > 0
       @socket.connect
