@@ -761,10 +761,10 @@ class Bot
   end
 
   # things to do when we receive a signal
-  def got_sig(sig)
-    debug "received #{sig}, queueing quit"
+  def got_sig(sig, func=:quit)
+    debug "received #{sig}, queueing #{func}"
     $interrupted += 1
-    quit unless @quit_mutex.locked?
+    self.send(func) unless @quit_mutex.locked?
     debug "interrupted #{$interrupted} times"
     if $interrupted >= 3
       debug "drastic!"
@@ -778,7 +778,7 @@ class Bot
     begin
       trap("SIGINT") { got_sig("SIGINT") }
       trap("SIGTERM") { got_sig("SIGTERM") }
-      trap("SIGHUP") { got_sig("SIGHUP") }
+      trap("SIGHUP") { got_sig("SIGHUP", :restart) }
     rescue ArgumentError => e
       debug "failed to trap signals (#{e.pretty_inspect}): running on Windows?"
     rescue Exception => e
