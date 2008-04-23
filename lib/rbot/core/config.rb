@@ -77,7 +77,7 @@ class ConfigModule < CoreBotModule
     if cfs.empty?
       m.reply _("no config key found matching %{r}") % { :r => params[:rx].to_s}
     else
-      m.reply _("possible keys: %{kl}") % { :kl => cfs.map { |c| c.first}.join(', ') }
+      m.reply _("possible keys: %{kl}") % { :kl => cfs.map { |c| c.first}.join(', ') } if cfs.length > 1
       m.reply cfs.map { |c| c.join(': ') }.join("\n")
     end
   end
