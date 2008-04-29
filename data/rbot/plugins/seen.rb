@@ -38,10 +38,10 @@ class SeenPlugin < Plugin
                                         nil, m.message.dup)
     elsif m.kind_of?(NickMessage)
       return if m.address?
-      @registry[m.message] = Saw.new(m.sourcenick.dup, Time.new, "NICK", 
-                                        nil, m.message.dup)
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "NICK", 
-                                        nil, m.message.dup)
+      @registry[m.oldnick] = Saw.new(m.oldnick, Time.new, "NICK", 
+                                        nil, m.newnick)
+      @registry[m.newnick] = Saw.new(m.oldnick, Time.new, "NICK", 
+                                        nil, m.newnick)
     elsif m.kind_of?(PartMessage)
       return if m.address?
       @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "PART", 
