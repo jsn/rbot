@@ -1,3 +1,10 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Seen Plugin
+#
+# Keep a database of who last said/did what
+
 define_structure :Saw, :nick, :time, :type, :where, :message
 
 class SeenPlugin < Plugin
@@ -21,39 +28,36 @@ class SeenPlugin < Plugin
   end
 
   def listen(m)
-    return if m.sourcenick.nil?
+    return unless m.source
     # keep database up to date with who last said what
-    if m.kind_of?(PrivMessage)
+    now = Time.new
+    case m
+    when PrivMessage
       return if m.private?
-      if m.action?
-        @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "ACTION", 
-                                          m.target, m.message.dup)
-      else
-        @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "PUBLIC",
-                                          m.target, m.message.dup)
-      end
-    elsif m.kind_of?(QuitMessage)
+      type = m.action? ? 'ACTION' : 'PUBLIC'
+      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, now, type,
+                                          m.target.to_s, m.message.dup)
+    when QuitMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "QUIT", 
+      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, now, "QUIT", 
                                         nil, m.message.dup)
-    elsif m.kind_of?(NickMessage)
+    when NickMessage
       return if m.address?
-      @registry[m.oldnick] = Saw.new(m.oldnick, Time.new, "NICK", 
-                                        nil, m.newnick)
-      @registry[m.newnick] = Saw.new(m.oldnick, Time.new, "NICK", 
-                                        nil, m.newnick)
-    elsif m.kind_of?(PartMessage)
+      saw = Saw.new(m.oldnick, now, "NICK", nil, m.newnick)
+      @registry[m.oldnick] = saw
+      @registry[m.newnick] = saw
+    when PartMessage
       return if m.address?
       @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "PART", 
-                                        m.target, m.message.dup)
-    elsif m.kind_of?(JoinMessage)
+                                        m.target.to_s, m.message.dup)
+    when JoinMessage
       return if m.address?
       @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "JOIN", 
-                                        m.target, m.message.dup)
-    elsif m.kind_of?(TopicMessage)
+                                        m.target.to_s, m.message.dup)
+    when TopicMessage
       return if m.address?
       @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "TOPIC", 
-                                        m.target, m.message.dup)
+                                        m.target.to_s, m.message.dup)
     end
   end
   
@@ -62,26 +66,26 @@ class SeenPlugin < Plugin
     ago = Time.new - saw.time
     
     if (ago.to_i == 0)
-      ret += "just now, "
+      ret << "just now, "
     else
-      ret += Utils.secs_to_string(ago) + " ago, "
+      ret << Utils.secs_to_string(ago) + " ago, "
     end
 
     case saw.type.to_sym
     when :PUBLIC
-      ret += "saying #{saw.message}"
+      ret << "saying #{saw.message}"
     when :ACTION
-      ret += "doing #{saw.nick} #{saw.message}"
+      ret << "doing #{saw.nick} #{saw.message}"
     when :NICK
-      ret += "changing nick from #{saw.nick} to #{saw.message}"
+      ret << "changing nick from #{saw.nick} to #{saw.message}"
     when :PART
-      ret += "leaving #{saw.where}"
+      ret << "leaving #{saw.where}"
     when :JOIN
-      ret += "joining #{saw.where}"
+      ret << "joining #{saw.where}"
     when :QUIT
-      ret += "quitting IRC (#{saw.message})"
+      ret << "quitting IRC (#{saw.message})"
     when :TOPIC
-      ret += "changing the topic of #{saw.where} to #{saw.message}"
+      ret << "changing the topic of #{saw.where} to #{saw.message}"
     end
   end
   
