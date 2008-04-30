@@ -1451,6 +1451,13 @@ module Irc
               setting = setting == "+" ? :set : :reset
               arg[1..-1].each_byte { |b|
                 m = b.chr.intern
+                if m == :+
+                  setting = :set
+                  next
+                elsif m == :-
+                  setting = :reset
+                  next
+                end
                 data[:modes] << [setting, m]
                 case m
                 when *@server.supports[:chanmodes][:typea]
