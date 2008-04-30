@@ -13,7 +13,7 @@ class Regexp
     new = self.source.gsub(/(^|[^\\])((?:\\\\)*)\(([^?])/) {
       "%s%s(?:%s" % [$1, $2, $3]
     }
-    Regexp.new(new)
+    Regexp.new(new, self.options)
   end
 end
 
