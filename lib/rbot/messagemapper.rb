@@ -15,6 +15,21 @@ class Regexp
     }
     Regexp.new(new, self.options)
   end
+
+  # We may want to remove head and tail anchors
+  def remove_head_tail
+    new = self.source.sub(/^\^/,'').sub(/\$$/,'')
+    Regexp.new(new, self.options)
+  end
+
+  # The MessageMapper cleanup method: does both remove_capture
+  # and remove_head_tail
+  def mm_cleanup
+    new = self.source.gsub(/(^|[^\\])((?:\\\\)*)\(([^?])/) {
+      "%s%s(?:%s" % [$1, $2, $3]
+    }.sub(/^\^/,'').sub(/\$$/,'')
+    Regexp.new(new, self.options)
+  end
 end
 
 module Irc
@@ -484,13 +499,13 @@ class Bot
           sub = is_single ? "\\S+" : ".*?"
         when Regexp
           # Remove captures and the ^ and $ that are sometimes placed in requirement regexps
-          sub = has_req.remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
+          sub = has_req.mm_cleanup
         when String
           sub = Regexp.escape(has_req)
         when Array
-          sub = has_req[0].remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
+          sub = has_req[0].mm_cleanup
         when Hash
-          sub = has_req[:regexp].remove_captures.source.sub(/^\^/,'').sub(/\$$/,'')
+          sub = has_req[:regexp].mm_cleanup
         else
           warning "Odd requirement #{has_req.inspect} of class #{has_req.class} for parameter '#{name}'"
           sub = Regexp.escape(has_req.to_s) rescue "\\S+"
