@@ -394,7 +394,7 @@ class AuthModule < CoreBotModule
         return _("user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy")
       end
     when "auth"
-      return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permission syntax, permissions [re]set, permissions view, user, meet, hello, allow, prevent")
+      return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permissions syntax, permissions [re]set, permissions view, user, meet, hello, allow, prevent")
     when "meet"
       return _("meet <nick> [as <user>]: creates a bot user for nick, calling it user (defaults to the nick itself)")
     when "hello"
