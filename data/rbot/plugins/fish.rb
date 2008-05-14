@@ -36,7 +36,8 @@ class BabelPlugin < Plugin
     trans_pair = "#{trans_from}_#{trans_to}"
 
     if (trans_text =~ /^http:\/\//) && (URI.parse(trans_text) rescue nil)
-      return 'webpage translation is not currently supported'
+      m.reply 'webpage translation is not currently supported'
+      return
       # TODO FIXME
       url = BASEURL+'/translate_url' +
         "?lp=#{trans_pair}&trurl=#{data_text}"
