@@ -1,5 +1,6 @@
 class BabelPlugin < Plugin
   LANGS = %w{en fr de it pt es nl ru zh zt el ja ko}
+  BASEURL = 'http://babelfish.yahoo.com'
 
   Config.register Config::EnumValue.new('translate.default_from',
     :values => LANGS, :default => 'en',
@@ -35,8 +36,10 @@ class BabelPlugin < Plugin
     trans_pair = "#{trans_from}_#{trans_to}"
 
     if (trans_text =~ /^http:\/\//) && (URI.parse(trans_text) rescue nil)
-      url = 'http://babelfish.altavista.com/babelfish/trurl_pagecontent' +
-        "?lp=#{trans_pair}&url=#{data_text}"
+      return 'webpage translation is not currently supported'
+      # TODO FIXME
+      url = BASEURL+'/translate_url' +
+        "?lp=#{trans_pair}&trurl=#{data_text}"
 
       return Utils.get_first_pars([url], 1, :message => m)
     end
@@ -53,10 +56,10 @@ class BabelPlugin < Plugin
       "content-type" => "application/x-www-form-urlencoded; charset=utf-8"
     }
 
-    query = "/babelfish/tr"
+    query = "/translate_txt"
 
     begin
-      body = @bot.httputil.get('http://babelfish.altavista.com'+query,
+      body = @bot.httputil.get(BASEURL+query,
                                :method => :post,
                                :body => data,
                                :headers => headers)
@@ -68,8 +71,8 @@ class BabelPlugin < Plugin
     case body
     when nil
       m.reply "couldn't talk to babelfish :("
-    when /^\s+<td bgcolor=white class=s><div style=padding:10px;>(.*)<\/div><\/td>\s*<\/tr>/m
-      answer = $1.gsub(/\s*[\r\n]+\s*/,' ')
+    when /^\s*<div id="result"><div style="[^"]*">(.*?)<\/div><\/div>\s*$/
+      answer = $1
       # cache the answer
       if(answer.length > 0)
         @registry["#{trans_pair}/#{data_text}"] = answer
