@@ -2,7 +2,7 @@
 #++
 #
 # :title: botsnack - give your bot some love
-# :version: 1.0
+# :version: 1.0a
 #
 # Author:: Jan Wikholm <jw@jw.fi>
 #
@@ -23,15 +23,11 @@ class BotsnackPlugin < Plugin
 
 
   def snack(m, params)
-    # Below is the 0.9.10 version, but I changed it because it would conflict 
-    # with config params [core.reply_with_nick true] and [core.nick_postfix ,]
-    # resulting in:
-    # <@unfo-> .botsnack
-    # <@rrBot> unfo-, unfo-: thanks :)
-    # OLD: m.reply @bot.lang.get("thanks_X") % m.sourcenick if(m.public?)
-    # OLD: m.reply @bot.lang.get("thanks") if(m.private?)
-    
-    m.reply @bot.lang.get("thanks") 
+    if m.public?
+      m.reply @bot.lang.get("thanks_X") % m.sourcenick
+    else
+      m.reply @bot.lang.get("thanks")
+    end
   end
 end
 
