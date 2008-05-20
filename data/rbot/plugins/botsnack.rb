@@ -18,7 +18,7 @@
 class BotsnackPlugin < Plugin
 
   def help(plugin, topic="")
-    "botsnack => reward #{@nick} for being good"
+    "botsnack => reward #{@bot.nick} for being good"
   end
 
 
