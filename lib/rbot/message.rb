@@ -348,7 +348,7 @@ module Irc
     # the nick or core.reply_with_nick is set to false
     #
     def reply(string, options={})
-      if @bot.config['core.reply_with_nick'] and not string =~ /\b#{Regexp.escape(@source.to_s)}\b/
+      if @bot.config['core.reply_with_nick'] and not string =~ /(?:^|\W)#{Regexp.escape(@source.to_s)}(?:$|\W)/
         return nickreply(string, options)
       end
       plainreply(string, options)
