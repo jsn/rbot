@@ -348,6 +348,7 @@ module Config
     end
 
     def run()
+      $stdout.sync = true
       puts _("First time rbot configuration wizard")
       puts "===================================="
       puts _("This is the first time you have run rbot with a config directory of: #{@bot.botclass}")
