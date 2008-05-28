@@ -132,11 +132,9 @@ module Irc
     attr_accessor :ignored
     alias :ignored? :ignored
 
-    # should the message handler be excuted in new thread?
-    # if set to true or false, this overrides :thread option in map. if it's nil,
-    # the map option takes effect
-    attr_accessor :thread
-    alias :thread? :thread
+    # set this to true if the method that delegates the message is run in a thread
+    attr_accessor :in_thread
+    alias :in_thread? :in_thread
 
     # instantiate a new Message
     # bot::      associated bot class
@@ -156,7 +154,7 @@ module Irc
       @replied = false
       @server = server
       @ignored = false
-      @thread = nil
+      @in_thread = false
 
       @identified = false
       if @msg_wants_id && @server.capabilities[:"identify-msg"]
