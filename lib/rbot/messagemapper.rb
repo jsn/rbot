@@ -207,7 +207,7 @@ class Bot
           debug "checking auth for #{auth}"
           if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
-            if m.thread || (m.thread == nil && tmpl.options[:thread] || tmpl.options[:threaded])
+            if m.thread || (m.thread.nil? && tmpl.options[:thread] || tmpl.options[:threaded])
               Thread.new do
                 begin
                   @parent.send(action, m, options)
