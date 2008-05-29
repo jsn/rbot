@@ -64,10 +64,10 @@ class ShortenURLs < Plugin
 
     begin
       tried << service
-      raise WWW::InvalidService, "#{service} blacklisted" if @blacklist.include?(service)
-      short = WWW::ShortURL.shorten(url, service)
-      raise WWW::InvalidService, "#{service} returned an empty string for #{url}" unless short and not short.empty?
-    rescue WWW::InvalidService
+      raise InvalidService, "#{service} blacklisted" if @blacklist.include?(service)
+      short = ShortURL.shorten(url, service)
+      raise InvalidService, "#{service} returned an empty string for #{url}" unless short and not short.empty?
+    rescue InvalidService
       pool = services - tried
       if pool.empty?
         m.reply "#{service} failed, and I don't know what else to try next" unless params[:called]
