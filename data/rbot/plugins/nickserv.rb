@@ -23,43 +23,43 @@ class NickServPlugin < Plugin
   
   Config.register Config::StringValue.new('nickserv.name',
     :default => "nickserv", :requires_restart => false,
-    :desc => "Name of the nick server (all lowercase)")
+    :desc => _("Name of the nick server (all lowercase)"))
 
   Config.register Config::StringValue.new('nickserv.ident_request',
     :default => "IDENTIFY", :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
-    :desc => "String to look for to see if the nick server is asking us to identify")
+    :desc => _("String to look for to see if the nick server is asking us to identify"))
   Config.register Config::StringValue.new('nickserv.nick_avail',
     :default => "not (currently )?online|killed|recovered|disconnesso|libero",
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_nick_avail", v },
-    :desc => "String to look for to see if the nick server is informing us that our nick is now available")
+    :desc => _("String to look for to see if the nick server is informing us that our nick is now available"))
   Config.register Config::StringValue.new('nickserv.identified_string',
     :default => "(Password|Contrase|Mot de passe).+(acce[pt]t|r[ie]cog?n).+(identif|r[ie]cog?n)",
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_identified_string", v },
-    :desc => "String to look for to see if the nick server is informing us that we have identified successfully")
+    :desc => _("String to look for to see if the nick server is informing us that we have identified successfully"))
 
   Config.register Config::BooleanValue.new('nickserv.wants_nick',
     :default => false, :requires_restart => false,
-    :desc => "Set to false if the nick server doesn't expect the nick as a parameter in the identify command")
+    :desc => _("Set to false if the nick server doesn't expect the nick as a parameter in the identify command"))
 
   Config.register Config::IntegerValue.new('nickserv.wait',
     :default => 30, :validate => Proc.new { |v| v > 0 }, :requires_restart => false,
-    :desc => "Seconds to wait after sending a message to nickserv, e.g. after ghosting")
+    :desc => _("Seconds to wait after sending a message to nickserv, e.g. after ghosting"))
 
   def help(plugin, topic="")
     case topic
     when ""
-      return "nickserv plugin: handles nickserv protected IRC nicks. topics password, register, identify, listnicks"
+      return _("nickserv plugin: handles nickserv protected IRC nicks. topics password, register, identify, listnicks")
     when "password"
-      return "nickserv password [<nick>] <passwd>: remember the password for nick <nick> and use it to identify in future"
+      return _("nickserv password [<nick>] <passwd>: remember the password for nick <nick> and use it to identify in future")
     when "register"
-      return "nickserv register [<password> [<email>]]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work. Also specify email if required by your services"
+      return _("nickserv register [<password> [<email>]]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work. Also specify email if required by your services")
     when "identify"
-      return "nickserv identify: identify with nickserv - shouldn't be needed - bot should identify with nickserv immediately on request - however this could be useful after splits or service disruptions, or when you just set the password for the current nick"
+      return _("nickserv identify: identify with nickserv - shouldn't be needed - bot should identify with nickserv immediately on request - however this could be useful after splits or service disruptions, or when you just set the password for the current nick")
     when "listnicks"
-      return "nickserv listnicks: lists nicknames and associated password the bot knows about - you will need config level auth access to do this one and it will reply by privmsg only"
+      return _("nickserv listnicks: lists nicknames and associated password the bot knows about - you will need config level auth access to do this one and it will reply by privmsg only")
     end
   end
   
@@ -112,7 +112,7 @@ class NickServPlugin < Plugin
     if nick == @bot.nick
       ns_say "SET PASSWORD #{passwd}"
     else
-      m.reply "I'm only changing this in my database, I won't inform #{ns_nick} of the change"
+      m.reply(_("I'm only changing this in my database, I won't inform %{ns_nick} of the change") % {:ns_nick => ns_nick})
     end
     @registry[nick] = passwd
     m.okay
@@ -133,7 +133,7 @@ class NickServPlugin < Plugin
         @bot.say m.sourcenick, "#{k} => #{v}"
       }
     else
-      m.reply "none known"
+      m.reply _("none known")
     end
   end
 
@@ -160,11 +160,11 @@ class NickServPlugin < Plugin
     when true
       m.okay
     when false
-      m.reply "I cannot identify for a this nick"
+      m.reply _("I cannot identify for a this nick")
     when nil
-      m.reply "I dunno the nickserv password for the nickname #{@bot.nick} :("
+      m.reply(_("I dunno the nickserv password for the nickname %{botnick} :(") % {:botnick => @bot.nick})
     else
-      m.reply "uh ... something went wrong ..."
+      m.reply _("uh ... something went wrong ...")
     end
   end
   
