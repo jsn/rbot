@@ -87,9 +87,6 @@ rescue LoadError, GetTextVersionError
     args[0]
   end
 
-  def bindtextdomain_to(*args)
-  end
-
   # the following extension to String#% is from ruby-gettext's string.rb file.
   # it needs to be included in the fallback since the source already use this form
 
