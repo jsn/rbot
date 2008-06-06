@@ -38,7 +38,15 @@ end
 desc "Update pot/po files."
 task :updatepo do
   require 'gettext/utils'
-  GetText.update_pofiles("rbot", Dir.glob("{lib,bin,data}/**/*.{rb,rhtml}"), "rbot")
+  plugin_files = Dir.glob('data/rbot/plugins/**/*.rb')
+  # all except plugin files use the rbot textdomain
+  GetText.update_pofiles("rbot",
+    Dir.glob("{lib,bin,data}/**/*.{rb,rhtml}") - plugin_files, "rbot")
+  # each plugin uses its own textdomain
+  plugin_files.each do |f|
+    basename = File.basename(f, '.rb')
+    GetText.update_pofiles("rbot-#{basename}", f, 'rbot')
+  end
 end
 
 desc "Create mo-files"

@@ -1,0 +1,16 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the PACKAGE package.
+# Tom Gilbert <tom@linuxbrit.co.uk>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-05 18:26-0400\n"
+"PO-Revision-Date: 2007-07-09 01:39-0400\n"
+"Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
+"Language-Team: Chinese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"

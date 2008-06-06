@@ -533,6 +533,8 @@ module Plugins
       # the idea here is to prevent namespace pollution. perhaps there
       # is another way?
       plugin_module = Module.new
+      # each plugin uses its own textdomain, we bind it automatically here
+      bindtextdomain_to(plugin_module, "rbot-#{File.basename(fname, '.rb')}")
 
       desc = desc.to_s + " " if desc
 
