@@ -1,0 +1,105 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"PO-Revision-Date: 2008-06-05 22:14-0400\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: data/rbot/plugins/factoids.rb:32
+msgid "from %{who}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:35
+msgid "on %{when}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:38
+msgid "in %{where}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:41
+msgid " [%{data}]"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:142
+msgid "%{name} (%{fname}) must be under %{dir}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:149
+msgid "%{name} is not a file"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:163
+msgid "fact must be the last field"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:170
+msgid "%{name} (%{fname}) doesn't exist"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:263
+msgid "factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404 data/rbot/plugins/factoids.rb:436
+msgid "please select a fact number between 1 and %{total}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:296
+msgid "I forgot that %{factoid}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:299
+msgid "I couldn't delete factoid %{idx}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:307
+msgid "I didn't know that %{factoid}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:314
+msgid "[%{idx}/%{total}] %{fact}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:342
+msgid "I know %{total} facts"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:420
+msgid "I know nothing about %{words}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:357
+msgid "%{len} out of %{total} facts refer to %{words}, I'll only show %{max}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:412
+msgid "I know nothing"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:452
+msgid "not a date '%{dstr}'"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:460
+msgid "couldn't change learn data for fact %{fact}: %{err}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:475
+msgid "failed to import facts from %{fname}: %{err}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:480
+msgid "%{len} facts loaded from %{fname}"
+msgstr ""
