@@ -1,10 +1,10 @@
 class SpellPlugin < Plugin
   def help(plugin, topic="")
-    "spell <word> => check spelling of <word>, suggest alternatives"
+    _("spell <word> => check spelling of <word>, suggest alternatives")
   end
   def privmsg(m)
     unless(m.params && m.params =~ /^\S+$/)
-      m.reply "incorrect usage: " + help(m.plugin)
+      m.reply _("incorrect usage: ") + help(m.plugin)
       return
     end
     p = IO.popen("ispell -a -S", "w+")
@@ -13,7 +13,7 @@ class SpellPlugin < Plugin
       p.close_write
       p.each_line {|l|
         if(l =~ /^\*/)
-          m.reply "#{m.params} may be spelled correctly"
+          m.reply (_("%{word} may be spelled correctly") % {:word => m.params})
           p.close
           return
         elsif(l =~ /^\s*&.*: (.*)$/)
@@ -21,18 +21,18 @@ class SpellPlugin < Plugin
           p.close
           return
         elsif(l =~ /^\s*\+ (.*)$/)
-          m.reply "#{m.params} is presumably derived from " + $1.downcase
+          m.reply (_("%{word} is presumably derived from ") % {:word => m.params}) + $1.downcase
           p.close
           return
         elsif(l =~ /^\s*#/)
-          m.reply "#{m.params}: no suggestions"
+          m.reply (_("%{word}: no suggestions") % {:word => m.params})
           p.close
           return
         end
       }
       p.close
     else
-      m.reply "couldn't exec ispell :("
+      m.reply _("couldn't exec ispell :(")
       return
     end
   end
