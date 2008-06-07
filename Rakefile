@@ -37,6 +37,12 @@ end
 
 desc "Update pot/po files."
 task :updatepo do
+  # ruby-gettext treats empty output from msgmerge as error, causing this task to
+  # fail. we provide a wrapper to work around it. see bin/msgmerge-wrapper.rb for
+  # details
+  ENV['REAL_MSGMERGE_PATH'] = ENV['MSGMERGE_PATH']
+  ENV['MSGMERGE_PATH'] = 'bin/msgmerge-wrapper.rb'
+
   require 'gettext/utils'
   plugin_files = Dir.glob('data/rbot/plugins/**/*.rb')
   # all except plugin files use the rbot textdomain
