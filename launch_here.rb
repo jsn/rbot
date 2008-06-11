@@ -4,6 +4,7 @@
 #
 
 SCM_DIR = File.expand_path File.dirname(__FILE__)
+$0 = File.expand_path $0
 
 Dir.chdir SCM_DIR
 
