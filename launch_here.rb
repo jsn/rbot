@@ -3,7 +3,10 @@
 # Load rbot from this directory. (No need to install it with setup.rb)
 #
 
-SCM_DIR = File.expand_path(File.dirname('__FILE__'))
+SCM_DIR = File.expand_path File.dirname(__FILE__)
+
+Dir.chdir SCM_DIR
+
 puts "Running from #{SCM_DIR}"
 
 $:.unshift File.join(SCM_DIR, 'lib')
