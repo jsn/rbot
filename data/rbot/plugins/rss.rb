@@ -25,21 +25,6 @@ end
 
 module ::RSS
 
-  # Make an  'unique' ID for a given item, based on appropriate bot options
-  # Currently only suppored is bot.config['rss.show_updated']: when true, the
-  # description is included in the uid hashing, otherwise it's not
-  #
-  def RSS.item_uid_for_bot(item, opts={})
-    options = { :show_updated => true}.merge(opts)
-    desc = nil
-    if options[:show_updated]
-      desc = item.content.content rescue item.description rescue nil
-    end
-    [(item.title.content rescue item.title rescue nil),
-     (item.link.href rescue item.link),
-     desc].hash
-  end
-
   # Add support for Slashdot namespace in RDF. The code is just an adaptation
   # of the DublinCore code.
   unless defined?(SLASH_PREFIX)
@@ -268,6 +253,26 @@ class RSSFeedsPlugin < Plugin
   Config.register Config::BooleanValue.new('rss.show_links',
     :default => true,
     :desc => "Whether to display links from the text of a feed item.")
+
+  # Make an  'unique' ID for a given item, based on appropriate bot options
+  # Currently only suppored is bot.config['rss.show_updated']: when false,
+  # only the guid/link is accounted for.
+  #
+  def make_uid(item)
+    uid = [
+      (item.guid.content rescue \
+       item.guid rescue \
+       item.link.href rescue \
+       item.link rescue ''
+      )
+    ]
+    if @bot.config['rss.show_updated']
+      uid.push((item.content.content rescue item.description rescue nil))
+      uid.unshift((item.title.content rescue item.title rescue nil))
+    end
+    uid.hash
+  end
+
 
   # We used to save the Mutex with the RssBlob, which was idiotic. And
   # since Mutexes dumped in one version might not be resotrable in another,
@@ -859,9 +864,8 @@ class RSSFeedsPlugin < Plugin
               otxt = []
 
               # These are used for checking new items vs old ones
-              uid_opts = { :show_updated => @bot.config['rss.show_updated'] }
               oids = Set.new feed.items.map { |item|
-                uid = RSS.item_uid_for_bot(item, uid_opts)
+                uid = make_uid item
                 otxt << item.to_s
                 debug [uid, item].inspect
                 debug [uid, otxt.last].inspect
@@ -880,7 +884,7 @@ class RSSFeedsPlugin < Plugin
                 # debug feed.xml
 
                 dispItems = feed.items.reject { |item|
-                  uid = RSS.item_uid_for_bot(item, uid_opts)
+                  uid = make_uid item
                   txt = item.to_s
                   if oids.include?(uid)
                     debug "rejecting old #{uid} #{item.inspect}"
