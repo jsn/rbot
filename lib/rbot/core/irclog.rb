@@ -92,7 +92,25 @@ class IrcLogModule < CoreBotModule
     when NoticeMessage
       irclog "-#{m.source}- #{m.message}", m.target
     when PrivMessage
-      irclog "<#{m.source}> #{m.message}", m.target
+      logtarget = who = m.target
+      if m.ctcp
+        case m.ctcp.intern
+        when :ACTION
+          irclog "* #{m.source} #{m.logmessage}", logtarget
+        when :VERSION
+          irclog "@ #{m.source} asked #{who} about version info", logtarget
+        when :SOURCE
+          irclog "@ #{m.source} asked #{who} about source info", logtarget
+        when :PING
+          irclog "@ #{m.source} pinged #{who}", logtarget
+        when :TIME
+          irclog "@ #{m.source} asked #{who} what time it is", logtarget
+        else
+          irclog "@ #{m.source} asked #{who} about #{[m.ctcp, m.message].join(' ')}", logtarget
+        end
+      else
+        irclog "<#{m.source}> #{m.logmessage}", logtarget
+      end
     when QuitMessage
       m.was_on.each { |ch|
         irclog "@ quit (#{m.message})", ch
