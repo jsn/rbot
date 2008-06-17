@@ -13,7 +13,7 @@ class SpellPlugin < Plugin
       p.close_write
       p.each_line {|l|
         if(l =~ /^\*/)
-          m.reply (_("%{word} may be spelled correctly") % {:word => m.params})
+          m.reply(_("%{word} may be spelled correctly") % {:word => m.params})
           p.close
           return
         elsif(l =~ /^\s*&.*: (.*)$/)
@@ -21,11 +21,11 @@ class SpellPlugin < Plugin
           p.close
           return
         elsif(l =~ /^\s*\+ (.*)$/)
-          m.reply (_("%{word} is presumably derived from ") % {:word => m.params}) + $1.downcase
+          m.reply((_("%{word} is presumably derived from ") % {:word => m.params}) + $1.downcase)
           p.close
           return
         elsif(l =~ /^\s*#/)
-          m.reply (_("%{word}: no suggestions") % {:word => m.params})
+          m.reply(_("%{word}: no suggestions") % {:word => m.params})
           p.close
           return
         end

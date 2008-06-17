@@ -39,10 +39,10 @@ class BabelPlugin < Plugin
       m.reply 'webpage translation is not currently supported'
       return
       # TODO FIXME
-      url = BASEURL+'/translate_url' +
-        "?lp=#{trans_pair}&trurl=#{data_text}"
-
-      return Utils.get_first_pars([url], 1, :message => m)
+      # url = BASEURL+'/translate_url' +
+      #   "?lp=#{trans_pair}&trurl=#{data_text}"
+      #
+      # return Utils.get_first_pars([url], 1, :message => m)
     end
 
     data = "lp=#{trans_pair}&doit=done&intl=1&tt=urltext&urltext=#{data_text}"
