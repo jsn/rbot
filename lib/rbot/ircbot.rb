@@ -66,12 +66,14 @@ def rawlog(level, message=nil, who_pos=1)
   $log_queue.push qmsg
 end
 
-def restart_logger
+def restart_logger(newlogger = false)
   if $log_thread && $log_thread.alive?
     $log_queue << nil
     $log_thread.join
     $log_thread = nil
   end
+
+  $logger = newlogger if newlogger
 
   $log_thread = Thread.new do
     ls = nil
@@ -444,6 +446,7 @@ class Bot
     @logfile = @config['log.file']
     if @logfile.class!=String || @logfile.empty?
       @logfile = "#{botclass}/#{File.basename(botclass).gsub(/^\.+/,'')}.log"
+      debug "Using `#{@logfile}' as debug log"
     end
 
     # See http://blog.humlab.umu.se/samuel/archives/000107.html
@@ -462,6 +465,21 @@ class Bot
       end
       Dir.chdir botclass
       # File.umask 0000                # Ensure sensible umask. Adjust as needed.
+    end
+
+    logger = Logger.new(@logfile,
+                        @config['log.keep'],
+                        @config['log.max_size']*1024*1024)
+    logger.datetime_format= $dateformat
+    logger.level = @config['log.level']
+    logger.level = $cl_loglevel if defined? $cl_loglevel
+    logger.level = 0 if $debug
+
+    restart_logger(logger)
+
+    log_session_start
+
+    if $daemonize
       log "Redirecting standard input/output/error"
       [$stdin, $stdout, $stderr].each do |fd|
         begin
@@ -485,15 +503,6 @@ class Bot
         return str.to_s.size
       end
     end
-
-    # Set the new logfile and loglevel. This must be done after the daemonizing
-    $logger = Logger.new(@logfile, @config['log.keep'], @config['log.max_size']*1024*1024)
-    $logger.datetime_format= $dateformat
-    $logger.level = @config['log.level']
-    $logger.level = $cl_loglevel if defined? $cl_loglevel
-    $logger.level = 0 if $debug
-
-    log_session_start
 
     File.open($opts['pidfile'] || "#{@botclass}/rbot.pid", 'w') do |pf|
       pf << "#{$$}\n"
