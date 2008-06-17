@@ -179,6 +179,7 @@ module Plugins
     def initialize
       @manager = Plugins::manager
       @bot = @manager.bot
+      @priority = nil
 
       @botmodule_triggers = Array.new
 
