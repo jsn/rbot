@@ -58,7 +58,7 @@ begin
   log "gettext loaded"
 
 rescue LoadError, GetTextVersionError
-  warn "failed to load ruby-gettext package: #{$!}; translations are disabled"
+  warning "failed to load ruby-gettext package: #{$!}; translations are disabled"
 
   # undefine GetText, in case it got defined because the error was caused by a
   # wrong version
