@@ -1445,46 +1445,53 @@ module Irc
           # are needed
           who_wants_params = []
 
-          argv[1..-1].each { |arg|
-            setting = arg[0].chr
-            if "+-".include?(setting)
-              setting = setting == "+" ? :set : :reset
-              arg[1..-1].each_byte { |b|
-                m = b.chr.intern
-                if m == :+
-                  setting = :set
-                  next
-                elsif m == :-
-                  setting = :reset
-                  next
-                end
-                data[:modes] << [setting, m]
-                case m
-                when *@server.supports[:chanmodes][:typea]
-                  who_wants_params << data[:modes].length - 1
-                when *@server.supports[:chanmodes][:typeb]
-                  who_wants_params << data[:modes].length - 1
-                when *@server.supports[:chanmodes][:typec]
-                  if setting == :set
-                    who_wants_params << data[:modes].length - 1
-                  end
-                when *@server.supports[:chanmodes][:typed]
-                  # Nothing to do
-                when *@server.supports[:prefix][:modes]
-                  who_wants_params << data[:modes].length - 1
-                else
-                  warning "Unknown mode #{m} in #{serverstring.inspect}"
-                end
-              }
-            else
+          modes = argv[1..-1].dup
+          debug modes
+          getting_args = false
+          while arg = modes.shift
+            debug arg
+            if getting_args
+              # getting args for previously set modes
               idx = who_wants_params.shift
               if idx.nil?
                 warning "Oops, problems parsing #{serverstring.inspect}"
                 break
               end
               data[:modes][idx] << arg
+              getting_args = false if who_wants_params.empty?
+            else
+              debug @server.supports[:chanmodes]
+              setting = :set
+              arg.each_char do |c|
+                m = c.intern
+                case m
+                when :+
+                  setting = :set
+                when :-
+                  setting = :reset
+                else
+                  data[:modes] << [setting, m]
+                  case m
+                  when *@server.supports[:chanmodes][:typea]
+                    who_wants_params << data[:modes].length - 1
+                  when *@server.supports[:chanmodes][:typeb]
+                    who_wants_params << data[:modes].length - 1
+                  when *@server.supports[:chanmodes][:typec]
+                    if setting == :set
+                      who_wants_params << data[:modes].length - 1
+                    end
+                  when *@server.supports[:chanmodes][:typed]
+                    # Nothing to do
+                  when *@server.supports[:prefix][:modes]
+                    who_wants_params << data[:modes].length - 1
+                  else
+                    warning "Unknown mode #{m} in #{serverstring.inspect}"
+                  end
+                end
+              end
+              getting_args = true unless who_wants_params.empty?
             end
-          }
+          end
 
           data[:modes].each { |mode|
             set, key, val = mode
