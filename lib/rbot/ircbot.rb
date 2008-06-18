@@ -558,7 +558,7 @@ class Bot
     # Array of channels names where the bot should be quiet
     # '*' means all channels
     #
-    @quiet = []
+    @quiet = Set.new
 
     @client[:welcome] = proc {|data|
       m = WelcomeMessage.new(self, server, data[:source], data[:target], data[:message])
@@ -753,17 +753,17 @@ class Bot
     return @quiet.include?('*') || @quiet.include?(channel.downcase)
   end
 
-  def set_quiet(channel)
+  def set_quiet(channel = nil)
     if channel
       ch = channel.downcase.dup
-      @quiet << ch unless @quiet.include?(ch)
+      @quiet << ch
     else
       @quiet.clear
       @quiet << '*'
     end
   end
 
-  def reset_quiet(channel)
+  def reset_quiet(channel = nil)
     if channel
       @quiet.delete channel.downcase
     else
