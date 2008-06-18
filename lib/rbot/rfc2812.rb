@@ -1462,8 +1462,8 @@ module Irc
             else
               debug @server.supports[:chanmodes]
               setting = :set
-              arg.each_char do |c|
-                m = c.intern
+              arg.each_byte do |c|
+                m = c.chr.intern
                 case m
                 when :+
                   setting = :set
