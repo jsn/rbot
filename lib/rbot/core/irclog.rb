@@ -24,6 +24,8 @@ class IrcLogModule < CoreBotModule
   attr :nolog_rx, :dolog_rx
   def initialize
     super
+    @queue = Queue.new
+    @thread = Thread.new { loggers_thread }
     @logs = Hash.new
     Dir.mkdir("#{@bot.botclass}/logs") unless File.exist?("#{@bot.botclass}/logs")
     event_irclog_list_changed(@bot.config['irclog.no_log'], @bot.config['irclog.do_log'])
@@ -56,35 +58,13 @@ class IrcLogModule < CoreBotModule
   # log IRC-related message +message+ to a file determined by +where+.
   # +where+ can be a channel name, or a nick for private message logging
   def irclog(message, where="server")
-    message = message.chomp
-    now = Time.now
-    stamp = now.strftime("%Y/%m/%d %H:%M:%S")
-    if where.class <= Server
-      where_str = "server"
-    else
-      where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
-    end
-    return unless can_log_on(where_str)
-    unless @logs.has_key? where_str
-      if @logs.size > @bot.config['irclog.max_open_files']
-        @logs.keys.sort do |a, b|
-          @logs[a][0] <=> @logs[b][0]
-        end.slice(0, @logs.size - @bot.config['irclog.max_open_files']).each do |w|
-          logfile_close w, "idle since #{@logs[w][0]}"
-        end
-      end
-      f = File.new("#{@bot.botclass}/logs/#{where_str}", "a")
-      f.sync = true
-      f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
-      @logs[where_str] = [now, f]
-    end
-    @logs[where_str][1].puts "[#{stamp}] #{message}"
-    @logs[where_str][0] = now
-    #debug "[#{stamp}] <#{where}> #{message}"
+    @queue.push [message, where]
   end
 
   def cleanup
-    @logs.keys.each { |w| logfile_close(w, 'rescan or shutdown') }
+    @queue << nil
+    @thread.join
+    @thread = nil
   end
 
   def sent(m)
@@ -250,6 +230,42 @@ class IrcLogModule < CoreBotModule
 
   def unknown_message(m)
     irclog m.logmessage, ".unknown"
+  end
+
+  protected
+  def loggers_thread
+    ls = nil
+    debug 'loggers_thread starting'
+    while ls = @queue.pop
+      message, where = ls
+      message = message.chomp
+      now = Time.now
+      stamp = now.strftime("%Y/%m/%d %H:%M:%S")
+      if where.class <= Server
+        where_str = "server"
+      else
+        where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
+      end
+      return unless can_log_on(where_str)
+      unless @logs.has_key? where_str
+        if @logs.size > @bot.config['irclog.max_open_files']
+          @logs.keys.sort do |a, b|
+            @logs[a][0] <=> @logs[b][0]
+          end.slice(0, @logs.size - @bot.config['irclog.max_open_files']).each do |w|
+            logfile_close w, "idle since #{@logs[w][0]}"
+          end
+        end
+        f = File.new("#{@bot.botclass}/logs/#{where_str}", "a")
+        f.sync = true
+        f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
+        @logs[where_str] = [now, f]
+      end
+      @logs[where_str][1].puts "[#{stamp}] #{message}"
+      @logs[where_str][0] = now
+      #debug "[#{stamp}] <#{where}> #{message}"
+    end
+    @logs.keys.each { |w| logfile_close(w, 'rescan or shutdown') }
+    debug 'loggers_thread terminating'
   end
 end
 
