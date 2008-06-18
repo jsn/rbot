@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,7 +81,9 @@ msgid "%{lp}'s move was legal, %{cp} must pick %{b}%{n}%{b} cards!"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:478
-msgid "%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and play again!"
+msgid ""
+"%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and "
+"play again!"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:506
@@ -217,7 +219,9 @@ msgid "'jo' to join in"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:801
-msgid "'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play Red Reverse, or 'pl y2y2' to play both Yellow 2 cards"
+msgid ""
+"'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play "
+"Red Reverse, or 'pl y2y2' to play both Yellow 2 cards"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:802
@@ -229,7 +233,9 @@ msgid "'pa' to pass your turn"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:804
-msgid "'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select Green (or 'pl w+4 g' to select the color when playing the Wild)"
+msgid ""
+"'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select "
+"Green (or 'pl w+4 g' to select the color when playing the Wild)"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:805
@@ -257,7 +263,9 @@ msgid "'tu' to show whose turn it is"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:813
-msgid "A Wild +4 can only be played legally if you don't have normal (not special) cards of the current color. "
+msgid ""
+"A Wild +4 can only be played legally if you don't have normal (not special) "
+"cards of the current color. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:814
@@ -265,43 +273,61 @@ msgid "The next player can challenge a W+4 by using the 'ch' command. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:815
-msgid "If the W+4 play was illegal, the player who played it must pick the W+4, pick 4 cards from the stock, and play a legal card. "
+msgid ""
+"If the W+4 play was illegal, the player who played it must pick the W+4, "
+"pick 4 cards from the stock, and play a legal card. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:816
-msgid "If the W+4 play was legal, the challenger must pick 6 cards instead of 4."
+msgid ""
+"If the W+4 play was legal, the challenger must pick 6 cards instead of 4."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:818
-msgid "play all your cards, one at a time, by matching either the color or the value of the currently discarded card. "
+msgid ""
+"play all your cards, one at a time, by matching either the color or the "
+"value of the currently discarded card. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:819
-msgid "cards with special effects: Skip (next player skips a turn), Reverse (reverses the playing order), +2 (next player has to take 2 cards). "
+msgid ""
+"cards with special effects: Skip (next player skips a turn), Reverse "
+"(reverses the playing order), +2 (next player has to take 2 cards). "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:820
-msgid "Wilds can be played on any card, and you must specify the color for the next card. "
+msgid ""
+"Wilds can be played on any card, and you must specify the color for the next "
+"card. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:821
-msgid "Wild +4 also forces the next player to take 4 cards, but it can only be played if you can't play a color card. "
+msgid ""
+"Wild +4 also forces the next player to take 4 cards, but it can only be "
+"played if you can't play a color card. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:822
-msgid "you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing the first player who can't play one to pick the cumulative sum of all cards. "
+msgid ""
+"you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing "
+"the first player who can't play one to pick the cumulative sum of all cards. "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:823
-msgid "you can also play a Reverse on a +2 or +4, bouncing the effect back to the previous player (that now comes next). "
+msgid ""
+"you can also play a Reverse on a +2 or +4, bouncing the effect back to the "
+"previous player (that now comes next). "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:826
-msgid "The points won with a game of %{uno} are totalled from the cards remaining in the hands of the other players."
+msgid ""
+"The points won with a game of %{uno} are totalled from the cards remaining "
+"in the hands of the other players."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:827
-msgid "Each normal (not special) card is worth its face value (from 0 to 9 points)."
+msgid ""
+"Each normal (not special) card is worth its face value (from 0 to 9 points)."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:828
@@ -317,11 +343,14 @@ msgid "There are 108 cards in a standard %{uno} deck."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:834
-msgid "For each color (Blue, Green, Red, Yellow) there are 19 numbered cards (from 0 to 9), with two of each number except for 0."
+msgid ""
+"For each color (Blue, Green, Red, Yellow) there are 19 numbered cards (from "
+"0 to 9), with two of each number except for 0."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:835
-msgid "There are also 6 special cards for each color, two each of +2, Reverse, Skip."
+msgid ""
+"There are also 6 special cards for each color, two each of +2, Reverse, Skip."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:836
@@ -329,15 +358,21 @@ msgid "Finally, there are 4 Wild and 4 Wild +4 cards."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:839
-msgid "The game manager (the user that started the game) can execute the following commands to manage it: "
+msgid ""
+"The game manager (the user that started the game) can execute the following "
+"commands to manage it: "
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:841
-msgid "'uno drop <user>' to drop a user from the game (any user can drop itself using 'uno drop')"
+msgid ""
+"'uno drop <user>' to drop a user from the game (any user can drop itself "
+"using 'uno drop')"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:842
-msgid "'uno replace <old> [with] <new>' to replace a player with someone else (useful in case of disconnects)"
+msgid ""
+"'uno replace <old> [with] <new>' to replace a player with someone else "
+"(useful in case of disconnects)"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:843
@@ -349,7 +384,9 @@ msgid "'uno end' to end the game before its natural completion"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:847
-msgid "%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help uno admin' for admin commands. In-game commands: %{cmds}."
+msgid ""
+"%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help "
+"uno admin' for admin commands. In-game commands: %{cmds}."
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:865
@@ -371,7 +408,9 @@ msgid "it's your turn, sleepyhead"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:927
-msgid "There is already an %{uno} game running here, managed by %{who}. say 'jo' to join in"
+msgid ""
+"There is already an %{uno} game running here, managed by %{who}. say 'jo' to "
+"join in"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:935
@@ -469,5 +508,6 @@ msgid "uh, what kind of score list did you want, again?"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:1180
-msgid " I can only show the top scores (with top) and the most wins (with topwin)"
+msgid ""
+" I can only show the top scores (with top) and the most wins (with topwin)"
 msgstr ""

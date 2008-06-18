@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,7 +41,9 @@ msgid "Alias of %{command}"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:112
-msgid "The arguments in alias must match the substitutions in command, and vice versa"
+msgid ""
+"The arguments in alias must match the substitutions in command, and vice "
+"versa"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:117
@@ -49,11 +51,15 @@ msgid "Error mapping %{text} as command: %{error}"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:138
-msgid "The alias seems to have caused infinite recursion. Please examine your alias definitions"
+msgid ""
+"The alias seems to have caused infinite recursion. Please examine your alias "
+"definitions"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:142
-msgid "Error handling the alias, The alias %{text} is not defined or has beeen removed. I will stop responding to it after rescan,"
+msgid ""
+"Error handling the alias, The alias %{text} is not defined or has beeen "
+"removed. I will stop responding to it after rescan,"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:154
@@ -61,9 +67,17 @@ msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:163
-msgid "\"alias <text> => <command>\" => add text as an alias of command. Text can contain placeholders marked with : or * for :words and *multiword arguments. The command can contain placeholders enclosed with < > which will be substituded with argument values. For example: alias googlerbot *terms => google site:ruby-rbot.org <terms>"
+msgid ""
+"\"alias <text> => <command>\" => add text as an alias of command. Text can "
+"contain placeholders marked with : or * for :words and *multiword arguments. "
+"The command can contain placeholders enclosed with < > which will be "
+"substituded with argument values. For example: alias googlerbot *terms => "
+"google site:ruby-rbot.org <terms>"
 msgstr ""
 
 #: data/rbot/plugins/alias.rb:165
-msgid "alias list => list defined aliases | alias whatis <alias> => show definition of the alias | alias remove <alias> => remove defined alias | see the \"create\" topic about adding aliases"
+msgid ""
+"alias list => list defined aliases | alias whatis <alias> => show definition "
+"of the alias | alias remove <alias> => remove defined alias | see the "
+"\"create\" topic about adding aliases"
 msgstr ""

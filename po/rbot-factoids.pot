@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,10 +49,13 @@ msgid "%{name} (%{fname}) doesn't exist"
 msgstr ""
 
 #: data/rbot/plugins/factoids.rb:263
-msgid "factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>"
+msgid ""
+"factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
+"<words>"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404 data/rbot/plugins/factoids.rb:436
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404
+#: data/rbot/plugins/factoids.rb:436
 msgid "please select a fact number between 1 and %{total}"
 msgstr ""
 

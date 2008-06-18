@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:13-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2007-08-23 17:49+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -15,54 +15,286 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: lib/rbot/botuser.rb:40
-msgid "Password for the bot owner"
-msgstr "Password per il padrone del bot"
+#: lib/rbot/core/filters_ui.rb:25
+msgid "no filters in group %{g}"
+msgstr ""
 
-#: lib/rbot/botuser.rb:43
+#: lib/rbot/core/filters_ui.rb:27
+msgid "no known filters"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:30
+msgid "known filters: "
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:38
+msgid "no known filter groups"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:40
+msgid "known filter groups: "
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:50
+msgid "no filters match %{pat}"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:52
+msgid "filters matching %{pat}: "
+msgstr ""
+
+#: lib/rbot/core/basics.rb:107
+msgid "quit [<message>] => quit IRC with message <message>"
+msgstr "quit [<messaggio>] => esce da IRC con il messaggio <messaggio>"
+
+#: lib/rbot/core/basics.rb:109
+msgid "restart => completely stop and restart the bot (including reconnect)"
+msgstr ""
+"restart => ferma il bot completamente e lo riavvia (facendolo anche "
+"ricollegare)"
+
+#: lib/rbot/core/basics.rb:113
+msgid "part"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:115
+msgid "hide => part all channels"
+msgstr "hide => lascia tutti i canali"
+
+#: lib/rbot/core/basics.rb:117
+msgid "nick <nick> => attempt to change nick to <nick>"
+msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
+
+#: lib/rbot/core/basics.rb:119
 msgid ""
-"Set false to prevent new botusers from logging in without a password when "
-"the user netmask is known"
+"say <channel>|<nick> <message> => say <message> to <channel> or in private "
+"message to <nick>"
 msgstr ""
-"Impostare a falso per impedire ai nuovi utenti di identificarsi senza "
-"password anche se la loro netmask è conosciuta"
 
-#: lib/rbot/botuser.rb:46
+#: lib/rbot/core/basics.rb:121
 msgid ""
-"Set false to prevent new botusers from recognizing IRC users without a need "
-"to manually login"
+"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
+"private message to <nick>"
 msgstr ""
-"Impostare a falso per impedire ai nuovi utenti di essere riconosciuti senza "
-"prima effettuare il login"
 
-#: lib/rbot/botuser.rb:49
-msgid "Set true to allow new botusers to be created automatically"
-msgstr ""
-"Impostare a vero per permettere la creazione automatica di nuovi botuser"
-
-#: lib/rbot/botuser.rb:913
-msgid "%{user}, you don't have '%{command}' permissions here"
-msgstr "%{user}, non hai i permessi per '%{command}' qui"
-
-#: lib/rbot/config.rb:217
-msgid "%{desc} [valid values are: %{values}]"
-msgstr "%{desc} [valori validi: %{values}]"
-
-#: lib/rbot/config.rb:352
-msgid "First time rbot configuration wizard"
-msgstr "Configurazione iniziale di rbot"
-
-#: lib/rbot/config.rb:355
-msgid "This wizard will ask you a few questions to get you started."
-msgstr "Ti verranno fatte alcune domande per cominciare."
-
-#: lib/rbot/config.rb:356
+#: lib/rbot/core/basics.rb:123
 msgid ""
-"The rest of rbot's configuration can be manipulated via IRC once rbot is "
-"connected and you are auth'd."
+"quiet [in here|<channel>] => with no arguments, stop speaking in all "
+"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
+"<channel>"
 msgstr ""
-"Il resto della configurazione di rbot può essere manipolata da IRC quando "
-"rbot è connesso e ti sei identificato"
+
+#: lib/rbot/core/basics.rb:125
+msgid ""
+"talk [in here|<channel>] => with no arguments, resume speaking in all "
+"channels, if \"in here\", resume speaking in this channel, or resume "
+"speaking in <channel>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:127
+msgid "ping => replies with a pong"
+msgstr "ping => risponde con un pong"
+
+#: lib/rbot/core/basics.rb:129
+msgid ""
+"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
+"to <mode>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:135
+msgid ""
+"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
+"quiet, talk, ping, mode"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:202
+msgid "year"
+msgstr "anno"
+
+#: lib/rbot/core/utils/utils.rb:202
+msgid "years"
+msgstr "anni"
+
+#: lib/rbot/core/utils/utils.rb:204
+msgid "month"
+msgstr "mese"
+
+#: lib/rbot/core/utils/utils.rb:204
+msgid "months"
+msgstr "mesi"
+
+#: lib/rbot/core/utils/utils.rb:206
+msgid "day"
+msgstr "giorno"
+
+#: lib/rbot/core/utils/utils.rb:206
+msgid "days"
+msgstr "giorni"
+
+#: lib/rbot/core/utils/utils.rb:208
+msgid "hour"
+msgstr "ora"
+
+#: lib/rbot/core/utils/utils.rb:208
+msgid "hours"
+msgstr "ore"
+
+#: lib/rbot/core/utils/utils.rb:210
+msgid "minute"
+msgstr "minuto"
+
+#: lib/rbot/core/utils/utils.rb:210
+msgid "minutes"
+msgstr "minuti"
+
+#: lib/rbot/core/utils/utils.rb:212
+msgid "second"
+msgstr "secondo"
+
+#: lib/rbot/core/utils/utils.rb:212
+msgid "seconds"
+msgstr "secondi"
+
+#: lib/rbot/core/utils/utils.rb:219
+msgid " and "
+msgstr " e "
+
+#: lib/rbot/core/userdata.rb:146
+msgid "%{key} data for %{user}: %{data}"
+msgstr ""
+
+#: lib/rbot/core/userdata.rb:152
+msgid "sorry, no %{key} data for %{user}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:18
+msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:39
+msgid "no such module %{module}"
+msgstr "non esiste alcun modulo %{module}"
+
+#: lib/rbot/core/config.rb:55 lib/rbot/core/config.rb:66
+#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:101
+#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:150
+msgid "no such config key %{key}"
+msgstr "non esiste una chiave di configurazione %{key}"
+
+#: lib/rbot/core/config.rb:78
+msgid "no config key found matching %{r}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:80
+msgid "possible keys: %{kl}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
+#: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
+msgid "this config change will take effect on the next restart"
+msgstr ""
+"questo cambiamente di configurazione richiede un riavvio per diventare "
+"effettivo"
+
+#: lib/rbot/core/config.rb:94 lib/rbot/core/config.rb:115
+#: lib/rbot/core/config.rb:143 lib/rbot/core/config.rb:166
+msgid "this config change will take effect on the next rescan"
+msgstr ""
+"questo cambiamente di configurazione richiede un rescan per diventare "
+"effettivo"
+
+#: lib/rbot/core/config.rb:108
+msgid "failed to set %{key}: %{error}"
+msgstr "impossibile impostare %{key}: %{error}"
+
+#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:154
+msgid "config key %{key} is not an array"
+msgstr "la chiave di configurazione %{key} non è una lista"
+
+#: lib/rbot/core/config.rb:138
+msgid "failed to add %{value} to %{key}: %{error}"
+msgstr "impossibile aggiungere %{value} a %{key}: %{error}"
+
+#: lib/rbot/core/config.rb:161
+msgid "failed to remove %{value} from %{key}: %{error}"
+msgstr "impossibile rimuovere %{value} da %{key}: %{errore}"
+
+#: lib/rbot/core/config.rb:175
+msgid "saving ..."
+msgstr "salvataggio in corso ..."
+
+#: lib/rbot/core/config.rb:177
+msgid "rescanning ..."
+msgstr "rescan ..."
+
+#: lib/rbot/core/config.rb:179
+msgid "done. %{plugin_status}"
+msgstr "fatto. %{plugin_status}"
+
+#: lib/rbot/core/config.rb:220
+msgid ""
+"config list => list configuration modules, config list <module> => list "
+"configuration keys for module <module>"
+msgstr ""
+
+#: lib/rbot/core/config.rb:222
+msgid "config get <key> => get configuration value for key <key>"
+msgstr ""
+
+#: lib/rbot/core/config.rb:224
+msgid "reset key <key> to the default"
+msgstr ""
+
+#: lib/rbot/core/config.rb:226
+msgid ""
+"config set <key> <value> => set configuration value for key <key> to <value>"
+msgstr ""
+
+#: lib/rbot/core/config.rb:228
+msgid "config desc <key> => describe what key <key> configures"
+msgstr ""
+
+#: lib/rbot/core/config.rb:230
+msgid ""
+"config add <value> to <key> => add value <value> to key <key> if <key> is an "
+"array"
+msgstr ""
+
+#: lib/rbot/core/config.rb:232
+msgid ""
+"config rm <value> from <key> => remove value <value> from key <key> if <key> "
+"is an array"
+msgstr ""
+
+#: lib/rbot/core/config.rb:234
+msgid ""
+"config module - bot configuration. usage: list, desc, get, set, unset, add, "
+"rm"
+msgstr ""
+
+#: lib/rbot/core/config.rb:239
+msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
+msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
+
+#: lib/rbot/core/config.rb:241
+msgid "status => display some information on the bot's status"
+msgstr ""
+
+#: lib/rbot/core/config.rb:243
+msgid "save => save current dynamic data and configuration"
+msgstr ""
+
+#: lib/rbot/core/config.rb:245
+msgid "rescan => reload modules and static facts"
+msgstr ""
+
+#: lib/rbot/core/config.rb:247
+msgid "version => describes software version"
+msgstr "versione => descrive la versione del software"
+
+#: lib/rbot/core/config.rb:249
+msgid "config-related tasks: config, save, rescan, version, nick, status"
+msgstr ""
 
 #: lib/rbot/core/auth.rb:69
 msgid "please do not use + or - in front of command %{command} when resetting"
@@ -632,345 +864,93 @@ msgstr "elaboro i dati da importare ..."
 msgid "failed to parse data: %{exception}"
 msgstr "impossibile elaborare i dati: %{exception}"
 
-#: lib/rbot/core/basics.rb:107
-msgid "quit [<message>] => quit IRC with message <message>"
-msgstr "quit [<messaggio>] => esce da IRC con il messaggio <messaggio>"
+#: lib/rbot/botuser.rb:40
+msgid "Password for the bot owner"
+msgstr "Password per il padrone del bot"
 
-#: lib/rbot/core/basics.rb:109
-msgid "restart => completely stop and restart the bot (including reconnect)"
-msgstr ""
-"restart => ferma il bot completamente e lo riavvia (facendolo anche "
-"ricollegare)"
-
-#: lib/rbot/core/basics.rb:113
-msgid "part"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:115
-msgid "hide => part all channels"
-msgstr "hide => lascia tutti i canali"
-
-#: lib/rbot/core/basics.rb:117
-msgid "nick <nick> => attempt to change nick to <nick>"
-msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
-
-#: lib/rbot/core/basics.rb:119
+#: lib/rbot/botuser.rb:43
 msgid ""
-"say <channel>|<nick> <message> => say <message> to <channel> or in private "
-"message to <nick>"
+"Set false to prevent new botusers from logging in without a password when "
+"the user netmask is known"
 msgstr ""
+"Impostare a falso per impedire ai nuovi utenti di identificarsi senza "
+"password anche se la loro netmask è conosciuta"
 
-#: lib/rbot/core/basics.rb:121
+#: lib/rbot/botuser.rb:46
 msgid ""
-"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
-"private message to <nick>"
+"Set false to prevent new botusers from recognizing IRC users without a need "
+"to manually login"
 msgstr ""
+"Impostare a falso per impedire ai nuovi utenti di essere riconosciuti senza "
+"prima effettuare il login"
 
-#: lib/rbot/core/basics.rb:123
-msgid ""
-"quiet [in here|<channel>] => with no arguments, stop speaking in all "
-"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
-"<channel>"
+#: lib/rbot/botuser.rb:49
+msgid "Set true to allow new botusers to be created automatically"
 msgstr ""
+"Impostare a vero per permettere la creazione automatica di nuovi botuser"
 
-#: lib/rbot/core/basics.rb:125
-msgid ""
-"talk [in here|<channel>] => with no arguments, resume speaking in all "
-"channels, if \"in here\", resume speaking in this channel, or resume "
-"speaking in <channel>"
-msgstr ""
+#: lib/rbot/botuser.rb:913
+msgid "%{user}, you don't have '%{command}' permissions here"
+msgstr "%{user}, non hai i permessi per '%{command}' qui"
 
-#: lib/rbot/core/basics.rb:127
-msgid "ping => replies with a pong"
-msgstr "ping => risponde con un pong"
-
-#: lib/rbot/core/basics.rb:129
-msgid ""
-"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
-"to <mode>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:135
-msgid ""
-"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
-"quiet, talk, ping, mode"
-msgstr ""
-
-#: lib/rbot/core/config.rb:18
-msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:39
-msgid "no such module %{module}"
-msgstr "non esiste alcun modulo %{module}"
-
-#: lib/rbot/core/config.rb:55 lib/rbot/core/config.rb:66
-#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:101
-#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:150
-msgid "no such config key %{key}"
-msgstr "non esiste una chiave di configurazione %{key}"
-
-#: lib/rbot/core/config.rb:78
-msgid "no config key found matching %{r}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:80
-msgid "possible keys: %{kl}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
-#: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
-msgid "this config change will take effect on the next restart"
-msgstr ""
-"questo cambiamente di configurazione richiede un riavvio per diventare "
-"effettivo"
-
-#: lib/rbot/core/config.rb:94 lib/rbot/core/config.rb:115
-#: lib/rbot/core/config.rb:143 lib/rbot/core/config.rb:166
-msgid "this config change will take effect on the next rescan"
-msgstr ""
-"questo cambiamente di configurazione richiede un rescan per diventare "
-"effettivo"
-
-#: lib/rbot/core/config.rb:108
-msgid "failed to set %{key}: %{error}"
-msgstr "impossibile impostare %{key}: %{error}"
-
-#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:154
-msgid "config key %{key} is not an array"
-msgstr "la chiave di configurazione %{key} non è una lista"
-
-#: lib/rbot/core/config.rb:138
-msgid "failed to add %{value} to %{key}: %{error}"
-msgstr "impossibile aggiungere %{value} a %{key}: %{error}"
-
-#: lib/rbot/core/config.rb:161
-msgid "failed to remove %{value} from %{key}: %{error}"
-msgstr "impossibile rimuovere %{value} da %{key}: %{errore}"
-
-#: lib/rbot/core/config.rb:175
-msgid "saving ..."
-msgstr "salvataggio in corso ..."
-
-#: lib/rbot/core/config.rb:177
-msgid "rescanning ..."
-msgstr "rescan ..."
-
-#: lib/rbot/core/config.rb:179
-msgid "done. %{plugin_status}"
-msgstr "fatto. %{plugin_status}"
-
-#: lib/rbot/core/config.rb:220
-msgid ""
-"config list => list configuration modules, config list <module> => list "
-"configuration keys for module <module>"
-msgstr ""
-
-#: lib/rbot/core/config.rb:222
-msgid "config get <key> => get configuration value for key <key>"
-msgstr ""
-
-#: lib/rbot/core/config.rb:224
-msgid "reset key <key> to the default"
-msgstr ""
-
-#: lib/rbot/core/config.rb:226
-msgid ""
-"config set <key> <value> => set configuration value for key <key> to <value>"
-msgstr ""
-
-#: lib/rbot/core/config.rb:228
-msgid "config desc <key> => describe what key <key> configures"
-msgstr ""
-
-#: lib/rbot/core/config.rb:230
-msgid ""
-"config add <value> to <key> => add value <value> to key <key> if <key> is an "
-"array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:232
-msgid ""
-"config rm <value> from <key> => remove value <value> from key <key> if <key> "
-"is an array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:234
-msgid ""
-"config module - bot configuration. usage: list, desc, get, set, unset, add, "
-"rm"
-msgstr ""
-
-#: lib/rbot/core/config.rb:239
-msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
-msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
-
-#: lib/rbot/core/config.rb:241
-msgid "status => display some information on the bot's status"
-msgstr ""
-
-#: lib/rbot/core/config.rb:243
-msgid "save => save current dynamic data and configuration"
-msgstr ""
-
-#: lib/rbot/core/config.rb:245
-msgid "rescan => reload modules and static facts"
-msgstr ""
-
-#: lib/rbot/core/config.rb:247
-msgid "version => describes software version"
-msgstr "versione => descrive la versione del software"
-
-#: lib/rbot/core/config.rb:249
-msgid "config-related tasks: config, save, rescan, version, nick, status"
-msgstr ""
-
-#: lib/rbot/core/userdata.rb:146
-msgid "%{key} data for %{user}: %{data}"
-msgstr ""
-
-#: lib/rbot/core/userdata.rb:152
-msgid "sorry, no %{key} data for %{user}"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:202
-msgid "year"
-msgstr "anno"
-
-#: lib/rbot/core/utils/utils.rb:202
-msgid "years"
-msgstr "anni"
-
-#: lib/rbot/core/utils/utils.rb:204
-msgid "month"
-msgstr "mese"
-
-#: lib/rbot/core/utils/utils.rb:204
-msgid "months"
-msgstr "mesi"
-
-#: lib/rbot/core/utils/utils.rb:206
-msgid "day"
-msgstr "giorno"
-
-#: lib/rbot/core/utils/utils.rb:206
-msgid "days"
-msgstr "giorni"
-
-#: lib/rbot/core/utils/utils.rb:208
-msgid "hour"
-msgstr "ora"
-
-#: lib/rbot/core/utils/utils.rb:208
-msgid "hours"
-msgstr "ore"
-
-#: lib/rbot/core/utils/utils.rb:210
-msgid "minute"
-msgstr "minuto"
-
-#: lib/rbot/core/utils/utils.rb:210
-msgid "minutes"
-msgstr "minuti"
-
-#: lib/rbot/core/utils/utils.rb:212
-msgid "second"
-msgstr "secondo"
-
-#: lib/rbot/core/utils/utils.rb:212
-msgid "seconds"
-msgstr "secondi"
-
-#: lib/rbot/core/utils/utils.rb:219
-msgid " and "
-msgstr " e "
-
-#: lib/rbot/core/filters_ui.rb:25
-msgid "no filters in group %{g}"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:27
-msgid "no known filters"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:30
-msgid "known filters: "
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:38
-msgid "no known filter groups"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:40
-msgid "known filter groups: "
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:50
-msgid "no filters match %{pat}"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:52
-msgid "filters matching %{pat}: "
-msgstr ""
-
-#: lib/rbot/ircbot.rb:1167
+#: lib/rbot/ircbot.rb:1176
 msgid "help topics: "
 msgstr "argomenti: "
 
-#: lib/rbot/ircbot.rb:1169
+#: lib/rbot/ircbot.rb:1178
 msgid " (help <topic> for more info)"
 msgstr " (help <argomento> per ulteriori informazioni)"
 
-#: lib/rbot/ircbot.rb:1172
+#: lib/rbot/ircbot.rb:1181
 msgid "no help for topic %{topic}"
 msgstr "nessun aiuto disponibile su %{topic}"
 
-#: lib/rbot/ircbot.rb:1183
+#: lib/rbot/ircbot.rb:1192
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 "Attivo da %{up}, %{plug} plugin attivi, %{sent} righe spedite, %{recv} righe "
 "ricevute."
 
-#: lib/rbot/plugins.rb:340
+#: lib/rbot/plugins.rb:341
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr "uso errato, chiedi aiuto con '%{command}'"
 
-#: lib/rbot/plugins.rb:664
+#: lib/rbot/plugins.rb:665
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "%{count} moduli di base caricati"
 msgstr[1] "%{count} modulo di base caricato"
 
-#: lib/rbot/plugins.rb:667
+#: lib/rbot/plugins.rb:668
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "%{count} moduli di base: %{list}"
 msgstr[1] "%{count} modulo di base: %{list}"
 
-#: lib/rbot/plugins.rb:673
+#: lib/rbot/plugins.rb:674
 msgid "no core botmodules loaded"
 msgstr "nessun modulo di base caricato"
 
-#: lib/rbot/plugins.rb:678
+#: lib/rbot/plugins.rb:679
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "%{count} plugin caricati"
 msgstr[1] "%{count} plugin caricato"
 
-#: lib/rbot/plugins.rb:681
+#: lib/rbot/plugins.rb:682
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "%{count} plugin: %{list}"
 msgstr[1] "%{count} plugin: %{list}"
 
-#: lib/rbot/plugins.rb:692
+#: lib/rbot/plugins.rb:693
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] "%{highlight}%{count} plugin ignorati%{highlight}"
 msgstr[1] "%{highlight}%{count} plugin ignorato%{highlight}"
 
-#: lib/rbot/plugins.rb:697
+#: lib/rbot/plugins.rb:698
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -984,13 +964,13 @@ msgstr[1] ""
 "%{highlight}%{count} plugin ignorato%{highlight}: usa %{bold}%{command}%"
 "{bold} per vedere perché"
 
-#: lib/rbot/plugins.rb:707
+#: lib/rbot/plugins.rb:708
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] "%{highlight}caricamento di %{count} plugin fallito%{highlight}"
 msgstr[1] "%{highlight}caricamento di %{count} plugin fallito%{highlight}"
 
-#: lib/rbot/plugins.rb:712
+#: lib/rbot/plugins.rb:713
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -1004,11 +984,11 @@ msgstr[1] ""
 "%{highlight}caricamento di %{count} plugin fallito%{highlight}: usa %{bold}%"
 "{command}%{bold} per vedere perché"
 
-#: lib/rbot/plugins.rb:742
+#: lib/rbot/plugins.rb:743
 msgid "no plugins failed to load"
 msgstr "nessun plugin ha fallito il caricamento"
 
-#: lib/rbot/plugins.rb:744
+#: lib/rbot/plugins.rb:745
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
@@ -1016,15 +996,15 @@ msgstr ""
 "%{highlight}%{plugin}%{highlight} in %{dir} fallito con errore %{exception}: "
 "%{reason}"
 
-#: lib/rbot/plugins.rb:748
+#: lib/rbot/plugins.rb:749
 msgid "at %{backtrace}"
 msgstr "in %{backtrace}"
 
-#: lib/rbot/plugins.rb:754
+#: lib/rbot/plugins.rb:755
 msgid "no plugins were ignored"
 msgstr "nessun plugin ignorato"
 
-#: lib/rbot/plugins.rb:758
+#: lib/rbot/plugins.rb:759
 msgid "overruled by previous"
 msgstr "preceduto da un omonimo"
 
@@ -1046,3 +1026,23 @@ msgstr ""
 #: lib/rbot/registry.rb:190
 msgid "marshal recovery failed, trying default"
 msgstr "recupero dati marshal fallito, tento di usare il valore predefinito"
+
+#: lib/rbot/config.rb:217
+msgid "%{desc} [valid values are: %{values}]"
+msgstr "%{desc} [valori validi: %{values}]"
+
+#: lib/rbot/config.rb:352
+msgid "First time rbot configuration wizard"
+msgstr "Configurazione iniziale di rbot"
+
+#: lib/rbot/config.rb:355
+msgid "This wizard will ask you a few questions to get you started."
+msgstr "Ti verranno fatte alcune domande per cominciare."
+
+#: lib/rbot/config.rb:356
+msgid ""
+"The rest of rbot's configuration can be manipulated via IRC once rbot is "
+"connected and you are auth'd."
+msgstr ""
+"Il resto della configurazione di rbot può essere manipolata da IRC quando "
+"rbot è connesso e ti sei identificato"

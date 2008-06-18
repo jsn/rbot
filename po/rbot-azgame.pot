@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,11 +28,14 @@ msgid "winner, %{tries}"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:163
-msgid "%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, %{bold}%{player}%{bold}!"
+msgid ""
+"%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, "
+"%{bold}%{player}%{bold}!"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:170
-msgid "The game was won after %{tries} tries. Scores for this game:    %{scores}"
+msgid ""
+"The game was won after %{tries} tries. Scores for this game:    %{scores}"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:173
@@ -68,7 +71,9 @@ msgid "the word in %{bold}%{range}%{bold} was:   %{bold}%{word}%{bold}"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:216
-msgid "The game was cancelled after %{tries} tries. Scores for this game would have been:    %{scores}"
+msgid ""
+"The game was cancelled after %{tries} tries. Scores for this game would have "
+"been:    %{scores}"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:219
@@ -124,7 +129,8 @@ msgid "no %{lang} word I know match %{pattern}"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:290
-msgid "more than 25 %{lang} words I know match %{pattern}, try a stricter matching"
+msgid ""
+"more than 25 %{lang} words I know match %{pattern}, try a stricter matching"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:296 data/rbot/plugins/games/azgame.rb:312
@@ -149,7 +155,9 @@ msgid "I already know the %{lang} word %{word}"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:545
-msgid "az [lang] word [count|list|add|delete] => manage the az wordlist for language lang (defaults to current bot language)"
+msgid ""
+"az [lang] word [count|list|add|delete] => manage the az wordlist for "
+"language lang (defaults to current bot language)"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:547
@@ -161,11 +169,17 @@ msgid "az check <word> => checks <word> against current game"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:551
-msgid "try to guess the word the bot is thinking of; if you guess wrong, the bot will use the new word to restrict the range of allowed words: eventually, the range will be so small around the correct word that you can't miss it"
+msgid ""
+"try to guess the word the bot is thinking of; if you guess wrong, the bot "
+"will use the new word to restrict the range of allowed words: eventually, "
+"the range will be so small around the correct word that you can't miss it"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:553
-msgid "az => start a game if none is running, show the current word range otherwise; you can say 'az <language>' if you want to play in a language different from the current bot default"
+msgid ""
+"az => start a game if none is running, show the current word range "
+"otherwise; you can say 'az <language>' if you want to play in a language "
+"different from the current bot default"
 msgstr ""
 
 #: data/rbot/plugins/games/azgame.rb:555

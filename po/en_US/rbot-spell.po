@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 18:27-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2007-07-14 00:06-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: English\n"
@@ -14,3 +14,27 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/spell.rb:3
+msgid "spell <word> => check spelling of <word>, suggest alternatives"
+msgstr ""
+
+#: data/rbot/plugins/spell.rb:7
+msgid "incorrect usage: "
+msgstr ""
+
+#: data/rbot/plugins/spell.rb:16
+msgid "%{word} may be spelled correctly"
+msgstr ""
+
+#: data/rbot/plugins/spell.rb:24
+msgid "%{word} is presumably derived from "
+msgstr ""
+
+#: data/rbot/plugins/spell.rb:28
+msgid "%{word}: no suggestions"
+msgstr ""
+
+#: data/rbot/plugins/spell.rb:35
+msgid "couldn't exec ispell :("
+msgstr ""

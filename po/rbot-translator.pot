@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,9 @@ msgid "List of translators to try in order when translator name not specified"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:298
-msgid "%{translator} <from> <to> <phrase> => Look up phrase using %{info}, supported from -> to languages: %{directions}"
+msgid ""
+"%{translator} <from> <to> <phrase> => Look up phrase using %{info}, "
+"supported from -> to languages: %{directions}"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:302
@@ -41,11 +43,18 @@ msgid "%{source} -> %{targets}"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:307
-msgid "Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. If \"translator\" is used in place of the translator name, the first translator in translator.default_list which supports the specified direction will be picked automatically. Use \"help <translator>\" to look up supported from and to languages"
+msgid ""
+"Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
+"{translators}. If \"translator\" is used in place of the translator name, "
+"the first translator in translator.default_list which supports the specified "
+"direction will be picked automatically. Use \"help <translator>\" to look up "
+"supported from and to languages"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:322
-msgid "None of the default translators (translator.default_list) supports translating from %{source} to %{target}"
+msgid ""
+"None of the default translators (translator.default_list) supports "
+"translating from %{source} to %{target}"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:337

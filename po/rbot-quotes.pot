@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,12 +16,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/quotes.rb:167 data/rbot/plugins/quotes.rb:209 data/rbot/plugins/quotes.rb:237
+#: data/rbot/plugins/quotes.rb:167 data/rbot/plugins/quotes.rb:209
+#: data/rbot/plugins/quotes.rb:237
 msgid "[%{num}] %{quote}"
 msgstr ""
 
-#: data/rbot/plugins/quotes.rb:172 data/rbot/plugins/quotes.rb:186 data/rbot/plugins/quotes.rb:200
-#: data/rbot/plugins/quotes.rb:214 data/rbot/plugins/quotes.rb:242
+#: data/rbot/plugins/quotes.rb:172 data/rbot/plugins/quotes.rb:186
+#: data/rbot/plugins/quotes.rb:200 data/rbot/plugins/quotes.rb:214
+#: data/rbot/plugins/quotes.rb:242
 msgid "quote not found!"
 msgstr ""
 

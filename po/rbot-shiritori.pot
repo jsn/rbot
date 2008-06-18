@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-05 22:14-0400\n"
+"POT-Creation-Date: 2008-06-18 16:41+0200\n"
 "PO-Revision-Date: 2008-06-05 22:14-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,9 @@ msgid "No one has given the first word yet. Say the first word to start."
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:213
-msgid "Poor %{current_player} is playing alone! Anyone care to join? %{previous_word} -> %{current_word}"
+msgid ""
+"Poor %{current_player} is playing alone! Anyone care to join? %"
+"{previous_word} -> %{current_word}"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:244
@@ -53,19 +55,27 @@ msgid "The word %{used_word} has been used. Retry from %{word}"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:301
-msgid "It's impossible to continue the chain from %{word}. The game has ended. Thanks a lot, %{player}! :("
+msgid ""
+"It's impossible to continue the chain from %{word}. The game has ended. "
+"Thanks a lot, %{player}! :("
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:305
-msgid "It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
+msgid ""
+"It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:310
-msgid "It's impossible to continue the chain from %{word}. Start with another word."
+msgid ""
+"It's impossible to continue the chain from %{word}. Start with another word."
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:331
-msgid "A game in which each player must continue the previous player's word, by using its last one or few characters/letters of the word to start a new word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
+msgid ""
+"A game in which each player must continue the previous player's word, by "
+"using its last one or few characters/letters of the word to start a new "
+"word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available "
+"rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:408
