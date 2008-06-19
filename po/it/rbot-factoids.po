@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
 "POT-Creation-Date: 2008-06-18 16:41+0200\n"
-"PO-Revision-Date: 2007-08-23 17:49+0100\n"
+"PO-Revision-Date: 2008-06-20 01:10+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
 "MIME-Version: 1.0\n"
@@ -17,91 +17,92 @@ msgstr ""
 
 #: data/rbot/plugins/factoids.rb:32
 msgid "from %{who}"
-msgstr "sei %{who}"
+msgstr "da %{who}"
 
 #: data/rbot/plugins/factoids.rb:35
 msgid "on %{when}"
-msgstr ""
+msgstr "il %{when}"
 
 #: data/rbot/plugins/factoids.rb:38
 msgid "in %{where}"
-msgstr ""
+msgstr "in %{where}"
 
 #: data/rbot/plugins/factoids.rb:41
 msgid " [%{data}]"
-msgstr ""
+msgstr "[%{data}]"
 
 #: data/rbot/plugins/factoids.rb:142
 msgid "%{name} (%{fname}) must be under %{dir}"
-msgstr ""
+msgstr "%{name} (%{fname}) deve essere sotto %{dir}"
 
 #: data/rbot/plugins/factoids.rb:149
 msgid "%{name} is not a file"
-msgstr ""
+msgstr "%{name} non è un file"
 
 #: data/rbot/plugins/factoids.rb:163
 msgid "fact must be the last field"
-msgstr ""
+msgstr "fact dev'essere l'ultimo campo"
 
 #: data/rbot/plugins/factoids.rb:170
 msgid "%{name} (%{fname}) doesn't exist"
-msgstr ""
+msgstr "%{name} (%{fname}) non esiste"
 
 #: data/rbot/plugins/factoids.rb:263
-msgid ""
-"factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
-"<words>"
-msgstr ""
+msgid "factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>"
+msgstr "factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>"
 
-#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404
+#: data/rbot/plugins/factoids.rb:292
+#: data/rbot/plugins/factoids.rb:404
 #: data/rbot/plugins/factoids.rb:436
 msgid "please select a fact number between 1 and %{total}"
-msgstr ""
+msgstr "per favore seleziona un numero di fatto tra 1 e %{total}"
 
 #: data/rbot/plugins/factoids.rb:296
 msgid "I forgot that %{factoid}"
-msgstr ""
+msgstr "ho dimenticato che %{factoid}"
 
 #: data/rbot/plugins/factoids.rb:299
 msgid "I couldn't delete factoid %{idx}"
-msgstr ""
+msgstr "non sono riuscito a dimenticare il fattoide %{idx}"
 
 #: data/rbot/plugins/factoids.rb:307
 msgid "I didn't know that %{factoid}"
-msgstr ""
+msgstr "non sapevo che %{factoid}"
 
 #: data/rbot/plugins/factoids.rb:314
 msgid "[%{idx}/%{total}] %{fact}"
-msgstr ""
+msgstr "[%{idx}/%{total}] %{fact}"
 
 #: data/rbot/plugins/factoids.rb:342
 msgid "I know %{total} facts"
-msgstr ""
+msgstr "conosco %{total} fatti"
 
-#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:420
+#: data/rbot/plugins/factoids.rb:352
+#: data/rbot/plugins/factoids.rb:420
 msgid "I know nothing about %{words}"
-msgstr ""
+msgstr "non so niente circa %{words}"
 
 #: data/rbot/plugins/factoids.rb:357
 msgid "%{len} out of %{total} facts refer to %{words}, I'll only show %{max}"
-msgstr ""
+msgstr "%{len} di %{total} fatti si riferiscono a %{words}, ne mostrerò solo %{max}"
 
 #: data/rbot/plugins/factoids.rb:412
 msgid "I know nothing"
-msgstr ""
+msgstr "non so niente"
 
 #: data/rbot/plugins/factoids.rb:452
 msgid "not a date '%{dstr}'"
-msgstr ""
+msgstr "'%{dstr}' non è una data"
 
 #: data/rbot/plugins/factoids.rb:460
 msgid "couldn't change learn data for fact %{fact}: %{err}"
-msgstr ""
+msgstr "non sono riuscito a cambiare i dati per il fatto %{fact}: %{err}"
 
 #: data/rbot/plugins/factoids.rb:475
 msgid "failed to import facts from %{fname}: %{err}"
-msgstr "impossibile rimuovere %{value} da %{key}: %{errore}"
+msgstr "impossibile importare i fatti da %{fname}: %{err}"
 
 #: data/rbot/plugins/factoids.rb:480
 msgid "%{len} facts loaded from %{fname}"
-msgstr ""
+msgstr "%{len} fatti caricati da %{fname}"
+
