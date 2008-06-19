@@ -120,7 +120,7 @@ class QuotePlugin < Plugin
   end
 
   def help(plugin, topic="")
-    case topic
+    case plugin
     when "addquote"
       _("addquote [<channel>] <quote> => Add quote <quote> for channel <channel>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
     when "delquote"
