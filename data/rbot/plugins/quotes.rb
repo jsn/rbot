@@ -122,23 +122,23 @@ class QuotePlugin < Plugin
   def help(plugin, topic="")
     case topic
     when "addquote"
-      return "addquote [<channel>] <quote> => Add quote <quote> for channel <channel>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !addquote without addressing if so configured"
+      _("addquote [<channel>] <quote> => Add quote <quote> for channel <channel>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
     when "delquote"
-      return "delquote [<channel>] <num> => delete quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !delquote without addressing if so configured"
+      _("delquote [<channel>] <num> => delete quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
     when "getquote"
-      return "getquote [<channel>] [<num>] => get quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Without <num>, a random quote will be returned. Responds to !getquote without addressing if so configured"
+      _("getquote [<channel>] [<num>] => get quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately. Without <num>, a random quote will be returned.") % { :nick => @bot.nick }
     when "searchquote"
-      return "searchquote [<channel>] <regexp> => search for quote from <channel> that matches <regexp>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !searchquote without addressing if so configured"
+      _("searchquote [<channel>] <regexp> => search for quote from <channel> that matches <regexp>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
     when "topicquote"
-      return "topicquote [<channel>] [<num>] => set topic to quote from <channel> with number <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Without <num>, a random quote will be set. Responds to !topicquote without addressing if so configured"
+      _("topicquote [<channel>] [<num>] => set topic to quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately. Without <num>, a random quote will be set.") % { :nick => @bot.nick }
     when "countquote"
-      return "countquote [<channel>] <regexp> => count quotes from <channel> that match <regexp>. You only need to supply <channel> if you are addressing #{@bot.nick} privately. Responds to !countquote without addressing if so configured"
+      _("countquote [<channel>] <regexp> => count quotes from <channel> that match <regexp>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
     when "whoquote"
-      return "whoquote [<channel>] <num> => show who added quote <num>. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
+      _("whoquote [<channel>] <num> => show who added quote <num>. You only need to supply <channel> if you are addressing %{nick} privately") % { :nick => @bot.nick }
     when "whenquote"
-      return "whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing #{@bot.nick} privately"
+      _("whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing %{nick} privately") % { :nick => @bot.nick }
     else
-      return "Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
+      _("Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote") % { :nick => @bot.nick }
     end
   end
 
@@ -155,7 +155,7 @@ class QuotePlugin < Plugin
     if delquote(channel, num)
       m.okay
     else
-      m.reply "quote not found!"
+      m.reply _("quote not found!")
     end
   end
 
