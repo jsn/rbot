@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-18 16:41+0200\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
 "PO-Revision-Date: 2008-06-20 01:04+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -18,4 +18,3 @@ msgstr ""
 #: data/rbot/plugins/rss.rb:814
 msgid "no such feed %{handle}"
 msgstr "non esiste alcun feed %{handle}"
-

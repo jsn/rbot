@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-18 16:41+0200\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
 "PO-Revision-Date: 2008-06-19 19:27+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -84,8 +84,8 @@ msgid ""
 "%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and "
 "play again!"
 msgstr ""
-"la mossa di %{lp} %{b}non%{b} era lega, %{lp} deve pescare %{b}%{n}%{b} carte e "
-"giocare di nuovo!"
+"la mossa di %{lp} %{b}non%{b} era lega, %{lp} deve pescare %{b}%{n}%{b} "
+"carte e giocare di nuovo!"
 
 #: data/rbot/plugins/games/uno.rb:506
 msgid "%{p} passes turn, and has to pick %{b}%{n}%{b} cards!"
@@ -129,7 +129,9 @@ msgstr "è il turno di %{player}"
 
 #: data/rbot/plugins/games/uno.rb:580
 msgid "next player must respond correctly or pick %{b}%{n}%{b} cards"
-msgstr "il prossimo giocatore deve rispondere correttamente o pescare %{b}%{n}%{b} carte"
+msgstr ""
+"il prossimo giocatore deve rispondere correttamente o pescare %{b}%{n}%{b} "
+"carte"
 
 #: data/rbot/plugins/games/uno.rb:587
 msgid "Current discard: %{card} %{c}"
@@ -224,8 +226,8 @@ msgid ""
 "'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play "
 "Red Reverse, or 'pl y2y2' to play both Yellow 2 cards"
 msgstr ""
-"'pl <carta>' per giocare <carta>: e.g. 'pl g7' per giocare Green 7, o 'pl rr' per giocare "
-"Red Reverse, o 'pl y2y2' per giocare due carte Yellow 2"
+"'pl <carta>' per giocare <carta>: e.g. 'pl g7' per giocare Green 7, o 'pl "
+"rr' per giocare Red Reverse, o 'pl y2y2' per giocare due carte Yellow 2"
 
 #: data/rbot/plugins/games/uno.rb:802
 msgid "'pe' to pick a card"
@@ -240,8 +242,9 @@ msgid ""
 "'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select "
 "Green (or 'pl w+4 g' to select the color when playing the Wild)"
 msgstr ""
-"'co <colore>' per scegliere un colore dopo aver giocato un Wild: e.g. 'co g' per scegliere "
-"Green (o 'pl w+4 g' per scegliere il colore quando si gioca il Wild)"
+"'co <colore>' per scegliere un colore dopo aver giocato un Wild: e.g. 'co g' "
+"per scegliere Green (o 'pl w+4 g' per scegliere il colore quando si gioca il "
+"Wild)"
 
 #: data/rbot/plugins/games/uno.rb:805
 msgid "'ca' to show current cards"
@@ -272,8 +275,8 @@ msgid ""
 "A Wild +4 can only be played legally if you don't have normal (not special) "
 "cards of the current color. "
 msgstr ""
-"Un Wild +4 può venir giocato legalmente solo se non si hanno carte normali (non speciali) "
-"del colore attuale. "
+"Un Wild +4 può venir giocato legalmente solo se non si hanno carte normali "
+"(non speciali) del colore attuale. "
 
 #: data/rbot/plugins/games/uno.rb:814
 msgid "The next player can challenge a W+4 by using the 'ch' command. "
@@ -284,8 +287,8 @@ msgid ""
 "If the W+4 play was illegal, the player who played it must pick the W+4, "
 "pick 4 cards from the stock, and play a legal card. "
 msgstr ""
-"Se la giocata del W+4 era illegale, il giocatore che l'ha sceso deve riprendere il W+4, "
-"pescare 4 carte dal mazzo e giocare una carta valida. "
+"Se la giocata del W+4 era illegale, il giocatore che l'ha sceso deve "
+"riprendere il W+4, pescare 4 carte dal mazzo e giocare una carta valida. "
 
 #: data/rbot/plugins/games/uno.rb:816
 msgid ""
@@ -298,62 +301,65 @@ msgid ""
 "play all your cards, one at a time, by matching either the color or the "
 "value of the currently discarded card. "
 msgstr ""
-"giocare tutte le proprie carte, una alla volta, purché abbiano lo stesso colore o "
-"lo stesso valore dell'ultima carta scoperta. "
+"giocare tutte le proprie carte, una alla volta, purché abbiano lo stesso "
+"colore o lo stesso valore dell'ultima carta scoperta. "
 
 #: data/rbot/plugins/games/uno.rb:819
 msgid ""
 "cards with special effects: Skip (next player skips a turn), Reverse "
 "(reverses the playing order), +2 (next player has to take 2 cards). "
 msgstr ""
-"carte con effetti speciali: Skip (il giocatore successivo salta un turno), Reverse "
-"(l'ordine di gioco viene invertito), +2 (il giocatore successivo deve pescare 2 carte ). "
+"carte con effetti speciali: Skip (il giocatore successivo salta un turno), "
+"Reverse (l'ordine di gioco viene invertito), +2 (il giocatore successivo "
+"deve pescare 2 carte ). "
 
 #: data/rbot/plugins/games/uno.rb:820
 msgid ""
 "Wilds can be played on any card, and you must specify the color for the next "
 "card. "
 msgstr ""
-"I Wild possono essere giocati su qualunque carta, e bisogna specificare il colore "
-"per la carta successiva. "
+"I Wild possono essere giocati su qualunque carta, e bisogna specificare il "
+"colore per la carta successiva. "
 
 #: data/rbot/plugins/games/uno.rb:821
 msgid ""
 "Wild +4 also forces the next player to take 4 cards, but it can only be "
 "played if you can't play a color card. "
 msgstr ""
-"Il Wild +4 costringe inoltre il giocatore successivo a pescarei 4 cards, ma si può giocare solo "
-"se non si hanno carte del colore giusto. "
+"Il Wild +4 costringe inoltre il giocatore successivo a pescarei 4 cards, ma "
+"si può giocare solo se non si hanno carte del colore giusto. "
 
 #: data/rbot/plugins/games/uno.rb:822
 msgid ""
 "you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing "
 "the first player who can't play one to pick the cumulative sum of all cards. "
 msgstr ""
-"si può giocare un +2 o un +4 in risposta ad un +2, e un +4 su un +4, costringendo "
-"il primo giocatore che non può rispondere a pescare la somma di tutte le penalità giocate. "
+"si può giocare un +2 o un +4 in risposta ad un +2, e un +4 su un +4, "
+"costringendo il primo giocatore che non può rispondere a pescare la somma di "
+"tutte le penalità giocate. "
 
 #: data/rbot/plugins/games/uno.rb:823
 msgid ""
 "you can also play a Reverse on a +2 or +4, bouncing the effect back to the "
 "previous player (that now comes next). "
 msgstr ""
-"si può anche giocare un Reverse su un +2 o un +4, rimbalzando l'effetto al giocatore precedente "
-"(che ora viene dopo). "
+"si può anche giocare un Reverse su un +2 o un +4, rimbalzando l'effetto al "
+"giocatore precedente (che ora viene dopo). "
 
 #: data/rbot/plugins/games/uno.rb:826
 msgid ""
 "The points won with a game of %{uno} are totalled from the cards remaining "
 "in the hands of the other players."
 msgstr ""
-"I punti vinti ad una partita di %{uno} si ottengono sommando i punti delle carte rimaste "
-"in mano agli altri giocatori."
+"I punti vinti ad una partita di %{uno} si ottengono sommando i punti delle "
+"carte rimaste in mano agli altri giocatori."
 
 #: data/rbot/plugins/games/uno.rb:827
 msgid ""
 "Each normal (not special) card is worth its face value (from 0 to 9 points)."
 msgstr ""
-"Ogni carta normale (non speciale) vale il proprio valore di facciata (da 0 a 9 punti)."
+"Ogni carta normale (non speciale) vale il proprio valore di facciata (da 0 a "
+"9 punti)."
 
 #: data/rbot/plugins/games/uno.rb:828
 msgid "Each colored special card (+2, Reverse, Skip) is worth 20 points."
@@ -372,14 +378,15 @@ msgid ""
 "For each color (Blue, Green, Red, Yellow) there are 19 numbered cards (from "
 "0 to 9), with two of each number except for 0."
 msgstr ""
-"Per ogni colore (Blue, Green, Red, Yellow) ci sono 19 carte numerate (da "
-"0 a 9), due di ciascun numero tranne per lo 0."
+"Per ogni colore (Blue, Green, Red, Yellow) ci sono 19 carte numerate (da 0 a "
+"9), due di ciascun numero tranne per lo 0."
 
 #: data/rbot/plugins/games/uno.rb:835
 msgid ""
 "There are also 6 special cards for each color, two each of +2, Reverse, Skip."
 msgstr ""
-"Ci sono anche 6 carte speciali per ciascun colore, due ciascuno di +2, Reverse, Skip."
+"Ci sono anche 6 carte speciali per ciascun colore, due ciascuno di +2, "
+"Reverse, Skip."
 
 #: data/rbot/plugins/games/uno.rb:836
 msgid "Finally, there are 4 Wild and 4 Wild +4 cards."
@@ -389,28 +396,29 @@ msgstr "Infine, ci sono 4 Wild e 4 Wild +4."
 msgid ""
 "The game manager (the user that started the game) can execute the following "
 "commands to manage it: "
-msgstr ""
-"L'utente che crea una partita può gestirla con i seguenti comandi: "
+msgstr "L'utente che crea una partita può gestirla con i seguenti comandi: "
 
 #: data/rbot/plugins/games/uno.rb:841
 msgid ""
 "'uno drop <user>' to drop a user from the game (any user can drop itself "
 "using 'uno drop')"
 msgstr ""
-"'uno drop <utente>' per espellere un utente dalla partita (chiunque può abbandonare da sé "
-"usando 'uno drop')"
+"'uno drop <utente>' per espellere un utente dalla partita (chiunque può "
+"abbandonare da sé usando 'uno drop')"
 
 #: data/rbot/plugins/games/uno.rb:842
 msgid ""
 "'uno replace <old> [with] <new>' to replace a player with someone else "
 "(useful in case of disconnects)"
 msgstr ""
-"'uno replace <vecchio> [with] <nuovo>' per rimpiazzare un giocatore con un altro "
-"(utile nel caso di disconnessioni)"
+"'uno replace <vecchio> [with] <nuovo>' per rimpiazzare un giocatore con un "
+"altro (utile nel caso di disconnessioni)"
 
 #: data/rbot/plugins/games/uno.rb:843
 msgid "'uno transfer [to] <nick>' to transfer game ownership to someone else"
-msgstr "'uno transfer [to] <nick>' per trasferire la gestione della partita a qualcun altro"
+msgstr ""
+"'uno transfer [to] <nick>' per trasferire la gestione della partita a "
+"qualcun altro"
 
 #: data/rbot/plugins/games/uno.rb:844
 msgid "'uno end' to end the game before its natural completion"
@@ -421,8 +429,9 @@ msgid ""
 "%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help "
 "uno admin' for admin commands. In-game commands: %{cmds}."
 msgstr ""
-"Gioco di %{uno}. !uno per cominciare una partita. vedi 'help uno rules' per le regole, 'help "
-"uno admin' per i comandi di amministrazione. Comandi di gioco: %{cmds}."
+"Gioco di %{uno}. !uno per cominciare una partita. vedi 'help uno rules' per "
+"le regole, 'help uno admin' per i comandi di amministrazione. Comandi di "
+"gioco: %{cmds}."
 
 #: data/rbot/plugins/games/uno.rb:865
 msgid "you already picked a card"
@@ -447,12 +456,13 @@ msgid ""
 "There is already an %{uno} game running here, managed by %{who}. say 'jo' to "
 "join in"
 msgstr ""
-"C'è già una partita di %{uno} in corso qui, gestita da %{who}. scrivi 'jo' per "
-"partecipare"
+"C'è già una partita di %{uno} in corso qui, gestita da %{who}. scrivi 'jo' "
+"per partecipare"
 
 #: data/rbot/plugins/games/uno.rb:935
 msgid "Ok, created %{uno} game on %{channel}, say 'jo' to join in"
-msgstr "Ok, creata partita di %{uno} in %{channel}, scrivi 'jo' per partecipare"
+msgstr ""
+"Ok, creata partita di %{uno} in %{channel}, scrivi 'jo' per partecipare"
 
 #: data/rbot/plugins/games/uno.rb:943 data/rbot/plugins/games/uno.rb:963
 #: data/rbot/plugins/games/uno.rb:1099 data/rbot/plugins/games/uno.rb:1107
@@ -466,7 +476,9 @@ msgstr "gestione della partita di %{uno} trasferita da %{old} a %{nick}"
 
 #: data/rbot/plugins/games/uno.rb:957
 msgid "who is this %{nick} you want me to transfer game ownership to?"
-msgstr "e chi sarebbe questo %{nick} a cui vuoi che trasferisca la gestione della partita?"
+msgstr ""
+"e chi sarebbe questo %{nick} a cui vuoi che trasferisca la gestione della "
+"partita?"
 
 #: data/rbot/plugins/games/uno.rb:1041
 msgid "%{nf} %{uno} games completed over %{np} games played. "
@@ -548,5 +560,5 @@ msgstr "uh, che tipo di punteggi volevi vedere?"
 msgid ""
 " I can only show the top scores (with top) and the most wins (with topwin)"
 msgstr ""
-" Posso mostrarti solo i migliori punteggi (con top) e il maggior numero di vittorie (con topwin)"
-
+" Posso mostrarti solo i migliori punteggi (con top) e il maggior numero di "
+"vittorie (con topwin)"
