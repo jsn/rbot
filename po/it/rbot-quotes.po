@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
 "POT-Creation-Date: 2008-06-18 16:41+0200\n"
-"PO-Revision-Date: 2007-08-23 17:49+0100\n"
+"PO-Revision-Date: 2008-06-20 01:43+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
 "MIME-Version: 1.0\n"
@@ -15,29 +15,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/quotes.rb:167 data/rbot/plugins/quotes.rb:209
+#: data/rbot/plugins/quotes.rb:167
+#: data/rbot/plugins/quotes.rb:209
 #: data/rbot/plugins/quotes.rb:237
 msgid "[%{num}] %{quote}"
-msgstr ""
+msgstr "[%{num}] %{quote}"
 
-#: data/rbot/plugins/quotes.rb:172 data/rbot/plugins/quotes.rb:186
-#: data/rbot/plugins/quotes.rb:200 data/rbot/plugins/quotes.rb:214
+#: data/rbot/plugins/quotes.rb:172
+#: data/rbot/plugins/quotes.rb:186
+#: data/rbot/plugins/quotes.rb:200
+#: data/rbot/plugins/quotes.rb:214
 #: data/rbot/plugins/quotes.rb:242
 msgid "quote not found!"
-msgstr ""
+msgstr "nessuna citazione trovata!"
 
 #: data/rbot/plugins/quotes.rb:181
 msgid "quote %{num} added by %{source}"
-msgstr ""
+msgstr "citazione %{num} aggiunto da %{source}"
 
 #: data/rbot/plugins/quotes.rb:195
 msgid "quote %{num} added on %{date}"
-msgstr "botuser %{source} rinominato %{dest}"
+msgstr "citazione %{source} aggiunta il %{dest}"
 
 #: data/rbot/plugins/quotes.rb:223
 msgid "%{total} quotes matching %{reg}"
-msgstr ""
+msgstr "%{total} citazioni per %{reg}"
 
 #: data/rbot/plugins/quotes.rb:228
 msgid "%{total} quotes"
-msgstr ""
+msgstr "%{total} citazioni"
+
