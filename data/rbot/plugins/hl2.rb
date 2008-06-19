@@ -47,11 +47,11 @@ class HL2Plugin < Plugin
   def help(plugin, topic="")
     case topic
     when ""
-      return "hl2 'server:port'/'preset name' => show basic information about the given server."
+      return "hl2 'server:port'/'preset name' => show basic information about the given server. See also 'hl2 add' and 'hl2 del'"
     when "add"
       return "hl2 add 'name' 'server:port' => add a preset."
     when "del"
-      return "hl2 del 'name' => remove a present."
+      return "hl2 del 'name' => remove a preset."
     end
   end
 
