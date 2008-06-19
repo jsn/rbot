@@ -4,7 +4,8 @@
 # :title: Half-Life 2 plugin for rbot
 #
 # Author:: Ole Christian Rynning <oc@rynning.no>
-# Copyright:: (C) 2006 Ole Christian Rynning
+# Author:: Andrew Northall <cubehat@gmail.com>
+# Copyright:: (C) 2006 Ole Christian Rynning & Andrew Northall
 # License:: GPL v2
 #
 # Simple Half-Life 2 (Source Engine) plugin to query online
@@ -12,6 +13,10 @@
 #
 # Added 2 seconds timeout to the response. And sockets are now
 # closing properly.
+#
+# Server presets can be added by using 'hl2 add name addr:port'
+# and 'hl2 del name'. Once presets are added they are accessed
+# as 'hl2 name'.
 
 require 'socket'
 require 'timeout'
@@ -40,21 +45,53 @@ class HL2Plugin < Plugin
   end
 
   def help(plugin, topic="")
-    "hl2 'server:port' => show basic information about the given server"
+    case topic
+    when ""
+      return "hl2 'server:port'/'preset name' => show basic information about the given server."
+    when "add"
+      return "hl2 add 'name' 'server:port' => add a preset."
+    when "del"
+      return "hl2 del 'name' => remove a present."
+    end
   end
 
   def hl2(m, params)
     addr, port = params[:conn_str].split(':')
+    if port == nil
+      @registry.each_key do
+        |key|
+        if addr.downcase == key.downcase
+          addr, port = @registry[key]
+        end
+      end
+    end
+    m.reply "invalid server" if port == nil
+    return if port == nil
     info = a2s_info(addr, port)
     if info
-      m.reply "#{info[3]} is online with #{info[8]}/#{info[9]} players."
+      m.reply "#{info[3]} (#{info[6]}): #{info[8]}/#{info[9]} - #{info[4]}"
     else
       m.reply "Couldn't connect to #{params[:conn_str]}"
     end
   end
 
+  def add_server(m, params)
+    @registry[params[:name]] = params[:conn_str].split(':')
+    m.okay
+  end
+
+  def rem_server(m, params)
+    if @registry.has_key?(params[:name]) == false
+      m.reply "but i don't know it!"
+      return
+    end
+    @registry.delete params[:name]
+    m.okay
+  end
 end
 
 plugin = HL2Plugin.new
+plugin.default_auth('edit', false)
 plugin.map 'hl2 :conn_str', :thread => true
-
+plugin.map 'hl2 add :name :conn_str', :thread => true, :action => :add_server, :auth_path => 'edit'
+plugin.map 'hl2 del :name', :thread => true, :action => :rem_server, :auth_path => 'edit'
