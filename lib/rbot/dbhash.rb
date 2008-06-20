@@ -4,7 +4,7 @@
 # :title: Berkeley DB interface
 
 begin
-  require 'bdb-not'
+  require 'bdb'
 rescue LoadError
   fatal "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
 rescue Exception => e
