@@ -52,18 +52,19 @@ class TimePlugin < Plugin
             zone = arr.join( sp )
         }
     
-    TZInfo::Timezone.get( zone ).now
+    tz = TZInfo::Timezone.get( zone )
+    "#{tz.friendly_identifier} - #{tz.now.strftime( '%a %b %d %H:%M' )} #{tz.current_period.abbreviation}"
   end
 
   def showTime(m, params)
     zone = params[:where].join('_')
     if params[:where].size > 0 then
       begin
-        m.reply "#{zone} - #{getTime( m,  zone )}"
+        m.reply getTime( m,  zone )
       rescue TZInfo::InvalidTimezoneIdentifier
         if @registry.has_key?( zone ) then
           zone =  @registry[ zone ]
-          m.reply "#{zone} - #{getTime( m,  zone )}"
+          m.reply getTime( m,  zone )
         else
           m.reply "#{zone} is an unknown time."
         end
@@ -71,7 +72,7 @@ class TimePlugin < Plugin
     else
       if @registry.has_key?( m.sourcenick) then
         zone = @registry[ m.sourcenick ]
-        m.reply "#{m.sourcenick}: #{zone} - #{getTime( m,  zone )}"
+        m.reply "#{m.sourcenick}: #{getTime( m,  zone )}"
       else
         m.reply "#{m.sourcenick}: use time set <Continent/City> to set your timezone."
       end
