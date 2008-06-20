@@ -66,12 +66,18 @@ def rawlog(level, message=nil, who_pos=1)
   $log_queue.push qmsg
 end
 
-def restart_logger(newlogger = false)
+def halt_logger
   if $log_thread && $log_thread.alive?
     $log_queue << nil
     $log_thread.join
     $log_thread = nil
   end
+end
+
+END { halt_logger }
+
+def restart_logger(newlogger = false)
+  halt_logger
 
   $logger = newlogger if newlogger
 
