@@ -35,28 +35,55 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
-desc "Update pot/po files."
-task :updatepo do
-  # ruby-gettext treats empty output from msgmerge as error, causing this task to
-  # fail. we provide a wrapper to work around it. see bin/msgmerge-wrapper.rb for
-  # details
-  ENV['REAL_MSGMERGE_PATH'] = ENV['MSGMERGE_PATH']
-  ENV['MSGMERGE_PATH'] = 'bin/msgmerge-wrapper.rb'
-
+PLUGIN_FILES = FileList['data/rbot/plugins/**/*.rb']
+NON_PLUGIN_FILES = FileList["{lib,bin,data}/**/*.{rb,rhtml}"] - PLUGIN_FILES
+rgettext_proc = proc do |t|
   require 'gettext/utils'
-  plugin_files = Dir.glob('data/rbot/plugins/**/*.rb')
-  # all except plugin files use the rbot textdomain
-  GetText.update_pofiles("rbot",
-    Dir.glob("{lib,bin,data}/**/*.{rb,rhtml}") - plugin_files, "rbot")
-  # each plugin uses its own textdomain
-  plugin_files.each do |f|
-    basename = File.basename(f, '.rb')
-    GetText.update_pofiles("rbot-#{basename}", f, 'rbot')
-  end
+  plugin_files, pot_file = t.prerequisites, t.name
+  GetText.rgettext(plugin_files, pot_file)
 end
 
-desc "Create mo-files"
-task :makemo do
+# generate pot file for non-plugin files
+file('po/rbot.pot' => NON_PLUGIN_FILES, &rgettext_proc)
+
+# generate pot files for plugin files
+rule(%r'^po/.+\.pot$' => proc {|fn|
+  PLUGIN_FILES.select {|f| f.pathmap('rbot-%n') == fn.pathmap('%n')}
+}, &rgettext_proc)
+
+# update po files
+# ruby-gettext treats empty output from msgmerge as error, causing this task to
+# fail. we provide a wrapper to work around it. see bin/msgmerge-wrapper.rb for
+# details
+ENV['REAL_MSGMERGE_PATH'] = ENV['MSGMERGE_PATH']
+ENV['MSGMERGE_PATH'] = 'bin/msgmerge-wrapper.rb'
+rule(%r'^po/.+/.+\.po$' => proc {|fn| fn.pathmap '%{^po/.+/,po/}X.pot'}) do |t|
   require 'gettext/utils'
-  GetText.create_mofiles(true)
+  po_file, pot_file = t.name, t.source
+  GetText.msgmerge po_file, pot_file, 'rbot'
 end
+
+# generate mo files
+rule(%r'^data/locale/.+/LC_MESSAGES/.+\.mo$' => proc {|fn|
+  fn.pathmap '%{^data/locale,po;LC_MESSAGES/,}X.po'
+}) do |t|
+  po_file, mo_file = t.source, t.name
+  require 'gettext/utils'
+  GetText.rmsgfmt po_file, mo_file
+end
+
+PLUGIN_BASENAMES = PLUGIN_FILES.map {|f| f.pathmap('%n')}
+LOCALES = FileList['po/*/'].map {|d| d.pathmap('%n')}
+
+desc 'Update po files'
+task :updatepo => LOCALES.map {|l|
+  ["po/#{l}/rbot.po"] +
+  PLUGIN_BASENAMES.map {|n| "po/#{l}/rbot-#{n}.po"}
+}.flatten
+
+desc 'Generate mo files'
+task :makemo => LOCALES.map {|l|
+  ["data/locale/#{l}/LC_MESSAGES/rbot.mo"] +
+  PLUGIN_BASENAMES.map {|n| "data/locale/#{l}/LC_MESSAGES/rbot-#{n}.mo"}
+}.flatten
+
