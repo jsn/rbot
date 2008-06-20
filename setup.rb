@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #
 # setup.rb
 #
@@ -249,7 +250,7 @@ class ConfigTable
                       'the ruby program using for installation'),
       ProgramItem.new('makeprog', 'name', makeprog,
                       'the make program to compile ruby extentions'),
-      SelectItem.new('shebang', 'all/ruby/never', 'ruby',
+      SelectItem.new('shebang', 'all/ruby/never', 'never',
                      'shebang line (#!) editing mode'),
       BoolItem.new('without-ext', 'yes/no', 'no',
                    'does not compile/install ruby extentions')
