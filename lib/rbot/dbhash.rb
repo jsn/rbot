@@ -1,8 +1,17 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Berkeley DB interface
+
 begin
-  require 'bdb'
+  require 'bdb-not'
+rescue LoadError
+  fatal "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
 rescue Exception => e
-  error "Got exception: #{e.pretty_inspect}"
-  error "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
+  fatal "rbot couldn't load the bdb module: #{e.pretty_inspect}"
+end
+
+if not defined? BDB
   exit 2
 end
 
