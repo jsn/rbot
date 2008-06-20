@@ -94,7 +94,7 @@ if $version =~ /git/
       rev << ")"
     rescue => e
       puts e.inspect
-    end
+    end if File.directory?(File.join(up, '.svn'))
     $version += rev
   end
 end
