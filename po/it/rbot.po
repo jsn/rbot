@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: rbot\n"
 "POT-Creation-Date: 2008-06-20 01:49+0200\n"
 "PO-Revision-Date: 2007-08-23 17:49+0100\n"
-"Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
+"Last-Translator: Feroce Maria Bumerlo <du.demon@tin.it>\n"
 "Language-Team: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,31 +17,31 @@ msgstr ""
 
 #: lib/rbot/core/filters_ui.rb:25
 msgid "no filters in group %{g}"
-msgstr ""
+msgstr "nessun filtro nel gruppo %{g}"
 
 #: lib/rbot/core/filters_ui.rb:27
 msgid "no known filters"
-msgstr ""
+msgstr "nessun filtro conosciuto"
 
 #: lib/rbot/core/filters_ui.rb:30
 msgid "known filters: "
-msgstr ""
+msgstr "filtri conosciuti"
 
 #: lib/rbot/core/filters_ui.rb:38
 msgid "no known filter groups"
-msgstr ""
+msgstr "nessun gruppo di filtri conosciuto"
 
 #: lib/rbot/core/filters_ui.rb:40
 msgid "known filter groups: "
-msgstr ""
+msgstr "gruppi di filtri conosciuti"
 
 #: lib/rbot/core/filters_ui.rb:50
 msgid "no filters match %{pat}"
-msgstr ""
+msgstr "nessun filtro corrispondente a %{pat}"
 
 #: lib/rbot/core/filters_ui.rb:52
 msgid "filters matching %{pat}: "
-msgstr ""
+msgstr "filtri corrispondenti a %{pat}"
 
 #: lib/rbot/core/basics.rb:107
 msgid "quit [<message>] => quit IRC with message <message>"
@@ -55,7 +55,7 @@ msgstr ""
 
 #: lib/rbot/core/basics.rb:113
 msgid "part"
-msgstr ""
+msgstr "esci"
 
 #: lib/rbot/core/basics.rb:115
 msgid "hide => part all channels"
@@ -69,28 +69,30 @@ msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
 msgid ""
 "say <channel>|<nick> <message> => say <message> to <channel> or in private "
 "message to <nick>"
-msgstr ""
-
+msgstr "say <canale>|<nick> <messaggio> => invia <messaggio> nel <canale> o in un"
+"messagio privato a <nick>"
 #: lib/rbot/core/basics.rb:121
 msgid ""
 "action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
 "private message to <nick>"
-msgstr ""
-
+msgstr "action <canale>|<nick> <messaggio> => invia un /me <messaggio> nel <canale> o in"
+"messaggi privato a <nick>"
 #: lib/rbot/core/basics.rb:123
 msgid ""
 "quiet [in here|<channel>] => with no arguments, stop speaking in all "
 "channels, if \"in here\", stop speaking in this channel, or stop speaking in "
 "<channel>"
-msgstr ""
+msgstr "quiet [in here|<canale>] => senza argomenti, smette di parlare in tutti i canali, "
+"se si specifica \"in here\", smette di parlare in questo canale, oppure smette di parlare in <canale>"
 
 #: lib/rbot/core/basics.rb:125
 msgid ""
 "talk [in here|<channel>] => with no arguments, resume speaking in all "
 "channels, if \"in here\", resume speaking in this channel, or resume "
 "speaking in <channel>"
-msgstr ""
-
+msgstr "talk [in here|<canale>] => senza argomenti, ricomincia a parlare in tutti "
+"i canali, se \"in here\", ricomincia a parlare in questo canale, oppure ricomincia "
+"a parlare in <canale>"
 #: lib/rbot/core/basics.rb:127
 msgid "ping => replies with a pong"
 msgstr "ping => risponde con un pong"
@@ -99,14 +101,14 @@ msgstr "ping => risponde con un pong"
 msgid ""
 "mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
 "to <mode>"
-msgstr ""
+msgstr "mode <canale> <mode> <nicks> => imposta i modi del canale per <nicks> nel <canale> "
 
 #: lib/rbot/core/basics.rb:135
 msgid ""
 "%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
 "quiet, talk, ping, mode"
-msgstr ""
-
+msgstr "%{name}: quit, restart, join, part, hide, save, nick, say, action, topic,"
+"quiet, talk, ping, mode"
 #: lib/rbot/core/utils/utils.rb:202
 msgid "year"
 msgstr "anno"
@@ -161,15 +163,15 @@ msgstr " e "
 
 #: lib/rbot/core/userdata.rb:146
 msgid "%{key} data for %{user}: %{data}"
-msgstr ""
+msgstr "%{key} dati for %{user}: %{data}"
 
 #: lib/rbot/core/userdata.rb:152
 msgid "sorry, no %{key} data for %{user}"
-msgstr ""
+msgstr "spiacente, nessun %{key} dato per %{user} "
 
 #: lib/rbot/core/config.rb:18
 msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
-msgstr ""
+msgstr "Sono un rubybot%{copyright}%{url} v. %{version}%{ago}"
 
 #: lib/rbot/core/config.rb:39
 msgid "no such module %{module}"
@@ -183,11 +185,11 @@ msgstr "non esiste una chiave di configurazione %{key}"
 
 #: lib/rbot/core/config.rb:78
 msgid "no config key found matching %{r}"
-msgstr ""
+msgstr "nessuna chiave di configurazione trovata corrispondente a %{r}"
 
 #: lib/rbot/core/config.rb:80
 msgid "possible keys: %{kl}"
-msgstr ""
+msgstr "chiavi possibili: %{kl}"
 
 #: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
 #: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
@@ -235,42 +237,42 @@ msgstr "fatto. %{plugin_status}"
 msgid ""
 "config list => list configuration modules, config list <module> => list "
 "configuration keys for module <module>"
-msgstr ""
-
+msgstr "config list => elenca i moduli di configurazione, config list <modulo> => elenca "
+"le chiavi di configurazione per il <modulo>"
 #: lib/rbot/core/config.rb:222
 msgid "config get <key> => get configuration value for key <key>"
-msgstr ""
+msgstr "config get <key> => restituisce il valore di configurazione per la <chiave>"
 
 #: lib/rbot/core/config.rb:224
 msgid "reset key <key> to the default"
-msgstr ""
+msgstr "ripristina il valore di default di <chiave>"
 
 #: lib/rbot/core/config.rb:226
 msgid ""
 "config set <key> <value> => set configuration value for key <key> to <value>"
 msgstr ""
-
+"config set <key> <valore> => assegna a <chiave> il valore di configurazione <valore>"
 #: lib/rbot/core/config.rb:228
 msgid "config desc <key> => describe what key <key> configures"
-msgstr ""
+msgstr "config desc <chiavey> => descrive cio' che la <chiave> configura"
 
 #: lib/rbot/core/config.rb:230
 msgid ""
 "config add <value> to <key> => add value <value> to key <key> if <key> is an "
 "array"
-msgstr ""
+msgstr "config add <valore> to <chiave> => aggiunge il <valore> alla <chiave> se la <chiave> è un array"
 
 #: lib/rbot/core/config.rb:232
 msgid ""
 "config rm <value> from <key> => remove value <value> from key <key> if <key> "
 "is an array"
-msgstr ""
-
+msgstr "config rm <valore> from <chiave> => rimuove <valore> da <chiave> se <chiave> "
+"e' un array"
 #: lib/rbot/core/config.rb:234
 msgid ""
 "config module - bot configuration. usage: list, desc, get, set, unset, add, "
 "rm"
-msgstr ""
+msgstr "Modulo di configurazione - configurazione del bot. uso: list, desc, get, set, unset, add, "
 
 #: lib/rbot/core/config.rb:239
 msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
@@ -278,15 +280,15 @@ msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
 
 #: lib/rbot/core/config.rb:241
 msgid "status => display some information on the bot's status"
-msgstr ""
+msgstr "status => mostra alcune informazioni circa lo stato del bot"
 
 #: lib/rbot/core/config.rb:243
 msgid "save => save current dynamic data and configuration"
-msgstr ""
+msgstr "save => salva i dati dinamici attuali e la configurazione"
 
 #: lib/rbot/core/config.rb:245
 msgid "rescan => reload modules and static facts"
-msgstr ""
+msgstr "rescan => effettua il reload dei moduli e dei dati statici"
 
 #: lib/rbot/core/config.rb:247
 msgid "version => describes software version"
@@ -294,7 +296,7 @@ msgstr "versione => descrive la versione del software"
 
 #: lib/rbot/core/config.rb:249
 msgid "config-related tasks: config, save, rescan, version, nick, status"
-msgstr ""
+msgstr "config-related tasks: config, save, rescan, version, nick, status"
 
 #: lib/rbot/core/auth.rb:69
 msgid "please do not use + or - in front of command %{command} when resetting"
@@ -363,7 +365,7 @@ msgstr "%{count} comandi trovati corrispondenti a %{pattern}%{extra}"
 
 #: lib/rbot/core/auth.rb:203
 msgid "%{cmd}: %{perms}"
-msgstr ""
+msgstr "%{cmd}: %{perms}"
 
 #: lib/rbot/core/auth.rb:260
 msgid "%{user} can already do that"
@@ -587,15 +589,17 @@ msgid ""
 "allow <user> to do <sample command> [<where>]: gives botuser <user> the "
 "permissions to execute a command such as the provided sample command (in "
 "private or in channel, according to the optional <where>)"
-msgstr ""
-
+msgstr "abilita <utente> ad eseguire <comando d'esempio> [<dove>]: da' all'utente del bot <utente> i "
+"permessi per eseguire un comando come quello fornito come esempio (in "
+"privato o nel canale, a seconda dell'opzione <dove>)"
 #: lib/rbot/core/auth.rb:405
 msgid ""
 "deny <user> from doing <sample command> [<where>]: removes from botuser "
 "<user> the permissions to execute a command such as the provided sample "
 "command (in private or in channel, according to the optional <where>)"
-msgstr ""
-
+msgstr "impedisce all'<utente> di esguir <comando d'esempio> [<dove>]: toglie all'utente del bot <botuser>"
+"i permessi er eseguire un comando come quello fornito come esempio "
+"(in privato o nel canale, a seconda dell'opzione <dove>)"
 #: lib/rbot/core/auth.rb:407
 msgid ""
 "auth commands: auth, login, whoami, who, permission[s], user, meet, hello, "
@@ -704,15 +708,16 @@ msgid ""
 "you are now registered as %{buname}. I created a random password for you : %"
 "{pass} and you can change it at any time by telling me 'user set password "
 "<password>' in private"
-msgstr ""
+msgstr "sei adesso registrato come %{buname}. ho creato una password casuale per te %{pass}."
+"puoi cambiarla in qualsiasi momento scrivendomi 'user set password <password>' in privato "
 
 #: lib/rbot/core/auth.rb:652
 msgid "but I already know %{buname}"
-msgstr ""
+msgstr "ma io conosco gia' %{buname}"
 
 #: lib/rbot/core/auth.rb:654
 msgid "I had problems meeting %{nick}: %{e}"
-msgstr ""
+msgstr "ho problemi a incontrare %{nick}: %{e}"
 
 #: lib/rbot/core/auth.rb:663
 msgid "couldn't find botuser %{user}"
