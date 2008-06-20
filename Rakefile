@@ -56,7 +56,7 @@ rule(%r'^po/.+\.pot$' => proc {|fn|
 # fail. we provide a wrapper to work around it. see bin/msgmerge-wrapper.rb for
 # details
 ENV['REAL_MSGMERGE_PATH'] = ENV['MSGMERGE_PATH']
-ENV['MSGMERGE_PATH'] = 'bin/msgmerge-wrapper.rb'
+ENV['MSGMERGE_PATH'] = ENV['MSGMERGE_WRAPPER_PATH'] || 'ruby msgmerge-wrapper.rb'
 rule(%r'^po/.+/.+\.po$' => proc {|fn| fn.pathmap '%{^po/.+/,po/}X.pot'}) do |t|
   require 'gettext/utils'
   po_file, pot_file = t.name, t.source
