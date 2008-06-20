@@ -10,6 +10,7 @@
 # License:: GPL v2
 
 class GrouphugPlugin < Plugin
+  REG  = Regexp.new('<div class="content">\s*<p>(.*?)</p>\s+</div>', Regexp::MULTILINE)
   def initialize
     super
     @confessions = Array.new
@@ -29,16 +30,14 @@ class GrouphugPlugin < Plugin
         opts.delete(:cache)
         data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
 
-        reg = Regexp.new('<div class="content">.*?<p>(.*?)</p>', Regexp::MULTILINE)
-        res = data.scan(reg)
+        res = data.scan(REG)
         confession = res[0][0].ircify_html
         confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
         m.reply confession
       else # Cache random confessions
         if @confessions.empty?
           data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
-          reg = Regexp.new('<div class="content">.*?<p>(.*?)</p>', Regexp::MULTILINE)
-          res = data.scan(reg)
+          res = data.scan(REG)
           res.each do |quote|
             @confessions << quote[0].ircify_html
           end
