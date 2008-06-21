@@ -165,8 +165,9 @@ class LastFmPlugin < Plugin
     elsif @registry.has_key? ( m.sourcenick ) then
       user = @registry[ m.sourcenick ]
     else
-      m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
-      return
+      # m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
+      # return
+      user = m.sourcenick
     end
     page = nil
     begin
@@ -255,8 +256,9 @@ class LastFmPlugin < Plugin
     elsif @registry.has_key? ( m.sourcenick ) then
       user = @registry[ m.sourcenick ]
     else
-      m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
-      return
+      # m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
+      # return
+      user = m.sourcenick
     end
     begin
       data = @bot.httputil.get("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
