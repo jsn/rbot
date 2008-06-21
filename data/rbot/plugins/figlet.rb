@@ -69,7 +69,7 @@ class FigletPlugin < Plugin
     exec_params = [figlet_path] + @figlet_params + [message]
 
     # run figlet
-    m.reply Utils.safe_exec(*exec_params)
+    m.reply Utils.safe_exec(*exec_params), :max_lines => 0
   end
 
 end
