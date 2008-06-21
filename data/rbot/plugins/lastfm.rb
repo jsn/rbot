@@ -80,7 +80,7 @@ class LastFmPlugin < Plugin
     when :who
       "lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm."
     else
-      "lastfm => show your now playing track at lastfm. lastfm <function> <user> => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album, now"
+      "lastfm => show your now playing track at lastfm. lastfm <function> [<user>] => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album, now, set, who"
     end
   end
 
@@ -249,7 +249,15 @@ class LastFmPlugin < Plugin
   def lastfm(m, params)
     action = params[:action].intern
     action = :neighbours if action == :neighbors
-    user = params[:user]
+    user = nil
+    if params[:user] then
+      user = params[:user].to_s
+    elsif @registry.has_key? ( m.sourcenick ) then
+      user = @registry[ m.sourcenick ]
+    else
+      m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
+      return
+    end
     begin
       data = @bot.httputil.get("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
       m.reply "#{action} for #{user}:"
@@ -275,4 +283,5 @@ plugin.map 'lastfm set *who', :action => :set_user, :thread => true
 plugin.map 'lastfm who *who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
 plugin.map 'lastfm :action *user', :thread => true
+plugin.map 'lastfm :action', :thread => true
 plugin.map 'lastfm', :action => :now_playing, :thread => true
