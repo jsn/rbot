@@ -65,7 +65,9 @@ end
 
 # generate mo files
 rule(%r'^data/locale/.+/LC_MESSAGES/.+\.mo$' => proc {|fn|
-  fn.pathmap '%{^data/locale,po;LC_MESSAGES/,}X.po'
+  [ fn.pathmap('%{^data/locale,po;LC_MESSAGES/,}X.po'), 
+    # the directory is created if not existing
+    fn.pathmap('%d') ]
 }) do |t|
   po_file, mo_file = t.source, t.name
   require 'gettext/utils'
@@ -74,6 +76,10 @@ end
 
 PLUGIN_BASENAMES = PLUGIN_FILES.map {|f| f.pathmap('%n')}
 LOCALES = FileList['po/*/'].map {|d| d.pathmap('%n')}
+
+LOCALES.each do |l|
+  directory "data/locale/#{l}/LC_MESSAGES"
+end
 
 desc 'Update po files'
 task :updatepo => LOCALES.map {|l|
