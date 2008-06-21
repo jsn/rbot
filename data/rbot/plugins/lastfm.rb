@@ -59,8 +59,10 @@ class LastFmPlugin < Plugin
       "lastfm track <name> => show information on track/song <name> from last.fm [not implemented yet]"
     when :album
       "lastfm album <name> => show information on album <name> from last.fm [not implemented yet]"
+    when :now
+      "lastfm now <user> => show the now playing track from last.fm"
     else
-      "lastfm <function> <user> => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album"
+      "lastfm <function> <user> => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album, now"
     end
   end
 
