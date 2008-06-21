@@ -48,6 +48,7 @@ require 'getoptlong'
 require 'fileutils'
 
 $version ||= "0.9.11-git"
+$version_timestamp ||= 0
 $opts = Hash.new
 
 orig_opts = ARGV.dup
