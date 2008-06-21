@@ -5,9 +5,11 @@
 #
 # Author:: Jeremy Voorhis
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
+# Author:: Casey Link <unnamedrambler@gmail.com>
 #
 # Copyright:: (C) 2005 Jeremy Voorhis
 # Copyright:: (C) 2007 Giuseppe Bilotta
+# Copyright:: (C) 2008 Casey Link
 #
 # License:: GPL v2
 
@@ -49,6 +51,18 @@ class LastFmPlugin < Plugin
 
   LASTFM = "http://www.last.fm"
 
+  def initialize
+    super
+    class << @registry
+      def store(val)
+        val
+      end
+      def restore(val)
+        val
+      end
+    end
+  end
+
   def help(plugin, topic="")
     case (topic.intern rescue nil)
     when :event, :events
@@ -60,9 +74,13 @@ class LastFmPlugin < Plugin
     when :album
       "lastfm album <name> => show information on album <name> from last.fm [not implemented yet]"
     when :now
-      "lastfm now <user> => show the now playing track from last.fm"
+      "lastfm now [<user>] => show the now playing track from last.fm"
+    when :set
+      "lastfm set <user> => associate your current irc nick with a last.fm user"
+    when :who
+      "lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm."
     else
-      "lastfm <function> <user> => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album, now"
+      "lastfm => show your now playing track at lastfm. lastfm <function> <user> => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album, now"
     end
   end
 
@@ -141,7 +159,15 @@ class LastFmPlugin < Plugin
 
   def now_playing(m, params)
     opts = { :cache => false }
-    user = params[:who].to_s
+    user = nil
+    if params[:who] then
+      user = params[:who].to_s
+    elsif @registry.has_key? ( m.sourcenick ) then
+      user = @registry[ m.sourcenick ]
+    else
+      m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
+      return
+    end
     page = nil
     begin
       page = @bot.httputil.get("#{LASTFM}/user/#{user}", opts)
@@ -198,6 +224,28 @@ class LastFmPlugin < Plugin
     m.reply "not implemented yet, sorry"
   end
 
+  def set_user(m, params)
+    user = params[:who].to_s
+    nick = m.sourcenick
+    @registry[ nick ] = user
+    m.reply "Ok, I'll remember that #{nick} is #{user} at last.fm"
+  end
+
+  def get_user(m, params)
+    nick = ""
+    if params[:who] then
+      nick = params[:who].to_s
+    else 
+      nick = m.sourcenick
+    end
+    if @registry.has_key?( nick ) then
+      user = @registry[ nick ]
+      m.reply "#{nick} is #{user} at last.fm"
+    else
+      m.reply "Sorry, I don't know who #{nick} is at last.fm"
+    end
+  end
+
   def lastfm(m, params)
     action = params[:action].intern
     action = :neighbours if action == :neighbors
@@ -219,7 +267,12 @@ plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_event, :require
 plugin.map 'lastfm artist *who', :action => :find_artist, :thread => true
 plugin.map 'lastfm group *who', :action => :find_artist, :thread => true
 plugin.map 'lastfm now *who', :action => :now_playing, :thread => true
+plugin.map 'lastfm now', :action => :now_playing, :thread => true
 plugin.map 'lastfm track *dunno', :action => :find_track
 plugin.map 'lastfm song *dunno', :action => :find_track
 plugin.map 'lastfm album *dunno', :action => :find_album
+plugin.map 'lastfm set *who', :action => :set_user, :thread => true
+plugin.map 'lastfm who *who', :action => :get_user, :thread => true
+plugin.map 'lastfm who', :action => :get_user, :thread => true
 plugin.map 'lastfm :action *user', :thread => true
+plugin.map 'lastfm', :action => :now_playing, :thread => true
