@@ -42,7 +42,7 @@ class FigletPlugin < Plugin
     test_figlet
 
     # set the commandline params
-    @figlet_params = ['-k', '-w', MAX_WIDTH.to_s]
+    @figlet_params = ['-k', '-w', MAX_WIDTH.to_s, '-C', 'utf8']
 
     # add the font from DEFAULT_FONTS to the cmdline (if figlet has that font)
     @figlet_params += ['-f', @figlet_font] if @figlet_font
