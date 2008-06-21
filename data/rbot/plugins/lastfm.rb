@@ -137,6 +137,24 @@ class LastFmPlugin < Plugin
     end
   end
 
+  def now_playing(m, params)
+    opts = { :cache => false }
+    user = params[:who].to_s
+    page = nil
+    begin
+      page = @bot.httputil.get("#{LASTFM}/user/#{user}", opts)
+      if page
+        if page.match(/class="nowListening">\s*<td class="subject">\s*<a href="\/music.*?">(.*)<\/a>\s*<\/td/)
+          m.reply "#{user} is jammin to #{$1.ircify_html}"
+        else
+          m.reply "#{user} isn't listening to anything right now."
+        end
+      end
+    rescue
+      m.reply "I had problems getting #{user}'s current info"
+    end
+  end
+
   def find_artist(m, params)
     artist = params[:who].to_s
     page = nil
@@ -198,6 +216,7 @@ plugin.map 'lastfm [:num] event[s] by *who', :action => :find_event, :requiremen
 plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm artist *who', :action => :find_artist, :thread => true
 plugin.map 'lastfm group *who', :action => :find_artist, :thread => true
+plugin.map 'lastfm now *who', :action => :now_playing, :thread => true
 plugin.map 'lastfm track *dunno', :action => :find_track
 plugin.map 'lastfm song *dunno', :action => :find_track
 plugin.map 'lastfm album *dunno', :action => :find_album
