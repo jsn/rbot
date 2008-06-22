@@ -671,6 +671,7 @@ class Bot
     }
     @client[:join] = proc {|data|
       m = JoinMessage.new(self, server, data[:source], data[:channel], data[:message])
+      sendq("MODE #{data[:channel]}", nil, 0) if m.address?
       @plugins.irc_delegate("join", m)
       sendq("WHO #{data[:channel]}", data[:channel], 2) if m.address?
     }
