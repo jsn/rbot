@@ -1289,6 +1289,7 @@ module Irc
           parse_mode(serverstring, argv[1..-1], data)
           handle(:mode, data)
         else
+          warning "Unknown message #{serverstring.inspect}"
           handle(:unknown, data)
         end
 	return # We've processed the numeric reply
