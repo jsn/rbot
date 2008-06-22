@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2008-06-22 12:00+0200\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
@@ -15,956 +15,330 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: lib/rbot/core/filters_ui.rb:25
-msgid "no filters in group %{g}"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:27
-msgid "no known filters"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:30
-msgid "known filters: "
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:38
-msgid "no known filter groups"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:40
-msgid "known filter groups: "
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:50
-msgid "no filters match %{pat}"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:52
-msgid "filters matching %{pat}: "
-msgstr ""
-
-#: lib/rbot/core/basics.rb:107
-msgid "quit [<message>] => quit IRC with message <message>"
-msgstr "quit [<message>] => 講 <message> 並離開 IRC"
-
-#: lib/rbot/core/basics.rb:109
-msgid "restart => completely stop and restart the bot (including reconnect)"
-msgstr "restart => 徹底停止並重新啟動機器人（包括重新連線）"
-
-#: lib/rbot/core/basics.rb:113
-msgid "part"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:115
-msgid "hide => part all channels"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:117
-msgid "nick <nick> => attempt to change nick to <nick>"
-msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
-
-#: lib/rbot/core/basics.rb:119
-msgid ""
-"say <channel>|<nick> <message> => say <message> to <channel> or in private "
-"message to <nick>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:121
-msgid ""
-"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
-"private message to <nick>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:123
-msgid ""
-"quiet [in here|<channel>] => with no arguments, stop speaking in all "
-"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
-"<channel>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:125
-msgid ""
-"talk [in here|<channel>] => with no arguments, resume speaking in all "
-"channels, if \"in here\", resume speaking in this channel, or resume "
-"speaking in <channel>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:127
-msgid "ping => replies with a pong"
-msgstr "ping => 回答 pong"
-
-#: lib/rbot/core/basics.rb:129
-msgid ""
-"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
-"to <mode>"
-msgstr ""
-"mode <channel> <mode> <nicks> => 設定 <nicks> 在 <channel> 頻道的權限為 "
-"<mode>"
-
-#: lib/rbot/core/basics.rb:135
-msgid ""
-"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
-"quiet, talk, ping, mode"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:202
-msgid "year"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:202
-msgid "years"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:204
-msgid "month"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:204
-msgid "months"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:206
-msgid "day"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:206
-msgid "days"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:208
-msgid "hour"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:208
-msgid "hours"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:210
-msgid "minute"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:210
-msgid "minutes"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:212
-msgid "second"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:212
-msgid "seconds"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:219
-msgid " and "
-msgstr ""
-
-#: lib/rbot/core/userdata.rb:146
-msgid "%{key} data for %{user}: %{data}"
-msgstr ""
-
-#: lib/rbot/core/userdata.rb:152
-msgid "sorry, no %{key} data for %{user}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:18
-msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:39
-msgid "no such module %{module}"
-msgstr "沒有 %{module} 模組"
-
-#: lib/rbot/core/config.rb:55 lib/rbot/core/config.rb:66
-#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:101
-#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:150
-msgid "no such config key %{key}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:78
-msgid "no config key found matching %{r}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:80
-msgid "possible keys: %{kl}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
-#: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
-msgid "this config change will take effect on the next restart"
-msgstr ""
-
-#: lib/rbot/core/config.rb:94 lib/rbot/core/config.rb:115
-#: lib/rbot/core/config.rb:143 lib/rbot/core/config.rb:166
-msgid "this config change will take effect on the next rescan"
-msgstr ""
-
-#: lib/rbot/core/config.rb:108
-msgid "failed to set %{key}: %{error}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:154
-msgid "config key %{key} is not an array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:138
-msgid "failed to add %{value} to %{key}: %{error}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:161
-msgid "failed to remove %{value} from %{key}: %{error}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:175
-msgid "saving ..."
-msgstr "正在儲存 ..."
-
-#: lib/rbot/core/config.rb:177
-msgid "rescanning ..."
-msgstr "正在重新掃描 ..."
-
-#: lib/rbot/core/config.rb:179
-msgid "done. %{plugin_status}"
-msgstr "完成。%{plugin_status}"
-
-#: lib/rbot/core/config.rb:220
-msgid ""
-"config list => list configuration modules, config list <module> => list "
-"configuration keys for module <module>"
-msgstr ""
-"config list => 列出可設定模組, config list <module> => 列出 <module> 模組的可"
-"設定參數"
-
-#: lib/rbot/core/config.rb:222
-msgid "config get <key> => get configuration value for key <key>"
-msgstr "config get <key> => 取得 <key> 的設定值"
-
-#: lib/rbot/core/config.rb:224
-msgid "reset key <key> to the default"
-msgstr "重設 <key> 回預設值"
-
-#: lib/rbot/core/config.rb:226
-msgid ""
-"config set <key> <value> => set configuration value for key <key> to <value>"
-msgstr "config set <key> <value> => 設定參數 <key> 的數值為 <value>"
-
-#: lib/rbot/core/config.rb:228
-msgid "config desc <key> => describe what key <key> configures"
-msgstr "config desc <key> => 描述參數 <key> 的功用"
-
-#: lib/rbot/core/config.rb:230
-msgid ""
-"config add <value> to <key> => add value <value> to key <key> if <key> is an "
-"array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:232
-msgid ""
-"config rm <value> from <key> => remove value <value> from key <key> if <key> "
-"is an array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:234
-msgid ""
-"config module - bot configuration. usage: list, desc, get, set, unset, add, "
-"rm"
-msgstr "config 模組 - 機器人設定。用法: list, desc, get, set, unset, add, "
-
-#: lib/rbot/core/config.rb:239
-msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
-msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
-
-#: lib/rbot/core/config.rb:241
-msgid "status => display some information on the bot's status"
-msgstr ""
-
-#: lib/rbot/core/config.rb:243
-msgid "save => save current dynamic data and configuration"
-msgstr "save => 儲存目前動態資料與設定"
-
-#: lib/rbot/core/config.rb:245
-msgid "rescan => reload modules and static facts"
-msgstr "rescan => 重新載入模組與靜態論據"
-
-#: lib/rbot/core/config.rb:247
-msgid "version => describes software version"
-msgstr "version => 描述軟體版本"
-
-#: lib/rbot/core/config.rb:249
-msgid "config-related tasks: config, save, rescan, version, nick, status"
-msgstr "設定相關任務: config, save, rescan"
-
-#: lib/rbot/core/auth.rb:69
-msgid "please do not use + or - in front of command %{command} when resetting"
-msgstr "請勿在重設的時候，在 #{command} 前面使用 + 或 -"
-
-#: lib/rbot/core/auth.rb:71
-msgid "+ or - expected in front of %{string}"
-msgstr "%{string} 前面應該有 + 或 -"
-
-#: lib/rbot/core/auth.rb:84
-msgid "'%{string}' doesn't look like a channel name"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:93
-msgid "trailing comma"
-msgstr "結尾有逗點"
-
-#: lib/rbot/core/auth.rb:94
-msgid "you probably forgot a comma"
-msgstr "你也許忘了一個逗點"
-
-#: lib/rbot/core/auth.rb:109 lib/rbot/core/auth.rb:163
-#: lib/rbot/core/auth.rb:229
-msgid "couldn't find botuser %{name}"
-msgstr "無法找到使用者 ${name}"
-
-#: lib/rbot/core/auth.rb:111
-msgid "you can't change permissions for %{username}"
-msgstr "你無法替 ${username} 改變權限"
-
-#: lib/rbot/core/auth.rb:118
-msgid "couldn't satisfy your request: %{errors}"
-msgstr "無法滿足你的要求: %{errors}"
-
-#: lib/rbot/core/auth.rb:157
-msgid "you are owner, you can do anything"
-msgstr "你是擁有者，你可以做任何事"
-
-#: lib/rbot/core/auth.rb:160
-msgid "owner can do anything"
-msgstr "擁有者可以做任何事"
-
-#: lib/rbot/core/auth.rb:171
-msgid "on any channel: "
-msgstr "在任何頻道: "
-
-#: lib/rbot/core/auth.rb:173
-msgid "in private: "
-msgstr "在私人頻道:"
-
-#: lib/rbot/core/auth.rb:185
-msgid "no permissions set for %{user}"
-msgstr "沒有為 ${user} 設定權限"
-
-#: lib/rbot/core/auth.rb:187
-msgid "permissions for %{user}:: %{permissions}"
-msgstr "${user} 的權限:: ${permission}"
-
-#: lib/rbot/core/auth.rb:197
-msgid ". only %{max} will be shown"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:198
-msgid "%{count} commands found matching %{pattern}%{extra}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:203
-msgid "%{cmd}: %{perms}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:260
-msgid "%{user} can already do that"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:262
-msgid "%{user} can't do that already"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:272
-msgid ""
-"sorry, %{cmd} doesn't look like a valid command. maybe you misspelled it, or "
-"you need to specify it should be in private?"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:295
-msgid "welcome, %{user}"
-msgstr "歡迎，%{user}"
-
-#: lib/rbot/core/auth.rb:310
-msgid "sorry, can't do"
-msgstr "抱歉，辦不到"
-
-#: lib/rbot/core/auth.rb:313
-msgid "couldn't login: %{exception}"
-msgstr "無法登入: %{exception}"
-
-#: lib/rbot/core/auth.rb:321
-msgid "I couldn't find anything to let you login automatically"
-msgstr "我不知道有什麼辦法可以讓你自動登入"
-
-#: lib/rbot/core/auth.rb:332
-msgid "you are %{who}"
-msgstr "你是%{who}"
-
-#: lib/rbot/core/auth.rb:334 lib/rbot/core/auth.rb:347
-msgid "no one that I know"
-msgstr "我不認識認識的人"
-
-#: lib/rbot/core/auth.rb:335 lib/rbot/core/auth.rb:348
-msgid "my boss"
-msgstr "我老大"
-
-#: lib/rbot/core/auth.rb:355
-msgid ""
-"login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with "
-"password <pass>. When using the full form, you must contact the bot in "
-"private. <pass> can be omitted if <botuser> allows login-by-mask and your "
-"netmask is among the known ones. if <botuser> is omitted too autologin will "
-"be attempted"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:357
-msgid "whoami: names the botuser you're linked to"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:359
-msgid "who is <user>: names the botuser <user> is linked to"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:363
-msgid ""
-"a permission is specified as module::path::to::cmd; when you want to enable "
-"it, prefix it with +; when you want to disable it, prefix it with -; when "
-"using the +reset+ command, do not use any prefix"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:365
-msgid ""
-"permissions [re]set <permission> [in <channel>] for <user>: sets or resets "
-"the permissions for botuser <user> in channel <channel> (use ? to change the "
-"permissions for private addressing)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:367
-msgid "permissions view [for <user>]: display the permissions for user <user>"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:369
-msgid ""
-"permissions search <pattern>: display the permissions associated with the "
-"commands matching <pattern>"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:371
-msgid "permission topics: syntax, (re)set, view, search"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:376
-msgid ""
-"user show <what> : shows info about the user; <what> can be any of "
-"autologin, login-by-mask, netmasks"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:378
-msgid ""
-"user enable|disable <what> : turns on or off <what> (autologin, login-by-"
-"mask)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:380
-msgid ""
-"user set password <blah> : sets the user password to <blah>; passwords can "
-"only contain upper and lowercase letters and numbers, and must be at least 4 "
-"characters long"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:382
-msgid ""
-"user add|rm netmask <mask> : adds/removes netmask <mask> from the list of "
-"netmasks known to the botuser you're linked to"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:384
-msgid ""
-"user reset <what> : resets <what> to the default values. <what> can be "
-"+netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will "
-"be reset to the default value) or +password+ (a new one will be generated "
-"and you'll be told in private)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:386
-msgid ""
-"user tell <who> the password for <botuser> : contacts <who> in private to "
-"tell him/her the password for <botuser>"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:388
-msgid ""
-"user create <name> <password> : create botuser named <name> with password "
-"<password>. The password can be omitted, in which case a random one will be "
-"generated. The <name> should only contain alphanumeric characters and the "
-"underscore (_)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:390
-msgid "user list : lists all the botusers"
-msgstr "user list : 列出所有使用者"
-
-#: lib/rbot/core/auth.rb:392
-msgid ""
-"user destroy <botuser> : destroys <botuser>. This function %{highlight}must%"
-"{highlight} be called in two steps. On the first call <botuser> is queued "
-"for destruction. On the second call, which must be in the form 'user confirm "
-"destroy <botuser>', the botuser will be destroyed. If you want to cancel the "
-"destruction, issue the command 'user cancel destroy <botuser>'"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:394
-msgid ""
-"user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, "
-"list, destroy"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:397
-msgid ""
-"auth <masterpassword>: log in as the bot owner; other commands: login, "
-"whoami, permissions syntax, permissions [re]set, permissions view, user, "
-"meet, hello, allow, prevent"
-msgstr ""
-"auth <masterpassword>: 登入成為機器人擁有者; 其他指令: login, whoami, "
-"permission syntax, permissions [re]set, permissions view, user"
-
-#: lib/rbot/core/auth.rb:399
-msgid ""
-"meet <nick> [as <user>]: creates a bot user for nick, calling it user "
-"(defaults to the nick itself)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:401
-msgid "hello: creates a bot user for the person issuing the command"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:403
-msgid ""
-"allow <user> to do <sample command> [<where>]: gives botuser <user> the "
-"permissions to execute a command such as the provided sample command (in "
-"private or in channel, according to the optional <where>)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:405
-msgid ""
-"deny <user> from doing <sample command> [<where>]: removes from botuser "
-"<user> the permissions to execute a command such as the provided sample "
-"command (in private or in channel, according to the optional <where>)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:407
-msgid ""
-"auth commands: auth, login, whoami, who, permission[s], user, meet, hello, "
-"allow, deny"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:412
-msgid "sorry, I need more arguments to %{command}"
-msgstr "抱歉，我需要更多參數來執行 %{command}"
-
-#: lib/rbot/core/auth.rb:416
-msgid "I can only %{command} these: %{arguments}"
-msgstr "我只能用這些參數執行 %{command}: %{argument}"
-
-#: lib/rbot/core/auth.rb:451
-msgid "no such bot user %{user}"
-msgstr "已建立使用者 %{user}"
-
-#: lib/rbot/core/auth.rb:454
-msgid "you can't mess with %{user}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:466
-msgid "you can't see the properties of %{user}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:475
-msgid "no way I'm telling you the master password!"
-msgstr "我不會告訴你密碼的！"
-
-#: lib/rbot/core/auth.rb:476
-msgid "you can't ask for someone else's password"
-msgstr "你不能詢問其他人的密碼"
-
-#: lib/rbot/core/auth.rb:478
-msgid ""
-"c'mon, you can't be asking me seriously to tell you the password in public!"
-msgstr "別鬧了，你不是真的要我在公開場合講出密碼吧！"
-
-#: lib/rbot/core/auth.rb:479
-msgid "the password for %{user} is %{password}"
-msgstr "%{user} 的密碼是 %{password}"
-
-#: lib/rbot/core/auth.rb:493
-msgid "can %{action}"
-msgstr "能 %{action}"
-
-#: lib/rbot/core/auth.rb:495
-msgid "can not %{action}"
-msgstr "不能 %{action}"
-
-#: lib/rbot/core/auth.rb:499
-msgid "knows no netmasks"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:501
-msgid "knows %{netmasks}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:508 lib/rbot/core/auth.rb:535
-#: lib/rbot/core/auth.rb:553 lib/rbot/core/auth.rb:585
-msgid "you can't change the default user"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:509 lib/rbot/core/auth.rb:537
-#: lib/rbot/core/auth.rb:555 lib/rbot/core/auth.rb:587
-msgid "you can't edit %{user}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:524 lib/rbot/core/auth.rb:571
-msgid "I ignored %{things} because %{reason}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:528 lib/rbot/core/auth.rb:575
-msgid "I haven't changed anything"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:546
-msgid "is that a joke? setting the password in public?"
-msgstr "這是個玩笑嗎？在公開場合設定密碼？"
-
-#: lib/rbot/core/auth.rb:578
-msgid "the password for %{user} is now %{password}"
-msgstr "%{user} 的密碼已經是 %{password}"
-
-#: lib/rbot/core/auth.rb:592
-msgid ""
-"I can only add/remove netmasks. See +help user add+ for more instructions"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:613
-msgid "sorry, I don't know how to %{request}"
-msgstr "抱歉，我不知道如何 %{request}"
-
-#: lib/rbot/core/auth.rb:616
-msgid "couldn't %{cmd}: %{exception}"
-msgstr "無法登入: %{exception}"
-
-#: lib/rbot/core/auth.rb:645
-msgid ""
-"you are now registered as %{buname}. I created a random password for you : %"
-"{pass} and you can change it at any time by telling me 'user set password "
-"<password>' in private"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:652
-msgid "but I already know %{buname}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:654
-msgid "I had problems meeting %{nick}: %{e}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:663
-msgid "couldn't find botuser %{user}"
-msgstr "找不到使用者 %{user}"
-
-#: lib/rbot/core/auth.rb:665
-msgid "I'm not telling the master password to anyone, pal"
-msgstr "我怎麼樣都不會說出密碼的"
-
-#: lib/rbot/core/auth.rb:666
-msgid "the password for botuser %{user} is %{password}"
-msgstr "使用者 %{user} 的密碼是 %{password}"
-
-#: lib/rbot/core/auth.rb:669
-msgid "I told %{user} that %{message}"
-msgstr "我告訴 %{user} 關於 %{message}"
-
-#: lib/rbot/core/auth.rb:675
-msgid "are you nuts, creating a botuser with a publicly known password?"
-msgstr "你瘋了嗎？用誰都曉得的密碼建立使用者？"
-
-#: lib/rbot/core/auth.rb:680
-msgid "failed to create %{user}: %{exception}"
-msgstr "無法建立 %{user}: %{exception}"
-
-#: lib/rbot/core/auth.rb:684
-msgid "created botuser %{user}"
-msgstr "已建立使用者 %{user}"
-
-#: lib/rbot/core/auth.rb:692
-msgid " (queued for destruction)"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:695
-msgid "I have no botusers other than the default ones"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:696
-msgid "botuser: %{list}"
-msgid_plural "botusers: %{list}"
-msgstr[0] "使用者: %{list}"
-
-#: lib/rbot/core/auth.rb:703
-msgid "You can't destroy %{user}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:713
-msgid "no such botuser %{user}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:720
-msgid "%{user} removed from the destruction queue"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:722
-msgid "%{user} was not queued for destruction"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:727
-msgid ""
-"%{user} already queued for destruction, use %{highlight}user confirm destroy "
-"%{user}%{highlight} to destroy it"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:730
-msgid ""
-"%{user} queued for destruction, use %{highlight}user confirm destroy %{user}%"
-"{highlight} to destroy it"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:734
-msgid "%{user} is not queued for destruction yet"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:743 lib/rbot/core/auth.rb:783
-msgid "failed: %{exception}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:745
-msgid "botuser %{user} destroyed"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:752
-msgid "please don't touch the default users"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:761
-msgid "no such botuser %{source}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:763
-msgid "botuser %{dest} exists already"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:786
-msgid "botuser %{source} copied to %{dest}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:789
-msgid "botuser %{source} renamed to %{dest}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:809
-msgid "selecting data to export ..."
-msgstr ""
-
-#: lib/rbot/core/auth.rb:825
-msgid "preparing data for export ..."
-msgstr ""
-
-#: lib/rbot/core/auth.rb:848
-msgid "failed to prepare data: %{exception}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:853
-msgid "exporting to %{file} ..."
-msgstr ""
-
-#: lib/rbot/core/auth.rb:860
-msgid "failed to export users: %{exception}"
-msgstr ""
-
-#: lib/rbot/core/auth.rb:864 lib/rbot/core/auth.rb:942
-msgid "done"
-msgstr "完成"
-
-#: lib/rbot/core/auth.rb:881
-msgid "reading %{file} ..."
-msgstr "讀取 %{file} ..."
-
-#: lib/rbot/core/auth.rb:885
-msgid "failed to import from: %{exception}"
-msgstr "載入失敗: %{exception}"
-
-#: lib/rbot/core/auth.rb:892
-msgid "selecting data to import ..."
-msgstr "選擇資料以載入 ..."
-
-#: lib/rbot/core/auth.rb:902
-msgid "parsing data from import ..."
-msgstr "分析載入資料 ..."
-
-#: lib/rbot/core/auth.rb:922
-msgid "failed to parse data: %{exception}"
-msgstr "分析資料失敗: %{excaption}"
-
-#: lib/rbot/botuser.rb:40
-msgid "Password for the bot owner"
-msgstr "機器人擁有者的密碼"
-
-#: lib/rbot/botuser.rb:43
-msgid ""
-"Set false to prevent new botusers from logging in without a password when "
-"the user netmask is known"
-msgstr ""
-"設定為 false 可以避免新使用者們如果符合使用者遮罩(user mask)，就不需要密碼也"
-"能登入"
-
-#: lib/rbot/botuser.rb:46
-msgid ""
-"Set false to prevent new botusers from recognizing IRC users without a need "
-"to manually login"
-msgstr ""
-"Set false to prevent new botusers from recognizing IRC users without a need "
-"to manually login"
-
-#: lib/rbot/botuser.rb:49
-msgid "Set true to allow new botusers to be created automatically"
-msgstr ""
-
-#: lib/rbot/botuser.rb:913
-msgid "%{user}, you don't have '%{command}' permissions here"
-msgstr "%{user}，你並沒有 '%{command}' 權限"
-
-#: lib/rbot/ircbot.rb:1176
-msgid "help topics: "
-msgstr ""
-
-#: lib/rbot/ircbot.rb:1178
-msgid " (help <topic> for more info)"
-msgstr ""
-
-#: lib/rbot/ircbot.rb:1181
-msgid "no help for topic %{topic}"
-msgstr ""
-
-#: lib/rbot/ircbot.rb:1192
-msgid ""
-"Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
-msgstr ""
-
-#: lib/rbot/plugins.rb:341
-msgid "incorrect usage, ask for help using '%{command}'"
-msgstr "用法錯誤，請用 %{command} 尋求協助"
-
-#: lib/rbot/plugins.rb:665
-msgid "%{count} core module loaded"
-msgid_plural "%{count} core modules loaded"
-msgstr[0] "%{count} 個核心模組已載入"
-
-#: lib/rbot/plugins.rb:668
-msgid "%{count} core module: %{list}"
-msgid_plural "%{count} core modules: %{list}"
-msgstr[0] "%{count} 個核心模組: %{list}"
-
-#: lib/rbot/plugins.rb:674
-msgid "no core botmodules loaded"
-msgstr "未載入任何核心模組"
-
-#: lib/rbot/plugins.rb:679
-msgid "%{count} plugin loaded"
-msgid_plural "%{count} plugins loaded"
-msgstr[0] "%{count} 個外掛程式已載入"
-
-#: lib/rbot/plugins.rb:682
-msgid "%{count} plugin: %{list}"
-msgid_plural "%{count} plugins: %{list}"
-msgstr[0] "%{count} 個外掛程式: %{list}"
-
-#: lib/rbot/plugins.rb:693
-msgid "%{highlight}%{count} plugin ignored%{highlight}"
-msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
-msgstr[0] "%{highlight}%{count} 個外掛程式被忽略%{highlight}"
-
-#: lib/rbot/plugins.rb:698
-msgid ""
-"%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
-"{bold} to see why"
-msgid_plural ""
-"%{highlight}%{count} plugins ignored%{highlight}: use %{bold}%{command}%"
-"{bold} to see why"
-msgstr[0] ""
-"%{highlight}%{count} 個外掛程式被忽略%{highlight}: 執行 %{bold}%{command}%"
-"{bold} 以瞭解原因"
-
-#: lib/rbot/plugins.rb:708
-msgid "%{highlight}%{count} plugin failed to load%{highlight}"
-msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
-msgstr[0] "%{highlight}%{count} 個外掛程式載入失敗%{highlight}"
-
-#: lib/rbot/plugins.rb:713
-msgid ""
-"%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
-"{command}%{bold} to see why"
-msgid_plural ""
-"%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%"
-"{command}%{bold} to see why"
-msgstr[0] ""
-"%{highlight}%{count} 個外掛程式載入失敗%{highlight}: 執行 %{bold}%{command}%"
-"{bold} 以瞭解原因"
-
-#: lib/rbot/plugins.rb:743
-msgid "no plugins failed to load"
-msgstr "沒有外掛程式載入失敗"
-
-#: lib/rbot/plugins.rb:745
-msgid ""
-"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
-"{reason}"
-msgstr ""
-"%{dir} 的 %{highlight}%{plugin}%{highlight} 外掛程式發生錯誤 %{exception}: %"
-"{reason}"
-
-#: lib/rbot/plugins.rb:749
-msgid "at %{backtrace}"
-msgstr ""
-
-#: lib/rbot/plugins.rb:755
-msgid "no plugins were ignored"
-msgstr "沒有外掛程式被忽略"
-
-#: lib/rbot/plugins.rb:759
-msgid "overruled by previous"
-msgstr "已被前者取代"
-
-#: lib/rbot/registry.rb:20
-msgid ""
-"upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
-msgstr ""
-
-#: lib/rbot/registry.rb:40
-msgid ""
-"upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
-"format"
-msgstr ""
-
-#: lib/rbot/registry.rb:190
-msgid "marshal recovery failed, trying default"
-msgstr ""
-
-#: lib/rbot/config.rb:217
-msgid "%{desc} [valid values are: %{values}]"
-msgstr "%{desc} [符合規定的值為: %{values}]"
-
-#: lib/rbot/config.rb:352
-msgid "First time rbot configuration wizard"
-msgstr "首次使用 rbot 設定精靈"
-
-#: lib/rbot/config.rb:355
-msgid "This wizard will ask you a few questions to get you started."
-msgstr "這個設定精靈會透過一些問句來協助你開始使用。"
-
-#: lib/rbot/config.rb:356
-msgid ""
-"The rest of rbot's configuration can be manipulated via IRC once rbot is "
-"connected and you are auth'd."
-msgstr "一旦機器人連上 IRC，只要你認證成功，就可以修改其餘的設定。"
+#~ msgid "quit [<message>] => quit IRC with message <message>"
+#~ msgstr "quit [<message>] => 講 <message> 並離開 IRC"
+
+#~ msgid "restart => completely stop and restart the bot (including reconnect)"
+#~ msgstr "restart => 徹底停止並重新啟動機器人（包括重新連線）"
+
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+
+#~ msgid "ping => replies with a pong"
+#~ msgstr "ping => 回答 pong"
+
+#~ msgid ""
+#~ "mode <channel> <mode> <nicks> => set channel modes for <nicks> on "
+#~ "<channel> to <mode>"
+#~ msgstr ""
+#~ "mode <channel> <mode> <nicks> => 設定 <nicks> 在 <channel> 頻道的權限為 "
+#~ "<mode>"
+
+#~ msgid "no such module %{module}"
+#~ msgstr "沒有 %{module} 模組"
+
+#~ msgid "saving ..."
+#~ msgstr "正在儲存 ..."
+
+#~ msgid "rescanning ..."
+#~ msgstr "正在重新掃描 ..."
+
+#~ msgid "done. %{plugin_status}"
+#~ msgstr "完成。%{plugin_status}"
+
+#~ msgid ""
+#~ "config list => list configuration modules, config list <module> => list "
+#~ "configuration keys for module <module>"
+#~ msgstr ""
+#~ "config list => 列出可設定模組, config list <module> => 列出 <module> 模組"
+#~ "的可設定參數"
+
+#~ msgid "config get <key> => get configuration value for key <key>"
+#~ msgstr "config get <key> => 取得 <key> 的設定值"
+
+#~ msgid "reset key <key> to the default"
+#~ msgstr "重設 <key> 回預設值"
+
+#~ msgid ""
+#~ "config set <key> <value> => set configuration value for key <key> to "
+#~ "<value>"
+#~ msgstr "config set <key> <value> => 設定參數 <key> 的數值為 <value>"
+
+#~ msgid "config desc <key> => describe what key <key> configures"
+#~ msgstr "config desc <key> => 描述參數 <key> 的功用"
+
+#~ msgid ""
+#~ "config module - bot configuration. usage: list, desc, get, set, unset, "
+#~ "add, rm"
+#~ msgstr "config 模組 - 機器人設定。用法: list, desc, get, set, unset, add, "
+
+#~ msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
+#~ msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+
+#~ msgid "save => save current dynamic data and configuration"
+#~ msgstr "save => 儲存目前動態資料與設定"
+
+#~ msgid "rescan => reload modules and static facts"
+#~ msgstr "rescan => 重新載入模組與靜態論據"
+
+#~ msgid "version => describes software version"
+#~ msgstr "version => 描述軟體版本"
+
+#~ msgid "config-related tasks: config, save, rescan, version, nick, status"
+#~ msgstr "設定相關任務: config, save, rescan"
+
+#~ msgid ""
+#~ "please do not use + or - in front of command %{command} when resetting"
+#~ msgstr "請勿在重設的時候，在 #{command} 前面使用 + 或 -"
+
+#~ msgid "+ or - expected in front of %{string}"
+#~ msgstr "%{string} 前面應該有 + 或 -"
+
+#~ msgid "trailing comma"
+#~ msgstr "結尾有逗點"
+
+#~ msgid "you probably forgot a comma"
+#~ msgstr "你也許忘了一個逗點"
+
+#~ msgid "couldn't find botuser %{name}"
+#~ msgstr "無法找到使用者 ${name}"
+
+#~ msgid "you can't change permissions for %{username}"
+#~ msgstr "你無法替 ${username} 改變權限"
+
+#~ msgid "couldn't satisfy your request: %{errors}"
+#~ msgstr "無法滿足你的要求: %{errors}"
+
+#~ msgid "you are owner, you can do anything"
+#~ msgstr "你是擁有者，你可以做任何事"
+
+#~ msgid "owner can do anything"
+#~ msgstr "擁有者可以做任何事"
+
+#~ msgid "on any channel: "
+#~ msgstr "在任何頻道: "
+
+#~ msgid "in private: "
+#~ msgstr "在私人頻道:"
+
+#~ msgid "no permissions set for %{user}"
+#~ msgstr "沒有為 ${user} 設定權限"
+
+#~ msgid "permissions for %{user}:: %{permissions}"
+#~ msgstr "${user} 的權限:: ${permission}"
+
+#~ msgid "welcome, %{user}"
+#~ msgstr "歡迎，%{user}"
+
+#~ msgid "sorry, can't do"
+#~ msgstr "抱歉，辦不到"
+
+#~ msgid "couldn't login: %{exception}"
+#~ msgstr "無法登入: %{exception}"
+
+#~ msgid "I couldn't find anything to let you login automatically"
+#~ msgstr "我不知道有什麼辦法可以讓你自動登入"
+
+#~ msgid "you are %{who}"
+#~ msgstr "你是%{who}"
+
+#~ msgid "no one that I know"
+#~ msgstr "我不認識認識的人"
+
+#~ msgid "my boss"
+#~ msgstr "我老大"
+
+#~ msgid "user list : lists all the botusers"
+#~ msgstr "user list : 列出所有使用者"
+
+#~ msgid ""
+#~ "auth <masterpassword>: log in as the bot owner; other commands: login, "
+#~ "whoami, permissions syntax, permissions [re]set, permissions view, user, "
+#~ "meet, hello, allow, prevent"
+#~ msgstr ""
+#~ "auth <masterpassword>: 登入成為機器人擁有者; 其他指令: login, whoami, "
+#~ "permission syntax, permissions [re]set, permissions view, user"
+
+#~ msgid "sorry, I need more arguments to %{command}"
+#~ msgstr "抱歉，我需要更多參數來執行 %{command}"
+
+#~ msgid "I can only %{command} these: %{arguments}"
+#~ msgstr "我只能用這些參數執行 %{command}: %{argument}"
+
+#~ msgid "no such bot user %{user}"
+#~ msgstr "已建立使用者 %{user}"
+
+#~ msgid "no way I'm telling you the master password!"
+#~ msgstr "我不會告訴你密碼的！"
+
+#~ msgid "you can't ask for someone else's password"
+#~ msgstr "你不能詢問其他人的密碼"
+
+#~ msgid ""
+#~ "c'mon, you can't be asking me seriously to tell you the password in "
+#~ "public!"
+#~ msgstr "別鬧了，你不是真的要我在公開場合講出密碼吧！"
+
+#~ msgid "the password for %{user} is %{password}"
+#~ msgstr "%{user} 的密碼是 %{password}"
+
+#~ msgid "can %{action}"
+#~ msgstr "能 %{action}"
+
+#~ msgid "can not %{action}"
+#~ msgstr "不能 %{action}"
+
+#~ msgid "is that a joke? setting the password in public?"
+#~ msgstr "這是個玩笑嗎？在公開場合設定密碼？"
+
+#~ msgid "the password for %{user} is now %{password}"
+#~ msgstr "%{user} 的密碼已經是 %{password}"
+
+#~ msgid "sorry, I don't know how to %{request}"
+#~ msgstr "抱歉，我不知道如何 %{request}"
+
+#~ msgid "couldn't %{cmd}: %{exception}"
+#~ msgstr "無法登入: %{exception}"
+
+#~ msgid "couldn't find botuser %{user}"
+#~ msgstr "找不到使用者 %{user}"
+
+#~ msgid "I'm not telling the master password to anyone, pal"
+#~ msgstr "我怎麼樣都不會說出密碼的"
+
+#~ msgid "the password for botuser %{user} is %{password}"
+#~ msgstr "使用者 %{user} 的密碼是 %{password}"
+
+#~ msgid "I told %{user} that %{message}"
+#~ msgstr "我告訴 %{user} 關於 %{message}"
+
+#~ msgid "are you nuts, creating a botuser with a publicly known password?"
+#~ msgstr "你瘋了嗎？用誰都曉得的密碼建立使用者？"
+
+#~ msgid "failed to create %{user}: %{exception}"
+#~ msgstr "無法建立 %{user}: %{exception}"
+
+#~ msgid "created botuser %{user}"
+#~ msgstr "已建立使用者 %{user}"
+
+#~ msgid "botuser: %{list}"
+#~ msgid_plural "botusers: %{list}"
+#~ msgstr[0] "使用者: %{list}"
+
+#~ msgid "done"
+#~ msgstr "完成"
+
+#~ msgid "reading %{file} ..."
+#~ msgstr "讀取 %{file} ..."
+
+#~ msgid "failed to import from: %{exception}"
+#~ msgstr "載入失敗: %{exception}"
+
+#~ msgid "selecting data to import ..."
+#~ msgstr "選擇資料以載入 ..."
+
+#~ msgid "parsing data from import ..."
+#~ msgstr "分析載入資料 ..."
+
+#~ msgid "failed to parse data: %{exception}"
+#~ msgstr "分析資料失敗: %{excaption}"
+
+#~ msgid "Password for the bot owner"
+#~ msgstr "機器人擁有者的密碼"
+
+#~ msgid ""
+#~ "Set false to prevent new botusers from logging in without a password when "
+#~ "the user netmask is known"
+#~ msgstr ""
+#~ "設定為 false 可以避免新使用者們如果符合使用者遮罩(user mask)，就不需要密碼"
+#~ "也能登入"
+
+#~ msgid ""
+#~ "Set false to prevent new botusers from recognizing IRC users without a "
+#~ "need to manually login"
+#~ msgstr ""
+#~ "Set false to prevent new botusers from recognizing IRC users without a "
+#~ "need to manually login"
+
+#~ msgid "%{user}, you don't have '%{command}' permissions here"
+#~ msgstr "%{user}，你並沒有 '%{command}' 權限"
+
+#~ msgid "incorrect usage, ask for help using '%{command}'"
+#~ msgstr "用法錯誤，請用 %{command} 尋求協助"
+
+#~ msgid "%{count} core module loaded"
+#~ msgid_plural "%{count} core modules loaded"
+#~ msgstr[0] "%{count} 個核心模組已載入"
+
+#~ msgid "%{count} core module: %{list}"
+#~ msgid_plural "%{count} core modules: %{list}"
+#~ msgstr[0] "%{count} 個核心模組: %{list}"
+
+#~ msgid "no core botmodules loaded"
+#~ msgstr "未載入任何核心模組"
+
+#~ msgid "%{count} plugin loaded"
+#~ msgid_plural "%{count} plugins loaded"
+#~ msgstr[0] "%{count} 個外掛程式已載入"
+
+#~ msgid "%{count} plugin: %{list}"
+#~ msgid_plural "%{count} plugins: %{list}"
+#~ msgstr[0] "%{count} 個外掛程式: %{list}"
+
+#~ msgid "%{highlight}%{count} plugin ignored%{highlight}"
+#~ msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
+#~ msgstr[0] "%{highlight}%{count} 個外掛程式被忽略%{highlight}"
+
+#~ msgid ""
+#~ "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
+#~ "{bold} to see why"
+#~ msgid_plural ""
+#~ "%{highlight}%{count} plugins ignored%{highlight}: use %{bold}%{command}%"
+#~ "{bold} to see why"
+#~ msgstr[0] ""
+#~ "%{highlight}%{count} 個外掛程式被忽略%{highlight}: 執行 %{bold}%{command}%"
+#~ "{bold} 以瞭解原因"
+
+#~ msgid "%{highlight}%{count} plugin failed to load%{highlight}"
+#~ msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
+#~ msgstr[0] "%{highlight}%{count} 個外掛程式載入失敗%{highlight}"
+
+#~ msgid ""
+#~ "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
+#~ "{command}%{bold} to see why"
+#~ msgid_plural ""
+#~ "%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%"
+#~ "{command}%{bold} to see why"
+#~ msgstr[0] ""
+#~ "%{highlight}%{count} 個外掛程式載入失敗%{highlight}: 執行 %{bold}%"
+#~ "{command}%{bold} 以瞭解原因"
+
+#~ msgid "no plugins failed to load"
+#~ msgstr "沒有外掛程式載入失敗"
+
+#~ msgid ""
+#~ "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %"
+#~ "{exception}: %{reason}"
+#~ msgstr ""
+#~ "%{dir} 的 %{highlight}%{plugin}%{highlight} 外掛程式發生錯誤 %"
+#~ "{exception}: %{reason}"
+
+#~ msgid "no plugins were ignored"
+#~ msgstr "沒有外掛程式被忽略"
+
+#~ msgid "overruled by previous"
+#~ msgstr "已被前者取代"
+
+#~ msgid "%{desc} [valid values are: %{values}]"
+#~ msgstr "%{desc} [符合規定的值為: %{values}]"
+
+#~ msgid "First time rbot configuration wizard"
+#~ msgstr "首次使用 rbot 設定精靈"
+
+#~ msgid "This wizard will ask you a few questions to get you started."
+#~ msgstr "這個設定精靈會透過一些問句來協助你開始使用。"
+
+#~ msgid ""
+#~ "The rest of rbot's configuration can be manipulated via IRC once rbot is "
+#~ "connected and you are auth'd."
+#~ msgstr "一旦機器人連上 IRC，只要你認證成功，就可以修改其餘的設定。"
