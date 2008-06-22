@@ -1285,6 +1285,9 @@ module Irc
           handle(:who, data)
         when RPL_ENDOFWHO
           handle(:eowho, data)
+        when RPL_CHANNELMODEIS
+          parse_mode(serverstring, argv[1..-1], data)
+          handle(:mode, data)
         else
           handle(:unknown, data)
         end
@@ -1401,108 +1404,7 @@ module Irc
 
         handle(:nick, data)
       when :MODE
-        # MODE ([+-]<modes> (<params>)*)*
-        # When a MODE message is received by a server,
-        # Type C will have parameters too, so we must
-        # be able to consume parameters for all
-        # but Type D modes
-
-        data[:target] = @server.user_or_channel(argv[0])
-        data[:modestring] = argv[1..-1].join(" ")
-        # data[:modes] is an array where each element
-        # is an array with two elements, the first of which
-        # is either :set or :reset, and the second symbol
-        # is the mode letter. An optional third element
-        # is present e.g. for channel modes that need
-        # a parameter
-        data[:modes] = []
-        case data[:target]
-        when User
-          # User modes aren't currently handled internally,
-          # but we still parse them and delegate to the client
-          warning "Unhandled user mode message '#{serverstring}'"
-          argv[1..-1].each { |arg|
-            setting = arg[0].chr
-            if "+-".include?(setting)
-              setting = setting == "+" ? :set : :reset
-              arg[1..-1].each_byte { |b|
-                m = b.chr.intern
-                data[:modes] << [setting, m]
-              }
-            else
-              # Although typically User modes don't take an argument,
-              # this is not true for all modes on all servers. Since
-              # we have no knowledge of which modes take parameters
-              # and which don't we just assign it to the last
-              # mode. This is not going to do strange things often,
-              # as usually User modes are only set one at a time
-              warning "Unhandled user mode parameter #{arg} found"
-              data[:modes].last << arg
-            end
-          }
-        else
-          # array of indices in data[:modes] where parameters
-          # are needed
-          who_wants_params = []
-
-          modes = argv[1..-1].dup
-          debug modes
-          getting_args = false
-          while arg = modes.shift
-            debug arg
-            if getting_args
-              # getting args for previously set modes
-              idx = who_wants_params.shift
-              if idx.nil?
-                warning "Oops, problems parsing #{serverstring.inspect}"
-                break
-              end
-              data[:modes][idx] << arg
-              getting_args = false if who_wants_params.empty?
-            else
-              debug @server.supports[:chanmodes]
-              setting = :set
-              arg.each_byte do |c|
-                m = c.chr.intern
-                case m
-                when :+
-                  setting = :set
-                when :-
-                  setting = :reset
-                else
-                  data[:modes] << [setting, m]
-                  case m
-                  when *@server.supports[:chanmodes][:typea]
-                    who_wants_params << data[:modes].length - 1
-                  when *@server.supports[:chanmodes][:typeb]
-                    who_wants_params << data[:modes].length - 1
-                  when *@server.supports[:chanmodes][:typec]
-                    if setting == :set
-                      who_wants_params << data[:modes].length - 1
-                    end
-                  when *@server.supports[:chanmodes][:typed]
-                    # Nothing to do
-                  when *@server.supports[:prefix][:modes]
-                    who_wants_params << data[:modes].length - 1
-                  else
-                    warning "Unknown mode #{m} in #{serverstring.inspect}"
-                  end
-                end
-              end
-              getting_args = true unless who_wants_params.empty?
-            end
-          end
-
-          data[:modes].each { |mode|
-            set, key, val = mode
-            if val
-              data[:target].mode[key].send(set, val)
-            else
-              data[:target].mode[key].send(set)
-            end
-          }
-        end
-
+        parse_mode(serverstring, argv, data)
         handle(:mode, data)
       else
         warning "Unknown message #{serverstring.inspect}"
@@ -1518,6 +1420,110 @@ module Irc
     def handle(key, data)
       if(@handlers.has_key?(key))
         @handlers[key].call(data)
+      end
+    end
+
+    # RPL_CHANNELMODEIS
+    # MODE ([+-]<modes> (<params>)*)*
+    # When a MODE message is received by a server,
+    # Type C will have parameters too, so we must
+    # be able to consume parameters for all
+    # but Type D modes
+    def parse_mode(serverstring, argv, data)
+      data[:target] = @server.user_or_channel(argv[0])
+      data[:modestring] = argv[1..-1].join(" ")
+      # data[:modes] is an array where each element
+      # is an array with two elements, the first of which
+      # is either :set or :reset, and the second symbol
+      # is the mode letter. An optional third element
+      # is present e.g. for channel modes that need
+      # a parameter
+      data[:modes] = []
+      case data[:target]
+      when User
+        # User modes aren't currently handled internally,
+        # but we still parse them and delegate to the client
+        warning "Unhandled user mode message '#{serverstring}'"
+        argv[1..-1].each { |arg|
+          setting = arg[0].chr
+          if "+-".include?(setting)
+            setting = setting == "+" ? :set : :reset
+            arg[1..-1].each_byte { |b|
+              m = b.chr.intern
+              data[:modes] << [setting, m]
+            }
+          else
+            # Although typically User modes don't take an argument,
+            # this is not true for all modes on all servers. Since
+            # we have no knowledge of which modes take parameters
+            # and which don't we just assign it to the last
+            # mode. This is not going to do strange things often,
+            # as usually User modes are only set one at a time
+            warning "Unhandled user mode parameter #{arg} found"
+            data[:modes].last << arg
+          end
+        }
+      else
+        # array of indices in data[:modes] where parameters
+        # are needed
+        who_wants_params = []
+
+        modes = argv[1..-1].dup
+        debug modes
+        getting_args = false
+        while arg = modes.shift
+          debug arg
+          if getting_args
+            # getting args for previously set modes
+            idx = who_wants_params.shift
+            if idx.nil?
+              warning "Oops, problems parsing #{serverstring.inspect}"
+              break
+            end
+            data[:modes][idx] << arg
+            getting_args = false if who_wants_params.empty?
+          else
+            debug @server.supports[:chanmodes]
+            setting = :set
+            arg.each_byte do |c|
+              m = c.chr.intern
+              case m
+              when :+
+                setting = :set
+              when :-
+                setting = :reset
+              else
+                data[:modes] << [setting, m]
+                case m
+                when *@server.supports[:chanmodes][:typea]
+                  who_wants_params << data[:modes].length - 1
+                when *@server.supports[:chanmodes][:typeb]
+                  who_wants_params << data[:modes].length - 1
+                when *@server.supports[:chanmodes][:typec]
+                  if setting == :set
+                    who_wants_params << data[:modes].length - 1
+                  end
+                when *@server.supports[:chanmodes][:typed]
+                  # Nothing to do
+                when *@server.supports[:prefix][:modes]
+                  who_wants_params << data[:modes].length - 1
+                else
+                  warning "Unknown mode #{m} in #{serverstring.inspect}"
+                end
+              end
+            end
+            getting_args = true unless who_wants_params.empty?
+          end
+        end
+
+        data[:modes].each { |mode|
+          set, key, val = mode
+          if val
+            data[:target].mode[key].send(set, val)
+          else
+            data[:target].mode[key].send(set)
+          end
+        }
       end
     end
   end
