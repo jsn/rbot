@@ -1358,6 +1358,14 @@ module Irc
 
       # Flags
       @mode = {}
+      class << @mode
+        def any?(*ar)
+          !!ar.find { |m| s = m.to_sym ; self[s] && self[s].set? }
+        end
+        def all?(*ar)
+          !ar.find { |m| s = m.to_sym ; !(self[s] && self[s].set?) }
+        end
+      end
     end
 
     # Removes a user from the channel
