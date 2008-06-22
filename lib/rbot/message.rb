@@ -33,6 +33,7 @@ module Irc
   Reverse = "\026"
   Italic = "\011"
   NormalText = "\017"
+  AttributeRx = /#{Bold}|#{Underline}|#{Reverse}|#{Italic}|#{NormalText}/
 
   # Color is prefixed by \003 and followed by optional
   # foreground and background specifications, two-digits-max

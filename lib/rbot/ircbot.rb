@@ -914,6 +914,12 @@ class Bot
     end
 
     multi_line = original_message.to_s.gsub(/[\r\n]+/, "\n")
+
+    # if target is a channel with +c or +C modes, strip colours
+    if where.kind_of?(Channel) and where.mode.any?('c', 'C')
+      multi_line.replace(BasicUserMessage.stripcolour(multi_line).gsub(AttributeRx,''))
+    end
+
     messages = Array.new
     case opts[:newlines]
     when :join
