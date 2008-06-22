@@ -108,21 +108,21 @@ class ::Array
     self.delete_at(index)
   end
 
-  # This method shuffles the items in the array
-  def shuffle!
-    base = self.dup
-    self.clear
-    while item = base.delete_one
-      self << item
-    end
-    self
-  end
+  # shuffle and shuffle! are defined in Ruby >= 1.8.7
 
   # This method returns a new array with the same items as
   # the receiver, but shuffled
-  def shuffle
-    ret = self.dup
-    ret.shuffle!
+  unless method_defined? :shuffle
+    def shuffle
+      sort_by { rand }
+    end
+  end
+
+  # This method shuffles the items in the array
+  unless method_defined? :shuffle!
+    def shuffle!
+      replace shuffle
+    end
   end
 
 end
