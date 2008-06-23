@@ -13,25 +13,21 @@ class UrbanPlugin < Plugin
 
   def get_def(m, word, n = nil)
     n = n ? n.to_i : 1
+    p = (n-1)/7 + 1
     u = URBAN + URI.escape(word)
-    u += '&skip=' + n.to_s if n
+    u += '&page=' + p.to_s if p > 1
     s = @bot.httputil.get(u)
 
     notfound = s.match %r{<div style="color: #669FCE"><i>.*?</i> isn't defined}
 
-    total = nil
-    if s.sub!(%r{<div class="pager"><b>(\d+)</b>\s*definition.*$}m, '')
-      total = $1.to_i
-    end
+    numpages = s[%r{<div id='paginator'>.*?</div>}m].scan(/\d+/).collect {|x| x.to_i}.max || 1
 
     rv = Array.new
-
     s.scan(%r{<td class='index'[^>]*>.*?(\d+)\..*?</td>.*?<td class='word'>(?:<a.*?>)?([^>]+)(?:</a>)?</td>.*?<div class='definition'>(.+?)</div>.*?<div class='example'>(.+?)</div>}m) do |num, wrd, desc, ex|
       rv << [num.to_i, wrd.strip, desc.strip, ex.strip]
     end
 
-    total ||= rv.size
-
+    maxnum = rv.collect {|x| x[0]}.max || 0
     return m.reply("#{Bold}#{word}#{Bold} not found") if rv.empty?
 
     if notfound
@@ -41,8 +37,8 @@ class UrbanPlugin < Plugin
     end
 
     answer = rv.find { |a| a[0] == n }
-    answer ||= (n > total ? rv.last : rv.first)
-    m.reply format_definition(total, *answer)
+    answer ||= (n > maxnum ? rv.last : rv.first)
+    m.reply format_definition((p == numpages ? maxnum : "#{(numpages-1)*7 + 1}+"), *answer)
   end
 
   def urban(m, params)
