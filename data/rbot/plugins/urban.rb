@@ -26,8 +26,8 @@ class UrbanPlugin < Plugin
 
     rv = Array.new
 
-    s.scan(%r{<td class="def_number"[^>]*>(\d+)\.</td>.*?<td class="def_word">(?:<a.*?>)?([^>]+)(?:</a>)?</td>.*?<div class="def_p">.*?<p>(.+?)</p>.*?<p style=".*?>(.+?)</p>}m) do |num, wrd, desc, ex|
-      rv << [num.to_i, wrd, desc, ex]
+    s.scan(%r{<td class='index'[^>]*>.*?(\d+)\..*?</td>.*?<td class='word'>(?:<a.*?>)?([^>]+)(?:</a>)?</td>.*?<div class='definition'>(.+?)</div>.*?<div class='example'>(.+?)</div>}m) do |num, wrd, desc, ex|
+      rv << [num.to_i, wrd.strip, desc.strip, ex.strip]
     end
 
     total ||= rv.size
