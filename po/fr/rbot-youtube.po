@@ -1,0 +1,58 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Yaohan Chen <yaohan.chen@gmail.com>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"PO-Revision-Date: 2008-06-21 16:07+0100\n"
+"Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/youtube.rb:33
+msgid "Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %{duration}. %{views} views, faved %{faves} times. %{desc}"
+msgstr "Categorie: %{cat}. Note: %{rating}. Autheur: %{author}. Durée: %{duration}. %{views} vues, favoris %{faves} fois. %{desc}"
+
+#: data/rbot/plugins/youtube.rb:77
+#: data/rbot/plugins/youtube.rb:107
+msgid "unknown duration"
+msgstr "durée inconnue"
+
+#: data/rbot/plugins/youtube.rb:183
+msgid "%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times. %{desc}"
+msgstr "%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} par %{author} (%{duration}). %{views} vues, favoris %{faves} fois. %{desc}"
+
+#: data/rbot/plugins/youtube.rb:186
+msgid ""
+"\n"
+" -- also available at: "
+msgstr ""
+"\n"
+" -- aussi disponnible à: "
+
+#: data/rbot/plugins/youtube.rb:193
+msgid "couldn't retrieve video info"
+msgstr "impossible de retrouver les infos de la video"
+
+#: data/rbot/plugins/youtube.rb:203
+msgid "error looking for %{what} on youtube: %{e}"
+msgstr "impossible de voir pour %{what} sur youtube: %{e}"
+
+#: data/rbot/plugins/youtube.rb:211
+msgid "no videos found for %{what}"
+msgstr "aucune video trouvée pour %{what}"
+
+#: data/rbot/plugins/youtube.rb:215
+msgid "One video found for %{what}: %{show}"
+msgstr "Une video trouvée pour %{what}: %{show}"
+
+#: data/rbot/plugins/youtube.rb:222
+msgid "Videos for %{what}: %{shorts}"
+msgstr "Videos pour %{what}: %{shorts}"
+

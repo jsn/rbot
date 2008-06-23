@@ -1,0 +1,84 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Yaohan Chen <yaohan.chen@gmail.com>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"PO-Revision-Date: 2008-06-21 16:40+0100\n"
+"Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/quotes.rb:125
+msgid "addquote [<channel>] <quote> => Add quote <quote> for channel <channel>. You only need to supply <channel> if you are addressing %{nick} privately."
+msgstr "addquote [<salon>] <quote> => Ajoute une <quote> pour le salon <salon>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé."
+
+#: data/rbot/plugins/quotes.rb:127
+msgid "delquote [<channel>] <num> => delete quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately."
+msgstr "delquote [<salon>] <num> => supprime une quote du <salon> avec le numero <num>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé."
+
+#: data/rbot/plugins/quotes.rb:129
+msgid "getquote [<channel>] [<num>] => get quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately. Without <num>, a random quote will be returned."
+msgstr "getquote [<salon>] [<num>] => obtiens une quote depuis <salon> avec le nombre <num>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé. Sans <num>, une quote alleatoire sera retournée."
+
+#: data/rbot/plugins/quotes.rb:131
+msgid "searchquote [<channel>] <regexp> => search for quote from <channel> that matches <regexp>. You only need to supply <channel> if you are addressing %{nick} privately."
+msgstr "searchquote [<salon>] <regexp> => cherche une quote du <salon> qui correspond à <regexp>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé"
+
+#: data/rbot/plugins/quotes.rb:133
+msgid "topicquote [<channel>] [<num>] => set topic to quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately. Without <num>, a random quote will be set."
+msgstr "topicquote [<salon>] [<num>] => met le topic depuis une quote de <salon> avec le nombre <num>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé Sans <num>, une quote alleatoire sera mise."
+
+#: data/rbot/plugins/quotes.rb:135
+msgid "countquote [<channel>] <regexp> => count quotes from <channel> that match <regexp>. You only need to supply <channel> if you are addressing %{nick} privately."
+msgstr "countquote [<salon>] <regexp> => compte les quotes du <salon> qui correspondent à <regexp>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé"
+
+#: data/rbot/plugins/quotes.rb:137
+msgid "whoquote [<channel>] <num> => show who added quote <num>. You only need to supply <channel> if you are addressing %{nick} privately"
+msgstr "whoquote [<salon>] <num> => affiche qui a ajouté la quote <num>.  Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé"
+
+#: data/rbot/plugins/quotes.rb:139
+msgid "whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing %{nick} privately"
+msgstr "whenquote [<salon>] <num> => affiche quand la quote <num> a été ajoutée. Vous avez seulement besoin de specifier <salon> si vous addressez %{nick} en privé"
+
+#: data/rbot/plugins/quotes.rb:141
+msgid "Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
+msgstr "Quote module (Sauvegarde et lecture de quotes) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote"
+
+#: data/rbot/plugins/quotes.rb:158
+#: data/rbot/plugins/quotes.rb:172
+#: data/rbot/plugins/quotes.rb:186
+#: data/rbot/plugins/quotes.rb:200
+#: data/rbot/plugins/quotes.rb:214
+#: data/rbot/plugins/quotes.rb:242
+msgid "quote not found!"
+msgstr "quote non trouvée!"
+
+#: data/rbot/plugins/quotes.rb:167
+#: data/rbot/plugins/quotes.rb:209
+#: data/rbot/plugins/quotes.rb:237
+msgid "[%{num}] %{quote}"
+msgstr "[%{num}] %{quote}"
+
+#: data/rbot/plugins/quotes.rb:181
+msgid "quote %{num} added by %{source}"
+msgstr "quote %{num} ajoutée par %{source}"
+
+#: data/rbot/plugins/quotes.rb:195
+msgid "quote %{num} added on %{date}"
+msgstr "quote %{num} ajoutée le %{date}"
+
+#: data/rbot/plugins/quotes.rb:223
+msgid "%{total} quotes matching %{reg}"
+msgstr "%{total} quotes correspondent %{reg}"
+
+#: data/rbot/plugins/quotes.rb:228
+msgid "%{total} quotes"
+msgstr "%{total} quotes"
+

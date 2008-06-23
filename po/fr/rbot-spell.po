@@ -1,0 +1,41 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Yaohan Chen <yaohan.chen@gmail.com>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"PO-Revision-Date: 2008-06-21 15:41+0100\n"
+"Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/spell.rb:3
+msgid "spell <word> => check spelling of <word>, suggest alternatives"
+msgstr "spell <mot> => cherche les corrections du <mot>, suggère des alternatives"
+
+#: data/rbot/plugins/spell.rb:7
+msgid "incorrect usage: "
+msgstr "utilisation incorrecte: "
+
+#: data/rbot/plugins/spell.rb:16
+msgid "%{word} may be spelled correctly"
+msgstr "%{word} dois être ecris correctement"
+
+#: data/rbot/plugins/spell.rb:24
+msgid "%{word} is presumably derived from "
+msgstr "%{word} est presumé derivé de "
+
+#: data/rbot/plugins/spell.rb:28
+msgid "%{word}: no suggestions"
+msgstr "%{word}: aucune suggestions"
+
+#: data/rbot/plugins/spell.rb:35
+msgid "couldn't exec ispell :("
+msgstr "impossible d'executer ispell :("
+

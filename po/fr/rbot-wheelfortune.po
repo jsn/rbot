@@ -1,0 +1,163 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Yaohan Chen <yaohan.chen@gmail.com>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"PO-Revision-Date: 2008-06-21 18:15+0100\n"
+"Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/games/wheelfortune.rb:48
+msgid " [Letters called so far: %{red}%{letters}%{nocolor}]"
+msgstr "[Lettres utilisés pour le moment: %{red}%{letters}%{nocolor}]"
+
+#: data/rbot/plugins/games/wheelfortune.rb:230
+msgid "wof [<channel>] play [<name>] for <single> to <max> => starts a wheel-of-fortune game on channel <channel> (default: current channel), named <name> (default: wheelfortune.game_name config setting, or the last game name used by the user), with <single> points per round. the game is won when a player reachers <max> points. vowels cost <single>*<single>/<max> points. The user that starts the game is the game manager and must set up the clues and answers in private. All the other users have to learn the answer to each clue by saying single consonants or the whole sentence. Every time a consonant is guessed, the bot will reveal the partial answer, showing the missing letters as * (asterisks)."
+msgstr "wof [<salon>] play [<nom>] for <simple> to <maximum> => demarre un jeu de la roue de la fortune sur le <salon> (defaut: channel courrant), nommée <nom> (defaut: wheelfortune.game_name parametre de config, ou le nom du dernier jeu utilisé par l'utilisateur), avec <simple> points par tours. le jeu est gagné par le joueur qui atteint les points <maximum>. les voyelles coutent <simple>*<simple>/<maximum> points. L'utilisateur qui demarre le jeu est le gestionnaire du jeu, et dois fixer les indices et reponses en privé. Tout les autres utilisateurs doivent deviner la reponse en donnant une consonne seule ou la phrase entière. A chaque fois qu'une consonne est juste, le bot revele une partie de la reponse, en montrant les lettres manquantes avec un * (asterisque)."
+
+#: data/rbot/plugins/games/wheelfortune.rb:232
+msgid "wof <channel> [category: <cat>,] clue: <clue>, answer: <ans> => set up a new question for the wheel-of-fortune game being played on channel <channel>. This command must be sent in private by the game manager. The category <cat> can be omitted. If you make mistakes, you can use 'wof replace' (see help) before the question gets asked"
+msgstr "wof <salon> [category: <categorie>,] clue: <indice>, answer: <reponse> => met une nouvelle question pour la roue de la fortune en cours dans <salon>. Cette commande dois être envoyée en privé par le gestionnaire du jeu. La categorie <categorie> peut être ommise. Si vous avez fais une erreur, vous pouvez utiliser 'wof replace' (voir l'aide) avant que la question sois dise"
+
+#: data/rbot/plugins/games/wheelfortune.rb:234
+msgid "wof <channel> replace <round> [category: <cat>,] [clue: <clue>,] [answer: <ans>] => fix the question for round <round> of the wheel-of-fortune game being played on <channel> by replacing the category and/or clue and/or answer"
+msgstr "wof <salon> replace <tour> [category: <categorie>,] [clue: <indice>,] [answer: <reponse>] => met la questions pour le <tour> de la roue de la fortune en cours dans <salon> en replacant la categorie et/ou l'indice et/ou la reponse"
+
+#: data/rbot/plugins/games/wheelfortune.rb:236
+msgid "wof cancel => cancels the wheel-of-fortune being played on the current channel"
+msgstr "wof cancel => annulle la roue de la fortune en cours"
+
+#: data/rbot/plugins/games/wheelfortune.rb:238
+msgid "wof buy <vowel> => buy the vowel <vowel>: the user buying the vowel will lose points equal to the vowel price, and the corresponding vowel will be revealed in the answer (if present)"
+msgstr "wof buy <voyelle> => achète la voyelle <voyelle>: l'utilisateur qui l'achète perd les points équivalents au prix de la voyelle, et la voyelle sera révellé dans la reponse (si presente)"
+
+#: data/rbot/plugins/games/wheelfortune.rb:240
+msgid "wof: wheel-of-fortune plugin. topics: play, category, clue, answer, replace, cancel, buy"
+msgstr "wof: plugin roue de la fortune. aides: play, category, clue, answer, replace, cancel, buy"
+
+#: data/rbot/plugins/games/wheelfortune.rb:247
+msgid "you must specify a channel"
+msgstr "vous devez specifier un salon"
+
+#: data/rbot/plugins/games/wheelfortune.rb:253
+msgid "there's already a %{name} game on %{chan}, managed by %{who}"
+msgstr "il y a déjà un jeu %{name} sur %{chan}, gérer par %{who}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:267
+msgid "%{who} just created a new %{name} game to %{max} points (%{single} per question, %{price} per vowel)"
+msgstr "%{who} viens juste de créer un nouveau jeu %{name} à %{max} points (%{single} par question, %{price} par voyelle)"
+
+#: data/rbot/plugins/games/wheelfortune.rb:274
+msgid "ok, the game has been created. now add clues and answers with \"wof %{chan} [category: <category>,] clue: <clue>, answer: <ans>\". if the clue and answer don't fit in one line, add the answer separately with \"wof %{chan} answer <answer>\""
+msgstr "ok, le jeu a été crée. maintenant ajoutez des indices et des réponses avec \"wof %{chan} [category: <categorie>,] clue: <indice>, answer: <reponse>\". si l'indice ne tiens pas sur une ligne, ajoutez la reponse séparement avec \"wof %{chan} answer <reponse>\""
+
+#: data/rbot/plugins/games/wheelfortune.rb:282
+#: data/rbot/plugins/games/wheelfortune.rb:343
+#: data/rbot/plugins/games/wheelfortune.rb:412
+#: data/rbot/plugins/games/wheelfortune.rb:522
+#: data/rbot/plugins/games/wheelfortune.rb:559
+msgid "there's no %{name} game running on %{chan}"
+msgstr "il n'y a aucuns jeu %{name} en cours sur %{chan}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:291
+msgid "you can't add questions to the %{name} game on %{chan}"
+msgstr "vous ne pouvez ajouter une question au jeu %{name} sur %{chan}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:301
+#: data/rbot/plugins/games/wheelfortune.rb:383
+msgid "sorry, the answer cannot contain the '*' character"
+msgstr "désolé, la reponse ne peut pas contenir le caractère '*'"
+
+#: data/rbot/plugins/games/wheelfortune.rb:308
+msgid "ok, clue added for %{name} round %{count} on %{chan}: %{catclue}"
+msgstr "ok, indice ajouté pour %{name} tour %{count} sur %{chan}: %{catclue}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:310
+msgid "there's already a pending clue for %{name} round %{count} on %{chan}: %{catclue}"
+msgstr "il y a déjà un indice en suspend pour %{name} tour %{count} sur %{chan}: %{catclue}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:323
+msgid "ok, QA added for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
+msgstr "ok, ajout du QA pour %{name} tour %{count} sur %{chan}: %{catclue} => %{ans}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:325
+msgid "there's no pending clue for %{name} on %{chan}!"
+msgstr "il n'y a pas d'indices en attendre pour %{name} sur %{chan}!"
+
+#: data/rbot/plugins/games/wheelfortune.rb:336
+msgid "something went wrong, I can't seem to understand what you're trying to set up"
+msgstr "quelquechose est faux, je ne peut pas comprendre ce que vous essayez de faire"
+
+#: data/rbot/plugins/games/wheelfortune.rb:352
+msgid "you can't replace questions to the %{name} game on %{chan}"
+msgstr "vous ne pouvez remplacer une questions du jeu %{name} sur %{chan}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:365
+msgid "there are no questions in the %{name} game on %{chan} which can be replaced"
+msgstr "il n'y a aucunes questions dans le jeu %{name} sur %{chan} qui peuvent être remplacées"
+
+#: data/rbot/plugins/games/wheelfortune.rb:370
+msgid "you can only replace questions between rounds %{min} and %{max} in the %{name} game on %{chan}"
+msgstr "vous pouvez seulement remplacer les questions entre les tours %{min} et %{max} dans le jeu %{name} sur %{chan}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:398
+msgid "ok, replaced QA for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
+msgstr "ok, remplaçons QA pour %{name} tour %{count} sur %{chan}: %{catclue} => %{ans}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:421
+#: data/rbot/plugins/games/wheelfortune.rb:528
+msgid "there are no %{name} questions for %{chan}, I'm waiting for %{who} to add them"
+msgstr "il n'y a aucunes %{name} questions pour %{chan}, j'attend que %{who} en ajoute"
+
+#: data/rbot/plugins/games/wheelfortune.rb:429
+msgid "%{bold}%{color}%{name}%{bold}, round %{count}:%{nocolor} %{qa}"
+msgstr "%{bold}%{color}%{name}%{bold}, tour %{count}:%{nocolor} %{qa}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:444
+msgid "no scores"
+msgstr "aucuns scores"
+
+#: data/rbot/plugins/games/wheelfortune.rb:465
+msgid "You must buy the %{vowel}"
+msgstr "Vous devez acheter le %{vowel}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:476
+msgid "%{who} got it! The answer was: %{ans}"
+msgstr "%{who} le prend! La reponse etais: %{ans}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:482
+msgid ""
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %{count} rounds!\n"
+"The final score is"
+msgstr ""
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}gagne%{bold} après %{count} tours!\n"
+"Le score final est:"
+
+#: data/rbot/plugins/games/wheelfortune.rb:493
+msgid "%{bold}%{color}%{name}%{bold}, round %{count}%{nocolor} -- score so far:"
+msgstr "%{bold}%{color}%{name}%{bold}, tour %{count}%{nocolor} -- score pour le moment:"
+
+#: data/rbot/plugins/games/wheelfortune.rb:538
+msgid "%{who} buys a %{vowel} for %{price} points"
+msgstr "%{who} achète un %{vowel} pour %{price} points"
+
+#: data/rbot/plugins/games/wheelfortune.rb:546
+msgid "you can't buy a %{vowel}, %{who}: it costs %{price} points and you only have %{score}"
+msgstr "vous ne pouvez pas acheter un %{vowel}, %{who}: cela coute %{price} points et vous avez seulement %{score}"
+
+#: data/rbot/plugins/games/wheelfortune.rb:569
+msgid "you can't cancel the current game"
+msgstr "vous ne pouvez pas stopper le jeu en cours"
+
+#: data/rbot/plugins/games/wheelfortune.rb:576
+msgid "%{name} game cancelled after %{count} rounds. Partial score:"
+msgstr "%{name} jeu annulé après %{count} tours. Score partiel:"
+

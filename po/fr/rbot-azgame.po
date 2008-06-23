@@ -1,0 +1,176 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Yaohan Chen <yaohan.chen@gmail.com>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"PO-Revision-Date: 2008-06-21 14:58+0100\n"
+"Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/games/azgame.rb:78
+#: data/rbot/plugins/games/azgame.rb:251
+#: data/rbot/plugins/games/azgame.rb:257
+msgid "%{count} try"
+msgid_plural "%{count} tries"
+msgstr[0] "%{count} essai"
+msgstr[1] "%{count} essais"
+
+#: data/rbot/plugins/games/azgame.rb:83
+msgid "winner, %{tries}"
+msgstr "gagnant, %{tries}"
+
+#: data/rbot/plugins/games/azgame.rb:163
+msgid "%{bold}BINGO!%{bold} the word was %{underline}%{word}%{underline}. Congrats, %{bold}%{player}%{bold}!"
+msgstr "%{bold}BINGO!%{bold} le mot est %{underline}%{word}%{underline}. Felicitation, %{bold}%{player}%{bold}!"
+
+#: data/rbot/plugins/games/azgame.rb:170
+msgid "The game was won after %{tries} tries. Scores for this game:    %{scores}"
+msgstr "Le jeu a été gagné apres %{tries} essais. Scores pour ce jeu:    %{scores}"
+
+#: data/rbot/plugins/games/azgame.rb:173
+msgid "%{word} is not in the range %{bold}%{range}%{bold}"
+msgstr "%{word} n'est pas dans cette limite %{bold}%{range}%{bold}"
+
+#: data/rbot/plugins/games/azgame.rb:177
+msgid "%{word} doesn't exist or is not acceptable for the game"
+msgstr "%{word} n'existe pas ou n'est pas acceptable pour ce jeu"
+
+#: data/rbot/plugins/games/azgame.rb:183
+msgid "close, but no cigar. New range: %{bold}%{range}%{bold}"
+msgstr "fermé, mais pas de cigar. Nouvelle limite: %{bold}%{range}%{bold}"
+
+#: data/rbot/plugins/games/azgame.rb:187
+msgid "%{word} is already one of the range extrema: %{range}"
+msgstr "%{word} est déjà dans la limite extreme: %{range}"
+
+#: data/rbot/plugins/games/azgame.rb:189
+msgid "hm, something went wrong while verifying %{word}"
+msgstr "hm, quelquechose est faux en verifiant %{word}"
+
+#: data/rbot/plugins/games/azgame.rb:198
+msgid "no A-Z game running here, can't check if %{word} is valid, can I?"
+msgstr "aucun jeu A-Z n'est demarrer pour le moment, impossible de verifier si %{word} est valide"
+
+#: data/rbot/plugins/games/azgame.rb:202
+msgid "I only accept single words composed by letters only, sorry"
+msgstr "J'accepte seulement les mot simples composés uniquement de lettres, désolé"
+
+#: data/rbot/plugins/games/azgame.rb:212
+msgid "the word in %{bold}%{range}%{bold} was:   %{bold}%{word}%{bold}"
+msgstr "le mot dans %{bold}%{range}%{bold} est:   %{bold}%{word}%{bold}"
+
+#: data/rbot/plugins/games/azgame.rb:216
+msgid "The game was cancelled after %{tries} tries. Scores for this game would have been:    %{scores}"
+msgstr "LE jeu a été annulé après %{tries} essais. Scores pour ce jeu aurraient été:    %{scores}"
+
+#: data/rbot/plugins/games/azgame.rb:219
+msgid "no A-Z game running in this channel ..."
+msgstr "aucun jeu A-Z n'est en cours sur ce salon ..."
+
+#: data/rbot/plugins/games/azgame.rb:229
+msgid "let me think ..."
+msgstr "laisse moi penser ..."
+
+#: data/rbot/plugins/games/azgame.rb:233
+msgid "couldn't think of anything ..."
+msgstr "impossible de penser quelquechose ..."
+
+#: data/rbot/plugins/games/azgame.rb:237
+msgid "I can't play A-Z in %{lang}, sorry"
+msgstr "Je ne peut jouer à A-Z en %{lang}, désolé"
+
+#: data/rbot/plugins/games/azgame.rb:240
+msgid "got it!"
+msgstr "prend le!"
+
+#: data/rbot/plugins/games/azgame.rb:250
+msgid " (after %{total_tries} and %{invalid_tries})"
+msgstr " (apres %{total_tries} et %{invalid_tries}"
+
+#: data/rbot/plugins/games/azgame.rb:253
+msgid "%{count} invalid try"
+msgid_plural "%{count} invalid tries"
+msgstr[0] "%{count} essai invalide"
+msgstr[1] "%{count} essais invalides"
+
+#: data/rbot/plugins/games/azgame.rb:256
+msgid " (after %{total_tries})"
+msgstr " (après %{total_tries}"
+
+#: data/rbot/plugins/games/azgame.rb:262
+msgid "A-Z: %{bold}%{range}%{bold}"
+msgstr "A-Z: %{bold}%{range}%{bold}"
+
+#: data/rbot/plugins/games/azgame.rb:273
+msgid "I have %{count} %{lang} word in my cache"
+msgid_plural "I have %{count} %{lang} words in my cache"
+msgstr[0] "J'ai %{count} %{lang} mot en cache"
+msgstr[1] "J'ai %{count} %{lang} mots en cache"
+
+#: data/rbot/plugins/games/azgame.rb:276
+msgid "provide a regexp to match"
+msgstr "soummet une regex à comparer"
+
+#: data/rbot/plugins/games/azgame.rb:288
+msgid "no %{lang} word I know match %{pattern}"
+msgstr "aucun mot %{lang} correspondant à %{pattern} n'est connu"
+
+#: data/rbot/plugins/games/azgame.rb:290
+msgid "more than 25 %{lang} words I know match %{pattern}, try a stricter matching"
+msgstr "plus de 25 mots %{lang} connus correspondent %{pattern}, essayez une recherche plus stricte"
+
+#: data/rbot/plugins/games/azgame.rb:296
+#: data/rbot/plugins/games/azgame.rb:312
+#: data/rbot/plugins/games/azgame.rb:324
+msgid "provide a word"
+msgstr "fournit un mot"
+
+#: data/rbot/plugins/games/azgame.rb:301
+#: data/rbot/plugins/games/azgame.rb:317
+msgid "I don't know any %{lang} word %{word}"
+msgstr "Je ne connais aucun mot %{word} %{lang}"
+
+#: data/rbot/plugins/games/azgame.rb:305
+msgid "%{word} learned from %{user} on %{date}"
+msgstr "%{word} appris par %{user} le %{date}"
+
+#: data/rbot/plugins/games/azgame.rb:307
+msgid "%{word} learned from %{user}"
+msgstr "%{word} appris par %{user}"
+
+#: data/rbot/plugins/games/azgame.rb:329
+msgid "I already know the %{lang} word %{word}"
+msgstr "Je connais déjà ce mot %{word} en %{lang}"
+
+#: data/rbot/plugins/games/azgame.rb:545
+msgid "az [lang] word [count|list|add|delete] => manage the az wordlist for language lang (defaults to current bot language)"
+msgstr "az [lang] word [count|list|add|delete] => gère la liste des mots de l'AZ pour la langue lang (par defaut la langue du bot)"
+
+#: data/rbot/plugins/games/azgame.rb:547
+msgid "az cancel => abort current game"
+msgstr "az cancel => annule le jeu en cours"
+
+#: data/rbot/plugins/games/azgame.rb:549
+msgid "az check <word> => checks <word> against current game"
+msgstr "az check <word> => verifie <word> pendant le jeu en cours"
+
+#: data/rbot/plugins/games/azgame.rb:551
+msgid "try to guess the word the bot is thinking of; if you guess wrong, the bot will use the new word to restrict the range of allowed words: eventually, the range will be so small around the correct word that you can't miss it"
+msgstr "try to guess the word the bot is thinking of; if you guess wrong, the bot will use the new word to restrict the range of allowed words: eventually, the range will be so small around the correct word that you can't miss it"
+
+#: data/rbot/plugins/games/azgame.rb:553
+msgid "az => start a game if none is running, show the current word range otherwise; you can say 'az <language>' if you want to play in a language different from the current bot default"
+msgstr "az => start a game if none is running, show the current word range otherwise; you can say 'az <language>' if you want to play in a language different from the current bot default"
+
+#: data/rbot/plugins/games/azgame.rb:555
+msgid "az topics: play, rules, cancel, manage, check"
+msgstr "aides AZ: play, rules, cancel, manage, check"
+

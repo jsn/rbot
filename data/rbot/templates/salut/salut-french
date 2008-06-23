@@ -1,0 +1,29 @@
+--- 
+:"generic-in": 
+- "'lo"
+- "'lu"
+- plop
+- "'jour"
+- bonjour
+:"morning-in": 
+- "'jour"
+:"afternoon-in": 
+- bonne journée
+- bonne journee
+- "'journée"
+- "'journee"
+:"generic-out": 
+- bye
+- cya
+- see you
+- a plus tard
+- a plus
+- "'nuit"
+- nenuit
+:"evening-in": 
+- "'soir"
+- bonsoir
+- "'nuit"
+:"generic-dest":
+- tous
+- all

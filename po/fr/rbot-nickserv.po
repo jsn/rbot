@@ -1,0 +1,81 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Yaohan Chen <yaohan.chen@gmail.com>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"PO-Revision-Date: 2008-06-21 16:31+0100\n"
+"Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/nickserv.rb:26
+msgid "Name of the nick server (all lowercase)"
+msgstr "Nom du serveur de pseudo (tout en minuscule)"
+
+#: data/rbot/plugins/nickserv.rb:31
+msgid "String to look for to see if the nick server is asking us to identify"
+msgstr "Chaine a détécter pour voir si le nick server demande de s'identifier"
+
+#: data/rbot/plugins/nickserv.rb:36
+msgid "String to look for to see if the nick server is informing us that our nick is now available"
+msgstr "Chaine a détécter pour voir si le nick server nous informe que le pseudo est disponnible"
+
+#: data/rbot/plugins/nickserv.rb:41
+msgid "String to look for to see if the nick server is informing us that we have identified successfully"
+msgstr "Chaine a détécter pour voir si le nick server nous informe que l'identification à reussi"
+
+#: data/rbot/plugins/nickserv.rb:45
+msgid "Set to false if the nick server doesn't expect the nick as a parameter in the identify command"
+msgstr "Mettre a false si le nick server ne requiert pas le pseudo en parametre lors de l'identification"
+
+#: data/rbot/plugins/nickserv.rb:49
+msgid "Seconds to wait after sending a message to nickserv, e.g. after ghosting"
+msgstr "Secondes a attendre apres avoir envoyé un message a nickserv, ex. apres un ghost"
+
+#: data/rbot/plugins/nickserv.rb:54
+msgid "nickserv plugin: handles nickserv protected IRC nicks. topics password, register, identify, listnicks"
+msgstr ""
+
+#: data/rbot/plugins/nickserv.rb:56
+msgid "nickserv password [<nick>] <passwd>: remember the password for nick <nick> and use it to identify in future"
+msgstr ""
+
+#: data/rbot/plugins/nickserv.rb:58
+msgid "nickserv register [<password> [<email>]]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work. Also specify email if required by your services"
+msgstr ""
+
+#: data/rbot/plugins/nickserv.rb:60
+msgid "nickserv identify: identify with nickserv - shouldn't be needed - bot should identify with nickserv immediately on request - however this could be useful after splits or service disruptions, or when you just set the password for the current nick"
+msgstr ""
+
+#: data/rbot/plugins/nickserv.rb:62
+msgid "nickserv listnicks: lists nicknames and associated password the bot knows about - you will need config level auth access to do this one and it will reply by privmsg only"
+msgstr "nickserv listnicks: liste les pseudos et mots de passe associé au bot - vous devez configurer le niveau d'acces pour qu'il ne reponde qu'en privé"
+
+#: data/rbot/plugins/nickserv.rb:115
+msgid "I'm only changing this in my database, I won't inform %{ns_nick} of the change"
+msgstr "Je change seulement dans ma base de donnée, je ne peut informer %{ns_nick} des changements"
+
+#: data/rbot/plugins/nickserv.rb:136
+msgid "none known"
+msgstr "aucun de connus"
+
+#: data/rbot/plugins/nickserv.rb:163
+msgid "I cannot identify for a this nick"
+msgstr "Je ne peut identifier pour ce pseudo"
+
+#: data/rbot/plugins/nickserv.rb:165
+msgid "I dunno the nickserv password for the nickname %{botnick} :("
+msgstr "J'ignore le mot de passe serveur de l'utilisateur %{botnick} :("
+
+#: data/rbot/plugins/nickserv.rb:167
+msgid "uh ... something went wrong ..."
+msgstr "uh... quelquechose est faux ..."
+
