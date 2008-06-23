@@ -7,6 +7,9 @@ class SpellPlugin < Plugin
   Config.register Config::StringValue.new('spell.program',
      :default => 'ispell',
      :desc => _('Program to use to check spelling'))
+  Config.register Config::StringValue.new('spell.command_line',
+     :default => '%s -a -S',
+     :desc => _('Command line used to call the spell.program. Use %s as a placeholder for the executable name'))
 
   def help(plugin, topic="")
     _("spell <word> => check spelling of <word>, suggest alternatives")
@@ -18,7 +21,7 @@ class SpellPlugin < Plugin
     end
 
     begin
-      IO.popen("%{prog} -a -S" % {:prog => @bot.config['spell.program']}, "w+") { |p|
+      IO.popen(@bot.config['spell.command_line'] % @bot.config['spell.program'], "w+") { |p|
         p.puts m.params
         p.close_write
         p.each_line { |l|
