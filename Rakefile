@@ -40,6 +40,7 @@ NON_PLUGIN_FILES = FileList["{lib,bin,data}/**/*.{rb,rhtml}"] - PLUGIN_FILES
 rgettext_proc = proc do |t|
   require 'gettext/utils'
   plugin_files, pot_file = t.prerequisites, t.name
+  puts "#{plugin_files.join(', ')} => #{pot_file}"
   GetText.rgettext(plugin_files, pot_file)
 end
 
@@ -60,6 +61,7 @@ ENV['MSGMERGE_PATH'] = ENV['MSGMERGE_WRAPPER_PATH'] || 'ruby msgmerge-wrapper.rb
 rule(%r'^po/.+/.+\.po$' => proc {|fn| fn.pathmap '%{^po/.+/,po/}X.pot'}) do |t|
   require 'gettext/utils'
   po_file, pot_file = t.name, t.source
+  puts "#{pot_file} => #{po_file}"
   GetText.msgmerge po_file, pot_file, 'rbot'
 end
 
@@ -70,6 +72,7 @@ rule(%r'^data/locale/.+/LC_MESSAGES/.+\.mo$' => proc {|fn|
     fn.pathmap('%d') ]
 }) do |t|
   po_file, mo_file = t.source, t.name
+  puts "#{po_file} => #{mo_file}"
   require 'gettext/utils'
   GetText.rmsgfmt po_file, mo_file
 end
