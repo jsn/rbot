@@ -418,6 +418,14 @@ module ::Irc
           raise RecurseTooDeep if o[:depth] > MAX_RECURSE_DEPTH
           new_m = o[:class].new(o[:bot], o[:server], o[:source], o[:target], string)
           new_m.recurse_depth = o[:depth]
+          # if "from" message is given, the created message will reply to "from"
+          if from
+            class << new_m
+              self
+            end.send(:define_method, :reply) do |*args|
+              from.reply *args
+            end
+          end
           return new_m unless o[:delegate]
           method = o[:class].to_s.gsub(/^Irc::|Message$/,'').downcase
           method = 'privmsg' if method == 'priv'
