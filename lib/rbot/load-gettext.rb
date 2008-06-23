@@ -24,6 +24,7 @@ begin
 
   add_default_locale_path(File.join(Irc::Bot::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo"))
 
+  GetText.cached = false
   bindtextdomain 'rbot'
 
   module GetText
