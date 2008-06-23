@@ -174,9 +174,26 @@ class LastFmPlugin < Plugin
       page = @bot.httputil.get("#{LASTFM}/user/#{user}", opts)
       if page
         if page.match(/class="nowListening">\s*<td class="subject">\s*<a href="\/music.*?">(.*)<\/a>\s*<\/td/)
-          m.reply "#{user} is jammin to #{$1.ircify_html}"
+          track = $1
+          if page.match(/class="nowListening currentStation">\s*(.*?)<\/a>/m)
+            m.reply "#{user} is #{$1.ircify_html}"
+          end
+          m.reply "#{user} is jammin to #{track.ircify_html}"
+        elsif page.match(/class="justlistened first">\s*<td class="subject">.*<\/span><\/a>?(.*)<\/a>\s*<\/td>\s*<td class="date">\s*just/m)
+          m.reply "#{user} just jammed to #{$1.ircify_html}"
         else
-          m.reply "#{user} isn't listening to anything right now."
+          params[:action] = "recenttracks"
+          params[:user] = user
+          lastfm(m, params)
+        end
+      else
+        return if params[:recurs]
+        if @registry.has_key? ( user ) then
+          params[:who] = @registry[ user ]
+          params[:recurs] = true
+          now_playing(m, params)
+        else
+          m.reply "#{user} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
         end
       end
     rescue
@@ -243,7 +260,7 @@ class LastFmPlugin < Plugin
       user = @registry[ nick ]
       m.reply "#{nick} is #{user} at last.fm"
     else
-      m.reply "Sorry, I don't know who #{nick} is at last.fm"
+      m.reply "Sorry, I don't know who #{nick} is at last.fm perhaps you need to: lastfm set <username>"
     end
   end
 
@@ -265,7 +282,7 @@ class LastFmPlugin < Plugin
       m.reply "#{action} for #{user}:"
       m.reply data.to_a[0..3].map{|l| l.split(',',2)[-1].chomp}.join(", ")
     rescue
-      m.reply "could not find #{action} for #{user} (is #{user} a user?)"
+      m.reply "could not find #{action} for #{user} (is #{user} a user?). perhaps you need to: lastfm set <username>"
     end
   end
 end
