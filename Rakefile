@@ -39,9 +39,9 @@ PLUGIN_FILES = FileList['data/rbot/plugins/**/*.rb']
 NON_PLUGIN_FILES = FileList["{lib,bin,data}/**/*.{rb,rhtml}"] - PLUGIN_FILES
 rgettext_proc = proc do |t|
   require 'gettext/utils'
-  plugin_files, pot_file = t.prerequisites, t.name
-  puts "#{plugin_files.join(', ')} => #{pot_file}"
-  GetText.rgettext(plugin_files, pot_file)
+  source_files, pot_file = t.prerequisites, t.name
+  puts "#{source_files.join(', ')} => #{pot_file}"
+  GetText.rgettext(source_files, pot_file)
 end
 
 # generate pot file for non-plugin files
