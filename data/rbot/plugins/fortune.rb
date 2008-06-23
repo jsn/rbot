@@ -12,34 +12,40 @@ class FortunePlugin < Plugin
     "fortune [<category>] => get a (short) fortune, optionally specifying fortune category || fortune categories => show categories"
   end
 
+  def find_fortune
+    fortune = @bot.config['fortune.path']
+    return fortune if fortune
+
+    ["/usr/bin/fortune",
+     "/usr/share/bin/fortune",
+     "/usr/games/fortune",
+     "/usr/local/games/fortune",
+     "/usr/local/bin/fortune"].each do |f|
+      if FileTest.executable? f
+        fortune = f
+        break
+      end
+    end
+
+    return nil unless fortune
+      
+    # Try setting the config entry
+    config_par = {:key => 'fortune.path', :value => [fortune], :silent => true }
+    debug "Setting fortune.path to #{fortune}"
+    set_path = @bot.plugins['config'].handle_set(m, config_par)
+    if set_path
+      debug "fortune.path set to #{@bot.config['fortune.path']}"
+    else
+      debug "couldn't set fortune.path"
+    end
+
+    return fortune
+  end
 
   ## Pick a fortune
   def fortune(m, params)
     db = params[:db]
-    fortune = @bot.config['fortune.path']
-    if fortune.empty?
-      ["/usr/bin/fortune",
-       "/usr/share/bin/fortune",
-       "/usr/games/fortune",
-       "/usr/local/games/fortune",
-       "/usr/local/bin/fortune"].each do |f|
-          if FileTest.executable? f
-            fortune = f
-
-            # Try setting the config entry
-            config_par = {:key => 'fortune.path', :value => [f], :silent => true }
-	    debug "Setting fortune.path to #{f}"
-            set_path = @bot.plugins['config'].handle_set(m, config_par)
-            if set_path
-              debug "fortune.path set to #{@bot.config['fortune.path']}"
-            else
-              debug "couldn't set fortune.path"
-            end
-
-            break
-          end
-        end
-    end
+    fortune = find_fortune
     m.reply "fortune executable not found (try setting the 'fortune.path' variable)" unless fortune
 
     begin
@@ -67,17 +73,18 @@ class FortunePlugin < Plugin
     m.reply ret
   end
 
-
   # Print the fortune categories
   def categories(m, params)
-    ## list all fortune files in /usr/share/games/fortune
-    categories = Dir["/usr/share/games/fortune/*"].select{ |f|
-      File.split(f).last.match(/^\w+$/)
+    fortune = find_fortune
+    m.reply "fortune executable not found (try setting the 'fortune.path' variable)" unless fortune
+
+    ## list all fortune databases
+    categories = Utils.safe_exec(fortune, "-f").split(/\n+ */).map{ |f|
+      f.split[1]
     }.select{ |f|
-      File.file?(f)
-    }.map{ |p|
-      File.split(p).last
+      f[0..0] != '/'
     }.sort
+
     ## say 'em!
     m.reply "Fortune categories: #{categories.join ', '}"
   end
