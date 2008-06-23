@@ -1509,7 +1509,8 @@ module Irc
                 when *@server.supports[:prefix][:modes]
                   who_wants_params << data[:modes].length - 1
                 else
-                  warning "Unknown mode #{m} in #{serverstring.inspect}"
+                  warning "Ignoring unknown mode #{m} in #{serverstring.inspect}"
+                  data[:modes].pop
                 end
               end
             end
