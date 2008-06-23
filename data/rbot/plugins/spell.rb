@@ -1,4 +1,13 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Spell plugin
+
 class SpellPlugin < Plugin
+  Config.register Config::StringValue.new('spell.program',
+     :default => 'ispell',
+     :desc => _('Program to use to check spelling'))
+
   def help(plugin, topic="")
     _("spell <word> => check spelling of <word>, suggest alternatives")
   end
@@ -7,7 +16,7 @@ class SpellPlugin < Plugin
       m.reply _("incorrect usage: ") + help(m.plugin)
       return
     end
-    p = IO.popen("ispell -a -S", "w+")
+    p = IO.popen("%{prog} -a -S" % {:prog => @bot.config['spell.program']}, "w+")
     if(p)
       p.puts m.params
       p.close_write
@@ -32,7 +41,7 @@ class SpellPlugin < Plugin
       }
       p.close
     else
-      m.reply _("couldn't exec ispell :(")
+      m.reply(_("couldn't exec %{prog} :(") % {:prog => @bot.config['spell.program']})
       return
     end
   end
