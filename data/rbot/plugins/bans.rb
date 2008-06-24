@@ -143,7 +143,7 @@ class BansPlugin < Plugin
 
     @registry[:badwords].each { |badword|
       next unless ['all', m.target.downcase].include?(badword.channel)
-      next unless badword.regexp.match(m.message)
+      next unless badword.regexp.match(m.plainmessage)
 
       do_cmd(badword.action.to_sym, m.source.nick, m.target, badword.timer, badword.reason)
       m.reply "bad word detected! #{badword.action} for #{badword.timer} because: #{badword.reason}"
