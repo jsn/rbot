@@ -42,6 +42,8 @@ module Irc
   Color = "\003"
   ColorRx = /#{Color}\d?\d?(?:,\d\d?)?/
 
+  FormattingRx = /#{AttributeRx}|#{ColorRx}/
+
   # Standard color codes
   ColorCode = {
     :black      => 1,
@@ -120,11 +122,14 @@ module Irc
     # User/Channel message was sent to
     attr_reader :target
 
-    # contents of the message
+    # contents of the message (stripped of initial/final format codes)
     attr_accessor :message
 
     # contents of the message (for logging purposes)
     attr_accessor :logmessage
+
+    # contents of the message (stripped of all formatting)
+    attr_accessor :plainmessage
 
     # has the message been replied to/handled by a plugin?
     attr_accessor :replied
@@ -151,7 +156,7 @@ module Irc
       @source = source
       @address = false
       @target = target
-      @message = BasicUserMessage.stripcolour message
+      @message = message || ""
       @replied = false
       @server = server
       @ignored = false
@@ -167,6 +172,8 @@ module Irc
         end
       end
       @logmessage = @message.dup
+      @plainmessage = BasicUserMessage.strip_formatting(@message)
+      @message = BasicUserMessage.strip_initial_formatting(@message)
 
       if target && target == @bot.myself
         @address = true
@@ -217,6 +224,15 @@ module Irc
       ret = string.gsub(ColorRx, "")
       #ret.tr!("\x00-\x1f", "")
       ret
+    end
+
+    def BasicUserMessage.strip_initial_formatting(string)
+      return "" unless string
+      ret = string.gsub(/^#{FormattingRx}|#{FormattingRx}$/,"")
+    end
+
+    def BasicUserMessage.strip_formatting(string)
+      string.gsub(FormattingRx,"")
     end
 
   end

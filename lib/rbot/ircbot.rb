@@ -929,7 +929,7 @@ class Bot
 
     # if target is a channel with +c or +C modes, strip colours
     if where.kind_of?(Channel) and where.mode.any?('c', 'C')
-      multi_line.replace(BasicUserMessage.stripcolour(multi_line).gsub(AttributeRx,''))
+      multi_line.replace BasicUserMessage.strip_formatting(multi_line)
     end
 
     messages = Array.new
