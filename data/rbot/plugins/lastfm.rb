@@ -160,9 +160,9 @@ class LastFmPlugin < Plugin
   def now_playing(m, params)
     opts = { :cache => false }
     user = nil
-    if params[:who] then
+    if params[:who]
       user = params[:who].to_s
-    elsif @registry.has_key? ( m.sourcenick ) then
+    elsif @registry.has_key? m.sourcenick
       user = @registry[ m.sourcenick ]
     else
       # m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
@@ -188,7 +188,7 @@ class LastFmPlugin < Plugin
         end
       else
         return if params[:recurs]
-        if @registry.has_key? ( user ) then
+        if @registry.has_key? user
           params[:who] = @registry[ user ]
           params[:recurs] = true
           now_playing(m, params)
@@ -251,12 +251,12 @@ class LastFmPlugin < Plugin
 
   def get_user(m, params)
     nick = ""
-    if params[:who] then
+    if params[:who]
       nick = params[:who].to_s
     else 
       nick = m.sourcenick
     end
-    if @registry.has_key?( nick ) then
+    if @registry.has_key? nick
       user = @registry[ nick ]
       m.reply "#{nick} is #{user} at last.fm"
     else
@@ -270,7 +270,7 @@ class LastFmPlugin < Plugin
     user = nil
     if params[:user] then
       user = params[:user].to_s
-    elsif @registry.has_key? ( m.sourcenick ) then
+    elsif @registry.has_key? m.sourcenick
       user = @registry[ m.sourcenick ]
     else
       # m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
