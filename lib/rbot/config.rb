@@ -40,7 +40,9 @@ module Config
       @order = @@order
       @@order += 1
       @key = key.to_sym
-      if params.has_key? :default
+      if @manager.overrides.key?(@key)
+        @default = @manager.overrides[@key]
+      elsif params.has_key? :default
         @default = params[:default]
       else
         @default = false
@@ -226,6 +228,7 @@ module Config
     attr_reader :bot
     attr_reader :items
     attr_reader :config
+    attr_reader :overrides
     attr_accessor :changed
 
     def initialize
@@ -235,6 +238,21 @@ module Config
     def reset_config
       @items = Hash.new
       @config = Hash.new(false)
+
+      # We allow default values for config keys to be overridden by
+      # the config file /etc/rbot.conf
+      # The main purpose for this is to allow distro or system-wide
+      # settings such as external program paths (figlet, toilet, ispell)
+      # to be set once for all the bots.
+      @overrides = Hash.new
+      etcfile = "/etc/rbot.conf"
+      if File.exist?(etcfile)
+        log "Loading defaults from #{etcfile}"
+        etcconf = YAML::load_file(etcfile)
+        etcconf.each { |k, v|
+          @overrides[k.to_sym] = v
+        }
+      end
     end
 
     # Associate with bot _bot_
