@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
-"PO-Revision-Date: 2008-06-05 22:14-0400\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2008-06-24 02:22+0200\n"
+"PO-Revision-Date: 2008-06-24 02:22+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/figlet.rb:7
+#: data/rbot/plugins/figlet.rb:11
 msgid "Path to the figlet program"
+msgstr ""
+
+#: data/rbot/plugins/figlet.rb:16
+msgid "figlet font to use"
+msgstr ""
+
+#: data/rbot/plugins/figlet.rb:22
+msgid "Path to the toilet program"
+msgstr ""
+
+#: data/rbot/plugins/figlet.rb:27
+msgid "toilet font to use"
+msgstr ""
+
+#: data/rbot/plugins/figlet.rb:33
+msgid "toilet filters to use (e.g. gay, metal)"
 msgstr ""

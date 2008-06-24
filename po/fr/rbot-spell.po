@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2008-06-24 02:22+0200\n"
 "PO-Revision-Date: 2008-06-21 15:41+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -15,27 +15,42 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: data/rbot/plugins/spell.rb:3
-msgid "spell <word> => check spelling of <word>, suggest alternatives"
-msgstr "spell <mot> => cherche les corrections du <mot>, suggère des alternatives"
+#: data/rbot/plugins/spell.rb:9
+msgid "Program to use to check spelling"
+msgstr ""
 
-#: data/rbot/plugins/spell.rb:7
+#: data/rbot/plugins/spell.rb:12
+msgid ""
+"Command line used to call the spell.program. Use %s as a placeholder for the "
+"executable name"
+msgstr ""
+
+#: data/rbot/plugins/spell.rb:15
+msgid "spell <word> => check spelling of <word>, suggest alternatives"
+msgstr ""
+"spell <mot> => cherche les corrections du <mot>, suggère des alternatives"
+
+#: data/rbot/plugins/spell.rb:19
 msgid "incorrect usage: "
 msgstr "utilisation incorrecte: "
 
-#: data/rbot/plugins/spell.rb:16
+#: data/rbot/plugins/spell.rb:30
 msgid "%{word} may be spelled correctly"
 msgstr "%{word} dois être ecris correctement"
 
-#: data/rbot/plugins/spell.rb:24
+#: data/rbot/plugins/spell.rb:34
 msgid "%{word} is presumably derived from "
 msgstr "%{word} est presumé derivé de "
 
-#: data/rbot/plugins/spell.rb:28
+#: data/rbot/plugins/spell.rb:36
 msgid "%{word}: no suggestions"
 msgstr "%{word}: aucune suggestions"
 
-#: data/rbot/plugins/spell.rb:35
-msgid "couldn't exec ispell :("
+#: data/rbot/plugins/spell.rb:42
+#, fuzzy
+msgid "couldn't exec %{prog} :("
 msgstr "impossible d'executer ispell :("
 
+#: data/rbot/plugins/spell.rb:45
+msgid "something odd happened while checking %{word} with %{prog}"
+msgstr ""
