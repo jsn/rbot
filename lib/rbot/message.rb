@@ -328,7 +328,8 @@ module Irc
 
       # free splitting for plugins
       @params = @message.dup
-      if @params.gsub!(/^\s*(\S+)[\s$]*/, "")
+      # Created messges (such as by fake_message) can contain multiple lines
+      if @params.gsub!(/\A\s*(\S+)[\s$]*/m, "")
         @plugin = $1.downcase
         @params = nil unless @params.length > 0
       end

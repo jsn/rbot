@@ -519,7 +519,8 @@ class Bot
       # debug "Delimited optionals: #{rx.inspect}"
       rx.gsub!(/(?:\\ )+/, "\\s+")
       # debug "Corrected spaces: #{rx.inspect}"
-      @regexp = Regexp.new("^#{rx}$")
+      # Created message (such as by fake_message) can contain multiple lines
+      @regexp = /\A#{rx}\z/m
     end
 
     # Recognize the provided string components, returning a hash of
