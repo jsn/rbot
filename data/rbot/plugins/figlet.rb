@@ -12,7 +12,7 @@ class FigletPlugin < Plugin
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_figlet })
 
   Config.register Config::StringValue.new('figlet.font',
-     :default => 'rectangles',
+     :default => 'smslant',
      :desc => _('figlet font to use'),
      :validate => Proc.new { |v| v !~ /\s|`/ },
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_figlet })
@@ -23,7 +23,7 @@ class FigletPlugin < Plugin
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_toilet })
 
   Config.register Config::StringValue.new('toilet.font',
-     :default => 'rectangles',
+     :default => 'smslant',
      :desc => _('toilet font to use'),
      :validate => Proc.new { |v| v !~ /\s|`/ },
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_toilet })
@@ -65,7 +65,7 @@ class FigletPlugin < Plugin
     @params[:figlet] = ['-k', '-w', MAX_WIDTH.to_s, '-C', 'utf8']
 
     # add the font from DEFAULT_FONTS to the cmdline (if figlet has that font)
-    @params[:figlet] += ['-f', figlet_font] if @has_figlet_font
+    @params[:figlet] += ['-f', figlet_font] if @has[:figlet_font]
   end
 
   def test_toilet
@@ -79,7 +79,7 @@ class FigletPlugin < Plugin
     @params[:toilet] = ['-k', '-w', MAX_WIDTH.to_s, '-E', 'utf8', '--irc']
 
     # add the font from DEFAULT_FONTS to the cmdline (if toilet has that font)
-    @params[:toilet] += ['-f', toilet_font] if @has_toilet_font
+    @params[:toilet] += ['-f', toilet_font] if @has[:toilet_font]
 
     # add the filters, if any
     toilet_filters.each { |f| @params[:toilet] += ['-F', f.dup] }
