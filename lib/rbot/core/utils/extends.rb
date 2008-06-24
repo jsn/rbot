@@ -400,6 +400,10 @@ module ::Irc
         # the :target, the message :class and whether or not to :delegate. To
         # initialize these entries from an existing message, you can use :from
         #
+        # Additionally, if :from is given, the reply method of created message
+        # is overriden to reply to :from instead. The #in_thread attribute
+        # for created mesage is also copied from :from
+        #
         # If you don't specify a :from you should specify a :source.
         #
         def fake_message(string, opts={})
@@ -418,13 +422,16 @@ module ::Irc
           raise RecurseTooDeep if o[:depth] > MAX_RECURSE_DEPTH
           new_m = o[:class].new(o[:bot], o[:server], o[:source], o[:target], string)
           new_m.recurse_depth = o[:depth]
-          # if "from" message is given, the created message will reply to "from"
           if from
+            # the created message will reply to the originating message
             class << new_m
               self
             end.send(:define_method, :reply) do |*args|
+              debug "replying to '#{from.message}' with #{args.first}"
               from.reply *args
             end
+            # the created message will follow originating message's in_thread
+            new_m.in_thread = from.in_thread if from.respond_to?(:in_thread)
           end
           return new_m unless o[:delegate]
           method = o[:class].to_s.gsub(/^Irc::|Message$/,'').downcase
