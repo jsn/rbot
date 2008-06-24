@@ -427,7 +427,9 @@ class Bot
       # keywords.rbot, which gets deleted on load and would therefore be missing always
       missing = Dir.chdir(template) { Dir.glob('*/**') } - Dir.chdir(botclass) { Dir.glob('*/**') }
       missing.map do |f|
-        FileUtils.cp File.join(template, f), File.join(botclass, f)
+        dest = File.join(botclass, f)
+        FileUtils.mkdir_p File.dirname dest
+        FileUtils.cp File.join(template, f), dest
       end
     else
       log "no #{botclass} directory found, creating from templates.."
