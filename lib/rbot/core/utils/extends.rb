@@ -428,7 +428,7 @@ module ::Irc
               self
             end.send(:define_method, :reply) do |*args|
               debug "replying to '#{from.message}' with #{args.first}"
-              from.reply *args
+              from.reply(*args)
             end
             # the created message will follow originating message's in_thread
             new_m.in_thread = from.in_thread if from.respond_to?(:in_thread)
