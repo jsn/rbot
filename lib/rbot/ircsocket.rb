@@ -455,7 +455,11 @@ module Irc
         if @sock.nil?
           error "SEND attempted on closed socket"
         else
-          @sock.puts(@filter.out(message))
+          # we use Socket#syswrite() instead of Socket#puts() because
+          # the latter is racy and can cause double message output in
+          # some circumstances
+          actual = @filter.out(message) + "\n"
+          @sock.syswrite actual
           @last_send = Time.new
           @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1
