@@ -417,7 +417,19 @@ class Bot
     botclass = File.expand_path(botclass)
     @botclass = botclass.gsub(/\/$/, "")
 
-    unless FileTest.directory? botclass
+    if FileTest.directory? botclass
+      # compare the templates dir with the current botclass, and fill it in with
+      # any missing file.
+      # Sadly, FileUtils.cp_r doesn't have an :update option, so we have to do it
+      # manually
+      template = File.join Config::datadir, 'templates'
+      # note that we use the */** pattern because we don't want to match
+      # keywords.rbot, which gets deleted on load and would therefore be missing always
+      missing = Dir.chdir(template) { Dir.glob('*/**') } - Dir.chdir(botclass) { Dir.glob('*/**') }
+      missing.map do |f|
+        FileUtils.cp File.join(template, f), File.join(botclass, f)
+      end
+    else
       log "no #{botclass} directory found, creating from templates.."
       if FileTest.exist? botclass
         error "file #{botclass} exists but isn't a directory"
