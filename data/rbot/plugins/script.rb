@@ -112,7 +112,7 @@ class ScriptPlugin < Plugin
     code    = params[:code].to_s
     nick    = m.sourcenick
     created = Time.new.strftime '%Y/%m/%d %H:%m'
-    channel = m.target
+    channel = m.target.to_s
 
     command = Command.new( code, nick, created, channel )
     @commands[name] = command
