@@ -48,7 +48,7 @@ class UrbanPlugin < Plugin
       resp = @bot.httputil.head('http://www.urbandictionary.com/random.php',
                                :max_redir => -1,
                                :cache => false)
-      return m.reply "Couldn't get the urban dictionary word of the day" if resp.nil?
+      return m.reply "Couldn't get a random urban dictionary word" if resp.nil?
       if resp.code == "302" && (loc = resp['location'])
         words = URI.unescape(loc.match(/define.php\?term=(.*)$/)[1]) rescue nil
       end
