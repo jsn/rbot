@@ -133,6 +133,7 @@ module Irc
 
     # has the message been replied to/handled by a plugin?
     attr_accessor :replied
+    alias :replied? :replied
 
     # should the message be ignored?
     attr_accessor :ignored
@@ -141,6 +142,25 @@ module Irc
     # set this to true if the method that delegates the message is run in a thread
     attr_accessor :in_thread
     alias :in_thread? :in_thread
+
+    def inspect(fields=nil)
+      ret = self.__to_s__[0..-2]
+      ret << ' bot=' << @bot.__to_s__
+      ret << ' server=' << server.to_s
+      ret << ' time=' << time.to_s
+      ret << ' source=' << source.to_s
+      ret << ' target=' << target.to_s
+      ret << ' message=' << message.inspect
+      ret << ' logmessage=' << logmessage.inspect
+      ret << ' plainmessage=' << plainmessage.inspect
+      ret << fields if fields
+      ret << ' (identified)' if identified?
+      ret << ' (addressed to me)' if identified?
+      ret << ' (replied)' if replied?
+      ret << ' (ignored)' if ignored?
+      ret << ' (in thread)' if in_thread?
+      ret << '>'
+    end
 
     # instantiate a new Message
     # bot::      associated bot class
@@ -251,6 +271,24 @@ module Irc
   # The +message+ member will have any bot addressing "^bot: " removed
   # (address? will return true in this case)
   class UserMessage < BasicUserMessage
+
+    def inspect
+      fields = ' plugin=' << plugin.inspect
+      fields << ' params=' << params.inspect
+      fields << ' channel=' << channel.to_s if channel
+      fields << ' (reply to ' << replyto.to_s << ')'
+      if self.private?
+        fields << ' (private)'
+      else
+        fields << ' (public)'
+      end
+      if self.action?
+        fields << ' (action)'
+      elsif ctcp
+        fields << ' (CTCP ' << ctcp << ')'
+      end
+      super(fields)
+    end
 
     # for plugin messages, the name of the plugin invoked by the message
     attr_reader :plugin
@@ -450,6 +488,11 @@ module Irc
     # channel user was kicked from
     attr_reader :channel
 
+    def inspect
+      fields = ' channel=' << channel.to_s
+      super(fields)
+    end
+
     def initialize(bot, server, source, target, channel, message="")
       super(bot, server, source, target, message)
       @channel = channel
@@ -462,6 +505,11 @@ module Irc
   class InviteMessage < BasicUserMessage
     # channel user was invited to
     attr_reader :channel
+
+    def inspect
+      fields = ' channel=' << channel.to_s
+      super(fields)
+    end
 
     def initialize(bot, server, source, target, channel, message="")
       super(bot, server, source, target, message)
@@ -485,6 +533,12 @@ module Irc
     def newnick
       return @message
     end
+
+    def inspect
+      fields = ' old=' << oldnick
+      fields << ' new=' << newnick
+      super(fields)
+    end
   end
 
   # class to manage mode changes
@@ -495,6 +549,11 @@ module Irc
       @address = (source == @bot.myself)
       @modes = []
     end
+
+    def inspect
+      fields = ' modes=' << modes.inspect
+      super(fields)
+    end
   end
 
   # class to manage NAME replies
@@ -503,6 +562,11 @@ module Irc
     def initialize(bot, server, source, target, message="")
       super(bot, server, source, target, message)
       @users = []
+    end
+
+    def inspect
+      fields = ' users=' << users.inspect
+      super(fields)
     end
   end
 
@@ -531,12 +595,24 @@ module Irc
       @channel = channel
       @info_or_set = nil
     end
+
+    def inspect
+      fields = ' topic=' << topic
+      fields << ' (set on ' << timestamp << ')'
+      super(fields)
+    end
   end
 
   # class to manage channel joins
   class JoinMessage < BasicUserMessage
     # channel joined
     attr_reader :channel
+
+    def inspect
+      fields = ' channel=' << channel.to_s
+      super(fields)
+    end
+
     def initialize(bot, server, source, channel, message="")
       super(bot, server, source, channel, message)
       @channel = channel
