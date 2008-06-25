@@ -1,0 +1,32 @@
+From fa4672aed1363f1e5b63a98de968e535cd083c2c Mon Sep 17 00:00:00 2001
+From: Spencer RInehart <anubis@vt.edu>
+Date: Wed, 25 Jun 2008 15:21:08 -0400
+Subject: [PATCH] urban plugin: when urbandictionary.com goes offline, don't throw errors.
+
+---
+ data/rbot/plugins/urban.rb |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/data/rbot/plugins/urban.rb b/data/rbot/plugins/urban.rb
+index d4aaef6..1b9d724 100644
+--- a/data/rbot/plugins/urban.rb
++++ b/data/rbot/plugins/urban.rb
+@@ -17,6 +17,7 @@ class UrbanPlugin < Plugin
+     u = URBAN + URI.escape(word)
+     u += '&page=' + p.to_s if p > 1
+     s = @bot.httputil.get(u)
++    return m.reply "Urbandictionary.com is currently offline." if s.nil?
+ 
+     notfound = s.match %r{<div style="color: #669FCE"><i>.*?</i> isn't defined}
+ 
+@@ -47,6 +48,7 @@ class UrbanPlugin < Plugin
+       resp = @bot.httputil.head('http://www.urbandictionary.com/random.php',
+                                :max_redir => -1,
+                                :cache => false)
++      return m.reply "Urbandictionary.com is currently offline." if resp.nil?
+       if resp.code == "302" && (loc = resp['location'])
+         words = URI.unescape(loc.match(/define.php\?term=(.*)$/)[1]) rescue nil
+       end
+-- 
+1.5.5.1
+

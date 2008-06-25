@@ -17,6 +17,7 @@ class UrbanPlugin < Plugin
     u = URBAN + URI.escape(word)
     u += '&page=' + p.to_s if p > 1
     s = @bot.httputil.get(u)
+    return m.reply "Couldn't get the urban dictionary definition for #{word}" if s.nil?
 
     notfound = s.match %r{<div style="color: #669FCE"><i>.*?</i> isn't defined}
 
@@ -47,6 +48,7 @@ class UrbanPlugin < Plugin
       resp = @bot.httputil.head('http://www.urbandictionary.com/random.php',
                                :max_redir => -1,
                                :cache => false)
+      return m.reply "Couldn't get the urban dictionary word of the day" if resp.nil?
       if resp.code == "302" && (loc = resp['location'])
         words = URI.unescape(loc.match(/define.php\?term=(.*)$/)[1]) rescue nil
       end
