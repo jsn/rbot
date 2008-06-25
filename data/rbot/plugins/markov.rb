@@ -209,7 +209,7 @@ class MarkovPlugin < Plugin
     return if ignore? m.source
 
     # in channel message, the kind we are interested in
-    message = clean_str m.message
+    message = clean_str m.plainmessage
 
     if m.action?
       message = "#{m.sourcenick} #{message}"
