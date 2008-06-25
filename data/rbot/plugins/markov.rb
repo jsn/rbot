@@ -32,6 +32,19 @@ class MarkovPlugin < Plugin
       @bot.config['markov.probability'] = @registry['probability']
       @registry.delete('probability')
     end
+    @learning_queue = Queue.new
+    @learning_thread = Thread.new do
+      while s = @learning_queue.pop
+        learn s
+      end
+    end
+  end
+
+  def cleanup
+    debug 'closing learning thread'
+    @learning_queue.push nil
+    @learning_thread.join
+    debug 'learning thread closed'
   end
 
   def generate_string(word1, word2)
@@ -202,20 +215,22 @@ class MarkovPlugin < Plugin
       message = "#{m.sourcenick} #{message}"
     end
     
+    @learning_queue.push message
+    random_markov(m, message) unless m.replied?
+  end
+
+  def learn(message)
+    # debug "learning #{message}"
     wordlist = message.split(/\s+/)
     return unless wordlist.length >= 2
-    Thread.new do
-      word1, word2 = :nonword, :nonword
-      wordlist.each do |word3|
-        k = "#{word1} #{word2}"
-        @registry[k] = @registry[k].push(word3)
-        word1, word2 = word2, word3
-      end
+    word1, word2 = :nonword, :nonword
+    wordlist.each do |word3|
       k = "#{word1} #{word2}"
-      @registry[k] = @registry[k].push(:nonword)
-
-      random_markov(m, message) unless m.replied?
+      @registry[k] = @registry[k].push(word3)
+      word1, word2 = word2, word3
     end
+    k = "#{word1} #{word2}"
+    @registry[k] = @registry[k].push(:nonword)
   end
 end
 
