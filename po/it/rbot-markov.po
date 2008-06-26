@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2008-06-26 14:47+0200\n"
 "PO-Revision-Date: 2008-06-22 12:05+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -15,7 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/markov.rb:133
+#: data/rbot/plugins/markov.rb:146
 msgid "markov has a %{prob}% chance of chipping in"
 msgstr "markov ha una probabilità del %{prob}% di intervenire"
-

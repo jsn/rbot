@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-24 02:22+0200\n"
+"POT-Creation-Date: 2008-06-26 14:47+0200\n"
 "PO-Revision-Date: 2008-06-21 15:04+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"

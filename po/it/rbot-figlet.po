@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-24 02:22+0200\n"
+"POT-Creation-Date: 2008-06-26 14:47+0200\n"
 "PO-Revision-Date: 2007-08-23 17:49+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"

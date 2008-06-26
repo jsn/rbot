@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-24 02:22+0200\n"
+"POT-Creation-Date: 2008-06-26 14:47+0200\n"
 "PO-Revision-Date: 2007-07-14 00:06-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: English\n"
@@ -179,6 +179,10 @@ msgstr "%{word} learned from %{user} on %{date}"
 #, fuzzy
 msgid "sorry, no %{key} data for %{user}"
 msgstr "%{word} learned from %{user} on %{date}"
+
+#: lib/rbot/core/config.rb:12
+msgid " [%{secs} ago]"
+msgstr ""
 
 #: lib/rbot/core/config.rb:18
 msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
@@ -900,19 +904,19 @@ msgstr ""
 msgid "%{user}, you don't have '%{command}' permissions here"
 msgstr "%{user}, you don't have '%{command}' permissions here"
 
-#: lib/rbot/ircbot.rb:1189
+#: lib/rbot/ircbot.rb:1203
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1191
+#: lib/rbot/ircbot.rb:1205
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1194
+#: lib/rbot/ircbot.rb:1208
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1205
+#: lib/rbot/ircbot.rb:1219
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
@@ -1031,19 +1035,19 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "marshal recovery failed, trying default"
 
-#: lib/rbot/config.rb:217
+#: lib/rbot/config.rb:219
 msgid "%{desc} [valid values are: %{values}]"
 msgstr "%{desc} [valid values are: %{values}]"
 
-#: lib/rbot/config.rb:352
+#: lib/rbot/config.rb:370
 msgid "First time rbot configuration wizard"
 msgstr "First time rbot configuration wizard"
 
-#: lib/rbot/config.rb:355
+#: lib/rbot/config.rb:373
 msgid "This wizard will ask you a few questions to get you started."
 msgstr "This wizard will ask you a few questions to get you started."
 
-#: lib/rbot/config.rb:356
+#: lib/rbot/config.rb:374
 msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
