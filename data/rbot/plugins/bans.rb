@@ -298,8 +298,8 @@ class BansPlugin < Plugin
 
       badwords.each { |badword|
         next unless ['all', badword.channel].include?(channel)
-	debug "Removing #{badword.inspect}" if badword == regexp
-        badwords.delete(badword) if badword == regexp
+        debug "Removing #{badword.inspect}" if badword.regexp == regexp
+        badwords.delete(badword) if badword.regexp == regexp
       }
     end
 
