@@ -1184,7 +1184,7 @@ class Bot
   end
 
   # changing mode
-  def mode(channel, mode, target)
+  def mode(channel, mode, target=nil)
     sendq "MODE #{channel} #{mode} #{target}", channel, 2
   end
 
