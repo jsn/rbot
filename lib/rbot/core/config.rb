@@ -9,9 +9,9 @@ class ConfigModule < CoreBotModule
 
   def version_string
     if $version_timestamp.to_i > 0
-      ago = String.new ' ['
-      ago << Utils.secs_to_string(Time.now.to_i - $version_timestamp.to_i)
-      ago << ' ago]'
+      ago = _(" [%{secs} ago]") % {
+        :secs => Utils.secs_to_string(Time.now.to_i - $version_timestamp.to_i)
+      }
     else
       ago = ''
     end
