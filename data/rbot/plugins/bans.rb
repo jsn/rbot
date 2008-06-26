@@ -401,15 +401,13 @@ class BansPlugin < Plugin
 
     case action
     when :ban
-      set_mode(channel, "+b", nick)
-      @bot.timer.add_once(timer) { set_mode(channel, "-b", nick) } if timer > 0
+      set_temporary_mode(channel, 'b', nick, timer)
     when :unban
       set_mode(channel, "-b", nick)
     when :kick
       do_kick(channel, nick, reason)
     when :kickban
-      set_mode(channel, "+b", nick)
-      @bot.timer.add_once(timer) { set_mode(channel, "-b", nick) } if timer > 0
+      set_temporary_mode(channel, 'b', nick, timer)
       do_kick(channel, nick, reason)
     when :silence, :quiet
       set_mode(channel, "+q", nick)
@@ -422,6 +420,13 @@ class BansPlugin < Plugin
   def set_mode(channel, mode, nick)
     host = channel.has_user?(nick) ? "*!*@" + channel.get_user(nick).host : nick
     @bot.mode(channel, mode, host)
+  end
+
+  def set_temporary_mode(channel, mode, nick, timer)
+    host = channel.has_user?(nick) ? "*!*@" + channel.users[nick].host : nick
+    @bot.mode(channel, "+#{mode}", host)
+    return if timer == 0
+    @bot.timer.add_once(timer) { @bot.mode(channel, "-#{mode}", host) }
   end
 
   def do_kick(channel, nick, reason="")
