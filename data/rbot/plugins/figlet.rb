@@ -54,6 +54,8 @@ class FigletPlugin < Plugin
     @bot.config['toilet.filters']
   end
 
+  attr_reader :has, :params
+
   def test_figlet
     #check that figlet is present
     @has[:figlet] = File.exist?(figlet_path)
@@ -102,7 +104,7 @@ class FigletPlugin < Plugin
   end
 
   def figlet(m, params)
-    key = m.plugin.intern
+    key = params[:plugin] || m.plugin.intern
     unless @has[key]
       m.reply("%{cmd} couldn't be found. if it's installed, you should set the %{cmd}.path config key to its path" % {
         :cmd => key
@@ -117,7 +119,7 @@ class FigletPlugin < Plugin
     end
 
     # collect the parameters to pass to safe_exec
-    exec_params = [send(:"#{m.plugin}_path")] + @params[key] + [message]
+    exec_params = [send(:"#{key}_path")] + @params[key] + [message]
 
     # run the program
     m.reply Utils.safe_exec(*exec_params), :max_lines => 0
