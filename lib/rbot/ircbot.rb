@@ -1054,8 +1054,14 @@ class Bot
   end
 
   # set topic of channel +where+ to +topic+
-  def topic(where, topic)
-    sendq "TOPIC #{where} :#{topic}", where, 2
+  # can also be used to retrieve the topic of channel +where+
+  # by omitting the last argument
+  def topic(where, topic=nil)
+    if topic.nil?
+      sendq "TOPIC #{where}", where, 2
+    else
+      sendq "TOPIC #{where} :#{topic}", where, 2
+    end
   end
 
   def disconnect(message=nil)
