@@ -1122,19 +1122,14 @@ module Irc
           data[:message] = argv[2]
           handle(:badnick, data)
         when RPL_TOPIC
-          data[:channel] = @server.get_channel(argv[1])
+          data[:channel] = @server.channel(argv[1])
           data[:topic] = argv[2]
-
-          if data[:channel]
-            data[:channel].topic.text = data[:topic]
-          else
-            warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
-          end
+          data[:channel].topic.text = data[:topic]
 
           handle(:topic, data)
         when RPL_TOPIC_INFO
           data[:nick] = @server.user(argv[0])
-          data[:channel] = @server.get_channel(argv[1])
+          data[:channel] = @server.channel(argv[1])
 
           # This must not be an IRC::User because it might not be an actual User,
           # and we risk overwriting valid User data
@@ -1142,12 +1137,8 @@ module Irc
 
           data[:time] = Time.at(argv[3].to_i)
 
-          if data[:channel]
-            data[:channel].topic.set_by = data[:source]
-            data[:channel].topic.set_on = data[:time]
-          else
-            warning "Received topic #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
-          end
+          data[:channel].topic.set_by = data[:source]
+          data[:channel].topic.set_on = data[:time]
 
           handle(:topicinfo, data)
         when RPL_NAMREPLY
