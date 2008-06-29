@@ -467,17 +467,17 @@ module Irc
 
   # class to manage IRC PRIVMSGs
   class PrivMessage < UserMessage
-    def initialize(bot, server, source, target, message)
-      @msg_wants_id = true
-      super
+    def initialize(bot, server, source, target, message, opts={})
+      @msg_wants_id = opts[:handle_id]
+      super(bot, server, source, target, message)
     end
   end
 
   # class to manage IRC NOTICEs
   class NoticeMessage < UserMessage
-    def initialize(bot, server, source, target, message)
-      @msg_wants_id = true
-      super
+    def initialize(bot, server, source, target, message, opts={})
+      @msg_wants_id = opts[:handle_id]
+      super(bot, server, source, target, message)
     end
   end
 

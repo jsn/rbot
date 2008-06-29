@@ -615,7 +615,7 @@ class Bot
     }
 
     @client[:privmsg] = proc { |data|
-      m = PrivMessage.new(self, server, data[:source], data[:target], data[:message])
+      m = PrivMessage.new(self, server, data[:source], data[:target], data[:message], :handle_id => true)
       # debug "Message source is #{data[:source].inspect}"
       # debug "Message target is #{data[:target].inspect}"
       # debug "Bot is #{myself.inspect}"
@@ -629,7 +629,7 @@ class Bot
       @plugins.irc_delegate('privmsg', m)
     }
     @client[:notice] = proc { |data|
-      message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message])
+      message = NoticeMessage.new(self, server, data[:source], data[:target], data[:message], :handle_id => true)
       # pass it off to plugins that want to hear everything
       @plugins.irc_delegate "notice", message
     }
