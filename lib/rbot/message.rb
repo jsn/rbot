@@ -233,11 +233,6 @@ module Irc
       return @address
     end
 
-    # has this message been replied to by a plugin?
-    def replied?
-      return @replied
-    end
-
     # strip mIRC colour escapes from a string
     def BasicUserMessage.stripcolour(string)
       return "" unless string
