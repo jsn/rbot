@@ -177,6 +177,11 @@ task :updatepo => [:define_po_rules, :check_po_tools] + LOCALES.map {|l|
   PLUGIN_BASENAMES.map {|n| "po/#{l}/rbot-#{n}.po"}
 }.flatten
 
+desc 'Normalize po files'
+task :normalizepo => :check_po_tools do
+  FileList['po/*/*.po'].each {|fn| normalize_po(fn)}
+end
+
 desc 'Generate mo files'
 task :makemo => LOCALES.map {|l|
   ["data/locale/#{l}/LC_MESSAGES/rbot.mo"] +
