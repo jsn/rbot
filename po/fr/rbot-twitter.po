@@ -22,4 +22,3 @@ msgstr "actions qui seront twitted"
 #: data/rbot/plugins/twitter.rb:174
 msgid "actions will not be twitted"
 msgstr "actions qui ne seront pas twitted"
-

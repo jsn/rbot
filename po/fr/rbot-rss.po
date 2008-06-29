@@ -18,4 +18,3 @@ msgstr ""
 #: data/rbot/plugins/rss.rb:814
 msgid "no such feed %{handle}"
 msgstr "aucun module %{module}"
-

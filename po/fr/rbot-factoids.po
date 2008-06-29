@@ -48,11 +48,14 @@ msgid "%{name} (%{fname}) doesn't exist"
 msgstr "%{name} (%{fname}) n'existe pas"
 
 #: data/rbot/plugins/factoids.rb:263
-msgid "factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>"
-msgstr "factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>"
+msgid ""
+"factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
+"<words>"
+msgstr ""
+"factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
+"<words>"
 
-#: data/rbot/plugins/factoids.rb:292
-#: data/rbot/plugins/factoids.rb:404
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404
 #: data/rbot/plugins/factoids.rb:436
 msgid "please select a fact number between 1 and %{total}"
 msgstr "veuillez selectionner un nombre entre 1 et %{total}"
@@ -77,14 +80,15 @@ msgstr "[%{idx}/%{total}] %{fact}"
 msgid "I know %{total} facts"
 msgstr "Je connais %{total} facts"
 
-#: data/rbot/plugins/factoids.rb:352
-#: data/rbot/plugins/factoids.rb:420
+#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:420
 msgid "I know nothing about %{words}"
 msgstr "Je ne connais rien à propos de %{word}"
 
 #: data/rbot/plugins/factoids.rb:357
 msgid "%{len} out of %{total} facts refer to %{words}, I'll only show %{max}"
-msgstr "%{len} de %{total} facts se referent a %{words}, Je n'en montrerais que %{max}"
+msgstr ""
+"%{len} de %{total} facts se referent a %{words}, Je n'en montrerais que %"
+"{max}"
 
 #: data/rbot/plugins/factoids.rb:412
 msgid "I know nothing"
@@ -105,4 +109,3 @@ msgstr "impossible d'importer les facts depuis %{fname}: %{err}"
 #: data/rbot/plugins/factoids.rb:480
 msgid "%{len} facts loaded from %{fname}"
 msgstr "%{len} facts chargés depuis %{fname}"
-

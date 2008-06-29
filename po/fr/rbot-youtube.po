@@ -16,17 +16,24 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: data/rbot/plugins/youtube.rb:33
-msgid "Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %{duration}. %{views} views, faved %{faves} times. %{desc}"
-msgstr "Categorie: %{cat}. Note: %{rating}. Autheur: %{author}. Durée: %{duration}. %{views} vues, favoris %{faves} fois. %{desc}"
+msgid ""
+"Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %"
+"{duration}. %{views} views, faved %{faves} times. %{desc}"
+msgstr ""
+"Categorie: %{cat}. Note: %{rating}. Autheur: %{author}. Durée: %{duration}. %"
+"{views} vues, favoris %{faves} fois. %{desc}"
 
-#: data/rbot/plugins/youtube.rb:77
-#: data/rbot/plugins/youtube.rb:107
+#: data/rbot/plugins/youtube.rb:77 data/rbot/plugins/youtube.rb:107
 msgid "unknown duration"
 msgstr "durée inconnue"
 
 #: data/rbot/plugins/youtube.rb:183
-msgid "%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%{duration}). %{views} views, faved %{faves} times. %{desc}"
-msgstr "%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} par %{author} (%{duration}). %{views} vues, favoris %{faves} fois. %{desc}"
+msgid ""
+"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%"
+"{duration}). %{views} views, faved %{faves} times. %{desc}"
+msgstr ""
+"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} par %{author} (%"
+"{duration}). %{views} vues, favoris %{faves} fois. %{desc}"
 
 #: data/rbot/plugins/youtube.rb:186
 msgid ""
@@ -55,4 +62,3 @@ msgstr "Une video trouvée pour %{what}: %{show}"
 #: data/rbot/plugins/youtube.rb:222
 msgid "Videos for %{what}: %{shorts}"
 msgstr "Videos pour %{what}: %{shorts}"
-

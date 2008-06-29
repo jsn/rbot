@@ -15,292 +15,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: lib/rbot/core/filters_ui.rb:25
-msgid "no filters in group %{g}"
-msgstr ""
+#: lib/rbot/botuser.rb:40
+msgid "Password for the bot owner"
+msgstr "機器人擁有者的密碼"
 
-#: lib/rbot/core/filters_ui.rb:27
-msgid "no known filters"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:30
-msgid "known filters: "
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:38
-msgid "no known filter groups"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:40
-msgid "known filter groups: "
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:50
-msgid "no filters match %{pat}"
-msgstr ""
-
-#: lib/rbot/core/filters_ui.rb:52
-msgid "filters matching %{pat}: "
-msgstr ""
-
-#: lib/rbot/core/basics.rb:107
-msgid "quit [<message>] => quit IRC with message <message>"
-msgstr "quit [<message>] => 講 <message> 並離開 IRC"
-
-#: lib/rbot/core/basics.rb:109
-msgid "restart => completely stop and restart the bot (including reconnect)"
-msgstr "restart => 徹底停止並重新啟動機器人（包括重新連線）"
-
-#: lib/rbot/core/basics.rb:113
-msgid "part"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:115
-msgid "hide => part all channels"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:117
-msgid "nick <nick> => attempt to change nick to <nick>"
-msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
-
-#: lib/rbot/core/basics.rb:119
+#: lib/rbot/botuser.rb:43
 msgid ""
-"say <channel>|<nick> <message> => say <message> to <channel> or in private "
-"message to <nick>"
+"Set false to prevent new botusers from logging in without a password when "
+"the user netmask is known"
 msgstr ""
+"設定為 false 可以避免新使用者們如果符合使用者遮罩(user mask)，就不需要密碼也"
+"能登入"
 
-#: lib/rbot/core/basics.rb:121
+#: lib/rbot/botuser.rb:46
 msgid ""
-"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
-"private message to <nick>"
+"Set false to prevent new botusers from recognizing IRC users without a need "
+"to manually login"
+msgstr ""
+"Set false to prevent new botusers from recognizing IRC users without a need "
+"to manually login"
+
+#: lib/rbot/botuser.rb:49
+msgid "Set true to allow new botusers to be created automatically"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:123
+#: lib/rbot/botuser.rb:913
+msgid "%{user}, you don't have '%{command}' permissions here"
+msgstr "%{user}，你並沒有 '%{command}' 權限"
+
+#: lib/rbot/config.rb:219
+msgid "%{desc} [valid values are: %{values}]"
+msgstr "%{desc} [符合規定的值為: %{values}]"
+
+#: lib/rbot/config.rb:370
+msgid "First time rbot configuration wizard"
+msgstr "首次使用 rbot 設定精靈"
+
+#: lib/rbot/config.rb:373
+msgid "This wizard will ask you a few questions to get you started."
+msgstr "這個設定精靈會透過一些問句來協助你開始使用。"
+
+#: lib/rbot/config.rb:374
 msgid ""
-"quiet [in here|<channel>] => with no arguments, stop speaking in all "
-"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
-"<channel>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:125
-msgid ""
-"talk [in here|<channel>] => with no arguments, resume speaking in all "
-"channels, if \"in here\", resume speaking in this channel, or resume "
-"speaking in <channel>"
-msgstr ""
-
-#: lib/rbot/core/basics.rb:127
-msgid "ping => replies with a pong"
-msgstr "ping => 回答 pong"
-
-#: lib/rbot/core/basics.rb:129
-msgid ""
-"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
-"to <mode>"
-msgstr ""
-"mode <channel> <mode> <nicks> => 設定 <nicks> 在 <channel> 頻道的權限為 "
-"<mode>"
-
-#: lib/rbot/core/basics.rb:135
-msgid ""
-"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
-"quiet, talk, ping, mode"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:202
-msgid "year"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:202
-msgid "years"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:204
-msgid "month"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:204
-msgid "months"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:206
-msgid "day"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:206
-msgid "days"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:208
-msgid "hour"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:208
-msgid "hours"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:210
-msgid "minute"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:210
-msgid "minutes"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:212
-msgid "second"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:212
-msgid "seconds"
-msgstr ""
-
-#: lib/rbot/core/utils/utils.rb:219
-msgid " and "
-msgstr ""
-
-#: lib/rbot/core/userdata.rb:146
-msgid "%{key} data for %{user}: %{data}"
-msgstr ""
-
-#: lib/rbot/core/userdata.rb:152
-msgid "sorry, no %{key} data for %{user}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:12
-msgid " [%{secs} ago]"
-msgstr ""
-
-#: lib/rbot/core/config.rb:18
-msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:39
-msgid "no such module %{module}"
-msgstr "沒有 %{module} 模組"
-
-#: lib/rbot/core/config.rb:55 lib/rbot/core/config.rb:66
-#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:101
-#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:150
-#, fuzzy
-msgid "no such config key %{key}"
-msgstr "已建立使用者 %{user}"
-
-#: lib/rbot/core/config.rb:78
-msgid "no config key found matching %{r}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:80
-msgid "possible keys: %{kl}"
-msgstr ""
-
-#: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
-#: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
-msgid "this config change will take effect on the next restart"
-msgstr ""
-
-#: lib/rbot/core/config.rb:94 lib/rbot/core/config.rb:115
-#: lib/rbot/core/config.rb:143 lib/rbot/core/config.rb:166
-msgid "this config change will take effect on the next rescan"
-msgstr ""
-
-#: lib/rbot/core/config.rb:108
-#, fuzzy
-msgid "failed to set %{key}: %{error}"
-msgstr "無法建立 %{user}: %{exception}"
-
-#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:154
-msgid "config key %{key} is not an array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:138
-#, fuzzy
-msgid "failed to add %{value} to %{key}: %{error}"
-msgstr "無法建立 %{user}: %{exception}"
-
-#: lib/rbot/core/config.rb:161
-#, fuzzy
-msgid "failed to remove %{value} from %{key}: %{error}"
-msgstr "無法建立 %{user}: %{exception}"
-
-#: lib/rbot/core/config.rb:175
-msgid "saving ..."
-msgstr "正在儲存 ..."
-
-#: lib/rbot/core/config.rb:177
-msgid "rescanning ..."
-msgstr "正在重新掃描 ..."
-
-#: lib/rbot/core/config.rb:179
-msgid "done. %{plugin_status}"
-msgstr "完成。%{plugin_status}"
-
-#: lib/rbot/core/config.rb:220
-msgid ""
-"config list => list configuration modules, config list <module> => list "
-"configuration keys for module <module>"
-msgstr ""
-"config list => 列出可設定模組, config list <module> => 列出 <module> 模組的可"
-"設定參數"
-
-#: lib/rbot/core/config.rb:222
-msgid "config get <key> => get configuration value for key <key>"
-msgstr "config get <key> => 取得 <key> 的設定值"
-
-#: lib/rbot/core/config.rb:224
-msgid "reset key <key> to the default"
-msgstr "重設 <key> 回預設值"
-
-#: lib/rbot/core/config.rb:226
-msgid ""
-"config set <key> <value> => set configuration value for key <key> to <value>"
-msgstr "config set <key> <value> => 設定參數 <key> 的數值為 <value>"
-
-#: lib/rbot/core/config.rb:228
-msgid "config desc <key> => describe what key <key> configures"
-msgstr "config desc <key> => 描述參數 <key> 的功用"
-
-#: lib/rbot/core/config.rb:230
-msgid ""
-"config add <value> to <key> => add value <value> to key <key> if <key> is an "
-"array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:232
-msgid ""
-"config rm <value> from <key> => remove value <value> from key <key> if <key> "
-"is an array"
-msgstr ""
-
-#: lib/rbot/core/config.rb:234
-msgid ""
-"config module - bot configuration. usage: list, desc, get, set, unset, add, "
-"rm"
-msgstr "config 模組 - 機器人設定。用法: list, desc, get, set, unset, add, "
-
-#: lib/rbot/core/config.rb:239
-msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
-msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
-
-#: lib/rbot/core/config.rb:241
-msgid "status => display some information on the bot's status"
-msgstr ""
-
-#: lib/rbot/core/config.rb:243
-msgid "save => save current dynamic data and configuration"
-msgstr "save => 儲存目前動態資料與設定"
-
-#: lib/rbot/core/config.rb:245
-msgid "rescan => reload modules and static facts"
-msgstr "rescan => 重新載入模組與靜態論據"
-
-#: lib/rbot/core/config.rb:247
-msgid "version => describes software version"
-msgstr "version => 描述軟體版本"
-
-#: lib/rbot/core/config.rb:249
-msgid "config-related tasks: config, save, rescan, version, nick, status"
-msgstr "設定相關任務: config, save, rescan"
+"The rest of rbot's configuration can be manipulated via IRC once rbot is "
+"connected and you are auth'd."
+msgstr "一旦機器人連上 IRC，只要你認證成功，就可以修改其餘的設定。"
 
 #: lib/rbot/core/auth.rb:69
 msgid "please do not use + or - in front of command %{command} when resetting"
@@ -831,33 +590,292 @@ msgstr "分析載入資料 ..."
 msgid "failed to parse data: %{exception}"
 msgstr "分析資料失敗: %{excaption}"
 
-#: lib/rbot/botuser.rb:40
-msgid "Password for the bot owner"
-msgstr "機器人擁有者的密碼"
+#: lib/rbot/core/basics.rb:107
+msgid "quit [<message>] => quit IRC with message <message>"
+msgstr "quit [<message>] => 講 <message> 並離開 IRC"
 
-#: lib/rbot/botuser.rb:43
+#: lib/rbot/core/basics.rb:109
+msgid "restart => completely stop and restart the bot (including reconnect)"
+msgstr "restart => 徹底停止並重新啟動機器人（包括重新連線）"
+
+#: lib/rbot/core/basics.rb:113
+msgid "part"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:115
+msgid "hide => part all channels"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:117
+msgid "nick <nick> => attempt to change nick to <nick>"
+msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+
+#: lib/rbot/core/basics.rb:119
 msgid ""
-"Set false to prevent new botusers from logging in without a password when "
-"the user netmask is known"
+"say <channel>|<nick> <message> => say <message> to <channel> or in private "
+"message to <nick>"
 msgstr ""
-"設定為 false 可以避免新使用者們如果符合使用者遮罩(user mask)，就不需要密碼也"
-"能登入"
 
-#: lib/rbot/botuser.rb:46
+#: lib/rbot/core/basics.rb:121
 msgid ""
-"Set false to prevent new botusers from recognizing IRC users without a need "
-"to manually login"
-msgstr ""
-"Set false to prevent new botusers from recognizing IRC users without a need "
-"to manually login"
-
-#: lib/rbot/botuser.rb:49
-msgid "Set true to allow new botusers to be created automatically"
+"action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
+"private message to <nick>"
 msgstr ""
 
-#: lib/rbot/botuser.rb:913
-msgid "%{user}, you don't have '%{command}' permissions here"
-msgstr "%{user}，你並沒有 '%{command}' 權限"
+#: lib/rbot/core/basics.rb:123
+msgid ""
+"quiet [in here|<channel>] => with no arguments, stop speaking in all "
+"channels, if \"in here\", stop speaking in this channel, or stop speaking in "
+"<channel>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:125
+msgid ""
+"talk [in here|<channel>] => with no arguments, resume speaking in all "
+"channels, if \"in here\", resume speaking in this channel, or resume "
+"speaking in <channel>"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:127
+msgid "ping => replies with a pong"
+msgstr "ping => 回答 pong"
+
+#: lib/rbot/core/basics.rb:129
+msgid ""
+"mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
+"to <mode>"
+msgstr ""
+"mode <channel> <mode> <nicks> => 設定 <nicks> 在 <channel> 頻道的權限為 "
+"<mode>"
+
+#: lib/rbot/core/basics.rb:135
+msgid ""
+"%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, "
+"quiet, talk, ping, mode"
+msgstr ""
+
+#: lib/rbot/core/config.rb:12
+msgid " [%{secs} ago]"
+msgstr ""
+
+#: lib/rbot/core/config.rb:18
+msgid "I'm a v. %{version}%{ago} rubybot%{copyright}%{url}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:39
+msgid "no such module %{module}"
+msgstr "沒有 %{module} 模組"
+
+#: lib/rbot/core/config.rb:55 lib/rbot/core/config.rb:66
+#: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:101
+#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:150
+#, fuzzy
+msgid "no such config key %{key}"
+msgstr "已建立使用者 %{user}"
+
+#: lib/rbot/core/config.rb:78
+msgid "no config key found matching %{r}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:80
+msgid "possible keys: %{kl}"
+msgstr ""
+
+#: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
+#: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
+msgid "this config change will take effect on the next restart"
+msgstr ""
+
+#: lib/rbot/core/config.rb:94 lib/rbot/core/config.rb:115
+#: lib/rbot/core/config.rb:143 lib/rbot/core/config.rb:166
+msgid "this config change will take effect on the next rescan"
+msgstr ""
+
+#: lib/rbot/core/config.rb:108
+#, fuzzy
+msgid "failed to set %{key}: %{error}"
+msgstr "無法建立 %{user}: %{exception}"
+
+#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:154
+msgid "config key %{key} is not an array"
+msgstr ""
+
+#: lib/rbot/core/config.rb:138
+#, fuzzy
+msgid "failed to add %{value} to %{key}: %{error}"
+msgstr "無法建立 %{user}: %{exception}"
+
+#: lib/rbot/core/config.rb:161
+#, fuzzy
+msgid "failed to remove %{value} from %{key}: %{error}"
+msgstr "無法建立 %{user}: %{exception}"
+
+#: lib/rbot/core/config.rb:175
+msgid "saving ..."
+msgstr "正在儲存 ..."
+
+#: lib/rbot/core/config.rb:177
+msgid "rescanning ..."
+msgstr "正在重新掃描 ..."
+
+#: lib/rbot/core/config.rb:179
+msgid "done. %{plugin_status}"
+msgstr "完成。%{plugin_status}"
+
+#: lib/rbot/core/config.rb:220
+msgid ""
+"config list => list configuration modules, config list <module> => list "
+"configuration keys for module <module>"
+msgstr ""
+"config list => 列出可設定模組, config list <module> => 列出 <module> 模組的可"
+"設定參數"
+
+#: lib/rbot/core/config.rb:222
+msgid "config get <key> => get configuration value for key <key>"
+msgstr "config get <key> => 取得 <key> 的設定值"
+
+#: lib/rbot/core/config.rb:224
+msgid "reset key <key> to the default"
+msgstr "重設 <key> 回預設值"
+
+#: lib/rbot/core/config.rb:226
+msgid ""
+"config set <key> <value> => set configuration value for key <key> to <value>"
+msgstr "config set <key> <value> => 設定參數 <key> 的數值為 <value>"
+
+#: lib/rbot/core/config.rb:228
+msgid "config desc <key> => describe what key <key> configures"
+msgstr "config desc <key> => 描述參數 <key> 的功用"
+
+#: lib/rbot/core/config.rb:230
+msgid ""
+"config add <value> to <key> => add value <value> to key <key> if <key> is an "
+"array"
+msgstr ""
+
+#: lib/rbot/core/config.rb:232
+msgid ""
+"config rm <value> from <key> => remove value <value> from key <key> if <key> "
+"is an array"
+msgstr ""
+
+#: lib/rbot/core/config.rb:234
+msgid ""
+"config module - bot configuration. usage: list, desc, get, set, unset, add, "
+"rm"
+msgstr "config 模組 - 機器人設定。用法: list, desc, get, set, unset, add, "
+
+#: lib/rbot/core/config.rb:239
+msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
+msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+
+#: lib/rbot/core/config.rb:241
+msgid "status => display some information on the bot's status"
+msgstr ""
+
+#: lib/rbot/core/config.rb:243
+msgid "save => save current dynamic data and configuration"
+msgstr "save => 儲存目前動態資料與設定"
+
+#: lib/rbot/core/config.rb:245
+msgid "rescan => reload modules and static facts"
+msgstr "rescan => 重新載入模組與靜態論據"
+
+#: lib/rbot/core/config.rb:247
+msgid "version => describes software version"
+msgstr "version => 描述軟體版本"
+
+#: lib/rbot/core/config.rb:249
+msgid "config-related tasks: config, save, rescan, version, nick, status"
+msgstr "設定相關任務: config, save, rescan"
+
+#: lib/rbot/core/filters_ui.rb:25
+msgid "no filters in group %{g}"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:27
+msgid "no known filters"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:30
+msgid "known filters: "
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:38
+msgid "no known filter groups"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:40
+msgid "known filter groups: "
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:50
+msgid "no filters match %{pat}"
+msgstr ""
+
+#: lib/rbot/core/filters_ui.rb:52
+msgid "filters matching %{pat}: "
+msgstr ""
+
+#: lib/rbot/core/userdata.rb:146
+msgid "%{key} data for %{user}: %{data}"
+msgstr ""
+
+#: lib/rbot/core/userdata.rb:152
+msgid "sorry, no %{key} data for %{user}"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:202
+msgid "year"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:202
+msgid "years"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:204
+msgid "month"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:204
+msgid "months"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:206
+msgid "day"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:206
+msgid "days"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:208
+msgid "hour"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:208
+msgid "hours"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:210
+msgid "minute"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:210
+msgid "minutes"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:212
+msgid "second"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:212
+msgid "seconds"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:219
+msgid " and "
+msgstr ""
 
 #: lib/rbot/ircbot.rb:1203
 msgid "help topics: "
@@ -974,21 +992,3 @@ msgstr ""
 #: lib/rbot/registry.rb:190
 msgid "marshal recovery failed, trying default"
 msgstr ""
-
-#: lib/rbot/config.rb:219
-msgid "%{desc} [valid values are: %{values}]"
-msgstr "%{desc} [符合規定的值為: %{values}]"
-
-#: lib/rbot/config.rb:370
-msgid "First time rbot configuration wizard"
-msgstr "首次使用 rbot 設定精靈"
-
-#: lib/rbot/config.rb:373
-msgid "This wizard will ask you a few questions to get you started."
-msgstr "這個設定精靈會透過一些問句來協助你開始使用。"
-
-#: lib/rbot/config.rb:374
-msgid ""
-"The rest of rbot's configuration can be manipulated via IRC once rbot is "
-"connected and you are auth'd."
-msgstr "一旦機器人連上 IRC，只要你認證成功，就可以修改其餘的設定。"

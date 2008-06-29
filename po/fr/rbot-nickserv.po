@@ -24,44 +24,80 @@ msgid "String to look for to see if the nick server is asking us to identify"
 msgstr "Chaine a détécter pour voir si le nick server demande de s'identifier"
 
 #: data/rbot/plugins/nickserv.rb:36
-msgid "String to look for to see if the nick server is informing us that our nick is now available"
-msgstr "Chaine a détécter pour voir si le nick server nous informe que le pseudo est disponnible"
+msgid ""
+"String to look for to see if the nick server is informing us that our nick "
+"is now available"
+msgstr ""
+"Chaine a détécter pour voir si le nick server nous informe que le pseudo est "
+"disponnible"
 
 #: data/rbot/plugins/nickserv.rb:41
-msgid "String to look for to see if the nick server is informing us that we have identified successfully"
-msgstr "Chaine a détécter pour voir si le nick server nous informe que l'identification à reussi"
+msgid ""
+"String to look for to see if the nick server is informing us that we have "
+"identified successfully"
+msgstr ""
+"Chaine a détécter pour voir si le nick server nous informe que "
+"l'identification à reussi"
 
 #: data/rbot/plugins/nickserv.rb:45
-msgid "Set to false if the nick server doesn't expect the nick as a parameter in the identify command"
-msgstr "Mettre a false si le nick server ne requiert pas le pseudo en parametre lors de l'identification"
+msgid ""
+"Set to false if the nick server doesn't expect the nick as a parameter in "
+"the identify command"
+msgstr ""
+"Mettre a false si le nick server ne requiert pas le pseudo en parametre lors "
+"de l'identification"
 
 #: data/rbot/plugins/nickserv.rb:49
-msgid "Seconds to wait after sending a message to nickserv, e.g. after ghosting"
-msgstr "Secondes a attendre apres avoir envoyé un message a nickserv, ex. apres un ghost"
+msgid ""
+"Seconds to wait after sending a message to nickserv, e.g. after ghosting"
+msgstr ""
+"Secondes a attendre apres avoir envoyé un message a nickserv, ex. apres un "
+"ghost"
 
 #: data/rbot/plugins/nickserv.rb:54
-msgid "nickserv plugin: handles nickserv protected IRC nicks. topics password, register, identify, listnicks"
+msgid ""
+"nickserv plugin: handles nickserv protected IRC nicks. topics password, "
+"register, identify, listnicks"
 msgstr ""
 
 #: data/rbot/plugins/nickserv.rb:56
-msgid "nickserv password [<nick>] <passwd>: remember the password for nick <nick> and use it to identify in future"
+msgid ""
+"nickserv password [<nick>] <passwd>: remember the password for nick <nick> "
+"and use it to identify in future"
 msgstr ""
 
 #: data/rbot/plugins/nickserv.rb:58
-msgid "nickserv register [<password> [<email>]]: register the current nick, choosing a random password unless <password> is supplied - current nick must not already be registered for this to work. Also specify email if required by your services"
+msgid ""
+"nickserv register [<password> [<email>]]: register the current nick, "
+"choosing a random password unless <password> is supplied - current nick must "
+"not already be registered for this to work. Also specify email if required "
+"by your services"
 msgstr ""
 
 #: data/rbot/plugins/nickserv.rb:60
-msgid "nickserv identify: identify with nickserv - shouldn't be needed - bot should identify with nickserv immediately on request - however this could be useful after splits or service disruptions, or when you just set the password for the current nick"
+msgid ""
+"nickserv identify: identify with nickserv - shouldn't be needed - bot should "
+"identify with nickserv immediately on request - however this could be useful "
+"after splits or service disruptions, or when you just set the password for "
+"the current nick"
 msgstr ""
 
 #: data/rbot/plugins/nickserv.rb:62
-msgid "nickserv listnicks: lists nicknames and associated password the bot knows about - you will need config level auth access to do this one and it will reply by privmsg only"
-msgstr "nickserv listnicks: liste les pseudos et mots de passe associé au bot - vous devez configurer le niveau d'acces pour qu'il ne reponde qu'en privé"
+msgid ""
+"nickserv listnicks: lists nicknames and associated password the bot knows "
+"about - you will need config level auth access to do this one and it will "
+"reply by privmsg only"
+msgstr ""
+"nickserv listnicks: liste les pseudos et mots de passe associé au bot - vous "
+"devez configurer le niveau d'acces pour qu'il ne reponde qu'en privé"
 
 #: data/rbot/plugins/nickserv.rb:115
-msgid "I'm only changing this in my database, I won't inform %{ns_nick} of the change"
-msgstr "Je change seulement dans ma base de donnée, je ne peut informer %{ns_nick} des changements"
+msgid ""
+"I'm only changing this in my database, I won't inform %{ns_nick} of the "
+"change"
+msgstr ""
+"Je change seulement dans ma base de donnée, je ne peut informer %{ns_nick} "
+"des changements"
 
 #: data/rbot/plugins/nickserv.rb:136
 msgid "none known"
@@ -78,4 +114,3 @@ msgstr "J'ignore le mot de passe serveur de l'utilisateur %{botnick} :("
 #: data/rbot/plugins/nickserv.rb:167
 msgid "uh ... something went wrong ..."
 msgstr "uh... quelquechose est faux ..."
-

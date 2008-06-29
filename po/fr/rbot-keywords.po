@@ -22,4 +22,3 @@ msgstr "Impossible de trouver la clé %{key}"
 #: data/rbot/plugins/keywords.rb:506
 msgid "failed to export keywords as factoids (%{err})"
 msgstr "impossible d'exporter la clé des facts (%{err})"
-

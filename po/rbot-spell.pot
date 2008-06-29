@@ -21,7 +21,9 @@ msgid "Program to use to check spelling"
 msgstr ""
 
 #: data/rbot/plugins/spell.rb:12
-msgid "Command line used to call the spell.program. Use %s as a placeholder for the executable name"
+msgid ""
+"Command line used to call the spell.program. Use %s as a placeholder for the "
+"executable name"
 msgstr ""
 
 #: data/rbot/plugins/spell.rb:15

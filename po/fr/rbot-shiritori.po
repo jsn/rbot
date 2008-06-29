@@ -17,19 +17,27 @@ msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:207
 msgid "%{current_player}, it's your turn. %{previous_word} -> %{current_word}"
-msgstr "%{current_player}, c'est votre tour. %{previous_word} -> %{current_word}"
+msgstr ""
+"%{current_player}, c'est votre tour. %{previous_word} -> %{current_word}"
 
 #: data/rbot/plugins/games/shiritori.rb:211
 msgid "No one has given the first word yet. Say the first word to start."
-msgstr "Personne n'a donnée le premier mot pour le moment. Dites le premier mot pour demarrer."
+msgstr ""
+"Personne n'a donnée le premier mot pour le moment. Dites le premier mot pour "
+"demarrer."
 
 #: data/rbot/plugins/games/shiritori.rb:213
-msgid "Poor %{current_player} is playing alone! Anyone care to join? %{previous_word} -> %{current_word}"
-msgstr "Pauvre %{current_player} est en train de jouer seul! Personne ne veut se joindre? %{previous_word} -> %{current_word}"
+msgid ""
+"Poor %{current_player} is playing alone! Anyone care to join? %"
+"{previous_word} -> %{current_word}"
+msgstr ""
+"Pauvre %{current_player} est en train de jouer seul! Personne ne veut se "
+"joindre? %{previous_word} -> %{current_word}"
 
 #: data/rbot/plugins/games/shiritori.rb:244
 msgid "%{player} took too long and is out of the game. Try again next game!"
-msgstr "%{player} prend trop de temps et est hors jeu. Essaye encore au prochain jeu!"
+msgstr ""
+"%{player} prend trop de temps et est hors jeu. Essaye encore au prochain jeu!"
 
 #: data/rbot/plugins/games/shiritori.rb:249
 msgid "%{player} is the last remaining player and the winner! Congratulations!"
@@ -52,20 +60,39 @@ msgid "The word %{used_word} has been used. Retry from %{word}"
 msgstr "Le mot %{used_word} a déjà été utilisé. Reesaye depuis %{word}"
 
 #: data/rbot/plugins/games/shiritori.rb:301
-msgid "It's impossible to continue the chain from %{word}. The game has ended. Thanks a lot, %{player}! :("
-msgstr "Il est impossible de continuer la chaine depuis %{word}. Le jeu est terminé. Merci beaucoup, %{player}! :("
+msgid ""
+"It's impossible to continue the chain from %{word}. The game has ended. "
+"Thanks a lot, %{player}! :("
+msgstr ""
+"Il est impossible de continuer la chaine depuis %{word}. Le jeu est terminé. "
+"Merci beaucoup, %{player}! :("
 
 #: data/rbot/plugins/games/shiritori.rb:305
-msgid "It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
-msgstr "Il est impossible de continuer la chaine depuis %{bad_word}. Reesaye depuis %{word}"
+msgid ""
+"It's impossible to continue the chain from %{bad_word}. Retry from %{word}"
+msgstr ""
+"Il est impossible de continuer la chaine depuis %{bad_word}. Reesaye depuis %"
+"{word}"
 
 #: data/rbot/plugins/games/shiritori.rb:310
-msgid "It's impossible to continue the chain from %{word}. Start with another word."
-msgstr "Il est impossible de continuer la chaine depuis %{word}. Commence avec un autre mot."
+msgid ""
+"It's impossible to continue the chain from %{word}. Start with another word."
+msgstr ""
+"Il est impossible de continuer la chaine depuis %{word}. Commence avec un "
+"autre mot."
 
 #: data/rbot/plugins/games/shiritori.rb:331
-msgid "A game in which each player must continue the previous player's word, by using its last one or few characters/letters of the word to start a new word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
-msgstr "Un jeu ou chaques joueurs doivent continuer le mot du joueur precedent, en utilisant au moins le dernier ou quelques caracteres/lettres du mot de demarrage pour recommencer un nouevau mot. 'shiritori <ruleset>' =>  Commence shiritori avec un set de regles. Regles disponnibles: %{rulesets}. 'shiritori stop' =>  Stoppe le shiritori en cours."
+msgid ""
+"A game in which each player must continue the previous player's word, by "
+"using its last one or few characters/letters of the word to start a new "
+"word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available "
+"rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game."
+msgstr ""
+"Un jeu ou chaques joueurs doivent continuer le mot du joueur precedent, en "
+"utilisant au moins le dernier ou quelques caracteres/lettres du mot de "
+"demarrage pour recommencer un nouevau mot. 'shiritori <ruleset>' =>  "
+"Commence shiritori avec un set de regles. Regles disponnibles: %{rulesets}. "
+"'shiritori stop' =>  Stoppe le shiritori en cours."
 
 #: data/rbot/plugins/games/shiritori.rb:408
 msgid "Already playing shiritori here"
@@ -90,4 +117,3 @@ msgstr "Shiritori est stoppé. C'etais super!"
 #: data/rbot/plugins/games/shiritori.rb:446
 msgid "No game to stop here, because no game is being played."
 msgstr "Aucun jeu a stopper, car aucun jeu n'est en cours."
-

@@ -21,14 +21,14 @@ msgstr "Fichier de donnée non trouvé ou corrompu, reinitialisation des donnée
 
 #: data/rbot/plugins/alias.rb:58
 msgid "Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}"
-msgstr "Entree d'alias non valide %{alias} : %{command} dans %{filename}: %{reason}"
+msgstr ""
+"Entree d'alias non valide %{alias} : %{command} dans %{filename}: %{reason}"
 
 #: data/rbot/plugins/alias.rb:74
 msgid "The definition you provided is invalid: %{reason}"
 msgstr "La definition que vous avez soumis est invalide: %{reason}"
 
-#: data/rbot/plugins/alias.rb:85
-#: data/rbot/plugins/alias.rb:102
+#: data/rbot/plugins/alias.rb:85 data/rbot/plugins/alias.rb:102
 msgid "No such alias is defined"
 msgstr "Aucun alias de ce type définis"
 
@@ -41,30 +41,57 @@ msgid "Alias of %{command}"
 msgstr "Alias de %{command}"
 
 #: data/rbot/plugins/alias.rb:112
-msgid "The arguments in alias must match the substitutions in command, and vice versa"
-msgstr "L'argument dans l'alias dois correspondre avec une substitution de commande, et vice versa"
+msgid ""
+"The arguments in alias must match the substitutions in command, and vice "
+"versa"
+msgstr ""
+"L'argument dans l'alias dois correspondre avec une substitution de commande, "
+"et vice versa"
 
 #: data/rbot/plugins/alias.rb:117
 msgid "Error mapping %{text} as command: %{error}"
 msgstr "Erreur en mappant %{text} avec la commande: %{error}"
 
 #: data/rbot/plugins/alias.rb:138
-msgid "The alias seems to have caused infinite recursion. Please examine your alias definitions"
-msgstr "L'alias semble avoir causer une recursivite infinie. Veuillez examiner vos definitions d'alias"
+msgid ""
+"The alias seems to have caused infinite recursion. Please examine your alias "
+"definitions"
+msgstr ""
+"L'alias semble avoir causer une recursivite infinie. Veuillez examiner vos "
+"definitions d'alias"
 
 #: data/rbot/plugins/alias.rb:142
-msgid "Error handling the alias, The alias %{text} is not defined or has beeen removed. I will stop responding to it after rescan,"
-msgstr "Erreur en utilisant l'alias. L'alias %{text} n'est pas definit ou a été supprimé. Je vais arreter de repondre apres avoir rescanné,"
+msgid ""
+"Error handling the alias, The alias %{text} is not defined or has beeen "
+"removed. I will stop responding to it after rescan,"
+msgstr ""
+"Erreur en utilisant l'alias. L'alias %{text} n'est pas definit ou a été "
+"supprimé. Je vais arreter de repondre apres avoir rescanné,"
 
 #: data/rbot/plugins/alias.rb:154
 msgid "Create and use aliases for commands. Topics: create, commands"
 msgstr "Crée et utilise des alias pour des commandes. Aides: create, commands"
 
 #: data/rbot/plugins/alias.rb:163
-msgid "\"alias <text> => <command>\" => add text as an alias of command. Text can contain placeholders marked with : or * for :words and *multiword arguments. The command can contain placeholders enclosed with < > which will be substituded with argument values. For example: alias googlerbot *terms => google site:ruby-rbot.org <terms>"
-msgstr "\"alias <texte> => <commands>\" => ajoute le texte comme un alias de la commande. Le texte peut contenir des séparateurs comme : ou * pour les :mots et *multi-arguments. La commande peut contenir des separateurs de delimitation comme < > qui peuvent substitué par des valeurs d'arguments. Par exemple: alias googlerbot *terms => google site:ruby-rbot.org <terms>"
+msgid ""
+"\"alias <text> => <command>\" => add text as an alias of command. Text can "
+"contain placeholders marked with : or * for :words and *multiword arguments. "
+"The command can contain placeholders enclosed with < > which will be "
+"substituded with argument values. For example: alias googlerbot *terms => "
+"google site:ruby-rbot.org <terms>"
+msgstr ""
+"\"alias <texte> => <commands>\" => ajoute le texte comme un alias de la "
+"commande. Le texte peut contenir des séparateurs comme : ou * pour les :mots "
+"et *multi-arguments. La commande peut contenir des separateurs de "
+"delimitation comme < > qui peuvent substitué par des valeurs d'arguments. "
+"Par exemple: alias googlerbot *terms => google site:ruby-rbot.org <terms>"
 
 #: data/rbot/plugins/alias.rb:165
-msgid "alias list => list defined aliases | alias whatis <alias> => show definition of the alias | alias remove <alias> => remove defined alias | see the \"create\" topic about adding aliases"
-msgstr "alias list => list defined aliases | alias whatis <alias> => affiche les definitions des alias | alias remove <alias> => supprime l'alias definit | voyez le \"create\" sujet a propos de l'ajout d'alias"
-
+msgid ""
+"alias list => list defined aliases | alias whatis <alias> => show definition "
+"of the alias | alias remove <alias> => remove defined alias | see the "
+"\"create\" topic about adding aliases"
+msgstr ""
+"alias list => list defined aliases | alias whatis <alias> => affiche les "
+"definitions des alias | alias remove <alias> => supprime l'alias definit | "
+"voyez le \"create\" sujet a propos de l'ajout d'alias"
