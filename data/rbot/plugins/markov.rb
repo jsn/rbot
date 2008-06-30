@@ -39,6 +39,7 @@ class MarkovPlugin < Plugin
         sleep 0.5
       end
     end
+    @learning_thread.priority = -1
   end
 
   def cleanup
