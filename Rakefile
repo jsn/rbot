@@ -17,7 +17,9 @@ spec = Gem::Specification.new do |s|
 
   #  s.files = Dir.glob("**/*").delete_if { |item| item.include?(".svn") }
   s.files = FileList['lib/**/*.rb', 'bin/*', 'data/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL',  'Usage_en.txt', 'setup.rb'].to_a.delete_if {|item| item == ".svn"}
-  s.executables << 'rbot'
+  s.bindir = 'bin'
+  s.executables = ['rbot', 'rbot-remote']
+  s.default_executable = 'rbot'
 
 #  s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
