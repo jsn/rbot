@@ -5,7 +5,7 @@
 
 class SpellPlugin < Plugin
   Config.register Config::StringValue.new('spell.path',
-     :default => '/usr/bin/ispell',
+     :default => 'ispell',
      :desc => _('Path to the program to use to check spelling'))
   Config.register Config::StringValue.new('spell.command_line',
      :default => '%s -a -S',

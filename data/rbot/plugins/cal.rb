@@ -1,6 +1,6 @@
 class CalPlugin < Plugin
   Config.register Config::StringValue.new('cal.path',
-     :default => '/usr/bin/cal',
+     :default => 'cal',
      :desc => _('Path to the cal program'))
 
   def help(plugin, topic="")

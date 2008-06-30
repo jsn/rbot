@@ -7,7 +7,7 @@ class FigletPlugin < Plugin
   MAX_WIDTH=68
 
   Config.register Config::StringValue.new('figlet.path',
-     :default => '/usr/bin/figlet',
+     :default => 'figlet',
      :desc => _('Path to the figlet program'),
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_figlet })
 
@@ -18,7 +18,7 @@ class FigletPlugin < Plugin
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_figlet })
 
   Config.register Config::StringValue.new('toilet.path',
-     :default => '/usr/bin/toilet',
+     :default => 'toilet',
      :desc => _('Path to the toilet program'),
      :on_change => Proc.new { |bot, v| bot.plugins['figlet'].test_toilet })
 

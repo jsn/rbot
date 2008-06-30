@@ -1,6 +1,6 @@
 class HostPlugin < Plugin
   Config.register Config::StringValue.new('host.path',
-     :default => '/usr/bin/host',
+     :default => 'host',
      :desc => _('Path to the host program'))
 
   def help(plugin, topic="")
