@@ -36,6 +36,7 @@ class MarkovPlugin < Plugin
     @learning_thread = Thread.new do
       while s = @learning_queue.pop
         learn s
+        sleep 0.5
       end
     end
   end
