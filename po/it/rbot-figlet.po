@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
 "POT-Creation-Date: 2008-06-26 14:47+0200\n"
-"PO-Revision-Date: 2007-08-23 17:49+0100\n"
+"PO-Revision-Date: 2008-06-30 11:05+0200\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
 "MIME-Version: 1.0\n"
@@ -21,17 +21,16 @@ msgstr "Percorso per il programma figlet"
 
 #: data/rbot/plugins/figlet.rb:16
 msgid "figlet font to use"
-msgstr ""
+msgstr "font da usare con figlet"
 
 #: data/rbot/plugins/figlet.rb:22
-#, fuzzy
 msgid "Path to the toilet program"
-msgstr "Percorso per il programma figlet"
+msgstr "Percorso per il programma toilet"
 
 #: data/rbot/plugins/figlet.rb:27
 msgid "toilet font to use"
-msgstr ""
+msgstr "font da usare con toilet"
 
 #: data/rbot/plugins/figlet.rb:33
 msgid "toilet filters to use (e.g. gay, metal)"
-msgstr ""
+msgstr "filtri da usare con toilet (es.: gay, metal)"

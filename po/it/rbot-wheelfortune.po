@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
 "POT-Creation-Date: 2008-06-20 01:49+0200\n"
-"PO-Revision-Date: 2008-06-20 01:34+0100\n"
+"PO-Revision-Date: 2008-06-30 10:58+0200\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,6 @@ msgid " [Letters called so far: %{red}%{letters}%{nocolor}]"
 msgstr " [Lettere chiamate finora: %{red}%{letters}%{nocolor}]"
 
 #: data/rbot/plugins/games/wheelfortune.rb:230
-#, fuzzy
 msgid ""
 "wof [<channel>] play [<name>] for <single> to <max> => starts a wheel-of-"
 "fortune game on channel <channel> (default: current channel), named <name> "
