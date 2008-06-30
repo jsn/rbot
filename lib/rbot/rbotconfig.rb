@@ -27,7 +27,7 @@ class Bot
       begin
         debug "trying to load rubygems"
         require 'rubygems'
-        if $version =~ /^(.*)-git( .*)?$/
+        if $version =~ /^(.*)-(?:git|rc\d)(?: .*)?$/
           version = $1
         else
           version = $version
