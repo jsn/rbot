@@ -4,9 +4,9 @@
 # :title: Spell plugin
 
 class SpellPlugin < Plugin
-  Config.register Config::StringValue.new('spell.program',
-     :default => 'ispell',
-     :desc => _('Program to use to check spelling'))
+  Config.register Config::StringValue.new('spell.path',
+     :default => '/usr/bin/ispell',
+     :desc => _('Path to the program to use to check spelling'))
   Config.register Config::StringValue.new('spell.command_line',
      :default => '%s -a -S',
      :desc => _('Command line used to call the spell.program. Use %s as a placeholder for the executable name'))
