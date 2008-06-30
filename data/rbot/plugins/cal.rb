@@ -1,12 +1,21 @@
 class CalPlugin < Plugin
+  Config.register Config::StringValue.new('cal.path',
+     :default => '/usr/bin/cal',
+     :desc => _('Path to the cal program'))
+
   def help(plugin, topic="")
     "cal [month year] => show current calendar [optionally specify month and year]"
   end
+  
+  def cal_path
+    @bot.config["cal.path"]
+  end
+
   def cal(m, params)
     if params.has_key?(:month)
-      m.reply Utils.safe_exec("cal", params[:month], params[:year])
+      m.reply Utils.safe_exec(cal_path, params[:month], params[:year])
     else
-      m.reply Utils.safe_exec("cal")
+      m.reply Utils.safe_exec(cal_path)
     end
   end
 end
