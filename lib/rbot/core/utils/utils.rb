@@ -236,6 +236,49 @@ module ::Irc
       end
     end
 
+    # Returns human readable time.
+    # Like: 5 days ago
+    #       about one hour ago
+    # options
+    # :start_date, sets the time to measure against, defaults to now
+    # :date_format, used with <tt>to_formatted_s<tt>, default to :default
+    def Utils.timeago(time, options = {})
+      start_date = options.delete(:start_date) || Time.new
+      date_format = options.delete(:date_format) || :default
+      delta_minutes = (start_date.to_i - time.to_i).floor / 60
+      if delta_minutes.abs <= (8724*60) # eight weeks? I'm lazy to count days for longer than that
+        distance = Utils.distance_of_time_in_words(delta_minutes);
+        if delta_minutes < 0
+          _("%{d} from now") % {:d => distance}
+        else
+          _("%{d} ago") % {:d => distance}
+        end
+      else
+        return _("on %{date}") % {:date => system_date.to_formatted_s(date_format)}
+      end
+    end
+  # Translates a number of minutes into verbal distances.
+  # e.g. 0.5 => less than a minute
+  #      70 => about one hour
+  def Utils.distance_of_time_in_words(minutes)
+    case
+      when minutes < 1
+        _("less than a minute")
+      when minutes < 50
+        _("%{m} minutes") % {:m => minutes}
+      when minutes < 90
+        _("about one hour")
+      when minutes < 1080
+        _("%{m} hours") % {:m => (minutes / 60).round}
+      when minutes < 1440
+        _("one day")
+      when minutes < 2880
+        _("about one day")
+      else
+        _("%{m} days") % {:m => (minutes / 1440).round}
+    end
+  end
+
 
     # Execute an external program, returning a String obtained by redirecting
     # the program's standards errors and output 
