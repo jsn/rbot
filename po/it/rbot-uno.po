@@ -534,7 +534,7 @@ msgstr "%{num} carte nel mazzo: %{stock}"
 
 #: data/rbot/plugins/games/uno.rb:1135
 msgid "%{uno} %{num} highest scores: "
-msgstr "%{uno} %{num} punteggi miglior: "
+msgstr "%{uno} %{num} punteggi migliori: "
 
 #: data/rbot/plugins/games/uno.rb:1144
 msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} points"
