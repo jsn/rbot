@@ -19,6 +19,7 @@ GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
 GOOGLE_WAP_SEARCH = "http://www.google.com/wml/search?hl=en&q="
 GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?></td><td>&nbsp;</td><td nowrap(?: dir=ltr)?>(?:<h2 class=r>)?<font size=\+1><b>(.+)</b>(?:</h2>)?</td>}
+GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
 GOOGLE_DEF_RESULT = %r{<p> (Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
 
 class SearchPlugin < Plugin
@@ -137,6 +138,36 @@ class SearchPlugin < Plugin
     debug "replying with: #{result.inspect}"
     m.reply "#{result}"
   end
+  
+  def gcount(m, params)
+    what = params[:words].to_s
+    searchfor = CGI.escape(what)
+    
+    debug "Getting gcount thing: #{searchfor.inspect}"
+    url = GOOGLE_SEARCH + searchfor
+
+    begin
+      html = @bot.httputil.get(url)
+    rescue => e
+      m.reply "error googlecounting #{what}"
+      return
+    end
+
+    debug "#{html.size} bytes of html recieved"
+    
+    results = html.scan(GOOGLE_COUNT_RESULT)
+    debug "results: #{results.inspect}"
+    
+    if results.length != 1
+      m.reply "couldn't count #{what}"
+      return
+    end
+    
+    result = results[0][0].ircify_html
+    debug "replying with: #{result.inspect}"
+    m.reply "total results: #{result}"
+
+  end
 
   def gdef(m, params)
     what = params[:words].to_s
@@ -193,6 +224,7 @@ plugin = SearchPlugin.new
 
 plugin.map "search *words", :action => 'google', :threaded => true
 plugin.map "google *words", :action => 'google', :threaded => true
+plugin.map "gcount *words", :action => 'gcount', :threaded => true 
 plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
 plugin.map "gdef *words", :action => 'gdef', :threaded => true
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
