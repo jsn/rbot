@@ -210,6 +210,9 @@ class LastFmPlugin < Plugin
       end
     end
     now = artist = track = albumtxt = date = nil
+    unless doc.root.elements["recenttracks"].has_elements?
+      m.reply _("%{u} hasn't played anything recently") % {:u => user}
+    end
     first = doc.root.elements[1].elements[1]
     now = first.attributes["nowplaying"]
     artist = first.elements["artist"].text
@@ -231,7 +234,7 @@ class LastFmPlugin < Plugin
          verb = @registry["#{m.sourcenick}_verb_past"]
        end
       ago = Utils.timeago(past)
-      m.reply _("%{u} is %{v} to \"%{t}\" by %{a} %{b}%{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
+      m.reply _("%{u} %{v} to \"%{t}\" by %{a} %{b}%{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
     end
   end
 
