@@ -69,7 +69,7 @@ msgstr "non hai quella carta"
 
 #: data/rbot/plugins/games/uno.rb:453
 msgid "%{cp} challenges %{lp}'s %{card}!"
-msgstr "%{cp} contesta il %{card}di %{lp}"
+msgstr "%{cp} contesta il %{card} di %{lp}!"
 
 #: data/rbot/plugins/games/uno.rb:457
 msgid "%{p} has %{cards}"
