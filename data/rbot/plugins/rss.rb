@@ -941,13 +941,13 @@ class RSSFeedsPlugin < Plugin
   end
 
   def select_nonempty(*ar)
-    debug ar
+    # debug ar
     ar.each { |i| return i unless i.nil_or_empty? }
     return nil
   end
 
   def printFormattedRss(feed, item, opts=nil)
-    debug item
+    # debug item
     places = feed.watchers
     handle = feed.handle.empty? ? "" : "::#{feed.handle}:: "
     date = String.new
