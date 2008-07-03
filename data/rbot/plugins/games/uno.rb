@@ -650,9 +650,9 @@ class UnoGame
     end
     cards = 7
     if @start_time
-      cards = @players.inject(0) do |s, pl|
+      cards = (@players.inject(0) do |s, pl|
         s +=pl.cards.length
-      end/@players.length
+      end*1.0/@players.length).ceil
     end
     p = Player.new(user)
     @players << p
