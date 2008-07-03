@@ -235,8 +235,11 @@ class LastFmPlugin < Plugin
     artist = first.elements["artist"].text
     track = first.elements["name"].text
     albumtxt = first.elements["album"].text
-    year = get_album(artist, albumtxt)[2]
-    album = "[#{albumtxt}, #{year}] " unless albumtxt == nil or year.length == 1
+    album = ""
+    if albumtxt
+      year = get_album(artist, albumtxt)[2]
+      album = "[#{albumtxt}, #{year}] " if year
+    end
     date = first.elements["date"].attributes["uts"]
     past = Time.at(date.to_i)
     if now == "true"
