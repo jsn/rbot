@@ -17,19 +17,28 @@ require 'rexml/document'
 
 class ::LastFmEvent
   def initialize(hash)
-    @url = hash[:url] if hash.key? :url
-    @date = hash[:date] if hash.key? :date
-    @artist = hash[:artist] if hash.key? :artist
-    @location = hash[:location] if hash.key? :location
-    @description = hash[:description] if hash.key? :description
-    @attendance = hash[:attendance] if hash.key? :attendance
+    @url = hash[:url]
+    @date = hash[:date]
+    @location = hash[:location]
+    @description = hash[:description]
+    @attendance = hash[:attendance]
+
+    @artists = hash[:artists]
+
+    if @artists.length > 10 #more than 10 artists and it floods
+      diff = @artists.length - 10
+      @artist_string = @artists[0..10].join(', ')
+      @artist_string << _(" and %{n} more...") % {:n => diff}
+    else
+      @artist_string = @artists.join(', ')
+    end
   end
 
   def compact_display
    if @attendance
-     return "%s %s @ %s (%s attending) %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @attendance, @url]
+     return "%s %s @ %s (%s attending) %s" % [@date.strftime("%a %b, %d %Y"), @artist_string, @location, @attendance, @url]
    end
-   return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @url]
+   return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist_string, @location, @url]
   end
   alias :to_s :compact_display
 
@@ -124,12 +133,7 @@ class LastFmPlugin < Plugin
       e.elements.each("artists/artist"){ |a|
         artists << a.text
       }
-      if artists.length > 10 #more than 10 artists and it floods
-       diff = artists.length - 10
-       artists = artists[0..10]
-       artists << _(" and %{n} more...") % {:n => diff}
-      end
-      h[:artists] = artists.join(", ")
+      h[:artists] = artists
       events << LastFmEvent.new(h)
     }
     events[0...num].each { |event|
