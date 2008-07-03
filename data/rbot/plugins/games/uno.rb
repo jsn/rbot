@@ -592,6 +592,7 @@ class UnoGame
 
   def show_user_cards(player)
     p = Player === player ? player : get_player(player)
+    return unless p
     notify p, _('Your cards: %{cards}') % {
       :cards => p.cards.join(' ')
     }
