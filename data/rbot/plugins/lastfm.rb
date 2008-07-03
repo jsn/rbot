@@ -16,16 +16,20 @@
 require 'rexml/document'
 
 class ::LastFmEvent
-  def initialize(url, date, artist, location, description)
-    @url = url
-    @date = date
-    @artist = artist
-    @location = location
-    @description = description
+  def initialize(hash)
+    @url = hash[:url] if hash.key? :url
+    @date = hash[:date] if hash.key? :date
+    @artist = hash[:artist] if hash.key? :artist
+    @location = hash[:location] if hash.key? :location
+    @description = hash[:description] if hash.key? :description
+    @attendance = hash[:attendance] if hash.key? :attendance
   end
 
   def compact_display
-    return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @url]
+   if @attendance
+     return "%s %s @ %s (%s attending) %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @attendance, @url]
+   end
+   return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @url]
   end
   alias :to_s :compact_display
 
@@ -101,15 +105,21 @@ class LastFmPlugin < Plugin
     disp_events = Array.new
     events = Array.new
     doc.root.elements.each("events/event"){ |e|
-      title = e.elements["title"].text
+      h = {}
+      h[:title] = e.elements["title"].text
       venue = e.elements["venue"].elements["name"].text
       city = e.elements["venue"].elements["location"].elements["city"].text
       country =  e.elements["venue"].elements["location"].elements["country"].text
-      loc = Bold + venue + Bold + " #{city}, #{country}"
+      h[:location] = Bold + venue + Bold + " #{city}, #{country}"
       date = e.elements["startDate"].text.split
-      date = Time.utc(date[3].to_i, date[2], date[1].to_i)
-      desc = e.elements["description"].text
-      url = e.elements["url"].text
+      h[:date] = Time.utc(date[3].to_i, date[2], date[1].to_i)
+      h[:desc] = e.elements["description"].text
+      h[:url] = e.elements["url"].text
+      e.detect {|node|
+        if node.kind_of? Element and node.attributes["name"] == "attendance" then
+          h[:attendance] = node.text
+        end
+      }
       artists = Array.new
       e.elements.each("artists/artist"){ |a|
         artists << a.text
@@ -119,8 +129,8 @@ class LastFmPlugin < Plugin
        artists = artists[0..10]
        artists << _(" and %{n} more...") % {:n => diff}
       end
-      artists = artists.join(", ")
-      events << LastFmEvent.new(url, date, artists, loc, desc)
+      h[:artists] = artists.join(", ")
+      events << LastFmEvent.new(h)
     }
     events[0...num].each { |event|
       disp_events << event.to_s
