@@ -854,6 +854,7 @@ class UnoPlugin < Plugin
 
   def message(m)
     return unless @games.key?(m.channel)
+    return unless m.plugin # skip messages such as: <someuser> botname,
     g = @games[m.channel]
     case m.plugin.intern
     when :jo # join game
