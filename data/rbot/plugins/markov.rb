@@ -169,6 +169,7 @@ class MarkovPlugin < Plugin
     return unless should_talk
 
     word1, word2 = message.split(/\s+/)
+    return unless word1 and word2
     line = generate_string(word1, word2)
     return unless line
     return if line == message
