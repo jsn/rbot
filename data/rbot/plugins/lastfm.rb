@@ -341,9 +341,15 @@ class LastFmPlugin < Plugin
     end
   end
 
+  # TODO this user data retrieval should be upgraded to API 2.0 but it would need separate parsing
+  # for each dataset, or almost
   def lastfm(m, params)
     action = params[:action].intern
     action = :neighbours if action == :neighbors
+    action = :recenttracks if action == :recentracks
+    action = :topalbums if action == :topalbum
+    action = :topartists if action == :topartist
+    action = :toptags if action == :toptag
     user = nil
     if params[:user] then
       user = params[:user].to_s
@@ -378,7 +384,9 @@ plugin.map 'lastfm set verb :present :past', :action => :set_verb, :thread => tr
 plugin.map 'lastfm who :who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
 plugin.map 'lastfm compare :user1 :user2', :action => :tasteometer, :thread => true
-#plugin.map 'lastfm :action :user', :thread => true
-#plugin.map 'lastfm :action', :thread => true
 plugin.map 'np', :action => :now_playing, :thread => true
 plugin.map 'lastfm', :action => :now_playing, :thread => true
+plugin.map "lastfm [user] :action [:user]", :thread => true,
+  :requirements => { :action =>
+    /^(?:events|friends|neighbou?rs|playlists|recent?tracks|top(?:album|artist|tag)s?|weekly(?:album|artist|track)chart|weeklychartlist)$/
+}
