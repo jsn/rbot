@@ -40,8 +40,6 @@ class LastFmPlugin < Plugin
     :default => 3, :validate => Proc.new{|v| v > 1},
     :desc => "Default number of events to display.")
 
-  LASTFM = "http://www.last.fm"
-
   APIKEY = "b25b959554ed76058ac220b7b2e0a026"
   APIURL = "http://ws.audioscrobbler.com/2.0/?api_key=#{APIKEY}&"
 
@@ -72,7 +70,7 @@ class LastFmPlugin < Plugin
     when :who
       _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
     else
-      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. lastfm <function> [<user>] => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, album, now, set, who")
+      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, now, set, who")
     end
   end
 
@@ -155,9 +153,11 @@ class LastFmPlugin < Plugin
           tasteometer(m, params)
         else
           m.reply _("%{u} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>") % {:u => baduser}
+          return
         end
       else
         m.reply _("Bad: %{e}") % {:e => doc.root.element["error"].text}
+        return
       end
     end
     now = artist = track = albumtxt = date = nil
@@ -204,14 +204,17 @@ class LastFmPlugin < Plugin
           now_playing(m, params)
         else
           m.reply "#{user} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
+          return
         end
       else
         m.reply _("Error %{e}") % {:e => doc.root.element["error"].text}
+        return
       end
     end
     now = artist = track = albumtxt = date = nil
-    unless doc.root.elements["recenttracks"].has_elements?
-      m.reply _("%{u} hasn't played anything recently") % {:u => user}
+    unless doc.root.elements[1].has_elements?
+     m.reply _("%{u} hasn't played anything recently") % {:u => user}
+     return
     end
     first = doc.root.elements[1].elements[1]
     now = first.attributes["nowplaying"]
@@ -242,10 +245,12 @@ class LastFmPlugin < Plugin
     xml = @bot.httputil.get(URI.escape("#{APIURL}method=artist.getinfo&artist=#{params[:artist]}"))
     unless xml
       m.reply _("I had problems getting info for %{a}.") % {:a => params[:artist]}
+      return
     end
     doc = Document.new xml
     unless doc
       m.reply _("last.fm parsing failed")
+      return
     end
     first = doc.root.elements["artist"]
     artist = first.elements["name"].text
@@ -301,7 +306,7 @@ class LastFmPlugin < Plugin
     key = "#{m.sourcenick}_verb_"
     @registry[ "#{key}past" ] = past
     @registry[ "#{key}present" ] = present
-    m.reply _("Ok, I'll remember that %{n} prefers %{p} and %{r}.") % {:n => m.sourcenick, :p => past, :r => present}
+    m.reply _("Ok, I'll remember that %{n} prefers %{r} and %{p}.") % {:n => m.sourcenick, :p => past, :r => present}
   end
 
   def get_user(m, params)
