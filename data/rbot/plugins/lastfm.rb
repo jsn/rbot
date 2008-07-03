@@ -13,35 +13,26 @@
 #
 # License:: GPL v2
 
+require 'rexml/document'
+
 class ::LastFmEvent
-  SELECTOR = /<tr class="vevent.*?<\/tr>/m
-  # matches are:
-  # 1. day 2. moth 3. year 4. url_who 5. who 6. url_where 7. where 8. how_many
-  # TODO festival have TWO dates  -------+
-  # TODO event type -------------+       |
-  #                              V       V
-  MATCHER = /<tr class="vevent\s+\w+\s+(?:\S+\s+)?\S+?-(\d\d)-(\d\d)-(\d\d\d\d)\s*">.*?<a class="url summary" href="(\/event\/\d+)">(.*?)<\/a>.*?<a href="(\/venue\/\d+)">(.*?)<\/a>.*?<td>(?:(.*?) attending\s+)?.*?<\/td>\s+<\/tr>/m
-  attr_accessor :url, :date, :artist, :location, :attendance
-  def initialize(url, date, artist, location, attendance)
+  def initialize(url, date, artist, location, description)
     @url = url
     @date = date
     @artist = artist
     @location = location
-    @attendance = attendance
+    @description = description
   end
 
   def compact_display
-    if @attendance.empty?
-      return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @url]
-    else
-      return "%s %s @ %s (%s) %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @attendance, @url]
-    end
+    return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist, @location, @url]
   end
   alias :to_s :compact_display
 
 end
 
 class LastFmPlugin < Plugin
+  include REXML
   Config.register Config::IntegerValue.new('lastfm.max_events',
     :default => 25, :validate => Proc.new{|v| v > 1},
     :desc => "Maximum number of events to display.")
@@ -50,6 +41,9 @@ class LastFmPlugin < Plugin
     :desc => "Default number of events to display.")
 
   LASTFM = "http://www.last.fm"
+
+  APIKEY = "b25b959554ed76058ac220b7b2e0a026"
+  APIURL = "http://ws.audioscrobbler.com/2.0/?api_key=#{APIKEY}&"
 
   def initialize
     super
@@ -66,95 +60,124 @@ class LastFmPlugin < Plugin
   def help(plugin, topic="")
     case (topic.intern rescue nil)
     when :event, :events
-      "lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to #{@bot.config['lastfm.default_events']} and cannot be higher than #{@bot.config['lastfm.max_events']}"
-    when :artist, :group
-      "lastfm artist <name> => show information on artist/group <name> from last.fm"
-    when :song, :track
-      "lastfm track <name> => show information on track/song <name> from last.fm [not implemented yet]"
+      _("lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}") % {:d => @bot.config['lastfm.default_events'], :m => @bot.config['lastfm.max_events']}
+    when :artist
+      _("lastfm artist <name> => show information on artist <name> from last.fm")
     when :album
-      "lastfm album <name> => show information on album <name> from last.fm [not implemented yet]"
-    when :now
-      "lastfm now [<user>] => show the now playing track from last.fm"
+      _("lastfm album <name> => show information on album <name> from last.fm [not implemented yet]")
+    when :now, :np
+      _("lastfm now [<user>] => show the now playing track from last.fm.  np [<user>] does the same.")
     when :set
-      "lastfm set <user> => associate your current irc nick with a last.fm user"
+      _("lastfm set nick <user> => associate your current irc nick with a last.fm user. lastfm set verb <present> <past> => set your preferred now playing verb. default \"listening\" and \"listened\".")
     when :who
-      "lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm."
+      _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
     else
-      "lastfm => show your now playing track at lastfm. lastfm <function> [<user>] => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, group, song, track, album, now, set, who"
+      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. lastfm <function> [<user>] => lastfm data for <user> on last.fm where <function> in [recenttracks, topartists, topalbums, toptracks, tags, friends, neighbors]. other topics: events, artist, album, now, set, who")
     end
   end
 
-  def find_event(m, params)
+  def find_events(m, params)
     num = params[:num] || @bot.config['lastfm.default_events']
     num = num.to_i.clip(1, @bot.config['lastfm.max_events'])
 
     location = artist = nil
     location = params[:location].to_s if params[:location]
     artist = params[:who].to_s if params[:who]
-    page = nil
-    spec = location ? "in #{location}" : "by #{artist}"
-    query = location ? "?findloc=#{CGI.escape(location)}" : "?s=#{CGI.escape(artist)}&findloc="
-    begin
-      page = @bot.httputil.get LASTFM + "/events/" + query
-      if page
-        events = Array.new
-        disp_events = Array.new
 
-        pre_events = page.scan(LastFmEvent::SELECTOR)
-        # debug pre_events.inspect
-        if pre_events.empty?
-          # We may not find any even because the page gives a list
-          # of locations instead. In this case, retry with the first of
-          # these location
-          if page.match(/<a href="(\/events\/\?l=[^"]+)">/)
-            debug "Rechecking with #{$1}"
-            page = @bot.httputil.get(LASTFM+$1)
-            debug page
-            pre_events = page.scan(LastFmEvent::SELECTOR) if page
-            debug pre_events
-          end
-          if pre_events.empty?
-            m.reply "No events found #{spec}, sorry"
-            return
-          end
-        end
-        pre_events.each { |s| s.scan(LastFmEvent::MATCHER) { |day, month, year, url_who, who, url_where, where, how_many|
-          date = Time.utc(year.to_i, month.to_i, day.to_i)
-          url = LASTFM + url_who
-          if who.match(/<strong>(.*?)<\/strong>(.+)?/)
-            artist = Bold + $1.ircify_html + Bold
-            artist << ", " << $2.ircify_html if $2
-          else
-            debug "who: #{who.inspect}"
-            artist = who.ircify_html
-          end
-          if where.match(/<strong>(.*?)<\/strong>(?:<br\s*\/>(.+)?)?/)
-            loc = Bold + $1.ircify_html + Bold
-            loc << ", " << $2.ircify_html if $2
-          else
-            debug where.inspect
-            loc = where.ircify_html
-          end
-          attendance = how_many ? how_many.ircify_html : ''
-          events << LastFmEvent.new(url, date, artist, loc, attendance)
-        } }
-        # debug events.inspect
+    uri = nil
+    if artist == nil
+      uri = URI.escape("#{APIURL}method=geo.getevents&location=#{location}")
+    else
+      uri = URI.escape("#{APIURL}method=artist.getevents&artist=#{artist}")
+    end
+    xml = @bot.httputil.get_response(uri)
 
-        events[0...num].each { |event|
-          disp_events << event.to_s
-        }
-        m.reply disp_events.join(' | '), :split_at => /\s+\|\s+/
+    doc = Document.new xml.body
+    if xml.class == Net::HTTPInternalServerError
+      if doc.root.attributes["status"] == "failed"
+        m.reply doc.root.elements["error"].text
       else
-        m.reply "No events found #{spec}"
-        return
+        m.reply _("Could not retrieve events")
       end
-    rescue Exception => e
-      m.reply "I had problems looking for events #{spec}"
-      error e.inspect
-      debug e.backtrace.join("\n")
-      debug page[0...10*1024] if page
+    end
+    disp_events = Array.new
+    events = Array.new
+    doc.root.elements.each("events/event"){ |e|
+      title = e.elements["title"].text
+      venue = e.elements["venue"].elements["name"].text
+      city = e.elements["venue"].elements["location"].elements["city"].text
+      country =  e.elements["venue"].elements["location"].elements["country"].text
+      loc = Bold + venue + Bold + " #{city}, #{country}"
+      date = e.elements["startDate"].text.split
+      date = Time.utc(date[3].to_i, date[2], date[1].to_i)
+      desc = e.elements["description"].text
+      url = e.elements["url"].text
+      artists = Array.new
+      e.elements.each("artists/artist"){ |a|
+        artists << a.text
+      }
+      if artists.length > 10 #more than 10 artists and it floods
+       diff = artists.length - 10
+       artists = artists[0..10]
+       artists << _(" and %{n} more...") % {:n => diff}
+      end
+      artists = artists.join(", ")
+      events << LastFmEvent.new(url, date, artists, loc, desc)
+    }
+    events[0...num].each { |event|
+      disp_events << event.to_s
+    }
+    m.reply disp_events.join(' | '), :split_at => /\s+\|\s+/
+
+  end  
+
+  def tasteometer(m, params)
+    opts = { :cache => false }
+    user1 = params[:user1].to_s
+    user2 = params[:user2].to_s
+    xml = @bot.httputil.get_response("#{APIURL}method=tasteometer.compare&type1=user&type2=user&value1=#{user1}&value2=#{user2}", opts)
+    doc = Document.new xml.body
+    unless doc
+      m.reply _("last.fm parsing failed")
       return
     end
+    if xml.class == Net::HTTPInternalServerError
+      if doc.root.elements["error"].attributes["code"] == "7" then 
+        error = doc.root.elements["error"].text
+        error.match(/Invalid username: \[(.*)\]/);
+        if @registry.has_key? $1 and not params[:recurs]
+          if user1 == $1
+            params[:user1] = @registry[ $1 ]
+          elsif user2 == $1
+            params[:user2] = @registry[ $1 ]
+          end
+          params[:recurs] = true
+          tasteometer(m, params)
+        else
+          m.reply _("%{u} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>") % {:u => baduser}
+        end
+      else
+        m.reply _("Bad: %{e}") % {:e => doc.root.element["error"].text}
+      end
+    end
+    now = artist = track = albumtxt = date = nil
+    score = doc.root.elements["comparison/result/score"].text.to_f
+    rating = nil
+    case
+      when score >= 0.9
+        rating = _("Super")
+      when score >= 0.7
+        rating = _("Very High")
+      when score >= 0.5
+        rating = _("High")
+      when score >= 0.3
+        rating = _("Medium")
+      when score >= 0.1
+        rating = _("Low")
+      else
+        rating = _("Very Low")
+    end
+    m.reply _("%{a}'s and %{b}'s musical compatibility rating is: %{r}") % {:a => user1, :b => user2, :r => rating}
   end
 
   def now_playing(m, params)
@@ -165,88 +188,117 @@ class LastFmPlugin < Plugin
     elsif @registry.has_key? m.sourcenick
       user = @registry[ m.sourcenick ]
     else
-      # m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
-      # return
       user = m.sourcenick
     end
-    page = nil
-    begin
-      page = @bot.httputil.get("#{LASTFM}/user/#{user}", opts)
-      if page
-        if page.match(/class="nowListening">\s*<td class="subject">\s*<a href="\/music.*?">(.*)<\/a>\s*<\/td/)
-          track = $1
-          if page.match(/class="nowListening currentStation">\s*(.*?)<\/a>/m)
-            m.reply "#{user} is #{$1.ircify_html}"
-          end
-          m.reply "#{user} is jammin to #{track.ircify_html}"
-        elsif page.match(/class="justlistened first">\s*<td class="subject">.*<\/span><\/a>?(.*)<\/a>\s*<\/td>\s*<td class="date">\s*just/m)
-          m.reply "#{user} just jammed to #{$1.ircify_html}"
-        else
-          params[:action] = "recenttracks"
-          params[:user] = user
-          lastfm(m, params)
-        end
-      else
-        return if params[:recurs]
-        if @registry.has_key? user
+    xml = @bot.httputil.get_response("#{APIURL}method=user.getrecenttracks&user=#{user}", opts)
+    doc = Document.new xml.body
+    unless doc
+      m.reply _("last.fm parsing failed")
+      return
+    end
+    if xml.class == Net::HTTPBadRequest
+      if doc.root.elements["error"].text == "Invalid user name supplied" then 
+        if @registry.has_key? user and not params[:recurs]
           params[:who] = @registry[ user ]
           params[:recurs] = true
           now_playing(m, params)
         else
           m.reply "#{user} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
         end
+      else
+        m.reply _("Error %{e}") % {:e => doc.root.element["error"].text}
       end
-    rescue
-      m.reply "I had problems getting #{user}'s current info"
+    end
+    now = artist = track = albumtxt = date = nil
+    first = doc.root.elements[1].elements[1]
+    now = first.attributes["nowplaying"]
+    artist = first.elements["artist"].text
+    track = first.elements["name"].text
+    albumtxt = first.elements["album"].text
+    year = get_album(artist, albumtxt)[2]
+    album = "[#{albumtxt}, #{year}] " unless albumtxt == nil or year.length == 1
+    date = first.elements["date"].attributes["uts"]
+    past = Time.at(date.to_i)
+    if now == "true"
+       verb = _("listening")
+       if @registry.has_key? "#{m.sourcenick}_verb_present"
+         verb = @registry["#{m.sourcenick}_verb_present"]
+       end
+      m.reply _("%{u} is %{v} to \"%{t}\" by %{a} %{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
+    else
+      verb = _("listened")
+       if @registry.has_key? "#{m.sourcenick}_verb_past"
+         verb = @registry["#{m.sourcenick}_verb_past"]
+       end
+      ago = Utils.timeago(past)
+      m.reply _("%{u} is %{v} to \"%{t}\" by %{a} %{b}%{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
     end
   end
 
   def find_artist(m, params)
-    artist = params[:who].to_s
-    page = nil
-    begin
-      esc = URI.escape(CGI.escape(artist))
-      page = @bot.httputil.get "#{LASTFM}/music/#{esc}"
-      if page
-        if page.match(/<h1 class="h1artist"><a href="([^"]+)">(.*?)<\/a><\/h1>/)
-          url = LASTFM + $1
-          title = $2.ircify_html
-        else
-          raise "No URL/Title found for #{artist}"
-        end
-
-        wiki = "This artist doesn't have a description yet. You can help by writing it: #{url}/+wiki?action=edit"
-        if page.match(/<div (?:class|id)="wikiAbstract">(.*?)<\/div>/m)
-          wiki = $1.ircify_html
-        end
-
-        m.reply "%s : %s\n%s" % [title, url, wiki], :overlong => :truncate
-      else
-        m.reply "no data found on #{artist}"
-        return
-      end
-    rescue Exception => e
-      m.reply "I had problems looking for #{artist}"
-      error e.inspect
-      debug e.backtrace.join("\n")
-      debug page[0...10*1024] if page
-      return
+    xml = @bot.httputil.get(URI.escape("#{APIURL}method=artist.getinfo&artist=#{params[:artist]}"))
+    unless xml
+      m.reply _("I had problems getting info for %{a}.") % {:a => params[:artist]}
     end
+    doc = Document.new xml
+    unless doc
+      m.reply _("last.fm parsing failed")
+    end
+    first = doc.root.elements["artist"]
+    artist = first.elements["name"].text
+    playcount = first.elements["stats"].elements["plays"].text
+    listeners = first.elements["stats"].elements["listeners"].text
+    summary = first.elements["bio"].elements["summary"].text
+    m.reply _("\"%{a}\" has been played %{c} times and is being listened to by %{l} people.") % {:a => artist, :c => playcount, :l => listeners}
+    m.reply summary.strip
   end
 
-  def find_track(m, params)
-    m.reply "not implemented yet, sorry"
+  def get_album(artist, album)
+    xml = @bot.httputil.get(URI.escape("#{APIURL}method=album.getinfo&artist=#{artist}&album=#{album}"))
+    unless xml
+      return [_("I had problems getting album info")]
+    end
+    doc = Document.new xml
+    unless doc
+      return [_("last.fm parsing failed")]
+    end
+    album = date = playcount = artist = date = year = nil
+    first = doc.root.elements["album"]
+    artist = first.elements["artist"].text
+    playcount = first.elements["playcount"].text
+    album = first.elements["name"].text
+    date = first.elements["releasedate"].text
+    unless date.strip.length < 2 
+      year = date.strip.split[2].chop
+    end
+    result = [artist, album, year, playcount]
+    return result
   end
 
   def find_album(m, params)
-    m.reply "not implemented yet, sorry"
+    album = get_album(params[:artist].to_s, params[:album].to_s)
+    if album.length == 1
+      m.reply _("I couldn't locate: \"%{a}\" by %{r}") % {:a => params[:album], :r => params[:artist]}
+      return
+    end
+    year = "(#{album[2]}) " unless album[2] == nil
+    m.reply _("The album \"%{a}\" by %{r} %{y}has been played %{c} times.") % {:a => album[1], :r => album[0], :y => year, :c => album[3]}
   end
 
   def set_user(m, params)
     user = params[:who].to_s
     nick = m.sourcenick
     @registry[ nick ] = user
-    m.reply "Ok, I'll remember that #{nick} is #{user} at last.fm"
+    m.reply _("Ok, I'll remember that %{n} is %{u} at last.fm") % {:n => nick, :u => user}
+  end
+
+  def set_verb(m, params)
+    past = params[:past].to_s
+    present = params[:present].to_s
+    key = "#{m.sourcenick}_verb_"
+    @registry[ "#{key}past" ] = past
+    @registry[ "#{key}present" ] = present
+    m.reply _("Ok, I'll remember that %{n} prefers %{p} and %{r}.") % {:n => m.sourcenick, :p => past, :r => present}
   end
 
   def get_user(m, params)
@@ -260,7 +312,7 @@ class LastFmPlugin < Plugin
       user = @registry[ nick ]
       m.reply "#{nick} is #{user} at last.fm"
     else
-      m.reply "Sorry, I don't know who #{nick} is at last.fm perhaps you need to: lastfm set <username>"
+      m.reply _("Sorry, I don't know who %{n} is at last.fm perhaps you need to: lastfm set <username>") % {:n => nick}
     end
   end
 
@@ -288,19 +340,20 @@ class LastFmPlugin < Plugin
 end
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm [:num] event[s] in *location', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] by *who', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_event, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm artist *who', :action => :find_artist, :thread => true
-plugin.map 'lastfm group *who', :action => :find_artist, :thread => true
-plugin.map 'lastfm now *who', :action => :now_playing, :thread => true
+plugin.map 'lastfm [:num] event[s] in *location', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] by *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm now :who', :action => :now_playing, :thread => true
 plugin.map 'lastfm now', :action => :now_playing, :thread => true
-plugin.map 'lastfm track *dunno', :action => :find_track
-plugin.map 'lastfm song *dunno', :action => :find_track
-plugin.map 'lastfm album *dunno', :action => :find_album
-plugin.map 'lastfm set *who', :action => :set_user, :thread => true
-plugin.map 'lastfm who *who', :action => :get_user, :thread => true
+plugin.map 'np :who', :action => :now_playing, :thread => true
+plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
+plugin.map 'lastfm album *album [by *artist]', :action => :find_album
+plugin.map 'lastfm set nick :who', :action => :set_user, :thread => true
+plugin.map 'lastfm set verb :present :past', :action => :set_verb, :thread => true
+plugin.map 'lastfm who :who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
-plugin.map 'lastfm :action *user', :thread => true
-plugin.map 'lastfm :action', :thread => true
+plugin.map 'lastfm compare :user1 :user2', :action => :tasteometer, :thread => true
+#plugin.map 'lastfm :action :user', :thread => true
+#plugin.map 'lastfm :action', :thread => true
+plugin.map 'np', :action => :now_playing, :thread => true
 plugin.map 'lastfm', :action => :now_playing, :thread => true
