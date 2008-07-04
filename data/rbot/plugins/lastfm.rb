@@ -85,8 +85,10 @@ class LastFmPlugin < Plugin
       _("lastfm set nick <user> => associate your current irc nick with a last.fm user. lastfm set verb <present> <past> => set your preferred now playing verb. default \"listening\" and \"listened\".")
     when :who
       _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
+    when :compare
+      _("lastfm compare <nick1> <nick2> => show musical taste compatibility between nick1 and nick2.")
     else
-      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who")
+      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who, compare")
     end
   end
 
