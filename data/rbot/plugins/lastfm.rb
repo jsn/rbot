@@ -14,6 +14,7 @@
 # License:: GPL v2
 
 require 'rexml/document'
+require 'cgi'
 
 class ::LastFmEvent
   def initialize(hash)
@@ -76,6 +77,8 @@ class LastFmPlugin < Plugin
       _("lastfm artist <name> => show information on artist <name> from last.fm")
     when :album
       _("lastfm album <name> => show information on album <name> from last.fm [not implemented yet]")
+    when :track
+      _("lastfm track <name> => search tracks matching <name> on last.fm")
     when :now, :np
       _("lastfm now [<user>] => show the now playing track from last.fm.  np [<user>] does the same.")
     when :set
@@ -83,7 +86,7 @@ class LastFmPlugin < Plugin
     when :who
       _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
     else
-      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, now, set, who")
+      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who")
     end
   end
 
@@ -278,6 +281,42 @@ class LastFmPlugin < Plugin
     m.reply summary.strip
   end
 
+  def find_track(m, params)
+    track = params[:track].to_s
+    xml = @bot.httputil.get(URI.escape("#{APIURL}method=track.search&track=#{CGI.escape track}"))
+    unless xml
+      m.reply _("I had problems getting info for %{a}.") % {:a => track}
+      return
+    end
+    debug xml
+    doc = Document.new xml
+    unless doc
+      m.reply _("last.fm parsing failed")
+      return
+    end
+    debug doc.root
+    results = doc.root.elements["results/opensearch:totalResults"].text.to_i rescue 0
+    if results > 0
+      begin
+        hits = []
+        doc.root.each_element("results/trackmatches/track") do |track|
+          hits << _("%{bold}%{t}%{bold} by %{bold}%{a}%{bold} (%{n} listeners)") % {
+            :t => track.elements["name"].text,
+            :a => track.elements["artist"].text,
+            :n => track.elements["listeners"].text,
+            :bold => Bold
+          }
+        end
+        m.reply hits.join(' -- '), :split_at => ' -- '
+      rescue
+        error $!
+        m.reply _("last.fm parsing failed")
+      end
+    else
+      m.reply _("track %{a} not found") % {:a => track}
+    end
+  end
+
   def get_album(artist, album)
     xml = @bot.httputil.get(URI.escape("#{APIURL}method=album.getinfo&artist=#{artist}&album=#{album}"))
     unless xml
@@ -379,6 +418,7 @@ plugin.map 'lastfm now', :action => :now_playing, :thread => true
 plugin.map 'np :who', :action => :now_playing, :thread => true
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
+plugin.map 'lastfm track *track', :action => :find_track, :thread => true
 plugin.map 'lastfm set nick :who', :action => :set_user, :thread => true
 plugin.map 'lastfm set verb :present :past', :action => :set_verb, :thread => true
 plugin.map 'lastfm who :who', :action => :get_user, :thread => true
