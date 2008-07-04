@@ -28,10 +28,10 @@ class ::LastFmEvent
 
     if @artists.length > 10 #more than 10 artists and it floods
       diff = @artists.length - 10
-      @artist_string = @artists[0..10].join(', ')
+      @artist_string = Bold + @artists[0..10].join(', ') + Bold
       @artist_string << _(" and %{n} more...") % {:n => diff}
     else
-      @artist_string = @artists.join(', ')
+      @artist_string = Bold + @artists.join(', ') + Bold
     end
   end
 
@@ -124,7 +124,7 @@ class LastFmPlugin < Plugin
       venue = e.elements["venue"].elements["name"].text
       city = e.elements["venue"].elements["location"].elements["city"].text
       country =  e.elements["venue"].elements["location"].elements["country"].text
-      h[:location] = Bold + venue + Bold + " #{city}, #{country}"
+      h[:location] = Underline + venue + Underline + " #{Bold + city + Bold}, #{country}"
       date = e.elements["startDate"].text.split
       h[:date] = Time.utc(date[3].to_i, date[2], date[1].to_i)
       h[:desc] = e.elements["description"].text
