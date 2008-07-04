@@ -11,14 +11,40 @@
 
 class GrouphugPlugin < Plugin
   REG  = Regexp.new('<div class="content">\s*<p>(.*?)</p>\s+</div>', Regexp::MULTILINE)
+  REGPOST = Regexp.new('title>(.*?) \| Group Hug')
   def initialize
     super
     @confessions = Array.new
   end
 
   def help( plugin, topic="" )
-    return "Grouphug plugin. Confess! Usage: 'confess' for random confession, 'confess <number>' for specific one."
+    return _("Grouphug plugin. Confess! Usage: 'confess' for random confession, 'confess <number>' for specific one, 'confess <confession>' to share your own confession, but you must have create auth. Confessions must be at least 10 words.")
   end
+
+  def post_confession(m, params)
+    c = params[:confession]
+    if c.length < 10
+      diff = 10 - c.length
+      m.reply _("Confession must be at least 10 words. You need %{m} more.") % {:m => diff}
+      return
+    end
+    uri = "http://beta.grouphug.us/confess"
+    form_id = "form_id=confession_node_form"
+    op = "op=Submit"
+    changed = "changed="
+    body = "body=#{c}"
+    msg = [form_id,body,changed,op].join("&")
+
+    response = bot.httputil.post(uri, msg)
+    debug response.body
+    if response.class == Net::HTTPOK
+      num = response.body.scan(REGPOST)
+      m.reply _("Confession posted: http://beta.grouphug.us/confessions/%{n}") % {:n => num}
+    else
+      m.reply _("I couldn't share your confession.")
+    end
+  end
+
 
   def confess(m, params)
     opts = { :cache => false }
@@ -54,8 +80,11 @@ end
 
 plugin = GrouphugPlugin.new
 
+plugin.default_auth('create', false)
+
 plugin.map "grouphug [:num]",
   :thread => true, :action => :confess, :requirements => { :num => /\d+/ }
 plugin.map "confess [:num]",
   :thread => true, :action => :confess, :requirements => { :num => /\d+/ }
+plugin.map "confess *confession", :thread => true, :action => :post_confession, :auth_path => 'create'
 
