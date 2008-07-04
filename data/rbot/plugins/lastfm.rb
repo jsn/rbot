@@ -278,7 +278,7 @@ class LastFmPlugin < Plugin
     listeners = first.elements["stats"].elements["listeners"].text
     summary = first.elements["bio"].elements["summary"].text
     m.reply _("\"%{a}\" has been played %{c} times and is being listened to by %{l} people.") % {:a => artist, :c => playcount, :l => listeners}
-    m.reply summary.strip
+    m.reply summary.ircify_html
   end
 
   def find_track(m, params)
