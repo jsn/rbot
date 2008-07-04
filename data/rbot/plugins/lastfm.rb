@@ -110,7 +110,7 @@ class LastFmPlugin < Plugin
 
     doc = Document.new xml.body
     if xml.class == Net::HTTPInternalServerError
-      if doc.root.attributes["status"] == "failed"
+      if doc.root and doc.root.attributes["status"] == "failed"
         m.reply doc.root.elements["error"].text
       else
         m.reply _("Could not retrieve events")
