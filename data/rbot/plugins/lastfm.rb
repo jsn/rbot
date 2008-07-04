@@ -100,9 +100,9 @@ class LastFmPlugin < Plugin
 
     uri = nil
     if artist == nil
-      uri = URI.escape("#{APIURL}method=geo.getevents&location=#{location}")
+      uri = "#{APIURL}method=geo.getevents&location=#{CGI.escape location}"
     else
-      uri = URI.escape("#{APIURL}method=artist.getevents&artist=#{artist}")
+      uri = "#{APIURL}method=artist.getevents&artist=#{CGI.escape artist}"
     end
     xml = @bot.httputil.get_response(uri)
 
@@ -150,7 +150,7 @@ class LastFmPlugin < Plugin
     opts = { :cache => false }
     user1 = params[:user1].to_s
     user2 = params[:user2].to_s
-    xml = @bot.httputil.get_response("#{APIURL}method=tasteometer.compare&type1=user&type2=user&value1=#{user1}&value2=#{user2}", opts)
+    xml = @bot.httputil.get_response("#{APIURL}method=tasteometer.compare&type1=user&type2=user&value1=#{CGI.escape user1}&value2=#{CGI.escape user2}", opts)
     doc = Document.new xml.body
     unless doc
       m.reply _("last.fm parsing failed")
@@ -207,7 +207,7 @@ class LastFmPlugin < Plugin
     else
       user = m.sourcenick
     end
-    xml = @bot.httputil.get_response("#{APIURL}method=user.getrecenttracks&user=#{user}", opts)
+    xml = @bot.httputil.get_response("#{APIURL}method=user.getrecenttracks&user=#{CGI.escape user}", opts)
     doc = Document.new xml.body
     unless doc
       m.reply _("last.fm parsing failed")
@@ -262,7 +262,7 @@ class LastFmPlugin < Plugin
   end
 
   def find_artist(m, params)
-    xml = @bot.httputil.get(URI.escape("#{APIURL}method=artist.getinfo&artist=#{params[:artist]}"))
+    xml = @bot.httputil.get("#{APIURL}method=artist.getinfo&artist=#{CGI.escape params[:artist].to_s}")
     unless xml
       m.reply _("I had problems getting info for %{a}.") % {:a => params[:artist]}
       return
@@ -283,7 +283,7 @@ class LastFmPlugin < Plugin
 
   def find_track(m, params)
     track = params[:track].to_s
-    xml = @bot.httputil.get(URI.escape("#{APIURL}method=track.search&track=#{CGI.escape track}"))
+    xml = @bot.httputil.get("#{APIURL}method=track.search&track=#{CGI.escape track}")
     unless xml
       m.reply _("I had problems getting info for %{a}.") % {:a => track}
       return
@@ -318,7 +318,7 @@ class LastFmPlugin < Plugin
   end
 
   def get_album(artist, album)
-    xml = @bot.httputil.get(URI.escape("#{APIURL}method=album.getinfo&artist=#{artist}&album=#{album}"))
+    xml = @bot.httputil.get("#{APIURL}method=album.getinfo&artist=#{CGI.escape artist}&album=#{CGI.escape album}")
     unless xml
       return [_("I had problems getting album info")]
     end
