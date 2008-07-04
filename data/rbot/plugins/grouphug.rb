@@ -18,7 +18,7 @@ class GrouphugPlugin < Plugin
   end
 
   def help( plugin, topic="" )
-    return _("Grouphug plugin. Confess! Usage: 'confess' for random confession, 'confess <number>' for specific one, 'confess <confession>' to share your own confession, but you must have create auth. Confessions must be at least 10 words.")
+    return _("Grouphug plugin. Confess! Usage: 'confess' for random confession, 'confess <number>' for specific one, 'confess <confession>' to share your own confession. Confessions must be at least 10 words.")
   end
 
   def post_confession(m, params)
