@@ -92,3 +92,5 @@ plugin = AutoOP.new
 plugin.map 'autoop list', :action => 'list'
 plugin.map 'autoop add :mask [*channels]', :action => 'add'
 plugin.map 'autoop rm :mask [*channels]', :action => 'rm'
+
+plugin.default_auth('*',false)
