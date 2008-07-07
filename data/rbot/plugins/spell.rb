@@ -9,7 +9,7 @@ class SpellPlugin < Plugin
      :desc => _('Path to the program to use to check spelling'))
   Config.register Config::StringValue.new('spell.command_line',
      :default => '%s -a -S',
-     :desc => _('Command line used to call the spell.program. Use %s as a placeholder for the executable name'))
+     :desc => _('Command line used to call the spell.path. Use %s as a placeholder for the executable name'))
 
   def help(plugin, topic="")
     _("spell <word> => check spelling of <word>, suggest alternatives")
@@ -21,7 +21,7 @@ class SpellPlugin < Plugin
     end
 
     begin
-      IO.popen(@bot.config['spell.command_line'] % @bot.config['spell.program'], "w+") { |p|
+      IO.popen(@bot.config['spell.command_line'] % @bot.config['spell.path'], "w+") { |p|
         p.puts m.params
         p.close_write
         p.each_line { |l|
@@ -39,11 +39,11 @@ class SpellPlugin < Plugin
         }
       }
     rescue
-      m.reply(_("couldn't exec %{prog} :(") % {:prog => @bot.config['spell.program']})
+      m.reply(_("couldn't exec %{prog} :(") % {:prog => @bot.config['spell.path']})
       return
     end
     m.reply(_("something odd happened while checking %{word} with %{prog}") % {
-      :word => m.params, :prog => @bot.config['spell.program']
+      :word => m.params, :prog => @bot.config['spell.path']
     })
   end
 end
