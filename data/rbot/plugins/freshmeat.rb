@@ -87,7 +87,7 @@ class FreshmeatPlugin < Plugin
     max = params[:limit].to_i
     max = 8 if max > 8
     begin
-      xml = @bot.httputil.get('http://images.feedstermedia.com/feedcache/ostg/freshmeat/fm-releases-global.xml')
+      xml = @bot.httputil.get('http://freshmeat.net/backend/fm-releases-global.xml')
       unless xml
         m.reply "freshmeat news parse failed"
         return
@@ -107,8 +107,8 @@ class FreshmeatPlugin < Plugin
     title_width = 0
     done = 0
     doc.elements.each("*/channel/item") {|e|
-      desc = e.elements["description"].text
-      title = e.elements["title"].text
+      desc = e.elements["description"].text.ircify_html
+      title = e.elements["title"].text.ircify_html
       #title.gsub!(/\s+\(.*\)\s*$/, "")
       title.strip!
       title_width = title.length if title.length > title_width
