@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-26 14:47+0200\n"
+"POT-Creation-Date: 2008-07-07 18:02+0200\n"
 "PO-Revision-Date: 2008-06-26 14:50+0200\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -953,19 +953,65 @@ msgstr "secondi"
 msgid " and "
 msgstr " e "
 
-#: lib/rbot/ircbot.rb:1203
+#: lib/rbot/core/utils/utils.rb:252
+msgid "%{d} from now"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:254
+#, fuzzy
+msgid "%{d} ago"
+msgstr " [%{secs} fa]"
+
+#: lib/rbot/core/utils/utils.rb:257
+#, fuzzy
+msgid "on %{date}"
+msgstr "può %{action}"
+
+#: lib/rbot/core/utils/utils.rb:266
+msgid "less than a minute"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:268
+#, fuzzy
+msgid "%{m} minutes"
+msgstr "minuti"
+
+#: lib/rbot/core/utils/utils.rb:270
+msgid "about one hour"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:272
+#, fuzzy
+msgid "%{m} hours"
+msgstr "ore"
+
+#: lib/rbot/core/utils/utils.rb:274
+#, fuzzy
+msgid "one day"
+msgstr "giorno"
+
+#: lib/rbot/core/utils/utils.rb:276
+msgid "about one day"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:278
+#, fuzzy
+msgid "%{m} days"
+msgstr "giorni"
+
+#: lib/rbot/ircbot.rb:1209
 msgid "help topics: "
 msgstr "argomenti: "
 
-#: lib/rbot/ircbot.rb:1205
+#: lib/rbot/ircbot.rb:1211
 msgid " (help <topic> for more info)"
 msgstr " (help <argomento> per ulteriori informazioni)"
 
-#: lib/rbot/ircbot.rb:1208
+#: lib/rbot/ircbot.rb:1214
 msgid "no help for topic %{topic}"
 msgstr "nessun aiuto disponibile su %{topic}"
 
-#: lib/rbot/ircbot.rb:1219
+#: lib/rbot/ircbot.rb:1225
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""

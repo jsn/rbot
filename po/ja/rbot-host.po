@@ -1,0 +1,3 @@
+#: data/rbot/plugins/host.rb:4
+msgid "Path to the host program"
+msgstr ""

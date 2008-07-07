@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-24 02:22+0200\n"
+"POT-Creation-Date: 2008-07-07 18:02+0200\n"
 "PO-Revision-Date: 2007-07-09 01:39-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Chinese\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: data/rbot/plugins/spell.rb:9
-msgid "Program to use to check spelling"
+msgid "Path to the program to use to check spelling"
 msgstr ""
 
 #: data/rbot/plugins/spell.rb:12

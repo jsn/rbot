@@ -1,0 +1,18 @@
+#: data/rbot/plugins/grouphug.rb:21
+msgid ""
+"Grouphug plugin. Confess! Usage: 'confess' for random confession, 'confess "
+"<number>' for specific one, 'confess <confession>' to share your own "
+"confession. Confessions must be at least 10 words."
+msgstr ""
+
+#: data/rbot/plugins/grouphug.rb:28
+msgid "Confession must be at least 10 words. You need %{m} more."
+msgstr ""
+
+#: data/rbot/plugins/grouphug.rb:42
+msgid "Confession posted: http://beta.grouphug.us/confessions/%{n}"
+msgstr ""
+
+#: data/rbot/plugins/grouphug.rb:44
+msgid "I couldn't share your confession."
+msgstr ""

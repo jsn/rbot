@@ -1,0 +1,3 @@
+#: data/rbot/plugins/cal.rb:4
+msgid "Path to the cal program"
+msgstr ""
