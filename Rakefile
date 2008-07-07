@@ -107,8 +107,12 @@ task :define_po_rules do
     puts "#{pot_file} => #{po_file}"
     if File.exists? po_file
       sh "#{MSGMERGE} --backup=off --update #{po_file} #{pot_file}"
+    elsif MSGINIT
+      locale = po_file[%r'^po/(.+)/.+\.po$', 1]
+      sh "#{MSGINIT} --locale=#{locale} --no-translator --input=#{pot_file} --output-file=#{po_file}"
     else
-      cp pot_file, po_file
+      warn "#{po_file} is missing and cannot be generated without msginit"
+      next
     end
     normalize_po(po_file)
     touch po_file
@@ -149,6 +153,9 @@ task :check_po_tools do
     'msgmerge' => {
       :options => %w[--backup= --update],
       :message => 'Cannot update po files' },
+    'msginit' => {
+      :options => %w[--locale= --no-translator --input= --output-file=],
+      :message => 'Cannot generate missing po files' },
     'msgcomm' => {
       :options => %w[--unique],
       :message => 'Pot files may be modified even without message change' },
