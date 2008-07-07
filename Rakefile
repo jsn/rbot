@@ -209,8 +209,7 @@ task :buildext do
 end
 
 desc 'Generate mo files'
-task :makemo => LOCALES.map {|l|
-  ["data/locale/#{l}/LC_MESSAGES/rbot.mo"] +
-  PLUGIN_BASENAMES.map {|n| "data/locale/#{l}/LC_MESSAGES/rbot-#{n}.mo"}
-}.flatten
+task :makemo =>
+  FileList['po/*/*.po'].pathmap('%{^po,data/locale}d/LC_MESSAGES/%n.mo')
+
 
