@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'rake/gempackagetask'
 
-task :default => [:repackage]
+task :default => [:buildext]
 
 spec = Gem::Specification.new do |s|
   s.name = 'rbot'
@@ -16,10 +16,11 @@ spec = Gem::Specification.new do |s|
   s.requirements << 'Ruby, version 1.8.0 (or newer)'
 
   #  s.files = Dir.glob("**/*").delete_if { |item| item.include?(".svn") }
-  s.files = FileList['lib/**/*.rb', 'bin/*', 'data/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL',  'Usage_en.txt', 'setup.rb'].to_a.delete_if {|item| item == ".svn"}
+  s.files = FileList['lib/**/*.rb', 'bin/*', 'data/rbot/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL',  'Usage_en.txt', 'setup.rb', 'po/*.pot', 'po/**/*.po'].to_a.delete_if {|item| item == ".svn"}
   s.bindir = 'bin'
   s.executables = ['rbot', 'rbot-remote']
   s.default_executable = 'rbot'
+  s.extensions = 'Rakefile'
 
 #  s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
@@ -182,6 +183,18 @@ task :updatepo => [:define_po_rules, :check_po_tools] + LOCALES.map {|l|
 desc 'Normalize po files'
 task :normalizepo => :check_po_tools do
   FileList['po/*/*.po'].each {|fn| normalize_po(fn)}
+end
+
+# this task invokes makemo if ruby-gettext is available, but otherwise succeeds
+# with a warning instead of failing. it is to be used by Gem's extension builder
+# to make installation not fail because of lack of ruby-gettext
+task :buildext do
+  begin
+    require 'gettext/utils'
+    Rake::Task[:makemo].invoke
+  rescue LoadError
+    warn 'Ruby-gettext cannot be located, so mo files cannot be built and installed' 
+  end
 end
 
 desc 'Generate mo files'
