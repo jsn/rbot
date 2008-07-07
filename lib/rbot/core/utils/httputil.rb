@@ -109,7 +109,16 @@ module ::Net
           # TODO
           # debug "full inflation failed (#{e}), trying to recover as much as possible"
         end
+      when /^(?:iso-8859-\d+|windows-\d+|utf-8|utf8)$/i
+        # B0rked servers (Freshmeat being one of them) sometimes return the charset
+        # in the content-encoding; in this case we assume that the document has
+        # a standarc content-encoding
+        old_hsh = self.to_hash
+        self['content-type']= self['content-type']+"; charset="+method.downcase
+        warning "Charset vs content-encoding confusion, trying to recover: from\n#{old_hsh.pretty_inspect}to\n#{self.to_hash.pretty_inspect}"
+        return str
       else
+        debug self.to_hash
         raise "Unhandled content encoding #{method}"
       end
     end
