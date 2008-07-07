@@ -49,7 +49,13 @@ class FreshmeatPlugin < Plugin
       m.reply "search for #{search} failed"
       return
     end
-    doc = Document.new xml
+    doc = nil
+    begin
+      doc = Document.new xml
+    rescue
+      debug xml
+      error $!
+    end
     unless doc
       m.reply "search for #{search} failed"
       return
