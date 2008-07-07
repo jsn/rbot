@@ -42,11 +42,6 @@ end
 def normalize_po(fn)
   content = File.read(fn)
 
-  # replace project-id-version placholder
-  modified = content.sub!(/^("Project-Id-Version: )PACKAGE VERSION(\\n")$/) {
-    "#{$1}rbot#{$2}"
-  }
-
   # sort the messages by file location
   if MSGCAT
     sorted = `#{MSGCAT} --width=79 --sort-by-file #{fn}`
@@ -55,6 +50,11 @@ def normalize_po(fn)
       modified = true
     end
   end
+
+  # replace project-id-version placholder
+  modified |= content.sub!(/^("Project-Id-Version: )PACKAGE VERSION(\\n")$/) {
+    "#{$1}rbot#{$2}"
+  }
 
   if modified
     File.open(fn, 'w') {|f| f.write content}
