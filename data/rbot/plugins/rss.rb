@@ -257,18 +257,28 @@ class RSSFeedsPlugin < Plugin
   # Make an  'unique' ID for a given item, based on appropriate bot options
   # Currently only suppored is bot.config['rss.show_updated']: when false,
   # only the guid/link is accounted for.
-  #
+  
+  def block_rescue(df = nil, &block)
+    block.call rescue nil
+  end
+
   def make_uid(item)
     uid = [
-      (item.guid.content rescue \
-       item.guid rescue \
-       item.link.href rescue \
-       item.link rescue ''
+      (block_rescue do item.guid.content end ||
+       block_rescue do item.guid end ||
+       block_rescue do item.link.href end ||
+       block_rescue do item.link end
       )
     ]
     if @bot.config['rss.show_updated']
-      uid.push((item.content.content rescue item.description rescue nil))
-      uid.unshift((item.title.content rescue item.title rescue nil))
+      uid.push(
+        block_rescue do item.content.content end ||
+        block_rescue do item.description end
+      )
+      uid.unshift(
+        block_rescue do item.title.content end ||
+        block_rescue do item.title end
+      )
     end
     uid.hash
   end
