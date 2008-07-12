@@ -24,7 +24,11 @@ begin
 
   add_default_locale_path(File.join(Irc::Bot::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo"))
 
-  GetText.cached = false
+  if GetText.respond_to? :cached=
+    GetText.cached = false
+  else
+    warning 'This version of ruby-gettext does not support non-cached mode; mo files are not reloaded when setting language'
+  end
   bindtextdomain 'rbot'
 
   module GetText
