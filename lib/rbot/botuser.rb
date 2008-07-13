@@ -461,7 +461,7 @@ class Bot
       # Adds a Netmask
       #
       def add_netmask(mask)
-        m = mask.to_irc_netmask
+        m = mask.to_irc_netmask(:server => nil,:force => true)
         @netmasks << m
         if self.autologin?
           Auth.manager.maskdb.add(self, m)
