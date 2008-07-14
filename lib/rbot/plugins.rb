@@ -943,7 +943,7 @@ module Plugins
       if method.to_sym == :privmsg
         delegate('ctcp_listen', m) if m.ctcp
         delegate('message', m)
-        privmsg(m) if m.address?
+        privmsg(m) if m.address? and not m.ignored?
         delegate('unreplied', m) unless m.replied
       else
         delegate(method, m)
