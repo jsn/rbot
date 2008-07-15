@@ -214,7 +214,6 @@ module Irc
       h = {}
       h[:server] = @server if defined?(@server) and @server
       h[:casemap] = @casemap if defined?(@casemap) and @casemap
-      h[:casemap] ||= @server.casemap if defined?(@server) and @server
       return h
     end
 
@@ -683,7 +682,7 @@ module Irc
     # Subclasses of Netmask will return a new Netmask, using full_downcase
     #
     def to_irc_netmask(opts={})
-      if self.class == Netmask and not opts[:force]
+      if self.class == Netmask
         return self if fits_with_server_and_casemap?(opts)
       end
       return self.full_downcase.to_irc_netmask(server_and_casemap.merge(opts))
