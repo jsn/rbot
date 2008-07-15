@@ -1102,6 +1102,16 @@ module Irc
 
     end
 
+    # Hash of modes. Subclass of Hash that defines any? and all?
+    # to check if boolean modes (Type D) are set
+    class ModeHash < Hash
+      def any?(*ar)
+        !!ar.find { |m| s = m.to_sym ; self[s] && self[s].set? }
+      end
+      def all?(*ar)
+        !ar.find { |m| s = m.to_sym ; !(self[s] && self[s].set?) }
+      end
+    end
 
     # Channel modes of type A manipulate lists
     #
@@ -1358,15 +1368,7 @@ module Irc
       }
 
       # Flags
-      @mode = {}
-      class << @mode
-        def any?(*ar)
-          !!ar.find { |m| s = m.to_sym ; self[s] && self[s].set? }
-        end
-        def all?(*ar)
-          !ar.find { |m| s = m.to_sym ; !(self[s] && self[s].set?) }
-        end
-      end
+      @mode = ModeHash.new
     end
 
     # Removes a user from the channel
