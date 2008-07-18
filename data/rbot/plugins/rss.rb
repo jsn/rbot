@@ -1035,10 +1035,13 @@ class RSSFeedsPlugin < Plugin
       desc = "(?)"
     end
 
-    link = item.link.href rescue item.link.chomp rescue nil
+    link = item.link.href rescue item.link rescue nil
+    link.strip! if link
 
     category = select_nonempty((item.category.content rescue nil), (item.dc_subject rescue nil))
+    category.strip! if category
     author = select_nonempty((item.author.name.content rescue nil), (item.dc_creator rescue nil), (item.author rescue nil))
+    author.strip! if author
 
     line1 = nil
     line2 = nil
