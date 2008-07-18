@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Please specify a version"
+	exit
+fi
+
+FULLVERSION=$1
+VERSION=${FULLVERSION/-*/}
+
+echo "Full version: $FULLVERSION"
+echo "Version: $VERSION"
+
+sed -ine "/^\$version =/ c \$version = '$FULLVERSION'" launch_here.rb   
+sed -ine "/^\$version ||=/ c \$version ||= '$FULLVERSION'" bin/rbot
+sed -ine "/^  s.version =/ c \  s.version = '$VERSION'" Rakefile   
+
+git commit -m "Version $FULLVERSION" -a
+git tag -a -m "rbot $FULLVERSION" rbot-$FULLVERSION
+rake package
+if [ $VERSION != $FULLVERSION ]; then
+	pushd pkg
+	mv rbot-$VERSION.gem rbot-$FULLVERSION.gem
+	mv rbot-$VERSION.tgz rbot-$FULLVERSION.tgz
+	mv rbot-$VERSION.zip rbot-$FULLVERSION.zip
+	popd
+fi
