@@ -259,7 +259,8 @@ class RSSFeedsPlugin < Plugin
   # only the guid/link is accounted for.
   
   def block_rescue(df = nil, &block)
-    block.call rescue nil
+    v = block.call rescue nil
+    (String === v && '' != v) ? v : nil
   end
 
   def make_uid(item)
@@ -280,6 +281,7 @@ class RSSFeedsPlugin < Plugin
         block_rescue do item.title end
       )
     end
+    # debug "taking hash of #{uid.inspect}"
     uid.hash
   end
 
