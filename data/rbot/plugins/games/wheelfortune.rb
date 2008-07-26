@@ -384,6 +384,7 @@ class WheelOfFortune < Plugin
           :chan => p[:chan]
         }
       end
+      return
     end
 
     cat = p[:cat].to_s
