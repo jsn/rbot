@@ -11,10 +11,16 @@
 class WoFQA
   attr_accessor :cat, :clue, :hint
   attr_reader :answer
+  attr_accessor :guessed
   def initialize(cat, clue, ans=nil)
     @cat = cat # category
     @clue = clue # clue phrase
     self.answer = ans
+    @guessed = false
+  end
+
+  def guessed?
+    @guessed
   end
 
   def catclue
@@ -147,6 +153,10 @@ class WoFGame
     else
       0
     end
+  end
+
+  def mark_guessed(qa)
+    qa.guessed = true
   end
 
   def mark_winner(user)
@@ -331,7 +341,7 @@ class WheelOfFortune < Plugin
         :name => game.name,
         :count => game.length
       }
-      announce(m, p.merge({ :next => true }) ) unless game.running?
+      announce(m, p) unless game.running?
     else
       m.reply _("something went wrong, I can't seem to understand what you're trying to set up") if clue.empty?
     end
@@ -416,7 +426,10 @@ class WheelOfFortune < Plugin
       return
     end
     game = @games[ch]
-    qa = p[:next] ? game.next : game.current
+    qa = game.current
+    if !qa or qa.guessed?
+      qa = game.next
+    end
     if !qa
       m.reply _("there are no %{name} questions for %{chan}, I'm waiting for %{who} to add them") % {
         :name => game.name,
@@ -472,6 +485,7 @@ class WheelOfFortune < Plugin
       # TODO what happens when the last hint reveals the whole answer?
       announce(m)
     when :gotit
+      game.mark_guessed(game.current)
       want_more = game.mark_winner(m.source)
       m.reply _("%{who} got it! The answer was: %{ans}") % {
         :who => m.sourcenick,
@@ -498,7 +512,7 @@ class WheelOfFortune < Plugin
           :nocolor => Irc.color()
         }
         score_table(m.channel, game)
-        announce(m, :next => true)
+        announce(m)
       end
     else
       # can this happen?
@@ -511,6 +525,7 @@ class WheelOfFortune < Plugin
     ch = m.channel.irc_downcase(m.server.casemap).intern
     return unless game = @games[ch]
     return unless game.running?
+    return unless game.current and not game.current.guessed?
     check = game.check(m.message, :buy => false)
     react_on_check(m, ch, game, check)
   end
