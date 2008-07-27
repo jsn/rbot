@@ -419,11 +419,11 @@ msgstr "la password per %{user} è %{password}"
 
 #: lib/rbot/core/auth.rb:493
 msgid "can %{action}"
-msgstr "può %{action}"
+msgstr "può fare %{action}"
 
 #: lib/rbot/core/auth.rb:495
 msgid "can not %{action}"
-msgstr "non può %{action}"
+msgstr "non può fare %{action}"
 
 #: lib/rbot/core/auth.rb:499
 msgid "knows no netmasks"
@@ -958,46 +958,40 @@ msgid "%{d} from now"
 msgstr ""
 
 #: lib/rbot/core/utils/utils.rb:254
-#, fuzzy
 msgid "%{d} ago"
-msgstr " [%{secs} fa]"
+msgstr "%{d} fa"
 
 #: lib/rbot/core/utils/utils.rb:257
-#, fuzzy
 msgid "on %{date}"
-msgstr "può %{action}"
+msgstr "il %{action}"
 
 #: lib/rbot/core/utils/utils.rb:266
 msgid "less than a minute"
-msgstr ""
+msgstr "meno di un minuto"
 
 #: lib/rbot/core/utils/utils.rb:268
-#, fuzzy
 msgid "%{m} minutes"
-msgstr "minuti"
+msgstr "%{m} minuti"
 
 #: lib/rbot/core/utils/utils.rb:270
 msgid "about one hour"
-msgstr ""
+msgstr "circa un'ora"
 
 #: lib/rbot/core/utils/utils.rb:272
-#, fuzzy
 msgid "%{m} hours"
-msgstr "ore"
+msgstr "%{m} ore"
 
 #: lib/rbot/core/utils/utils.rb:274
-#, fuzzy
 msgid "one day"
-msgstr "giorno"
+msgstr "un giorno"
 
 #: lib/rbot/core/utils/utils.rb:276
 msgid "about one day"
-msgstr ""
+msgstr "circa un giorno"
 
 #: lib/rbot/core/utils/utils.rb:278
-#, fuzzy
 msgid "%{m} days"
-msgstr "giorni"
+msgstr "%{m} giorni"
 
 #: lib/rbot/ircbot.rb:1209
 msgid "help topics: "

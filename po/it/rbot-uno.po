@@ -84,7 +84,7 @@ msgid ""
 "%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and "
 "play again!"
 msgstr ""
-"la mossa di %{lp} %{b}non%{b} era lega, %{lp} deve pescare %{b}%{n}%{b} "
+"la mossa di %{lp} %{b}non%{b} era legale, %{lp} deve pescare %{b}%{n}%{b} "
 "carte e giocare di nuovo!"
 
 #: data/rbot/plugins/games/uno.rb:506
