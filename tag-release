@@ -11,17 +11,24 @@ VERSION=${FULLVERSION/-*/}
 echo "Full version: $FULLVERSION"
 echo "Version: $VERSION"
 
-sed -ine "/^\$version =/ c \$version = '$FULLVERSION'" launch_here.rb   
-sed -ine "/^\$version ||=/ c \$version ||= '$FULLVERSION'" bin/rbot
-sed -ine "/^  s.version =/ c \  s.version = '$VERSION'" Rakefile   
+sed -i -e "/^\$version =/ c \$version = '$FULLVERSION'" launch_here.rb
+sed -i -e "/^\$version ||=/ c \$version ||= '$FULLVERSION'" bin/rbot
+sed -i -e "/^  s.version =/ c \  s.version = '$VERSION'" Rakefile
 
-git commit -m "Version $FULLVERSION" -a
-git tag -a -m "rbot $FULLVERSION" rbot-$FULLVERSION
-rake package
-if [ $VERSION != $FULLVERSION ]; then
-	pushd pkg
-	mv rbot-$VERSION.gem rbot-$FULLVERSION.gem
-	mv rbot-$VERSION.tgz rbot-$FULLVERSION.tgz
-	mv rbot-$VERSION.zip rbot-$FULLVERSION.zip
-	popd
+NOGIT=${FULLVERSION/-git/}
+if [ $NOGIT == $FULLVERSION ]; then
+	# Not a git version
+	git commit -m "Version $FULLVERSION" -a
+	git tag -a -m "rbot $FULLVERSION" rbot-$FULLVERSION
+	rake package
+	if [ $VERSION != $FULLVERSION ]; then
+		pushd pkg
+		mv rbot-$VERSION.gem rbot-$FULLVERSION.gem
+		mv rbot-$VERSION.tgz rbot-$FULLVERSION.tgz
+		mv rbot-$VERSION.zip rbot-$FULLVERSION.zip
+		popd
+	fi
+else
+	# git version
+	git commit -m "Start working on $NOGIT" -a
 fi
