@@ -47,7 +47,7 @@ require 'etc'
 require 'getoptlong'
 require 'fileutils'
 
-$version ||= '0.9.11'
+$version ||= '0.9.12-git'
 $version_timestamp ||= 0
 $opts = Hash.new
 

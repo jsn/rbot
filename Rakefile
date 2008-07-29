@@ -6,7 +6,7 @@ task :default => [:buildext]
 
 spec = Gem::Specification.new do |s|
   s.name = 'rbot'
-  s.version = '0.9.11'
+  s.version = '0.9.12'
   s.summary = <<-EOF
     A modular ruby IRC bot.
   EOF
