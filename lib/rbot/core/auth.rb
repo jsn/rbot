@@ -37,6 +37,13 @@ class AuthModule < CoreBotModule
   def load_array(key=:default, forced=false)
     debug "loading botusers (#{key}): #{@registry[key].pretty_inspect}"
     @bot.auth.load_array(@registry[key], forced) if @registry.has_key?(key)
+    if @bot.auth.botowner.password != @bot.config['auth.password']
+      error "Master password is out of sync!"
+      debug "  db password: #{@bot.auth.botowner.password}"
+      debug "conf password: #{@bot.config['auth.password']}"
+      error "Using conf password"
+      @bot.auth.botowner.password = @bot.config['auth.password']
+    end
   end
 
   # The permission parameters accept arguments with the following syntax:
