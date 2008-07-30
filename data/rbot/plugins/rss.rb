@@ -591,13 +591,12 @@ class RSSFeedsPlugin < Plugin
       fetched = fetchRss(feed, m, false)
     end
     return unless fetched or feed.xml
-    if not fetched and feed.items
-      m.reply "using old data"
-    else
+    if fetched or not feed.items
       parsed = parseRss(feed, m)
-      m.reply "using old data" unless parsed
     end
     return unless feed.items
+    m.reply "using old data" unless fetched and parsed
+
     title = feed.title
     items = feed.items
 
