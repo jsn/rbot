@@ -155,7 +155,7 @@ module Irc
       ret << ' plainmessage=' << plainmessage.inspect
       ret << fields if fields
       ret << ' (identified)' if identified?
-      ret << ' (addressed to me)' if identified?
+      ret << ' (addressed to me)' if address?
       ret << ' (replied)' if replied?
       ret << ' (ignored)' if ignored?
       ret << ' (in thread)' if in_thread?
