@@ -113,8 +113,6 @@ class BasicsModule < CoreBotModule
       _("part <channel> => part channel <channel>")
     when "hide"
       _("hide => part all channels")
-    when "nick"
-      _("nick <nick> => attempt to change nick to <nick>")
     when "say"
       _("say <channel>|<nick> <message> => say <message> to <channel> or in private message to <nick>")
     when "action"
@@ -132,7 +130,7 @@ class BasicsModule < CoreBotModule
     #     when "hello"
     #       return "hello|hi|hey|yo [#{@bot.myself}] => greet the bot"
     else
-      _("%{name}: quit, restart, join, part, hide, save, nick, say, action, topic, quiet, talk, ping, mode") % {:name=>name}
+      _("%{name}: quit, restart, join, part, hide, save, say, action, topic, quiet, talk, ping, mode") % {:name=>name}
       #, botsnack, hello
     end
   end
