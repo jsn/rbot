@@ -207,6 +207,22 @@ class Bot
     myself.nick
   end
 
+  # nick wanted by the bot. This defaults to the irc.nick config value,
+  # but may be overridden by a manual !nick command
+  def wanted_nick
+    @wanted_nick || config['irc.nick']
+  end
+
+  # set the nick wanted by the bot
+  def wanted_nick=(wn)
+    if wn.nil? or wn.to_s.downcase == config['irc.nick'].downcase
+      @wanted_nick = nil
+    else
+      @wanted_nick = wn.to_s.dup
+    end
+  end
+
+
   # bot inspection
   # TODO multiserver
   def inspect
@@ -583,6 +599,10 @@ class Bot
     # '*' means all channels
     #
     @quiet = Set.new
+
+    # the nick we want, if it's different from the irc.nick config value
+    # (e.g. as set by a !nick command)
+    @wanted_nick = nil
 
     @client[:welcome] = proc {|data|
       m = WelcomeMessage.new(self, server, data[:source], data[:target], data[:message])

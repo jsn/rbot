@@ -181,6 +181,7 @@ class ConfigModule < CoreBotModule
 
   def bot_nick(m, param)
     @bot.nickchg(param[:nick])
+    @bot.wanted_nick = param[:nick]
   end
 
   def bot_status(m, param)
