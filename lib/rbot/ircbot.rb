@@ -272,6 +272,10 @@ class Bot
     Config.register Config::IntegerValue.new('server.ping_timeout',
       :default => 30, :validate => Proc.new{|v| v >= 0},
       :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
+    Config.register Config::ArrayValue.new('server.nocolor_modes',
+      :default => ['c'], :wizard => false,
+      :requires_restart => false,
+      :desc => "List of channel modes that require messages to be without colors")
 
     Config.register Config::StringValue.new('irc.nick', :default => "rbot",
       :desc => "IRC nickname the bot should attempt to use", :wizard => true,
@@ -929,8 +933,8 @@ class Bot
 
     multi_line = original_message.to_s.gsub(/[\r\n]+/, "\n")
 
-    # if target is a channel with +c or +C modes, strip colours
-    if where.kind_of?(Channel) and where.mode.any?('c', 'C')
+    # if target is a channel with nocolor modes, strip colours
+    if where.kind_of?(Channel) and where.mode.any?(*config['server.nocolor_modes'])
       multi_line.replace BasicUserMessage.strip_formatting(multi_line)
     end
 
