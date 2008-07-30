@@ -12,23 +12,23 @@
 
 class NickRecoverPlugin < Plugin
   
-  Config.register Config::BooleanValue.new('nickrecover.enabled',
-    :default => true, :requires_restart => false,
-    :desc => _("Should the bot try to recover its nick?"))
-
-  Config.register Config::IntegerValue.new('nickrecover.poll_time',
-    :default => 60, :valiedate => Proc.new { |v| v > 0 },
+  Config.register Config::IntegerValue.new('irc.nick_retry',
+    :default => 60, :valiedate => Proc.new { |v| v >= 0 },
     :on_change => Proc.new do |bot, v|
-      bot.plugin['nickrecover'].start_recovery(v)
+      if v > 0
+        bot.plugin['nickrecover'].start_recovery(v)
+      else
+        bot.plugin['nickrecover'].stop_recovery
+      end
     end, :requires_restart => false,
     :desc => _("Time in seconds to wait between attempts to recover the nick"))
 
   def enabled?
-    @bot.config['nickrecover.enabled']
+    @bot.config['irc.nick_retry'] > 0
   end
 
   def poll_time
-    @bot.config['nickrecover.poll_time']
+    @bot.config['irc.nick_retry']
   end
 
   def wanted_nick
