@@ -1121,7 +1121,12 @@ class RSSFeedsPlugin < Plugin
       end
       items = []
       if rss.nil?
-        report_problem("#{feed} does not include RSS 1.0 or 0.9x/2.0", nil, m)
+        if xml.match(/xmlns\s*=\s*(['"])http:\/\/www.w3.org\/2005\/Atom\1/) and not defined?(RSS::Atom)
+          report_problem("#{feed.handle} @ #{feed.url} looks like an Atom feed, but your Ruby/RSS library doesn't seem to support it. Consider getting the latest version from http://raa.ruby-lang.org/project/rss/", nil, m)
+        else
+          report_problem("#{feed.handle} @ #{feed.url} doesn't seem to contain an RSS or Atom feed I can read", nil, m)
+        end
+        return nil
       else
         begin
           rss.output_encoding = 'UTF-8'
