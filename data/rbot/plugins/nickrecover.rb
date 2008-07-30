@@ -21,7 +21,15 @@ class NickRecoverPlugin < Plugin
         bot.plugin['nickrecover'].stop_recovery
       end
     end, :requires_restart => false,
-    :desc => _("Time in seconds to wait between attempts to recover the nick"))
+    :desc => _("Time in seconds to wait between attempts to recover the nick. set to 0 to disable nick recovery."))
+
+  def help(plugin,topic="")
+    [
+      _("the nickrecover plugin takes care of recovering the bot nick by trying to change nick until it succeeds."),
+      _("the plugin waits irc.nick_retry seconds between attempts."),
+      _("set irc.nick_retry to 0 to disable it.")
+    ].join(' ')
+  end
 
   def enabled?
     @bot.config['irc.nick_retry'] > 0
