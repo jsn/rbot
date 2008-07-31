@@ -56,6 +56,10 @@ class QuotePlugin < Plugin
     super
   end
 
+  def lastquote(channel)
+    @lists[channel].length-1
+  end
+
   def addquote(source, channel, quote)
     @lists[channel] = Array.new if(!@lists.has_key?(channel))
     num = @lists[channel].length 
@@ -137,8 +141,10 @@ class QuotePlugin < Plugin
       _("whoquote [<channel>] <num> => show who added quote <num>. You only need to supply <channel> if you are addressing %{nick} privately") % { :nick => @bot.nick }
     when "whenquote"
       _("whenquote [<channel>] <num> => show when quote <num> was added. You only need to supply <channel> if you are addressing %{nick} privately") % { :nick => @bot.nick }
+    when "lastquote"
+      _("lastquote [<channel>] => show the last quote in a given channel. You only need to supply <channel> if you are addressing %{nick} privately") % { :nick => @bot.nick }
     else
-      _("Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote") % { :nick => @bot.nick }
+      _("Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote, lastquote") % { :nick => @bot.nick }
     end
   end
 
@@ -242,6 +248,19 @@ class QuotePlugin < Plugin
       m.reply _("quote not found!")
     end
   end
+
+  def cmd_lastquote(m, p)
+    channel = p[:channel] || m.channel.to_s
+    quote, total = getquote(m.source, channel, lastquote(channel))
+    if quote
+      m.reply _("[%{num}] %{quote}") % {
+        :num => quote.num,
+        :quote => quote.quote
+      }
+    else
+      m.reply _("quote not found!")
+    end
+  end
 end
 
 plugin = QuotePlugin.new
@@ -258,6 +277,7 @@ plugin.map "whenquote :num", :action => :cmd_whenquote, :private => false, :requ
 plugin.map "searchquote *reg", :action => :cmd_searchquote, :private => false, :auth_path => '!quote::view::search!'
 plugin.map "countquote [*reg]", :action => :cmd_countquote, :private => false, :auth_path => '!quote::view::count!'
 plugin.map "topicquote [:num]", :action => :cmd_topicquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::topic!'
+plugin.map "lastquote", :action => :cmd_lastquote, :private => false, :auth_path => '!quote::view::last!'
 
 plugin.default_auth('other::edit', false) # Prevent random people from editing other channels quote lists by default
 plugin.default_auth('other::view', true) # But allow them to view them
