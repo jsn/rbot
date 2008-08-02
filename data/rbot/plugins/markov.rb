@@ -17,9 +17,9 @@ class MarkovPlugin < Plugin
     :default => 25,
     :validate => Proc.new { |v| (0..100).include? v },
     :desc => "Percentage chance of markov plugin chipping in")
-  Config.register Config::ArrayValue.new('markov.ignore_users',
+  Config.register Config::ArrayValue.new('markov.ignore',
     :default => [],
-    :desc => "Hostmasks of users to be ignored")
+    :desc => "Hostmasks and channel names markov should NOT learn from (e.g. idiot*!*@*, #privchan).")
 
   def initialize
     super
@@ -31,6 +31,11 @@ class MarkovPlugin < Plugin
     if @registry.has_key?('probability')
       @bot.config['markov.probability'] = @registry['probability']
       @registry.delete('probability')
+    end
+    if @bot.config['markov.ignore_users']
+      debug "moving markov.ignore_users to markov.ignore"
+      @bot.config['markov.ignore'] = @bot.config['markov.ignore_users'].dup
+      @bot.config.delete('markov.ignore_users')
     end
     @learning_queue = Queue.new
     @learning_thread = Thread.new do
@@ -96,10 +101,12 @@ class MarkovPlugin < Plugin
     end
   end
 
-  def ignore?(user=nil)
-    return false unless user
-    @bot.config['markov.ignore_users'].each do |mask|
-      return true if user.matches?(mask)
+  def ignore?(m=nil)
+    return false unless m
+    return true if m.address? or m.private?
+    @bot.config['markov.ignore'].each do |mask|
+      return true if m.channel.downcase == mask.downcase
+      return true if m.source.matches?(mask)
     end
     return false
   end
@@ -109,29 +116,29 @@ class MarkovPlugin < Plugin
     user = params[:option]
     case action
     when 'remove':
-      if @bot.config['markov.ignore_users'].include? user
-        s = @bot.config['markov.ignore_users']
+      if @bot.config['markov.ignore'].include? user
+        s = @bot.config['markov.ignore']
         s.delete user
-        @bot.config['ignore_users'] = s
+        @bot.config['ignore'] = s
         m.reply "#{user} removed"
       else
         m.reply "not found in list"
       end
     when 'add':
       if user
-        if @bot.config['markov.ignore_users'].include?(user)
+        if @bot.config['markov.ignore'].include?(user)
           m.reply "#{user} already in list"
         else
-          @bot.config['markov.ignore_users'] = @bot.config['markov.ignore_users'].push user
+          @bot.config['markov.ignore'] = @bot.config['markov.ignore'].push user
           m.reply "#{user} added to markov ignore list"
         end
       else
-        m.reply "give the name of a person to ignore"
+        m.reply "give the name of a person or channel to ignore"
       end
     when 'list':
-      m.reply "I'm ignoring #{@bot.config['markov.ignore_users'].join(", ")}"
+      m.reply "I'm ignoring #{@bot.config['markov.ignore'].join(", ")}"
     else
-      m.reply "have markov ignore the input from a hostmask.  usage: markov ignore add <mask>; markov ignore remove <mask>; markov ignore list"
+      m.reply "have markov ignore the input from a hostmask or a channel.  usage: markov ignore add <mask or channel>; markov ignore remove <mask or channel>; markov ignore list"
     end
   end
 
@@ -207,9 +214,7 @@ class MarkovPlugin < Plugin
   end
   
   def message(m)
-    return unless m.public?
-    return if m.address?
-    return if ignore? m.source
+    return if ignore? m
 
     # in channel message, the kind we are interested in
     message = clean_str m.plainmessage
