@@ -206,6 +206,7 @@ class IPLookupPlugin < Plugin
   end
 
   def userip(m, params)
+    m.reply "not implemented yet"
     #users = @channels[m.channel].users
     #m.reply "users = #{users.inspect}"
     #m.reply @bot.sendq("WHO #{params[:user]}")
