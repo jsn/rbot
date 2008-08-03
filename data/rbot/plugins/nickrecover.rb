@@ -43,6 +43,14 @@ class NickRecoverPlugin < Plugin
     @bot.wanted_nick
   end
 
+  def has_nick?
+    @bot.nick.downcase == wanted_nick.downcase
+  end
+
+  def recover
+    @bot.nickchg wanted_nick
+  end
+
   def stop_recovery
     @bot.timer.remove(@recovery) if @recovery
   end
@@ -51,15 +59,20 @@ class NickRecoverPlugin < Plugin
     if @recovery
       @bot.timer.reschedule(@recovery, poll_time)
     else
-      @recovery = @bot.timer.add(time) { @bot.nickchg wanted_nick }
+      @recovery = @bot.timer.add(time) do
+        has_nick? ? stop_recovery : recover
+      end
     end
   end
 
   def initialize
     super
     @recovery = nil
-    if enabled? and @bot.nick.downcase != wanted_nick
-      start_recovery
+  end
+
+  def connect
+    if enabled?
+      start_recovery unless has_nick?
     end
   end
 
@@ -72,6 +85,10 @@ class NickRecoverPlugin < Plugin
     else
       stop_recovery
     end
+  end
+
+  def cleanup
+    stop_recovery
   end
 
 end
