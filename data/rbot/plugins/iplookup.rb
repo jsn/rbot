@@ -214,9 +214,9 @@ class IPLookupPlugin < Plugin
 end
 
 plugin = IPLookupPlugin.new
-plugin.map 'iplookup :ip', :action => 'iplookup', :requirements => {:ip => /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/}
-plugin.map 'iplookup :domain', :action => 'iplookup', :requirements => {:domain => /^[a-z0-9\.\-]{4,255}$/i}
-plugin.map 'userip :user', :action => 'userip', :requirements => {:user => /\w+/}
+plugin.map 'iplookup :ip', :action => 'iplookup', :requirements => {:ip => /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/}, :thread => true
+plugin.map 'iplookup :domain', :action => 'iplookup', :requirements => {:domain => /^[a-z0-9\.\-]{4,255}$/i}, :thread => true
+plugin.map 'userip :user', :action => 'userip', :requirements => {:user => /\w+/}, :thread => true
 
 
 if __FILE__ == $0
