@@ -493,8 +493,8 @@ class Regexp
   HEX_DIGITS = /#{HEX_DIGIT}+/
   HEX_OCTET = /#{HEX_DIGIT}#{HEX_DIGIT}?/
   DEC_OCTET = /[01]?\d?\d|2[0-4]\d|25[0-5]/
-  DEC_IP_ADDR = /#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}.#{DEC_OCTET}/
-  HEX_IP_ADDR = /#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}.#{HEX_OCTET}/
+  DEC_IP_ADDR = /#{DEC_OCTET}\.#{DEC_OCTET}\.#{DEC_OCTET}\.#{DEC_OCTET}/
+  HEX_IP_ADDR = /#{HEX_OCTET}\.#{HEX_OCTET}\.#{HEX_OCTET}\.#{HEX_OCTET}/
   IP_ADDR = /#{DEC_IP_ADDR}|#{HEX_IP_ADDR}/
 
   # IPv6, from Resolv::IPv6, without the \A..\z anchors
