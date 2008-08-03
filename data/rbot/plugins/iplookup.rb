@@ -188,8 +188,10 @@ class IPLookupPlugin < Plugin
   end
 
   def iplookup(m, params)
-    reply = ""
-    if params[:domain]
+    debug params
+    if params[:domain].match(/^#{Regexp::Irc::HOSTADDR}$/)
+      ip = params[:domain]
+    else
       begin
         ip = Resolv.getaddress(params[:domain])
         reply += "#{params[:domain]} | "
@@ -197,8 +199,6 @@ class IPLookupPlugin < Plugin
         m.reply "#{e.message}"
         return
       end
-    else
-      ip = params[:ip]
     end
 
     reply += ArinWhois.lookup_info(ip)
@@ -214,8 +214,7 @@ class IPLookupPlugin < Plugin
 end
 
 plugin = IPLookupPlugin.new
-plugin.map 'iplookup :ip', :action => 'iplookup', :requirements => {:ip => /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/}, :thread => true
-plugin.map 'iplookup :domain', :action => 'iplookup', :requirements => {:domain => /^[a-z0-9\.\-]{4,255}$/i}, :thread => true
+plugin.map 'iplookup :domain', :action => 'iplookup', :thread => true
 plugin.map 'userip :user', :action => 'userip', :requirements => {:user => /\w+/}, :thread => true
 
 
