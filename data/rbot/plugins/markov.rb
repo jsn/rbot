@@ -35,7 +35,7 @@ class MarkovPlugin < Plugin
     if @bot.config['markov.ignore_users']
       debug "moving markov.ignore_users to markov.ignore"
       @bot.config['markov.ignore'] = @bot.config['markov.ignore_users'].dup
-      @bot.config.delete('markov.ignore_users')
+      @bot.config.delete('markov.ignore_users'.to_sym)
     end
     @learning_queue = Queue.new
     @learning_thread = Thread.new do
