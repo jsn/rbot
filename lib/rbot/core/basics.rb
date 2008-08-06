@@ -11,13 +11,28 @@ class BasicsModule < CoreBotModule
     :default => false, :wizard => true, :requires_restart => true,
     :desc => "Should the bot wait until its identification is confirmed before joining any channels?")
 
+  # Avoiding sending WHO to any channel that we are already in.
+  # Helps a LOT when you are present in a lot of channels.
   def join_channels
+    existing_channels = Set.new
+    # The channels array contains channels that we are invited to and not IN as
+    # well. Eg, if a user without permissions invites us.
+    existing_channels.merge @bot.server.channels.map { |c|
+      c.has_user?(@bot.nick) ? c.name : nil
+    }.compact
+    # Now join the difference between the channels we are supposed to be in and
+    # the ones that we are already in.
     @bot.config['irc.join_channels'].each { |c|
+      if existing_channels.include?(c)
+        next
+      end
       debug "autojoining channel #{c}"
       if(c =~ /^(\S+)\s+(\S+)$/i)
         @bot.join $1, $2
-      else
-        @bot.join c if(c)
+        existing_channels << $1
+      elsif(c)
+        @bot.join c
+        existing_channels << c
       end
     }
   end
