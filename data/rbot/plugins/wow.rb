@@ -90,7 +90,7 @@ class RealmPlugin < Plugin
           xmldoc = @bot.httputil.get("http://www.worldofwarcraft.com/realmstatus/status.xml", :cache => false)
           raise "unable to retrieve realm status" unless xmldoc
           realm_list = (REXML::Document.new xmldoc).root
-          realm_data = realm_list.elements["r[@n=\"#{realm_name}\"]"]
+          realm_data = realm_list.get_elements("//r[@n=\"#{realm_name}\"]").first
           if realm_data and realm_data.attributes.any? then
             realm = Realm.new(
               realm_data.attributes['n'],
