@@ -20,6 +20,10 @@ class MarkovPlugin < Plugin
   Config.register Config::ArrayValue.new('markov.ignore',
     :default => [],
     :desc => "Hostmasks and channel names markov should NOT learn from (e.g. idiot*!*@*, #privchan).")
+  Config.register Config::IntegerValue.new('markov.max_words',
+    :default => 50,
+    :validate => Proc.new { |v| (0..100).include? v },
+    :desc => "Maximum number of words the bot should put in a sentence")
 
   def initialize
     super
@@ -55,7 +59,7 @@ class MarkovPlugin < Plugin
   end
 
   def generate_string(word1, word2)
-    # limit to max of 50 words
+    # limit to max of markov.max_words words
     output = word1 + " " + word2
 
     # try to avoid :nonword in the first iteration
@@ -67,7 +71,7 @@ class MarkovPlugin < Plugin
       word1, word2 = word2, word3
     end
 
-    49.times do
+    (@bot.config['markov.max_words'] - 1).times do
       wordlist = @registry["#{word1} #{word2}"]
       break if wordlist.empty?
       word3 = wordlist[rand(wordlist.length)]
