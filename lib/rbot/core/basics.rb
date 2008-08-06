@@ -7,6 +7,32 @@
 
 class BasicsModule < CoreBotModule
 
+  Config.register Config::BooleanValue.new('irc.join_after_identify',
+    :default => false, :wizard => true, :requires_restart => true,
+    :desc => "Should the bot wait until its identification is confirmed before joining any channels?")
+
+  def join_channels
+    @bot.config['irc.join_channels'].each { |c|
+      debug "autojoining channel #{c}"
+      if(c =~ /^(\S+)\s+(\S+)$/i)
+        @bot.join $1, $2
+      else
+        @bot.join c if(c)
+      end
+    }
+  end
+
+  def identified
+    join_channels
+  end
+
+  # on connect, we join the default channels unless we have to wait for
+  # identification. Observe that this means the bot may not connect any channels
+  # until the 'identified' method gets delegated
+  def connect
+    join_channels unless @bot.config['irc.join_after_identify']
+  end
+
   def ctcp_listen(m)
     who = m.private? ? "me" : m.target
     case m.ctcp.intern

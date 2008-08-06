@@ -609,15 +609,6 @@ class Bot
 
       @plugins.delegate("welcome", m)
       @plugins.delegate("connect")
-
-      @config['irc.join_channels'].each { |c|
-        debug "autojoining channel #{c}"
-        if(c =~ /^(\S+)\s+(\S+)$/i)
-          join $1, $2
-        else
-          join c if(c)
-        end
-      }
     }
 
     # TODO the next two @client should go into rfc2812.rb, probably
