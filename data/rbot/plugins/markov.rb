@@ -183,7 +183,9 @@ class MarkovPlugin < Plugin
     return unless word1 and word2
     line = generate_string(word1, word2)
     return unless line
-    return if line == message
+    # we do nothing if the line we return is just an initial substring
+    # of the line we received
+    return if message.index(line) == 0
     @bot.timer.add_once(delay) {
       m.reply line
     }
