@@ -98,10 +98,10 @@ class RealmPlugin < Plugin
               realm_data.attributes['t'].to_i,
               realm_data.attributes['l'].to_i)
           else
-            "Realm, #{realm_name}, not found."
+            "realm #{realm_name} not found."
           end
         rescue => err
-          "Error retrieving realm status: #{err}"
+          "error retrieving realm status: #{err}"
         end
     end
     def realm(m,params)
