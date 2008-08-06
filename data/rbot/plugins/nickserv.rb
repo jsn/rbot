@@ -35,7 +35,7 @@ class NickServPlugin < Plugin
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_nick_avail", v },
     :desc => _("String to look for to see if the nick server is informing us that our nick is now available"))
   Config.register Config::StringValue.new('nickserv.identified_string',
-    :default => "(Password|Contrase|Mot de passe).+(acce[pt]t|r[ie]cog?n).+(identif|r[ie]cog?n)",
+    :default => "((Password|Contrase|Mot de passe).+(acce[pt]t|r[ie]cog?n).+)?(you|tu|vous).+(identif|r[ie]cog?n)",
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_identified_string", v },
     :desc => _("String to look for to see if the nick server is informing us that we have identified successfully"))
@@ -68,15 +68,15 @@ class NickServPlugin < Plugin
   end
 
   def set_ident_request(val)
-    @ident_request = Regexp.new(val)
+    @ident_request = Regexp.new(val, true)
   end
 
   def set_nick_avail(val)
-    @nick_avail = Regexp.new(val)
+    @nick_avail = Regexp.new(val, true)
   end
 
   def set_identified_string(val)
-    @identified_string = Regexp.new(val)
+    @identified_string = Regexp.new(val, true)
   end
 
   def initialize
