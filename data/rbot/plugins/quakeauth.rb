@@ -49,3 +49,5 @@ end
 plugin = QPlugin.new
 plugin.map 'qauth set :nick :passwd', :action => "set"
 plugin.map 'qauth identify', :action => "identify"
+
+plugin.default_auth('*', false)
