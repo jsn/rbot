@@ -68,6 +68,20 @@ class BasicsModule < CoreBotModule
   def bot_rejoin(m, param)
     join_channels
   end
+  
+  def bot_channel_list(m, param)
+    ret = 'I am in: '
+    server = m.server
+    nick = @bot.nick
+    unless server.channels.empty?
+        ret << server.channels.map{ |c|
+          "%s%s" % [c.modes_of(nick).map { |mo|
+            server.prefix_for_mode(mo)
+          }, c.name]
+        }.join(' ')
+    end
+    m.reply ret
+  end
 
   def bot_quit(m, param)
     @bot.quit param[:msg].to_s
@@ -204,6 +218,9 @@ basics.map "part :chan",
   :auth_path => 'move'
 basics.map "rejoin",
   :action => 'bot_rejoin',
+  :auth_path => 'move'
+basics.map "channels",
+  :action => 'bot_channel_list',
   :auth_path => 'move'
 basics.map "hide",
   :action => 'bot_hide',
