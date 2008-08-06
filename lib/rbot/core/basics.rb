@@ -64,6 +64,10 @@ class BasicsModule < CoreBotModule
       @bot.part m.target if m.public?
     end
   end
+  
+  def bot_rejoin(m, param)
+    join_channels
+  end
 
   def bot_quit(m, param)
     @bot.quit param[:msg].to_s
@@ -197,6 +201,9 @@ basics.map "join :chan :pass",
 basics.map "part :chan",
   :action => 'bot_part',
   :defaults => {:chan => nil},
+  :auth_path => 'move'
+basics.map "rejoin",
+  :action => 'bot_rejoin',
   :auth_path => 'move'
 basics.map "hide",
   :action => 'bot_hide',
