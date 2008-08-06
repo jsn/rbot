@@ -5,11 +5,11 @@ class QPlugin < Plugin
   def help(plugin, topic="")
     case topic
     when ""
-      return "quath plugin: handles Q auths. topics set, identify"
+      return "qauth plugin: handles Q auths. topics set, identify"
     when "set"
-      return "nickserv set <user> <passwd>: set the Q user and password and use it to identify in future"
+      return "qauth set <user> <passwd>: set the Q user and password and use it to identify in future"
     when "identify"
-      return "quath identify: identify with Q (if user and auth are set)"
+      return "qauth identify: identify with Q (if user and auth are set)"
     end
   end
   
