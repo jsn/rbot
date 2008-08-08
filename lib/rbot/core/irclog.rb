@@ -21,8 +21,8 @@ class IrcLogModule < CoreBotModule
     },
     :desc => "List of channels and nicks for which logging is enabled. IRC patterns can be used too. This can be used to override wide patters in irclog.no_log")
   Config.register Config::StringValue.new('irclog.filename_format',
-    :default => '%{where}', :requires_rescan => true,
-    :desc => "filename pattern for the IRC log. You can put typical strftime keys such as %Y for year and %m for month, plus the special %{where} key for location (channel name or user nick)")
+    :default => '%%{where}', :requires_rescan => true,
+    :desc => "filename pattern for the IRC log. You can put typical strftime keys such as %Y for year and %m for month, plus the special %%{where} key for location (channel name or user nick)")
 
   attr :nolog_rx, :dolog_rx
   def initialize
