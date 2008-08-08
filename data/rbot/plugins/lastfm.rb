@@ -427,8 +427,8 @@ plugin.map 'lastfm who :who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
 plugin.map 'lastfm compare :user1 :user2', :action => :tasteometer, :thread => true
 plugin.map 'np', :action => :now_playing, :thread => true
-plugin.map 'lastfm', :action => :now_playing, :thread => true
 plugin.map "lastfm [user] :action [:user]", :thread => true,
   :requirements => { :action =>
     /^(?:events|friends|neighbou?rs|playlists|recent?tracks|top(?:album|artist|tag)s?|weekly(?:album|artist|track)chart|weeklychartlist)$/
 }
+plugin.map "lastfm [:who]", :action => :now_playing, :thread => true
