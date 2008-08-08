@@ -540,7 +540,7 @@ module Plugins
       desc = desc.to_s + " " if desc
 
       begin
-        plugin_string = IO.readlines(fname).join("")
+        plugin_string = IO.read(fname)
         debug "loading #{desc}#{fname}"
         plugin_module.module_eval(plugin_string, fname)
         return :loaded
