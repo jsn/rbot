@@ -97,6 +97,7 @@ class RealmPlugin < Plugin
               realm_data.attributes['s'].to_i,
               realm_data.attributes['t'].to_i,
               realm_data.attributes['l'].to_i)
+            realm.to_s
           else
             "realm #{realm_name} not found."
           end
