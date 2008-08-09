@@ -45,7 +45,7 @@ class QPlugin < Plugin
   end
   
   def connect
-    identify(nil, nil)
+    identify(nil, nil) if on_quakenet?
   end
 
   def identify(m, params)
