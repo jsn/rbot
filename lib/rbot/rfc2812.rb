@@ -1288,6 +1288,62 @@ module Irc
           handle(:who, data)
         when RPL_ENDOFWHO
           handle(:eowho, data)
+        when RPL_WHOISUSER
+          @whois ||= Hash.new
+          @whois[:nick] = argv[1]
+          @whois[:user] = argv[2]
+          @whois[:host] = argv[3]
+          @whois[:real_name] = argv[-1]
+
+          user = @server.get_user(@whois[:nick])
+          user.user = @whois[:user]
+          user.host = @whois[:host]
+          user.real_name = @whois[:real_name]
+        when RPL_WHOISSERVER
+          @whois ||= Hash.new
+          @whois[:nick] = argv[1]
+          @whois[:server] = argv[2]
+          @whois[:server_info] = argv[-1]
+          # TODO update user info
+        when RPL_WHOISOPERATOR
+          @whois ||= Hash.new
+          @whois[:nick] = argv[1]
+          @whois[:operator] = argv[-1]
+          # TODO update user info
+        when RPL_WHOISIDLE
+          @whois ||= Hash.new
+          @whois[:nick] = argv[1]
+          user = @server.get_user(@whois[:nick])
+          @whois[:idle] = argv[2].to_i
+          user.idle_since = Time.now - @whois[:idle]
+          if argv[-1] == 'seconds idle, signon time'
+            @whois[:signon] = Time.at(argv[3].to_i)
+            user.signon = @whois[:signon]
+          end
+        when RPL_ENDOFWHOIS
+          @whois ||= Hash.new
+          @whois[:nick] = argv[1]
+          data[:whois] = @whois.dup
+          @whois.clear
+          handle(:whois, data)
+        when RPL_WHOISCHANNELS
+          @whois ||= Hash.new
+          @whois[:nick] = argv[1]
+          @whois[:channels] = []
+          user = @server.get_user(@whois[:nick])
+          argv[-1].split.each do |prechan|
+            pfx = prechan.scan(/[#{@server.supports[:prefix][:prefixes].join}]/)
+            modes = pfx.map { |p| @server.mode_for_prefix p }
+            chan = prechan[pfx.length..prechan.length]
+
+            channel = @server.get_channel(chan)
+            if channel
+              channel.add_user(user, :silent => true)
+              modes.map { |mode| channel.mode[mode].set(user) }
+            end
+
+            @whois[:channels] << [chan, modes]
+          end
         when RPL_CHANNELMODEIS
           parse_mode(serverstring, argv[1..-1], data)
           handle(:mode, data)

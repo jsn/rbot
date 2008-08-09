@@ -553,6 +553,21 @@ module Irc
     end
   end
 
+  # class to manage WHOIS replies
+  class WhoisMessage < BasicUserMessage
+    attr_reader :whois
+    def initialize(bot, server, source, target, whois)
+      super(bot, server, source, target, "")
+      @address = (target == @bot.myself)
+      @whois = whois
+    end
+
+    def inspect
+      fields = ' whois=' << whois.inspect
+      super(fields)
+    end
+  end
+
   # class to manage NAME replies
   class NamesMessage < BasicUserMessage
     attr_accessor :users

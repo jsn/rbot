@@ -922,7 +922,7 @@ module Irc
   class User < Netmask
     alias :to_s :nick
 
-    attr_accessor :real_name
+    attr_accessor :real_name, :idle_since, :signon
 
     # Create a new IRC User from a given Netmask (or anything that can be converted
     # into a Netmask) provided that the given Netmask does not have globs.
@@ -934,6 +934,8 @@ module Irc
       raise ArgumentError, "#{str.inspect} must not have globs (unescaped * or ?)" if host.has_irc_glob? && host != "*"
       @away = false
       @real_name = String.new
+      @idle_since = nil
+      @signon = nil
     end
 
     # The nick of a User may be changed freely, but it must not contain glob patterns.

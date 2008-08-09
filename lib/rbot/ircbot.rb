@@ -698,6 +698,12 @@ class Bot
       m.modes = data[:modes]
       @plugins.delegate "modechange", m
     }
+    @client[:whois] = proc {|data|
+      source = data[:source]
+      target = server.get_user(data[:whois][:nick])
+      m = WhoisMessage.new(self, server, source, target, data[:whois])
+      @plugins.delegate "whois", m
+    }
     @client[:join] = proc {|data|
       m = JoinMessage.new(self, server, data[:source], data[:channel], data[:message])
       sendq("MODE #{data[:channel]}", nil, 0) if m.address?
@@ -1207,6 +1213,11 @@ class Bot
   # changing mode
   def mode(channel, mode, target=nil)
     sendq "MODE #{channel} #{mode} #{target}", channel, 2
+  end
+
+  # asking whois
+  def whois(nick, target=nil)
+    sendq "WHOIS #{target} #{nick}", nil, 0
   end
 
   # kicking a user
