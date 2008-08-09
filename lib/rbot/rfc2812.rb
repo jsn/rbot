@@ -144,6 +144,12 @@ module Irc
   # "<channel> <mode> <mode params>"
   RPL_CHANNELMODEIS=324
 
+  # "<channel> <unixtime>"
+  RPL_CREATIONTIME=329
+
+  # "<channel> <url>"
+  RPL_CHANNEL_URL=328
+
   # "<channel> :No topic is set"
   RPL_NOTOPIC=331
 
@@ -1279,6 +1285,16 @@ module Irc
         when RPL_CHANNELMODEIS
           parse_mode(serverstring, argv[1..-1], data)
           handle(:mode, data)
+        when RPL_CREATIONTIME
+          data[:channel] = argv[1]
+          data[:time] = Time.at(argv[2].to_i)
+          @server.get_channel(data[:channel]).creation_time=data[:time]
+          handle(:creationtime, data)
+        when RPL_CHANNEL_URL
+          data[:channel] = argv[1]
+          data[:url] = argv[2]
+          @server.get_channel(data[:channel]).url=data[:url].dup
+          handle(:channel_url, data)
         else
           warning "Unknown message #{serverstring.inspect}"
           handle(:unknown, data)

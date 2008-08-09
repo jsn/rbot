@@ -1299,12 +1299,15 @@ module Irc
     include ServerOrCasemap
     attr_reader :name, :topic, :mode, :users
     alias :to_s :name
+    attr_accessor :creation_time, :url
 
     def inspect
       str = self.__to_s__[0..-2]
       str << " on server #{server}" if server
       str << " @name=#{@name.inspect} @topic=#{@topic.text.inspect}"
       str << " @users=[#{user_nicks.sort.join(', ')}]"
+      str << " (created on #{creation_time})" if creation_time
+      str << " (URL #{url})" if url
       str << ">"
     end
 
@@ -1368,6 +1371,12 @@ module Irc
 
       # Flags
       @mode = ModeHash.new
+
+      # creation time, only on some networks
+      @creation_time = nil
+
+      # URL, only on some networks
+      @url = nil
     end
 
     # Removes a user from the channel
