@@ -1244,6 +1244,12 @@ module Irc
         when RPL_DATASTR
           data[:text] = argv[1]
           handle(:datastr, data)
+        when RPL_AWAY
+          data[:nick] = argv[1]
+          data[:message] = argv[-1]
+          user = @server.get_user(data[:nick])
+          user.away = data[:message]
+          handle(:away, data)
 	when RPL_WHOREPLY
           data[:channel] = argv[1]
           data[:user] = argv[2]
