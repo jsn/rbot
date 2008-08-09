@@ -35,6 +35,7 @@ class QPlugin < Plugin
         val
       end
     end
+    @source = nil
   end
 
   def set(m, params)
@@ -48,7 +49,7 @@ class QPlugin < Plugin
   end
 
   def identify(m, params)
-    @source = m.replyto
+    @source = m.replyto if m
     @registry['quakenet.auth'] = params[:password] if params[:password]
 
     if @registry.has_key?('quakenet.user') && @registry.has_key?('quakenet.auth')
