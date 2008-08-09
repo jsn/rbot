@@ -357,6 +357,8 @@ module Irc
         @action = @ctcp == 'ACTION'
         debug "Received CTCP command #{@ctcp} with options #{@message} (action? #{@action})"
         @logmessage = @message.dup
+        @plainmessage = BasicUserMessage.strip_formatting(@message)
+        @message = BasicUserMessage.strip_initial_formatting(@message)
       end
 
       # free splitting for plugins
