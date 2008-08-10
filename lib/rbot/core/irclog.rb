@@ -272,10 +272,15 @@ class IrcLogModule < CoreBotModule
           end
         end
         fp = logfilepath(where_str, now)
-        FileUtils.mkdir_p File.dirname(fp)
-        f = File.new(fp, "a")
-        f.sync = true
-        f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
+        begin
+          FileUtils.mkdir_p File.dirname(fp)
+          f = File.new(fp, "a")
+          f.sync = true
+          f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
+        rescue Exception => e
+          error e
+          next
+        end
         @logs[where_str] = [now, f]
       end
       @logs[where_str][1].puts "[#{stamp}] #{message}"
