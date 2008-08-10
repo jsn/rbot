@@ -73,9 +73,9 @@ class SeenPlugin < Plugin
 
     case saw.type.to_sym
     when :PUBLIC
-      ret << "saying #{saw.message}"
+      ret << "saying \"#{saw.message}\" in #{saw.where}"
     when :ACTION
-      ret << "doing #{saw.nick} #{saw.message}"
+      ret << "doing #{saw.nick} #{saw.message} in #{saw.where}"
     when :NICK
       ret << "changing nick from #{saw.nick} to #{saw.message}"
     when :PART
