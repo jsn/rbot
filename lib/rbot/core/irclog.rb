@@ -273,7 +273,31 @@ class IrcLogModule < CoreBotModule
         end
         fp = logfilepath(where_str, now)
         begin
-          FileUtils.mkdir_p File.dirname(fp)
+          dir = File.dirname(fp)
+          # first of all, we check we're not trying to build a directory structure
+          # where one of the components exists already as a file, so we
+          # backtrack along dir until we come across the topmost existing name.
+          # If it's a file, we rename to filename.old.filedate
+          up = dir.dup
+          until File.exist? up
+            up.replace File.dirname up
+          end
+          unless File.directory? up
+            backup = up.dup
+            backup << ".old." << File.atime(up).strftime('%Y%m%d%H%M%S')
+            debug "#{up} is not a directory! renaming to #{backup}"
+            File.rename(up, backup)
+          end
+          FileUtils.mkdir_p(dir)
+          # conversely, it may happen that fp exists and is a directory, in
+          # which case we rename the directory instead
+          if File.directory? fp
+            backup = fp.dup
+            backup << ".old." << File.atime(fp).strftime('%Y%m%d%H%M%S')
+            debug "#{fp} is not a file! renaming to #{backup}"
+            File.rename(fp, backup)
+          end
+          # it should be fine to create the file now
           f = File.new(fp, "a")
           f.sync = true
           f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
