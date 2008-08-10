@@ -90,10 +90,17 @@ class BasicsModule < CoreBotModule
     nick = @bot.nick
     unless server.channels.empty?
         ret << server.channels.map{ |c|
-          "%s%s" % [c.modes_of(nick).map { |mo|
-            server.prefix_for_mode(mo)
-          }, c.name]
-        }.join(' ')
+          if c.has_user?(@bot.nick)
+            "%s%s" % [
+              c.modes_of(nick).map { |mo| 
+                server.prefix_for_mode(mo) 
+              }, 
+              c.name
+            ]
+          else
+            nil
+          end
+        }.compact.join(' ')
     end
     m.reply ret
   end
