@@ -981,7 +981,6 @@ module Irc
     #
     # ==server events currently supported:
     #
-    # TODO handle errors ERR_NOSUCHNICK, ERR_NOSUCHCHANNEL
     # TODO handle errors ERR_CHANOPRIVSNEEDED, ERR_CANNOTSENDTOCHAN
     #
     # welcome::     server welcome message on connect
@@ -1351,6 +1350,18 @@ module Irc
           data[:url] = argv[2]
           @server.channel(data[:channel]).url=data[:url].dup
           handle(:channel_url, data)
+        when ERR_NOSUCHNICK
+          data[:nick] = argv[1]
+          if user = @server.get_user(data[:nick])
+            @server.delete_user(user)
+          end
+          handle(:nosuchnick, data)
+        when ERR_NOSUCHCHANNEL
+          data[:channel] = argv[1]
+          if channel = @server.get_channel(data[:channel])
+            @server.delete_channel(channel)
+          end
+          handle(:nosuchchannel, data)
         else
           warning "Unknown message #{serverstring.inspect}"
           handle(:unknown, data)
