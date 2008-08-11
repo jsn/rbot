@@ -1155,11 +1155,7 @@ module Irc
           data[:channeltype] = argv[1]
           data[:channel] = argv[2]
 
-          chan = @server.get_channel(data[:channel])
-          unless chan
-            warning "Received names #{data[:topic].inspect} for channel #{data[:channel].inspect} I was not on"
-            return
-          end
+          chan = @server.channel(data[:channel])
 
           users = []
           argv[3].scan(/\S+/).each { |u|
@@ -1247,7 +1243,7 @@ module Irc
         when RPL_AWAY
           data[:nick] = argv[1]
           data[:message] = argv[-1]
-          user = @server.get_user(data[:nick])
+          user = @server.user(data[:nick])
           user.away = data[:message]
           handle(:away, data)
 	when RPL_WHOREPLY
@@ -1268,7 +1264,7 @@ module Irc
           end
           data[:hopcount], data[:real_name] = argv[7].split(" ", 2)
 
-          user = @server.get_user(data[:nick])
+          user = @server.user(data[:nick])
 
           user.user = data[:user]
           user.host = data[:host]
@@ -1278,7 +1274,7 @@ module Irc
           # TODO hopcount
           user.real_name = data[:real_name]
 
-          channel = @server.get_channel(data[:channel])
+          channel = @server.channel(data[:channel])
 
           channel.add_user(user, :silent=>true)
           data[:modes].map { |mode|
@@ -1295,7 +1291,7 @@ module Irc
           @whois[:host] = argv[3]
           @whois[:real_name] = argv[-1]
 
-          user = @server.get_user(@whois[:nick])
+          user = @server.user(@whois[:nick])
           user.user = @whois[:user]
           user.host = @whois[:host]
           user.real_name = @whois[:real_name]
@@ -1313,7 +1309,7 @@ module Irc
         when RPL_WHOISIDLE
           @whois ||= Hash.new
           @whois[:nick] = argv[1]
-          user = @server.get_user(@whois[:nick])
+          user = @server.user(@whois[:nick])
           @whois[:idle] = argv[2].to_i
           user.idle_since = Time.now - @whois[:idle]
           if argv[-1] == 'seconds idle, signon time'
@@ -1330,17 +1326,15 @@ module Irc
           @whois ||= Hash.new
           @whois[:nick] = argv[1]
           @whois[:channels] = []
-          user = @server.get_user(@whois[:nick])
+          user = @server.user(@whois[:nick])
           argv[-1].split.each do |prechan|
             pfx = prechan.scan(/[#{@server.supports[:prefix][:prefixes].join}]/)
             modes = pfx.map { |p| @server.mode_for_prefix p }
             chan = prechan[pfx.length..prechan.length]
 
-            channel = @server.get_channel(chan)
-            if channel
-              channel.add_user(user, :silent => true)
-              modes.map { |mode| channel.mode[mode].set(user) }
-            end
+            channel = @server.channel(chan)
+            channel.add_user(user, :silent => true)
+            modes.map { |mode| channel.mode[mode].set(user) }
 
             @whois[:channels] << [chan, modes]
           end
@@ -1350,12 +1344,12 @@ module Irc
         when RPL_CREATIONTIME
           data[:channel] = argv[1]
           data[:time] = Time.at(argv[2].to_i)
-          @server.get_channel(data[:channel]).creation_time=data[:time]
+          @server.channel(data[:channel]).creation_time=data[:time]
           handle(:creationtime, data)
         when RPL_CHANNEL_URL
           data[:channel] = argv[1]
           data[:url] = argv[2]
-          @server.get_channel(data[:channel]).url=data[:url].dup
+          @server.channel(data[:channel]).url=data[:url].dup
           handle(:channel_url, data)
         else
           warning "Unknown message #{serverstring.inspect}"
