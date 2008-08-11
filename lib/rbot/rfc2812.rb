@@ -1152,9 +1152,7 @@ module Irc
           # - "@" is used for secret channels, "*" for private
           # channels, and "=" for others (public channels).
           data[:channeltype] = argv[1]
-          data[:channel] = argv[2]
-
-          chan = @server.channel(data[:channel])
+          data[:channel] = chan = @server.channel(argv[2])
 
           users = []
           argv[3].scan(/\S+/).each { |u|
@@ -1178,7 +1176,7 @@ module Irc
           }
           @tmpusers += users
         when RPL_ENDOFNAMES
-          data[:channel] = argv[1]
+          data[:channel] = @server.channel(argv[1])
           data[:users] = @tmpusers
           handle(:names, data)
           @tmpusers = Array.new
@@ -1240,17 +1238,16 @@ module Irc
           data[:text] = argv[1]
           handle(:datastr, data)
         when RPL_AWAY
-          data[:nick] = argv[1]
+          data[:nick] = user = @server.user(argv[1])
           data[:message] = argv[-1]
-          user = @server.user(data[:nick])
           user.away = data[:message]
           handle(:away, data)
 	when RPL_WHOREPLY
-          data[:channel] = argv[1]
+          data[:channel] = channel = @server.channel(argv[1])
           data[:user] = argv[2]
           data[:host] = argv[3]
           data[:userserver] = argv[4]
-          data[:nick] = argv[5]
+          data[:nick] = user = @server.user(argv[5])
           if argv[6] =~ /^(H|G)(\*)?(.*)?$/
             data[:away] = ($1 == 'G')
             data[:ircop] = $2
@@ -1263,8 +1260,6 @@ module Irc
           end
           data[:hopcount], data[:real_name] = argv[7].split(" ", 2)
 
-          user = @server.user(data[:nick])
-
           user.user = data[:user]
           user.host = data[:host]
           user.away = data[:away] # FIXME doesn't provide the actual message
@@ -1272,8 +1267,6 @@ module Irc
           # TODO userserver
           # TODO hopcount
           user.real_name = data[:real_name]
-
-          channel = @server.channel(data[:channel])
 
           channel.add_user(user, :silent=>true)
           data[:modes].map { |mode|
@@ -1341,14 +1334,14 @@ module Irc
           parse_mode(serverstring, argv[1..-1], data)
           handle(:mode, data)
         when RPL_CREATIONTIME
-          data[:channel] = argv[1]
+          data[:channel] = @server.channel(argv[1])
           data[:time] = Time.at(argv[2].to_i)
-          @server.channel(data[:channel]).creation_time=data[:time]
+          data[:channel].creation_time=data[:time]
           handle(:creationtime, data)
         when RPL_CHANNEL_URL
-          data[:channel] = argv[1]
+          data[:channel] = @server.channel(argv[1])
           data[:url] = argv[2]
-          @server.channel(data[:channel]).url=data[:url].dup
+          data[:channel].url=data[:url].dup
           handle(:channel_url, data)
         when ERR_NOSUCHNICK
           data[:nick] = argv[1]
