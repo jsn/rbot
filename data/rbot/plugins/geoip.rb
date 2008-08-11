@@ -7,25 +7,44 @@
 # Copyright:: (C) 2008 Raine Virta
 # License:: GPL v2
 #
-# Resolves the geographic locations of users and IP addresses
+# Resolves the geographic locations of users (network-wide) and IP addresses
 
 module GeoIP
   GEO_IP = "http://www.geoiptool.com/en/?IP="
+  REGEX  = {
+    :country => %r{Country:.*?<a href=".*?" target="_blank"> (.*?)</a>}m,
+    :region  => %r{Region:.*?<a href=".*?" target="_blank">(.*?)</a>}m,
+    :city    => %r{City:.*?<td align="left" class="arial_bold">(.*?)</td>}m
+  }
+
 
   def self.resolve(hostname)
-    raw = Irc::Utils.bot.httputil.get(GEO_IP+hostname, :cache => true)
+    res = {}
+    raw = Irc::Utils.bot.httputil.get_response(GEO_IP+hostname)
+    raw = raw.decompress_body(raw.raw_body)
 
-    {
-      :country => raw.scan(%r{Country:.*?<a href=".*?" target="_blank"> (.*?)</a>}m).to_s,
-      :region  => raw.scan(%r{Region:.*?<a href=".*?" target="_blank">(.*?)</a>}m).to_s,
-      :city    => raw.scan(%r{City:.*?<td align="left" class="arial_bold">(.*?)</td>}m).to_s
-    }
+    REGEX.each { |key, regex| res[key] = Iconv.conv('utf-8', 'ISO-8859-1', raw.scan(regex).to_s) }
+
+    return res
   end
 end
 
 class GeoIpPlugin < Plugin
   def help(plugin, topic="")
-    "geoip [<user|hostname|ip>] => returns the geographic location of whichever has been given"
+    "geoip [<user|hostname|ip>] => returns the geographic location of whichever has been given -- note: user can be anyone on the network"
+  end
+
+  def whois(m)
+    # need to see if the whois reply was invoked by this plugin
+    return unless m.whois[:nick] == @nick
+
+    if m.target
+      @bot.say @source, host2output(m.target.host, m.target.nick)
+    else
+      @bot.say @source, "no such user on "+@bot.server.hostname.split(".")[-2]
+    end
+
+    @nick, @source = nil
   end
 
   def geoip(m, params)
@@ -33,7 +52,8 @@ class GeoIpPlugin < Plugin
       m.reply host2output(m.source.host, m.source.nick)
     else
       if m.replyto.class == Channel
-        # check if there is an user with nick same as input given
+
+        # check if there is an user on the channel with nick same as input given
         user = m.replyto.users.find { |user| user.nick == params[:input] }
 
         if user
@@ -42,11 +62,17 @@ class GeoIpPlugin < Plugin
         end
       end
 
+      # input is a host name or an IP
       if params[:input] =~ /[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,3}/i ||
          params[:input] =~ Resolv::IPv4::Regex
         m.reply host2output(params[:input])
+
+      # assume input is a nick
       else
-        m.reply "invalid input"
+        @source = m.replyto
+        @nick   = params[:input]
+
+        @bot.whois(@nick)
       end
     end
   end
@@ -55,7 +81,7 @@ class GeoIpPlugin < Plugin
     geo = GeoIP::resolve(host)
 
     if geo[:country].empty?
-      return _("#{host} could not be resolved")
+      return _("#{nick ? "#{nick}'s location" : host} could not be resolved")
     end
 
     res = _("%{thing} is #{nick ? "from" : "located in"}") % {
