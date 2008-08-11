@@ -17,7 +17,6 @@ module GeoIP
     :city    => %r{City:.*?<td align="left" class="arial_bold">(.*?)</td>}m
   }
 
-
   def self.resolve(hostname)
     res = {}
     raw = Irc::Utils.bot.httputil.get_response(GEO_IP+hostname)
@@ -29,22 +28,51 @@ module GeoIP
   end
 end
 
+class Stack
+  def initialize
+    @hash = {}
+  end
+
+  def [](nick)
+    @hash[nick] = [] unless @hash[nick]
+    @hash[nick]
+  end
+
+  def has_nick?(nick)
+    @hash.has_key?(nick)
+  end
+
+  def clear(nick)
+    @hash.delete(nick)
+  end
+end
+
 class GeoIpPlugin < Plugin
   def help(plugin, topic="")
     "geoip [<user|hostname|ip>] => returns the geographic location of whichever has been given -- note: user can be anyone on the network"
   end
 
-  def whois(m)
-    # need to see if the whois reply was invoked by this plugin
-    return unless m.whois[:nick] == @nick
+  def initialize
+    super
 
-    if m.target
-      @bot.say @source, host2output(m.target.host, m.target.nick)
-    else
-      @bot.say @source, "no such user on "+@bot.server.hostname.split(".")[-2]
+    @stack = Stack.new
+  end
+
+  def whois(m)
+    nick = m.whois[:nick].downcase
+
+    # need to see if the whois reply was invoked by this plugin
+    return unless @stack.has_nick?(nick)
+
+    @stack[nick].each do |source|
+      if m.target
+        @bot.say source, host2output(m.target.host, m.target.nick)
+      else
+        @bot.say source, "no such user on "+@bot.server.hostname.split(".")[-2]
+      end
     end
 
-    @nick, @source = nil
+    @stack.clear(m.whois[:nick])
   end
 
   def geoip(m, params)
@@ -63,16 +91,16 @@ class GeoIpPlugin < Plugin
       end
 
       # input is a host name or an IP
-      if params[:input] =~ /[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,3}/i ||
+      if params[:input] =~ /[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,4}/i ||
          params[:input] =~ Resolv::IPv4::Regex
         m.reply host2output(params[:input])
 
       # assume input is a nick
       else
-        @source = m.replyto
-        @nick   = params[:input]
+        nick = params[:input].downcase
 
-        @bot.whois(@nick)
+        @stack[nick] << m.replyto
+        @bot.whois(nick)
       end
     end
   end
