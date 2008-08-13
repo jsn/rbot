@@ -14,7 +14,7 @@ module GeoIP
 
   GEO_IP_PRIMARY   = "http://lakka.kapsi.fi:40086/lookup.yaml?host="
   GEO_IP_SECONDARY = "http://www.geoiptool.com/en/?IP="
-  HOST_NAME_REGEX  = /[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,4}/i
+  HOST_NAME_REGEX  = /^[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,4}/i
 
   REGEX  = {
     :country => %r{Country:.*?<a href=".*?" target="_blank"> (.*?)</a>}m,
