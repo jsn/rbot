@@ -10,21 +10,39 @@
 # Resolves the geographic locations of users (network-wide) and IP addresses
 
 module GeoIP
-  GEO_IP = "http://www.geoiptool.com/en/?IP="
+  class InvalidHostError < RuntimeError; end
+
+  GEO_IP_PRIMARY   = "http://kapsi.fi:40086/lookup.yaml?host="
+  GEO_IP_SECONDARY = "http://www.geoiptool.com/en/?IP="
+  HOST_NAME_REGEX  = /[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,4}/i
+
   REGEX  = {
     :country => %r{Country:.*?<a href=".*?" target="_blank"> (.*?)</a>}m,
     :region  => %r{Region:.*?<a href=".*?" target="_blank">(.*?)</a>}m,
     :city    => %r{City:.*?<td align="left" class="arial_bold">(.*?)</td>}m
   }
 
+  def self.valid_host?(hostname)
+    hostname =~ HOST_NAME_REGEX ||
+    hostname =~ Resolv::IPv4::Regex && (hostname.split(".").map { |e| e.to_i }.max <= 255)
+  end
+
   def self.resolve(hostname)
-    res = {}
-    raw = Irc::Utils.bot.httputil.get_response(GEO_IP+hostname)
-    raw = raw.decompress_body(raw.raw_body)
+    raise InvalidHostError unless valid_host?(hostname)
 
-    REGEX.each { |key, regex| res[key] = Iconv.conv('utf-8', 'ISO-8859-1', raw.scan(regex).to_s) }
+    yaml = Irc::Utils.bot.httputil.get(GEO_IP_PRIMARY+hostname)
 
-    return res
+    if yaml
+      return YAML::load(yaml)
+    else
+      res = {}
+      raw = Irc::Utils.bot.httputil.get_response(GEO_IP_SECONDARY+hostname)
+      raw = raw.decompress_body(raw.raw_body)
+
+      REGEX.each { |key, regex| res[key] = Iconv.conv('utf-8', 'ISO-8859-1', raw.scan(regex).to_s) }
+
+      return res
+    end
   end
 end
 
@@ -72,7 +90,7 @@ class GeoIpPlugin < Plugin
       end
     end
 
-    @stack.clear(m.whois[:nick])
+    @stack.clear(nick)
   end
 
   def geoip(m, params)
@@ -91,24 +109,29 @@ class GeoIpPlugin < Plugin
       end
 
       # input is a host name or an IP
-      if params[:input] =~ /[a-z0-9\-]+(?:\.[a-z0-9\-]+)*\.[a-z]{2,4}/i ||
-         params[:input] =~ Resolv::IPv4::Regex
-        m.reply host2output(params[:input])
+      if GeoIP::valid_host?(params[:input])
+         m.reply host2output(params[:input])
 
       # assume input is a nick
-      else
+      elsif params[:input] !~ /\./
         nick = params[:input].downcase
 
         @stack[nick] << m.replyto
         @bot.whois(nick)
+      else
+        m.reply "invalid input"
       end
     end
   end
 
   def host2output(host, nick=nil)
-    geo = GeoIP::resolve(host)
+    return "127.0.0.1 could not be res.. wait, what?" if host == "127.0.0.1"
 
-    if geo[:country].empty?
+    begin
+      geo = GeoIP::resolve(host)
+
+      raise if geo[:country].empty?
+    rescue GeoIP::InvalidHostError, RuntimeError
       return _("#{nick ? "#{nick}'s location" : host} could not be resolved")
     end
 
@@ -119,7 +142,7 @@ class GeoIpPlugin < Plugin
 
     res << " %{city}," % {
       :city => geo[:city]
-    } unless geo[:city].empty?
+    } unless geo[:city].to_s.empty?
 
     res << " %{country}" % {
       :country => geo[:country]
@@ -127,7 +150,7 @@ class GeoIpPlugin < Plugin
 
     res << " (%{region})" % {
       :region  => geo[:region]
-    } unless geo[:region].empty? || geo[:region] == geo[:city]
+    } unless geo[:region].to_s.empty? || geo[:region] == geo[:city]
 
     return res
   end
