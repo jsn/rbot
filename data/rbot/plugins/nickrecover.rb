@@ -52,16 +52,24 @@ class NickRecoverPlugin < Plugin
   end
 
   def stop_recovery
-    @bot.timer.remove(@recovery) if @recovery
+    begin
+      @bot.timer.remove(@recovery) if @recovery
+    ensure
+      @recovery = nil
+    end
   end
 
   def start_recovery(time=self.poll_time)
     if @recovery
-      @bot.timer.reschedule(@recovery, poll_time)
-    else
-      @recovery = @bot.timer.add(time) do
-        has_nick? ? stop_recovery : recover
+      begin
+        @bot.timer.reschedule(@recovery, poll_time)
+        return
+      rescue
+        @recovery=nil
       end
+    end
+    @recovery = @bot.timer.add(time) do
+      has_nick? ? stop_recovery : recover
     end
   end
 
