@@ -1,10 +1,18 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: IRC Socket
+#
+# This module implements the IRC socket interface, including IRC message
+# penalty computation and the message queue system
+
 require 'monitor'
 
 class ::String
   # Calculate the penalty which will be assigned to this message
   # by the IRCd
   def irc_send_penalty
-    # According to eggrdop, the initial penalty is
+    # According to eggdrop, the initial penalty is
     penalty = 1 + self.size/100
     # on everything but UnderNET where it's
     # penalty = 2 + self.size/120
