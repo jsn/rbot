@@ -231,12 +231,6 @@ module Irc
     # accumulator for the throttle
     attr_reader :throttle_bytes
 
-    # delay between lines sent
-    attr_accessor :sendq_delay
-
-    # max lines to burst
-    attr_accessor :sendq_burst
-
     # an optional filter object. we call @filter.in(data) for
     # all incoming data and @filter.out(data) for all outgoing data
     attr_reader :filter
@@ -263,7 +257,7 @@ module Irc
     # server_list:: list of servers to connect to
     # host::   optional local host to bind to (ruby 1.7+ required)
     # create a new Irc::Socket
-    def initialize(server_list, host, sendq_delay=2, sendq_burst=4, opts={})
+    def initialize(server_list, host, opts={})
       @server_list = server_list.dup
       @server_uri = nil
       @conn_count = 0
@@ -277,17 +271,6 @@ module Irc
         @ssl = opts[:ssl]
       else
         @ssl = false
-      end
-
-      if sendq_delay
-        @sendq_delay = sendq_delay.to_f
-      else
-        @sendq_delay = 2
-      end
-      if sendq_burst
-        @sendq_burst = sendq_burst.to_i
-      else
-        @sendq_burst = 4
       end
     end
 
@@ -330,9 +313,8 @@ module Irc
         sock.connect
       end
       @sock = sock
-      @last_send = Time.new - @sendq_delay
+      @last_send = Time.new
       @flood_send = Time.new
-      @last_throttle = Time.new
       @burst = 0
       @sock.extend(MonitorMixin)
       @sendq = MessageQueue.new
@@ -405,7 +387,6 @@ module Irc
         error "error while shutting down: #{e.pretty_inspect}"
       end
       @sock = nil
-      @burst = 0
       @sendq.clear
     end
 
@@ -413,30 +394,17 @@ module Irc
 
     def writer_loop
       loop do
-        # we could wait for the message, then calculate the delay and sleep
-        # if necessary. however, if high-priority message is enqueued while
-        # we sleep, it won't be the first to go out when the sleep is over.
-        # thus, we have to call Time.now() twice, once to calculate the delay
-        # and once to adjust @burst / @flood_send.
         begin
           now = Time.now
-          if @sendq_delay > 0
-            burst_delay = 0
-            if @burst > @sendq_burst
-              burst_delay = @last_send + @sendq_delay - now
-            end
-
-            flood_delay = @flood_send - MAX_IRC_SEND_PENALTY - now
-            delay = [burst_delay, flood_delay, 0].max
-            if delay > 0
-              debug "sleep(#{delay}) # (f: #{flood_delay}, b: #{burst_delay})"
-              sleep(delay) 
-            end
+	  flood_delay = @flood_send - MAX_IRC_SEND_PENALTY - now
+	  delay = [flood_delay, 0].max
+	  if delay > 0
+            debug "sleep(#{delay}) # (f: #{flood_delay})"
+            sleep(delay)
           end
           msg = @sendq.shift
           now = Time.now
           @flood_send = now if @flood_send < now
-          @burst = 0 if @last_send + @sendq_delay < now
           debug "got #{msg.inspect} from queue, sending"
           emergency_puts(msg, true)
         rescue Exception => e
@@ -463,7 +431,6 @@ module Irc
           @last_send = Time.new
           @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1
-          @burst += 1
         end
       rescue Exception => e
         handle_socket_error(:SEND, e)
