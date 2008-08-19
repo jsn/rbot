@@ -396,15 +396,13 @@ module Irc
       loop do
         begin
           now = Time.now
-	  flood_delay = @flood_send - MAX_IRC_SEND_PENALTY - now
-	  delay = [flood_delay, 0].max
-	  if delay > 0
+          flood_delay = @flood_send - MAX_IRC_SEND_PENALTY - now
+          delay = [flood_delay, 0].max
+          if delay > 0
             debug "sleep(#{delay}) # (f: #{flood_delay})"
             sleep(delay)
           end
           msg = @sendq.shift
-          now = Time.now
-          @flood_send = now if @flood_send < now
           debug "got #{msg.inspect} from queue, sending"
           emergency_puts(msg, true)
         rescue Exception => e
@@ -427,8 +425,10 @@ module Irc
           # the latter is racy and can cause double message output in
           # some circumstances
           actual = @filter.out(message) + "\n"
+          now = Time.new
           @sock.syswrite actual
-          @last_send = Time.new
+          @last_send = now
+          @flood_send = now if @flood_send < now
           @flood_send += message.irc_send_penalty if penalty
           @lines_sent += 1
         end
