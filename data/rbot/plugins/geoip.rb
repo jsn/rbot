@@ -157,4 +157,4 @@ class GeoIpPlugin < Plugin
 end
 
 plugin = GeoIpPlugin.new
-plugin.map "geoip [:input]", :action => 'geoip'
+plugin.map "geoip [:input]", :action => 'geoip', :thread => true
