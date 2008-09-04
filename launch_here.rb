@@ -39,12 +39,12 @@ begin
       rev = "unknown revision"
     end
     $version << " (#{branch} branch, #{rev})"
-  elsif File.directory? File.join(up, '.svn')
+  elsif File.directory? File.join(SCM_DIR, '.svn')
     rev = " (unknown revision)"
     begin
       svn_out = `svn info`
       rev = " (revision #{$1}" if svn_out =~ /Last Changed Rev: (\d+)/
-      svn_st = `svn st #{up}`
+      svn_st = `svn st #{SCM_DIR}`
       rev << ", local changes" if svn_st =~ /^[MDA] /
       rev << ")"
     rescue => e
