@@ -195,7 +195,9 @@ module Irc
       @plainmessage = BasicUserMessage.strip_formatting(@message)
       @message = BasicUserMessage.strip_initial_formatting(@message)
 
-      @address = true if source == @bot.myself
+      if target && target == @bot.myself
+        @address = true
+      end
 
     end
 
@@ -321,8 +323,9 @@ module Irc
       @ctcp = false
       @action = false
 
-      if @address = (target == @bot.myself)
+      if target == @bot.myself
         @private = true
+        @address = true
         @channel = nil
         @replyto = source
       else
@@ -517,6 +520,7 @@ module Irc
     attr_accessor :is_on
     def initialize(bot, server, source, oldnick, newnick)
       super(bot, server, source, oldnick, newnick)
+      @address = (source == @bot.myself)
       @is_on = []
     end
 
@@ -540,6 +544,7 @@ module Irc
     attr_accessor :modes
     def initialize(bot, server, source, target, message="")
       super(bot, server, source, target, message)
+      @address = (source == @bot.myself)
       @modes = []
     end
 
@@ -554,6 +559,7 @@ module Irc
     attr_reader :whois
     def initialize(bot, server, source, target, whois)
       super(bot, server, source, target, "")
+      @address = (target == @bot.myself)
       @whois = whois
     end
 
@@ -624,6 +630,7 @@ module Irc
       super(bot, server, source, channel, message)
       @channel = channel
       # in this case sourcenick is the nick that could be the bot
+      @address = (source == @bot.myself)
     end
   end
 
