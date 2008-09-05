@@ -591,6 +591,8 @@ class Bot
     # '*' means all channels
     #
     @quiet = Set.new
+    # but we always speak here
+    @not_quiet = Set.new
 
     # the nick we want, if it's different from the irc.nick config value
     # (e.g. as set by a !nick command)
@@ -784,24 +786,30 @@ class Bot
 
   # checks if we should be quiet on a channel
   def quiet_on?(channel)
-    return @quiet.include?('*') || @quiet.include?(channel.downcase)
+    ch = channel.downcase
+    return (@quiet.include?('*') && !@not_quiet.include?(ch)) || @quiet.include?(ch)
   end
 
   def set_quiet(channel = nil)
     if channel
       ch = channel.downcase.dup
+      @not_quiet.delete(ch)
       @quiet << ch
     else
       @quiet.clear
+      @not_quiet.clear
       @quiet << '*'
     end
   end
 
   def reset_quiet(channel = nil)
     if channel
-      @quiet.delete channel.downcase
+      ch = channel.downcase.dup
+      @quiet.delete(ch)
+      @not_quiet << ch
     else
       @quiet.clear
+      @not_quiet.clear
     end
   end
 
