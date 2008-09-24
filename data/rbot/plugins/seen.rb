@@ -55,7 +55,7 @@ class SeenPlugin < Plugin
       @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "JOIN", 
                                         m.target.to_s, m.message.dup)
     when TopicMessage
-      return if m.address?
+      return if m.address? or m.info_or_set == :info
       @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "TOPIC", 
                                         m.target.to_s, m.message.dup)
     end
