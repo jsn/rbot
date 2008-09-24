@@ -4,6 +4,8 @@
 #   Channels is the User on (of those the client is on too)?
 #   We may want this so that when a User leaves all Channels and he hasn't
 #   sent us privmsgs, we know we can remove him from the Server @users list
+#   FIXME for the time being, we do it with a method that scans the server
+#   (if defined), so the method is slow and should not be used frequently.
 # * Maybe ChannelList and UserList should be HashesOf instead of ArrayOf?
 #   See items marked as TODO Ho.
 #   The framework to do this is now in place, thanks to the new [] method
@@ -1039,6 +1041,14 @@ module Irc
       else
         return @server.channel(channel).has_voice?(self) if @server
         raise "Can't resolve channel #{channel}"
+      end
+    end
+
+    def channels
+      if @server
+        @server.channels.select { |ch| ch.has_user?(self) }
+      else
+        Array.new
       end
     end
   end
