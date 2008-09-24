@@ -1297,6 +1297,7 @@ class Bot
         m = PrivMessage.new(*args)
       when "QUIT"
         m = QuitMessage.new(*args)
+        m.was_on = myself.channels
     end
     @plugins.delegate('sent', m)
   end
