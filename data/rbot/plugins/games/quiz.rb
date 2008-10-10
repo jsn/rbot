@@ -930,9 +930,23 @@ class QuizPlugin < Plugin
 
   end
 
+  def stop(m, params)
+    unless m.public?
+      m.reply 'you must be on some channel to use this command'
+      return
+    end
+    if @quizzes.delete m.channel
+      @ask_mutex.synchronize do
+        t = @waiting.delete(m.channel)
+        @bot.timer.remove t if t
+      end
+      m.okay
+    else
+      m.reply(_("there is no active quiz on #{m.channel}"))
+    end
+  end
+
 end
-
-
 
 plugin = QuizPlugin.new
 plugin.default_auth( 'edit', false )
@@ -950,6 +964,7 @@ plugin.map 'quiz refresh',          :action => 'cmd_refresh'
 plugin.map 'quiz top5',             :action => 'cmd_top5'
 plugin.map 'quiz top :number',      :action => 'cmd_top_number'
 plugin.map 'quiz stats',            :action => 'cmd_stats'
+plugin.map 'quiz stop', :action => :stop
 
 # Admin commands
 plugin.map 'quiz autoask :enable',  :action => 'cmd_autoask', :auth_path => 'edit'

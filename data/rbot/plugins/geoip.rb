@@ -82,12 +82,13 @@ class GeoIpPlugin < Plugin
     # need to see if the whois reply was invoked by this plugin
     return unless @stack.has_nick?(nick)
 
+    if m.target
+      msg = host2output(m.target.host, m.target.nick)
+    else
+      msg = "no such user on "+@bot.server.hostname.split(".")[-2]
+    end
     @stack[nick].each do |source|
-      if m.target
-        @bot.say source, host2output(m.target.host, m.target.nick)
-      else
-        @bot.say source, "no such user on "+@bot.server.hostname.split(".")[-2]
-      end
+      @bot.say source, msg
     end
 
     @stack.clear(nick)
@@ -157,4 +158,4 @@ class GeoIpPlugin < Plugin
 end
 
 plugin = GeoIpPlugin.new
-plugin.map "geoip [:input]", :action => 'geoip'
+plugin.map "geoip [:input]", :action => 'geoip', :thread => true
