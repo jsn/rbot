@@ -93,7 +93,7 @@ msgstr "[%{num}] %{quote}"
 
 #: data/rbot/plugins/quotes.rb:187
 msgid "quote %{num} added by %{source}"
-msgstr "citazione %{num} aggiunto da %{source}"
+msgstr "citazione %{num} aggiunta da %{source}"
 
 #: data/rbot/plugins/quotes.rb:201
 msgid "quote %{num} added on %{date}"

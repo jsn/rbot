@@ -122,9 +122,15 @@ class FigletPlugin < Plugin
     exec_params = [send(:"#{key}_path")] + @params[key] + [message]
 
     # run the program
-    m.reply Utils.safe_exec(*exec_params), :max_lines => 0
+    m.reply strip_first_last_empty_line(Utils.safe_exec(*exec_params)), :max_lines => 0
   end
   alias :toilet :figlet
+
+  private
+
+  def strip_first_last_empty_line(txt)
+    txt.gsub(/\A(?:^\s*\r?\n)+/m,'').rstrip
+  end
 
 end
 

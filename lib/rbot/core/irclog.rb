@@ -167,13 +167,13 @@ class IrcLogModule < CoreBotModule
   end
 
   def log_nick(m)
-    m.is_on.each { |ch|
+    (m.is_on & @bot.myself.channels).each { |ch|
       irclog "@ #{m.oldnick} is now known as #{m.newnick}", ch
     }
   end
 
   def log_quit(m)
-    m.was_on.each { |ch|
+    (m.was_on & @bot.myself.channels).each { |ch|
       irclog "@ Quit: #{m.source}: #{m.logmessage}", ch
     }
   end

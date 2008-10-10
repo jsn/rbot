@@ -277,14 +277,6 @@ class Bot
     Config.register Config::IntegerValue.new('server.reconnect_wait',
       :default => 5, :validate => Proc.new{|v| v >= 0},
       :desc => "Seconds to wait before attempting to reconnect, on disconnect")
-    Config.register Config::FloatValue.new('server.sendq_delay',
-      :default => 2.0, :validate => Proc.new{|v| v >= 0},
-      :desc => "(flood prevention) the delay between sending messages to the server (in seconds)",
-      :on_change => Proc.new {|bot, v| bot.socket.sendq_delay = v })
-    Config.register Config::IntegerValue.new('server.sendq_burst',
-      :default => 4, :validate => Proc.new{|v| v >= 0},
-      :desc => "(flood prevention) max lines to burst to the server before throttling. Most ircd's allow bursts of up 5 lines",
-      :on_change => Proc.new {|bot, v| bot.socket.sendq_burst = v })
     Config.register Config::IntegerValue.new('server.ping_timeout',
       :default => 30, :validate => Proc.new{|v| v >= 0},
       :desc => "reconnect if server doesn't respond to PING within this many seconds (set to 0 to disable)")
@@ -589,7 +581,7 @@ class Bot
         debug "server.list is now #{@config['server.list'].inspect}"
     end
 
-    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], @config['server.sendq_delay'], @config['server.sendq_burst'], :ssl => @config['server.ssl'])
+    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], :ssl => @config['server.ssl'])
     @client = Client.new
 
     @plugins.scan
@@ -599,6 +591,8 @@ class Bot
     # '*' means all channels
     #
     @quiet = Set.new
+    # but we always speak here
+    @not_quiet = Set.new
 
     # the nick we want, if it's different from the irc.nick config value
     # (e.g. as set by a !nick command)
@@ -792,24 +786,30 @@ class Bot
 
   # checks if we should be quiet on a channel
   def quiet_on?(channel)
-    return @quiet.include?('*') || @quiet.include?(channel.downcase)
+    ch = channel.downcase
+    return (@quiet.include?('*') && !@not_quiet.include?(ch)) || @quiet.include?(ch)
   end
 
   def set_quiet(channel = nil)
     if channel
       ch = channel.downcase.dup
+      @not_quiet.delete(ch)
       @quiet << ch
     else
       @quiet.clear
+      @not_quiet.clear
       @quiet << '*'
     end
   end
 
   def reset_quiet(channel = nil)
     if channel
-      @quiet.delete channel.downcase
+      ch = channel.downcase.dup
+      @quiet.delete(ch)
+      @not_quiet << ch
     else
       @quiet.clear
+      @not_quiet.clear
     end
   end
 
@@ -1297,6 +1297,7 @@ class Bot
         m = PrivMessage.new(*args)
       when "QUIT"
         m = QuitMessage.new(*args)
+        m.was_on = myself.channels
     end
     @plugins.delegate('sent', m)
   end
