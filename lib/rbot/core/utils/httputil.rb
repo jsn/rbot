@@ -610,8 +610,8 @@ class HttpUtil
     opts = {:method => :head}.merge(options)
     begin
       resp = get_response(uri, opts, &block)
-      raise "http error #{resp}" if Net::HTTPClientError === resp ||
-        Net::HTTPServerError == resp
+      # raise "http error #{resp}" if Net::HTTPClientError === resp ||
+      #   Net::HTTPServerError == resp
       return resp
     rescue Exception => e
       error e
