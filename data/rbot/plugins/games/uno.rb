@@ -336,14 +336,28 @@ class UnoGame
     # if play is forced, check against the only allowed cards
     return false if @must_play and not @must_play.include?(card)
 
-    # When a +something is online, you can only play a +something of same or
-    # higher something, or a Reverse of the correct color, or a Reverse on
-    # a Reverse
-    # TODO make optional
     if @picker > 0
-      return true if card.picker >= @last_picker
-      return true if card.value == 'Reverse' and (card.color == @color or @discard.value == card.value)
-      return false
+      # During a picker run (i.e. after a +something was played and before a
+      # player is forced to pick) you can only play pickers (+2, +4) and
+      # Reverse. Reverse can be played if the previous card matches by color or
+      # value (as usual), a +4 can always be played, a +2 can be played on a +2
+      # of any color or on a Reverse of the correct color unless a +4 was
+      # played on it
+      # TODO make optional
+      case card.value
+      when 'Reverse'
+        # Reverse can be played if it matches color or value
+        return (card.color == @color) || (@discard.value == card.value)
+      when '+2'
+        return false if @last_picker > 2
+        return true if @discard.value == card.value
+        return true if @discard.value == 'Reverse' and @color == card.color
+        return false
+      when '+4'
+        return true
+      else
+        return false
+      end
     else
       # You can always play a Wild
       return true if Wild === card
