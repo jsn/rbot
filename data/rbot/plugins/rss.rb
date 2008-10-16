@@ -1153,7 +1153,7 @@ class RSSFeedsPlugin < Plugin
         report_problem("no items found in the feed, maybe try weed?", e, m)
         return nil
       end
-      feed.title = title
+      feed.title = title.strip
       feed.items = items
       return true
     end
