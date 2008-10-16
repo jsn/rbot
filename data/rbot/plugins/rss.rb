@@ -315,7 +315,7 @@ class RSSFeedsPlugin < Plugin
   def define_filters
     @outkey = :"rss.out"
     @bot.register_filter(:headlines, @outkey) { |s|
-      line1 = "%{handle}%{title}"
+      line1 = (s[:handle].empty? ? "%{date}" : "%{handle}") << "%{title}"
       make_stream(line1, nil, s)
     }
     @bot.register_filter(:blog, @outkey) { |s|
