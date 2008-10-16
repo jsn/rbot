@@ -329,13 +329,13 @@ class RSSFeedsPlugin < Plugin
       make_stream(line1, line2, s, :author => author, :abt => abt)
     }
     @bot.register_filter(:news, @outkey) { |s|
-      line1 = "%{handle}%{date}%{title} @ %{link}" % s
+      line1 = "%{handle}%{date}%{title}%{at}%{link}" % s
       line2 = "%{handle}%{date}%{desc}" % s
       make_stream(line1, line2, s)
     }
     @bot.register_filter(:git, @outkey) { |s|
       author = s[:author] ? (s[:author] + " ") : ""
-      line1 = "%{handle}%{date}%{author}committed %{title} @ %{link}"
+      line1 = "%{handle}%{date}%{author}committed %{title}%{at}%{link}"
       make_stream(line1, nil, s, :author => author)
     }
     @bot.register_filter(:forum, @outkey) { |s|
@@ -353,7 +353,7 @@ class RSSFeedsPlugin < Plugin
     }
     @bot.register_filter(:trac, @outkey) { |s|
       author = s[:author].sub(/@\S+?\s*>/, "@...>") + ": " if s[:author]
-      line1 = "%{handle}%{date}%{author}%{title} @ %{link}"
+      line1 = "%{handle}%{date}%{author}%{title}%{at}%{link}"
       line2 = nil
       unless s[:item].title =~ /^(?:Changeset \[(?:[\da-f]+)\]|\(git commit\))/
         line2 = "%{handle}%{date}%{desc}"
