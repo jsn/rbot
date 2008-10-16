@@ -314,6 +314,10 @@ class RSSFeedsPlugin < Plugin
   # TODO: load personal ones
   def define_filters
     @outkey = :"rss.out"
+    @bot.register_filter(:headlines, @outkey) { |s|
+      line1 = "%{handle}%{title}"
+      make_stream(line1, nil, s)
+    }
     @bot.register_filter(:blog, @outkey) { |s|
       author = s[:author] ? (s[:author] + " ") : ""
       abt = s[:category] ? "about #{s[:category]} " : ""
