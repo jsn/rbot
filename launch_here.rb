@@ -8,7 +8,7 @@ puts "Running from #{SCM_DIR}"
 
 $:.unshift File.join(SCM_DIR, 'lib')
 
-$version = 'rbot-0.9.14'
+$version = '0.9.14'
 
 pwd = Dir.pwd
 begin
