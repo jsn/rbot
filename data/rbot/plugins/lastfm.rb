@@ -82,7 +82,7 @@ class LastFmPlugin < Plugin
     when :now, :np
       _("lastfm now [<user>] => show the now playing track from last.fm.  np [<user>] does the same.")
     when :set
-      _("lastfm set nick <user> => associate your current irc nick with a last.fm user. lastfm set verb <present> <past> => set your preferred now playing verb. default \"listening\" and \"listened\".")
+      _("lastfm set user <user> => associate your current irc nick with a last.fm user. lastfm set verb <present> <past> => set your preferred now playing verb. default \"listening\" and \"listened\".")
     when :who
       _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
     when :compare
@@ -422,6 +422,8 @@ plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
 plugin.map 'lastfm track *track', :action => :find_track, :thread => true
 plugin.map 'lastfm set nick :who', :action => :set_user, :thread => true
+plugin.map 'lastfm set user :who', :action => :set_user, :thread => true
+plugin.map 'lastfm set username :who', :action => :set_user, :thread => true
 plugin.map 'lastfm set verb :present :past', :action => :set_verb, :thread => true
 plugin.map 'lastfm who :who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
