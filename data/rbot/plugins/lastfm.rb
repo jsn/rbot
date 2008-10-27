@@ -245,8 +245,12 @@ class LastFmPlugin < Plugin
       year = get_album(artist, albumtxt)[2]
       album = "[#{albumtxt}, #{year}] " if year
     end
-    date = first.elements["date"].attributes["uts"]
-    past = Time.at(date.to_i)
+    past = nil
+    date = XPath.first(first, "//date")
+    if date != nil
+      time = date.attributes["uts"]
+      past = Time.at(time.to_i)
+    end
     if now == "true"
        verb = _("listening")
        if @registry.has_key? "#{m.sourcenick}_verb_present"
