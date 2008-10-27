@@ -761,7 +761,11 @@ class UnoGame
       }
     end
     if @picker > 0 and not halted
-      p = @players[1]
+      if @discard.value == 'Reverse'
+        p = @players.last
+      else
+        p = @players[1]
+      end
       announce _("%{p} has to pick %{b}%{n}%{b} cards!") % {
         :p => p, :n => @picker, :b => Bold
       }
