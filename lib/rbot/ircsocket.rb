@@ -12,6 +12,8 @@ class ::String
   # Calculate the penalty which will be assigned to this message
   # by the IRCd
   def irc_send_penalty
+    penalty_min = 1
+    penalty_max = 99
     # According to eggdrop, the initial penalty is
     penalty = 1 + self.size/100
     # on everything but UnderNET where it's
@@ -59,13 +61,13 @@ class ::String
     else # Unknown messages
       penalty += 1
     end
-    if penalty > 99
-      debug "Wow, more than 99 secs of penalty!"
-      penalty = 99
+    if penalty > penalty_max
+      debug "Wow, more than #{penalty_max} secs of penalty!"
+      penalty = penalty_max
     end
-    if penalty < 2
-      debug "Wow, less than 2 secs of penalty!"
-      penalty = 2
+    if penalty < penalty_min
+      debug "Wow, less than #{penalty_min} secs of penalty!"
+      penalty = penalty_min
     end
     debug "penalty: #{penalty}"
     return penalty
