@@ -15,7 +15,7 @@ class ::String
     penalty_min = 1
     penalty_max = 99
     # According to eggdrop, the initial penalty is
-    penalty = 1 + self.size/100
+    penalty = 1 + self.size/200
     # on everything but UnderNET where it's
     # penalty = 2 + self.size/120
 
@@ -51,9 +51,9 @@ class ::String
       penalty += dests.split(',').size
     when :WHO
       # I'm too lazy to implement this one correctly
-      penalty += 5
+      penalty += 1
     when :AWAY, :JOIN, :VERSION, :TIME, :TRACE, :WHOIS, :DNS
-      penalty += 2
+      penalty += 1
     when :INVITE, :NICK
       penalty += 3
     when :ISON
