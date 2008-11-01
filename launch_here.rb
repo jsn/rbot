@@ -8,7 +8,7 @@ puts "Running from #{SCM_DIR}"
 
 $:.unshift File.join(SCM_DIR, 'lib')
 
-$version = '0.9.13'
+$version = '0.9.15-git'
 
 pwd = Dir.pwd
 begin

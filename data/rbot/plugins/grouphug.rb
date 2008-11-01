@@ -57,7 +57,7 @@ class GrouphugPlugin < Plugin
         data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
 
         res = data.scan(REG)
-        confession = res[0][0].ircify_html
+        confession = res[2][0].ircify_html # use res[2] to skip the new sidebar "Group Hug is run by one person..." and other text.
         confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
         m.reply confession
       else # Cache random confessions

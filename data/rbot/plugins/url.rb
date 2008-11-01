@@ -128,7 +128,7 @@ class UrlPlugin < Plugin
     urls_displayed = 0
     urls.each do |urlstr|
       debug "working on #{urlstr}"
-      next unless urlstr =~ /^https?:/
+      next unless urlstr =~ /^https?:\/\/./
       title = nil
       debug "Getting title for #{urlstr}..."
       reply = nil

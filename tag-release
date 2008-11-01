@@ -5,6 +5,11 @@ if [ -z $1 ]; then
 	exit
 fi
 
+abort() {
+	echo $1
+	exit 1
+}
+
 FULLVERSION=$1
 VERSION=${FULLVERSION/-*/}
 
@@ -18,9 +23,9 @@ sed -i -e "/^  s.version =/ c \  s.version = '$VERSION'" Rakefile
 NOGIT=${FULLVERSION/-git/}
 if [ $NOGIT == $FULLVERSION ]; then
 	# Not a git version
-	git commit -m "Version $FULLVERSION" -a
-	git tag -a -m "rbot $FULLVERSION" rbot-$FULLVERSION
-	rake package
+	rake package || abort "Failed to build package!"
+	git commit -m "Version $FULLVERSION" -a || abort "Failed to commit release!"
+	git tag -a -m "rbot $FULLVERSION" rbot-$FULLVERSION || abort "Failed to tag release!"
 	if [ $VERSION != $FULLVERSION ]; then
 		pushd pkg
 		mv rbot-$VERSION.gem rbot-$FULLVERSION.gem

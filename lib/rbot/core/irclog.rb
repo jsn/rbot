@@ -23,6 +23,9 @@ class IrcLogModule < CoreBotModule
   Config.register Config::StringValue.new('irclog.filename_format',
     :default => '%%{where}', :requires_rescan => true,
     :desc => "filename pattern for the IRC log. You can put typical strftime keys such as %Y for year and %m for month, plus the special %%{where} key for location (channel name or user nick)")
+  Config.register Config::StringValue.new('irclog.timestamp_format',
+    :default => '[%Y/%m/%d %H:%M:%S]', :requires_rescan => true,
+    :desc => "timestamp pattern for the IRC log, using typical strftime keys")
 
   attr :nolog_rx, :dolog_rx
   def initialize
@@ -41,6 +44,10 @@ class IrcLogModule < CoreBotModule
     return true
   end
 
+  def timestamp(time)
+    return time.strftime @bot.config['irclog.timestamp_format']
+  end
+
   def event_irclog_list_changed(nolist, dolist)
     @nolog_rx = nolist.empty? ? nil : Regexp.union(*(nolist.map { |r| r.to_irc_regexp }))
     debug "no log: #{@nolog_rx}"
@@ -54,8 +61,8 @@ class IrcLogModule < CoreBotModule
 
   def logfile_close(where_str, reason = 'unknown reason')
     f = @logs.delete(where_str) or return
-    stamp = Time.now.strftime '%Y/%m/%d %H:%M:%S'
-    f[1].puts "[#{stamp}] @ Log closed by #{@bot.myself.nick} (#{reason})"
+    stamp = timestamp(Time.now)
+    f[1].puts "#{stamp} @ Log closed by #{@bot.myself.nick} (#{reason})"
     f[1].close
   end
 
@@ -248,7 +255,7 @@ class IrcLogModule < CoreBotModule
       message, where = ls
       message = message.chomp
       now = Time.now
-      stamp = now.strftime("%Y/%m/%d %H:%M:%S")
+      stamp = timestamp(now)
       if where.class <= Server
         where_str = "server"
       else
@@ -300,16 +307,16 @@ class IrcLogModule < CoreBotModule
           # it should be fine to create the file now
           f = File.new(fp, "a")
           f.sync = true
-          f.puts "[#{stamp}] @ Log started by #{@bot.myself.nick}"
+          f.puts "#{stamp} @ Log started by #{@bot.myself.nick}"
         rescue Exception => e
           error e
           next
         end
         @logs[where_str] = [now, f]
       end
-      @logs[where_str][1].puts "[#{stamp}] #{message}"
+      @logs[where_str][1].puts "#{stamp} #{message}"
       @logs[where_str][0] = now
-      #debug "[#{stamp}] <#{where}> #{message}"
+      #debug "#{stamp} <#{where}> #{message}"
     end
     @logs.keys.each { |w| logfile_close(w, 'rescan or shutdown') }
     debug 'loggers_thread terminating'
