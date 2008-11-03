@@ -52,6 +52,9 @@ class ScriptPlugin < Plugin
     name = m.message.split.first
 
     if m.address? and @commands.has_key?( name )
+      auth_path = "script::run::#{name}".intern
+      return unless @bot.auth.allow?(auth_path, m.source, m.replyto)
+
       code = @commands[name].code.dup.untaint
 
       # Convenience variables, can be accessed by scripts:
@@ -172,6 +175,7 @@ plugin = ScriptPlugin.new
 plugin.default_auth( 'edit', false )
 plugin.default_auth( 'eval', false )
 plugin.default_auth( 'echo', false )
+plugin.default_auth( 'run', true )
 
 plugin.map 'script add -f :name *code', :action => 'handle_add_force', :auth_path => 'edit'
 plugin.map 'script add :name *code',    :action => 'handle_add',       :auth_path => 'edit'
