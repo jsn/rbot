@@ -48,7 +48,7 @@ class ScriptPlugin < Plugin
   end
 
 
-  def listen( m )
+  def message( m )
     name = m.message.split.first
 
     if m.address? and @commands.has_key?( name )
