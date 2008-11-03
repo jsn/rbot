@@ -76,6 +76,26 @@ class ScriptPlugin < Plugin
     end
   end
 
+  def handle_allow_deny(m, p)
+    name = p[:stuff]
+    if @commands.has_key?( name )
+      @bot.plugins['auth'].auth_allow_deny(m, p.merge(
+        :auth_path => "script::run::#{name}".intern
+      ))
+    else
+      m.reply(_("%{stuff} is not a script I know of") % p)
+    end
+  end
+
+  def handle_allow(m, p)
+    handle_allow_deny(m, p.merge(:allow => true))
+  end
+
+  def handle_deny(m, p)
+    handle_allow_deny(m, p.merge(:allow => false))
+  end
+
+
 
   def handle_eval( m, params )
     code = params[:code].to_s.dup.untaint
@@ -185,4 +205,12 @@ plugin.map 'script echo *code',         :action => 'handle_echo'
 plugin.map 'script list :page',         :action => 'handle_list',      :defaults => { :page => '1' }
 plugin.map 'script show :name',         :action => 'handle_show'
 
+plugin.map 'script allow :stuff for :user [*where]',
+  :action => 'handle_allow',
+  :requirements => {:where => /^(?:anywhere|everywhere|[io]n \S+)$/},
+  :auth_path => 'edit'
+plugin.map 'script deny :stuff for :user [*where]',
+  :action => 'handle_deny',
+  :requirements => {:where => /^(?:anywhere|everywhere|[io]n \S+)$/},
+  :auth_path => 'edit'
 
