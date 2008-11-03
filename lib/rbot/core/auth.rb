@@ -242,23 +242,27 @@ class AuthModule < CoreBotModule
       where = m.parse_channel_list(p[:where].to_s).first # should only be one anyway
     end
 
-    # pseudo-message to find the template. The source is ignored, and the
-    # target is set according to where the template should be checked
-    # (public or private)
-    # This might still fail in the case of 'everywhere' for commands there are
-    # really only private
-    case where
-    when :"?"
-      pseudo_target = @bot.myself
-    when :*
-      pseudo_target = m.channel
+    if p.has_key? :auth_path
+      auth_path = p[:auth_path]
     else
-      pseudo_target = m.server.channel(where)
+      # pseudo-message to find the template. The source is ignored, and the
+      # target is set according to where the template should be checked
+      # (public or private)
+      # This might still fail in the case of 'everywhere' for commands there are
+      # really only private
+      case where
+      when :"?"
+        pseudo_target = @bot.myself
+      when :*
+        pseudo_target = m.channel
+      else
+        pseudo_target = m.server.channel(where)
+      end
+
+      pseudo = PrivMessage.new(bot, m.server, m.source, pseudo_target, p[:stuff].to_s)
+
+      auth_path = find_auth(pseudo)
     end
-
-    pseudo = PrivMessage.new(bot, m.server, m.source, pseudo_target, p[:stuff].to_s)
-
-    auth_path = find_auth(pseudo)
     debug auth_path
 
     if auth_path
