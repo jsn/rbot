@@ -34,10 +34,15 @@ class ScriptPlugin < Plugin
 
 
   def help( plugin, topic="" )
-    if topic == "add"
+    case topic
+    when "add"
       "Scripts are little Ruby programs that run in the context of the script plugin. You can access @bot (class Irc::Bot), m (class Irc::PrivMessage), user (class String, either the first argument, or if missing the sourcenick), and args (class Array, an array of arguments). Example: 'script add greet m.reply( 'Hello ' + user )'. Invoke the script just like a plugin: '<botnick>: greet'."
-    else  
-      "Create mini plugins on IRC. 'script add <name> <code>' => Create script named <name> with the Ruby program <code>. 'script list' => Show a list of all known scripts. 'script show <name>' => Show the source code for <name>. 'script del <name>' => Delete the script <name>. 'script eval <expr>' => evaluate expression <expr>. 'script echo <expr>' => evaluate and display expression <expr>."
+    when "allow"
+      "script allow <script> for <user> [where] => allow <user> to run script <script> [where]"
+    when "allow"
+      "script deny <script> for <user> [where] => prevent <user> from running script <script> [where]"
+    else
+      "Create mini plugins on IRC. 'script add <name> <code>' => Create script named <name> with the Ruby program <code>. 'script list' => Show a list of all known scripts. 'script show <name>' => Show the source code for <name>. 'script del <name>' => Delete the script <name>. 'script eval <expr>' => evaluate expression <expr>. 'script echo <expr>' => evaluate and display expression <expr>. See also: add, allow, deny."
     end
   end
 
