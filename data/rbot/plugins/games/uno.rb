@@ -845,8 +845,14 @@ class UnoPlugin < Plugin
       _("The points won with a game of %{uno} are totalled from the cards remaining in the hands of the other players."),
       _("Each normal (not special) card is worth its face value (from 0 to 9 points)."),
       _("Each colored special card (+2, Reverse, Skip) is worth 20 points."),
-      _("Each Wild and Wild +4 is worth 50 points.")
+      _("Each Wild and Wild +4 is worth 50 points."),
+      help(plugin, 'top'),
+      help(plugin, 'topwin'),
       ].join(" ") % { :uno => UnoGame::UNO }
+    when 'top'
+      _("You can see the scoring table with 'uno top N' where N is the number of top scores to show.")
+    when 'topwin'
+      _("You can see the winners table with 'uno topwin N' where N is the number of top winners to show.")
     when /cards?/
       [
       _("There are 108 cards in a standard %{uno} deck."),
@@ -863,7 +869,7 @@ class UnoPlugin < Plugin
       _("'uno end' to end the game before its natural completion")
       ].join("; ")
     else
-      _("%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help uno admin' for admin commands. In-game commands: %{cmds}.") % {
+      _("%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help uno admin' for admin commands, 'help uno score' for scoring rules. In-game commands: %{cmds}.") % {
         :uno => UnoGame::UNO,
         :cmds => help(plugin, 'commands')
       }
