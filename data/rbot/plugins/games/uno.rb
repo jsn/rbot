@@ -1157,6 +1157,14 @@ class UnoPlugin < Plugin
       scores << [v.won.inject(0) { |s, w| s+=w.score }, k]
     end
 
+    if wins.empty?
+      m.reply(_("no %{uno} games were completed here") % {
+        :uno => UnoGame::UNO
+      })
+      return
+    end
+
+
     if n = p[:scorenum]
       msg = _("%{uno} %{num} highest scores: ") % {
         :uno => UnoGame::UNO, :num => p[:scorenum]
