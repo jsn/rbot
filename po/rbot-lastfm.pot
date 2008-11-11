@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-07-07 18:02+0200\n"
-"PO-Revision-Date: 2008-07-07 18:02+0200\n"
+"POT-Creation-Date: 2008-11-11 20:21+0100\n"
+"PO-Revision-Date: 2008-11-11 20:21+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -50,7 +50,7 @@ msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:85
 msgid ""
-"lastfm set nick <user> => associate your current irc nick with a last.fm "
+"lastfm set user <user> => associate your current irc nick with a last.fm "
 "user. lastfm set verb <present> <past> => set your preferred now playing "
 "verb. default \"listening\" and \"listened\"."
 msgstr ""
@@ -79,8 +79,8 @@ msgid "Could not retrieve events"
 msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:158 data/rbot/plugins/lastfm.rb:215
-#: data/rbot/plugins/lastfm.rb:274 data/rbot/plugins/lastfm.rb:296
-#: data/rbot/plugins/lastfm.rb:315 data/rbot/plugins/lastfm.rb:329
+#: data/rbot/plugins/lastfm.rb:278 data/rbot/plugins/lastfm.rb:300
+#: data/rbot/plugins/lastfm.rb:319 data/rbot/plugins/lastfm.rb:333
 msgid "last.fm parsing failed"
 msgstr ""
 
@@ -129,61 +129,61 @@ msgstr ""
 msgid "%{u} hasn't played anything recently"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:251
+#: data/rbot/plugins/lastfm.rb:255
 msgid "listening"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:255
+#: data/rbot/plugins/lastfm.rb:259
 msgid "%{u} is %{v} to \"%{t}\" by %{a} %{b}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:257
+#: data/rbot/plugins/lastfm.rb:261
 msgid "listened"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:262
+#: data/rbot/plugins/lastfm.rb:266
 msgid "%{u} %{v} to \"%{t}\" by %{a} %{b}%{p}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:269 data/rbot/plugins/lastfm.rb:290
+#: data/rbot/plugins/lastfm.rb:273 data/rbot/plugins/lastfm.rb:294
 msgid "I had problems getting info for %{a}."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:282
+#: data/rbot/plugins/lastfm.rb:286
 msgid ""
 "%{b}%{a}%{b} has been played %{c} times and is being listened to by %{l} "
 "people."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:305
+#: data/rbot/plugins/lastfm.rb:309
 msgid "%{bold}%{t}%{bold} by %{bold}%{a}%{bold} (%{n} listeners)"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:318
+#: data/rbot/plugins/lastfm.rb:322
 msgid "track %{a} not found"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:325
+#: data/rbot/plugins/lastfm.rb:329
 msgid "I had problems getting album info"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:347
+#: data/rbot/plugins/lastfm.rb:351
 msgid "I couldn't locate: \"%{a}\" by %{r}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:351
+#: data/rbot/plugins/lastfm.rb:355
 msgid "The album \"%{a}\" by %{r} %{y}has been played %{c} times."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:358
+#: data/rbot/plugins/lastfm.rb:362
 msgid "Ok, I'll remember that %{n} is %{u} at last.fm"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:367
+#: data/rbot/plugins/lastfm.rb:371
 msgid "Ok, I'll remember that %{n} prefers %{r} and %{p}."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:381
+#: data/rbot/plugins/lastfm.rb:385
 msgid ""
 "Sorry, I don't know who %{n} is at last.fm perhaps you need to: lastfm set "
 "<username>"

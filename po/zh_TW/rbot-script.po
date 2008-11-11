@@ -1,0 +1,3 @@
+#: data/rbot/plugins/script.rb:91
+msgid "%{stuff} is not a script I know of"
+msgstr ""
