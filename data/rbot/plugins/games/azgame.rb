@@ -35,6 +35,12 @@ class AzGame
     def @range.to_s
       return "%s -- %s" % self
     end
+    if @rules[:list]
+      @check = Proc.new { |w| @rules[:list].include?(w) }
+    else
+      @check_method = "is_#{@lang}?"
+      @check = Proc.new { |w| @plugin.send(@check_method, w) }
+    end
   end
 
   def check(word)
@@ -47,7 +53,7 @@ class AzGame
     return [:out, @range] if w < @range.first or w > @range.last
     return [:ignore, @range] if w == @range.first or w == @range.last
     # This is potentially slow (for languages that check online)
-    return [:noexist, @range] unless @plugin.send("is_#{@lang}?", w)
+    return [:noexist, @range] unless @check.call(w)
     debug "we like it"
     # Check again if there was a winner in the mean time,
     # and bail out if there was
@@ -121,22 +127,25 @@ class AzGamePlugin < Plugin
       :listener => /^[a-z]+$/
     },
     }
+  end
 
-    japanese_wordlist = "#{@bot.botclass}/azgame/wordlist-japanese"
-    if File.exist?(japanese_wordlist)
-      words = File.readlines(japanese_wordlist) \
-                             .map {|line| line.strip} .uniq
+  def initialize_wordlist(lang)
+    wordlist = "#{@bot.botclass}/azgame/wordlist-#{lang}"
+    if File.exist?(wordlist)
+      words = File.readlines(wordlist).map {|line| line.strip}.uniq
       if(words.length >= 4) # something to guess
-        @rules[:japanese] = {
+        rules = {
             :good => /^\S+$/,
             :list => words,
             :first => words[0],
             :last => words[-1],
             :listener => /^\S+$/
         }
-        debug "Japanese wordlist loaded, #{@rules[:japanese][:list].length} lines; first word: #{@rules[:japanese][:first]}, last word: #{@rules[:japanese][:last]}"
+        debug "#{lang} wordlist loaded, #{rules[:list].length} lines; first word: #{rules[:first]}, last word: #{rules[:last]}"
+        return rules
       end
     end
+    return false
   end
 
   def save
@@ -233,12 +242,20 @@ class AzGamePlugin < Plugin
           m.reply _("couldn't think of anything ...")
           return
         end
+        m.reply _("got it!")
+        @games[k] = AzGame.new(self, lang, @rules[lang], word)
+      elsif !@rules.has_key?(lang) and rules = initialize_wordlist(lang)
+        word = random_pick_wordlist(rules)
+        if word.empty?
+          m.reply _("couldn't think of anything ...")
+          return
+        end
+        m.reply _("got it!")
+        @games[k] = AzGame.new(self, lang, rules, word)
       else
         m.reply _("I can't play A-Z in %{lang}, sorry") % {:lang => lang}
         return
       end
-      m.reply _("got it!")
-      @games[k] = AzGame.new(self, lang, @rules[lang], word)
     end
     tr = @games[k].total_tries
     # this message building code is rewritten to make translation easier
@@ -335,17 +352,12 @@ class AzGamePlugin < Plugin
     end
   end
 
-  def is_japanese?(word)
-    @rules[:japanese][:list].include?(word)
-  end
-
   # return integer between min and max, inclusive
   def rand_between(min, max)
     rand(max - min + 1) + min
   end
 
-  def random_pick_japanese(min=nil, max=nil)
-    rules = @rules[:japanese]
+  def random_pick_wordlist(rules, min=nil, max=nil)
     min = rules[:first] if min.nil_or_empty?
     max = rules[:last]  if max.nil_or_empty?
     debug "Randomly picking word between #{min} and #{max}"
