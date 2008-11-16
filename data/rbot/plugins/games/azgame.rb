@@ -127,10 +127,12 @@ class AzGamePlugin < Plugin
       :listener => /^[a-z]+$/
     },
     }
+
+    @wordlist_base = "#{@bot.botclass}/azgame/wordlist-"
   end
 
   def initialize_wordlist(lang)
-    wordlist = "#{@bot.botclass}/azgame/wordlist-#{lang}"
+    wordlist = @wordlist_base + lang
     if File.exist?(wordlist)
       words = File.readlines(wordlist).map {|line| line.strip}.uniq
       if(words.length >= 4) # something to guess
@@ -564,7 +566,15 @@ class AzGamePlugin < Plugin
     when 'play'
       return _("az => start a game if none is running, show the current word range otherwise; you can say 'az <language>' if you want to play in a language different from the current bot default")
     end
-    return _("az topics: play, rules, cancel, manage, check")
+    offset = @wordlist_base.length
+    langs = @rules.keys
+    wls = Dir.glob(@wordlist_base + "*").map { |f| f[offset,f.length].intern rescue nil }.compact - langs
+    return [
+      _("az topics: play, rules, cancel, manage, check"),
+      _("available languages: %{langs}") % { :langs => langs.join(", ") },
+      wls.empty? ? nil : _("available wordlists: %{wls}") % { :wls => wls.join(", ") },
+    ].compact.join(". ")
+
   end
 
 end
