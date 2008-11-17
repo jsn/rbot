@@ -36,7 +36,29 @@ class AzGame
       return "%s -- %s" % self
     end
     if @rules[:list]
-      @check = Proc.new { |w| @rules[:list].include?(w) }
+      @check_method = "is_#{@rules[:addlang]}?"
+      # trick: if addlang was not in rules, this will be is_? which is
+      # not a method of the plugin
+      if @check_method and not @plugin.respond_to? @check_method
+        @check_method = nil
+      end
+      @check = Proc.new do |w|
+        wl = @rules[:list].include?(w)
+        if !wl and @check_method
+          if wl = @plugin.send(@check_method, w)
+            debug "adding #{w} to #{@rules[:addfile]}"
+            begin
+              File.open(@rules[:addfile], "a") do |f|
+                f.puts w
+              end
+            rescue Exception => e
+              error "failed to add #{w} to #{@rules[:addfile]}"
+              error e
+            end
+          end
+        end
+        wl
+      end
     else
       @check_method = "is_#{@lang}?"
       @check = Proc.new { |w| @plugin.send(@check_method, w) }
@@ -129,19 +151,30 @@ class AzGamePlugin < Plugin
     }
 
     @wordlist_base = "#{@bot.botclass}/azgame/wordlist-"
+    @autoadd_base = "#{@bot.botclass}/azgame/autoadd-"
   end
 
-  def initialize_wordlist(lang)
+  def initialize_wordlist(params)
+    lang = params[:lang]
+    addlang = params[:addlang]
     wordlist = @wordlist_base + lang.to_s
+    autoadd = @autoadd_base + addlang.to_s
     if File.exist?(wordlist)
       # wordlists are assumed to be UTF-8, but we need to strip the BOM, if present
-      words = File.readlines(wordlist).map {|line| line.sub("\xef\xbb\xbf",'').strip}.uniq.sort
+      words = File.readlines(wordlist).map {|line| line.sub("\xef\xbb\xbf",'').strip}
+      if addlang and File.exist?(autoadd)
+        word += File.readlines(autoadd).map {|line| line.sub("\xef\xbb\xbf",'').strip}
+      end
+      words.uniq!
+      words.sort!
       if(words.length >= 4) # something to guess
         rules = {
             :good => /^\S+$/,
             :list => words,
             :first => words[0],
             :last => words[-1],
+            :addlang => addlang,
+            :addfile => autoadd,
             :listener => /^\S+$/
         }
         debug "#{lang} wordlist loaded, #{rules[:list].length} lines; first word: #{rules[:first]}, last word: #{rules[:last]}"
@@ -247,7 +280,7 @@ class AzGamePlugin < Plugin
         end
         m.reply _("got it!")
         @games[k] = AzGame.new(self, lang, @rules[lang], word)
-      elsif !@rules.has_key?(lang) and rules = initialize_wordlist(lang)
+      elsif !@rules.has_key?(lang) and rules = initialize_wordlist(params)
         word = random_pick_wordlist(rules)
         if word.empty?
           m.reply _("couldn't think of anything ...")
@@ -584,5 +617,5 @@ plugin = AzGamePlugin.new
 plugin.map 'az [:lang] word :cmd *params', :action=>'wordlist', :defaults => { :lang => nil, :cmd => 'count', :params => [] }, :auth_path => '!az::edit!'
 plugin.map 'az cancel', :action=>'stop_game', :private => false
 plugin.map 'az check :word', :action => 'manual_word_check', :private => false
-plugin.map 'az [play] [:lang]', :action=>'start_game', :private => false, :defaults => { :lang => nil }
+plugin.map 'az [play] [:lang] [autoadd :addlang]', :action=>'start_game', :private => false, :defaults => { :lang => nil, :addlang => nil }
 
