@@ -134,7 +134,8 @@ class AzGamePlugin < Plugin
   def initialize_wordlist(lang)
     wordlist = @wordlist_base + lang.to_s
     if File.exist?(wordlist)
-      words = File.readlines(wordlist).map {|line| line.strip}.uniq
+      # wordlists are assumed to be UTF-8, but we need to strip the BOM, if present
+      words = File.readlines(wordlist).map {|line| line.sub("\xef\xbb\xbf",'').strip}.uniq
       if(words.length >= 4) # something to guess
         rules = {
             :good => /^\S+$/,
