@@ -186,7 +186,7 @@ module Config
       unless newval.include? val
         newval << val
         validate_item(val) or raise ArgumentError, "invalid item: #{val}"
-        validate(newval) or raise ArgumentError, "invalid value: #{newval.to_s}"
+        validate(newval) or raise ArgumentError, "invalid value: #{newval.inspect}"
         set(newval)
       end
     end
