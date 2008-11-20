@@ -21,6 +21,7 @@ class UnicodePlugin < CoreBotModule
     Config.register Config::ArrayValue.new(
     'encoding.charsets', :default => ['utf-8', 'cp1252', 'iso-8859-15'],
     :desc => "Ordered list of iconv(3) charsets the bot should try",
+    :validate_item => Proc.new { |x| !!(Iconv.new('utf-8', x) rescue nil) },
     :on_change => Proc.new { |bot, v| reconfigure_filter(bot) })
 
     class UnicodeFilter
