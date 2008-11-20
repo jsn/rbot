@@ -1092,6 +1092,13 @@ class RSSFeedsPlugin < Plugin
     # reassign the 0.9 RDFs to 1.0, and hope it goes right.
     xml.gsub!("xmlns=\"http://my.netscape.com/rdf/simple/0.9/\"",
               "xmlns=\"http://purl.org/rss/1.0/\"")
+    # make sure the parser doesn't double-convert in case the feed is not UTF-8
+    xml.sub!(/<\?xml (.*?)\?>/) do |match|
+      if /\bencoding=(['"])(.*?)\1/.match(match)
+        match.sub!(/\bencoding=(['"])(?:.*?)\1/,'encoding="UTF-8"')
+      end
+      match
+    end
     feed.mutex.synchronize do
       feed.xml = xml
     end
