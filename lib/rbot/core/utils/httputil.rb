@@ -482,6 +482,14 @@ class HttpUtil
   #
   def get_response(uri_or_s, options = {}, &block) # :yields: resp
     uri = uri_or_s.kind_of?(URI) ? uri_or_s : URI.parse(uri_or_s.to_s)
+    unless URI::HTTP === uri
+      if uri.scheme
+        raise "#{uri.scheme.inspect} URI scheme is not supported"
+      else
+        raise "don't know what to do with #{uri.to_s.inspect}"
+      end
+    end
+
     opts = {
       :max_redir => @bot.config['http.max_redir'],
       :yield => :final,
@@ -547,35 +555,35 @@ class HttpUtil
     debug "prepared request: #{req.to_hash.inspect}"
 
     begin
-    get_proxy(uri, opts).start do |http|
-      http.request(req) do |resp|
-        resp['x-rbot-location'] = uri.to_s
-        if Net::HTTPNotModified === resp
-          debug "not modified"
-          begin
-            cached.revalidate(resp)
-          rescue Exception => e
-            error e
-          end
-          debug "reusing cached"
-          resp = cached.response
-        elsif Net::HTTPServerError === resp || Net::HTTPClientError === resp
-          debug "http error, deleting cached obj" if cached
-          @cache.delete(cache_key)
-        elsif opts[:cache]
-          begin
-            return handle_response(uri, resp, opts, &block)
-          ensure
-            if cached = CachedObject.maybe_new(resp) rescue nil
-              debug "storing to cache"
-              @cache[cache_key] = cached
+      get_proxy(uri, opts).start do |http|
+        http.request(req) do |resp|
+          resp['x-rbot-location'] = uri.to_s
+          if Net::HTTPNotModified === resp
+            debug "not modified"
+            begin
+              cached.revalidate(resp)
+            rescue Exception => e
+              error e
             end
+            debug "reusing cached"
+            resp = cached.response
+          elsif Net::HTTPServerError === resp || Net::HTTPClientError === resp
+            debug "http error, deleting cached obj" if cached
+            @cache.delete(cache_key)
+          elsif opts[:cache]
+            begin
+              return handle_response(uri, resp, opts, &block)
+            ensure
+              if cached = CachedObject.maybe_new(resp) rescue nil
+                debug "storing to cache"
+                @cache[cache_key] = cached
+              end
+            end
+            return ret
           end
-          return ret
+          return handle_response(uri, resp, opts, &block)
         end
-        return handle_response(uri, resp, opts, &block)
       end
-    end
     rescue Exception => e
       error e
       raise e.message
