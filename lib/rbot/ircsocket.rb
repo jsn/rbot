@@ -275,11 +275,7 @@ module Irc
       @spooler = false
       @lines_sent = 0
       @lines_received = 0
-      if opts.kind_of?(Hash) and opts.key?(:ssl)
-        @ssl = opts[:ssl]
-      else
-        @ssl = false
-      end
+      @ssl = opts[:ssl]
     end
 
     def connected?
