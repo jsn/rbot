@@ -395,6 +395,13 @@ class Bot
         bot.set_default_send_options :truncate_text => v.dup
       },
       :desc => "When truncating overlong messages (see send.overlong) or when sending too many lines per message (see send.max_lines) replace the end of the last line with this text")
+    Config.register Config::IntegerValue.new('send.penalty_pct',
+      :default => 100,
+      :validate => Proc.new { |v| v >= 0 },
+      :on_change => Proc.new { |bot, v|
+        bot.socket.penalty_pct = v
+      },
+      :desc => "Percentage of IRC penalty to consider when sending messages to prevent being disconnected for excess flood. Set to 0 to disable penalty control.")
 
     @argv = params[:argv]
     @run_dir = params[:run_dir] || Dir.pwd
@@ -581,7 +588,7 @@ class Bot
         debug "server.list is now #{@config['server.list'].inspect}"
     end
 
-    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], :ssl => @config['server.ssl'])
+    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], :ssl => @config['server.ssl'], :penalty_pct =>@config['send.penalty_pct'])
     @client = Client.new
 
     @plugins.scan

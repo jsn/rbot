@@ -246,6 +246,9 @@ module Irc
     # normalized uri of the current server
     attr_reader :server_uri
 
+    # penalty multiplier (percent)
+    attr_accessor :penalty_pct
+
     # default trivial filter class
     class IdentityFilter
         def in(x)
@@ -276,6 +279,7 @@ module Irc
       @lines_sent = 0
       @lines_received = 0
       @ssl = opts[:ssl]
+      @penalty_pct = opts[:penalty_pct] || 100
     end
 
     def connected?
@@ -433,7 +437,7 @@ module Irc
           @sock.syswrite actual
           @last_send = now
           @flood_send = now if @flood_send < now
-          @flood_send += message.irc_send_penalty if penalty
+          @flood_send += message.irc_send_penalty*@penalty_pct/100.0 if penalty
           @lines_sent += 1
         end
       rescue Exception => e
