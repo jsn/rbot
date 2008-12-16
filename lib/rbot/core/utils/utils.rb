@@ -244,7 +244,7 @@ module ::Irc
     # :date_format, used with <tt>to_formatted_s<tt>, default to :default
     def Utils.timeago(time, options = {})
       start_date = options.delete(:start_date) || Time.new
-      date_format = options.delete(:date_format) || :default
+      date_format = options.delete(:date_format) || "%x"
       delta_minutes = (start_date.to_i - time.to_i).floor / 60
       if delta_minutes.abs <= (8724*60) # eight weeks? I'm lazy to count days for longer than that
         distance = Utils.distance_of_time_in_words(delta_minutes);
@@ -254,7 +254,7 @@ module ::Irc
           _("%{d} ago") % {:d => distance}
         end
       else
-        return _("on %{date}") % {:date => system_date.to_formatted_s(date_format)}
+        return _("on %{date}") % {:date => time.strftime(date_format)}
       end
     end
   # Translates a number of minutes into verbal distances.
