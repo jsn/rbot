@@ -262,6 +262,8 @@ module ::Irc
   #      70 => about one hour
   def Utils.distance_of_time_in_words(minutes)
     case
+      when minutes < 0
+        Utils.distance_of_time_in_words(-minutes)
       when minutes < 1
         _("less than a minute")
       when minutes < 50
