@@ -179,10 +179,12 @@ module ::Irc
     SEC_PER_HR = SEC_PER_MIN * 60
     # Seconds per day
     SEC_PER_DAY = SEC_PER_HR * 24
+    # Seconds per week
+    SEC_PER_WK = SEC_PER_DAY * 7
     # Seconds per (30-day) month
     SEC_PER_MNTH = SEC_PER_DAY * 30
-    # Second per (30*12 = 360 day) year
-    SEC_PER_YR = SEC_PER_MNTH * 12
+    # Second per (non-leap) year
+    SEC_PER_YR = SEC_PER_DAY * 365
 
     # Auxiliary method needed by Utils.secs_to_string
     def Utils.secs_to_string_case(array, var, string, plural)
@@ -245,42 +247,50 @@ module ::Irc
     def Utils.timeago(time, options = {})
       start_date = options.delete(:start_date) || Time.new
       date_format = options.delete(:date_format) || "%x"
-      delta_minutes = (start_date.to_i - time.to_i).floor / 60
-      if delta_minutes.abs <= (8724*60) # eight weeks? I'm lazy to count days for longer than that
-        distance = Utils.distance_of_time_in_words(delta_minutes);
-        if delta_minutes < 0
+      delta = (start_date - time).round
+      if delta.abs < 2
+        _("right now")
+      else
+        distance = Utils.age_string(delta)
+        if delta < 0
           _("%{d} from now") % {:d => distance}
         else
           _("%{d} ago") % {:d => distance}
         end
-      else
-        return _("on %{date}") % {:date => time.strftime(date_format)}
       end
     end
-  # Translates a number of minutes into verbal distances.
-  # e.g. 0.5 => less than a minute
-  #      70 => about one hour
-  def Utils.distance_of_time_in_words(minutes)
-    case
-      when minutes < 0
-        Utils.distance_of_time_in_words(-minutes)
-      when minutes < 1
-        _("less than a minute")
-      when minutes < 50
-        _("%{m} minutes") % {:m => minutes}
-      when minutes < 90
-        _("about one hour")
-      when minutes < 1080
-        _("%{m} hours") % {:m => (minutes / 60).round}
-      when minutes < 1440
-        _("one day")
-      when minutes < 2880
-        _("about one day")
-      else
-        _("%{m} days") % {:m => (minutes / 1440).round}
-    end
-  end
 
+    # Converts age in seconds to "nn units". Inspired by previous attempts
+    # but also gitweb's age_string() sub
+    def Utils.age_string(secs)
+      case
+      when secs < 0
+        Utils.age_string(-secs)
+      when secs > 2*SEC_PER_YR
+        _("%{m} years") % { :m => secs/SEC_PER_YR }
+      when secs > 2*SEC_PER_MNTH
+        _("%{m} months") % { :m => secs/SEC_PER_MNTH }
+      when secs > 2*SEC_PER_WK
+        _("%{m} weeks") % { :m => secs/SEC_PER_WK }
+      when secs > 2*SEC_PER_DAY
+        _("%{m} days") % { :m => secs/SEC_PER_DAY }
+      when secs > 2*SEC_PER_HR
+        _("%{m} hours") % { :m => secs/SEC_PER_HR }
+      when (20*SEC_PER_MIN..40*SEC_PER_MIN).include?(secs)
+        _("half an hour")
+      when (50*SEC_PER_MIN..70*SEC_PER_MIN).include?(secs)
+        # _("about one hour")
+        _("an hour")
+      when (80*SEC_PER_MIN..100*SEC_PER_MIN).include?(secs)
+        _("an hour and a half")
+      when secs > 2*SEC_PER_MIN
+        _("%{m} minutes") % { :m => secs/SEC_PER_MIN }
+      when secs > 1
+        _("%{m} seconds") % { :m => secs }
+      else 
+        _("one second")
+      end
+    end
 
     # Execute an external program, returning a String obtained by redirecting
     # the program's standards errors and output 
