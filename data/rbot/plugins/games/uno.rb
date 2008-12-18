@@ -880,6 +880,7 @@ class UnoPlugin < Plugin
     return unless @games.key?(m.channel)
     return unless m.plugin # skip messages such as: <someuser> botname,
     g = @games[m.channel]
+    replied = true
     case m.plugin.intern
     when :jo # join game
       return if m.params
@@ -945,7 +946,10 @@ class UnoPlugin < Plugin
       else
         g.show_turn(:cards => false)
       end
+    else
+      replied=false
     end
+    m.replied=true if replied
   end
 
   def create_game(m, p)
