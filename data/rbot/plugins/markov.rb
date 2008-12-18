@@ -254,7 +254,7 @@ class MarkovPlugin < Plugin
     lines.each { |l| @learning_queue.push l }
   end
 
-  def message(m)
+  def unreplied(m)
     return if ignore? m
 
     # in channel message, the kind we are interested in
