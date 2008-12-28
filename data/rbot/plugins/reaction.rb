@@ -170,7 +170,7 @@ class ReactionPlugin < Plugin
     super
     if @registry.has_key?(:reactions)
       @reactions = @registry[:reactions]
-      raise unless @reactions
+      raise LoadError, "corrupted reaction database" unless @reactions
     else
       @reactions = []
     end

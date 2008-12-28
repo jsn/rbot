@@ -21,7 +21,7 @@ class ScriptPlugin < Plugin
     super
     if @registry.has_key?(:commands)
       @commands = @registry[:commands]
-      raise unless @commands
+      raise LoadError, "corrupted script database" unless @commands
     else
       @commands = Hash.new
     end

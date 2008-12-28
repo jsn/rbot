@@ -445,7 +445,7 @@ class RSSFeedsPlugin < Plugin
       }
 
       @feeds = @registry[:feeds]
-      raise unless @feeds
+      raise LoadError, "corrupted feed database" unless @feeds
 
       @registry.recovery = nil
 
