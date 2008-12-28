@@ -535,7 +535,7 @@ class RSSFeedsPlugin < Plugin
     when "rewatch"
       "rss rewatch : restart threads that watch for changes in watched rss"
     when "types"
-      "rss types : show the rss types for which an output format existi (all other types will use the default one)"
+      "rss types : show the rss types for which an output format exist (all other types will use the default one)"
     else
       "manage RSS feeds: rss types|show|list|watched|add|change|del(ete)|rm|(force)replace|watch|unwatch|rmwatch|rewatch|who watches"
     end
