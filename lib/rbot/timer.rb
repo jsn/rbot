@@ -248,7 +248,7 @@ class Timer
       @actions.delete k unless a.next
     end
 
-    nxt = @actions.values.map { |v| v.next }.min
+    nxt = @actions.values.find_all { |v| !v.blocked? }.map{ |v| v.next }.min
 
     if nxt
       delta = nxt - now
