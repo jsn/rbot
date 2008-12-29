@@ -233,30 +233,22 @@ class Timer
   end
 
   def run_actions(now = Time.now)
-    nxt = nil
     @actions.keys.each do |k|
       return -1 if @stopping
-      a = @actions[k]
-      next if (!a) or a.blocked?
+      a = @actions[k] or next
+      next if a.blocked? || a.next > now
 
-      if a.next <= now
-        begin
-          @current = k
-          v = a.run(now)
-        ensure
-          @current = nil
-        end
-
-        unless v
-          @actions.delete k
-          next
-        end
-      else
-        v = a.next
+      begin
+        @current = k
+        a.run(now)
+      ensure
+        @current = nil
       end
 
-      nxt = v if v and ((!nxt) or (v < nxt))
+      @actions.delete k unless a.next
     end
+
+    nxt = @actions.values.map { |v| v.next }.min
 
     if nxt
       delta = nxt - now
