@@ -28,7 +28,9 @@ class UrlPlugin < Plugin
     :default => ['localhost', '^192\.168\.', '^10\.', '^127\.', '^172\.(1[6-9]|2\d|31)\.'],
     :on_change => Proc.new { |bot, v| bot.plugins['url'].reset_no_info_hosts },
     :desc => "A list of regular expressions matching hosts for which no info should be provided")
-
+  Config.register Config::ArrayValue.new('url.only_on_channels',
+    :desc => "Show link info only on these channels",
+    :default => [])
 
   def initialize
     super
@@ -121,6 +123,10 @@ class UrlPlugin < Plugin
   end
 
   def handle_urls(m, urls, display_info=@bot.config['url.display_link_info'])
+    unless (channels = @bot.config['url.only_on_channels']).empty?
+      return unless channels.map { |c| c.downcase }.include?(m.channel.downcase)
+    end
+
     return if urls.empty?
     debug "found urls #{urls.inspect}"
     list = m.public? ? @registry[m.target] : nil
