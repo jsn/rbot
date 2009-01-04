@@ -62,6 +62,10 @@ class DeliciousPlugin < Plugin
 
   def event_url_added(url, options = {})
     debug("called with #{url}, #{options.inspect}")
+    if @bot.config['delicious.user'].empty?
+      debug "del.icio.us plugin not configured, skipping"
+      return
+    end
     opts = Hash.new
     opts[:description] = options[:title] || options[:info] || url
     opts[:extended] = options[:extra] if options[:extra]
