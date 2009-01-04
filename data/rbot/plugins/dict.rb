@@ -53,8 +53,8 @@ class DictPlugin < Plugin
 
   def initialize
     super
-    @dmurl = "http://www.demauroparavia.it/"
-    @dmurlrx = %r{http://(?:www\.)?demauroparavia\.it/(\d+)}
+    @dmurl = "http://old.demauroparavia.it/"
+    @dmurlrx = %r{http://(?:www|old\.)?demauroparavia\.it/(\d+)}
     @dmwapurl = "http://wap.demauroparavia.it/index.php?lemma=%s"
     @dmwaplemma = "http://wap.demauroparavia.it/lemma.php?ID=%s"
     @oxurl = "http://www.askoxford.com/concise_oed/%s"
