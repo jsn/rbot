@@ -62,7 +62,14 @@ class TwitterPlugin < Plugin
       uri = "http://twitter.com/statuses/user_timeline/#{user}.xml?count=#{count}"
     else
       count = @bot.config['twitter.friends_status_count']
-      uri = "http://twitter.com/statuses/friends_timeline/#{user}.xml"
+      auth = ""
+      if m.private?
+        auth << URI.escape(@registry[m.sourcenick + "_username"])
+        auth << ":"
+        auth << URI.escape(@registry[m.sourcenick + "_password"])
+        auth << "@"
+      end
+      uri = "http://#{auth}twitter.com/statuses/friends_timeline/#{user}.xml"
     end
 
     response = @bot.httputil.get(uri, :headers => @header, :cache => false)
