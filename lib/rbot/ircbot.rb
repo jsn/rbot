@@ -41,6 +41,9 @@ class Exception
   end
 end
 
+class ServerError < RuntimeError
+end
+
 def rawlog(level, message=nil, who_pos=1)
   call_stack = caller
   if call_stack.length > who_pos
@@ -743,6 +746,9 @@ class Bot
       m.users = data[:users]
       @plugins.delegate "names", m
     }
+    @client[:error] = proc { |data|
+      raise ServerError, data[:message]
+    }
     @client[:unknown] = proc { |data|
       #debug "UNKNOWN: #{data[:serverstring]}"
       m = UnknownMessage.new(self, server, server, nil, data[:serverstring])
@@ -869,6 +875,7 @@ class Bot
   # begin event handling loop
   def mainloop
     while true
+      too_fast = false
       begin
         quit if $interrupted > 0
         connect
@@ -899,6 +906,10 @@ class Bot
       rescue Errno::ETIMEDOUT, Errno::ECONNABORTED, TimeoutError, SocketError => e
         error "network exception: #{e.pretty_inspect}"
         quit_msg = e.to_s
+      rescue ServerError
+        # received an ERROR from the server
+        quit_msg = "server ERROR: " + e.message
+        too_fast = e.message.index("reconnect too fast")
       rescue BDB::Fatal => e
         fatal "fatal bdb error: #{e.pretty_inspect}"
         DBTree.stats
@@ -923,6 +934,7 @@ class Bot
 
       log "\n\nWaiting to reconnect\n\n"
       sleep @config['server.reconnect_wait']
+      sleep 10*@config['server.reconnect_wait'] if too_fast
     end
   end
 
