@@ -8,15 +8,17 @@ class AutoRejoinPlugin < Plugin
   end
 
   def kick(m)
+    password = m.channel.mode[:k].value
+
     if m.address?
       r = rand(10)
       if r > 0
 	@bot.timer.add_once(r) {
-	  @bot.join m.channel
+	  @bot.join m.channel, password
 	  @bot.say(m.channel, @bot.lang.get("insult") % m.sourcenick) if @bot.config['rejoin.insult']
 	}
       else
-	@bot.join m.channel
+	@bot.join m.channel, password
 	@bot.say(m.channel, @bot.lang.get("insult") % m.sourcenick) if @bot.config['rejoin.insult']
       end
     end
