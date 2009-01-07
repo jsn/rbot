@@ -50,6 +50,8 @@ class TwitterPlugin < Plugin
 
     nick = params[:nick] || @registry[m.sourcenick + "_username"]
 
+    friends = params[:friends]
+
     if not nick
       m.reply "you should specify the username of the twitter touse, or identify using 'twitter identify [username] [password]'"
       return false
@@ -58,7 +60,7 @@ class TwitterPlugin < Plugin
     user = URI.escape(nick)
 
     count = @bot.config['twitter.status_count']
-    unless params[:friends]
+    unless friends
       uri = "http://twitter.com/statuses/user_timeline/#{user}.xml?count=#{count}"
     else
       count = @bot.config['twitter.friends_status_count']
@@ -90,24 +92,34 @@ class TwitterPlugin < Plugin
           delta = ((time > now) ? time - now : now - time)
           msg = st.elements['text'].to_s + " (#{Utils.secs_to_string(delta.to_i)} ago via #{st.elements['source'].to_s})"
           author = ""
-          if params[:friends]
+          if friends
             author = Utils.decode_html_entities(st.elements['user'].elements['name'].text) + ": " rescue ""
           end
           texts << author+Utils.decode_html_entities(msg).ircify_html
         }
-        if params[:friends]
+        if friends
           # friends always return the latest 20 updates, so we clip the count
           texts[count..-1]=nil
         end
       rescue
         error $!
-        m.reply "could not parse status for #{nick}"
+        if friends
+          m.reply "could not parse status for #{nick}'s friends"
+        else
+          m.reply "could not parse status for #{nick}"
+        end
         return false
       end
       m.reply texts.reverse.join("\n")
       return true
     else
-      m.reply "could not get status for #{nick}"
+      if friends
+        rep = "could not get status for #{nick}'s friends"
+        rep << ", try asking in private" unless m.private?
+      else
+        rep = "could not get status for #{nick}"
+      end
+      m.reply rep
       return false
     end
   end
