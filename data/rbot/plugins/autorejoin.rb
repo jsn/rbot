@@ -1,3 +1,8 @@
+#-- vim:sw=2:et
+#++
+#
+# :title: Autorejoin
+
 class AutoRejoinPlugin < Plugin
   Config.register Config::BooleanValue.new('rejoin.insult',
     :default => true,
