@@ -1474,6 +1474,9 @@ module Irc
       when :MODE
         parse_mode(serverstring, argv, data)
         handle(:mode, data)
+      when :ERROR
+        data[:message] = argv[1]
+        handle(:error, data)
       else
         warning "Unknown message #{serverstring.inspect}"
         handle(:unknown, data)
