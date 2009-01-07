@@ -10,6 +10,10 @@ class AutoRejoinPlugin < Plugin
   Config.register Config::BooleanValue.new('rejoin.kick',
     :default => false,
     :desc => "Determines if the bot will kick whoever kicked it, after rejoin")
+  Config.register Config::ArrayValue.new('rejoin.no_kick_list',
+    :default => ["owner"],
+    :desc => "List of botusers that can kick the bot without being kicked")
+
 
   def initialize
     super
@@ -24,7 +28,7 @@ class AutoRejoinPlugin < Plugin
     password = m.channel.mode[:k].value
 
     if m.address?
-      if @bot.config['rejoin.kick']
+      if @bot.config['rejoin.kick'] and not @bot.config['rejoin.no_kick_list'].include? m.source.botuser.username
         @should_kick[m.channel.downcase] = m.sourcenick
       end
       r = rand(10)
