@@ -1534,7 +1534,7 @@ module Irc
             data[:modes].last << arg
           end
         }
-      else
+      when Channel
         # array of indices in data[:modes] where parameters
         # are needed
         who_wants_params = []
@@ -1587,6 +1587,10 @@ module Irc
             getting_args = true unless who_wants_params.empty?
           end
         end
+        unless who_wants_params.empty?
+          warning "Unhandled malformed modeline #{data[:modestring]} (unexpected empty arguments)"
+          return
+        end
 
         data[:modes].each { |mode|
           set, key, val = mode
@@ -1596,6 +1600,8 @@ module Irc
             data[:target].mode[key].send(set)
           end
         }
+      else
+        warning "Ignoring #{data[:modestring]} for unrecognized target #{argv[0]} (#{data[:target].inspect})"
       end
     end
   end
