@@ -18,7 +18,7 @@ class RotPlugin < Plugin
   end
 
   def rot13(m, params)
-    m.reply @bot.filter(:rot13, params[:string].to_s)
+    m.reply @bot.filter(:rot13, params[:string].to_s).to_s
   end
 end
 plugin = RotPlugin.new
