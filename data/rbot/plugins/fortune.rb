@@ -7,6 +7,9 @@ class FortunePlugin < Plugin
   Config.register Config::StringValue.new('fortune.path',
     :default => '',
     :desc => "Full path to the fortune executable")
+  Config.register Config::ArrayValue.new('fortune.options',
+    :default => ['-n', '350', '-s'],
+    :desc => "Options to be passed on to fortune")
 
   def help(plugin, topic="")
     "fortune [<category>] => get a (short) fortune, optionally specifying fortune category || fortune categories => show categories"
@@ -44,12 +47,15 @@ class FortunePlugin < Plugin
 
   ## Pick a fortune
   def fortune(m, params)
-    db = params[:db]
     fortune = find_fortune(m)
     m.reply "fortune executable not found (try setting the 'fortune.path' variable)" unless fortune
 
+    command = [fortune] + @bot.config['fortune.options']
+    command << params[:db]
+    command.compact!
+
     begin
-      ret = Utils.safe_exec(fortune, "-n", "350", "-s", db)
+      ret = Utils.safe_exec(*command)
 
       ## cleanup ret
       ret = ret.split(/\n+/).map do |l|
