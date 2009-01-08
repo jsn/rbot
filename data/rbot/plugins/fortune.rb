@@ -12,9 +12,9 @@ class FortunePlugin < Plugin
     "fortune [<category>] => get a (short) fortune, optionally specifying fortune category || fortune categories => show categories"
   end
 
-  def find_fortune
+  def find_fortune(m)
     fortune = @bot.config['fortune.path']
-    return fortune if fortune
+    return fortune if fortune and not fortune.empty?
 
     ["/usr/bin/fortune",
      "/usr/share/bin/fortune",
@@ -45,7 +45,7 @@ class FortunePlugin < Plugin
   ## Pick a fortune
   def fortune(m, params)
     db = params[:db]
-    fortune = find_fortune
+    fortune = find_fortune(m)
     m.reply "fortune executable not found (try setting the 'fortune.path' variable)" unless fortune
 
     begin
@@ -75,7 +75,7 @@ class FortunePlugin < Plugin
 
   # Print the fortune categories
   def categories(m, params)
-    fortune = find_fortune
+    fortune = find_fortune(m)
     m.reply "fortune executable not found (try setting the 'fortune.path' variable)" unless fortune
 
     ## list all fortune databases
