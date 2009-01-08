@@ -160,7 +160,7 @@ class AuthModule < CoreBotModule
   def auth_view_perm(m, params)
     begin
       if params[:user].nil?
-        user = get_botusername_for(m.source)
+        user = get_botuser_for(m.source)
         return m.reply(_("you are owner, you can do anything")) if user.owner?
       else
         user = @bot.auth.get_botuser(params[:user].sub(/^all$/,"everyone"))
