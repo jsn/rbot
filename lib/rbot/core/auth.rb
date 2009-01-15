@@ -411,9 +411,21 @@ class AuthModule < CoreBotModule
     when "hello"
       return _("hello: creates a bot user for the person issuing the command")
     when "allow"
-      return _("allow <user> to do <sample command> [<where>]: gives botuser <user> the permissions to execute a command such as the provided sample command (in private or in channel, according to the optional <where>)")
+      return [
+        _("allow <user> to do <sample command> [<where>]: gives botuser <user> the permissions to execute a command such as the provided sample command"),
+        _("(in private or in channel, according to the optional <where>)."),
+        _("<sample command> should be a full command, not just the command keyword --"),
+        _("correct: allow user to do addquote stuff --"),
+        _("wrong: allow user to do addquote.")
+      ].join(" ")
     when "deny"
-      return _("deny <user> from doing <sample command> [<where>]: removes from botuser <user> the permissions to execute a command such as the provided sample command (in private or in channel, according to the optional <where>)")
+      return [
+        _("deny <user> from doing <sample command> [<where>]: removes from botuser <user> the permissions to execute a command such as the provided sample command"),
+        _("(in private or in channel, according to the optional <where>)."),
+        _("<sample command> should be a full command, not just the command keyword --"),
+        _("correct: deny user from doing addquote stuff --"),
+        _("wrong: deny user from doing addquote.")
+      ].join(" ")
     else
       return _("auth commands: auth, login, whoami, who, permission[s], user, meet, hello, allow, deny")
     end
