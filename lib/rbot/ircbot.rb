@@ -872,14 +872,28 @@ class Bot
     myself.user = @config['irc.user']
   end
 
+  # disconnect the bot from IRC, if connected, and then connect (again)
+  def reconnect(message=nil, too_fast=false)
+    if @socket.connected?
+      disconnect(message)
+
+      log "\n\nDisconnected\n\n"
+
+      quit if $interrupted > 0
+
+      log "\n\nWaiting to reconnect\n\n"
+      sleep @config['server.reconnect_wait']
+      sleep 10*@config['server.reconnect_wait'] if too_fast
+    end
+    connect
+  end
+
   # begin event handling loop
   def mainloop
     while true
       too_fast = false
       begin
         quit if $interrupted > 0
-        connect
-
         quit_msg = nil
         while @socket.connected?
           quit if $interrupted > 0
@@ -925,16 +939,7 @@ class Bot
         log_session_end
         exit 2
       end
-
-      disconnect(quit_msg)
-
-      log "\n\nDisconnected\n\n"
-
-      quit if $interrupted > 0
-
-      log "\n\nWaiting to reconnect\n\n"
-      sleep @config['server.reconnect_wait']
-      sleep 10*@config['server.reconnect_wait'] if too_fast
+      reconnect(quit_msg, too_fast)
     end
   end
 
