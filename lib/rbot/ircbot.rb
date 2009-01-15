@@ -829,7 +829,8 @@ class Bot
   # things to do when we receive a signal
   def got_sig(sig, func=:quit)
     debug "received #{sig}, queueing #{func}"
-    $interrupted += 1
+    # this is not an interruption if we just need to reconnect
+    $interrupted += 1 unless func == :reconnect
     self.send(func) unless @quit_mutex.locked?
     debug "interrupted #{$interrupted} times"
     if $interrupted >= 3
@@ -845,6 +846,7 @@ class Bot
       trap("SIGINT") { got_sig("SIGINT") }
       trap("SIGTERM") { got_sig("SIGTERM") }
       trap("SIGHUP") { got_sig("SIGHUP", :restart) }
+      trap("SIGUSR1") { got_sig("SIGUSR1", :reconnect) }
     rescue ArgumentError => e
       debug "failed to trap signals (#{e.pretty_inspect}): running on Windows?"
     rescue Exception => e
