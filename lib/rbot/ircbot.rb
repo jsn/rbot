@@ -859,6 +859,7 @@ class Bot
     begin
       quit if $interrupted > 0
       @socket.connect
+      @last_rec = Time.now
     rescue => e
       raise e.class, "failed to connect to IRC server at #{@socket.server_uri}: " + e
     end
@@ -876,9 +877,17 @@ class Bot
 
   # disconnect the bot from IRC, if connected, and then connect (again)
   def reconnect(message=nil, too_fast=false)
+    # we will wait only if @last_rec was not nil, i.e. if we were connected or
+    # got disconnected by a network error
+    # if someone wants to manually call disconnect() _and_ reconnect(), they
+    # will have to take care of the waiting themselves
+    will_wait = !!@last_rec
+
     if @socket.connected?
       disconnect(message)
+    end
 
+    if will_wait
       log "\n\nDisconnected\n\n"
 
       quit if $interrupted > 0
@@ -887,6 +896,7 @@ class Bot
       sleep @config['server.reconnect_wait']
       sleep 10*@config['server.reconnect_wait'] if too_fast
     end
+
     connect
   end
 
