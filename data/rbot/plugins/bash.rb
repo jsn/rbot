@@ -67,7 +67,11 @@ class BashPlugin < Plugin
 
   include REXML
   def help(plugin, topic="")
-    "bash => print a random quote from bash.org, bash quote_id => print that quote id from bash.org, bash latest => print the latest quote from bash.org (currently broken, need to get josh@bash.org to fix the xml)"
+    [
+      _("bash => print a random quote from bash.org"),
+      _("bash quote_id => print that quote id from bash.org"),
+      _("bash latest => print the latest quote from bash.org (currently broken, need to get josh@bash.org to fix the xml)")
+    ].join(", ")
   end
 
   def bash_filter(s)
