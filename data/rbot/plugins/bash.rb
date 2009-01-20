@@ -71,7 +71,7 @@ class BashPlugin < Plugin
       _("bash => print a random quote from bash.org"),
       _("bash quote_id => print that quote id from bash.org"),
       _("bash search <terms> => print the first bash.org quote matching <terms>"),
-      _("bash latest => print the latest quote from bash.org (currently broken, need to get josh@bash.org to fix the xml)")
+      _("bash latest => print the latest quote from bash.org")
     ].join(", ")
   end
 
