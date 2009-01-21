@@ -160,7 +160,7 @@ class UrlPlugin < Plugin
 
       if display_info > urls_displayed
         if reply
-          m.reply reply, :overlong => :truncate,
+          m.reply reply, :overlong => :truncate, :to => :public,
             :nick => (m.address? ? :auto : false)
           urls_displayed += 1
         end

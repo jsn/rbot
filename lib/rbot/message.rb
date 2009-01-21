@@ -22,6 +22,10 @@ module Irc
         :default => ':', :wizard => true,
         :desc => "when replying with nick put this character after the nick of the user the bot is replying to"
       )
+      Config.register BooleanValue.new('core.private_replies',
+        :default => false,
+        :desc => 'Should the bot reply to private instead of the channel?'
+      )
     end
   end
 
@@ -404,16 +408,32 @@ module Irc
     #   state if the nick of the user calling the command should be prepended
     #   :auto uses core.reply_with_nick
     #
+    # :to [:private, :public, :auto]
+    #   where should the bot reply?
+    #   :private always reply to the nick
+    #   :public reply to the channel (if available)
+    #   :auto uses core.private_replies
+
     def reply(string, options={})
-      opts = {:nick => :auto}.merge options
+      opts = {:nick => :auto, :to => :auto}.merge options
+
       if opts[:nick] == :auto
         opts[:nick] = @bot.config['core.reply_with_nick']
       end
-      if (opts[:nick] && self.public? &&
+
+      if !self.public?
+        opts[:to] = :private
+      elsif opts[:to] == :auto
+        opts[:to] = @bot.config['core.private_replies'] ? :private : :public
+      end
+
+      if (opts[:nick] &&
+          opts[:to] != :private &&
           string !~ /(?:^|\W)#{Regexp.escape(@source.to_s)}(?:$|\W)/)
         string = "#{@source}#{@bot.config['core.nick_postfix']} #{string}"
       end
-      @bot.say @replyto, string, options
+      to = (opts[:to] == :private) ? source : @channel
+      @bot.say to, string, options
       @replied = true
     end
 

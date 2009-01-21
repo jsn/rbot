@@ -158,7 +158,7 @@ class SalutPlugin < Plugin
       end
     end
     debug "Replying #{choice}"
-    m.reply choice, :nick => false
+    m.reply choice, :nick => false, :to => :public
   end
 
   def reload
