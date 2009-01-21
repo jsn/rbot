@@ -390,26 +390,31 @@ module Irc
     # So if the message is private, it will reply to the user. If it was
     # in a channel, it will reply in the channel.
     def plainreply(string, options={})
-      @bot.say @replyto, string, options
-      @replied = true
+      reply string, {:nick => false}.merge(options)
     end
 
     # Same as reply, but when replying in public it adds the nick of the user
     # the bot is replying to
     def nickreply(string, options={})
-      extra = self.public? ? "#{@source}#{@bot.config['core.nick_postfix']} " : ""
-      @bot.say @replyto, extra + string, options
-      @replied = true
+      reply string, {:nick => true}.merge(options)
     end
 
-    # the default reply style is to nickreply unless the reply already contains
-    # the nick or core.reply_with_nick is set to false
+    # The general way to reply to a command. The following options are available:
+    # :nick [false, true, :auto]
+    #   state if the nick of the user calling the command should be prepended
+    #   :auto uses core.reply_with_nick
     #
     def reply(string, options={})
-      if @bot.config['core.reply_with_nick'] and not string =~ /(?:^|\W)#{Regexp.escape(@source.to_s)}(?:$|\W)/
-        return nickreply(string, options)
+      opts = {:nick => :auto}.merge options
+      if opts[:nick] == :auto
+        opts[:nick] = @bot.config['core.reply_with_nick']
       end
-      plainreply(string, options)
+      if (opts[:nick] && self.public? &&
+          string !~ /(?:^|\W)#{Regexp.escape(@source.to_s)}(?:$|\W)/)
+        string = "#{@source}#{@bot.config['core.nick_postfix']} #{string}"
+      end
+      @bot.say @replyto, string, options
+      @replied = true
     end
 
     # convenience method to reply to a message with an action. It's the
@@ -431,7 +436,7 @@ module Irc
     # convenience method to reply "okay" in the current language to the
     # message
     def plainokay
-      self.plainreply @bot.lang.get("okay")
+      self.reply @bot.lang.get("okay"), :nick => false
     end
 
     # Like the above, but append the username
@@ -442,16 +447,13 @@ module Irc
         str.gsub!(/[!,.]$/,"")
         str += ", #{@source}"
       end
-      self.plainreply str
+      self.reply str, :nick => false
     end
 
     # the default okay style is the same as the default reply style
     #
     def okay
-      if @bot.config['core.reply_with_nick']
-        return nickokay
-      end
-      plainokay
+      @bot.config['core.reply_with_nick'] ? nickokay : plainokay
     end
 
     # send a NOTICE to the message source
