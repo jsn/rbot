@@ -38,6 +38,13 @@ module ::Irc
       Irc::Utils.bot.plugins['userdata'].with_data(self, &block)
     end
 
+    # This method removes the data associated with the key, returning
+    # the value of the deleted key.
+
+    def delete_botdata(*keys)
+      Irc::Utils.bot.plugins['userdata'].delete_data(self, *keys)
+    end
+
   end
 end
 
@@ -136,6 +143,14 @@ class UserDataModule < CoreBotModule
     set_data_hash(user, h)
 
     return h
+  end
+
+  def delete_data(user, *keys)
+    h = get_data_hash(user)
+    debug h
+    rv = keys.map { |k| h.delete k }
+    set_data_hash(user, h)
+    rv.size == 1 ? rv.first : rv
   end
 
   def handle_get(m, params)
