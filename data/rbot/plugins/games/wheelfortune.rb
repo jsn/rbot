@@ -476,9 +476,7 @@ class WheelOfFortune < Plugin
       # m.reply "STUPID! YOU SO STUPID!"
       return
     when *game.must_buy
-      m.nickreply _("You must buy the %{vowel}") % {
-        :vowel => check
-      }
+      m.reply _("You must buy the %{vowel}") % {:vowel => check}, :nick => true
     when :wrong
       return
     when Numeric, :missing

@@ -941,7 +941,7 @@ class UnoPlugin < Plugin
     when :tu # show whose turn is it
       return if m.params
       if g.has_turn?(m.source)
-        m.nickreply _("it's your turn, sleepyhead")
+        m.reply _("it's your turn, sleepyhead"), :nick => true
       else
         g.show_turn(:cards => false)
       end

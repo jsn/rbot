@@ -187,7 +187,7 @@ class MarkovPlugin < Plugin
     # of the line we received
     return if message.index(line) == 0
     @bot.timer.add_once(delay) {
-      m.plainreply line
+      m.reply line, :nick => false
     }
   end
 

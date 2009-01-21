@@ -53,7 +53,7 @@ class DicePlugin < Plugin
     dice = d.split(/d/)
     repr = []
     r = 0
-    unless dice[0] =~ /^[0-9]+/
+    unless dice[0] =~ /^\d+/
       dice[0] = 1
     end
     for i in 0...dice[0].to_i
@@ -86,14 +86,14 @@ class DicePlugin < Plugin
   def privmsg(m)
     # If either not given parameters or given incorrect parameters, return with
     # the help message
-    unless(m.params && m.params =~ /^[0-9]*d[0-9]+(\s*[+-]\s*([0-9]+|[0-9]*d[0-9])+)*$/)
-      m.nickreply "incorrect usage: " + help(m.plugin)
+    unless m.params && m.params =~ /^\d*d\d+(\s*[-]\s*(\d+|\d*d\d)+)*$/
+      m.reply "incorrect usage: " + help(m.plugin)
       return
     end
 
     # Extract the actual dice request from the message parameters, splitting it
     # into dice and modifiers
-    a = m.params.gsub(/\s+/,'').scan(/^[0-9]*d[0-9]+|[+-][0-9]*d[0-9]+|[+-][0-9]+/)
+    a = m.params.gsub(/\s+/,'').scan(/^\d*d\d+|[+-]\d*d\d+|[+-]\d+/)
     # check nr of total dices and sides per dice
     nr = 0
     a.each { |dice|
@@ -123,7 +123,7 @@ class DicePlugin < Plugin
       t = t + tmp.get_view
     end
     t.chop!
-    m.nickreply r.to_s + " || " + m.params + ": " + t
+    m.reply(r.to_s + " || " + m.params + ": " + t)
   end
 end
 plugin = DicePlugin.new

@@ -158,7 +158,7 @@ class SalutPlugin < Plugin
       end
     end
     debug "Replying #{choice}"
-    m.plainreply choice
+    m.reply choice, :nick => false
   end
 
   def reload
