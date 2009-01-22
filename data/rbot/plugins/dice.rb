@@ -100,14 +100,14 @@ class DicePlugin < Plugin
       dc, ds = dice.split(/d/)
       # check sides
       if ds.to_i > @bot.config['dice.max_sides']
-       m.reply "sorry, don't have any dices with more than %u sides" % @bot.config['dice.max_sides']
+       m.reply "sorry, don't have any dices with more than %u sides" % @bot.config['dice.max_sides'], :nick => true
        return
       end
       # We use .max with 1 so that specs such as d6 count as 1 and not as 0
       nr += [dc.to_i, 1].max
     }
     if nr > @bot.config['dice.max_dices']
-      m.reply "can't handle more than %u dices" % @bot.config['dice.max_dices']
+      m.reply "can't handle more than %u dices" % @bot.config['dice.max_dices'], :nick => true
       return
     end
 
@@ -123,7 +123,7 @@ class DicePlugin < Plugin
       t = t + tmp.get_view
     end
     t.chop!
-    m.reply(r.to_s + " || " + m.params + ": " + t)
+    m.reply(r.to_s + " || " + m.params + ": " + t, :nick => true)
   end
 end
 plugin = DicePlugin.new

@@ -10,7 +10,7 @@ class EightBallPlugin < Plugin
   end
   def eightball(m, params)
     answers = @answers[rand(@answers.length)]
-    action = "shakes the magic 8-ball... #{answers}"
+    action = "shakes the magic 8-ball for #{m.source} ... #{answers}"
     @bot.action m.replyto, action
   end
 end
