@@ -1,0 +1,3 @@
+#: data/rbot/plugins/autorejoin.rb:60
+msgid "for kicking me out earlier"
+msgstr ""

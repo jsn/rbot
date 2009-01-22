@@ -1,0 +1,15 @@
+#: data/rbot/plugins/bash.rb:71
+msgid "bash => print a random quote from bash.org"
+msgstr ""
+
+#: data/rbot/plugins/bash.rb:72
+msgid "bash quote_id => print that quote id from bash.org"
+msgstr ""
+
+#: data/rbot/plugins/bash.rb:73
+msgid "bash search <terms> => print the first bash.org quote matching <terms>"
+msgstr ""
+
+#: data/rbot/plugins/bash.rb:74
+msgid "bash latest => print the latest quote from bash.org"
+msgstr ""

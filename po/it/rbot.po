@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-07-30 23:38+0200\n"
+"POT-Creation-Date: 2009-01-22 16:32+0100\n"
 "PO-Revision-Date: 2008-06-26 14:50+0200\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -133,15 +133,15 @@ msgstr "%{count} comandi trovati corrispondenti a %{pattern}%{extra}"
 msgid "%{cmd}: %{perms}"
 msgstr "%{cmd}: %{perms}"
 
-#: lib/rbot/core/auth.rb:267
+#: lib/rbot/core/auth.rb:271
 msgid "%{user} can already do that"
 msgstr "%{user} può già farlo"
 
-#: lib/rbot/core/auth.rb:269
+#: lib/rbot/core/auth.rb:273
 msgid "%{user} can't do that already"
 msgstr "%{user} già non può farlo"
 
-#: lib/rbot/core/auth.rb:279
+#: lib/rbot/core/auth.rb:283
 msgid ""
 "sorry, %{cmd} doesn't look like a valid command. maybe you misspelled it, or "
 "you need to specify it should be in private?"
@@ -149,35 +149,35 @@ msgstr ""
 "spiacente, %{cmd} non sembra un comando valido. forse non è scritto "
 "correttamente, o devi specificare che dev'essere in privato?"
 
-#: lib/rbot/core/auth.rb:302
+#: lib/rbot/core/auth.rb:306
 msgid "welcome, %{user}"
 msgstr "benvenuto, %{user}"
 
-#: lib/rbot/core/auth.rb:317
+#: lib/rbot/core/auth.rb:321
 msgid "sorry, can't do"
 msgstr "spiacente, non si può"
 
-#: lib/rbot/core/auth.rb:320
+#: lib/rbot/core/auth.rb:324
 msgid "couldn't login: %{exception}"
 msgstr "impossibile effettuare il login: %{exception}"
 
-#: lib/rbot/core/auth.rb:328
+#: lib/rbot/core/auth.rb:332
 msgid "I couldn't find anything to let you login automatically"
 msgstr "non ho trovato nulla con cui farti effettuare il login automatico"
 
-#: lib/rbot/core/auth.rb:339
+#: lib/rbot/core/auth.rb:343
 msgid "you are %{who}"
 msgstr "sei %{who}"
 
-#: lib/rbot/core/auth.rb:341 lib/rbot/core/auth.rb:354
+#: lib/rbot/core/auth.rb:345 lib/rbot/core/auth.rb:358
 msgid "no one that I know"
 msgstr "nessuno di mia conoscenza"
 
-#: lib/rbot/core/auth.rb:342 lib/rbot/core/auth.rb:355
+#: lib/rbot/core/auth.rb:346 lib/rbot/core/auth.rb:359
 msgid "my boss"
 msgstr "il mio padrone"
 
-#: lib/rbot/core/auth.rb:362
+#: lib/rbot/core/auth.rb:366
 msgid ""
 "login [<botuser>] [<pass>]: logs in to the bot as botuser <botuser> with "
 "password <pass>. When using the full form, you must contact the bot in "
@@ -191,16 +191,16 @@ msgstr ""
 "mask e la tua netmask è tra quelle conosciute. se anche <botuser> viene "
 "omesso tenterò il login automatico"
 
-#: lib/rbot/core/auth.rb:364
+#: lib/rbot/core/auth.rb:368
 msgid "whoami: names the botuser you're linked to"
 msgstr "whoami: fornisce il nome del botuser a cui sei identificato"
 
-#: lib/rbot/core/auth.rb:366
+#: lib/rbot/core/auth.rb:370
 msgid "who is <user>: names the botuser <user> is linked to"
 msgstr ""
 "who is <utente>: fornisce il nome del botuser a cui è identificato <utente>"
 
-#: lib/rbot/core/auth.rb:370
+#: lib/rbot/core/auth.rb:374
 msgid ""
 "a permission is specified as module::path::to::cmd; when you want to enable "
 "it, prefix it with +; when you want to disable it, prefix it with -; when "
@@ -210,7 +210,7 @@ msgstr ""
 "abilitarlo, premetti un +; per disabilitarlo, premetti un -; per "
 "reimpostarlo (+reset+) non usare alcun prefisso"
 
-#: lib/rbot/core/auth.rb:372
+#: lib/rbot/core/auth.rb:376
 msgid ""
 "permissions [re]set <permission> [in <channel>] for <user>: sets or resets "
 "the permissions for botuser <user> in channel <channel> (use ? to change the "
@@ -220,11 +220,11 @@ msgstr ""
 "reimposta i permessi per il botuser <user> nel canale <channel> (usa ? per "
 "cambiare i permessi delle comunicazioni private)"
 
-#: lib/rbot/core/auth.rb:374
+#: lib/rbot/core/auth.rb:378
 msgid "permissions view [for <user>]: display the permissions for user <user>"
 msgstr "permissions view [for <user>]: mostra i permessi per l'utente <user>"
 
-#: lib/rbot/core/auth.rb:376
+#: lib/rbot/core/auth.rb:380
 msgid ""
 "permissions search <pattern>: display the permissions associated with the "
 "commands matching <pattern>"
@@ -232,11 +232,11 @@ msgstr ""
 "permissions search <pattern>: mostra i permessi associati ai comandi che "
 "corrispondono a <pattern>"
 
-#: lib/rbot/core/auth.rb:378
+#: lib/rbot/core/auth.rb:382
 msgid "permission topics: syntax, (re)set, view, search"
 msgstr "argomenti di permission: syntax, (re)set, view, search"
 
-#: lib/rbot/core/auth.rb:383
+#: lib/rbot/core/auth.rb:387
 msgid ""
 "user show <what> : shows info about the user; <what> can be any of "
 "autologin, login-by-mask, netmasks"
@@ -244,7 +244,7 @@ msgstr ""
 "user show <what>: mostra informazioni sull'utente; <what> può essere "
 "autologin, login-by-mask, netmask"
 
-#: lib/rbot/core/auth.rb:385
+#: lib/rbot/core/auth.rb:389
 msgid ""
 "user enable|disable <what> : turns on or off <what> (autologin, login-by-"
 "mask)"
@@ -252,7 +252,7 @@ msgstr ""
 "user enable|disable <what>: abilita o disabilita <what> per l'utente (<what> "
 "può essere autologin o login-by-mask)"
 
-#: lib/rbot/core/auth.rb:387
+#: lib/rbot/core/auth.rb:391
 msgid ""
 "user set password <blah> : sets the user password to <blah>; passwords can "
 "only contain upper and lowercase letters and numbers, and must be at least 4 "
@@ -262,7 +262,7 @@ msgstr ""
 "essere lunga almeno 4 caratteri e può contenere solo lettere maiuscole e "
 "minuscole, e numeri"
 
-#: lib/rbot/core/auth.rb:389
+#: lib/rbot/core/auth.rb:393
 msgid ""
 "user add|rm netmask <mask> : adds/removes netmask <mask> from the list of "
 "netmasks known to the botuser you're linked to"
@@ -270,7 +270,7 @@ msgstr ""
 "user add|rm netmask <mask>: aggiunge o rimuove la netmask <mask> dalla lista "
 "delle netmask conosciute dal botuser a cui sei identificato"
 
-#: lib/rbot/core/auth.rb:391
+#: lib/rbot/core/auth.rb:395
 msgid ""
 "user reset <what> : resets <what> to the default values. <what> can be "
 "+netmasks+ (the list will be emptied), +autologin+ or +login-by-mask+ (will "
@@ -282,7 +282,7 @@ msgstr ""
 "(verranno reimpostati ai valori predefiniti) o +password+ (una nuova "
 "password verrà generata e ti verrà comunicata in privato)"
 
-#: lib/rbot/core/auth.rb:393
+#: lib/rbot/core/auth.rb:397
 msgid ""
 "user tell <who> the password for <botuser> : contacts <who> in private to "
 "tell him/her the password for <botuser>"
@@ -290,7 +290,7 @@ msgstr ""
 "user tell <who> the password for <botuser>: contatta <who> in privato per "
 "comunicargli la password per <botuser>"
 
-#: lib/rbot/core/auth.rb:395
+#: lib/rbot/core/auth.rb:399
 msgid ""
 "user create <name> <password> : create botuser named <name> with password "
 "<password>. The password can be omitted, in which case a random one will be "
@@ -302,11 +302,11 @@ msgstr ""
 "una casuale. <name> può contenere solo caratteri alfanumerici ed il "
 "carattere di sottolineatura (_)"
 
-#: lib/rbot/core/auth.rb:397
+#: lib/rbot/core/auth.rb:401
 msgid "user list : lists all the botusers"
 msgstr "user list: elenca i botuser"
 
-#: lib/rbot/core/auth.rb:399
+#: lib/rbot/core/auth.rb:403
 msgid ""
 "user destroy <botuser> : destroys <botuser>. This function %{highlight}must%"
 "{highlight} be called in two steps. On the first call <botuser> is queued "
@@ -321,7 +321,7 @@ msgstr ""
 "verrà distrutto. per annullare la distruzione usa il comando 'user cancel "
 "destroy <botuser>'"
 
-#: lib/rbot/core/auth.rb:401
+#: lib/rbot/core/auth.rb:405
 msgid ""
 "user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, "
 "list, destroy"
@@ -329,7 +329,7 @@ msgstr ""
 "argomenti per user: show, enable|disable add|rm, netmask, set, reset, tell, "
 "create, list, destroy"
 
-#: lib/rbot/core/auth.rb:404
+#: lib/rbot/core/auth.rb:408
 msgid ""
 "auth <masterpassword>: log in as the bot owner; other commands: login, "
 "whoami, permissions syntax, permissions [re]set, permissions view, user, "
@@ -339,7 +339,7 @@ msgstr ""
 "login, whoami, permission syntax, permissions [re]set, permissions view, "
 "user, meet, hello, allow, prevent"
 
-#: lib/rbot/core/auth.rb:406
+#: lib/rbot/core/auth.rb:410
 msgid ""
 "meet <nick> [as <user>]: creates a bot user for nick, calling it user "
 "(defaults to the nick itself)"
@@ -347,31 +347,57 @@ msgstr ""
 "meet <nick> [as <user>]: crea un bot user per il dato nick, chiamandolo user "
 "(predefinito: il nick stesso)"
 
-#: lib/rbot/core/auth.rb:408
+#: lib/rbot/core/auth.rb:412
 msgid "hello: creates a bot user for the person issuing the command"
 msgstr "hello: crea un botuser per la persona che esegue il comando"
 
-#: lib/rbot/core/auth.rb:410
+#: lib/rbot/core/auth.rb:415
+#, fuzzy
 msgid ""
 "allow <user> to do <sample command> [<where>]: gives botuser <user> the "
-"permissions to execute a command such as the provided sample command (in "
-"private or in channel, according to the optional <where>)"
+"permissions to execute a command such as the provided sample command"
 msgstr ""
 "abilita <utente> ad eseguire <comando d'esempio> [<dove>]: da' all'utente "
 "del bot <utente> i permessi per eseguire un comando come quello fornito come "
 "esempio (in privato o nel canale, a seconda dell'opzione <dove>)"
 
-#: lib/rbot/core/auth.rb:412
+#: lib/rbot/core/auth.rb:416 lib/rbot/core/auth.rb:424
+msgid "(in private or in channel, according to the optional <where>)."
+msgstr ""
+
+#: lib/rbot/core/auth.rb:417 lib/rbot/core/auth.rb:425
+msgid ""
+"<sample command> should be a full command, not just the command keyword --"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:418
+msgid "correct: allow user to do addquote stuff --"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:419
+msgid "wrong: allow user to do addquote."
+msgstr ""
+
+#: lib/rbot/core/auth.rb:423
+#, fuzzy
 msgid ""
 "deny <user> from doing <sample command> [<where>]: removes from botuser "
 "<user> the permissions to execute a command such as the provided sample "
-"command (in private or in channel, according to the optional <where>)"
+"command"
 msgstr ""
 "impedisce all'<utente> di esguir <comando d'esempio> [<dove>]: toglie "
 "all'utente del bot <botuser>i permessi er eseguire un comando come quello "
 "fornito come esempio (in privato o nel canale, a seconda dell'opzione <dove>)"
 
-#: lib/rbot/core/auth.rb:414
+#: lib/rbot/core/auth.rb:426
+msgid "correct: deny user from doing addquote stuff --"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:427
+msgid "wrong: deny user from doing addquote."
+msgstr ""
+
+#: lib/rbot/core/auth.rb:430
 msgid ""
 "auth commands: auth, login, whoami, who, permission[s], user, meet, hello, "
 "allow, deny"
@@ -379,102 +405,102 @@ msgstr ""
 "comandi auth: auth, login, whoami, permission[s], user, neet, hello, allow, "
 "deny"
 
-#: lib/rbot/core/auth.rb:419
+#: lib/rbot/core/auth.rb:435
 msgid "sorry, I need more arguments to %{command}"
 msgstr "scusa, ma mi servono più argomenti per %{command}"
 
-#: lib/rbot/core/auth.rb:423
+#: lib/rbot/core/auth.rb:439
 msgid "I can only %{command} these: %{arguments}"
 msgstr "posso usare %{command} solo su: %{arguments}"
 
-#: lib/rbot/core/auth.rb:458
+#: lib/rbot/core/auth.rb:474
 msgid "no such bot user %{user}"
 msgstr "nessun botuser %{user}"
 
-#: lib/rbot/core/auth.rb:461
+#: lib/rbot/core/auth.rb:477
 msgid "you can't mess with %{user}"
 msgstr "non puoi alterare %{user}"
 
-#: lib/rbot/core/auth.rb:473
+#: lib/rbot/core/auth.rb:489
 msgid "you can't see the properties of %{user}"
 msgstr "non puoi vedere le proprietà di %{user}"
 
-#: lib/rbot/core/auth.rb:482
+#: lib/rbot/core/auth.rb:498
 msgid "no way I'm telling you the master password!"
 msgstr "non esiste proprio che io ti dica la password del padrone!"
 
-#: lib/rbot/core/auth.rb:483
+#: lib/rbot/core/auth.rb:499
 msgid "you can't ask for someone else's password"
 msgstr "non puoi chiedere la password di qualcun altro"
 
-#: lib/rbot/core/auth.rb:485
+#: lib/rbot/core/auth.rb:501
 msgid ""
 "c'mon, you can't be asking me seriously to tell you the password in public!"
 msgstr ""
 "non mi stai chiedendo veramente di dirti la passord in pubblico, spero!"
 
-#: lib/rbot/core/auth.rb:486
+#: lib/rbot/core/auth.rb:502
 msgid "the password for %{user} is %{password}"
 msgstr "la password per %{user} è %{password}"
 
-#: lib/rbot/core/auth.rb:500
+#: lib/rbot/core/auth.rb:516
 msgid "can %{action}"
 msgstr "può fare %{action}"
 
-#: lib/rbot/core/auth.rb:502
+#: lib/rbot/core/auth.rb:518
 msgid "can not %{action}"
 msgstr "non può fare %{action}"
 
-#: lib/rbot/core/auth.rb:506
+#: lib/rbot/core/auth.rb:522
 msgid "knows no netmasks"
 msgstr "non conosce netmask"
 
-#: lib/rbot/core/auth.rb:508
+#: lib/rbot/core/auth.rb:524
 msgid "knows %{netmasks}"
 msgstr "conosce %{netmasks}"
 
-#: lib/rbot/core/auth.rb:515 lib/rbot/core/auth.rb:542
-#: lib/rbot/core/auth.rb:560 lib/rbot/core/auth.rb:592
+#: lib/rbot/core/auth.rb:531 lib/rbot/core/auth.rb:558
+#: lib/rbot/core/auth.rb:576 lib/rbot/core/auth.rb:608
 msgid "you can't change the default user"
 msgstr "non puoi cambiare l'utente predefinito"
 
-#: lib/rbot/core/auth.rb:516 lib/rbot/core/auth.rb:544
-#: lib/rbot/core/auth.rb:562 lib/rbot/core/auth.rb:594
+#: lib/rbot/core/auth.rb:532 lib/rbot/core/auth.rb:560
+#: lib/rbot/core/auth.rb:578 lib/rbot/core/auth.rb:610
 msgid "you can't edit %{user}"
 msgstr "non puoi modificare %{user}"
 
-#: lib/rbot/core/auth.rb:531 lib/rbot/core/auth.rb:578
+#: lib/rbot/core/auth.rb:547 lib/rbot/core/auth.rb:594
 msgid "I ignored %{things} because %{reason}"
 msgstr "ho ignorato %{things} perché %{reason}"
 
-#: lib/rbot/core/auth.rb:535 lib/rbot/core/auth.rb:582
+#: lib/rbot/core/auth.rb:551 lib/rbot/core/auth.rb:598
 msgid "I haven't changed anything"
 msgstr "non ho cambiato nulla"
 
-#: lib/rbot/core/auth.rb:553
+#: lib/rbot/core/auth.rb:569
 msgid "is that a joke? setting the password in public?"
 msgstr "scherzi? cambiare la password in pubblico?"
 
-#: lib/rbot/core/auth.rb:585
+#: lib/rbot/core/auth.rb:601
 msgid "the password for %{user} is now %{password}"
 msgstr "la password per %{user} è ora %{password}"
 
-#: lib/rbot/core/auth.rb:599
+#: lib/rbot/core/auth.rb:615
 msgid ""
 "I can only add/remove netmasks. See +help user add+ for more instructions"
 msgstr ""
 "Posso aggiungere e rimuovere solo le netmask. Vedi anche +help user add+ per "
 "ulteriori istruzioni"
 
-#: lib/rbot/core/auth.rb:620
+#: lib/rbot/core/auth.rb:636
 msgid "sorry, I don't know how to %{request}"
 msgstr "spiacente non so come fare %{request}"
 
-#: lib/rbot/core/auth.rb:623
+#: lib/rbot/core/auth.rb:639
 msgid "couldn't %{cmd}: %{exception}"
 msgstr "impossibile effettuare il login: %{exception}"
 
-#: lib/rbot/core/auth.rb:652
+#: lib/rbot/core/auth.rb:668
 msgid ""
 "you are now registered as %{buname}. I created a random password for you : %"
 "{pass} and you can change it at any time by telling me 'user set password "
@@ -484,73 +510,73 @@ msgstr ""
 "te : %{pass} ma puoi cambiarla in qualsiasi momento scrivendomi 'user set "
 "password <password>' in privato "
 
-#: lib/rbot/core/auth.rb:659
+#: lib/rbot/core/auth.rb:675
 msgid "but I already know %{buname}"
 msgstr "ma io conosco già %{buname}"
 
-#: lib/rbot/core/auth.rb:661
+#: lib/rbot/core/auth.rb:677
 msgid "I had problems meeting %{nick}: %{e}"
 msgstr "ho problemi a incontrare %{nick}: %{e}"
 
-#: lib/rbot/core/auth.rb:670
+#: lib/rbot/core/auth.rb:686
 msgid "couldn't find botuser %{user}"
 msgstr "non conosco alcun botuser %{user}"
 
-#: lib/rbot/core/auth.rb:672
+#: lib/rbot/core/auth.rb:688
 msgid "I'm not telling the master password to anyone, pal"
 msgstr "la password del padrone non la dico a nessuno, compare"
 
-#: lib/rbot/core/auth.rb:673
+#: lib/rbot/core/auth.rb:689
 msgid "the password for botuser %{user} is %{password}"
 msgstr "la password per %{user} è %{password}"
 
-#: lib/rbot/core/auth.rb:676
+#: lib/rbot/core/auth.rb:692
 msgid "I told %{user} that %{message}"
 msgstr "ho detto a %{user} che %{message}"
 
-#: lib/rbot/core/auth.rb:682
+#: lib/rbot/core/auth.rb:698
 msgid "are you nuts, creating a botuser with a publicly known password?"
 msgstr "sei scemo, a creare botuser con una password in pubblico?"
 
-#: lib/rbot/core/auth.rb:687
+#: lib/rbot/core/auth.rb:703
 msgid "failed to create %{user}: %{exception}"
 msgstr "impossibile creare %{user}: %{exception}"
 
-#: lib/rbot/core/auth.rb:691
+#: lib/rbot/core/auth.rb:707
 msgid "created botuser %{user}"
 msgstr "botuser creato %{user}"
 
-#: lib/rbot/core/auth.rb:699
+#: lib/rbot/core/auth.rb:715
 msgid " (queued for destruction)"
 msgstr "(in coda per la distruzione)"
 
-#: lib/rbot/core/auth.rb:702
+#: lib/rbot/core/auth.rb:718
 msgid "I have no botusers other than the default ones"
 msgstr "non ho botuser se non i predefiniti"
 
-#: lib/rbot/core/auth.rb:703
+#: lib/rbot/core/auth.rb:719
 msgid "botuser: %{list}"
 msgid_plural "botusers: %{list}"
 msgstr[0] "botuser: %{list}"
 msgstr[1] "botuser: %{list}"
 
-#: lib/rbot/core/auth.rb:710
+#: lib/rbot/core/auth.rb:726
 msgid "You can't destroy %{user}"
 msgstr "non puoi distruggere %{user}"
 
-#: lib/rbot/core/auth.rb:720
+#: lib/rbot/core/auth.rb:736
 msgid "no such botuser %{user}"
 msgstr "nessun botuser %{user}"
 
-#: lib/rbot/core/auth.rb:727
+#: lib/rbot/core/auth.rb:743
 msgid "%{user} removed from the destruction queue"
 msgstr "%{user} rimosso dalla coda per la distruzione"
 
-#: lib/rbot/core/auth.rb:729
+#: lib/rbot/core/auth.rb:745
 msgid "%{user} was not queued for destruction"
 msgstr "%{user} non era in coda per la distruzione"
 
-#: lib/rbot/core/auth.rb:734
+#: lib/rbot/core/auth.rb:750
 msgid ""
 "%{user} already queued for destruction, use %{highlight}user confirm destroy "
 "%{user}%{highlight} to destroy it"
@@ -558,7 +584,7 @@ msgstr ""
 "%{user} era già in coda per la distruzione, usa %{highlight}user destroy %"
 "{user} <password>%{highlight} per distruggerlo"
 
-#: lib/rbot/core/auth.rb:737
+#: lib/rbot/core/auth.rb:753
 msgid ""
 "%{user} queued for destruction, use %{highlight}user confirm destroy %{user}%"
 "{highlight} to destroy it"
@@ -566,101 +592,101 @@ msgstr ""
 "%{user} messo in coda per la distruzione, usa %{highlight}user destroy %"
 "{user} <password>%{highlight} per distruggerlo"
 
-#: lib/rbot/core/auth.rb:741
+#: lib/rbot/core/auth.rb:757
 msgid "%{user} is not queued for destruction yet"
 msgstr "%{user} non è ancora in coda per la distruzione"
 
-#: lib/rbot/core/auth.rb:750 lib/rbot/core/auth.rb:790
+#: lib/rbot/core/auth.rb:766 lib/rbot/core/auth.rb:806
 msgid "failed: %{exception}"
 msgstr "fallito: %{exception}"
 
-#: lib/rbot/core/auth.rb:752
+#: lib/rbot/core/auth.rb:768
 msgid "botuser %{user} destroyed"
 msgstr "botuser %{user} distrutto"
 
-#: lib/rbot/core/auth.rb:759
+#: lib/rbot/core/auth.rb:775
 msgid "please don't touch the default users"
 msgstr "per favore non toccare gli utenti predefiniti"
 
-#: lib/rbot/core/auth.rb:768
+#: lib/rbot/core/auth.rb:784
 msgid "no such botuser %{source}"
 msgstr "nessun botuser %{source}"
 
-#: lib/rbot/core/auth.rb:770
+#: lib/rbot/core/auth.rb:786
 msgid "botuser %{dest} exists already"
 msgstr "il botuser %{dest} esiste già"
 
-#: lib/rbot/core/auth.rb:793
+#: lib/rbot/core/auth.rb:809
 msgid "botuser %{source} copied to %{dest}"
 msgstr "botuser %{source} copiato in %{dest}"
 
-#: lib/rbot/core/auth.rb:796
+#: lib/rbot/core/auth.rb:812
 msgid "botuser %{source} renamed to %{dest}"
 msgstr "botuser %{source} rinominato %{dest}"
 
-#: lib/rbot/core/auth.rb:816
+#: lib/rbot/core/auth.rb:832
 msgid "selecting data to export ..."
 msgstr "sto selezionando i dati da esportare ..."
 
-#: lib/rbot/core/auth.rb:832
+#: lib/rbot/core/auth.rb:848
 msgid "preparing data for export ..."
 msgstr "preparo i dati da esportare ..."
 
-#: lib/rbot/core/auth.rb:855
+#: lib/rbot/core/auth.rb:871
 msgid "failed to prepare data: %{exception}"
 msgstr "impossibile preparare i dati: %{exception}"
 
-#: lib/rbot/core/auth.rb:860
+#: lib/rbot/core/auth.rb:876
 msgid "exporting to %{file} ..."
 msgstr "esporto su %{file} ..."
 
-#: lib/rbot/core/auth.rb:867
+#: lib/rbot/core/auth.rb:883
 msgid "failed to export users: %{exception}"
 msgstr "impossibile esportare gli utenti: %{exception}"
 
-#: lib/rbot/core/auth.rb:871 lib/rbot/core/auth.rb:949
+#: lib/rbot/core/auth.rb:887 lib/rbot/core/auth.rb:965
 msgid "done"
 msgstr "fatto"
 
-#: lib/rbot/core/auth.rb:888
+#: lib/rbot/core/auth.rb:904
 msgid "reading %{file} ..."
 msgstr "leggo %{file} ..."
 
-#: lib/rbot/core/auth.rb:892
+#: lib/rbot/core/auth.rb:908
 msgid "failed to import from: %{exception}"
 msgstr "impossibile importare: %{exception}"
 
-#: lib/rbot/core/auth.rb:899
+#: lib/rbot/core/auth.rb:915
 msgid "selecting data to import ..."
 msgstr "seleziono i dati da importare ..."
 
-#: lib/rbot/core/auth.rb:909
+#: lib/rbot/core/auth.rb:925
 msgid "parsing data from import ..."
 msgstr "elaboro i dati da importare ..."
 
-#: lib/rbot/core/auth.rb:929
+#: lib/rbot/core/auth.rb:945
 msgid "failed to parse data: %{exception}"
 msgstr "impossibile elaborare i dati: %{exception}"
 
-#: lib/rbot/core/basics.rb:107
+#: lib/rbot/core/basics.rb:133
 msgid "quit [<message>] => quit IRC with message <message>"
 msgstr "quit [<messaggio>] => esce da IRC con il messaggio <messaggio>"
 
-#: lib/rbot/core/basics.rb:109
+#: lib/rbot/core/basics.rb:135
 msgid "restart => completely stop and restart the bot (including reconnect)"
 msgstr ""
 "restart => ferma il bot completamente e lo riavvia (facendolo anche "
 "ricollegare)"
 
-#: lib/rbot/core/basics.rb:113
+#: lib/rbot/core/basics.rb:139
 msgid "part"
 msgstr "esci"
 
-#: lib/rbot/core/basics.rb:115
+#: lib/rbot/core/basics.rb:141
 msgid "hide => part all channels"
 msgstr "hide => lascia tutti i canali"
 
-#: lib/rbot/core/basics.rb:117
+#: lib/rbot/core/basics.rb:143
 msgid ""
 "say <channel>|<nick> <message> => say <message> to <channel> or in private "
 "message to <nick>"
@@ -668,7 +694,7 @@ msgstr ""
 "say <canale>|<nick> <messaggio> => invia <messaggio> nel <canale> o in "
 "unmessagio privato a <nick>"
 
-#: lib/rbot/core/basics.rb:119
+#: lib/rbot/core/basics.rb:145
 msgid ""
 "action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
 "private message to <nick>"
@@ -676,7 +702,7 @@ msgstr ""
 "action <canale>|<nick> <messaggio> => invia un /me <messaggio> nel <canale> "
 "o inmessaggi privato a <nick>"
 
-#: lib/rbot/core/basics.rb:121
+#: lib/rbot/core/basics.rb:147
 msgid ""
 "quiet [in here|<channel>] => with no arguments, stop speaking in all "
 "channels, if \"in here\", stop speaking in this channel, or stop speaking in "
@@ -686,7 +712,7 @@ msgstr ""
 "canali, se si specifica \"in here\", smette di parlare in questo canale, "
 "oppure smette di parlare in <canale>"
 
-#: lib/rbot/core/basics.rb:123
+#: lib/rbot/core/basics.rb:149
 msgid ""
 "talk [in here|<channel>] => with no arguments, resume speaking in all "
 "channels, if \"in here\", resume speaking in this channel, or resume "
@@ -696,11 +722,11 @@ msgstr ""
 "canali, se \"in here\", ricomincia a parlare in questo canale, oppure "
 "ricomincia a parlare in <canale>"
 
-#: lib/rbot/core/basics.rb:125
+#: lib/rbot/core/basics.rb:151
 msgid "ping => replies with a pong"
 msgstr "ping => risponde con un pong"
 
-#: lib/rbot/core/basics.rb:127
+#: lib/rbot/core/basics.rb:153
 msgid ""
 "mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
 "to <mode>"
@@ -708,7 +734,7 @@ msgstr ""
 "mode <canale> <mode> <nicks> => imposta i modi del canale per <nicks> nel "
 "<canale> "
 
-#: lib/rbot/core/basics.rb:133
+#: lib/rbot/core/basics.rb:159
 msgid ""
 "%{name}: quit, restart, join, part, hide, save, say, action, topic, quiet, "
 "talk, ping, mode"
@@ -889,119 +915,142 @@ msgstr "nessun filtro corrispondente a %{pat}"
 msgid "filters matching %{pat}: "
 msgstr "filtri corrispondenti a %{pat}: "
 
-#: lib/rbot/core/userdata.rb:146
+#: lib/rbot/core/userdata.rb:161
 msgid "%{key} data for %{user}: %{data}"
 msgstr "dati %{key} per %{user}: %{data}"
 
-#: lib/rbot/core/userdata.rb:152
+#: lib/rbot/core/userdata.rb:167
 msgid "sorry, no %{key} data for %{user}"
 msgstr "spiacente, nessun dato %{key} per %{user} "
 
-#: lib/rbot/core/utils/utils.rb:202
+#: lib/rbot/core/utils/utils.rb:204
 msgid "year"
 msgstr "anno"
 
-#: lib/rbot/core/utils/utils.rb:202
+#: lib/rbot/core/utils/utils.rb:204
 msgid "years"
 msgstr "anni"
 
-#: lib/rbot/core/utils/utils.rb:204
+#: lib/rbot/core/utils/utils.rb:206
 msgid "month"
 msgstr "mese"
 
-#: lib/rbot/core/utils/utils.rb:204
+#: lib/rbot/core/utils/utils.rb:206
 msgid "months"
 msgstr "mesi"
 
-#: lib/rbot/core/utils/utils.rb:206
+#: lib/rbot/core/utils/utils.rb:208
 msgid "day"
 msgstr "giorno"
 
-#: lib/rbot/core/utils/utils.rb:206
+#: lib/rbot/core/utils/utils.rb:208
 msgid "days"
 msgstr "giorni"
 
-#: lib/rbot/core/utils/utils.rb:208
+#: lib/rbot/core/utils/utils.rb:210
 msgid "hour"
 msgstr "ora"
 
-#: lib/rbot/core/utils/utils.rb:208
+#: lib/rbot/core/utils/utils.rb:210
 msgid "hours"
 msgstr "ore"
 
-#: lib/rbot/core/utils/utils.rb:210
+#: lib/rbot/core/utils/utils.rb:212
 msgid "minute"
 msgstr "minuto"
 
-#: lib/rbot/core/utils/utils.rb:210
+#: lib/rbot/core/utils/utils.rb:212
 msgid "minutes"
 msgstr "minuti"
 
-#: lib/rbot/core/utils/utils.rb:212
+#: lib/rbot/core/utils/utils.rb:214
 msgid "second"
 msgstr "secondo"
 
-#: lib/rbot/core/utils/utils.rb:212
+#: lib/rbot/core/utils/utils.rb:214
 msgid "seconds"
 msgstr "secondi"
 
-#: lib/rbot/core/utils/utils.rb:219
+#: lib/rbot/core/utils/utils.rb:221
 msgid " and "
 msgstr " e "
 
 #: lib/rbot/core/utils/utils.rb:252
+msgid "right now"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:256
 msgid "%{d} from now"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:254
+#: lib/rbot/core/utils/utils.rb:258
 msgid "%{d} ago"
 msgstr "%{d} fa"
 
-#: lib/rbot/core/utils/utils.rb:257
-msgid "on %{date}"
-msgstr "il %{action}"
-
-#: lib/rbot/core/utils/utils.rb:266
-msgid "less than a minute"
-msgstr "meno di un minuto"
-
-#: lib/rbot/core/utils/utils.rb:268
-msgid "%{m} minutes"
-msgstr "%{m} minuti"
-
 #: lib/rbot/core/utils/utils.rb:270
-msgid "about one hour"
-msgstr "circa un'ora"
+#, fuzzy
+msgid "%{m} years"
+msgstr "%{m} giorni"
 
 #: lib/rbot/core/utils/utils.rb:272
-msgid "%{m} hours"
-msgstr "%{m} ore"
+#, fuzzy
+msgid "%{m} months"
+msgstr "%{m} minuti"
 
 #: lib/rbot/core/utils/utils.rb:274
-msgid "one day"
-msgstr "un giorno"
+#, fuzzy
+msgid "%{m} weeks"
+msgstr "%{m} minuti"
 
 #: lib/rbot/core/utils/utils.rb:276
-msgid "about one day"
-msgstr "circa un giorno"
-
-#: lib/rbot/core/utils/utils.rb:278
 msgid "%{m} days"
 msgstr "%{m} giorni"
 
-#: lib/rbot/ircbot.rb:1233
+#: lib/rbot/core/utils/utils.rb:278
+msgid "%{m} hours"
+msgstr "%{m} ore"
+
+#: lib/rbot/core/utils/utils.rb:280
+#, fuzzy
+msgid "half an hour"
+msgstr "circa un'ora"
+
+#: lib/rbot/core/utils/utils.rb:283
+#, fuzzy
+msgid "an hour"
+msgstr "ora"
+
+#: lib/rbot/core/utils/utils.rb:285
+msgid "an hour and a half"
+msgstr ""
+
+#: lib/rbot/core/utils/utils.rb:287
+msgid "%{m} minutes"
+msgstr "%{m} minuti"
+
+#: lib/rbot/core/utils/utils.rb:289
+#, fuzzy
+msgid "%{m} seconds"
+msgstr "secondi"
+
+#: lib/rbot/core/utils/utils.rb:291
+#, fuzzy
+msgid "one second"
+msgstr "secondo"
+
+#: lib/rbot/ircbot.rb:1271
 msgid "help topics: "
 msgstr "argomenti: "
 
-#: lib/rbot/ircbot.rb:1235
+#: lib/rbot/ircbot.rb:1273
 msgid " (help <topic> for more info)"
 msgstr " (help <argomento> per ulteriori informazioni)"
 
-#: lib/rbot/ircbot.rb:1238
+#: lib/rbot/ircbot.rb:1276
 msgid "no help for topic %{topic}"
 msgstr "nessun aiuto disponibile su %{topic}"
 
-#: lib/rbot/ircbot.rb:1249
+#: lib/rbot/ircbot.rb:1287
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
@@ -1125,3 +1174,15 @@ msgstr "recupero dati marshal fallito, tento di usare il valore predefinito"
 
 #~ msgid "nick <nick> => attempt to change nick to <nick>"
 #~ msgstr "nick <nick> => cerca di cambiare il nick in <nick>"
+
+#~ msgid "about one day"
+#~ msgstr "circa un giorno"
+
+#~ msgid "one day"
+#~ msgstr "un giorno"
+
+#~ msgid "less than a minute"
+#~ msgstr "meno di un minuto"
+
+#~ msgid "on %{date}"
+#~ msgstr "il %{action}"
