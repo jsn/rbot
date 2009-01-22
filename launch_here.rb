@@ -22,10 +22,12 @@ begin
         branch = $1.dup || "unknown"
         changed = git_out.match(/^# Change(.*)\n/)
         rev = "revision "
-        git_out = `git log -1 --pretty=format:"%h%n%b%n%ct"`.split("\n")
+        git_out = `git log -1 --pretty=format:"%h%n%s%n%ct"`.split("\n")
         rev << git_out.first
+        subject = git_out[1].strip
+        subject[77,subject.length] = "..." if subject.length > 80
+        rev << " [#{subject}]" unless subject.empty?
         $version_timestamp = git_out.last.to_i
-        rev << "(svn #{$1})" if git_out[1].match(/^git-svn-id: \S+@(\d+)/)
         rev << ", local changes" if changed
       else # older gits
         git_out = `git branch`
