@@ -287,7 +287,7 @@ class RSSFeedsPlugin < Plugin
 
 
   # We used to save the Mutex with the RssBlob, which was idiotic. And
-  # since Mutexes dumped in one version might not be resotrable in another,
+  # since Mutexes dumped in one version might not be restorable in another,
   # we need a few tricks to be able to restore data from other versions of Ruby
   #
   # When migrating 1.8.6 => 1.8.5, all we need to do is define an empty
@@ -338,7 +338,7 @@ class RSSFeedsPlugin < Plugin
       make_stream(line1, line2, s)
     }
     @bot.register_filter(:git, @outkey) { |s|
-      author = s[:author] ? (s[:author] + " ") : ""
+      author = s[:author].sub(/@\S+?\s*>/, "@...>") + " " if s[:author]
       line1 = "%{handle}%{date}%{author}committed %{title}%{at}%{link}"
       make_stream(line1, nil, s, :author => author)
     }
