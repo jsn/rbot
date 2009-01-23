@@ -16,31 +16,29 @@ begin
 
   if File.exists? '.git'
     begin
-      git_out = `git status`
-      git_out.match(/^# On branch (.*)\n/)
-      if $1 # git 1.5.x
-        branch = $1.dup || "unknown"
-        changed = git_out.match(/^# Change(.*)\n/)
-        rev = "revision "
-        git_out = `git log -1 --pretty=format:"%h%n%s%n%ct"`.split("\n")
-        rev << git_out.first
-        subject = git_out[1].strip
-        subject[77,subject.length] = "..." if subject.length > 80
-        rev << " [#{subject}]" unless subject.empty?
-        $version_timestamp = git_out.last.to_i
-        rev << ", local changes" if changed
-      else # older gits
-        git_out = `git branch`
-        git_out.match(/^\* (.*)\n/)
-        branch = $1.dup rescue "unknown"
-        rev = "revision " + `git rev-parse HEAD`[0,6]
+      git_out = `git log -1 --pretty=format:"%H%n%s%n%ct" | git name-rev --stdin`.split("\n")
+      $version_timestamp = git_out.last.to_i
+      subject = git_out[1].strip
+      subject[77..-1] = "..." if subject.length > 80
+      commit, branch_spec = git_out.first.scan(/^(\S+)(?: \((\S+)\))?$/).first
+      rev = "revision #{commit[0,7]}"
+      rev << " [#{subject}]" unless subject.empty?
+      changes = `git diff --shortstat HEAD`.split(", ").first
+      rev << ", #{changes.strip}" if changes
+      if branch_spec
+        tag, branch, offset = branch_spec.scan(/^(?:(tag)s\/)?(\S+?)(?:^0)?(?:~(\d+))?$/).first
+        tag ||= "branch"
+        branch << " #{tag}"
+        branch << "-#{offset}" if offset
+      else
+        branch = "unknown branch"
       end
     rescue => e
       puts e.inspect
       branch = "unknown branch"
       rev = "unknown revision"
     end
-    $version << " (#{branch} branch, #{rev})"
+    $version << " (#{branch}, #{rev})"
   elsif File.directory? File.join(SCM_DIR, '.svn')
     rev = " (unknown revision)"
     begin
