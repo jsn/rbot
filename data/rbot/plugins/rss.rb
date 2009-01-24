@@ -150,6 +150,36 @@ module ::RSS
 
     SlashModel::ELEMENTS.collect! {|name| "#{SLASH_PREFIX}_#{name}"}
   end
+
+  class Element
+    class << self
+      def def_bang(name, chain)
+        class_eval %<
+          def #{name}!
+            blank2nil { #{chain.join(' rescue ')} rescue nil }
+          end
+        >, *get_file_and_line_from_caller(0)
+      end
+    end
+
+    {
+      :link => %w{link.href link},
+      :guid => %w{guid.content guid},
+      :content => %w{content.content content},
+      :description => %w{description.content description},
+      :title => %w{title.content title},
+      :category => %w{category.content category},
+      :dc_subject => %w{dc_subject},
+      :author => %w{author.name.content author.name author},
+      :dc_creator => %w{dc_creator}
+    }.each { |name, chain| def_bang name, chain }
+
+    protected
+    def blank2nil(&block)
+      x = yield
+      (x && !x.empty?) ? x : nil
+    end
+  end
 end
 
 
@@ -258,28 +288,11 @@ class RSSFeedsPlugin < Plugin
   # Currently only suppored is bot.config['rss.show_updated']: when false,
   # only the guid/link is accounted for.
   
-  def block_rescue(df = nil, &block)
-    v = block.call rescue nil
-    (String === v && '' != v) ? v : nil
-  end
-
   def make_uid(item)
-    uid = [
-      (block_rescue do item.guid.content end ||
-       block_rescue do item.guid end ||
-       block_rescue do item.link.href end ||
-       block_rescue do item.link end
-      )
-    ]
+    uid = [item.guid! || item.link!]
     if @bot.config['rss.show_updated']
-      uid.push(
-        block_rescue do item.content.content end ||
-        block_rescue do item.description end
-      )
-      uid.unshift(
-        block_rescue do item.title.content end ||
-        block_rescue do item.title end
-      )
+      uid.push(item.content! || item.description!)
+      uid.unshift item.title!
     end
     # debug "taking hash of #{uid.inspect}"
     uid.hash
@@ -955,12 +968,6 @@ class RSSFeedsPlugin < Plugin
       return seconds
   end
 
-  def select_nonempty(*ar)
-    # debug ar
-    ar.each { |i| return i unless i.nil_or_empty? }
-    return nil
-  end
-
   def printFormattedRss(feed, item, opts=nil)
     # debug item
     places = feed.watchers
@@ -1038,12 +1045,12 @@ class RSSFeedsPlugin < Plugin
       desc = "(?)"
     end
 
-    link = item.link.href rescue item.link rescue nil
+    link = item.link!
     link.strip! if link
 
-    category = select_nonempty((item.category.content rescue nil), (item.dc_subject rescue nil))
+    category = item.category! || item.dc_subject!
     category.strip! if category
-    author = select_nonempty((item.author.name.content rescue nil), (item.dc_creator rescue nil), (item.author rescue nil))
+    author = item.dc_creator! || item.author!
     author.strip! if author
 
     line1 = nil
