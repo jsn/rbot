@@ -612,7 +612,7 @@ class RSSFeedsPlugin < Plugin
       parsed = parseRss(feed, m)
     end
     return unless feed.items
-    m.reply "using old data" unless fetched and parsed
+    m.reply "using old data" unless fetched and parsed and parsed > 0
 
     title = feed.title
     items = feed.items
@@ -900,9 +900,11 @@ class RSSFeedsPlugin < Plugin
                 uid
               }
 
-              unless parseRss(feed)
-                debug "no items in feed #{feed}"
+              nitems = parseRss(feed)
+              if nitems.nil?
                 failures += 1
+              elsif nitems == 0
+                debug "no items in feed #{feed}"
               else
                 debug "Checking if new items are available for #{feed}"
                 failures -= 1 if failures > 0
@@ -1165,11 +1167,11 @@ class RSSFeedsPlugin < Plugin
 
       if items.empty?
         report_problem("no items found in the feed, maybe try weed?", e, m)
-        return nil
+      else
+        feed.title = title.strip
+        feed.items = items
       end
-      feed.title = title.strip
-      feed.items = items
-      return true
+      return items.length
     end
   end
 end
