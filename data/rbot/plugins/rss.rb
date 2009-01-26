@@ -883,14 +883,12 @@ class RSSFeedsPlugin < Plugin
             debug "xml for #{feed} didn't change"
             failures -= 1 if failures > 0
           else
-            if not feed.items
-              debug "no previous items in feed #{feed}"
-              parseRss(feed)
-              failures -= 1 if failures > 0
-            else
-              # This one is used for debugging
-              otxt = []
+            # This one is used for debugging
+            otxt = []
 
+            if feed.items.nil?
+              oids = []
+            else
               # These are used for checking new items vs old ones
               oids = Set.new feed.items.map { |item|
                 uid = make_uid item
@@ -899,6 +897,7 @@ class RSSFeedsPlugin < Plugin
                 debug [uid, otxt.last].inspect
                 uid
               }
+            end
 
               nitems = parseRss(feed)
               if nitems.nil?
@@ -938,7 +937,6 @@ class RSSFeedsPlugin < Plugin
                   debug "No new items found in #{feed}"
                 end
               end
-            end
           end
         end
       rescue Exception => e
