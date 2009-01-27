@@ -185,7 +185,7 @@ end
 
 class ::RssBlob
   attr_accessor :url, :handle, :type, :refresh_rate, :xml, :title, :items,
-    :mutex, :watchers, :last_fetched
+    :mutex, :watchers, :last_fetched, :http_cache
 
   def initialize(url,handle=nil,type=nil,watchers=[], xml=nil, lf = nil)
     @url = url
@@ -197,6 +197,7 @@ class ::RssBlob
     @type = type
     @watchers=[]
     @refresh_rate = nil
+    @http_cache = false
     @xml = xml
     @title = nil
     @items = nil
@@ -836,6 +837,7 @@ class RSSFeedsPlugin < Plugin
     if params and handle = params[:handle]
       feed = @feeds.fetch(handle.downcase, nil)
       if feed
+        feed.http_cache = false
         @bot.timer.reschedule(@watch[feed.handle], (params[:delay] || 0).to_f)
         m.okay if m
       else
@@ -873,9 +875,10 @@ class RSSFeedsPlugin < Plugin
         debug "fetching #{feed}"
         first_run = !feed.last_fetched
         oldxml = feed.xml ? feed.xml.dup : nil
-        unless fetchRss(feed)
+        unless fetchRss(feed, nil, feed.http_cache)
           failures += 1
         else
+          feed.http_cache = true
           if first_run
             debug "first run for #{feed}, getting items"
             parseRss(feed)
