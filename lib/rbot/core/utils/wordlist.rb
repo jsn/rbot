@@ -33,7 +33,8 @@ class Wordlist
       File.readlines(wordlist_path)
     end
 
-    wordlist.map! { |l| l.strip }
+    # wordlists are assumed to be UTF-8, but we need to strip the BOM, if present
+    wordlist.map! { |l| l.sub("\xef\xbb\xbf",'').strip }
     wordlist.reject do |word|
       word =~ /\s/ && !opts[:spaces] ||
       word.empty?
