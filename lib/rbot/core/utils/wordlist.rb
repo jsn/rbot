@@ -39,6 +39,19 @@ class Wordlist
       word.empty?
     end
   end
+
+  # Return an array with the list of available wordlists.
+  # Available options:
+  # pattern:: pattern that should be matched by the wordlist filename
+  def self.list(options={})
+    pattern = options[:pattern] || "**"
+    # refuse patterns that contain ../
+    return [] if pattern =~ /\.\.\//
+    striplen = self.wordlist_base.length+1
+    Dir.glob(File.join(self.wordlist_base, pattern)).map { |name|
+      name[striplen..-1]
+    }
+  end
 end
 end
 end
