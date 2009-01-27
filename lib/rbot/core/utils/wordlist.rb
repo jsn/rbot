@@ -52,6 +52,14 @@ class Wordlist
       name[striplen..-1]
     }
   end
+
+  def self.exist?(path)
+    fn = path.to_s
+    # refuse to check outside of the wordlist base directory
+    return false if fn =~ /\.\.\//
+    File.exist?(File.join(self.wordlist_base, fn))
+  end
+
 end
 end
 end
