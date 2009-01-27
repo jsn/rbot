@@ -217,7 +217,7 @@ class HangmanPlugin < Plugin
           str = "you've killed the poor guy :("
         end
 
-        m.reply "#{str} go #{Bold}again#{Bold}?"
+        m.reply "#{str} go #{Bold}again#{Bold}?", :nick => true
 
         @games.delete(source)
       end
