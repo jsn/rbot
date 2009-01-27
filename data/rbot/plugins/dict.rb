@@ -112,7 +112,8 @@ class DictPlugin < Plugin
     text += entries[0...hits].map { |ar|
       n += 1
       urls << @dmwaplemma % ar[2]
-      "#{n}. #{Bold}#{ar[0]}#{Bold} - #{ar[1].gsub(/<\/?em>/,'')}: #{@dmurl}#{ar[2]}"
+      key = ar[1].ircify_html
+      "#{n}. #{Bold}#{ar[0]}#{Bold} - #{key}: #{@dmurl}#{ar[2]}"
     }.join(" | ")
     m.reply text
 
