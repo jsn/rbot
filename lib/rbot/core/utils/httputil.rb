@@ -498,7 +498,6 @@ class HttpUtil
     }.merge(options)
 
     resp = nil
-    cached = nil
 
     req_class = case opts[:method].to_s.downcase.intern
                 when :head, :"net::http::head"
@@ -532,7 +531,9 @@ class HttpUtil
 
     debug "get_response(#{uri}, #{opts.inspect})"
 
-    if opts[:cache] && cached = @cache[cache_key]
+    cached = @cache[cache_key]
+
+    if opts[:cache] && cached
       debug "got cached"
       if !cached.expired?
         debug "using cached"
@@ -545,7 +546,10 @@ class HttpUtil
     headers['Range'] = opts[:range] if opts[:range]
     headers['Authorization'] = opts[:auth_head] if opts[:auth_head]
 
-    cached.setup_headers(headers) if cached && (req_class == Net::HTTP::Get)
+    if opts[:cache] && cached && (req_class == Net::HTTP::Get)
+      cached.setup_headers headers
+    end
+
     req = req_class.new(uri.request_uri, headers)
     if uri.user && uri.password
       req.basic_auth(uri.user, uri.password)
@@ -570,18 +574,16 @@ class HttpUtil
           elsif Net::HTTPServerError === resp || Net::HTTPClientError === resp
             debug "http error, deleting cached obj" if cached
             @cache.delete(cache_key)
-          elsif opts[:cache]
-            begin
-              return handle_response(uri, resp, opts, &block)
-            ensure
-              if cached = CachedObject.maybe_new(resp) rescue nil
-                debug "storing to cache"
-                @cache[cache_key] = cached
-              end
-            end
-            return ret
           end
-          return handle_response(uri, resp, opts, &block)
+
+          begin
+            return handle_response(uri, resp, opts, &block)
+          ensure
+            if cached = CachedObject.maybe_new(resp) rescue nil
+              debug "storing to cache"
+              @cache[cache_key] = cached
+            end
+          end
         end
       end
     rescue Exception => e
