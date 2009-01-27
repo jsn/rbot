@@ -124,11 +124,13 @@ class UrlPlugin < Plugin
 
   def handle_urls(m, params={})
     opts = {
-      :display_info => @bot.config['url.display_link_info']
+      :display_info => @bot.config['url.display_link_info'],
+      :channels => @bot.config['url.only_on_channels']
     }.merge params
     urls = opts[:urls]
     display_info= opts[:display_info]
-    unless (channels = @bot.config['url.only_on_channels']).empty?
+    channels = opts[:channels]
+    unless channels.empty?
       return unless channels.map { |c| c.downcase }.include?(m.channel.downcase)
     end
 
@@ -189,7 +191,12 @@ class UrlPlugin < Plugin
   def info(m, params)
     escaped = URI.escape(params[:urls].to_s, OUR_UNSAFE)
     urls = URI.extract(escaped)
-    Thread.new { handle_urls(m, :urls => urls, :display_info => params[:urls].length) }
+    Thread.new do
+      handle_urls(m,
+                  :urls => urls,
+                  :display_info => params[:urls].length,
+                  :channels => [])
+    end
   end
 
   def message(m)
