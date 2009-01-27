@@ -3,7 +3,6 @@
 #
 # :title: Quotes plugin
 #
-# TODO:: use message mapper instead of multiple ifs
 # TODO:: switch to db
 
 define_structure :Quote, :num, :date, :source, :quote
