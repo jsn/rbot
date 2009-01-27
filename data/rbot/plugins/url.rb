@@ -122,7 +122,12 @@ class UrlPlugin < Plugin
     return extra.join(", ") if title or not @bot.config['url.titles_only']
   end
 
-  def handle_urls(m, urls, display_info=@bot.config['url.display_link_info'])
+  def handle_urls(m, params={})
+    opts = {
+      :display_info => @bot.config['url.display_link_info']
+    }.merge params
+    urls = opts[:urls]
+    display_info= opts[:display_info]
     unless (channels = @bot.config['url.only_on_channels']).empty?
       return unless channels.map { |c| c.downcase }.include?(m.channel.downcase)
     end
@@ -184,7 +189,7 @@ class UrlPlugin < Plugin
   def info(m, params)
     escaped = URI.escape(params[:urls].to_s, OUR_UNSAFE)
     urls = URI.extract(escaped)
-    Thread.new { handle_urls(m, urls, params[:urls].length) }
+    Thread.new { handle_urls(m, :urls => urls, :display_info => params[:urls].length) }
   end
 
   def message(m)
@@ -193,7 +198,7 @@ class UrlPlugin < Plugin
     escaped = URI.escape(m.message, OUR_UNSAFE)
     urls = URI.extract(escaped, ['http', 'https'])
     return if urls.empty?
-    Thread.new { handle_urls(m, urls) }
+    Thread.new { handle_urls(m, :urls => urls) }
   end
 
   def reply_urls(opts={})
