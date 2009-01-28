@@ -644,19 +644,34 @@ class RSSFeedsPlugin < Plugin
 
   def list_rss(m, params)
     wanted = params[:handle]
-    reply = String.new
-    @feeds.each { |handle, feed|
-      next if wanted and !handle.match(/#{wanted}/i)
-      reply << "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
-      (reply << " refreshing every #{Utils.secs_to_string(feed.refresh_rate)}") if feed.refresh_rate
-      (reply << " (watched)") if feed.watched_by?(m.replyto)
-      reply << "\n"
-    }
-    if reply.empty?
+    listed = @feeds.keys
+    if wanted
+      wanted_rx = Regexp.new(wanted, true)
+      listed.reject! { |handle| !handle.match(wanted_rx) }
+    end
+    listed.sort!
+    debug listed
+    if @bot.config['send.max_lines'] > 0 and listed.size > @bot.config['send.max_lines']
+      reply = listed.inject([]) do |ar, handle|
+        feed = @feeds[handle]
+        string = handle.dup
+        (string << " (#{feed.type})") if feed.type
+        (string << " (watched)") if feed.watched_by?(m.replyto)
+        ar << string
+      end.join(', ')
+    elsif listed.size > 0
+      reply = listed.inject([]) do |ar, handle|
+        feed = @feeds[handle]
+        string = "#{feed.handle}: #{feed.url} (in format: #{feed.type ? feed.type : 'default'})"
+        (string << " refreshing every #{Utils.secs_to_string(feed.refresh_rate)}") if feed.refresh_rate
+        (string << " (watched)") if feed.watched_by?(m.replyto)
+        ar << string
+      end.join("\n")
+    else
       reply = "no feeds found"
       reply << " matching #{wanted}" if wanted
     end
-    m.reply reply, :max_lines => reply.length
+    m.reply reply, :max_lines => 0
   end
 
   def watched_rss(m, params)
