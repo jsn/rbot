@@ -872,7 +872,7 @@ class RSSFeedsPlugin < Plugin
   private
   def watchRss(feed, m=nil)
     if @watch.has_key?(feed.handle)
-      report_problem("watcher thread for #{feed.handle} is already running", nil, m)
+      # report_problem("watcher thread for #{feed.handle} is already running", nil, m)
       return
     end
     status = Hash.new
