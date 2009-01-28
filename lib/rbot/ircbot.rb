@@ -645,13 +645,15 @@ class Bot
       @config['irc.ignore_channels'].each { |channel|
         if m.target.downcase == channel.downcase
           m.ignored = true
+          break
         end
       }
       @config['irc.ignore_users'].each { |mask|
         if m.source.matches?(server.new_netmask(mask))
           m.ignored = true
+          break
         end
-      }
+      } unless m.ignored
 
       @plugins.irc_delegate('privmsg', m)
     }
