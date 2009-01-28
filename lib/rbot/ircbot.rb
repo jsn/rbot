@@ -306,6 +306,9 @@ class Bot
     Config.register Config::ArrayValue.new('irc.ignore_users',
       :default => [],
       :desc => "Which users to ignore input from. This is mainly to avoid bot-wars triggered by creative people")
+    Config.register Config::ArrayValue.new('irc.ignore_channels',
+      :default => [],
+      :desc => "Which channels to ignore input in. This is mainly to turn the bot into a logbot that doesn't interact with users in any way (in the specified channels)")
 
     Config.register Config::IntegerValue.new('core.save_every',
       :default => 60, :validate => Proc.new{|v| v >= 0},
@@ -639,6 +642,11 @@ class Bot
       # debug "Message target is #{data[:target].inspect}"
       # debug "Bot is #{myself.inspect}"
 
+      @config['irc.ignore_channels'].each { |channel|
+        if m.target.downcase == channel.downcase
+          m.ignored = true
+        end
+      }
       @config['irc.ignore_users'].each { |mask|
         if m.source.matches?(server.new_netmask(mask))
           m.ignored = true
