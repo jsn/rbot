@@ -905,8 +905,9 @@ class Bot
     while true
       too_fast = false
       begin
-        quit if $interrupted > 0
         quit_msg = nil
+        reconnect(quit_msg, too_fast)
+        quit if $interrupted > 0
         while @socket.connected?
           quit if $interrupted > 0
 
@@ -936,6 +937,7 @@ class Bot
         # received an ERROR from the server
         quit_msg = "server ERROR: " + e.message
         too_fast = e.message.index("reconnect too fast")
+        retry
       rescue BDB::Fatal => e
         fatal "fatal bdb error: #{e.pretty_inspect}"
         DBTree.stats
@@ -951,7 +953,6 @@ class Bot
         log_session_end
         exit 2
       end
-      reconnect(quit_msg, too_fast)
     end
   end
 
