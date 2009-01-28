@@ -165,7 +165,7 @@ class Imdb
       end
 
       ratings = "no votes"
-      m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+<small>\(<a href="ratings">([0-9,]+) votes?<\/a>\)<\/small>/.match(resp.body)
+      m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+[^<]+<a href="ratings"[^>]+>([0-9,]+) votes?<\/a>/.match(resp.body)
       if m
         ratings = "#{m[1]}/10 (#{m[2]} voters)"
       end
