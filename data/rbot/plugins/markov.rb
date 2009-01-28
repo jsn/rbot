@@ -259,3 +259,7 @@ plugin.map 'chat about :seed1 :seed2', :action => "chat"
 plugin.map 'chat', :action => "rand_chat"
 plugin.map 'markov probability [:probability]', :action => "probability",
            :requirements => {:probability => /^\d+%?$/}
+
+plugin.default_auth('ignore', false)
+plugin.default_auth('probability', false)
+
