@@ -129,7 +129,7 @@ module Irc
     include Singleton
 
     def initialize
-      super('rfc1459', "\x41-\x5e", "\x61-\x7e")
+      super('rfc1459', "\x41-\x5a\x7b-\x7e", "\x61-\x7a\x5b-\x5e")
     end
 
   end
@@ -141,7 +141,7 @@ module Irc
     include Singleton
 
     def initialize
-      super('strict-rfc1459', "\x41-\x5d", "\x61-\x7d")
+      super('strict-rfc1459', "\x41-\x5a\x7b-\x7d", "\x61-\x7a\x5b-\x5d")
     end
 
   end
