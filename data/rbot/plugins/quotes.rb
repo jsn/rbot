@@ -265,6 +265,18 @@ end
 plugin = QuotePlugin.new
 plugin.register("quotes")
 
+plugin.default_auth('other::edit', false) # Prevent random people from editing other channels quote lists by default
+plugin.default_auth('other::view', true) # But allow them to view them
+
+plugin.map "addquote :channel *quote", :action => :cmd_addquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::edit::add!'
+plugin.map "delquote :channel :num", :action => :cmd_delquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::edit::del!'
+plugin.map "getquote :channel [:num]", :action => :cmd_getquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::get!'
+plugin.map "whoquote :channel :num", :action => :cmd_whoquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::who!'
+plugin.map "whenquote :channel :num", :action => :cmd_whenquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::when!'
+plugin.map "searchquote :channel *reg", :action => :cmd_searchquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::search!'
+plugin.map "countquote :channel [*reg]", :action => :cmd_countquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::count!'
+plugin.map "topicquote :channel [:num]", :action => :cmd_topicquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::topic!'
+
 plugin.default_auth('edit', false) # Prevent random people from removing quotes
 plugin.default_auth('edit::add', true) # But allow them to add them
 
@@ -278,14 +290,3 @@ plugin.map "countquote [*reg]", :action => :cmd_countquote, :private => false, :
 plugin.map "topicquote [:num]", :action => :cmd_topicquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::topic!'
 plugin.map "lastquote", :action => :cmd_lastquote, :private => false, :auth_path => '!quote::view::last!'
 
-plugin.default_auth('other::edit', false) # Prevent random people from editing other channels quote lists by default
-plugin.default_auth('other::view', true) # But allow them to view them
-
-plugin.map "addquote :channel *quote", :action => :cmd_addquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::edit::add!'
-plugin.map "delquote :channel :num", :action => :cmd_delquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::edit::del!'
-plugin.map "getquote :channel [:num]", :action => :cmd_getquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::get!'
-plugin.map "whoquote :channel :num", :action => :cmd_whoquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::who!'
-plugin.map "whenquote :channel :num", :action => :cmd_whenquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::when!'
-plugin.map "searchquote :channel *reg", :action => :cmd_searchquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::search!'
-plugin.map "countquote [:channel] [*reg]", :action => :cmd_countquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::count!'
-plugin.map "topicquote :channel [:num]", :action => :cmd_topicquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::topic!'
