@@ -276,6 +276,7 @@ plugin.map "whenquote :channel :num", :action => :cmd_whenquote, :requirements =
 plugin.map "searchquote :channel *reg", :action => :cmd_searchquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::search!'
 plugin.map "countquote :channel [*reg]", :action => :cmd_countquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::count!'
 plugin.map "topicquote :channel [:num]", :action => :cmd_topicquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::topic!'
+plugin.map "lastquote :channel", :action => :cmd_lastquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::last!'
 
 plugin.default_auth('edit', false) # Prevent random people from removing quotes
 plugin.default_auth('edit::add', true) # But allow them to add them
