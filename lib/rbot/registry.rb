@@ -100,7 +100,7 @@ class Bot
   #   blah = @registry[:blah]
   #   blah[:foo] = "flump"
   #   @registry[:blah] = blah
-
+  #
   # If you don't need to store objects, and strictly want a persistant hash of
   # strings, you can override the store/restore methods to suit your needs, for
   # example (in your plugin):
