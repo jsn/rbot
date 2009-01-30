@@ -1134,25 +1134,32 @@ class RSSFeedsPlugin < Plugin
     return nil unless feed.xml
     feed.mutex.synchronize do
       xml = feed.xml
-      begin
-        ## do validate parse
-        rss = RSS::Parser.parse(xml)
-        debug "parsed and validated #{feed}"
-      rescue RSS::InvalidRSSError
-        ## do non validate parse for invalid RSS 1.0
+      rss = nil
+      errors = []
+      RSS::AVAILABLE_PARSERS.each do |parser|
         begin
-          rss = RSS::Parser.parse(xml, false)
-          debug "parsed but not validated #{feed}"
+          ## do validate parse
+          rss = RSS::Parser.parse(xml, true, true, parser)
+          debug "parsed and validated #{feed} with #{parser}"
+          break
+        rescue RSS::InvalidRSSError
+          begin
+            ## do non validate parse for invalid RSS 1.0
+            rss = RSS::Parser.parse(xml, false, true, parser)
+            debug "parsed but not validated #{feed} with #{parser}"
+            break
+          rescue RSS::Error => e
+            errors << [parser, e, "parsing rss stream failed, whoops =("]
+          end
         rescue RSS::Error => e
-          report_problem("parsing rss stream failed, whoops =(", e, m)
-          return nil
+          errors << [parser, e, "parsing rss stream failed, oioi"]
+        rescue => e
+          errors << [parser, e, "processing error occured, sorry =("]
         end
-      rescue RSS::Error => e
-        report_problem("parsing rss stream failed, oioi", e, m)
-        return nil
-      rescue => e
-        report_problem("processing error occured, sorry =(", e, m)
-        return nil
+      end
+      debug errors unless errors.empty?
+      if !rss
+        self.send(:report_problem, errors.last[2], errors.last[1], m)
       end
       items = []
       if rss.nil?
