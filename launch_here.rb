@@ -16,14 +16,14 @@ begin
 
   if File.exists? '.git'
     begin
-      git_out = `git log -1 --pretty=format:"%H%n%s%n%ct" | git name-rev --stdin`.split("\n")
-      $version_timestamp = git_out.last.to_i
-      subject = git_out[1].strip
+      git_out = `git log -1 --pretty=raw | git name-rev --stdin`.split("\n")
+      commit, branch_spec = git_out.first.scan(/^commit (\S+)(?: \((\S+)\))?$/).first
+      $version_timestamp = git_out[4].split[-2].to_i
+      subject = git_out[6].strip rescue ""
       subject[77..-1] = "..." if subject.length > 80
-      commit, branch_spec = git_out.first.scan(/^(\S+)(?: \((\S+)\))?$/).first
       rev = "revision #{commit[0,7]}"
       rev << " [#{subject}]" unless subject.empty?
-      changes = `git diff --shortstat HEAD`.split(", ").first
+      changes = `git diff-index --stat HEAD`.split("\n").last.split(", ").first rescue nil
       rev << ", #{changes.strip}" if changes
       if branch_spec
         tag, branch, offset = branch_spec.scan(/^(?:(tag)s\/)?(\S+?)(?:^0)?(?:~(\d+))?$/).first
