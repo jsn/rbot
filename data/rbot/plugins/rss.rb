@@ -1157,9 +1157,10 @@ class RSSFeedsPlugin < Plugin
           errors << [parser, e, "processing error occured, sorry =("]
         end
       end
-      debug errors unless errors.empty?
-      if !rss
+      unless errors.empty?
+        debug errors
         self.send(:report_problem, errors.last[2], errors.last[1], m)
+        return nil
       end
       items = []
       if rss.nil?
