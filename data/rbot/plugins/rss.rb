@@ -185,7 +185,7 @@ end
 
 class ::RssBlob
   attr_accessor :url, :handle, :type, :refresh_rate, :xml, :title, :items,
-    :mutex, :watchers, :last_fetched, :http_cache
+    :mutex, :watchers, :last_fetched, :http_cache, :last_success
 
   def initialize(url,handle=nil,type=nil,watchers=[], xml=nil, lf = nil)
     @url = url
@@ -203,6 +203,7 @@ class ::RssBlob
     @items = nil
     @mutex = Mutex.new
     @last_fetched = lf
+    @last_success = nil
     sanitize_watchers(watchers)
   end
 
@@ -276,6 +277,10 @@ class RSSFeedsPlugin < Plugin
   Config.register Config::IntegerValue.new('rss.thread_sleep',
     :default => 300, :validate => Proc.new{|v| v > 30},
     :desc => "How many seconds to sleep before checking RSS feeds again")
+
+  Config.register Config::IntegerValue.new('rss.announce_timeout',
+    :default => 0,
+    :desc => "Don't announce watched feed if these many seconds elapsed since the last successful update")
 
   Config.register Config::BooleanValue.new('rss.show_updated',
     :default => true,
@@ -888,7 +893,13 @@ class RSSFeedsPlugin < Plugin
       failures = status[:failures]
       begin
         debug "fetching #{feed}"
-        first_run = !feed.last_fetched
+
+        first_run = !feed.last_success
+        if (@bot.config['rss.announce_timeout'] > 0 &&
+           (Time.now - feed.last_success > @bot.config['rss.announce_timeout']))
+          debug "#{feed} wasn't polled for too long, supressing output"
+          first_run = true
+        end
         oldxml = feed.xml ? feed.xml.dup : nil
         unless fetchRss(feed, nil, feed.http_cache)
           failures += 1
@@ -1126,6 +1137,7 @@ class RSSFeedsPlugin < Plugin
     end
     feed.mutex.synchronize do
       feed.xml = xml
+      feed.last_success = Time.now
     end
     return true
   end
