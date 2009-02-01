@@ -35,6 +35,7 @@
 define_structure :OnJoinAction, :host, :action, :channel, :reason
 define_structure :BadWordAction, :regexp, :action, :channel, :timer, :reason
 define_structure :WhitelistEntry, :host, :channel
+define_structure :MassHlAction, :num, :perc, :action, :channel, :timer, :reason
 
 class BansPlugin < Plugin
 
@@ -99,6 +100,7 @@ class BansPlugin < Plugin
     end
 
     @registry[:onjoin] = Array.new unless @registry.has_key? :onjoin
+    @registry[:masshl] = Array.new unless @registry.has_key? :masshl
   end
 
   def help(plugin, topic="")
@@ -118,20 +120,42 @@ class BansPlugin < Plugin
     when "bans"
       case topic
       when "add"
-        return "bans add <onjoin|badword|whitelist>: add an automatic action for people that join or say some bad word, or a whitelist entry. further help available"
+        return "bans add <onjoin|badword|whitelist|masshl>: add an automatic action for people that join or say some bad word, or a whitelist entry. further help available"
       when "add onjoin"
         return "bans add onjoin <hostmask> [action] [#channel] [reason ...]: will add an autoaction for any one who joins with hostmask. default action is silence, default channel is all"
       when "add badword"
         return "bans add badword <regexp> [action] [Xs/m/h/d] [#channel|all] [reason ...]: adds a badword regexp, if a user sends a message that matches regexp, the action will be invoked. default action is silence, default channel is all"
       when "add whitelist"
         return "bans add whitelist <hostmask> [#channel|all]: add the given hostmask to the whitelist. no autoaction will be triggered by users on the whitelist"
+      when "add masshl"
+        return "masshl add <max_nicks|percentage> [action] [Xs/m/h/d] [#channel|all] [reason ...]: adds an massive highligh action. You can use both max and % in one trigger, the higher value will be taken. For two triggers in one channel, the one with higher requirements will be taken"
       when "rm"
-        return "bans rm <onjoin|badword|whitelist> <hostmask/regexp> [#channel], or bans rm <onjoin|badword|whitelist> index <num>: removes the specified onjoin or badword rule or whitelist entry."
+        return "bans rm <onjoin|badword|whitelist> <hostmask/regexp> [#channel], or bans rm <onjoin|badword|whitelist> index <num>: removes the specified onjoin or badword rule or whitelist entry. For masshl, bans rm masshl index [#channel|all]"
       when "list"
-        return"bans list <onjoin|badword|whitelist>: lists all onjoin or badwords or whitelist entries"
+        return"bans list <onjoin|badword|whitelist|masshl>: lists all onjoin or badwords or whitelist entries. For masshl, you can add [#channel|all]"
+      else
+        return "commands are: add, add onjoin, add badword, add whitelist, add masshl, rm, list"
       end
     end
     return "bans <command>: allows a user of the bot to do a range of bans and unbans. commands are: [un]ban, kick[ban], [un]silence, add, rm and list"
+  end
+
+  def message(m)
+    return unless m.channel
+    mm = m.plainmessage.irc_downcase(m.server.casemap).split(/[\s\.,:]/)
+    nicks_said = (m.channel.users.map { |u| u.downcase} & mm).size
+    return unless nicks_said > 0 # not really needed, but saves some cycles
+    got_nicks = 0
+    masshl_action = nil
+    @registry[:masshl].each { |masshl|
+      next unless masshl.channel == m.channel.downcase or masshl.channel == "all"
+      needed = [masshl.num.to_i, (masshl.perc * m.channel.user_nicks.size / 100).to_i].max
+      next if needed > nicks_said or needed < got_nicks
+      masshl_action = masshl
+      got_nicks = needed
+    }
+    return unless masshl_action
+    do_cmd masshl_action.action.intern, m.sourcenick, m.channel, masshl_action.timer, masshl_action.reason
   end
 
   def listen(m)
@@ -198,6 +222,47 @@ class BansPlugin < Plugin
   def unsilence_user(m, params=nil)
     nick, channel = params[:nick], check_channel(m, params[:channel])
     do_cmd(:unsilence, nick, channel)
+  end
+
+  def add_masshl(m, params=nil)
+    num = params[:num].to_i
+    perc = params[:perc] ? /(\d{1,2})\%/.match(params[:perc])[1].to_i : 0
+    channel, action = params[:channel].downcase.dup, params[:action]
+    timer, reason = params[:timer].dup, params[:reason].to_s
+    if perc == 0 and num == 0
+      m.reply "both triggers 0, you don't want this."
+      return
+    end
+
+    masshl = @registry[:masshl]
+    masshl << MassHlAction.new(num, perc, action, channel, timer, reason)
+    @registry[:masshl] = masshl
+
+    m.okay
+  end
+
+  def rm_masshl(m, params=nil)
+    masshl = @registry[:masshl]
+    masshl_w = params[:channel] ? masshl.select { |mh| mh.channel == params[:channel].downcase } : masshl
+    count = masshl_w.length
+    idx = params[:idx].to_i
+
+    if idx > count
+      m.reply "No such masshl \##{idx}"
+      return
+    end
+    masshl.delete(masshl_w[idx-1])
+    @registry[:masshl] = masshl
+    m.okay
+  end
+
+  def list_masshl(m, params=nil)
+    masshl = @registry[:masshl]
+    masshl = masshl.select { |mh| mh.channel == params[:channel].downcase } if params[:channel]
+    m.reply params[:channel] ? "masshl rules: #{masshl.length} for #{params[:channel]}" : "masshl rules: #{masshl.length}"
+    masshl.each_with_index { |mh, idx|
+      m.reply "\##{idx+1}: #{mh.num} | #{mh.perc}% | #{mh.action} | #{mh.channel} | #{mh.timer} | #{mh.reason}"
+    }
   end
 
   def add_onjoin(m, params=nil)
@@ -507,3 +572,31 @@ plugin.map 'bans rm whitelist :host :channel', :action => 'rm_whitelist',
 plugin.map 'bans list whitelist', :action => 'list_whitelist',
   :auth_path => 'list::whitelist'
 
+plugin.map 'bans add masshl :num :perc :action :timer :channel *reason', :action => 'add_masshl',
+  :requirements => {:num => /\d{1,2}/, :perc => /\d{1,2}\%/,:action => BansPlugin::ActionRe, :timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelAllRe},
+  :defaults => {:action => 'silence', :timer => "0s", :channel => 'all', :reason => 'masshl'},
+  :auth_path => 'edit::masshl'
+plugin.map 'bans add masshl :perc :num :action :timer :channel *reason', :action => 'add_masshl',
+  :requirements => {:num => /\d{1,2}/, :perc => /\d{1,2}\%/,:action => BansPlugin::ActionRe, :timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelAllRe},
+  :defaults => {:action => 'silence', :timer => "0s", :channel => 'all', :reason => 'masshl'},
+  :auth_path => 'edit::masshl'
+plugin.map 'bans add masshl :perc :action :timer :channel *reason', :action => 'add_masshl',
+  :requirements => {:num => /\d{1,2}/, :perc => /\d{1,2}\%/,:action => BansPlugin::ActionRe, :timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelAllRe},
+  :defaults => {:num => 0, :action => 'silence', :timer => "0s", :channel => 'all', :reason => 'masshl'},
+  :auth_path => 'edit::masshl'
+plugin.map 'bans add masshl :num :action :timer :channel *reason', :action => 'add_masshl',
+  :requirements => {:num => /\d{1,2}/, :perc => /\d{1,2}\%/,:action => BansPlugin::ActionRe, :timer => BansPlugin::TimerRe, :channel => BansPlugin::ChannelAllRe},
+  :defaults => {:perc => "0%", :action => 'silence', :timer => "0s", :channel => 'all', :reason => 'masshl'},
+  :auth_path => 'edit::masshl'
+plugin.map 'bans rm masshl :idx', :action => 'rm_masshl',
+  :requirements => {:channel => nil, :num => BansPlugin::IdxRe},
+  :auth_path => 'edit::masshl'
+plugin.map 'bans rm masshl :idx :channel', :action => 'rm_masshl',
+  :requirements => {:channel => BansPlugin::ChannelAllRe},
+  :defaults => {:channel => nil},
+  :auth_path => 'edit::masshl'
+plugin.map 'bans list masshl', :action => 'list_masshl',
+  :auth_path => 'list::masshl'
+plugin.map 'bans list masshl :channel', :action => 'list_masshl',
+  :defaults => {:channel => nil},
+  :auth_path => 'list::masshl'
