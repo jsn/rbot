@@ -146,7 +146,7 @@ class LastFmPlugin < Plugin
     }
     m.reply disp_events.join(' | '), :split_at => /\s+\|\s+/
 
-  end  
+  end
 
   def tasteometer(m, params)
     opts = { :cache => false }
@@ -159,7 +159,7 @@ class LastFmPlugin < Plugin
       return
     end
     if xml.class == Net::HTTPInternalServerError
-      if doc.root.elements["error"].attributes["code"] == "7" then 
+      if doc.root.elements["error"].attributes["code"] == "7" then
         error = doc.root.elements["error"].text
         error.match(/Invalid username: \[(.*)\]/);
         if @registry.has_key? $1 and not params[:recurs]
@@ -216,7 +216,7 @@ class LastFmPlugin < Plugin
       return
     end
     if xml.class == Net::HTTPBadRequest
-      if doc.root.elements["error"].text == "Invalid user name supplied" then 
+      if doc.root.elements["error"].text == "Invalid user name supplied" then
         if @registry.has_key? user and not params[:recurs]
           params[:who] = @registry[ user ]
           params[:recurs] = true
@@ -280,7 +280,7 @@ class LastFmPlugin < Plugin
     end
     first = doc.root.elements["artist"]
     artist = first.elements["name"].text
-    playcount = first.elements["stats"].elements["plays"].text
+    playcount = first.elements["stats"].elements["playcount"].text
     listeners = first.elements["stats"].elements["listeners"].text
     summary = first.elements["bio"].elements["summary"].text
     m.reply _("%{b}%{a}%{b} has been played %{c} times and is being listened to by %{l} people.") % {:b => Bold, :a => artist, :c => playcount, :l => listeners}
@@ -338,7 +338,7 @@ class LastFmPlugin < Plugin
     playcount = first.elements["playcount"].text
     album = first.elements["name"].text
     date = first.elements["releasedate"].text
-    unless date.strip.length < 2 
+    unless date.strip.length < 2
       year = date.strip.split[2].chop
     end
     result = [artist, album, year, playcount]
@@ -375,7 +375,7 @@ class LastFmPlugin < Plugin
     nick = ""
     if params[:who]
       nick = params[:who].to_s
-    else 
+    else
       nick = m.sourcenick
     end
     if @registry.has_key? nick
