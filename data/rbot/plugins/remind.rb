@@ -58,18 +58,19 @@ class RemindPlugin < Plugin
           else
             raise "invalid time string"
         end
-      when (/^(\d+):(\d+):(\d+)$/)
+      when (/^(\d+):(\d+)(?:\:(\d+))?$/)
         hour = $1.to_i
         min = $2.to_i
         sec = $3.to_i
         now = Time.now
         later = Time.mktime(now.year, now.month, now.day, hour, min, sec)
-        return later - now
-      when (/^(\d+):(\d+)$/)
-        hour = $1.to_i
-        min = $2.to_i
-        now = Time.now
-        later = Time.mktime(now.year, now.month, now.day, hour, min, now.sec)
+
+        # if the given hour is earlier than current hour, given timestr
+        # must have been meant to be in the future
+        if hour < now.hour || hour <= now.hour && min < now.min
+          later += 60*60*24
+        end
+
         return later - now
       when (/^(\d+):(\d+)(am|pm)$/)
         hour = $1.to_i
