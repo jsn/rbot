@@ -31,7 +31,20 @@ class SlashdotPlugin < Plugin
     if arts.length > 1
       tits = []
       arts.each { |el|
-        artitle = (el/"div.generaltitle").first.to_html.ircify_html
+        # see if the div tag with generaltitle class is present
+        artitle = (el/"div.generaltitle").first
+        if artitle
+          tits << artitle.to_html.ircify_html
+          next
+        end
+        # otherwise, check for skin+datitle a tags
+        datitle = (el/"a.datitle").first
+        next unless datitle
+        skin = (el/"a.skin").first
+        artitle = [
+          skin ? skin.innerHTML.ircify_html : nil,
+          datitle.innerHTML.ircify_html
+        ].compact.join(" ")
         tits << artitle
       }
       content = tits.join(" | ")
