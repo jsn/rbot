@@ -1172,7 +1172,7 @@ class RSSFeedsPlugin < Plugin
       unless errors.empty?
         debug errors
         self.send(:report_problem, errors.last[2], errors.last[1], m)
-        return nil
+        return nil unless rss
       end
       items = []
       if rss.nil?
