@@ -161,7 +161,7 @@ class BashPlugin < Plugin
       # may want to echo more than one for latest/random
       quote = quotes.first
     end
-    m.reply quote.to_s
+    m.reply quote.to_s, :split_at => /\s+\|\s+/
   end
 
   def xml_bash(m, id=nil)
