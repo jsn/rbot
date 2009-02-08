@@ -71,7 +71,8 @@ class GrouphugPlugin < Plugin
         confession = @confessions.pop
         m.reply confession
       end
-    rescue
+    rescue Exception => e
+      error e
       m.reply "failed to connect to grouphug.us"
     end
   end
