@@ -46,6 +46,15 @@ class GrouphugPlugin < Plugin
     end
   end
 
+  def get_confessions(html)
+    return [] unless html
+    start = html.index(START)
+    res = html[start, html.length - start].scan(REG)
+    return [] unless res
+    return res.map { |quote|
+      quote[0].ircify_html
+    }
+  end
 
   def confess(m, params)
     opts = { :cache => false }
@@ -56,22 +65,20 @@ class GrouphugPlugin < Plugin
         path = "confessions/#{params[:num]}"
         opts.delete(:cache)
         data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
-        start = data.index(START)
-        res = data[start, data.length - start].scan(REG)
-        confession = res.first[0].ircify_html
-        confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
-        m.reply confession
+        confessions = get_confessions(data)
+        if confessions.length > 1
+          warn "more than one confession found!"
+          warn confessions
+        end
+        confessions << "no confession ##{params[:num]} found" if confessions.empty?
+        m.reply confessions.first
       else # Cache random confessions
         if @confessions.empty?
           data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
-          start = data.index(START)
-          res = data[start, data.length - start].scan(REG)
-          res.each do |quote|
-            @confessions << quote[0].ircify_html
-          end
+          @confessions.replace get_confessions(data)
         end
-        confession = @confessions.pop
-        m.reply confession
+        @confessions << "no confessions found!" if @confessions.empty?
+        m.reply @confessions.pop
       end
     rescue Exception => e
       error e
