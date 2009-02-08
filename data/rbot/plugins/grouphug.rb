@@ -10,6 +10,7 @@
 # License:: GPL v2
 
 class GrouphugPlugin < Plugin
+  START = '<div id="main"'
   REG  = Regexp.new('<div class="content">\s*<p>(.*?)</p>\s+</div>', Regexp::MULTILINE)
   REGPOST = Regexp.new('title>(.*?) \| Group Hug')
   def initialize
@@ -55,15 +56,16 @@ class GrouphugPlugin < Plugin
         path = "confessions/#{params[:num]}"
         opts.delete(:cache)
         data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
-
-        res = data.scan(REG)
-        confession = res[2][0].ircify_html # use res[2] to skip the new sidebar "Group Hug is run by one person..." and other text.
+        start = data.index(START)
+        res = data[start, data.length - start].scan(REG)
+        confession = res.first[0].ircify_html
         confession = "no confession ##{params[:num]} found" if confession.empty? and params[:num]
         m.reply confession
       else # Cache random confessions
         if @confessions.empty?
           data = @bot.httputil.get("http://grouphug.us/#{path}", opts)
-          res = data.scan(REG)
+          start = data.index(START)
+          res = data[start, data.length - start].scan(REG)
           res.each do |quote|
             @confessions << quote[0].ircify_html
           end
