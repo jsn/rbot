@@ -16,6 +16,7 @@ class GrouphugPlugin < Plugin
   def initialize
     super
     @confessions = Array.new
+    @bot.register_filter(:grouphug, :htmlinfo) { |s| grouphug_filter(s) }
   end
 
   def help( plugin, topic="" )
@@ -85,6 +86,23 @@ class GrouphugPlugin < Plugin
       m.reply "failed to connect to grouphug.us"
     end
   end
+
+  def grouphug_filter(s)
+    # check if we like the location of the page
+    loc = Utils.check_location(s, %r{http://(?:.*\.)?grouphug\.us})
+    return unless loc
+    # check if there are any conefssions
+    confessions = get_confessions(s[:text])
+    return if confessions.empty?
+    title = s[:text].ircify_html_title
+    # return the first confession
+    return {
+          :title => title,
+          :content => confessions.first,
+          :grouphug_confessions => confessions
+    }
+  end
+
 end
 
 
