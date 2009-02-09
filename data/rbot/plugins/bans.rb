@@ -142,6 +142,24 @@ class BansPlugin < Plugin
 
   def message(m)
     return unless m.channel
+
+    # check the whitelist first
+    @registry[:whitelist].each { |white|
+      next unless ['all', m.target.downcase].include?(white.channel)
+      return if m.source.matches?(white.host)
+    }
+
+    # check the badwords next
+    @registry[:badwords].each { |badword|
+      next unless ['all', m.target.downcase].include?(badword.channel)
+      next unless badword.regexp.match(m.plainmessage)
+
+      m.reply "bad word detected! #{badword.action} for #{badword.timer} because: #{badword.reason}"
+      do_cmd(badword.action.to_sym, m.source.nick, m.target, badword.timer, badword.reason)
+      return
+    }
+
+    # and finally, see if the user triggered masshl
     mm = m.plainmessage.irc_downcase(m.server.casemap).split(/[\s\.,:]/)
     nicks_said = (m.channel.users.map { |u| u.downcase} & mm).size
     return unless nicks_said > 0 # not really needed, but saves some cycles
@@ -156,23 +174,6 @@ class BansPlugin < Plugin
     }
     return unless masshl_action
     do_cmd masshl_action.action.intern, m.sourcenick, m.channel, masshl_action.timer, masshl_action.reason
-  end
-
-  def listen(m)
-    return unless m.respond_to?(:public?) and m.public?
-    @registry[:whitelist].each { |white|
-      next unless ['all', m.target.downcase].include?(white.channel)
-      return if m.source.matches?(white.host)
-    }
-
-    @registry[:badwords].each { |badword|
-      next unless ['all', m.target.downcase].include?(badword.channel)
-      next unless badword.regexp.match(m.plainmessage)
-
-      m.reply "bad word detected! #{badword.action} for #{badword.timer} because: #{badword.reason}"
-      do_cmd(badword.action.to_sym, m.source.nick, m.target, badword.timer, badword.reason)
-      return
-    }
   end
 
   def join(m)
