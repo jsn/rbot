@@ -9,7 +9,7 @@
 #
 # Resolves the geographic locations of users (network-wide) and IP addresses
 
-module GeoIP
+module ::GeoIP
   class InvalidHostError < RuntimeError; end
 
   GEO_IP_PRIMARY   = "http://lakka.kapsi.fi:40086/lookup.yaml?host="
