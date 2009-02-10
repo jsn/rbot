@@ -19,7 +19,9 @@ module GeoIP
   REGEX  = {
     :country => %r{Country:.*?<a href=".*?" target="_blank"> (.*?)</a>}m,
     :region  => %r{Region:.*?<a href=".*?" target="_blank">(.*?)</a>}m,
-    :city    => %r{City:.*?<td align="left" class="arial_bold">(.*?)</td>}m
+    :city    => %r{City:.*?<td align="left" class="arial_bold">(.*?)</td>}m,
+    :lat     => %r{Latitude:.*?<td align="left" class="arial_bold">(.*?)</td>}m,
+    :lon     => %r{Longitude:.*?<td align="left" class="arial_bold">(.*?)</td>}m
   }
 
   def self.valid_host?(hostname)
