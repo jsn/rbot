@@ -632,7 +632,7 @@ module ::Irc
     # returns non-nil, its results are merged in _ds_ and returned. Otherwise
     # nil is returned.
     #
-    # The input DataStream shuold have the downloaded HTML as primary key
+    # The input DataStream should have the downloaded HTML as primary key
     # (:text) and possibly a :headers key holding the resonse headers.
     #
     def Utils.try_htmlinfo_filters(ds)
@@ -641,7 +641,7 @@ module ::Irc
       cur = nil
       # TODO filter priority
       filters.each { |n|
-        debug "testing filter #{n}"
+        debug "testing htmlinfo filter #{n}"
         cur = @@bot.filter(@@bot.global_filter_name(n, :htmlinfo), ds)
         debug "returned #{cur.pretty_inspect}"
         break if cur
