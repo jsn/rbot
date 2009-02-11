@@ -973,8 +973,22 @@ class Bot
   # Type can be PRIVMSG, NOTICE, etc, but those you should really use the
   # relevant say() or notice() methods. This one should be used for IRCd
   # extensions you want to use in modules.
-  def sendmsg(type, where, original_message, options={})
-    opts = @default_send_options.merge(options)
+  def sendmsg(original_type, original_where, original_message, options={})
+
+    # filter message with sendmsg filters
+    ds = DataStream.new original_message.to_s.dup,
+      :type => original_type, :dest => original_where,
+      :options => @default_send_options.merge(options)
+    filters = filter_names(:sendmsg)
+    filters.each do |fname|
+      debug "filtering #{ds[:text]} with sendmsg filter #{fname}"
+      ds.merge! filter(self.global_filter_name(fname, :sendmsg), ds)
+    end
+
+    opts = ds[:options]
+    type = ds[:type]
+    where = ds[:dest]
+    filtered = ds[:text]
 
     # For starters, set up appropriate queue channels and rings
     mchan = opts[:queue_channel]
@@ -995,7 +1009,7 @@ class Bot
       end
     end
 
-    multi_line = original_message.to_s.gsub(/[\r\n]+/, "\n")
+    multi_line = filtered.gsub(/[\r\n]+/, "\n")
 
     # if target is a channel with nocolor modes, strip colours
     if where.kind_of?(Channel) and where.mode.any?(*config['server.nocolor_modes'])
