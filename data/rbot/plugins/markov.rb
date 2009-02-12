@@ -99,10 +99,13 @@ class MarkovPlugin < Plugin
 
   def status(m,params)
     if @bot.config['markov.enabled']
-      m.reply "markov is currently enabled, #{probability?}% chance of chipping in, #{@learning_queue.length} messages in queue"
+      reply = "markov is currently enabled, #{probability?}% chance of chipping in"
+      l = @learning_queue.length
+      reply << ", #{l} messages in queue" if l > 0
     else
-      m.reply "markov is currently disabled"
+      reply = "markov is currently disabled"
     end
+    m.reply reply
   end
 
   def ignore?(m=nil)
