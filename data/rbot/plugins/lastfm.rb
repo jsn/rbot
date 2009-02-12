@@ -150,8 +150,8 @@ class LastFmPlugin < Plugin
 
   def tasteometer(m, params)
     opts = { :cache => false }
-    user1 = params[:user1].to_s
-    user2 = params[:user2].to_s
+    user1 = resolve_username(m, params[:user1])
+    user2 = resolve_username(m, params[:user2])
     xml = @bot.httputil.get_response("#{APIURL}method=tasteometer.compare&type1=user&type2=user&value1=#{CGI.escape user1}&value2=#{CGI.escape user2}", opts)
     doc = Document.new xml.body
     unless doc
@@ -163,18 +163,9 @@ class LastFmPlugin < Plugin
         error = doc.root.elements["error"].text
         error.match(/Invalid username: \[(.*)\]/);
         baduser = $1
-        if @registry.has_key? baduser and not params[:recurs]
-          if user1 == baduser
-            params[:user1] = @registry[baduser]
-          elsif user2 == baduser
-            params[:user2] = @registry[baduser]
-          end
-          params[:recurs] = true
-          tasteometer(m, params)
-        else
-          m.reply _("%{u} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>") % {:u => baduser}
-          return
-        end
+
+        m.reply _("%{u} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>") % {:u => baduser}
+        return
       else
         m.reply _("Bad: %{e}") % {:e => doc.root.element["error"].text}
         return
@@ -202,14 +193,7 @@ class LastFmPlugin < Plugin
 
   def now_playing(m, params)
     opts = { :cache => false }
-    user = nil
-    if params[:who]
-      user = params[:who].to_s
-    elsif @registry.has_key? m.sourcenick
-      user = @registry[ m.sourcenick ]
-    else
-      user = m.sourcenick
-    end
+    user = resolve_username(m, params[:who])
     xml = @bot.httputil.get_response("#{APIURL}method=user.getrecenttracks&user=#{CGI.escape user}", opts)
     doc = Document.new xml.body
     unless doc
@@ -218,14 +202,8 @@ class LastFmPlugin < Plugin
     end
     if xml.class == Net::HTTPBadRequest
       if doc.root.elements["error"].text == "Invalid user name supplied" then
-        if @registry.has_key? user and not params[:recurs]
-          params[:who] = @registry[ user ]
-          params[:recurs] = true
-          now_playing(m, params)
-        else
-          m.reply "#{user} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
-          return
-        end
+        m.reply "#{user} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
+        return
       else
         m.reply _("Error %{e}") % {:e => doc.root.element["error"].text}
         return
@@ -396,16 +374,7 @@ class LastFmPlugin < Plugin
     action = :topalbums if action == :topalbum
     action = :topartists if action == :topartist
     action = :toptags if action == :toptag
-    user = nil
-    if params[:user] then
-      user = params[:user].to_s
-    elsif @registry.has_key? m.sourcenick
-      user = @registry[ m.sourcenick ]
-    else
-      # m.reply "I don't know who you are on last.fm. Use 'lastfm set username' to identify yourself."
-      # return
-      user = m.sourcenick
-    end
+    user = resolve_username(m, params[:user])
     begin
       data = @bot.httputil.get("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
       m.reply "#{action} for #{user}:"
@@ -413,6 +382,11 @@ class LastFmPlugin < Plugin
     rescue
       m.reply "could not find #{action} for #{user} (is #{user} a user?). perhaps you need to: lastfm set <username>"
     end
+  end
+
+  def resolve_username(m, name)
+    name = m.sourcenick if name.nil?
+    @registry[name] or name
   end
 end
 
