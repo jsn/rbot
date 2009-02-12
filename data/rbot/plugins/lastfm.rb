@@ -82,7 +82,7 @@ class LastFmPlugin < Plugin
     when :now, :np
       _("lastfm now [<user>] => show the now playing track from last.fm.  np [<user>] does the same.")
     when :set
-      _("lastfm set user <user> => associate your current irc nick with a last.fm user. lastfm set verb <present> <past> => set your preferred now playing verb. default \"listening\" and \"listened\".")
+      _("lastfm set user <user> => associate your current irc nick with a last.fm user. lastfm set verb <present>, <past> => set your preferred now playing/just played verbs. default \"is listening to\" and \"listened to\".")
     when :who
       _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
     when :compare
@@ -252,18 +252,18 @@ class LastFmPlugin < Plugin
       past = Time.at(time.to_i)
     end
     if now == "true"
-       verb = _("listening")
+       verb = _("is listening to")
        if @registry.has_key? "#{m.sourcenick}_verb_present"
          verb = @registry["#{m.sourcenick}_verb_present"]
        end
-      m.reply _("%{u} is %{v} to \"%{t}\" by %{a} %{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
+       m.reply _("%{u} %{v} \"%{t}\" by %{a} %{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
     else
-      verb = _("listened")
+      verb = _("listened to")
        if @registry.has_key? "#{m.sourcenick}_verb_past"
          verb = @registry["#{m.sourcenick}_verb_past"]
        end
       ago = Utils.timeago(past)
-      m.reply _("%{u} %{v} to \"%{t}\" by %{a} %{b}%{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
+      m.reply _("%{u} %{v} \"%{t}\" by %{a} %{b}%{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
     end
   end
 
@@ -368,7 +368,7 @@ class LastFmPlugin < Plugin
     key = "#{m.sourcenick}_verb_"
     @registry[ "#{key}past" ] = past
     @registry[ "#{key}present" ] = present
-    m.reply _("Ok, I'll remember that %{n} prefers %{r} and %{p}.") % {:n => m.sourcenick, :p => past, :r => present}
+    m.reply _("Ok, I'll remember that %{n} prefers \"%{r}\" and \"%{p}\".") % {:n => m.sourcenick, :p => past, :r => present}
   end
 
   def get_user(m, params)
@@ -428,7 +428,7 @@ plugin.map 'lastfm track *track', :action => :find_track, :thread => true
 plugin.map 'lastfm set nick :who', :action => :set_user, :thread => true
 plugin.map 'lastfm set user :who', :action => :set_user, :thread => true
 plugin.map 'lastfm set username :who', :action => :set_user, :thread => true
-plugin.map 'lastfm set verb :present :past', :action => :set_verb, :thread => true
+plugin.map 'lastfm set verb *present, *past', :action => :set_verb, :thread => true
 plugin.map 'lastfm who :who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
 plugin.map 'lastfm compare :user1 :user2', :action => :tasteometer, :thread => true
