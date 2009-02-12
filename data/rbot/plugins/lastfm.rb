@@ -86,7 +86,7 @@ class LastFmPlugin < Plugin
     when :who
       _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
     when :compare
-      _("lastfm compare <nick1> <nick2> => show musical taste compatibility between nick1 and nick2.")
+      _("lastfm compare [<nick1>] <nick2> => show musical taste compatibility between nick1 (or user if omitted) and nick2")
     else
       _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who, compare")
     end
@@ -406,7 +406,8 @@ plugin.map 'lastfm set username :who', :action => :set_user, :thread => true
 plugin.map 'lastfm set verb *present, *past', :action => :set_verb, :thread => true
 plugin.map 'lastfm who :who', :action => :get_user, :thread => true
 plugin.map 'lastfm who', :action => :get_user, :thread => true
-plugin.map 'lastfm compare :user1 :user2', :action => :tasteometer, :thread => true
+plugin.map 'lastfm compare to :user2', :action => :tasteometer, :thread => true
+plugin.map 'lastfm compare [:user1] [to] :user2', :action => :tasteometer, :thread => true
 plugin.map 'np', :action => :now_playing, :thread => true
 plugin.map "lastfm [user] :action [:user]", :thread => true,
   :requirements => { :action =>
