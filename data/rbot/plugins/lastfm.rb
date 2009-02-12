@@ -158,15 +158,16 @@ class LastFmPlugin < Plugin
       m.reply _("last.fm parsing failed")
       return
     end
-    if xml.class == Net::HTTPInternalServerError
+    if xml.class == Net::HTTPBadRequest
       if doc.root.elements["error"].attributes["code"] == "7" then
         error = doc.root.elements["error"].text
         error.match(/Invalid username: \[(.*)\]/);
-        if @registry.has_key? $1 and not params[:recurs]
-          if user1 == $1
-            params[:user1] = @registry[ $1 ]
-          elsif user2 == $1
-            params[:user2] = @registry[ $1 ]
+        baduser = $1
+        if @registry.has_key? baduser and not params[:recurs]
+          if user1 == baduser
+            params[:user1] = @registry[baduser]
+          elsif user2 == baduser
+            params[:user2] = @registry[baduser]
           end
           params[:recurs] = true
           tasteometer(m, params)
