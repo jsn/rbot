@@ -399,8 +399,6 @@ plugin = LastFmPlugin.new
 plugin.map 'lastfm [:num] event[s] in *location', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm [:num] event[s] by *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [now] [:who]', :action => :now_playing, :thread => true
-plugin.map 'np :who', :action => :now_playing, :thread => true
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
 plugin.map 'lastfm track *track', :action => :find_track, :thread => true
@@ -409,8 +407,9 @@ plugin.map 'lastfm set verb *present, *past', :action => :set_verb, :thread => t
 plugin.map 'lastfm who [:who]', :action => :get_user, :thread => true
 plugin.map 'lastfm compare to :user2', :action => :tasteometer, :thread => true
 plugin.map 'lastfm compare [:user1] [to] :user2', :action => :tasteometer, :thread => true
-plugin.map 'np', :action => :now_playing, :thread => true
 plugin.map "lastfm [user] :action [:user]", :thread => true,
   :requirements => { :action =>
     /^(?:events|friends|neighbou?rs|playlists|recent?tracks|top(?:album|artist|tag)s?|weekly(?:album|artist|track)chart|weeklychartlist)$/
 }
+plugin.map 'lastfm [now] [:who]', :action => :now_playing, :thread => true
+plugin.map 'np [:who]', :action => :now_playing, :thread => true
