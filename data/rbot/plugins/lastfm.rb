@@ -84,11 +84,11 @@ class LastFmPlugin < Plugin
     when :set
       _("lastfm set user <user> => associate your current irc nick with a last.fm user. lastfm set verb <present>, <past> => set your preferred now playing/just played verbs. default \"is listening to\" and \"listened to\".")
     when :who
-      _("lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, show who you are at lastfm.")
+      _("lastfm who [<nick>] => show who <nick> is on last.fm. if <nick> is empty, show who you are on lastfm.")
     when :compare
       _("lastfm compare [<nick1>] <nick2> => show musical taste compatibility between nick1 (or user if omitted) and nick2")
     else
-      _("lastfm [<user>] => show your or <user>'s now playing track at lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who, compare")
+      _("lastfm [<user>] => show your or <user>'s now playing track on lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who, compare")
     end
   end
 
@@ -113,7 +113,7 @@ class LastFmPlugin < Plugin
       if doc.root and doc.root.attributes["status"] == "failed"
         m.reply doc.root.elements["error"].text
       else
-        m.reply _("Could not retrieve events")
+        m.reply _("could not retrieve events")
       end
     end
     disp_events = Array.new
@@ -164,10 +164,10 @@ class LastFmPlugin < Plugin
         error.match(/Invalid username: \[(.*)\]/);
         baduser = $1
 
-        m.reply _("%{u} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>") % {:u => baduser}
+        m.reply _("%{u} doesn't exist on last.fm") % {:u => baduser}
         return
       else
-        m.reply _("Bad: %{e}") % {:e => doc.root.element["error"].text}
+        m.reply _("error: %{e}") % {:e => doc.root.element["error"].text}
         return
       end
     end
@@ -202,10 +202,12 @@ class LastFmPlugin < Plugin
     end
     if xml.class == Net::HTTPBadRequest
       if doc.root.elements["error"].text == "Invalid user name supplied" then
-        m.reply "#{user} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
+        m.reply _("%{user} doesn't exist on last.fm, perhaps they need to: lastfm 2 <username>") % {
+          :user => user
+        }
         return
       else
-        m.reply _("Error %{e}") % {:e => doc.root.element["error"].text}
+        m.reply _("error: %{e}") % {:e => doc.root.element["error"].text}
         return
       end
     end
@@ -249,7 +251,7 @@ class LastFmPlugin < Plugin
   def find_artist(m, params)
     xml = @bot.httputil.get("#{APIURL}method=artist.getinfo&artist=#{CGI.escape params[:artist].to_s}")
     unless xml
-      m.reply _("I had problems getting info for %{a}.") % {:a => params[:artist]}
+      m.reply _("I had problems getting info for %{a}") % {:a => params[:artist]}
       return
     end
     doc = Document.new xml
@@ -262,7 +264,7 @@ class LastFmPlugin < Plugin
     playcount = first.elements["stats"].elements["playcount"].text
     listeners = first.elements["stats"].elements["listeners"].text
     summary = first.elements["bio"].elements["summary"].text
-    m.reply _("%{b}%{a}%{b} has been played %{c} times and is being listened to by %{l} people.") % {:b => Bold, :a => artist, :c => playcount, :l => listeners}
+    m.reply _("%{b}%{a}%{b} has been played %{c} times and is being listened to by %{l} people") % {:b => Bold, :a => artist, :c => playcount, :l => listeners}
     m.reply summary.ircify_html
   end
 
@@ -270,7 +272,7 @@ class LastFmPlugin < Plugin
     track = params[:track].to_s
     xml = @bot.httputil.get("#{APIURL}method=track.search&track=#{CGI.escape track}")
     unless xml
-      m.reply _("I had problems getting info for %{a}.") % {:a => track}
+      m.reply _("I had problems getting info for %{a}") % {:a => track}
       return
     end
     debug xml
@@ -331,14 +333,14 @@ class LastFmPlugin < Plugin
       return
     end
     year = "(#{album[2]}) " unless album[2] == nil
-    m.reply _("The album \"%{a}\" by %{r} %{y}has been played %{c} times.") % {:a => album[1], :r => album[0], :y => year, :c => album[3]}
+    m.reply _("the album \"%{a}\" by %{r} %{y}has been played %{c} times") % {:a => album[1], :r => album[0], :y => year, :c => album[3]}
   end
 
   def set_user(m, params)
     user = params[:who].to_s
     nick = m.sourcenick
     @registry[ nick ] = user
-    m.reply _("Ok, I'll remember that %{n} is %{u} at last.fm") % {:n => nick, :u => user}
+    m.reply _("okay, I'll remember that %{n} is %{u} on last.fm") % {:n => nick, :u => user}
   end
 
   def set_verb(m, params)
@@ -347,7 +349,7 @@ class LastFmPlugin < Plugin
     key = "#{m.sourcenick}_verb_"
     @registry[ "#{key}past" ] = past
     @registry[ "#{key}present" ] = present
-    m.reply _("Ok, I'll remember that %{n} prefers \"%{r}\" and \"%{p}\".") % {:n => m.sourcenick, :p => past, :r => present}
+    m.reply _("okay, I'll remember that %{n} prefers \"%{r}\" and \"%{p}\"") % {:n => m.sourcenick, :p => past, :r => present}
   end
 
   def get_user(m, params)
@@ -359,9 +361,12 @@ class LastFmPlugin < Plugin
     end
     if @registry.has_key? nick
       user = @registry[ nick ]
-      m.reply "#{nick} is #{user} at last.fm"
+      m.reply _("%{nick} is %{user} on last.fm") % {
+        :nick => nick,
+        :user => user
+      }
     else
-      m.reply _("Sorry, I don't know who %{n} is at last.fm perhaps you need to: lastfm set <username>") % {:n => nick}
+      m.reply _("sorry, I don't know who %{n} is on last.fm, perhaps they need to: lastfm set user <username>") % {:n => nick}
     end
   end
 
