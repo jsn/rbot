@@ -437,36 +437,25 @@ class Bot
           botclass.gsub!("\\","/")
         end
       end
-      botclass += "/.rbot"
+      botclass = File.join(botclass, ".rbot")
     end
     botclass = File.expand_path(botclass)
     @botclass = botclass.gsub(/\/$/, "")
 
-    if FileTest.directory? botclass
-      # compare the templates dir with the current botclass, and fill it in with
-      # any missing file.
-      # Sadly, FileUtils.cp_r doesn't have an :update option, so we have to do it
-      # manually
-      template = File.join Config::datadir, 'templates'
-      # note that we use the */** pattern because we don't want to match
-      # keywords.rbot, which gets deleted on load and would therefore be missing always
-      missing = Dir.chdir(template) { Dir.glob('*/**') } - Dir.chdir(botclass) { Dir.glob('*/**') }
-      missing.map do |f|
-        dest = File.join(botclass, f)
-        FileUtils.mkdir_p(File.dirname dest)
-        FileUtils.cp File.join(template, f), dest
-      end
-    else
-      log "no #{botclass} directory found, creating from templates.."
-      if FileTest.exist? botclass
-        error "file #{botclass} exists but isn't a directory"
-        exit 2
-      end
-      FileUtils.cp_r Config::datadir+'/templates', botclass
-    end
+    repopulate_botclass_directory
 
-    Dir.mkdir("#{botclass}/registry") unless File.exist?("#{botclass}/registry")
-    Dir.mkdir("#{botclass}/safe_save") unless File.exist?("#{botclass}/safe_save")
+    registry_dir = File.join(@botclass, 'registry')
+    Dir.mkdir(registry_dir) unless File.exist?(registry_dir)
+    unless FileTest.directory? registry_dir
+      error "registry storage location #{registry_dir} is not a directory"
+      exit 2
+    end
+    save_dir = File.join(@botclass, 'safe_save')
+    Dir.mkdir(save_dir) unless File.exist?(save_dir)
+    unless FileTest.directory? save_dir
+      error "safe save location #{save_dir} is not a directory"
+      exit 2
+    end
 
     # Time at which the last PING was sent
     @last_ping = nil
@@ -490,7 +479,9 @@ class Bot
 
     @logfile = @config['log.file']
     if @logfile.class!=String || @logfile.empty?
-      @logfile = "#{botclass}/#{File.basename(botclass).gsub(/^\.+/,'')}.log"
+      logfname =  File.basename(botclass).gsub(/^\.+/,'')
+      logfname << ".log"
+      @logfile = File.join(botclass, logfname)
       debug "Using `#{@logfile}' as debug log"
     end
 
@@ -549,7 +540,7 @@ class Bot
       end
     end
 
-    File.open($opts['pidfile'] || "#{@botclass}/rbot.pid", 'w') do |pf|
+    File.open($opts['pidfile'] || File.join(@botclass, 'rbot.pid'), 'w') do |pf|
       pf << "#{$$}\n"
     end
 
@@ -579,7 +570,6 @@ class Bot
     @auth.everyone.set_default_permission("*", true)
     @auth.botowner.password= @config['auth.password']
 
-    Dir.mkdir("#{botclass}/plugins") unless File.exist?("#{botclass}/plugins")
     @plugins = Plugins::manager
     @plugins.bot_associate(self)
     setup_plugins_path()
@@ -776,14 +766,47 @@ class Bot
     trap_sigs
   end
 
+  def repopulate_botclass_directory
+    template_dir = File.join Config::datadir, 'templates'
+    if FileTest.directory? @botclass
+      # compare the templates dir with the current botclass dir, filling up the
+      # latter with any missing file. Sadly, FileUtils.cp_r doesn't have an
+      # :update option, so we have to do it manually.
+      # Note that we use the */** pattern because we don't want to match
+      # keywords.rbot, which gets deleted on load and would therefore be missing
+      # always
+      missing = Dir.chdir(template_dir) { Dir.glob('*/**') } - Dir.chdir(@botclass) { Dir.glob('*/**') }
+      missing.map do |f|
+        dest = File.join(@botclass, f)
+        FileUtils.mkdir_p(File.dirname dest)
+        FileUtils.cp File.join(template_dir, f), dest
+      end
+    else
+      log "no #{@botclass} directory found, creating from templates..."
+      if FileTest.exist? @botclass
+        error "file #{@botclass} exists but isn't a directory"
+        exit 2
+      end
+      FileUtils.cp_r template_dir, @botclass
+    end
+  end
+
   def setup_plugins_path
+    plugdir_default = File.join(Config::datadir, 'plugins')
+    plugdir_local = File.join(@botclass, 'plugins')
+    Dir.mkdir(plugdir_local) unless File.exist?(plugdir_local)
+
     @plugins.clear_botmodule_dirs
-    @plugins.add_botmodule_dir(Config::coredir + "/utils")
+    @plugins.add_botmodule_dir(File.join(Config::coredir, 'utils'))
     @plugins.add_botmodule_dir(Config::coredir)
-    @plugins.add_botmodule_dir("#{botclass}/plugins")
+    if FileTest.directory? plugdir_local
+      @plugins.add_botmodule_dir(plugdir_local)
+    else
+      warning "local plugin location #{plugdir_local} is not a directory"
+    end
 
     @config['plugins.path'].each do |_|
-        path = _.sub(/^\(default\)/, Config::datadir + '/plugins')
+        path = _.sub(/^\(default\)/, plugdir_default)
         @plugins.add_botmodule_dir(path)
     end
   end
