@@ -15,7 +15,11 @@
 
 
 # requires Ruby/DICT <http://www.caliban.org/ruby/ruby-dict.shtml>
-require 'dict'
+begin
+  require 'dict'
+rescue LoadError
+  raise LoadError, "Ruby/DICT not found, grab it from http://www.caliban.org/ruby/ruby-dict.shtml"
+end
 
 class ::String
   # Returns a new string truncated to length 'to'
