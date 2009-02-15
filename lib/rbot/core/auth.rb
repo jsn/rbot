@@ -817,13 +817,13 @@ class AuthModule < CoreBotModule
 
   def auth_export(m, params)
 
-    exportfile = "#{@bot.botclass}/new-auth.users"
+    exportfile = @bot.path "new-auth.users"
 
     what = params[:things]
 
     has_to = what[-2] == "to"
     if has_to
-      exportfile = "#{@bot.botclass}/#{what[-1]}"
+      exportfile = @bot.path what[-1]
       what.slice!(-2,2)
     end
 
@@ -889,13 +889,13 @@ class AuthModule < CoreBotModule
 
   def auth_import(m, params)
 
-    importfile = "#{@bot.botclass}/new-auth.users"
+    importfile = @bot.path "new-auth.users"
 
     what = params[:things]
 
     has_from = what[-2] == "from"
     if has_from
-      importfile = "#{@bot.botclass}/#{what[-1]}"
+      importfile = @bot.path what[-1]
       what.slice!(-2,2)
     end
 

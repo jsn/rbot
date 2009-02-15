@@ -186,8 +186,9 @@ class QuizPlugin < Plugin
   def fetch_data( m )
     # Read the winning messages file 
     @win_messages = Array.new
-    if File.exists? "#{@bot.botclass}/quiz/win_messages"
-      IO.foreach("#{@bot.botclass}/quiz/win_messages") { |line| @win_messages << line.chomp }
+    winfile = datafile 'win_messages'
+    if File.exists? winfile
+      IO.foreach(winfile) { |line| @win_messages << line.chomp }
     else
       warning( "win_messages file not found!" )
       # Fill the array with a least one message or code accessing it would fail
@@ -212,13 +213,13 @@ class QuizPlugin < Plugin
           m.reply "Failed to download questions from #{p}, ignoring sources"
         end
       else
-        path = "#{@bot.botclass}/quiz/#{p}"
+        path = datafile p
         debug "Fetching from #{path}"
 
         # Local data
         begin
-          datafile = File.new( path, File::RDONLY )
-          data << "\n\n" << datafile.read
+          file = File.new( path, File::RDONLY )
+          data << "\n\n" << file.read
         rescue
           m.reply "Failed to read from local database file #{p}, skipping."
         end

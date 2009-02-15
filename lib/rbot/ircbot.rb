@@ -791,6 +791,12 @@ class Bot
     end
   end
 
+  # Return a path under the current botclass by joining the mentioned
+  # components. The components are automatically converted to String
+  def path(*components)
+    File.join(@botclass, *(components.map {|c| c.to_s}))
+  end
+
   def setup_plugins_path
     plugdir_default = File.join(Config::datadir, 'plugins')
     plugdir_local = File.join(@botclass, 'plugins')

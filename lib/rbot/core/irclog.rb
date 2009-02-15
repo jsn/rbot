@@ -33,7 +33,9 @@ class IrcLogModule < CoreBotModule
     @queue = Queue.new
     @thread = Thread.new { loggers_thread }
     @logs = Hash.new
-    Dir.mkdir("#{@bot.botclass}/logs") unless File.exist?("#{@bot.botclass}/logs")
+    logdir = @bot.path 'logs'
+    Dir.mkdir(logdir) unless File.exist?(logdir)
+    # TODO what shall we do if the logdir couldn't be created? (e.g. it existed as a file)
     event_irclog_list_changed(@bot.config['irclog.no_log'], @bot.config['irclog.do_log'])
     @fn_format = @bot.config['irclog.filename_format']
   end
@@ -244,7 +246,7 @@ class IrcLogModule < CoreBotModule
   end
 
   def logfilepath(where_str, now)
-    File.join(@bot.botclass, 'logs', now.strftime(@fn_format) % { :where => where_str })
+    @bot.path('logs', now.strftime(@fn_format) % { :where => where_str })
   end
 
   protected

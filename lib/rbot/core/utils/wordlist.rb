@@ -11,7 +11,7 @@ module ::Irc
 class Bot
 class Wordlist
   def self.wordlist_base
-    @@wordlist_base ||= File.join(Utils.bot.botclass, 'wordlists')
+    @@wordlist_base ||= Utils.bot.path 'wordlists'
   end
 
   def self.get(path, options={})

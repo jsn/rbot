@@ -52,18 +52,20 @@ module Irc
     def initialize(bot, key, absfilename=false)
       @bot = bot
       @key = key
+      relfilename = @bot.path key
+      relfilename << '.db'
       if absfilename && File.exist?(key)
         # db already exists, use it
         @db = DBHash.open_db(key)
-      elsif File.exist?(@bot.botclass + "/#{key}.db")
-        # db already exists, use it
-        @db = DBHash.open_db(@bot.botclass + "/#{key}.db")
       elsif absfilename
         # create empty db
         @db = DBHash.create_db(key)
+      elsif File.exist? relfilename
+        # db already exists, use it
+        @db = DBHash.open_db relfilename
       else
         # create empty db
-        @db = DBHash.create_db(@bot.botclass + "/#{key}.db")
+        @db = DBHash.create_db relfilename
       end
     end
 
@@ -98,14 +100,17 @@ module Irc
       @key = key
       if @@env.nil?
         begin
-          @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER, "set_lg_max" => @@lg_max)
+          @@env = BDB::Env.open(@bot.botclass, BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER, "set_lg_max" => @@lg_max)
           debug "DBTree: environment opened with max log size #{@@env.conf['lg_max']}"
         rescue => e
           debug "DBTree: failed to open environment: #{e.pretty_inspect}. Retrying ..."
-          @@env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
+          @@env = BDB::Env.open(@bot.botclass, BDB::INIT_TRANSACTION | BDB::CREATE |  BDB::RECOVER)
         end
-        #@@env = BDB::Env.open("#{@bot.botclass}", BDB::CREATE | BDB::INIT_MPOOL | BDB::RECOVER)
+        #@@env = BDB::Env.open(@bot.botclass, BDB::CREATE | BDB::INIT_MPOOL | BDB::RECOVER)
       end
+
+      relfilename = @bot.path key
+      relfilename << '.db'
 
       if absfilename && File.exist?(key)
         # db already exists, use it
@@ -113,12 +118,12 @@ module Irc
       elsif absfilename
         # create empty db
         @db = DBTree.create_db(key)
-      elsif File.exist?(@bot.botclass + "/#{key}.db")
+      elsif File.exist? relfilename
         # db already exists, use it
-        @db = DBTree.open_db(@bot.botclass + "/#{key}.db")
+        @db = DBTree.open_db relfilename
       else
         # create empty db
-        @db = DBTree.create_db(@bot.botclass + "/#{key}.db")
+        @db = DBTree.create_db relfilename
       end
     end
 

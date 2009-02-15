@@ -120,7 +120,7 @@ class FactoidsPlugin < Plugin
     super
 
     # TODO config
-    @dir = File.join(@bot.botclass,"factoids")
+    @dir = datafile
     @filename = "factoids.rbot"
     @factoids = FactoidList.new
     @triggers = Set.new

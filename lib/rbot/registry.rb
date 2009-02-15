@@ -16,30 +16,30 @@ class Bot
     # NB this function is called _early_ in init(), pretty much all you have to
     # work with is @bot.botclass.
     def upgrade_data
-      if File.exist?("#{@bot.botclass}/registry.db")
+      oldreg = @bot.path 'registry.db'
+      newreg = @bot.path 'plugin_registry.db'
+      if File.exist?(oldreg)
         log _("upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format")
-        old = BDB::Hash.open("#{@bot.botclass}/registry.db", nil,
-                             "r+", 0600)
-        new = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
-                                BDB::CREATE | BDB::EXCL,
-                                0600)
+        old = BDB::Hash.open(oldreg, nil, "r+", 0600)
+        new = BDB::CIBtree.open(newreg, nil, BDB::CREATE | BDB::EXCL, 0600)
         old.each {|k,v|
           new[k] = v
         }
         old.close
         new.close
-        File.rename("#{@bot.botclass}/registry.db", "#{@bot.botclass}/registry.db.old")
+        File.rename(oldreg, oldreg + ".old")
       end
     end
 
     def upgrade_data2
-      if File.exist?("#{@bot.botclass}/plugin_registry.db")
-        Dir.mkdir("#{@bot.botclass}/registry") unless File.exist?("#{@bot.botclass}/registry")
-        env = BDB::Env.open("#{@bot.botclass}", BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)# | BDB::TXN_NOSYNC)
+      oldreg = @bot.path 'plugin_registry.db'
+      newdir = @bot.path 'registry'
+      if File.exist?(oldreg)
+        Dir.mkdir(newdir) unless File.exist?(newdir)
+        env = BDB::Env.open(@bot.botclass, BDB::INIT_TRANSACTION | BDB::CREATE | BDB::RECOVER)# | BDB::TXN_NOSYNC)
         dbs = Hash.new
         log _("upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split format")
-        old = BDB::CIBtree.open("#{@bot.botclass}/plugin_registry.db", nil,
-          "r+", 0600, "env" => env)
+        old = BDB::CIBtree.open(oldreg, nil, "r+", 0600, "env" => env)
         old.each {|k,v|
           prefix,key = k.split("/", 2)
           prefix.downcase!
@@ -64,7 +64,7 @@ class Bot
           dbs[prefix][key] = v
         }
         old.close
-        File.rename("#{@bot.botclass}/plugin_registry.db", "#{@bot.botclass}/plugin_registry.db.old")
+        File.rename(oldreg, oldreg + ".old")
         dbs.each {|k,v|
           log _("closing db #{k}")
           v.close
@@ -126,7 +126,7 @@ class Bot
     def initialize(bot, name)
       @bot = bot
       @name = name.downcase
-      @filename = "#{@bot.botclass}/registry/#{@name}"
+      @filename = @bot.path 'registry', @name
       dirs = File.dirname(@filename).split("/")
       dirs.length.times { |i|
         dir = dirs[0,i+1].join("/")+"/"

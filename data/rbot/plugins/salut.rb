@@ -168,7 +168,7 @@ class SalutPlugin < Plugin
     @all_langs = @bot.config['salut.all_languages']
     if @all_langs
       # Get all available languages
-      langs = Dir.new("#{@bot.botclass}/salut").collect {|f|
+      langs = Dir.new(datafile).collect {|f|
         f =~ /salut-([^.]+)/ ? $1 : nil
       }.compact
       langs.each { |lang|
@@ -183,11 +183,11 @@ class SalutPlugin < Plugin
   end
 
   def load_lang(lang)
-    dir = "#{@bot.botclass}/salut"
+    dir = datafile
     if not File.exist?(dir)
       Dir.mkdir(dir)
     end
-    file = "#{@bot.botclass}/salut/salut-#{lang}"
+    file = File.join dir, "salut-#{lang}"
     if File.exist?(file)
       begin
         salutations = Hash.new
@@ -214,7 +214,7 @@ class SalutPlugin < Plugin
   end
 
   def save_lang(lang, val)
-    fn = "#{@bot.botclass}/salut/salut-#{lang}"
+    fn = datafile "salut-#{lang}"
     Utils.safe_save(fn) { |file|
       file.puts val.to_yaml
     }

@@ -18,12 +18,16 @@ class DebugPlugin < Plugin
     :default => "",
     :desc => "Directory where profile/string dumps are to be stored")
 
+  def dirname
+    @bot.config['debug.logdir']
+  end
+
   def initialize
     super
     @prev = Hash.new(0)
     @curr = Hash.new(0)
     @delta = Hash.new(0)
-    @file = File.open("#{@bot.botclass}/#{@bot.config['debug.logdir']}/memory_profiler.log",'w')
+    @file = File.open(datafile("memory_profiler.log"), 'w')
     @thread = @bot.timer.add(@bot.config['debug.interval']) {
         begin
           GC.start
@@ -39,7 +43,7 @@ class DebugPlugin < Plugin
           end
 
           if @bot.config['debug.dump_strings']
-            File.open("#{@bot.botclass}/#{@bot.config['debug.logdir']}/memory_profiler_strings.log.#{Time.now.to_i}",'w') do |f|
+            File.open(datafile("memory_profiler_strings.log.#{Time.now.to_i}"), 'w') do |f|
               curr_strings.sort.each do |s|
                 f.puts s
               end
@@ -107,7 +111,7 @@ class DebugPlugin < Plugin
         end
       end
 
-      File.open("#{@bot.botclass}/#{@bot.config['debug.logdir']}/memory_profiler_strings.log.#{Time.now.to_i}",'w') do |f|
+      File.open(datafile("memory_profiler_strings.log.#{Time.now.to_i}"), 'w') do |f|
         curr_strings.sort.each do |s|
           f.puts s
         end

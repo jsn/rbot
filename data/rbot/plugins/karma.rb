@@ -14,16 +14,17 @@ class KarmaPlugin < Plugin
     @registry.set_default(0)
 
     # import if old file format found
-    if(File.exist?("#{@bot.botclass}/karma.rbot"))
+    oldkarma = @bot.path 'karma.rbot'
+    if File.exist? oldkarma
       log "importing old karma data"
-      IO.foreach("#{@bot.botclass}/karma.rbot") do |line|
+      IO.foreach(oldkarma) do |line|
         if(line =~ /^(\S+)<=>([\d-]+)$/)
           item = $1
           karma = $2.to_i
           @registry[item] = karma
         end
       end
-      File.delete("#{@bot.botclass}/karma.rbot")
+      File.delete oldkarma
     end
   end
 

@@ -41,12 +41,12 @@ class LartPlugin < Plugin
 
     # We may be on an old installation, so on the first run read non-language-specific larts
     unless defined?(@oldlart)
-      @oldlart = "#{@bot.botclass}/lart/larts"
-      @oldpraise = "#{@bot.botclass}/lart/praise"
+      @oldlart = datafile 'larts'
+      @oldpraise = datafile 'praise'
     end
 
-    @lartfile.replace "#{@bot.botclass}/lart/larts-#{lang}"
-    @praisefile.replace "#{@bot.botclass}/lart/praises-#{lang}"
+    @lartfile.replace(datafile "larts-#{lang}")
+    @praisefile.replace(datafile "praises-#{lang}")
     @larts.clear
     @praises.clear
     if File.exists? @lartfile
@@ -72,8 +72,7 @@ class LartPlugin < Plugin
 
   def save
     return unless @changed
-    Dir.mkdir("#{@bot.botclass}/lart") if not FileTest.directory? "#{@bot.botclass}/lart"
-    # TODO implement safe saving here too
+    Dir.mkdir(datafile) unless FileTest.directory? datafile
     Utils.safe_save(@lartfile) { |file|
       file.puts @larts
     }

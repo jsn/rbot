@@ -38,8 +38,8 @@ class AliasPlugin < Plugin
 
   def initialize
     super
-    @data_path = "#{@bot.botclass}/alias/"
-    @data_file = "#{@data_path}/aliases.yaml"
+    @data_path = datafile
+    @data_file = File.join(@data_path, 'aliases.yaml')
     # hash of alias => command entries
     data = nil
     aliases = if File.exist?(@data_file) &&

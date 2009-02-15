@@ -150,7 +150,7 @@ class AzGamePlugin < Plugin
     },
     }
 
-    @autoadd_base = "#{@bot.botclass}/azgame/autoadd-"
+    @autoadd_base = datafile "autoadd-"
   end
 
   def initialize_wordlist(params)

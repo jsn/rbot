@@ -169,7 +169,7 @@ module ::Irc
     def Utils.bot=(b)
       debug "initializing utils"
       @@bot = b
-      @@safe_save_dir = "#{@@bot.botclass}/safe_save"
+      @@safe_save_dir = @@bot.path('safe_save')
     end
 
 

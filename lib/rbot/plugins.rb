@@ -349,6 +349,20 @@ module Plugins
         @bot.plugins.mark_priorities_dirty
       end
     end
+
+    # Directory name to be joined to the botclass to access data files. By
+    # default this is the plugin name itself, but may be overridden, for
+    # example by plugins that share their datafiles or for backwards
+    # compatibilty
+    def dirname
+      name
+    end
+
+    # Filename for a datafile built joining the botclass, plugin dirname and
+    # actual file name
+    def datafile(*fname)
+      @bot.path dirname, *fname
+    end
   end
 
   # A CoreBotModule is a BotModule that provides core functionality.

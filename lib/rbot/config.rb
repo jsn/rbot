@@ -262,9 +262,10 @@ module Config
       return unless @bot
 
       @changed = false
-      if(File.exist?("#{@bot.botclass}/conf.yaml"))
+      conf = @bot.path 'conf.yaml'
+      if File.exist? conf
         begin
-          newconfig = YAML::load_file("#{@bot.botclass}/conf.yaml")
+          newconfig = YAML::load_file conf
           newconfig.each { |key, val|
             @config[key.to_sym] = val
           }
@@ -327,8 +328,10 @@ module Config
         return
       end
       begin
+	conf = @bot.path 'conf.yaml'
+	fnew = conf + '.new'
         debug "Writing new conf.yaml ..."
-        File.open("#{@bot.botclass}/conf.yaml.new", "w") do |file|
+        File.open(fnew, "w") do |file|
           savehash = {}
           @config.each { |key, val|
             savehash[key.to_s] = val
@@ -336,8 +339,7 @@ module Config
           file.puts savehash.to_yaml
         end
         debug "Officializing conf.yaml ..."
-        File.rename("#{@bot.botclass}/conf.yaml.new",
-                    "#{@bot.botclass}/conf.yaml")
+        File.rename(fnew, conf)
         @changed = false
       rescue => e
         error "failed to write configuration file conf.yaml! #{$!}"
