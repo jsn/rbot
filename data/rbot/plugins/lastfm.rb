@@ -37,9 +37,9 @@ class ::LastFmEvent
 
   def compact_display
    if @attendance
-     return "%s %s @ %s (%s attending) %s" % [@date.strftime("%a %b, %d %Y"), @artist_string, @location, @attendance, @url]
+     return "%s %s @ %s (%s attending) %s" % [@date.strftime("%a, %b %d"), @artist_string, @location, @attendance, @url]
    end
-   return "%s %s @ %s %s" % [@date.strftime("%a %b, %d %Y"), @artist_string, @location, @url]
+   return "%s %s @ %s %s" % [@date.strftime("%a, %b %d"), @artist_string, @location, @url]
   end
   alias :to_s :compact_display
 
