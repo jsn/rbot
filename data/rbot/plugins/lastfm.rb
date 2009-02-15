@@ -103,8 +103,10 @@ class LastFmPlugin < Plugin
     uri = nil
     if artist == nil
       uri = "#{APIURL}method=geo.getevents&location=#{CGI.escape location}"
+      emptymsg = _("no events found in %{location}") % {:location => location}
     else
       uri = "#{APIURL}method=artist.getevents&artist=#{CGI.escape artist}"
+      emptymsg = _("no events found by %{artist}") % {:artist => artist}
     end
     xml = @bot.httputil.get_response(uri)
 
@@ -141,6 +143,10 @@ class LastFmPlugin < Plugin
       h[:artists] = artists
       events << LastFmEvent.new(h)
     }
+    if events.empty?
+      m.reply emptymsg
+      return
+    end
     events[0...num].each { |event|
       disp_events << event.to_s
     }
