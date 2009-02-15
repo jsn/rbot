@@ -177,9 +177,8 @@ class LastFmPlugin < Plugin
         return
       end
     end
-    now = artist = track = albumtxt = date = nil
     score = doc.root.elements["comparison/result/score"].text.to_f
-    rating = nil
+    artists = doc.root.get_elements("comparison/result/artists/artist").map { |e| e.elements["name"].text}
     case
       when score >= 0.9
         rating = _("Super")
@@ -194,7 +193,19 @@ class LastFmPlugin < Plugin
       else
         rating = _("Very Low")
     end
-    m.reply _("%{a}'s and %{b}'s musical compatibility rating is: %{r}") % {:a => user1, :b => user2, :r => rating}
+
+    reply = _("%{a}'s and %{b}'s musical compatibility rating is %{bold}%{r}%{bold}") % {
+      :a => user1,
+      :b => user2,
+      :r => rating.downcase,
+      :bold => Bold
+    }
+
+    reply << _(" and music they have in common includes: %{artists}") % {
+      :artists => artists.join(", ")
+    } unless artists.empty?
+
+    m.reply reply
   end
 
   def now_playing(m, params)
