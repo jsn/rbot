@@ -276,24 +276,39 @@ class LastFmPlugin < Plugin
   end
 
   def find_artist(m, params)
-    xml = @bot.httputil.get("#{APIURL}method=artist.getinfo&artist=#{CGI.escape params[:artist].to_s}")
-    unless xml
+    info_xml = @bot.httputil.get("#{APIURL}method=artist.getinfo&artist=#{CGI.escape params[:artist].to_s}")
+    unless info_xml
       m.reply _("I had problems getting info for %{a}") % {:a => params[:artist]}
       return
     end
-    doc = Document.new xml
-    unless doc
+    info_doc = Document.new info_xml
+    unless info_doc
       m.reply _("last.fm parsing failed")
       return
     end
-    first = doc.root.elements["artist"]
+    tags_xml = @bot.httputil.get("#{APIURL}method=artist.gettoptags&artist=#{CGI.escape params[:artist].to_s}")
+    tags_doc = Document.new tags_xml
+
+    first = info_doc.root.elements["artist"]
     artist = first.elements["name"].text
     url = first.elements["url"].text
-    playcount = first.elements["stats"].elements["playcount"].text
-    listeners = first.elements["stats"].elements["listeners"].text
+    stats = {}
+    %w(playcount listeners).each do |e|
+      t = first.elements["stats/#{e}"].text
+      stats[e.to_sym] = t.gsub(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1,")
+    end
     summary = first.elements["bio"].elements["summary"].text
-    m.reply _("%{b}%{a}%{b} <%{u}> has been played %{c} times and is being listened to by %{l} people") % {
-      :b => Bold, :a => artist, :u => url, :c => playcount, :l => listeners}
+    similar = first.get_elements("similar/artist").map { |a|
+      _("%{b}%{a}%{b}") % { :a => a.elements["name"].text, :b => Bold } }
+    tags = tags_doc.root.get_elements("toptags/tag")[0..4].map { |t|
+      _("%{u}%{t}%{u}") % { :t => t.elements["name"].text, :u => Underline } }
+    reply = _("%{b}%{a}%{b} <%{u}> has been played %{b}%{c}%{b} times and is being listened to by %{b}%{l}%{b} people") % {
+      :b => Bold, :a => artist, :u => url, :c => stats[:playcount], :l => stats[:listeners] }
+    reply << _(". Tagged as: %{t}") % {
+      :t => tags.join(", "), :b => Bold } unless tags.empty?
+    reply << _(". Similar artists: %{s}") % {
+      :s => similar.join(", "), :b => Bold } unless similar.empty?
+    m.reply reply
     m.reply summary.ircify_html
   end
 
