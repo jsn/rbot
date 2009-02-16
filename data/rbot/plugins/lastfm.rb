@@ -550,7 +550,11 @@ class LastFmPlugin < Plugin
           :bold   => Bold
         }
       end
-      m.reply items[0, num].join(", ")
+      if items.empty?
+        m.reply _("%{user} hasn't played anything in this period of time") % { :user => user }
+      else
+        m.reply items[0, num].join(", ")
+      end
     end
   end
 
