@@ -53,6 +53,18 @@ class LastFmPlugin < Plugin
   Config.register Config::IntegerValue.new('lastfm.default_events',
     :default => 3, :validate => Proc.new{|v| v > 1},
     :desc => "Default number of events to display.")
+  Config.register Config::IntegerValue.new('lastfm.max_shouts',
+    :default => 5, :validate => Proc.new{|v| v > 1},
+    :desc => "Maximum number of user shouts to display.")
+  Config.register Config::IntegerValue.new('lastfm.default_shouts',
+    :default => 3, :validate => Proc.new{|v| v > 1},
+    :desc => "Default number of user shouts to display.")
+  Config.register Config::IntegerValue.new('lastfm.max_user_data',
+    :default => 25, :validate => Proc.new{|v| v > 1},
+    :desc => "Maximum number of user data entries (except events and shouts) to display.")
+  Config.register Config::IntegerValue.new('lastfm.default_user_data',
+    :default => 10, :validate => Proc.new{|v| v > 1},
+    :desc => "Default number of user data entries (except events and shouts) to display.")
 
   APIKEY = "b25b959554ed76058ac220b7b2e0a026"
   APIURL = "http://ws.audioscrobbler.com/2.0/?api_key=#{APIKEY}&"
@@ -398,6 +410,14 @@ class LastFmPlugin < Plugin
       params[:action]
     end.to_sym
 
+    if action == :shouts
+      num = params[:num] || @bot.config['lastfm.default_shouts']
+      num = num.to_i.clip(1, @bot.config['lastfm.max_shouts'])
+    else
+      num = params[:num] || @bot.config['lastfm.default_user_data']
+      num = num.to_i.clip(1, @bot.config['lastfm.max_user_data'])
+    end
+
     user = resolve_username(m, params[:user])
     uri = "#{APIURL}method=user.get#{action}&user=#{CGI.escape user}"
 
@@ -425,71 +445,88 @@ class LastFmPlugin < Plugin
       return
     end
 
+    seemore =  _("; see %{uri} for more")
     case action
     when :friends
       friends = doc.root.get_elements("friends/user").map do |u|
         u.elements["name"].text
       end
 
-      unless friends.empty?
-        m.reply _("%{user} has %{total} friends; %{friends}") %
-          { :user => user, :total => friends.size, :friends => friends.join(", ") }
+      if friends.empty?
+        reply = _("%{user} has no friends :(")
+      elsif friends.length <= num
+        reply = _("%{user} has %{total} friends: %{friends}")
       else
-        m.reply _("%{user} has no friends :(") % { :user => user }
+        reply = _("%{user} has %{total} friends, including %{friends}")
+        reply << seemore
       end
+      m.reply reply % {
+        :user => user,
+        :total => friends.size,
+        :friends => friends.shuffle[0, num].join(", "),
+        :uri => "http://www.last.fm/user/#{CGI.escape user}/friends"
+      }
     when :lovedtracks
       loved = doc.root.get_elements("lovedtracks/track").map do |track|
         [track.elements["artist/name"].text, track.elements["name"].text].join(" - ")
       end
-      loved_prep = loved.shuffle[0..4].to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
+      loved_prep = loved.shuffle[0, num].to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
 
-      unless loved.empty?
-        m.reply _("%{user} has loved %{total} tracks, including %{tracks} %{uri}") % {
+      if loved.empty?
+        reply = _("%{user} has not loved any tracks")
+      elsif loved.length <= num
+        reply = _("%{user} has loved %{total} tracks: %{tracks}")
+      else
+        reply = _("%{user} has loved %{total} tracks, including %{tracks}")
+        reply << seemore
+      end
+      m.reply reply % {
           :user => user,
           :total => loved.size,
           :tracks => loved_prep.join(", "),
           :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved"
         }
-      else
-        m.reply _("%{user} has not loved any tracks") % { :user => user }
-      end
     when :neighbours
       nbrs = doc.root.get_elements("neighbours/user").map do |u|
         u.elements["name"].text
       end
 
-      unless nbrs.empty?
-        m.reply _("%{user}'s musical neighbors include %{nbrs} %{uri}") % {
-          :user  => user,
-          :nbrs  => nbrs.shuffle[0..9].join(", "),
-          :uri   => "http://www.last.fm/user/#{CGI.escape user}/neighbours"
-        }
+      if nbrs.empty?
+        reply = _("no one seems to share %{user}'s musical taste")
+      elsif nbrs.length <= num
+        reply = _("%{user} musical neighbours are %{nbrs}")
       else
-        m.reply _("no one seems to share %{user}'s musical taste") % { :user => user }
+        reply = _("%{user} musical neighbours include %{nbrs}")
+        reply << seemore
       end
+      m.reply reply % {
+          :user  => user,
+          :nbrs  => nbrs.shuffle[0, num].join(", "),
+          :uri   => "http://www.last.fm/user/#{CGI.escape user}/neighbours"
+      }
     when :recenttracks
       tracks = doc.root.get_elements("recenttracks/track").map do |track|
         [track.elements["artist"].text, track.elements["name"].text].join(" - ")
       end
-      tracks_prep = tracks.to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
+      tracks_prep = tracks[0, num].to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
 
-      unless tracks.empty?
+      if tracks.empty?
+        m.reply _("%{user} hasn't played anything recently") % { :user => user }
+      else
         m.reply _("%{user} has recently played %{tracks}") %
           { :user => user, :tracks => tracks_prep.join(", ") }
-      else
-        m.reply _("%{user} hasn't played anything recently") % { :user => user }
       end
     when :shouts
       shouts = doc.root.get_elements("shouts/shout")
-      unless shouts.empty?
-        shouts[0..4].each do |shout|
+      if shouts.empty?
+        m.reply _("there are no shouts for %{user}") % { :user => user }
+      else
+        shouts[0, num].each do |shout|
           m.reply _("<%{author}> %{body}") % {
             :body   => shout.elements["body"].text,
             :author => shout.elements["author"].text,
           }
         end
-      else
-        m.reply _("there are no shouts for %{user}") % { :user => user }
       end
     when :toptracks, :topalbums, :topartists, :weeklytrackchart, :weeklyalbumchart, :weeklyartistchart
       type  = action.to_s.scan(/track|album|artist/).to_s
@@ -513,7 +550,7 @@ class LastFmPlugin < Plugin
           :bold   => Bold
         }
       end
-      m.reply items[0..9].join(", ")
+      m.reply items[0, num].join(", ")
     end
   end
 
@@ -535,11 +572,11 @@ plugin.map 'lastfm set verb *present, *past', :action => :set_verb, :thread => t
 plugin.map 'lastfm who [:who]', :action => :get_user, :thread => true
 plugin.map 'lastfm compare to :user2', :action => :tasteometer, :thread => true
 plugin.map 'lastfm compare [:user1] [to] :user2', :action => :tasteometer, :thread => true
-plugin.map "lastfm [user] :action [:user]", :thread => true,
+plugin.map "lastfm [user] [:num] :action [:user]", :thread => true,
   :requirements => { :action =>
     /^(?:events|shouts|friends|neighbou?rs|(?:loved|recent?)tracks|top(?:album|artist|track)s?|weekly(?:albums?|artists?|tracks?)(?:chart)?)$/
 }
-plugin.map 'lastfm [user] :action [:user] over [*period]', :thread => true,
+plugin.map 'lastfm [user] [:num] :action [:user] over [*period]', :thread => true,
   :requirements => {
     :action => /^(?:top(?:album|artist|track)s?)$/,
     :period => /^(?:(?:3|6|12) months)|(?:a\s|1\s)?year$/
