@@ -36,7 +36,7 @@ class ::LastFmEvent
   end
 
   def compact_display
-   if @attendance
+   unless @attendance.zero?
      return "%s %s @ %s (%s attending) %s" % [@date.strftime("%a, %b %d"), @artist_string, @location, @attendance, @url]
    end
    return "%s %s @ %s %s" % [@date.strftime("%a, %b %d"), @artist_string, @location, @url]
@@ -96,17 +96,19 @@ class LastFmPlugin < Plugin
     num = params[:num] || @bot.config['lastfm.default_events']
     num = num.to_i.clip(1, @bot.config['lastfm.max_events'])
 
-    location = artist = nil
-    location = params[:location].to_s if params[:location]
-    artist = params[:who].to_s if params[:who]
+    location = params[:location]
+    artist = params[:who]
+    user = resolve_username(m, params[:user])
 
-    uri = nil
-    if artist == nil
-      uri = "#{APIURL}method=geo.getevents&location=#{CGI.escape location}"
-      emptymsg = _("no events found in %{location}") % {:location => location}
-    else
-      uri = "#{APIURL}method=artist.getevents&artist=#{CGI.escape artist}"
-      emptymsg = _("no events found by %{artist}") % {:artist => artist}
+    if location
+      uri = "#{APIURL}method=geo.getevents&location=#{CGI.escape location.to_s}"
+      emptymsg = _("no events found in %{location}") % {:location => location.to_s}
+    elsif artist
+      uri = "#{APIURL}method=artist.getevents&artist=#{CGI.escape artist.to_s}"
+      emptymsg = _("no events found by %{artist}") % {:artist => artist.to_s}
+    elsif user
+      uri = "#{APIURL}method=user.getevents&user=#{CGI.escape user}"
+      emptymsg = _("%{user} is not attending any events") % {:user => user}
     end
     xml = @bot.httputil.get_response(uri)
 
@@ -131,11 +133,7 @@ class LastFmPlugin < Plugin
       h[:date] = Time.utc(date[3].to_i, date[2], date[1].to_i)
       h[:desc] = e.elements["description"].text
       h[:url] = e.elements["url"].text
-      e.detect {|node|
-        if node.kind_of? Element and node.attributes["name"] == "attendance" then
-          h[:attendance] = node.text
-        end
-      }
+      h[:attendance] = e.elements["attendance"].text.to_i
       artists = Array.new
       e.elements.each("artists/artist"){ |a|
         artists << a.text
@@ -219,7 +217,7 @@ class LastFmPlugin < Plugin
     end
     if xml.class == Net::HTTPBadRequest
       if doc.root.elements["error"].text == "Invalid user name supplied" then
-        m.reply _("%{user} doesn't exist on last.fm, perhaps they need to: lastfm 2 <username>") % {
+        m.reply _("%{user} doesn't exist on last.fm, perhaps they need to: lastfm user <username>") % {
           :user => user
         }
         return
@@ -387,22 +385,135 @@ class LastFmPlugin < Plugin
     end
   end
 
-  # TODO this user data retrieval should be upgraded to API 2.0 but it would need separate parsing
-  # for each dataset, or almost
   def lastfm(m, params)
-    action = params[:action].intern
-    action = :neighbours if action == :neighbors
-    action = :recenttracks if action == :recentracks
-    action = :topalbums if action == :topalbum
-    action = :topartists if action == :topartist
-    action = :toptags if action == :toptag
+    action = case params[:action]
+    when "neighbors"   then "neighbours"
+    when "recentracks" then "recenttracks"
+    when /^weekly(track|album|artist)s$/
+      "weekly#{$1}chart"
+    when "events"
+      find_events(m, params)
+      return
+    else
+      params[:action]
+    end.to_sym
+
     user = resolve_username(m, params[:user])
-    begin
-      data = @bot.httputil.get("http://ws.audioscrobbler.com/1.0/user/#{user}/#{action}.txt")
-      m.reply "#{action} for #{user}:"
-      m.reply data.to_a[0..3].map{|l| l.split(',',2)[-1].chomp}.join(", ")
-    rescue
-      m.reply "could not find #{action} for #{user} (is #{user} a user?). perhaps you need to: lastfm set <username>"
+    uri = "#{APIURL}method=user.get#{action}&user=#{CGI.escape user}"
+
+    if period = params[:period]
+      period_uri = (period.last == "year" ? "12month" : period.first + "month")
+      uri << "&period=#{period_uri}"
+    end
+
+    res = @bot.httputil.get_response(uri)
+    unless res.body
+      m.reply _("I had problems accessing last.fm")
+      return
+    end
+    doc = Document.new(res.body)
+    unless doc
+      m.reply _("last.fm parsing failed")
+      return
+    end
+
+    case res
+    when Net::HTTPBadRequest
+      if doc.root and doc.root.attributes["status"] == "failed"
+        m.reply "error: " << doc.root.elements["error"].text.downcase
+      end
+      return
+    end
+
+    case action
+    when :friends
+      friends = doc.root.get_elements("friends/user").map do |u|
+        u.elements["name"].text
+      end
+
+      unless friends.empty?
+        m.reply _("%{user} has %{total} friends; %{friends}") %
+          { :user => user, :total => friends.size, :friends => friends.join(", ") }
+      else
+        m.reply _("%{user} has no friends :(") % { :user => user }
+      end
+    when :lovedtracks
+      loved = doc.root.get_elements("lovedtracks/track").map do |track|
+        [track.elements["artist/name"].text, track.elements["name"].text].join(" - ")
+      end
+      loved_prep = loved.shuffle[0..4].to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
+
+      unless loved.empty?
+        m.reply _("%{user} has loved %{total} tracks, including %{tracks} %{uri}") % {
+          :user => user,
+          :total => loved.size,
+          :tracks => loved_prep.join(", "),
+          :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved"
+        }
+      else
+        m.reply _("%{user} has not loved any tracks") % { :user => user }
+      end
+    when :neighbours
+      nbrs = doc.root.get_elements("neighbours/user").map do |u|
+        u.elements["name"].text
+      end
+
+      unless nbrs.empty?
+        m.reply _("%{user}'s musical neighbors include %{nbrs} %{uri}") % {
+          :user  => user,
+          :nbrs  => nbrs.shuffle[0..9].join(", "),
+          :uri   => "http://www.last.fm/user/#{CGI.escape user}/neighbours"
+        }
+      else
+        m.reply _("no one seems to share %{user}'s musical taste") % { :user => user }
+      end
+    when :recenttracks
+      tracks = doc.root.get_elements("recenttracks/track").map do |track|
+        [track.elements["artist"].text, track.elements["name"].text].join(" - ")
+      end
+      tracks_prep = tracks.to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
+
+      unless tracks.empty?
+        m.reply _("%{user} has recently played %{tracks}") %
+          { :user => user, :tracks => tracks_prep.join(", ") }
+      else
+        m.reply _("%{user} hasn't played anything recently") % { :user => user }
+      end
+    when :shouts
+      shouts = doc.root.get_elements("shouts/shout")
+      unless shouts.empty?
+        shouts[0..4].each do |shout|
+          m.reply _("<%{author}> %{body}") % {
+            :body   => shout.elements["body"].text,
+            :author => shout.elements["author"].text,
+          }
+        end
+      else
+        m.reply _("there are no shouts for %{user}") % { :user => user }
+      end
+    when :toptracks, :topalbums, :topartists, :weeklytrackchart, :weeklyalbumchart, :weeklyartistchart
+      type  = action.to_s.scan(/track|album|artist/).to_s
+      items = doc.root.get_elements("#{action}/#{type}").map do |item|
+        case action
+        when :weeklytrackchart, :weeklyalbumchart
+          format = "%{artist} - %{title} (%{bold}%{plays}%{bold})"
+          artist = item.elements["artist"].text
+        when :weeklyartistchart, :topartists
+          format = "%{artist} (%{bold}%{plays}%{bold})"
+          artist = item.elements["name"].text
+        when :toptracks, :topalbums
+          format = "%{artist} - (%{title} %{bold}%{plays}%{bold})"
+          artist = item.elements["artist/name"].text
+        end
+
+        _(format) % {
+          :artist => artist,
+          :title  => item.elements["name"].text,
+          :plays  => item.elements["playcount"].text,
+          :bold   => Bold
+        }
+      end
+      m.reply items[0..9].join(", ")
     end
   end
 
@@ -426,7 +537,12 @@ plugin.map 'lastfm compare to :user2', :action => :tasteometer, :thread => true
 plugin.map 'lastfm compare [:user1] [to] :user2', :action => :tasteometer, :thread => true
 plugin.map "lastfm [user] :action [:user]", :thread => true,
   :requirements => { :action =>
-    /^(?:events|friends|neighbou?rs|playlists|recent?tracks|top(?:album|artist|tag)s?|weekly(?:album|artist|track)chart|weeklychartlist)$/
+    /^(?:events|shouts|friends|neighbou?rs|(?:loved|recent?)tracks|top(?:album|artist|track)s?|weekly(?:albums?|artists?|tracks?)(?:chart)?)$/
+}
+plugin.map 'lastfm [user] :action [:user] over [*period]', :thread => true,
+  :requirements => {
+    :action => /^(?:top(?:album|artist|track)s?)$/,
+    :period => /^(?:(?:3|6|12) months)|(?:a\s|1\s)?year$/
 }
 plugin.map 'lastfm [now] [:who]', :action => :now_playing, :thread => true
 plugin.map 'np [:who]', :action => :now_playing, :thread => true
