@@ -288,10 +288,12 @@ class LastFmPlugin < Plugin
     end
     first = doc.root.elements["artist"]
     artist = first.elements["name"].text
+    url = first.elements["url"].text
     playcount = first.elements["stats"].elements["playcount"].text
     listeners = first.elements["stats"].elements["listeners"].text
     summary = first.elements["bio"].elements["summary"].text
-    m.reply _("%{b}%{a}%{b} has been played %{c} times and is being listened to by %{l} people") % {:b => Bold, :a => artist, :c => playcount, :l => listeners}
+    m.reply _("%{b}%{a}%{b} <%{u}> has been played %{c} times and is being listened to by %{l} people") % {
+      :b => Bold, :a => artist, :u => url, :c => playcount, :l => listeners}
     m.reply summary.ircify_html
   end
 
