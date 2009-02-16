@@ -379,7 +379,12 @@ class FactoidsPlugin < Plugin
       return if @triggers.empty?
       query = $1.strip.downcase
       if @triggers.include?(query)
-        facts(m, :words => query.split)
+        words = query.split
+        words.instance_variable_set(:@string_value, query)
+        def words.to_s
+          @string_value
+        end
+        facts(m, :words => words)
       end
     else
       return if m.address? # we don't learn stuff directed at us which is not an explicit learn command
