@@ -972,7 +972,7 @@ class Bot
       rescue Errno::ETIMEDOUT, Errno::ECONNABORTED, TimeoutError, SocketError => e
         error "network exception: #{e.pretty_inspect}"
         quit_msg = e.to_s
-      rescue ServerError
+      rescue ServerError => e
         # received an ERROR from the server
         quit_msg = "server ERROR: " + e.message
         too_fast = e.message.index("reconnect too fast")
