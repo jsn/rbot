@@ -112,15 +112,15 @@ class NiftyTranslator < Translator
    super(Translator::Direction.all_from_to(%w[ja en zh_CN ko], %w[ja]), cache)
     @form = WWW::Mechanize.new.
             get('http://nifty.amikai.com/amitext/indexUTF8.jsp').
-            forms.name('translateForm').first
+            forms_with(:name => 'translateForm').last
   end
 
   def do_translate(text, from, to)
-    @form.radiobuttons.name('langpair').value = "#{from},#{to}".upcase
-    @form.fields.name('sourceText').value = text
+    @form.radiobuttons_with(:name => 'langpair').first.value = "#{from},#{to}".upcase
+    @form.fields_with(:name => 'sourceText').last.value = text
 
-    @form.submit(@form.buttons.name('translate')).
-          forms.name('translateForm').fields.name('translatedText').value
+    @form.submit(@form.buttons_with(:name => 'translate').last).
+          forms_with(:name => 'translateForm').last.fields_with(:name => 'translatedText').last.value
   end
 end
 
@@ -149,7 +149,7 @@ class ExciteTranslator < Translator
 
   def open_form(name)
     WWW::Mechanize.new.get("http://www.excite.co.jp/world/#{name}").
-                   forms.name('world').first
+                   forms_with(:name => 'world').first
   end
 
   def do_translate(text, from, to)
@@ -157,15 +157,15 @@ class ExciteTranslator < Translator
     form = @forms[non_ja_language]
 
     if non_ja_language =~ /zh_(CN|TW)/
-      form.fields.name('wb_lp').value = "#{from}#{to}".sub(/_(?:CN|TW)/, '').upcase
-      form.fields.name('big5').value = ($1 == 'TW' ? 'yes' : 'no')
+      form_with_fields(:name => 'wb_lp').first.value = "#{from}#{to}".sub(/_(?:CN|TW)/, '').upcase
+      form_with_fields(:name => 'big5').first.value = ($1 == 'TW' ? 'yes' : 'no')
     else
       # the en<->ja page is in Shift_JIS while other pages are UTF-8
       text = Iconv.iconv('Shift_JIS', 'UTF-8', text) if non_ja_language == 'en'
-      form.fields.name('wb_lp').value = "#{from}#{to}".upcase
+      form.fields_with(:name => 'wb_lp').first.value = "#{from}#{to}".upcase
     end
-    form.fields.name('before').value = text
-    result = form.submit.forms.name('world').fields.name('after').value
+    form.fields_with(:name => 'before').first.value = text
+    result = form.submit.forms_with(:name => 'world').first.fields_with(:name => 'after').first.value
     # the en<->ja page is in Shift_JIS while other pages are UTF-8
     if non_ja_language == 'en'
       Iconv.iconv('UTF-8', 'Shift_JIS', result)
@@ -197,9 +197,9 @@ class GoogleTranslator < Translator
     # without faking the user agent, Google Translate will serve non-UTF-8 text
     agent.user_agent_alias = 'Linux Konqueror'
     @form = agent.get('http://www.google.com/translate_t').
-            forms.action('/translate_t').first
-    @source_list = @form.fields.name('sl')
-    @target_list = @form.fields.name('tl')
+            forms_with(:action => '/translate_t').first
+    @source_list = @form.fields_with(:name => 'sl').last
+    @target_list = @form.fields_with(:name => 'tl').last
   end
 
   def do_translate(text, from, to)
@@ -207,7 +207,7 @@ class GoogleTranslator < Translator
 
     @source_list.value = from.sub('_', '-')
     @target_list.value = to.sub('_', '-')
-    @form.fields.name('text').value = text
+    @form.fields_with(:name => 'text').last.value = text
     @form.submit.parser.search('div#result_box').inner_html
   end
 end
@@ -220,18 +220,18 @@ class BabelfishTranslator < Translator
     require 'mechanize'
 
     @form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
-            forms.name('frmTrText').first
-    @lang_list = @form.fields.name('lp')
+            forms_with(:name => 'frmTrText').first
+    @lang_list = @form.fields_with(:name => 'lp').first
     language_pairs = @lang_list.options.map {|o| o.value.split('_')}.
                                             reject {|p| p.empty?}
     super(Translator::Direction.pairs(language_pairs), cache)
   end
 
   def do_translate(text, from, to)
-    if @form.fields.name('trtext').empty?
+    if @form.fields_with(:name => 'trtext').first.empty?
       @form.add_field!('trtext', text)
     else
-      @form.fields.name('trtext').value = text
+      @form.fields_with(:name => 'trtext').first.value = text
     end
     @lang_list.value = "#{from}_#{to}"
     @form.submit.parser.search("td.s/div[@style]").inner_html
