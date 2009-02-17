@@ -230,13 +230,13 @@ class BabelfishTranslator < Translator
   end
 
   def do_translate(text, from, to)
-    if @form.fields_with(:name => 'trtext').first.empty?
+    if @form.fields_with(:name => 'trtext').empty?
       @form.add_field!('trtext', text)
     else
       @form.fields_with(:name => 'trtext').first.value = text
     end
     @lang_list.value = "#{from}_#{to}"
-    @form.submit.parser.search("td.s/div[@style]").inner_html
+    @form.submit.parser.search("div[@id='result']/div[@style]").inner_html
   end
 end
 
