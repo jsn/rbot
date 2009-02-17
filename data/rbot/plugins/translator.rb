@@ -116,7 +116,9 @@ class NiftyTranslator < Translator
   end
 
   def do_translate(text, from, to)
-    @form.radiobuttons_with(:name => 'langpair').first.value = "#{from},#{to}".upcase
+    @radio = @form.radiobuttons_with(:name => 'langpair').first
+    @radio.value = "#{from},#{to}".upcase
+    @radio.check
     @form.fields_with(:name => 'sourceText').last.value = text
 
     @form.submit(@form.buttons_with(:name => 'translate').last).
