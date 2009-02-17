@@ -183,11 +183,13 @@ class GoogleTranslator < Translator
   def initialize(cache={})
     require 'mechanize'
     load_form!
-    language_pairs = @lang_list.options.map do |o|
-      # these options have values like "en|zh-CN"; map to things like ['en', 'zh_CN'].
-      o.value.split('|').map {|l| l.sub('-', '_')}
-    end
-    super(Translator::Direction.pairs(language_pairs), cache)
+
+    # we can probably safely assume that google translate is able to translate from
+    # any language in the source lang drop down list to any language in the target one
+    # so we create the language pairs based on that assumption
+    sl = @source_list.options.map { |o| o.value.sub('-', '_') }
+    tl = @target_list.options.map { |o| o.value.sub('-', '_') }
+    super(Translator::Direction.all_from_to(tl, sl), cache)
   end
 
   def load_form!
@@ -196,13 +198,15 @@ class GoogleTranslator < Translator
     agent.user_agent_alias = 'Linux Konqueror'
     @form = agent.get('http://www.google.com/translate_t').
             forms.action('/translate_t').first
-    @lang_list = @form.fields.name('langpair')
+    @source_list = @form.fields.name('sl')
+    @target_list = @form.fields.name('tl')
   end
 
   def do_translate(text, from, to)
     load_form!
 
-    @lang_list.value = "#{from}|#{to}".sub('_', '-')
+    @source_list.value = from.sub('_', '-')
+    @target_list.value = to.sub('_', '-')
     @form.fields.name('text').value = text
     @form.submit.parser.search('div#result_box').inner_html
   end
