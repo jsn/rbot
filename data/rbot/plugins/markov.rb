@@ -111,7 +111,7 @@ class MarkovPlugin < Plugin
   end
 
   def help(plugin, topic="")
-    "markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. usage: 'markov' to attempt to say something relevant to the last line of chat, if it can.  other options to markov: 'ignore' => ignore a hostmask (accept no input), 'status' => show current status, 'probability [<chance>]' => set the % chance of rbot responding to input, or display the current probability, 'chat' => try and say something intelligent, 'chat about <foo> <bar>' => riff on a word pair (if possible)"
+    _("markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. usage: 'markov' to attempt to say something relevant to the last line of chat, if it can.  other options to markov: 'ignore' => ignore a hostmask (accept no input), 'status' => show current status, 'probability [<chance>]' => set the % chance of rbot responding to input, or display the current probability, 'chat' => try and say something intelligent, 'chat about <foo> <bar>' => riff on a word pair (if possible)")
   end
 
   def clean_str(s)
@@ -155,25 +155,25 @@ class MarkovPlugin < Plugin
         s = @bot.config['markov.ignore']
         s.delete user
         @bot.config['ignore'] = s
-        m.reply "#{user} removed"
+        m.reply _("%{u} removed") % { :u => user }
       else
-        m.reply "not found in list"
+        m.reply _("not found in list")
       end
     when 'add':
       if user
         if @bot.config['markov.ignore'].include?(user)
-          m.reply "#{user} already in list"
+          m.reply _("%{u} already in list") % { :u => user }
         else
           @bot.config['markov.ignore'] = @bot.config['markov.ignore'].push user
-          m.reply "#{user} added to markov ignore list"
+          m.reply _("%{u} added to markov ignore list") % { :u => user }
         end
       else
-        m.reply "give the name of a person or channel to ignore"
+        m.reply _("give the name of a person or channel to ignore")
       end
     when 'list':
-      m.reply "I'm ignoring #{@bot.config['markov.ignore'].join(", ")}"
+      m.reply _("I'm ignoring %{ignored}") % { :ignored => @bot.config['markov.ignore'].join(", ") }
     else
-      m.reply "have markov ignore the input from a hostmask or a channel.  usage: markov ignore add <mask or channel>; markov ignore remove <mask or channel>; markov ignore list"
+      m.reply _("have markov ignore the input from a hostmask or a channel. usage: markov ignore add <mask or channel>; markov ignore remove <mask or channel>; markov ignore list")
     end
   end
 
@@ -227,7 +227,7 @@ class MarkovPlugin < Plugin
     if line and line != [params[:seed1], params[:seed2]].compact.join(" ")
       m.reply line
     else
-      m.reply "I can't :("
+      m.reply _("I can't :(")
     end
   end
 
@@ -246,7 +246,7 @@ class MarkovPlugin < Plugin
     if output.length > 1
       m.reply output.join(" ")
     else
-      m.reply "I can't :("
+      m.reply _("I can't :(")
     end
   end
 
