@@ -620,13 +620,15 @@ plugin.map 'lastfm who [:who]', :action => :get_user, :thread => true
 plugin.map 'lastfm compare to :user2', :action => :tasteometer, :thread => true
 plugin.map 'lastfm compare [:user1] [to] :user2', :action => :tasteometer, :thread => true
 plugin.map "lastfm [user] [:num] :action [:user]", :thread => true,
-  :requirements => { :action =>
-    /^(?:events|shouts|friends|neighbou?rs|loved(?:tracks)?|recent(?:t?racks)?|top(?:album|artist|track)s?|weekly(?:albums?|artists?|tracks?)(?:chart)?)$/
+  :requirements => {
+    :action => /^(?:events|shouts|friends|neighbou?rs|loved(?:tracks)?|recent(?:t?racks)?|top(?:album|artist|track)s?|weekly(?:albums?|artists?|tracks?)(?:chart)?)$/,
+    :num => /^\d+$/
 }
 plugin.map 'lastfm [user] [:num] :action [:user] over [*period]', :thread => true,
   :requirements => {
     :action => /^(?:top(?:album|artist|track)s?)$/,
-    :period => /^(?:(?:3|6|12) months)|(?:a\s|1\s)?year$/
+    :period => /^(?:(?:3|6|12) months)|(?:a\s|1\s)?year$/,
+    :num => /^\d+$/
 }
 plugin.map 'lastfm [now] [:who]', :action => :now_playing, :thread => true
 plugin.map 'np [:who]', :action => :now_playing, :thread => true
