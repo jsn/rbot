@@ -6,10 +6,12 @@
 # Author:: Jeremy Voorhis
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
 # Author:: Casey Link <unnamedrambler@gmail.com>
+# Author:: Raine Virta <rane@kapsi.fi>
 #
 # Copyright:: (C) 2005 Jeremy Voorhis
 # Copyright:: (C) 2007 Giuseppe Bilotta
 # Copyright:: (C) 2008 Casey Link
+# Copyright:: (C) 2009 Raine Virta
 #
 # License:: GPL v2
 
@@ -82,6 +84,7 @@ class LastFmPlugin < Plugin
   end
 
   def help(plugin, topic="")
+    period = _(", where <period> can be one of: 3|6|12 months, a year")
     case (topic.intern rescue nil)
     when :event, :events
       _("lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}") % {:d => @bot.config['lastfm.default_events'], :m => @bot.config['lastfm.max_events']}
@@ -92,15 +95,37 @@ class LastFmPlugin < Plugin
     when :track
       _("lastfm track <name> => search tracks matching <name> on last.fm")
     when :now, :np
-      _("lastfm now [<user>] => show the now playing track from last.fm.  np [<user>] does the same.")
+      _("lastfm now [<nick>] => show the now playing track from last.fm. np [<nick>] does the same.")
     when :set
       _("lastfm set user <user> => associate your current irc nick with a last.fm user. lastfm set verb <present>, <past> => set your preferred now playing/just played verbs. default \"is listening to\" and \"listened to\".")
     when :who
       _("lastfm who [<nick>] => show who <nick> is on last.fm. if <nick> is empty, show who you are on lastfm.")
     when :compare
       _("lastfm compare [<nick1>] <nick2> => show musical taste compatibility between nick1 (or user if omitted) and nick2")
+    when :shouts
+      _("lastfm shouts [<nick>] => show shouts to <nick>")
+    when :friends
+      _("lastfm friends [<nick>] => show <nick>'s friends")
+    when :neighbors, :neighbours
+      _("lastfm neighbors [<nick>] => show people who share similar musical taste as <nick>")
+    when :lovedtracks
+      _("lastfm loved[tracks] [<nick>] => show tracks that <nick> has loved")
+    when :recenttracks, :recentracks
+      _("lastfm recent[tracks] [<nick>] => show tracks that <nick> has recently played")
+    when :topalbums
+      _("lastfm topalbums [<nick>] [over <period>] => show <nick>'s top albums%{p}") % { :p => period }
+    when :topartists
+      _("lastfm topartists [<nick>] [over <period>] => show <nick>'s top artists%{p}") % { :p => period }
+    when :toptracks
+      _("lastfm toptracks [<nick>] [over <period>] => show <nick>'s top tracks%{p}") % { :p => period }
+    when :weeklyalbumchart
+      _("lastfm weeklyalbumchart [<nick>] => show <nick>'s weekly album chart")
+    when :weeklyartistchart
+      _("lastfm weeklyartistchart [<nick>] => show <nick>'s weekly artist chart")
+    when :weeklytrackchart
+      _("lastfm weeklyartistchart [<nick>] => show <nick>'s weekly track chart")
     else
-      _("lastfm [<user>] => show your or <user>'s now playing track on lastfm. np [<user>] => same as 'lastfm'. other topics: events, artist, album, track, now, set, who, compare")
+      _("last.fm plugin - topics: events, artist, album, track, now, set, who, compare, shouts, friends, neighbors, (loved|recent)tracks, top(albums|tracks|artists), weekly(album|artist|track)chart")
     end
   end
 
