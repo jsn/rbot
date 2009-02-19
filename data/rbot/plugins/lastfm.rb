@@ -581,7 +581,7 @@ class LastFmPlugin < Plugin
           format = "%{artist} (%{bold}%{plays}%{bold})"
           artist = item.elements["name"].text
         when :toptracks, :topalbums
-          format = "%{artist} - (%{title} %{bold}%{plays}%{bold})"
+          format = "%{artist} - %{title} (%{bold}%{plays}%{bold})"
           artist = item.elements["artist/name"].text
         end
 
