@@ -441,8 +441,9 @@ class LastFmPlugin < Plugin
 
   def lastfm(m, params)
     action = case params[:action]
-    when "neighbors"   then "neighbours"
-    when "recentracks" then "recenttracks"
+    when "neighbors" then "neighbours"
+    when "recentracks", "recent" then "recenttracks"
+    when "loved" then "lovedtracks"
     when /^weekly(track|album|artist)s$/
       "weekly#{$1}chart"
     when "events"
@@ -620,7 +621,7 @@ plugin.map 'lastfm compare to :user2', :action => :tasteometer, :thread => true
 plugin.map 'lastfm compare [:user1] [to] :user2', :action => :tasteometer, :thread => true
 plugin.map "lastfm [user] [:num] :action [:user]", :thread => true,
   :requirements => { :action =>
-    /^(?:events|shouts|friends|neighbou?rs|(?:loved|recent?)tracks|top(?:album|artist|track)s?|weekly(?:albums?|artists?|tracks?)(?:chart)?)$/
+    /^(?:events|shouts|friends|neighbou?rs|loved(?:tracks)?|recent(?:t?racks)?|top(?:album|artist|track)s?|weekly(?:albums?|artists?|tracks?)(?:chart)?)$/
 }
 plugin.map 'lastfm [user] [:num] :action [:user] over [*period]', :thread => true,
   :requirements => {
