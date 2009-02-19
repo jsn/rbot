@@ -11,7 +11,7 @@
 # in case it couldn't be achieved.
 
 class NickRecoverPlugin < Plugin
-  
+
   Config.register Config::IntegerValue.new('irc.nick_retry',
     :default => 60, :valiedate => Proc.new { |v| v >= 0 },
     :on_change => Proc.new do |bot, v|

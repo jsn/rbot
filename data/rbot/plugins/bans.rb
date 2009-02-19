@@ -458,7 +458,7 @@ class BansPlugin < Plugin
     when /^(\d+)m$/
       timer = $1.to_i * 60
     when /^(\d+)h$/
-      timer = $1.to_i * 60 * 60 
+      timer = $1.to_i * 60 * 60
     when /^(\d+)d$/
       timer = $1.to_i * 60 * 60 * 24
     else

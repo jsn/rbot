@@ -134,7 +134,7 @@ class InsultPlugin < Plugin
 ]
 
 ##
-# Amounts 
+# Amounts
 ##
 @@amt = [
 "accumulation",
@@ -206,7 +206,7 @@ class InsultPlugin < Plugin
 "cold sores",
 "anal warts",
 ]
-  
+
   def help(plugin, topic="")
     return "[msg]insult me|<person> => insult you or <person>. msginsult insults in private"
   end

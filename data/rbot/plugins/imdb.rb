@@ -469,7 +469,7 @@ class ImdbPlugin < Plugin
   end
 
   # Find the movies with a participation of :who in the year :year
-  # TODO: allow year to be either a year or a decade ('[in the] 1960s') 
+  # TODO: allow year to be either a year or a decade ('[in the] 1960s')
   #
   def movies(m, params)
     who = params[:who].to_s

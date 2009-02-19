@@ -203,11 +203,11 @@ class RemindPlugin < Plugin
   end
   def no_more(m, params)
     who = params.has_key?(:who) ? params[:who] : m.sourcenick
-    deleted = params.has_key?(:string) ? 
+    deleted = params.has_key?(:string) ?
               del_reminder(who, params[:string].to_s) : del_reminder(who)
     if deleted
       m.okay
-    else 
+    else
       m.reply "but I wasn't going to :/"
     end
   end

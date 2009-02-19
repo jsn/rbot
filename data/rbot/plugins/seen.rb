@@ -11,7 +11,7 @@ class SeenPlugin < Plugin
   def help(plugin, topic="")
     "seen <nick> => have you seen, or when did you last see <nick>"
   end
-  
+
   def privmsg(m)
     unless(m.params =~ /^(\S)+$/)
       m.reply "incorrect usage: " + help(m.plugin)
@@ -39,7 +39,7 @@ class SeenPlugin < Plugin
                                           m.target.to_s, m.message.dup)
     when QuitMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, now, "QUIT", 
+      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, now, "QUIT",
                                         nil, m.message.dup)
     when NickMessage
       return if m.address?
@@ -48,23 +48,23 @@ class SeenPlugin < Plugin
       @registry[m.newnick] = saw
     when PartMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "PART", 
+      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "PART",
                                         m.target.to_s, m.message.dup)
     when JoinMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "JOIN", 
+      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "JOIN",
                                         m.target.to_s, m.message.dup)
     when TopicMessage
       return if m.address? or m.info_or_set == :info
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "TOPIC", 
+      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "TOPIC",
                                         m.target.to_s, m.message.dup)
     end
   end
-  
+
   def seen(saw)
     ret = "#{saw.nick} was last seen "
     ago = Time.new - saw.time
-    
+
     if (ago.to_i == 0)
       ret << "just now, "
     else
@@ -88,7 +88,7 @@ class SeenPlugin < Plugin
       ret << "changing the topic of #{saw.where} to #{saw.message}"
     end
   end
-  
+
 end
 plugin = SeenPlugin.new
 plugin.register("seen")

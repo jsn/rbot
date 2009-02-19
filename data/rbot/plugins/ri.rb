@@ -52,7 +52,7 @@ class RiPlugin < Plugin
       return m.reply("failed to execute ri")
     end
     ret = ret.gsub(/\t/, "  ").split(/\n/).join(" ").gsub(/\s\s+/, '  ')
-    
+
     if ret.length > @bot.config['ri.max_length']
       if !m.private? && tgt.to_s != m.sourcenick
         return m.reply('entry is too long to send to the channel or to some other user, use /msg to ask me about it')

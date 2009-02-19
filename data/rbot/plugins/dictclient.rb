@@ -77,11 +77,11 @@ class DictClientPlugin < Plugin
   Config.register Config::StringValue.new('dictclient.match_format',
     :default => '<matches>––<database>',
     :desc => _('Format of match results. <matches> will be replaced with the formatted headwords, <database> with the formatted database name'))
-  
+
   def initialize
     super
   end
-  
+
   # create a DICT object, which is passed to the block. after the block finishes,
   # the DICT object is automatically disconnected. the return value of the block
   # is returned from this method.
@@ -104,15 +104,15 @@ class DictClientPlugin < Plugin
     end
     ret
   end
-  
+
   def format_headword(w)
     @bot.config['dictclient.headword_format'].gsub '<headword>', w
   end
-    
+
   def format_database(d)
     @bot.config['dictclient.database_format'].gsub '<database>', d
   end
-  
+
   def cmd_define(m, params)
     phrase = params[:phrase].to_s
     results = with_dict(m) {|d| d.define(params[:database], params[:phrase])}
@@ -122,7 +122,7 @@ class DictClientPlugin < Plugin
         # the number of definitions is above dictclient.max_defs_before_collapse
         if results.any? {|r| r.database != results[0].database} &&
            results.length > @bot.config['dictclient.max_defs_before_collapse']
-          _("Many definitions for %{phrase} were found in %{databases}. Use 'define <phrase> from <database> to view a definition.") % 
+          _("Many definitions for %{phrase} were found in %{databases}. Use 'define <phrase> from <database> to view a definition.") %
           { :phrase => format_headword(phrase),
             :databases => results.collect {|r| r.database}.uniq.
                                   collect {|d| format_database d}.join(', ') }
@@ -139,13 +139,13 @@ class DictClientPlugin < Plugin
           }.join ' | '
         end
       else
-        _("No definition for %{phrase} found from %{database}.") % 
+        _("No definition for %{phrase} found from %{database}.") %
           { :phrase => format_headword(phrase),
             :database => format_database(params[:database]) }
       end
     )
   end
-  
+
   def cmd_match(m, params)
     phrase = params[:phrase].to_s
     results = with_dict(m) {|d| d.match(params[:database],
@@ -160,14 +160,14 @@ class DictClientPlugin < Plugin
           )
         }.join ' '
       else
-        _("Nothing matched %{query} from %{database} using %{strategy}") % 
+        _("Nothing matched %{query} from %{database} using %{strategy}") %
         { :query => format_headword(phrase),
           :database => format_database(params[:database]),
           :strategy => params[:strategy] }
       end
     )
   end
-    
+
   def cmd_databases(m, params)
     with_dict(m) do |d|
       m.reply _("Databases: %{list}") % {
@@ -175,7 +175,7 @@ class DictClientPlugin < Plugin
       }
     end
   end
-  
+
   def cmd_strategies(m, params)
     with_dict(m) do |d|
       m.reply _("Strategies: %{list}") % {
@@ -183,7 +183,7 @@ class DictClientPlugin < Plugin
       }
     end
   end
-    
+
   def help(plugin, topic='')
     case topic
     when 'define'

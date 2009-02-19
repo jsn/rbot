@@ -55,7 +55,7 @@ class KarmaPlugin < Plugin
     @registry[thing] = params[:val].to_i
     karma(m, params)
   end
-  
+
   def help(plugin, topic="")
     "karma module: Listens to everyone's chat. <thing>++/<thing>-- => increase/decrease karma for <thing>, karma for <thing>? => show karma for <thing>, karmastats => show stats. Karma is a community rating system - only in-channel messages can affect karma and you cannot adjust your own."
   end

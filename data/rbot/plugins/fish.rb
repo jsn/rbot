@@ -25,7 +25,7 @@ class BabelPlugin < Plugin
     trans_from = params[:fromlang] ? params[:fromlang] : @bot.config['translate.default_from']
     trans_to = params[:tolang] ? params[:tolang] : @bot.config['translate.default_to']
     trans_text = params[:phrase].to_s
-    
+
     lang_match = langs.join("|")
     unless(trans_from =~ /^(#{lang_match})$/ && trans_to =~ /^(#{lang_match})$/)
       m.reply "invalid language: valid languagess are: #{langs.join(' ')}"

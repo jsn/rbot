@@ -172,7 +172,7 @@ class BashPlugin < Plugin
       xml = @bot.httputil.get("http://bash.org/xml/?random&num=1", :cache => false)
     else
       xml = @bot.httputil.get("http://bash.org/xml/?" + id + "&num=1")
-    end	
+    end
 
     unless xml
       m.reply "bash.org rss parse failed"
@@ -184,7 +184,7 @@ class BashPlugin < Plugin
       return
     end
     doc.elements.each("*/item") {|e|
-      if(id != 0) 
+      if(id != 0)
         reply = e.elements["title"].text.gsub(/QDB: /,"") + " " + e.elements["link"].text.gsub(/QDB: /,"") + "\n"
         reply = reply + e.elements["description"].text.gsub(/\<br \/\>/, "\n")
       else

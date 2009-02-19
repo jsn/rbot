@@ -15,7 +15,7 @@ require "shorturl"
 require "uri"
 
 class ShortenURLs < Plugin
-  # starting from about shorturl 0.8.4, the WWW module is not defined 
+  # starting from about shorturl 0.8.4, the WWW module is not defined
   include WWW rescue nil
 
   Config.register Config::ArrayValue.new('shortenurls.services_blacklist',

@@ -8,7 +8,7 @@
 
 require 'soap/wsdlDriver'
 # TODO why not use HttpUtil instead of open-uri?
-require 'open-uri' 
+require 'open-uri'
 require 'rexml/document'
 require 'erb'
 
@@ -48,7 +48,7 @@ class Forecast
         return parse(retrieve),Time.new
     end
 private
-    def retrieve 
+    def retrieve
         forecast = @forecaster.NDFDgenByDay(
             @lat,@long,Time.now.strftime("%Y-%m-%d"),2,"24 hourly")
         (REXML::Document.new(forecast)).root
@@ -105,7 +105,7 @@ class ForecastPlugin < Plugin
             end
         end
     end
-    
+
     def get_forecast(m,loc)
       begin
         @cache_mutex.synchronize do

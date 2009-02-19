@@ -44,7 +44,7 @@ class MathPlugin < Plugin
       val = Math.exp($2).to_s
       expr.gsub!(/#{Regexp.escape exp}/, "+#{val}")
     end
-    
+
     while expr =~ /^\s*(dec2hex\s*(\d+))\s*\?*/
       exp = $1
       val = sprintf("%x", $2)
@@ -56,13 +56,13 @@ class MathPlugin < Plugin
     while expr =~ /(log\s*((\d+\.?\d*)|\d*\.?\d+))\s*/
       exp = $1
       res = $2
-      
+
       if res == 0
         val = "Infinity"
       else
         val = Math.log(res).to_s
       end
-      
+
       expr.gsub!(/#{Regexp.escape exp}/, "+#{val}")
     end
 

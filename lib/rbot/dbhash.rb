@@ -75,7 +75,7 @@ module Irc
 
     def DBHash.create_db(name)
       debug "DBHash: creating empty db #{name}"
-      return BDB::Hash.open(name, nil, 
+      return BDB::Hash.open(name, nil,
       BDB::CREATE | BDB::EXCL, 0600)
     end
 

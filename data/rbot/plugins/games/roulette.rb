@@ -2,13 +2,13 @@ define_structure :RouletteHistory, :games, :shots, :deaths, :misses, :wins
 
 class RoulettePlugin < Plugin
   Config.register Config::BooleanValue.new('roulette.autospin',
-    :default => true, 
+    :default => true,
     :desc => "Automatically spins the roulette at the butlast shot")
   Config.register Config::BooleanValue.new('roulette.kick',
-    :default => false, 
+    :default => false,
     :desc => "Kicks shot players from the channel")
   Config.register Config::BooleanValue.new('roulette.twice_in_a_row',
-    :default => false, 
+    :default => false,
     :desc => "Allow players to go twice in a row")
 
   def initialize
@@ -174,7 +174,7 @@ class RoulettePlugin < Plugin
       k = match[1]
 
       total_players += 1
-      
+
       win_rate = v.wins.to_f / v.games * 100
       if h_win_percent[0].nil? || win_rate > h_win_percent[1] && v.games > 2
         h_win_percent = [[k], win_rate]

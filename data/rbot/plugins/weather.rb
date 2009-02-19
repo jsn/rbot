@@ -71,18 +71,18 @@ class WeatherPlugin < Plugin
   Config.register Config::BooleanValue.new('weather.advisory',
     :default => true,
     :desc => "Should the bot report special weather advisories when any is present?")
-  
+
   def help(plugin, topic="")
     case topic
     when "nws"
       "weather nws <station> => display the current conditions at the location specified by the NOAA National Weather Service station code <station> ( lookup your station code at http://www.nws.noaa.gov/data/current_obs/ )"
     when "station", "wu"
-      "weather [<units>] <location> => display the current conditions at the location specified, looking it up on the Weather Underground site; you can use 'station <code>' to look up data by station code ( lookup your station code at http://www.weatherunderground.com/ ); you can optionally set <units>  to 'metric' or 'english' if you only want data with the units; use 'both' for units to go back to having both." 
+      "weather [<units>] <location> => display the current conditions at the location specified, looking it up on the Weather Underground site; you can use 'station <code>' to look up data by station code ( lookup your station code at http://www.weatherunderground.com/ ); you can optionally set <units>  to 'metric' or 'english' if you only want data with the units; use 'both' for units to go back to having both."
     else
       "weather information lookup. Looks up weather information for the last location you specified. See topics 'nws' and 'wu' for more information"
     end
   end
-  
+
   def initialize
     super
 
@@ -91,7 +91,7 @@ class WeatherPlugin < Plugin
     @wu_url         = "http://mobile.wunderground.com/cgi-bin/findweather/getForecast?brand=mobile%s&query=%s"
     @wu_station_url = "http://mobile.wunderground.com/auto/mobile%s/global/stations/%s.html"
   end
-  
+
   def weather(m, params)
     if params[:where].empty?
       if @registry.has_key?(m.sourcenick)

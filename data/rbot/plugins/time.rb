@@ -45,13 +45,13 @@ class TimePlugin < Plugin
     end
     ['/', '_'].each { |sp|
         arr = Array.new
-        zone.split(sp).each{ |s| 
+        zone.split(sp).each{ |s|
             s[0] = s[0,1].upcase
             s[1, s.length] = s[1, s.length].downcase if sp == '/'
             arr.push(s) }
             zone = arr.join( sp )
         }
-    
+
     tz = TZInfo::Timezone.get( zone )
     "#{tz.friendly_identifier} - #{tz.now.strftime( '%a %b %d %H:%M' )} #{tz.current_period.abbreviation}"
   end

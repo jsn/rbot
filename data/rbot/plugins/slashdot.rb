@@ -62,7 +62,7 @@ class SlashdotPlugin < Plugin
       @bot.register_filter(:slashdot, :htmlinfo) { |s| slashdot_filter(s) }
     end
   end
-  
+
   def search_slashdot(m, params)
     max = params[:limit].to_i
     search = params[:search].to_s
@@ -99,7 +99,7 @@ class SlashdotPlugin < Plugin
       m.reply "search for #{search} failed"
     end
   end
-  
+
   def slashdot(m, params)
     debug params.inspect
     max = params[:limit].to_i
@@ -123,12 +123,12 @@ class SlashdotPlugin < Plugin
     max = 8 if max > 8
     matches = Array.new
     doc.elements.each("*/story") {|e|
-      matches << [ e.elements["title"].text, 
-                   e.elements["author"].text, 
+      matches << [ e.elements["title"].text,
+                   e.elements["author"].text,
                    e.elements["time"].text.gsub(/\d{4}-(\d{2})-(\d{2})/, "\\2/\\1").gsub(/:\d\d$/, "") ]
       done += 1
       break if done >= max
-    } 
+    }
     if oneline
       m.reply matches.collect{|mat| mat[0]}.join(" | ")
     else

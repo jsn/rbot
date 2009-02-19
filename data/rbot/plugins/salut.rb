@@ -15,12 +15,12 @@
 
 class SalutPlugin < Plugin
   Config.register Config::BooleanValue.new('salut.all_languages',
-    :default => true, 
+    :default => true,
     :desc => "Check for a salutation in all languages and not just in the one defined by core.language",
     :on_change => Proc.new {|bot, v| bot.plugins['salut'].reload}
   )
   Config.register Config::BooleanValue.new('salut.address_only',
-    :default => true, 
+    :default => true,
     :desc => "When set to true, the bot will only reply to salutations directed at him",
     :on_change => Proc.new {|bot, v| bot.plugins['salut'].reload}
   )
@@ -113,7 +113,7 @@ class SalutPlugin < Plugin
     return unless salut
     # If the bot wasn't addressed, we continue only if the match was exact
     # (apart from space and punctuation) or if @match[:dest] matches too
-    return unless to_me or m.message =~ /^#{@punct}#{salut.first}#{@punct}$/ or m.message =~ @match[salut[1]][:dest] 
+    return unless to_me or m.message =~ /^#{@punct}#{salut.first}#{@punct}$/ or m.message =~ @match[salut[1]][:dest]
     h = Time.new.hour
     case h
     when 4...12

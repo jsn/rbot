@@ -88,7 +88,7 @@ class FreshmeatPlugin < Plugin
       m.reply reply
     }
   end
-  
+
   def freshmeat(m, params)
     max = params[:limit].to_i
     max = 8 if max > 8
@@ -134,5 +134,5 @@ end
 plugin = FreshmeatPlugin.new
 plugin.map 'freshmeat search :limit *search', :action => 'search_freshmeat',
             :defaults => {:limit => 4}, :requirements => {:limit => /^\d+$/}
-plugin.map 'freshmeat :limit', :defaults => {:limit => 4}, 
+plugin.map 'freshmeat :limit', :defaults => {:limit => 4},
                                :requirements => {:limit => /^\d+$/}

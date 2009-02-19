@@ -113,7 +113,7 @@ class SearchPlugin < Plugin
   def gcalc(m, params)
     what = params[:words].to_s
     searchfor = CGI.escape(what)
-    
+
     debug "Getting gcalc thing: #{searchfor.inspect}"
     url = GOOGLE_SEARCH + searchfor
 
@@ -125,24 +125,24 @@ class SearchPlugin < Plugin
     end
 
     debug "#{html.size} bytes of html recieved"
-    
+
     results = html.scan(GOOGLE_CALC_RESULT)
     debug "results: #{results.inspect}"
-    
+
     if results.length != 1
       m.reply "couldn't calculate #{what}"
       return
     end
-    
+
     result = results[0][0].ircify_html
     debug "replying with: #{result.inspect}"
     m.reply "#{result}"
   end
-  
+
   def gcount(m, params)
     what = params[:words].to_s
     searchfor = CGI.escape(what)
-    
+
     debug "Getting gcount thing: #{searchfor.inspect}"
     url = GOOGLE_SEARCH + searchfor
 
@@ -154,15 +154,15 @@ class SearchPlugin < Plugin
     end
 
     debug "#{html.size} bytes of html recieved"
-    
+
     results = html.scan(GOOGLE_COUNT_RESULT)
     debug "results: #{results.inspect}"
-    
+
     if results.length != 1
       m.reply "couldn't count #{what}"
       return
     end
-    
+
     result = results[0][0].ircify_html
     debug "replying with: #{result.inspect}"
     m.reply "total results: #{result}"
@@ -172,7 +172,7 @@ class SearchPlugin < Plugin
   def gdef(m, params)
     what = params[:words].to_s
     searchfor = CGI.escape("define " + what)
-    
+
     debug "Getting gdef thing: #{searchfor.inspect}"
     url = GOOGLE_WAP_SEARCH + searchfor
 
@@ -186,12 +186,12 @@ class SearchPlugin < Plugin
     debug html
     results = html.scan(GOOGLE_DEF_RESULT)
     debug "results: #{results.inspect}"
-    
+
     if results.length != 1
       m.reply "couldn't find a definition for #{what} on Google"
       return
     end
-    
+
     head = results[0][0].ircify_html
     text = results[0][1].ircify_html
     link = results[0][2]
@@ -224,7 +224,7 @@ plugin = SearchPlugin.new
 
 plugin.map "search *words", :action => 'google', :threaded => true
 plugin.map "google *words", :action => 'google', :threaded => true
-plugin.map "gcount *words", :action => 'gcount', :threaded => true 
+plugin.map "gcount *words", :action => 'gcount', :threaded => true
 plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
 plugin.map "gdef *words", :action => 'gdef', :threaded => true
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true

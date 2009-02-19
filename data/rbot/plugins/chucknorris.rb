@@ -16,20 +16,20 @@ class ChuckNorrisPlugin < Plugin
     else
       raise "Error: Couldn't find chucknorris.yml[.gz]"
     end
-    
+
     debug "+ [chucknorris] Loading #{path}..."
-    
+
     @@facts = YAML.load(fyml).map{|fact,(score,votes)| votes >= MIN_VOTES ? [score,fact] : nil}.compact
     debug "+ [chucknorris] #{@@facts.length} Chuck Norris facts loaded..."
     debug "  Random fact: #{@@facts[rand(@@facts.size)].inspect}"
-    
+
     super
   end
 
   def name
     "chucknorris"
   end
-  
+
   # Just a little helper for the initialize method...
   def find_facts_file(name)
     full_path = File.join Config::datadir, "plugins", name
@@ -40,11 +40,11 @@ class ChuckNorrisPlugin < Plugin
       found_files[0]
     end
   end
-  
+
   # HELP!
   def help(plugin, topic="chuck")
     "chuck|norris|chucknorris [min_rating] => show a random Chuck Norris fact (optional minimum rating from 1-10, default=6.0)."
-    #\"fact [person]\" shows a fact about someone in the channel. 
+    #\"fact [person]\" shows a fact about someone in the channel.
   end
 
   # The meat.

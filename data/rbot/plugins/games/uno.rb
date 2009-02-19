@@ -108,7 +108,7 @@ class UnoGame
       @color = 'Wild'
       raise if value and not value == '+4'
       if value
-        @value = value.dup 
+        @value = value.dup
         @shortform = 'w'+value
       else
         @value = nil
@@ -411,7 +411,7 @@ class UnoGame
         # only be possible if the first W+4 was illegal, so it wouldn't
         # apply for a W+4 played on a +2 anyway.
         #
-        if @picker == 0 and Wild === cards.first and cards.first.value 
+        if @picker == 0 and Wild === cards.first and cards.first.value
           # save the previous discard in case of challenge
           @last_discard = @discard.dup
           # save the color too, in case it was a Wild

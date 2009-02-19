@@ -25,7 +25,7 @@ module ::Irc
     #
     # If you have to do large-scale editing of the Bot data Hash,
     # please use with_botdata.
-    # 
+    #
     def set_botdata(key, value=nil, &block)
       Irc::Utils.bot.plugins['userdata'].set_data(self, key, value, &block)
     end

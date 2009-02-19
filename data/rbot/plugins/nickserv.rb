@@ -20,7 +20,7 @@
 #         previously identified successfully
 
 class NickServPlugin < Plugin
-  
+
   Config.register Config::StringValue.new('nickserv.name',
     :default => "nickserv", :requires_restart => false,
     :desc => _("Name of the nick server (all lowercase)"))
@@ -62,7 +62,7 @@ class NickServPlugin < Plugin
       return _("nickserv listnicks: lists nicknames and associated password the bot knows about - you will need config level auth access to do this one and it will reply by privmsg only")
     end
   end
-  
+
   def genpasswd
     return Irc::Bot::Auth.random_password
   end
@@ -167,12 +167,12 @@ class NickServPlugin < Plugin
       m.reply _("uh ... something went wrong ...")
     end
   end
-  
+
   def connect
     @identified = false
     do_identify
   end
-  
+
   def nicktaken(nick)
     if @registry.has_key?(nick)
       ns_say "GHOST #{nick} #{@registry[nick]}"

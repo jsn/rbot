@@ -31,7 +31,7 @@ class LinkBot < Plugin
     :desc => "List of regexp which match linkbot messages; each regexp needs to have three captures, which in order are the nickname of the original speaker, network, and original message",
     :on_change => proc {|bot, v| bot.plugins['linkbot'].update_patterns})
   # TODO use template strings instead of regexp for user friendliness
-  
+
   # Initialize the plugin
   def initialize
     super

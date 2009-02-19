@@ -10,7 +10,7 @@ class DnsPlugin < Plugin
   def help(plugin, topic="")
     "dns <hostname|ip> => show local resolution results for hostname or ip address"
   end
-  
+
   def name_to_ip(m, params)
     begin
       a = getaddresses(params[:host])
@@ -23,7 +23,7 @@ class DnsPlugin < Plugin
       m.reply "#{params[:host]}: not found"
     end
   end
-  
+
   def ip_to_name(m, params)
     begin
       a = gethostname(params[:ip])

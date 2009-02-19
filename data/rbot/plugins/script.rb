@@ -11,7 +11,7 @@
 #
 # Scripts are little Ruby programs that run in the context of the script
 # plugin. You can create them directly in an IRC channel, and invoke them just
-# like normal rbot plugins. 
+# like normal rbot plugins.
 
 define_structure :Command, :code, :nick, :created, :channel
 
@@ -64,8 +64,8 @@ class ScriptPlugin < Plugin
 
       # Convenience variables, can be accessed by scripts:
       args = m.message.split
-      args.delete_at( 0 ) 
-      user = args.empty? ? m.sourcenick : args.first  
+      args.delete_at( 0 )
+      user = args.empty? ? m.sourcenick : args.first
 
       Thread.start {
         # TODO allow different safe levels for different botusers
@@ -152,7 +152,7 @@ class ScriptPlugin < Plugin
   def handle_add_force( m, params )
     handle_add( m, params, true )
   end
-    
+
 
   def handle_del( m, params )
     name = params[:name]
@@ -176,9 +176,9 @@ class ScriptPlugin < Plugin
     page = params[:page].to_i
     page = [page, 1].max
     page = [page, num_pages].min
-    str = cmds[(page-1)*cmds_per_page, cmds_per_page].join(', ') 
+    str = cmds[(page-1)*cmds_per_page, cmds_per_page].join(', ')
 
-    m.reply "Available scripts (page #{page}/#{num_pages}): #{str}" 
+    m.reply "Available scripts (page #{page}/#{num_pages}): #{str}"
   end
 
 

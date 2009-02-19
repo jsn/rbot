@@ -86,7 +86,7 @@ module Irc
             data
           end
       if ColorCode.key?(f)
-        ColorCode[f] 
+        ColorCode[f]
       else
         0
       end

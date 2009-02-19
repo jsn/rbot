@@ -58,10 +58,10 @@ class AliasPlugin < Plugin
 	warning _("Invalid alias entry %{alias} : %{command} in %{filename}: %{reason}") %
                 {:alias => a, :command => c, :filename => @data_file, :reason => $1}
       end
-    end 
-  end 
+    end
+  end
 
-  def save 
+  def save
     FileUtils.mkdir_p(@data_path)
     Utils.safe_save(@data_file) {|f| f.write @aliases.to_yaml}
   end
@@ -110,7 +110,7 @@ class AliasPlugin < Plugin
     command.scan(/<(\w+)>/).flatten.to_set ==
       text.split.grep(/\A[:*](\w+)\Z/) {$1}.to_set or
       raise AliasDefinitionError.new(_('The arguments in alias must match the substitutions in command, and vice versa'))
-    
+
     begin
       map text, :action => :"alias_handle<#{text}>", :auth_path => 'run'
     rescue

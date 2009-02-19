@@ -16,7 +16,7 @@ class VanDalePlugin < Plugin
 		ret = Array.new
 		Utils.safe_exec("/usr/local/bin/gnuvd", m.params).each{|line| if line.length > 5 then ret << line end}
 		m.reply ret.delete_at(0)
-		while ret[0] =~ /^[[:alpha:]_]*[0-9]/ 
+		while ret[0] =~ /^[[:alpha:]_]*[0-9]/
 			m.reply ret.delete_at(0)
 		end
 		while ret[0] =~ /^[0-9]/

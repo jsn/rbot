@@ -5,7 +5,7 @@ class TubePlugin < Plugin
   def help(plugin, topic="")
   "tube [district|circle|metropolitan|central|jubilee|bakerloo|waterlooandcity|hammersmithandcity|victoria|eastlondon|northern|piccadilly] => display tube service status for the specified line(Docklands Light Railway is not currently supported)" # , tube stations => list tube stations (not lines) with problems"
   end
-  
+
   def tube(m, params)
     line = params[:line]
     tube_page = @bot.httputil.get('http://www.tfl.gov.uk/tfl/livetravelnews/realtime/tube/default.html')
@@ -45,7 +45,7 @@ class TubePlugin < Plugin
         stations_array.push $1
       end
     }
-    if stations_array.empty? 
+    if stations_array.empty?
       m.reply "There are no station-specific announcements"
       return
     else

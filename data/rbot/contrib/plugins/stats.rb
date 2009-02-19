@@ -19,10 +19,10 @@
 
 class StatsPlugin < Plugin
 
-	@@commands = { 
+	@@commands = {
 		"stats" => "handle_stats",
 		"track" => "handle_track",
-		"untrack" => "handle_untrack", 
+		"untrack" => "handle_untrack",
 		"listtokens" => "handle_listtokens",
 		"rmabuser" => "handle_rmabuser"
 	}
@@ -61,7 +61,7 @@ class StatsPlugin < Plugin
 			m.reply "What a crazy fool!  Did you mean |help stats?"
 			return
 		end
-		
+
 		meth = self.method(@@commands[m.plugin])
 		meth.call(m)
 	end

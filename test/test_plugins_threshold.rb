@@ -55,7 +55,7 @@ class PluginsPriorityTest < Test::Unit::TestCase
     @mock3 = MockModule.new(3)
     @mock4 = MockModule.new(4)
     @mock5 = MockModule.new(5)
-      
+
     # This whole thing is a PITA because PluginManagerClass is a singleton
     unless @@manager
       @@manager = PluginManagerClass.instance
@@ -73,7 +73,7 @@ class PluginsPriorityTest < Test::Unit::TestCase
     @@manager.instance_eval { @sort_call_count = nil }
     @@manager.mark_priorities_dirty
 
-    # We add the modules to the lists in the wrong order 
+    # We add the modules to the lists in the wrong order
     # on purpose to make sure the sort is working
     @@manager.plugins.clear
     @@manager.core_modules.clear
@@ -91,7 +91,7 @@ class PluginsPriorityTest < Test::Unit::TestCase
     dlist << @mock2
     dlist << @mock5
   end
-    
+
   def test_above
     @@manager.delegate_event('test', :above => 3)
 
@@ -101,7 +101,7 @@ class PluginsPriorityTest < Test::Unit::TestCase
     assert_equal 1, @mock4.test_called_at.size
     assert_equal 1, @mock5.test_called_at.size
   end
-    
+
   def test_below
     @@manager.delegate_event('test', :below => 3)
 

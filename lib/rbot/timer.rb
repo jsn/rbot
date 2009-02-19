@@ -62,7 +62,7 @@ class Timer
       @repeat = opts[:repeat] if opts.include? :repeat
 
       if block_given?
-        @block = block 
+        @block = block
       elsif opts[:code]
         @block = opts[:code]
       end

@@ -6,7 +6,7 @@ class CalPlugin < Plugin
   def help(plugin, topic="")
     "cal [month year] => show current calendar [optionally specify month and year]"
   end
-  
+
   def cal_path
     @bot.config["cal.path"]
   end

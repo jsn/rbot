@@ -198,7 +198,7 @@ module Plugins
       @priority ||= 1
     end
 
-    # Returns the symbol :BotModule 
+    # Returns the symbol :BotModule
     def botmodule_class
       :BotModule
     end
@@ -318,7 +318,7 @@ module Plugins
     #
     # This command is now superceded by the #map() command, which should be used
     # instead whenever possible.
-    # 
+    #
     def register(cmd, opts={})
       raise ArgumentError, "Second argument must be a hash!" unless opts.kind_of?(Hash)
       who = @manager.who_handles?(cmd)
@@ -341,7 +341,7 @@ module Plugins
       m.reply(_("incorrect usage, ask for help using '%{command}'") % {:command => "#{@bot.nick}: help #{m.plugin}"})
     end
 
-    # Define the priority of the module.  During event delegation, lower 
+    # Define the priority of the module.  During event delegation, lower
     # priority modules will be called first.  Default priority is 1
     def priority=(prio)
       if @priority != prio
@@ -812,7 +812,7 @@ module Plugins
     end
 
     def sort_modules
-      @sorted_modules = (core_modules + plugins).sort do |a, b| 
+      @sorted_modules = (core_modules + plugins).sort do |a, b|
         a.priority <=> b.priority
       end || []
 

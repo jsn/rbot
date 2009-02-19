@@ -37,7 +37,7 @@ class QuotePlugin < Plugin
         if @changed[channel]
           debug "Writing new quotefile for channel #{channel} ..."
           Utils.safe_save(datafile channel) {|file|
-            quotes.compact.each {|q| 
+            quotes.compact.each {|q|
               file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
             }
           }
@@ -65,7 +65,7 @@ class QuotePlugin < Plugin
 
   def addquote(source, channel, quote)
     @lists[channel] = Array.new if(!@lists.has_key?(channel))
-    num = @lists[channel].length 
+    num = @lists[channel].length
     @lists[channel][num] = Quote.new(num, Time.new, source.fullform, quote)
     @changed[channel] = true
     return num

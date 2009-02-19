@@ -73,7 +73,7 @@ class ModesPlugin < Plugin
   def do_mode(m, channel, user, mode)
     unless channel
       if m.private?
-        target = user.nil? ? "you" : user 
+        target = user.nil? ? "you" : user
         m.reply "You should tell me where you want me to #{mode} #{target}."
         return
       else

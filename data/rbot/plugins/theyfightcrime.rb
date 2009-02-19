@@ -1,21 +1,21 @@
 HE = [
 
     ['a superhumanly strong','an underprivileged','a globe-trotting','an impetuous','a shy','a suave','a notorious','a one-legged','an all-American','a short-sighted','an otherworldly','a hate-fuelled','a scrappy','an unconventional','a jaded','a leather-clad','a fiendish','a Nobel prize-winning','a suicidal','a maverick','a bookish','an old-fashioned','a witless','a lounge-singing','a war-weary','a scarfaced','a gun-slinging','an obese','a time-tossed','a benighted','an uncontrollable','an immortal','an oversexed','a world-famous','an ungodly','a fast talking','a deeply religious','a lonely','a sword-wielding','a genetically engineered'],
-    
+
     ['white trash','zombie','shark-wrestling','playboy','guitar-strumming','Jewish',
     'sweet-toothed','bohemian','crooked','chivalrous','moralistic','amnesiac','devious','drug-addicted',
     'voodoo','Catholic','overambitious','coffee-fuelled','pirate','misogynist','skateboarding',
     'arachnophobic','Amish','small-town','Republican','one-eyed','gay','guerilla','vegetarian',
     'dishevelled','alcoholic','flyboy','ninja','albino','hunchbacked','neurotic','umbrella-wielding',
     'native American','soccer-playing','day-dreaming'],
-    
+
     ['grifter','stage actor','paramedic','gentleman spy','jungle king','hairdresser',
     'photographer','ex-con','vagrant','filmmaker','werewolf','senator','romance novelist','shaman','cop',
     'rock star','farmboy','cat burglar','cowboy','cyborg','inventor','assassin','boxer','dog-catcher',
     'master criminal','gangster','firefighter','househusband','dwarf','librarian','paranormal investigator',
     'Green Beret','waffle chef','vampire hunter','messiah','astronaut','sorceror','card sharp','matador',
     'barbarian'],
-    
+
     ['with a robot buddy named Sparky','whom everyone believes is mad','gone bad',
     'with a mysterious suitcase handcuffed to his arm','living undercover at Ringling Bros. Circus',
     'searching for his wife''s true killer','who dotes on his loving old ma','looking for ''the Big One''',
@@ -42,19 +42,19 @@ SHE = [
     'a plucky','a sarcastic','a psychotic','a hard-bitten','a manipulative','an orphaned','a cosmopolitan',
     'a chain-smoking','a cold-hearted','a warm-hearted','a sharp-shooting','an enchanted','a wealthy','a pregnant',
     'a mentally unstable','a virginal','a brilliant','a disco-crazy','a provocative','an artistic'],
-    
+
     ['tempestuous', 'Buddhist', 'foul-mouthed', 'nymphomaniac', 'green-skinned', 'impetuous', 'African-American','punk','hypochondriac','junkie','blonde','goth','insomniac','gypsy','mutant','renegade', 'tomboy','French-Canadian','motormouth','belly-dancing','communist','hip-hop','thirtysomething',
     'cigar-chomping','extravagent','out-of-work','Bolivian','mute','cat-loving','snooty','wisecracking',
     'red-headed','winged','kleptomaniac','antique-collecting','psychic','gold-digging','bisexual','paranoid',
     'streetsmart'],
-    
+
     ['archaeologist','pearl diver','mechanic','detective','hooker','femme fatale',
     'former first lady','barmaid','fairy princess','magician''s assistant','schoolgirl','college professor',
     'angel','bounty hunter','opera singer','cab driver','soap star','doctor','politician','lawyer','nun',
     'snake charmer','journalist','bodyguard','vampire','stripper','Valkyrie','wrestler','mermaid','single mother',
     'safe cracker','traffic cop','research scientist','queen of the dead','Hell''s Angel','museum curator',
     'advertising executive','widow','mercenary','socialite'],
-    
+
     ['on her way to prison for a murder she didn''t commit','trying to make a difference in a man''s world',
     'with the soul of a mighty warrior','looking for love in all the wrong places','with an MBA from Harvard',
     'who hides her beauty behind a pair of thick-framed spectacles','with the power to see death',
@@ -80,14 +80,14 @@ TITLE = [
     'BLOOD', 'HARD', 'STEEL', 'TERMINAL', 'HOT', 'COLD', 'TOTAL', 'PROGNOSIS:',
     'BURNING', 'FAST', 'PAINFUL', 'MISSION:', 'DEADLY', 'PARTIAL',
     'RAGING', 'CORDIAL'],
-    
+
     ['DECISION', 'INCISION', 'CONCLUSION',
     'CONCUSSION', 'HEAT', 'FIRE', 'RECOIL', 'INSTINCT', 'DESIRE', 'WEAPON',
     'BADGE', 'DEED', 'JUSTICE', 'HEAT', 'VENGEANCE', 'RECESSION', 'COMBUSTION',
     'JUDGEMENT', 'WARNING', 'AWAKENING', 'JURISDICTION', 'BASIS', 'FINDINGS',
     'INJECTION', 'REJECTION', 'REMISSION', 'DIGESTION', 'IDENTITY',
     'DISPERSION'],
-    
+
     ['II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX']
 
 ]
@@ -96,11 +96,11 @@ class TheyFightCrime < Plugin
     def help(plugin, topic="")
         "movieplot => generate a random movie scenario. movietitle => generate a random movie title."
     end
-    
+
     def get_random_things(thing_array)
         thing_array.map { |things| things.pick_one }
     end
-    
+
     def movieplot(m, params)
         he_things = get_random_things(HE)
         she_things = get_random_things(SHE)

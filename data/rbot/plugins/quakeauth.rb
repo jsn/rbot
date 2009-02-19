@@ -10,7 +10,7 @@
 # Automatically auths with Q on QuakeNet servers
 
 class QPlugin < Plugin
-  
+
   def help(plugin, topic="")
     case topic
     when ""
@@ -23,7 +23,7 @@ class QPlugin < Plugin
       return "qauth register <email>: register with Q, an email on how to proceed will be sent to the email address you provide"
     end
   end
-  
+
   def initialize
     super
     # this plugin only wants to store strings!
@@ -43,7 +43,7 @@ class QPlugin < Plugin
     @registry['quakenet.auth'] = params[:password]
     m.okay
   end
-  
+
   def connect
     identify(nil, {}) if on_quakenet?
   end

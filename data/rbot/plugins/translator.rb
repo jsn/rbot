@@ -39,7 +39,7 @@ class Translator
     @cache = cache
   end
 
- 
+
   # whether the translator supports this direction
   def support?(from, to)
     from != to && @directions[from].include?(to)
@@ -316,7 +316,7 @@ class TranslatorPlugin < Plugin
   end
 
   def update_default
-    @default_translators = bot.config['translator.default_list'] & @translators.keys 
+    @default_translators = bot.config['translator.default_list'] & @translators.keys
   end
 
   def cmd_translator(m, params)

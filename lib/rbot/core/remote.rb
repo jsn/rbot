@@ -147,7 +147,7 @@ class Bot
     #
     # Presently, the hash returned on success has only one key, :return, whose
     # value is the actual return value of the successfull dispatch.
-    # 
+    #
     # TODO this same kind of mechanism could actually be used in MessageMapper
     # itself to be able to handle the case of multiple plugins having the same
     # 'first word' ...

@@ -57,16 +57,16 @@ class Bot
       return 'english'
     end
 
-    Config.register Config::EnumValue.new('core.language', 
+    Config.register Config::EnumValue.new('core.language',
       :default => Irc::Bot::Language.from_locale, :wizard => true,
       :values => Proc.new{|bot|
             Dir.new(Config::datadir + "/languages").collect {|f|
               f =~ /\.lang$/ ? f.gsub(/\.lang$/, "") : nil
             }.compact
-          },   
+          },
       :on_change => Proc.new {|bot, v| bot.lang.set_language v},
       :desc => "Which language file the bot should use")
-    
+
     def initialize(bot, language)
       @bot = bot
       set_language language

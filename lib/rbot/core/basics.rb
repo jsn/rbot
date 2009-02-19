@@ -190,7 +190,7 @@ basics.map "mode :where :what *who",
   :action => 'bot_mode',
   :auth_path => 'talk::do'
 
-basics.map "join :chan :pass", 
+basics.map "join :chan :pass",
   :action => 'bot_join',
   :defaults => {:pass => nil},
   :auth_path => 'move'

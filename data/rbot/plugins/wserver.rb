@@ -12,20 +12,20 @@ class WserverPlugin < Plugin
         m.reply "cowardly refusing to follow more than 3 redirects"
         return
       end
-      
+
       begin
         uri = URI.parse(hostname)
       rescue URI::InvalidURIError => err
         m.reply "#{hostname} is not a valid URI"
         return
       end
-      
+
       unless(uri)
         m.reply "incorrect usage: " + help(m.plugin)
         return
       end
-        
-      
+
+
       resp = @bot.httputil.head(uri)
       server = resp['Server']
       if(server && server.length > 0)
@@ -34,7 +34,7 @@ class WserverPlugin < Plugin
         m.reply "couldn't tell what #{uri.host} is running"
       end
 
-      if(resp.code == "302" || resp.code == "301") 
+      if(resp.code == "302" || resp.code == "301")
         newloc = resp['location']
         newuri = URI.parse(newloc)
         # detect and ignore incorrect redirects (to relative paths etc)

@@ -9,7 +9,7 @@ class DiggPlugin < Plugin
   def help(plugin, topic="")
     "digg [<max>=5] => show digg headlines, [<max>=5] => return up to <max> headlines (use a negative number to show all the headlines on one line)"
   end
-  
+
   def digg(m, params)
     max = params[:limit].to_i
     debug "max is #{max}"
@@ -32,11 +32,11 @@ class DiggPlugin < Plugin
     max = 8 if max > 8
     matches = Array.new
     doc.elements.each("rss/channel/item") {|e|
-      matches << [ e.elements["title"].text, 
+      matches << [ e.elements["title"].text,
                    Time.parse(e.elements["pubDate"].text).strftime('%a @ %I:%M%p') ]
       done += 1
       break if done >= max
-    } 
+    }
     if oneline
       m.reply matches.collect{|mat| mat[0]}.join(" | ")
     else

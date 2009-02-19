@@ -24,7 +24,7 @@ require 'rbot/maskdb'
 #     }
 #   }
 # end
-# 
+#
 
 module Irc
 class Bot

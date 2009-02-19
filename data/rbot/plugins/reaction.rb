@@ -207,7 +207,7 @@ class ReactionPlugin < Plugin
       "between 0 and 1 (i.e. 0% and 100%). A reaction can have multiple replies, each with a different chance; if the total of the chances is less than one, " +
       "there is a chance that the trigger will not actually cause a reply. Otherwise, the chances express the relative frequency of the replies."
     when :trigger, :triggers
-      "reaction triggers can have one of the format: single_word 'multiple words' \"multiple words \" /regular_expression/ !regular_expression!. " + 
+      "reaction triggers can have one of the format: single_word 'multiple words' \"multiple words \" /regular_expression/ !regular_expression!. " +
       "If prefixed by 'act:' (e.g. act:/(order|command)s/) the bot will only respond if a CTCP ACTION matches the trigger"
     when :reply, :replies
       "reaction replies are simply messages that the bot will reply when a trigger is matched. " +

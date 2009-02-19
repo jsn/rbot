@@ -153,7 +153,7 @@ class IrcLogModule < CoreBotModule
         irclog "@ #{m.source} asked #{who} about #{[m.ctcp, m.message].join(' ')}", logtarget
       end
     else
-      if m.public? 
+      if m.public?
         irclog "<#{m.source}> #{m.logmessage}", m.target
       else
         irclog "<#{m.source}(#{m.sourceaddress})> #{m.logmessage}", m.source

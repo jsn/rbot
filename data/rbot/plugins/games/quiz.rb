@@ -184,7 +184,7 @@ class QuizPlugin < Plugin
   # (in quiz/) or web pages.
   #
   def fetch_data( m )
-    # Read the winning messages file 
+    # Read the winning messages file
     @win_messages = Array.new
     winfile = datafile 'win_messages'
     if File.exists? winfile
@@ -339,7 +339,7 @@ class QuizPlugin < Plugin
         end
       end
 
-      # If less than all other players' scores, append to table 
+      # If less than all other players' scores, append to table
       unless inserted
         i += 1 unless q.rank_table.empty?
         q.rank_table << [nick, stats]
@@ -370,7 +370,7 @@ class QuizPlugin < Plugin
 
     message = m.message.downcase.strip
 
-    nick = m.sourcenick.to_s 
+    nick = m.sourcenick.to_s
 
     # Support multiple alternate answers and cores
     answer = q.answers.find { |ans| ans.valid?(message) }

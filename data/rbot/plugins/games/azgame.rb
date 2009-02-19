@@ -355,10 +355,10 @@ class AzGamePlugin < Plugin
       if wc[word].key?(:when)
         tr = _("%{word} learned from %{user} on %{date}") % {:word => word, :user => wc[word][:who], :date => wc[word][:when]}
       else
-        tr = _("%{word} learned from %{user}") % {:word => word, :user => wc[word][:who]} 
+        tr = _("%{word} learned from %{user}") % {:word => word, :user => wc[word][:who]}
       end
       m.reply tr
-    when :delete 
+    when :delete
       if pars.empty?
         m.reply _("provide a word")
         return

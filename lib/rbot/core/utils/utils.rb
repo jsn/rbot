@@ -287,13 +287,13 @@ module ::Irc
         _("%{m} minutes") % { :m => secs/SEC_PER_MIN }
       when secs > 1
         _("%{m} seconds") % { :m => secs }
-      else 
+      else
         _("one second")
       end
     end
 
     # Execute an external program, returning a String obtained by redirecting
-    # the program's standards errors and output 
+    # the program's standards errors and output
     #
     def Utils.safe_exec(command, *args)
       IO.popen("-") { |p|

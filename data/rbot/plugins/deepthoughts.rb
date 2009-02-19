@@ -79,7 +79,7 @@ class DeepThoughts < Plugin
     def help(plugin, topic="")
         "deepthought => think a deep thought."
     end
-    
+
     def deepthought(m, params)
         m.reply THOUGHTS.pick_one
     end

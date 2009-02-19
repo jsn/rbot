@@ -16,7 +16,7 @@
 
 require 'rss'
 
-# Try to load rss/content/2.0 so we can access the data in <content:encoded> 
+# Try to load rss/content/2.0 so we can access the data in <content:encoded>
 # tags.
 begin
   require 'rss/content/2.0'
@@ -293,7 +293,7 @@ class RSSFeedsPlugin < Plugin
   # Make an  'unique' ID for a given item, based on appropriate bot options
   # Currently only suppored is bot.config['rss.show_updated']: when false,
   # only the guid/link is accounted for.
-  
+
   def make_uid(item)
     uid = [item.guid! || item.link!]
     if @bot.config['rss.show_updated']
@@ -1018,7 +1018,7 @@ class RSSFeedsPlugin < Plugin
           else
             date = item.source.updated.content.to_s
           end
-        elsif item.respond_to?(:pubDate) 
+        elsif item.respond_to?(:pubDate)
           if item.pubDate.class <= Time
             date = item.pubDate.strftime("%Y/%m/%d %H:%M")
           else
@@ -1055,7 +1055,7 @@ class RSSFeedsPlugin < Plugin
     desc_opt[:limit] = @bot.config['rss.text_max']
     desc_opt[:a_href] = :link_out if @bot.config['rss.show_links']
 
-    # We prefer content_encoded here as it tends to provide more html formatting 
+    # We prefer content_encoded here as it tends to provide more html formatting
     # for use with ircify_html.
     if item.respond_to?(:content_encoded) && item.content_encoded
       desc = item.content_encoded.ircify_html(desc_opt)

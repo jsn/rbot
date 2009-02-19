@@ -10,7 +10,7 @@
 # The purpose is to provide a workaround for ruby-gettext, which treats empty output
 # from msgmerge as error in the po file, where it should mean that no modification
 # is needed to the defpo. For updates on the issue follow
-# http://rubyforge.org/pipermail/gettext-users-en/2008-June/000094.html 
+# http://rubyforge.org/pipermail/gettext-users-en/2008-June/000094.html
 
 
 msgmerge = ENV['REAL_MSGMERGE_PATH'] || 'msgmerge'

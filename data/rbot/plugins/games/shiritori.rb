@@ -1,7 +1,7 @@
 #-- vim:sw=2:et
 #kate: indent-width 2
 #++
-# 
+#
 # :title: Shiritori Plugin for RBot
 #
 # Author:: Yaohan Chen <yaohan.chen@gmail.com>
@@ -16,10 +16,10 @@
 # players can interrupt a turn to join, or a free mode where anyone can speak at any
 # time.
 #
-# In Japanese mode, if present, the plugin can use normalize-japanese 
+# In Japanese mode, if present, the plugin can use normalize-japanese
 # <http://neruchan.mine.nu:60880/normalize-japanese.rb> to allow
 # katakana words be used like hiragana.
-# 
+#
 # TODO
 # * a system to describe settings, so they can be displayed, changed and saved
 # * adjust settings during game
@@ -35,7 +35,7 @@ class Dictionary
   def has_word?(s)
     raise NotImplementedError
   end
-  
+
   # whether any word starts with prefix, excluding words in excludes. This can be
   # possible with non-enumerable dictionaries since some dictionary engines provide
   # prefix searching.
@@ -51,12 +51,12 @@ class WordlistDictionary < Dictionary
     @words = words
     # debug "Created dictionary with #{@words.length} words"
   end
-  
+
     # whether string s is a word
   def has_word?(s)
     @words.include? s
   end
-  
+
   # whether any word starts with prefix, excluding words in excludes
   def any_word_starting?(prefix, excludes)
     # (@words - except).any? {|w| w =~ /\A#{prefix}.+/}
@@ -69,7 +69,7 @@ end
 # whether it's possible to continue a word
 class Shiritori
   attr_reader :used_words
-  
+
   # dictionary:: a Dictionary object
   # overlap_lengths:: a Range for allowed lengths to overlap when continuing words
   # check_continuable:: whether all words are checked whether they're continuable,
@@ -82,7 +82,7 @@ class Shiritori
     @allow_reuse = allow_reuse
     @used_words = []
   end
-  
+
   # Prefix of s with length n
   def head_of(s, n)
     # TODO ruby2 unicode
@@ -102,7 +102,7 @@ class Shiritori
   def range_under(r, n)
     r.begin .. [r.end, n-1].min
   end
-  
+
   # TODO allow the ruleset to customize this
   def continues?(w2, w1)
     # this uses the definition w1[-n,n] == w2[0,n] && n < [w1.length, w2.length].min
@@ -110,7 +110,7 @@ class Shiritori
     range_under(@overlap_lengths, [len(w1), len(w2)].min).any? {|n|
       tail_of(w1, n)== head_of(w2, n)}
   end
-  
+
   # Checks whether *any* unused word in the dictionary completes the word
   # This has the limitation that it can't detect when a word is continuable, but the
   # only continuers aren't continuable
@@ -118,8 +118,8 @@ class Shiritori
     range_under(@overlap_lengths, len(s)).any? {|n|
       @dictionary.any_word_starting?(tail_of(s, n), @used_words) }
   end
-  
-  # Given a string, give a verdict based on current shiritori state and dictionary 
+
+  # Given a string, give a verdict based on current shiritori state and dictionary
   def process(s)
     # TODO optionally allow used words
     # TODO ruby2 unicode
@@ -167,14 +167,14 @@ class ShiritoriGame
     @timer_handle = nil
     @say = say
     @when_die = when_die
-    
+
     # TODO allow other forms of dictionaries
     dictionary = WordlistDictionary.new(@ruleset[:words])
     @game = Shiritori.new(dictionary, @ruleset[:overlap_lengths],
                                       @ruleset[:check_continuable],
                                       @ruleset[:allow_reuse])
   end
-  
+
   def say(s)
      @say.call(s)
   end
@@ -184,10 +184,10 @@ class ShiritoriGame
   # * when time_limit > 0, new players can join at any time, but existing players must
   #   take turns, each of which expires after time_limit
   # * when time_imit is 0, anyone can speak in the game at any time
-  def take_turns? 
+  def take_turns?
     @players.length > 1 && @ruleset[:time_limit] > 0
   end
-  
+
   # the player who has the current turn
   def current_player
     @players.first
@@ -200,7 +200,7 @@ class ShiritoriGame
   def previous_word
     @game.used_words[-2]
   end
-  
+
   # announce the current word, and player if take_turns?
   def announce
     say(if take_turns?
@@ -237,13 +237,13 @@ class ShiritoriGame
     end
     announce
   end
-  
+
   # handle when turn time limit goes out
   def time_out
     if @ruleset[:lose_when_timeout]
       say _("%{player} took too long and is out of the game. Try again next game!") %
       { :player => current_player }
-      if @players.length == 2 
+      if @players.length == 2
         # 2 players before, and one should remain now
         # since the game is ending, save the trouble of removing and booting the player
         say _("%{player} is the last remaining player and the winner! Congratulations!") %
@@ -269,12 +269,12 @@ class ShiritoriGame
   def handle_message(m)
     message = m.message
     speaker = m.sourcenick.to_s
-    
+
     return unless @ruleset[:listen] =~ message
 
     # in take_turns mode, only new players are allowed to interrupt a turn
     return if @booted_players.include? speaker ||
-              (take_turns? && 
+              (take_turns? &&
                speaker != current_player &&
                (@players.length > 1 && @players.include?(speaker)))
 
@@ -310,7 +310,7 @@ class ShiritoriGame
       m.reply _("It's impossible to continue the chain from %{word}. Start with another word.") % {:word => message}
     end
   end
-  
+
   # end the game
   def die
     # redefine restart_timer to no-op
@@ -331,11 +331,11 @@ class ShiritoriPlugin < Plugin
     _("A game in which each player must continue the previous player's word, by using its last one or few characters/letters of the word to start a new word. 'shiritori <ruleset>' => Play shiritori with a set of rules. Available rulesets: %{rulesets}. 'shiritori stop' => Stop the current shiritori game.") %
       {:rulesets => @rulesets.keys.join(', ')}
   end
-  
+
   def initialize()
     super
     @games = {}
-    
+
     # TODO make rulesets more easily customizable
     # TODO initialize default ruleset from config
     # Default values of rulesets
@@ -401,7 +401,7 @@ class ShiritoriPlugin < Plugin
     end
     return ruleset
   end
-  
+
   # start shiritori in a channel
   def cmd_shiritori(m, params)
     if @games.has_key?( m.channel )
@@ -426,7 +426,7 @@ class ShiritoriPlugin < Plugin
       end
     end
   end
-  
+
   # change rules for current game
   def cmd_set(m, params)
     require 'enumerator'
@@ -434,7 +434,7 @@ class ShiritoriPlugin < Plugin
     params[:rules].each_slice(2) {|opt, value| new_rules[opt] = value}
     raise NotImplementedError
   end
-  
+
   # stop the current game
   def cmd_stop(m, params)
     if @games.has_key? m.channel
@@ -446,19 +446,19 @@ class ShiritoriPlugin < Plugin
       m.reply _("No game to stop here, because no game is being played.")
     end
   end
-  
+
   # remove the game, so channel messages are no longer processed, and timer removed
   def remove_game(channel)
     @games.delete channel
   end
-  
+
   # all messages from a channel is sent to its shiritori game if any
   def message(m)
     return unless @games.has_key?(m.channel)
     # send the message to the game in the channel to handle it
     @games[m.channel].handle_message m
   end
-  
+
   # remove all games
   def cleanup
     @games.each_key {|g| g.die}

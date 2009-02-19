@@ -33,7 +33,7 @@ class Object
 
   # We alias the to_s method to __to_s__ to make
   # it accessible in all classes
-  alias :__to_s__ :to_s 
+  alias :__to_s__ :to_s
 end
 
 # The Irc module is used to keep all IRC-related classes
@@ -542,7 +542,7 @@ class Regexp
     GEN_HOST = /#{HOSTNAME}|#{HOSTADDR}/
 
     # # FreeNode network replaces the host of affiliated users with
-    # # 'virtual hosts' 
+    # # 'virtual hosts'
     # # FIXME we need the true syntax to match it properly ...
     # PDPC_HOST_PART = /[0-9A-Za-z.-]+/
     # PDPC_HOST = /#{PDPC_HOST_PART}(?:\/#{PDPC_HOST_PART})+/
@@ -550,7 +550,7 @@ class Regexp
     # # NOTE: the final optional and non-greedy dot is needed because some
     # # servers (e.g. FreeNode) send the hostname of the services as "services."
     # # which is not RFC compliant, but sadly done.
-    # GEN_HOST_EXT = /#{PDPC_HOST}|#{GEN_HOST}\.??/ 
+    # GEN_HOST_EXT = /#{PDPC_HOST}|#{GEN_HOST}\.??/
 
     # Sadly, different networks have different, RFC-breaking ways of cloaking
     # the actualy host address: see above for an example to handle FreeNode.
@@ -1350,7 +1350,7 @@ module Irc
     # Adds a user to the channel
     #
     def add_user(user, opts={})
-      silent = opts.fetch(:silent, false) 
+      silent = opts.fetch(:silent, false)
       if has_user?(user)
         warn "Trying to add user #{user} to channel #{self} again" unless silent
       else

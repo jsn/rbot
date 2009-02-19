@@ -15,7 +15,7 @@ require 'time'
 class RoshamboPlugin < Plugin
 
   def initialize
-    super 
+    super
     @scoreboard = {}
     @beats = { :rock => :scissors, :paper => :rock, :scissors => :paper}
     @plays = @beats.keys

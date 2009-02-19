@@ -31,7 +31,7 @@ class FortunePlugin < Plugin
     end
 
     return nil unless fortune
-      
+
     # Try setting the config entry
     config_par = {:key => 'fortune.path', :value => [fortune], :silent => true }
     debug "Setting fortune.path to #{fortune}"
@@ -94,7 +94,7 @@ class FortunePlugin < Plugin
     ## say 'em!
     m.reply "Fortune categories: #{categories.join ', '}"
   end
- 
+
 end
 plugin = FortunePlugin.new
 plugin.map 'fortune categories', :action => "categories"

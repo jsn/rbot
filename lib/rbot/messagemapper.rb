@@ -144,7 +144,7 @@ class Bot
     # threaded::
     #   a boolean (defaults to false) that determines whether the action should be
     #   called in a separate thread.
-    #   
+    #
     #
     # Further examples:
     #

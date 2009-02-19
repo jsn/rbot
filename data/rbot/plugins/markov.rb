@@ -197,7 +197,7 @@ class MarkovPlugin < Plugin
   def chat(m, params)
     line = generate_string(params[:seed1], params[:seed2])
     if line != "#{params[:seed1]} #{params[:seed2]}"
-      m.reply line 
+      m.reply line
     else
       m.reply "I can't :("
     end
@@ -221,7 +221,7 @@ class MarkovPlugin < Plugin
       m.reply "I can't :("
     end
   end
-  
+
   def message(m)
     return if ignore? m
 
@@ -231,7 +231,7 @@ class MarkovPlugin < Plugin
     if m.action?
       message = "#{m.sourcenick} #{message}"
     end
-    
+
     @learning_queue.push message
     random_markov(m, message) unless m.replied?
   end
