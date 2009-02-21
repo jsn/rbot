@@ -60,23 +60,51 @@ class MarkovPlugin < Plugin
 
   def generate_string(word1, word2)
     # limit to max of markov.max_words words
-    output = word1 + " " + word2
-
-    # try to avoid :nonword in the first iteration
-    wordlist = @registry["#{word1} #{word2}"]
-    wordlist.delete(:nonword)
-    if not wordlist.empty?
-      word3 = wordlist[rand(wordlist.length)]
-      output = output + " " + word3
-      word1, word2 = word2, word3
+    if word2
+      output = "#{word1} #{word2}"
+    else
+      output = word1.to_s
     end
+
+    if @registry.key? output
+      wordlist = @registry[output]
+      wordlist.delete(:nonword)
+    else
+      output.downcase!
+      keys = []
+      @registry.each_key(output) do |key|
+        if key.downcase.include? output
+          keys << key
+        else
+          break
+        end
+      end
+      if keys.empty?
+        keys = @registry.keys.select { |k| k.downcase.include? output }
+      end
+      return nil if keys.empty?
+      while key = keys.delete_one
+        wordlist = @registry[key]
+        wordlist.delete(:nonword)
+        unless wordlist.empty?
+          output = key
+          word1, word2 = output.split
+          break
+        end
+      end
+    end
+    return nil if wordlist.empty?
+
+    word3 = wordlist.pick_one
+    output << " #{word3}"
+    word1, word2 = word2, word3
 
     (@bot.config['markov.max_words'] - 1).times do
       wordlist = @registry["#{word1} #{word2}"]
       break if wordlist.empty?
-      word3 = wordlist[rand(wordlist.length)]
+      word3 = wordlist.pick_one
       break if word3 == :nonword
-      output = output + " " + word3
+      output << " #{word3}"
       word1, word2 = word2, word3
     end
     return output
@@ -196,7 +224,7 @@ class MarkovPlugin < Plugin
 
   def chat(m, params)
     line = generate_string(params[:seed1], params[:seed2])
-    if line != "#{params[:seed1]} #{params[:seed2]}"
+    if line and line != [params[:seed1], params[:seed2]].compact.join(" ")
       m.reply line
     else
       m.reply "I can't :("
@@ -262,7 +290,7 @@ plugin.map 'markov ignore', :action => "ignore"
 plugin.map 'markov enable', :action => "enable"
 plugin.map 'markov disable', :action => "disable"
 plugin.map 'markov status', :action => "status"
-plugin.map 'chat about :seed1 :seed2', :action => "chat"
+plugin.map 'chat about :seed1 [:seed2]', :action => "chat"
 plugin.map 'chat', :action => "rand_chat"
 plugin.map 'markov probability [:probability]', :action => "probability",
            :requirements => {:probability => /^\d+%?$/}
