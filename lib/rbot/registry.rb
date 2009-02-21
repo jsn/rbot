@@ -230,7 +230,7 @@ class Bot
     # just like Hash#each_key
     def each_key(&block)
       return nil unless File.exist?(@filename)
-      registry.each {|key, value|
+      registry.each_key {|key|
         block.call(key)
       }
     end
@@ -238,7 +238,7 @@ class Bot
     # just like Hash#each_value
     def each_value(&block)
       return nil unless File.exist?(@filename)
-      registry.each {|key, value|
+      registry.each_value { |value|
         block.call(restore(value))
       }
     end
