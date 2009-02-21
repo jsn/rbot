@@ -44,7 +44,7 @@ class MarkovPlugin < Plugin
     @learning_queue = Queue.new
     @learning_thread = Thread.new do
       while s = @learning_queue.pop
-        learn s
+        learn_line s
         sleep 0.5
       end
     end
@@ -222,6 +222,10 @@ class MarkovPlugin < Plugin
     end
   end
 
+  def learn(*lines)
+    lines.each { |l| @learning_queue.push l }
+  end
+
   def message(m)
     return if ignore? m
 
@@ -232,11 +236,11 @@ class MarkovPlugin < Plugin
       message = "#{m.sourcenick} #{message}"
     end
 
-    @learning_queue.push message
+    learn message
     random_markov(m, message) unless m.replied?
   end
 
-  def learn(message)
+  def learn_line(message)
     # debug "learning #{message}"
     wordlist = message.split(/\s+/)
     return unless wordlist.length >= 2
