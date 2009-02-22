@@ -92,7 +92,7 @@ class SeenPlugin < Plugin
 
     case saw.type.to_sym
     when :PUBLIC
-      ret << "saying #{saw.message}"
+      ret << "saying \"#{saw.message}\""
     when :ACTION
       ret << "doing #{saw.nick} #{saw.message}"
     when :NICK
@@ -104,7 +104,7 @@ class SeenPlugin < Plugin
     when :QUIT
       ret << "quitting IRC (#{saw.message})"
     when :TOPIC
-      ret << "changing the topic of #{saw.where} to #{saw.message}"
+      ret << "changing the topic of #{saw.where} to \"#{saw.message}\""
     end
 
     case saw.type.to_sym
