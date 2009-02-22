@@ -49,33 +49,38 @@ class SeenPlugin < Plugin
     when PrivMessage
       return if m.private?
       type = m.action? ? 'ACTION' : 'PUBLIC'
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, now, type,
-                                          m.target.to_s, m.message.dup)
+      store m, Saw.new(m.sourcenick.dup, now, type,
+                       m.target.to_s, m.message.dup)
     when QuitMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, now, "QUIT",
-                                        nil, m.message.dup)
+      store m, Saw.new(m.sourcenick.dup, now, "QUIT",
+                       nil, m.message.dup)
     when NickMessage
       return if m.address?
-      saw = Saw.new(m.oldnick, now, "NICK", nil, m.newnick)
-      @registry[m.oldnick] = saw
-      @registry[m.newnick] = saw
+      store m, Saw.new(m.oldnick, now, "NICK", nil, m.newnick)
     when PartMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "PART",
-                                        m.target.to_s, m.message.dup)
+      store m, Saw.new(m.sourcenick.dup, Time.new, "PART",
+                       m.target.to_s, m.message.dup)
     when JoinMessage
       return if m.address?
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "JOIN",
-                                        m.target.to_s, m.message.dup)
+      store m, Saw.new(m.sourcenick.dup, Time.new, "JOIN",
+                       m.target.to_s, m.message.dup)
     when TopicMessage
       return if m.address? or m.info_or_set == :info
-      @registry[m.sourcenick] = Saw.new(m.sourcenick.dup, Time.new, "TOPIC",
-                                        m.target.to_s, m.message.dup)
+      store m, Saw.new(m.sourcenick.dup, Time.new, "TOPIC",
+                       m.target.to_s, m.message.dup)
     end
   end
 
-  def seen(saw)
+  def seen(reg)
+    saw = case reg
+    when Struct::Saw
+      reg # for backwards compatibility
+    when Array
+      reg.last
+    end
+
     ret = "#{saw.nick} was last seen "
     ago = Time.new - saw.time
 
@@ -103,6 +108,22 @@ class SeenPlugin < Plugin
     end
   end
 
+  def store(m, saw)
+    reg = @registry[saw.nick]
+
+    if reg && reg.is_a?(Array)
+      reg.shift if reg.size > 1
+      reg.push(saw)
+    else
+      reg = [saw]
+    end
+
+    if m.is_a? NickMessage
+      @registry[m.newnick] = reg
+    end
+
+    @registry[saw.nick] = reg
+  end
 end
 plugin = SeenPlugin.new
 plugin.register("seen")
