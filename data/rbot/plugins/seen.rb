@@ -106,6 +106,35 @@ class SeenPlugin < Plugin
     when :TOPIC
       ret << "changing the topic of #{saw.where} to #{saw.message}"
     end
+
+    case saw.type.to_sym
+    when :PART, :QUIT
+      before = reg.first
+      if before.type == "PUBLIC" || before.type == "ACTION"
+        time_diff = saw.time - before.time
+        if time_diff < 300
+          time = "a moment"
+        elsif time_diff < 3600
+          time = "a while"
+        else
+          return ret
+        end
+
+        ret << ' and %{time} before' % { :time => time }
+
+        if before.type == "PUBLIC"
+          ret << ' saying "%{message}"' % {
+            :message => before.message
+          }
+        elsif before.type == "ACTION"
+          ret << ' doing *%{message}*' % {
+            :nick => saw.nick,
+            :message => before.message
+          }
+        end
+      end
+    end
+    return ret
   end
 
   def store(m, saw)
