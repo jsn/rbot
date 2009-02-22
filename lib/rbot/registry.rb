@@ -220,25 +220,25 @@ class Bot
     end
 
     # just like Hash#each
-    def each(&block)
+    def each(set=nil, bulk=0, &block)
       return nil unless File.exist?(@filename)
-      registry.each {|key,value|
+      registry.each(set, bulk) {|key,value|
         block.call(key, restore(value))
       }
     end
 
     # just like Hash#each_key
-    def each_key(&block)
+    def each_key(set=nil, bulk=0, &block)
       return nil unless File.exist?(@filename)
-      registry.each_key {|key|
+      registry.each_key(set, bulk) {|key|
         block.call(key)
       }
     end
 
     # just like Hash#each_value
-    def each_value(&block)
+    def each_value(set=nil, bulk=0, &block)
       return nil unless File.exist?(@filename)
-      registry.each_value { |value|
+      registry.each_value(set, bulk) { |value|
         block.call(restore(value))
       }
     end
