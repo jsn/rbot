@@ -99,6 +99,7 @@ class SeenPlugin < Plugin
       ret << "changing nick from #{saw.nick} to #{saw.message}"
     when :PART
       ret << "leaving #{saw.where}"
+      ret << " (#{saw.message})" unless saw.message.empty?
     when :JOIN
       ret << "joining #{saw.where}"
     when :QUIT
