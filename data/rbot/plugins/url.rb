@@ -71,7 +71,7 @@ class UrlPlugin < Plugin
     checks.flatten!
 
     unless checks.grep(@no_info_hosts).empty?
-      return "Sorry, info retrieval for #{url.host} (#{checks.first}) is disabled"
+      return ( opts[:always_reply] ? "Sorry, info retrieval for #{url.host} (#{checks.first}) is disabled" : false )
     end
 
     logopts = opts.dup
@@ -147,6 +147,7 @@ class UrlPlugin < Plugin
       reply = nil
       begin
         title = get_title_for_url(urlstr,
+                                  :always_reply => m.address?,
                                   :nick => m.source.nick,
                                   :channel => m.channel,
                                   :ircline => m.message)
