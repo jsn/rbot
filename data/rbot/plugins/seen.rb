@@ -8,6 +8,10 @@
 define_structure :Saw, :nick, :time, :type, :where, :message
 
 class SeenPlugin < Plugin
+  Config.register Config::IntegerValue.new('seen.max_results',
+    :default => 3, :validate => Proc.new{|v| v >= 0},
+    :desc => "Maximum number of seen users to return in search (0 = no limit).")
+
   def help(plugin, topic="")
     "seen <nick> => have you seen, or when did you last see <nick>"
   end
@@ -23,7 +27,17 @@ class SeenPlugin < Plugin
     if @registry.has_key?(m.params)
       m.reply seen(@registry[m.params])
     else
-      m.reply "nope!"
+      rx = Regexp.new(m.params, true)
+      num_matched = 0
+      @registry.each {|nick, saw|
+        if nick.match(rx)
+          m.reply seen(saw)
+          num_matched += 1
+          break if num_matched == @bot.config['seen.max_results']
+        end
+      }
+
+      m.reply "nope!" if num_matched.zero?
     end
   end
 
