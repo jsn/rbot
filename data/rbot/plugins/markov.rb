@@ -281,6 +281,71 @@ class MarkovPlugin < Plugin
     k = "#{word1} #{word2}"
     @registry[k] = @registry[k].push(:nonword)
   end
+
+  # TODO allow learning from URLs
+  def learn_from(m, params)
+    begin
+      path = params[:file]
+      file = File.open(path, "r")
+      pattern = params[:pattern].empty? ? nil : Regexp.new(params[:pattern].to_s)
+    rescue Errno::ENOENT
+      m.reply _("no such file")
+      return
+    end
+
+    if file.eof?
+      m.reply _("the file is empty!")
+      return
+    end
+
+    if params[:testing]
+      lines = []
+      range = case params[:lines]
+      when /^\d+\.\.\d+$/
+        Range.new(*params[:lines].split("..").map { |e| e.to_i })
+      when /^\d+$/
+        Range.new(1, params[:lines].to_i)
+      else
+        Range.new(1, [@bot.config['send.max_lines'], 3].max)
+      end
+
+      file.each do |line|
+        next unless file.lineno >= range.begin
+        lines << line.chomp
+        break if file.lineno == range.end
+      end
+
+      lines = lines.map do |l|
+        pattern ? l.scan(pattern).to_s : l
+      end.reject { |e| e.empty? }
+
+      if pattern
+        unless lines.empty?
+          m.reply _("example matches for that pattern at lines %{range} include: %{lines}") % {
+            :lines => lines.map { |e| Underline+e+Underline }.join(", "),
+            :range => range.to_s
+          }
+        else
+          m.reply _("the pattern doesn't match anything at lines %{range}") % {
+            :range => range.to_s
+          }
+        end
+      else
+        m.reply _("learning from the file without a pattern would learn, for example: ")
+        lines.each { |l| m.reply l }
+      end
+
+      return
+    end
+
+    if pattern
+      file.each { |l| learn(l.scan(pattern).to_s) }
+    else
+      file.each { |l| learn(l.chomp) }
+    end
+
+    m.okay
+  end
 end
 
 plugin = MarkovPlugin.new
@@ -294,7 +359,12 @@ plugin.map 'chat about :seed1 [:seed2]', :action => "chat"
 plugin.map 'chat', :action => "rand_chat"
 plugin.map 'markov probability [:probability]', :action => "probability",
            :requirements => {:probability => /^\d+%?$/}
+plugin.map 'markov learn from :file [:testing [:lines lines]] [using pattern *pattern]', :action => "learn_from", :thread => true,
+           :requirements => {
+             :testing => /^testing$/,
+             :lines   => /^(?:\d+\.\.\d+|\d+)$/ }
 
 plugin.default_auth('ignore', false)
 plugin.default_auth('probability', false)
+plugin.default_auth('learn', false)
 
