@@ -96,6 +96,11 @@ class SearchPlugin < Plugin
       single ? u : "#{n}. #{Bold}#{t}#{Bold}: #{u}"
     }.join(" | ")
 
+    if params[:lucky]
+      m.reply urls.first
+      return
+    end
+
     # If we return a single, full result, change the output to a more compact representation
     if single
       m.reply "Result for %s: %s -- %s" % [what, results, Utils.get_first_pars(urls, first_pars)], :overlong => :truncate
@@ -108,6 +113,11 @@ class SearchPlugin < Plugin
 
     Utils.get_first_pars urls, first_pars, :message => m
 
+  end
+
+  def lucky(m, params)
+    params.merge!(:lucky => true)
+    google(m, params)
   end
 
   def gcalc(m, params)
@@ -224,6 +234,7 @@ plugin = SearchPlugin.new
 
 plugin.map "search *words", :action => 'google', :threaded => true
 plugin.map "google *words", :action => 'google', :threaded => true
+plugin.map "lucky *words", :action => 'lucky', :threaded => true
 plugin.map "gcount *words", :action => 'gcount', :threaded => true
 plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
 plugin.map "gdef *words", :action => 'gdef', :threaded => true
