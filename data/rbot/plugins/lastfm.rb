@@ -276,7 +276,7 @@ class LastFmPlugin < Plugin
     album = ""
     if albumtxt
       year = get_album(artist, albumtxt)[2]
-      album = "[#{albumtxt}, #{year}] " if year
+      album = "[#{albumtxt}, #{year}]" if year
     end
     past = nil
     date = XPath.first(first, "//date")
@@ -289,15 +289,18 @@ class LastFmPlugin < Plugin
        if @registry.has_key? "#{m.sourcenick}_verb_present"
          verb = @registry["#{m.sourcenick}_verb_present"]
        end
-       m.reply _("%{u} %{v} \"%{t}\" by %{a} %{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
+       reply = _("%{u} %{v} \"%{t}\" by %{a} %{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
     else
       verb = _("listened to")
        if @registry.has_key? "#{m.sourcenick}_verb_past"
          verb = @registry["#{m.sourcenick}_verb_past"]
        end
       ago = Utils.timeago(past)
-      m.reply _("%{u} %{v} \"%{t}\" by %{a} %{b}%{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
+      reply = _("%{u} %{v} \"%{t}\" by %{a} %{b} %{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
     end
+
+    reply << _("; see %{uri} for more") % { :uri => "http://www.last.fm/user/#{CGI.escape user}"}
+    m.reply reply
   end
 
   def find_artist(m, params)
