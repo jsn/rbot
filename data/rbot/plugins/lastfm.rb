@@ -47,6 +47,8 @@ class ::LastFmEvent
 
 end
 
+define_structure :LastFmVenue, :id, :city, :street, :postal, :country, :name, :url, :lat, :long
+
 class LastFmPlugin < Plugin
   include REXML
   Config.register Config::IntegerValue.new('lastfm.max_events',
@@ -127,6 +129,39 @@ class LastFmPlugin < Plugin
     else
       _("last.fm plugin - topics: events, artist, album, track, now, set, who, compare, shouts, friends, neighbors, (loved|recent)tracks, top(albums|tracks|artists), weekly(album|artist|track)chart")
     end
+  end
+
+  # TODO allow searching by country etc.
+  #
+  # Options: name, limit
+  def search_venue_by(options)
+    params = {}
+    params[:venue] = CGI.escape(options[:name])
+    options.delete(:name)
+    params.merge!(options)
+
+    uri = "#{APIURL}method=venue.search&"
+    uri << params.to_a.map {|e| e.join("=")}.join("&")
+
+    xml = @bot.httputil.get_response(uri)
+    doc = Document.new xml.body
+    results = []
+
+    doc.root.elements.each("results/venuematches/venue") do |v|
+      venue = LastFmVenue.new
+      venue.id      = v.elements["id"].text.to_i
+      venue.url     = v.elements["url"].text
+      venue.lat     = v.elements["location/geo:point/geo:lat"].text.to_f
+      venue.long    = v.elements["location/geo:point/geo:long"].text.to_f
+      venue.name    = v.elements["name"].text
+      venue.city    = v.elements["location/city"].text
+      venue.street  = v.elements["location/street"].text
+      venue.postal  = v.elements["location/postalcode"].text
+      venue.country = v.elements["location/country"].text
+
+      results << venue
+    end
+    results
   end
 
   def find_events(m, params)
