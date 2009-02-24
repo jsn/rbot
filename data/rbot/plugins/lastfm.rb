@@ -469,10 +469,12 @@ class LastFmPlugin < Plugin
       uri << "&period=#{period_uri}"
     end
 
-    res = @bot.httputil.get_response(uri)
-    unless res.body
-      m.reply _("I had problems accessing last.fm")
-      return
+    begin
+      res = @bot.httputil.get_response(uri)
+      raise _("no response body") unless res.body
+    rescue Exception => e
+        m.reply _("I had problems accessing last.fm: %{e}") % {:e => e.message}
+        return
     end
     doc = Document.new(res.body)
     unless doc
