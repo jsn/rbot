@@ -111,7 +111,34 @@ class MarkovPlugin < Plugin
   end
 
   def help(plugin, topic="")
-    _("markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. usage: 'markov' to attempt to say something relevant to the last line of chat, if it can.  other options to markov: 'ignore' => ignore a hostmask (accept no input), 'status' => show current status, 'probability [<chance>]' => set the % chance of rbot responding to input, or display the current probability, 'chat' => try and say something intelligent, 'chat about <foo> <bar>' => riff on a word pair (if possible)")
+    topic, subtopic = topic.split
+
+    case topic
+    when "ignore"
+      case subtopic
+      when "add"
+        "markov ignore add <hostmask|channel> => ignore a hostmask or a channel"
+      when "list"
+        "markov ignore list => show ignored hostmasks and channels"
+      when "remove"
+        "markov ignore remove <hostmask|channel> => unignore a hostmask or channel"
+      else
+        "ignore hostmasks or channels -- topics: add, remove, list"
+      end
+    when "status"
+      "markov status => show if markov is enabled, probability and amount of messages in queue for learning"
+    when "probability"
+      "markov probability [<percent>] => set the % chance of rbot responding to input, or display the current probability"
+    when "chat"
+      case subtopic
+      when "about"
+        "markov chat about <word> [<another word>] => talk about <word> or riff on a word pair (if possible)"
+      else
+        "markov chat => try to say something intelligent"
+      end
+    else
+      "markov plugin: listens to chat to build a markov chain, with which it can (perhaps) attempt to (inanely) contribute to 'discussion'. Sort of.. Will get a *lot* better after listening to a lot of chat. Usage: 'chat' to attempt to say something relevant to the last line of chat, if it can -- help topics: ignore, status, probability, chat, chat about"
+    end
   end
 
   def clean_str(s)
