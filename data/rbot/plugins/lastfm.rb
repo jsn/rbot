@@ -539,9 +539,9 @@ class LastFmPlugin < Plugin
       if nbrs.empty?
         reply = _("no one seems to share %{user}'s musical taste")
       elsif nbrs.length <= num
-        reply = _("%{user} musical neighbours are %{nbrs}")
+        reply = _("%{user}'s musical neighbours are %{nbrs}")
       else
-        reply = _("%{user} musical neighbours include %{nbrs}")
+        reply = _("%{user}'s musical neighbours include %{nbrs}")
         reply << seemore
       end
       m.reply reply % {
