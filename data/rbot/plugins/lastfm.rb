@@ -553,7 +553,24 @@ class LastFmPlugin < Plugin
       tracks = doc.root.get_elements("recenttracks/track").map do |track|
         [track.elements["artist"].text, track.elements["name"].text].join(" - ")
       end
-      tracks_prep = tracks[0, num].to_enum(:each_with_index).collect { |e,i| (i % 2).zero? ? Underline+e+Underline : e }
+
+      counts = []
+      tracks.each do |track|
+        if t = counts.assoc(track)
+          counts[counts.rindex(t)] = [track, t[-1] += 1]
+        else
+          counts << [track, 1]
+        end
+      end
+
+      tracks_prep = counts[0, num].to_enum(:each_with_index).map do |e,i|
+        str = (i % 2).zero? ? Underline+e[0]+Underline : e[0]
+        str << " (%{i} times%{m})" % {
+          :i => e.last,
+          :m => counts.size == 1 ? _(" or more") : nil
+        } if e.last > 1
+        str
+      end
 
       if tracks.empty?
         m.reply _("%{user} hasn't played anything recently") % { :user => user }
