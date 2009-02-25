@@ -170,11 +170,16 @@ class LastFmPlugin < Plugin
 
     location = params[:location]
     artist = params[:who]
+    venue = params[:venue]
     user = resolve_username(m, params[:user])
 
     if location
       uri = "#{APIURL}method=geo.getevents&location=#{CGI.escape location.to_s}"
       emptymsg = _("no events found in %{location}") % {:location => location.to_s}
+    elsif venue
+      venues = search_venue_by(:name => venue.to_s, :limit => 1)
+      venue  = venues.first
+      uri = "#{APIURL}method=venue.getevents&venue=#{venue.id}"
     elsif artist
       uri = "#{APIURL}method=artist.getevents&artist=#{CGI.escape artist.to_s}"
       emptymsg = _("no events found by %{artist}") % {:artist => artist.to_s}
@@ -667,6 +672,7 @@ end
 plugin = LastFmPlugin.new
 plugin.map 'lastfm [:num] event[s] in *location', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm [:num] event[s] by *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] at *venue', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
