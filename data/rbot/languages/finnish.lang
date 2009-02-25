@@ -1,0 +1,50 @@
+okay:
+  okei
+  selvä :)
+  ok!
+  tehty
+  toki
+  valmis
+dunno:
+  mitäh?
+  en tiedä
+  emt
+  ei hajuakaan
+  ei tietoa
+  hä?
+  häh?
+  älä multa kysy
+dunno_about_X:
+  en tiedä mikä %s on
+  mikä on %s?
+  %s? mikä se on?
+insult:
+  %s: :(
+  %s: vihaan sua :(
+  %s: kuole senkin paska!
+  %s: nyt loukkasit minua :'(
+hello:
+  moi :)
+  terve
+  hei
+  päivää
+hello_X:
+  terve %s :)
+  %s: terve
+  %s: moi :)
+  %s: hei
+  moi %s
+  %s: mitä kuuluu?
+welcome:
+  ole hyvä :)
+thanks:
+  kiitti
+  kiitos :)
+  tänks
+thanks_X:
+  %s: kiitos
+  %s: kiitti :)
+quit:
+  moikka
+  hyvästi
+  näkemiin

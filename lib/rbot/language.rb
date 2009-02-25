@@ -24,6 +24,7 @@ class Bot
       :dutch    => 'nl',
       :japanese => 'ja',
       :russian  => 'ru',
+      :finnish  => 'fi',
       :traditional_chinese => 'zh_TW',
       :simplified_chinese => 'zh_CN'
     }
