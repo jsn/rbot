@@ -416,6 +416,44 @@ class LastFmPlugin < Plugin
     end
   end
 
+  def find_venue(m, params)
+    venue  = params[:venue].to_s
+    venues = search_venue_by(:name => venue, :limit => 1)
+    venue  = venues.last
+
+    if venues.empty?
+      m.reply "sorry, can't find such venue"
+      return
+    end
+
+    reply = _("%{b}%{name}%{b}, %{street}, %{u}%{city}%{u}, %{country}, see %{url} for more info") % {
+      :u => Underline, :b => Bold, :name => venue.name, :city => venue.city, :street => venue.street,
+      :country => venue.country, :url => venue.url
+    }
+
+    if venue.street && venue.city
+      maps_uri = "http://maps.google.com/maps?q=#{venue.street},+#{venue.city}"
+      maps_uri << ",+#{venue.postal}" if venue.postal
+    elsif venue.lat && venue.long
+      maps_uri = "http://maps.google.com/maps?q=#{venue.lat},+#{venue.long}"
+    else
+      m.reply reply
+      return
+    end
+
+    maps_uri << "+(#{venue.name.gsub(" ", "%A0")})"
+
+    begin
+      require "shorturl"
+      maps_uri = ShortURL.shorten(CGI.escape(maps_uri))
+    rescue LoadError => e
+      error e
+    end
+
+    reply << _(" and %{maps} for maps") % { :maps => maps_uri, :b => Bold }
+    m.reply reply
+  end
+
   def get_album(artist, album)
     xml = @bot.httputil.get("#{APIURL}method=album.getinfo&artist=#{CGI.escape artist}&album=#{CGI.escape album}")
     unless xml
@@ -677,6 +715,7 @@ plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_events, :requir
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
 plugin.map 'lastfm track *track', :action => :find_track, :thread => true
+plugin.map 'lastfm venue *venue', :action => :find_venue, :thread => true
 plugin.map 'lastfm set user[name] :who', :action => :set_user, :thread => true
 plugin.map 'lastfm set verb *present, *past', :action => :set_verb, :thread => true
 plugin.map 'lastfm who [:who]', :action => :get_user, :thread => true
