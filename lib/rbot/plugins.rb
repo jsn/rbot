@@ -424,7 +424,8 @@ module Plugins
         h[k] = Array.new
       }
 
-      @dirs = []
+      @core_module_dirs = []
+      @plugin_dirs = []
 
       @failed = Array.new
       @ignored = Array.new
@@ -580,18 +581,23 @@ module Plugins
     private :load_botmodule_file
 
     # add one or more directories to the list of directories to
-    # load botmodules from
-    #
-    # TODO find a way to specify necessary plugins which _must_ be loaded
-    #
-    def add_botmodule_dir(*dirlist)
-      @dirs += dirlist
-      debug "Botmodule loading path: #{@dirs.join(', ')}"
+    # load core modules from
+    def add_core_module_dir(*dirlist)
+      @core_module_dirs += dirlist
+      debug "Core module loading paths: #{@core_module_dirs.join(', ')}"
+    end
+
+    # add one or more directories to the list of directories to
+    # load plugins from
+    def add_plugin_dir(*dirlist)
+      @plugin_dirs += dirlist
+      debug "Plugin loading paths: #{@plugin_dirs.join(', ')}"
     end
 
     def clear_botmodule_dirs
-      @dirs.clear
-      debug "Botmodule loading path cleared"
+      @core_module_dirs.clear
+      @plugin_dirs.clear
+      debug "Core module and plugin loading paths cleared"
     end
 
     # load plugins from pre-assigned list of directories
@@ -607,7 +613,7 @@ module Plugins
         processed[pn.intern] = :blacklisted
       }
 
-      dirs = @dirs
+      dirs = @core_module_dirs + @plugin_dirs
       dirs.each {|dir|
         if(FileTest.directory?(dir))
           d = Dir.new(dir)

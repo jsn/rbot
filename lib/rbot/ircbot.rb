@@ -803,17 +803,17 @@ class Bot
     Dir.mkdir(plugdir_local) unless File.exist?(plugdir_local)
 
     @plugins.clear_botmodule_dirs
-    @plugins.add_botmodule_dir(File.join(Config::coredir, 'utils'))
-    @plugins.add_botmodule_dir(Config::coredir)
+    @plugins.add_core_module_dir(File.join(Config::coredir, 'utils'))
+    @plugins.add_core_module_dir(Config::coredir)
     if FileTest.directory? plugdir_local
-      @plugins.add_botmodule_dir(plugdir_local)
+      @plugins.add_plugin_dir(plugdir_local)
     else
       warning "local plugin location #{plugdir_local} is not a directory"
     end
 
     @config['plugins.path'].each do |_|
         path = _.sub(/^\(default\)/, plugdir_default)
-        @plugins.add_botmodule_dir(path)
+        @plugins.add_plugin_dir(path)
     end
   end
 
