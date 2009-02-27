@@ -600,27 +600,31 @@ module Plugins
       debug "Core module and plugin loading paths cleared"
     end
 
-    # load plugins from pre-assigned list of directories
-    def scan
-      @failed.clear
-      @ignored.clear
-      @delegate_list.clear
-
+    def scan_botmodules(opts={})
+      type = opts[:type]
       processed = Hash.new
 
-      @bot.config['plugins.blacklist'].each { |p|
-        pn = p + ".rb"
-        processed[pn.intern] = :blacklisted
-      }
+      case type
+      when :core
+        dirs = @core_module_dirs
+      when :plugins
+        dirs = @plugin_dirs
 
-      dirs = @core_module_dirs + @plugin_dirs
-      dirs.each {|dir|
-        if(FileTest.directory?(dir))
-          d = Dir.new(dir)
-          d.sort.each {|file|
+        @bot.config['plugins.blacklist'].each { |p|
+          pn = p + ".rb"
+          processed[pn.intern] = :blacklisted
+        }
+      end
 
-            next if(file =~ /^\./)
+      dirs.each do |dir|
+        next unless FileTest.directory?(dir)
+        d = Dir.new(dir)
+        d.sort.each do |file|
+          next unless file =~ /\.rb$/
+          next if file =~ /^\./
 
+          case type
+          when :plugins
             if processed.has_key?(file.intern)
               @ignored << {:name => file, :dir => dir, :reason => processed[file.intern]}
               next
@@ -635,20 +639,28 @@ module Plugins
               @ignored << {:name => $1, :dir => dir, :reason => processed[$1.intern]}
               next
             end
+          end
 
-            next unless(file =~ /\.rb$/)
-
-            did_it = load_botmodule_file("#{dir}/#{file}", "plugin")
-            case did_it
-            when Symbol
-              processed[file.intern] = did_it
-            when Exception
-              @failed <<  { :name => file, :dir => dir, :reason => did_it }
-            end
-
-          }
+          did_it = load_botmodule_file("#{dir}/#{file}", "plugin")
+          case did_it
+          when Symbol
+            processed[file.intern] = did_it
+          when Exception
+            @failed << { :name => file, :dir => dir, :reason => did_it }
+          end
         end
-      }
+      end
+    end
+
+    # load plugins from pre-assigned list of directories
+    def scan
+      @failed.clear
+      @ignored.clear
+      @delegate_list.clear
+
+      scan_botmodules(:type => :core)
+      scan_botmodules(:type => :plugins)
+
       debug "finished loading plugins: #{status(true)}"
       (core_modules + plugins).each { |p|
        p.methods.grep(DEFAULT_DELEGATE_PATTERNS).each { |m|
