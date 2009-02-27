@@ -441,18 +441,18 @@ class HangmanPlugin < Plugin
     else
       return unless m.public?
 
-      user  = m.server.get_user(params[:nick])
-      stats = @stats.player_stats(target)[user]
+      nick = params[:nick]
+      stats = @stats.player_stats(target)[nick]
 
       unless stats.played.zero?
         m.reply _("%{nick} has %{score} points after %{games} games") % {
-          :nick  => user.nick,
+          :nick  => nick,
           :score => stats.score.round,
           :games => stats.played
         }
       else
         m.reply _("%{nick} hasn't played hangman :(") % {
-          :nick => user.nick
+          :nick => nick
         }
       end
     end
