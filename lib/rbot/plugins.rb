@@ -10,6 +10,9 @@ class Bot
     Config.register Config::ArrayValue.new('plugins.blacklist',
       :default => [], :wizard => false, :requires_rescan => true,
       :desc => "Plugins that should not be loaded")
+    Config.register Config::ArrayValue.new('plugins.whitelist',
+      :default => [], :wizard => false, :requires_rescan => true,
+      :desc => "Only whitelisted plugins will be loaded unless the list is empty")
 module Plugins
   require 'rbot/messagemapper'
 
@@ -614,6 +617,10 @@ module Plugins
           pn = p + ".rb"
           processed[pn.intern] = :blacklisted
         }
+
+        whitelist = @bot.config['plugins.whitelist'].map { |p|
+          p + ".rb"
+        }
       end
 
       dirs.each do |dir|
@@ -625,7 +632,10 @@ module Plugins
 
           case type
           when :plugins
-            if processed.has_key?(file.intern)
+            if !whitelist.empty? && !whitelist.include?(file)
+              @ignored << {:name => file, :dir => dir, :reason => :"not whitelisted" }
+              next
+            elsif processed.has_key?(file.intern)
               @ignored << {:name => file, :dir => dir, :reason => processed[file.intern]}
               next
             end
