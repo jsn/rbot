@@ -282,6 +282,10 @@ class RSSFeedsPlugin < Plugin
     :default => 0,
     :desc => "Don't announce watched feed if these many seconds elapsed since the last successful update")
 
+  Config.register Config::IntegerValue.new('rss.announce_max',
+    :default => 3,
+    :desc => "Maximum number of new items to announce when a watched feed is updated")
+
   Config.register Config::BooleanValue.new('rss.show_updated',
     :default => true,
     :desc => "Whether feed items for which the description was changed should be shown as new")
@@ -957,7 +961,19 @@ class RSSFeedsPlugin < Plugin
                 }
 
                 if dispItems.length > 0
+                  max = @bot.config['rss.announce_max']
                   debug "Found #{dispItems.length} new items in #{feed}"
+                  if max > 0 and dispItems.length > max
+                    debug "showing only the latest #{dispItems.length}"
+                    feed.watchers.each do |loc|
+                      @bot.say loc, (_("feed %{feed} had %{num} updates, showing the latest %{max}") % {
+                        :feed => feed.handle,
+                        :num => dispItems.length,
+                        :max => max
+                      })
+                    end
+                    dispItems.slice!(max..-1)
+                  end
                   # When displaying watched feeds, publish them from older to newer
                   dispItems.reverse.each { |item|
                     printFormattedRss(feed, item)
