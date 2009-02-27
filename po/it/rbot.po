@@ -352,34 +352,33 @@ msgid "hello: creates a bot user for the person issuing the command"
 msgstr "hello: crea un botuser per la persona che esegue il comando"
 
 #: lib/rbot/core/auth.rb:415
-#, fuzzy
 msgid ""
 "allow <user> to do <sample command> [<where>]: gives botuser <user> the "
 "permissions to execute a command such as the provided sample command"
 msgstr ""
 "abilita <utente> ad eseguire <comando d'esempio> [<dove>]: da' all'utente "
 "del bot <utente> i permessi per eseguire un comando come quello fornito come "
-"esempio (in privato o nel canale, a seconda dell'opzione <dove>)"
+"esempio"
 
 #: lib/rbot/core/auth.rb:416 lib/rbot/core/auth.rb:424
 msgid "(in private or in channel, according to the optional <where>)."
-msgstr ""
+msgstr "(in privato o nel canale, a seconda dell'opzione <dove>)."
 
 #: lib/rbot/core/auth.rb:417 lib/rbot/core/auth.rb:425
 msgid ""
 "<sample command> should be a full command, not just the command keyword --"
 msgstr ""
+"<comando d'esempio> dovrebbe essere un comand completo, non solo la parola chiave --"
 
 #: lib/rbot/core/auth.rb:418
 msgid "correct: allow user to do addquote stuff --"
-msgstr ""
+msgstr "giusto: allow user to do addquote stuff --"
 
 #: lib/rbot/core/auth.rb:419
 msgid "wrong: allow user to do addquote."
-msgstr ""
+msgstr "sbagliato: allow user to do addquote."
 
 #: lib/rbot/core/auth.rb:423
-#, fuzzy
 msgid ""
 "deny <user> from doing <sample command> [<where>]: removes from botuser "
 "<user> the permissions to execute a command such as the provided sample "
@@ -387,15 +386,15 @@ msgid ""
 msgstr ""
 "impedisce all'<utente> di esguir <comando d'esempio> [<dove>]: toglie "
 "all'utente del bot <botuser>i permessi er eseguire un comando come quello "
-"fornito come esempio (in privato o nel canale, a seconda dell'opzione <dove>)"
+"fornito come esempio"
 
 #: lib/rbot/core/auth.rb:426
 msgid "correct: deny user from doing addquote stuff --"
-msgstr ""
+msgstr "giusto: deny user from doing addquote stuff --"
 
 #: lib/rbot/core/auth.rb:427
 msgid "wrong: deny user from doing addquote."
-msgstr ""
+msgstr "sbagliato: deny user from doing addquote."
 
 #: lib/rbot/core/auth.rb:430
 msgid ""
@@ -988,19 +987,16 @@ msgid "%{d} ago"
 msgstr "%{d} fa"
 
 #: lib/rbot/core/utils/utils.rb:270
-#, fuzzy
 msgid "%{m} years"
-msgstr "%{m} giorni"
+msgstr "%{m} anni"
 
 #: lib/rbot/core/utils/utils.rb:272
-#, fuzzy
 msgid "%{m} months"
-msgstr "%{m} minuti"
+msgstr "%{m} mesi"
 
 #: lib/rbot/core/utils/utils.rb:274
-#, fuzzy
 msgid "%{m} weeks"
-msgstr "%{m} minuti"
+msgstr "%{m} settimane"
 
 #: lib/rbot/core/utils/utils.rb:276
 msgid "%{m} days"
@@ -1011,32 +1007,28 @@ msgid "%{m} hours"
 msgstr "%{m} ore"
 
 #: lib/rbot/core/utils/utils.rb:280
-#, fuzzy
 msgid "half an hour"
-msgstr "circa un'ora"
+msgstr "mezz'ora"
 
 #: lib/rbot/core/utils/utils.rb:283
-#, fuzzy
 msgid "an hour"
-msgstr "ora"
+msgstr "un'ora"
 
 #: lib/rbot/core/utils/utils.rb:285
 msgid "an hour and a half"
-msgstr ""
+msgstr "un'ora e mezza"
 
 #: lib/rbot/core/utils/utils.rb:287
 msgid "%{m} minutes"
 msgstr "%{m} minuti"
 
 #: lib/rbot/core/utils/utils.rb:289
-#, fuzzy
 msgid "%{m} seconds"
-msgstr "secondi"
+msgstr "%{m} secondi"
 
 #: lib/rbot/core/utils/utils.rb:291
-#, fuzzy
 msgid "one second"
-msgstr "secondo"
+msgstr "un secondo"
 
 #: lib/rbot/ircbot.rb:1271
 msgid "help topics: "
