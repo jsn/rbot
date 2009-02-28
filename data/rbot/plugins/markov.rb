@@ -62,6 +62,17 @@ class MarkovPlugin < Plugin
     debug 'learning thread closed'
   end
 
+  # if passed a pair, pick a word from the registry using the pair as key.
+  # otherwise, pick a word from an given list
+  def pick_word(word1, word2=:nonword)
+    if word1.kind_of? Array
+      wordlist = word1
+    else
+      wordlist = @registry["#{word1} #{word2}"]
+    end
+    wordlist.pick_one || :nonword
+  end
+
   def generate_string(word1, word2)
     # limit to max of markov.max_words words
     if word2
@@ -97,16 +108,15 @@ class MarkovPlugin < Plugin
         end
       end
     end
-    return nil if wordlist.empty?
 
-    word3 = wordlist.pick_one
+    word3 = pick_word(wordlist)
+    return nil if word3 == :nonword
+
     output << " #{word3}"
     word1, word2 = word2, word3
 
     (@bot.config['markov.max_words'] - 1).times do
-      wordlist = @registry["#{word1} #{word2}"]
-      break if wordlist.empty?
-      word3 = wordlist.pick_one
+      word3 = pick_word(word1, word2)
       break if word3 == :nonword
       output << " #{word3}"
       word1, word2 = word2, word3
@@ -266,10 +276,8 @@ class MarkovPlugin < Plugin
     # pick a random pair from the db and go from there
     word1, word2 = :nonword, :nonword
     output = Array.new
-    50.times do
-      wordlist = @registry["#{word1} #{word2}"]
-      break if wordlist.empty?
-      word3 = wordlist[rand(wordlist.length)]
+    @bot.config['markov.max_words'].times do
+      word3 = pick_word(word1, word2)
       break if word3 == :nonword
       output << word3
       word1, word2 = word2, word3
