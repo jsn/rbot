@@ -307,18 +307,21 @@ class MarkovPlugin < Plugin
     random_markov(m, message) unless m.replied?
   end
 
+  def learn_triplet(word1, word2, word3)
+      k = "#{word1} #{word2}"
+      @registry[k] = @registry[k].push(word3)
+  end
+
   def learn_line(message)
     # debug "learning #{message}"
     wordlist = message.split(/\s+/)
     return unless wordlist.length >= 2
     word1, word2 = :nonword, :nonword
+    wordlist << :nonword
     wordlist.each do |word3|
-      k = "#{word1} #{word2}"
-      @registry[k] = @registry[k].push(word3)
+      learn_triplet(word1, word2, word3)
       word1, word2 = word2, word3
     end
-    k = "#{word1} #{word2}"
-    @registry[k] = @registry[k].push(:nonword)
   end
 
   # TODO allow learning from URLs
