@@ -122,7 +122,7 @@ class ConfigModule < CoreBotModule
 
   def handle_add(m, params)
     key = params[:key].to_s.intern
-    value = params[:value]
+    values = params[:value].to_s.split(/,\s+/)
     unless @bot.config.items.has_key?(key)
       m.reply _("no such config key %{key}") % {:key => key}
       return
@@ -132,11 +132,13 @@ class ConfigModule < CoreBotModule
       return
     end
     return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
-    begin
-      @bot.config.items[key].add(value)
-    rescue ArgumentError => e
-      m.reply _("failed to add %{value} to %{key}: %{error}") % {:value => value, :key => key, :error => e.message}
-      return
+    values.each do |value|
+      begin
+        @bot.config.items[key].add(value)
+      rescue ArgumentError => e
+        m.reply _("failed to add %{value} to %{key}: %{error}") % {:value => value, :key => key, :error => e.message}
+        next
+      end
     end
     handle_get(m,{:key => key})
     m.reply _("this config change will take effect on the next restart") if @bot.config.items[key].requires_restart
@@ -145,7 +147,7 @@ class ConfigModule < CoreBotModule
 
   def handle_rm(m, params)
     key = params[:key].to_s.intern
-    value = params[:value]
+    values = params[:value].to_s.split(/,\s+/)
     unless @bot.config.items.has_key?(key)
       m.reply _("no such config key %{key}") % {:key => key}
       return
@@ -155,11 +157,13 @@ class ConfigModule < CoreBotModule
       return
     end
     return if !@bot.auth.allow?(@bot.config.items[key].auth_path, m.source, m.replyto)
-    begin
-      @bot.config.items[key].rm(value)
-    rescue ArgumentError => e
-      m.reply _("failed to remove %{value} from %{key}: %{error}") % {:value => value, :key => key, :error => e.message}
-      return
+    values.each do |value|
+      begin
+        @bot.config.items[key].rm(value)
+      rescue ArgumentError => e
+        m.reply _("failed to remove %{value} from %{key}: %{error}") % {:value => value, :key => key, :error => e.message}
+        next
+      end
     end
     handle_get(m,{:key => key})
     m.reply _("this config change will take effect on the next restart") if @bot.config.items[key].requires_restart
@@ -228,7 +232,7 @@ class ConfigModule < CoreBotModule
       when "desc"
       _("config desc <key> => describe what key <key> configures")
       when "add"
-      _("config add <value> to <key> => add value <value> to key <key> if <key> is an array")
+      _("config add <values> to <key> => add values <values> to key <key> if <key> is an array")
       when "rm"
       _("config rm <value> from <key> => remove value <value> from key <key> if <key> is an array")
       else
@@ -296,16 +300,16 @@ conf.map "version",
 conf.map 'config set :key *value',
   :action => 'handle_set',
   :auth_path => 'edit'
-conf.map 'config add :value to :key',
+conf.map 'config add *value to :key',
   :action => 'handle_add',
   :auth_path => 'edit'
-conf.map 'config rm :value from :key',
+conf.map 'config rm *value from :key',
   :action => 'handle_rm',
   :auth_path => 'edit'
-conf.map 'config del :value from :key',
+conf.map 'config del *value from :key',
   :action => 'handle_rm',
   :auth_path => 'edit'
-conf.map 'config delete :value from :key',
+conf.map 'config delete *value from :key',
   :action => 'handle_rm',
   :auth_path => 'edit'
 conf.map 'config unset :key',
