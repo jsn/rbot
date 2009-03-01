@@ -306,6 +306,9 @@ conf.map 'config add *value to :key',
 conf.map 'config rm *value from :key',
   :action => 'handle_rm',
   :auth_path => 'edit'
+conf.map 'config remove *value from :key',
+  :action => 'handle_rm',
+  :auth_path => 'edit'
 conf.map 'config del *value from :key',
   :action => 'handle_rm',
   :auth_path => 'edit'
