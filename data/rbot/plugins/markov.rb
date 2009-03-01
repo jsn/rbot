@@ -29,6 +29,168 @@ class MarkovPlugin < Plugin
     :validate => Proc.new { |v| v >= 0 },
     :desc => "Time the learning thread spends sleeping after learning a line. If set to zero, learning from files can be very CPU intensive, but also faster.")
 
+  MARKER = :"\r\n"
+
+  # upgrade a registry entry from 0.9.14 and earlier, converting the Arrays
+  # into Hashes of weights
+  def upgrade_entry(k, logfile)
+    logfile.puts "\t#{k.inspect}"
+    logfile.flush
+    logfile.fsync
+
+    ar = @registry[k]
+
+    # wipe the current key
+    @registry.delete(k)
+
+    # discard empty keys
+    if ar.empty?
+      logfile.puts "\tEMPTY"
+      return
+    end
+
+    # otherwise, proceed
+    logfile.puts "\t#{ar.inspect}"
+
+    # re-encode key to UTF-8 and cleanup as needed
+    words = k.split.map do |w|
+      BasicUserMessage.strip_formatting(
+        @bot.socket.filter.in(w)
+      ).sub(/\001$/,'')
+    end
+
+    # old import that failed to split properly?
+    if words.length == 1 and words.first.include? '/'
+      # split at the last /
+      unsplit = words.first
+      at = unsplit.rindex('/')
+      words = [unsplit[0,at], unsplit[at+1..-1]]
+    end
+
+    # if any of the re-split/re-encoded words have spaces,
+    # or are empty, we would get a chain we can't convert,
+    # so drop it
+    if words.first.empty? or words.first.include?(' ') or
+      words.last.empty? or words.last.include?(' ')
+      logfile.puts "\tSKIPPED"
+      return
+    end
+
+    # former unclean CTCP, we can't convert this
+    if words.first[0] == 1
+      logfile.puts "\tSKIPPED"
+      return
+    end
+
+    # nonword CTCP => SKIP
+    # someword CTCP => nonword someword
+    if words.last[0] == 1
+      if words.first == "nonword"
+        logfile.puts "\tSKIPPED"
+        return
+      end
+      words.unshift MARKER
+      words.pop
+    end
+
+    # intern the old keys
+    words.map! do |w|
+      ['nonword', MARKER].include?(w) ? MARKER : w.chomp("\001")
+    end
+
+    newkey = words.join(' ')
+    logfile.puts "\t#{newkey.inspect}"
+
+    # the new key exists already, so we want to merge
+    if k != newkey and @registry.key? newkey
+      ar2 = @registry[newkey]
+      logfile.puts "\tMERGE"
+      logfile.puts "\t\t#{ar2.inspect}"
+      ar.push(*ar2)
+      # and get rid of the key
+      @registry.delete(newkey)
+    end
+
+    total = 0
+    hash = Hash.new(0)
+
+    @chains_mutex.synchronize do
+      if @chains.key? newkey
+        ar2 = @chains[newkey]
+        total += ar2.first
+        hash.update ar2.last
+      end
+
+      ar.each do |word|
+        case word
+        when :nonword
+          # former marker
+          sym = MARKER
+        else
+          # we convert old words into UTF-8, cleanup, resplit if needed,
+          # and only get the first word. we may lose some data for old
+          # missplits, but this is the best we can do
+          w = BasicUserMessage.strip_formatting(
+            @bot.socket.filter.in(word).split.first
+          )
+          case w
+          when /^\001\S+$/, "\001", ""
+            # former unclean CTCP or end of CTCP
+            next
+          else
+            # intern after clearing leftover end-of-actions if present
+            sym = w.chomp("\001").intern
+          end
+        end
+        hash[sym] += 1
+        total += 1
+      end
+      if hash.empty?
+        logfile.puts "\tSKIPPED"
+        return
+      end
+      logfile.puts "\t#{[total, hash].inspect}"
+      @chains[newkey] = [total, hash]
+    end
+  end
+
+  def upgrade_registry
+    # we load all the keys and then iterate over this array because
+    # running each() on the registry and updating it at the same time
+    # doesn't work
+    keys = @registry.keys
+    # no registry, nothing to do
+    return if keys.empty?
+
+    ki = 0
+    log "starting markov database conversion thread (v1 to v2, #{keys.length} keys)"
+
+    keys.each { |k| @upgrade_queue.push k }
+    @upgrade_queue.push nil
+
+    @upgrade_thread = Thread.new do
+      logfile = File.open(@bot.path('markov-conversion.log'), 'a')
+      logfile.puts "=== conversion thread started #{Time.now} ==="
+      while k = @upgrade_queue.pop
+        ki += 1
+        logfile.puts "Key #{ki} (#{@upgrade_queue.length} in queue):"
+        begin
+          upgrade_entry(k, logfile)
+        rescue Exception => e
+          logfile.puts "=== ERROR ==="
+          logfile.puts e.pretty_inspect
+          logfile.puts "=== EREND ==="
+        end
+        sleep @bot.config['markov.learn_delay'] unless @bot.config['markov.learn_delay'].zero?
+      end
+      logfile.puts "=== conversion thread stopped #{Time.now} ==="
+      logfile.close
+    end
+    @upgrade_thread.priority = -1
+  end
+
+  attr_accessor :chains
+
   def initialize
     super
     @registry.set_default([])
@@ -45,6 +207,15 @@ class MarkovPlugin < Plugin
       @bot.config['markov.ignore'] = @bot.config['markov.ignore_users'].dup
       @bot.config.delete('markov.ignore_users'.to_sym)
     end
+
+    @chains = @registry.sub_registry('v2')
+    @chains.set_default([])
+    @chains_mutex = Mutex.new
+
+    @upgrade_queue = Queue.new
+    @upgrade_thread = nil
+    upgrade_registry
+
     @learning_queue = Queue.new
     @learning_thread = Thread.new do
       while s = @learning_queue.pop
@@ -56,6 +227,14 @@ class MarkovPlugin < Plugin
   end
 
   def cleanup
+    if @upgrade_thread and @upgrade_thread.alive?
+      debug 'closing conversion thread'
+      @upgrade_queue.clear
+      @upgrade_queue.push nil
+      @upgrade_thread.join
+      debug 'conversion thread closed'
+    end
+
     debug 'closing learning thread'
     @learning_queue.push nil
     @learning_thread.join
@@ -64,13 +243,28 @@ class MarkovPlugin < Plugin
 
   # if passed a pair, pick a word from the registry using the pair as key.
   # otherwise, pick a word from an given list
-  def pick_word(word1, word2=:nonword)
+  def pick_word(word1, word2=MARKER)
     if word1.kind_of? Array
       wordlist = word1
     else
-      wordlist = @registry["#{word1} #{word2}"]
+      k = "#{word1} #{word2}"
+      return MARKER unless @chains.key? k
+      wordlist = @chains[k]
     end
-    wordlist.pick_one || :nonword
+    total = wordlist.first
+    hash = wordlist.last
+    return MARKER if total == 0
+    return hash.keys.first if hash.length == 1
+    hit = rand(total)
+    ret = MARKER
+    hash.each do |k, w|
+      hit -= w
+      if hit < 0
+        ret = k
+        break
+      end
+    end
+    return ret
   end
 
   def generate_string(word1, word2)
@@ -81,13 +275,13 @@ class MarkovPlugin < Plugin
       output = word1.to_s
     end
 
-    if @registry.key? output
-      wordlist = @registry[output]
-      wordlist.delete(:nonword)
+    if @chains.key? output
+      wordlist = @chains[output]
+      wordlist.last.delete(MARKER)
     else
       output.downcase!
       keys = []
-      @registry.each_key(output) do |key|
+      @chains.each_key(output) do |key|
         if key.downcase.include? output
           keys << key
         else
@@ -95,29 +289,30 @@ class MarkovPlugin < Plugin
         end
       end
       if keys.empty?
-        keys = @registry.keys.select { |k| k.downcase.include? output }
+        keys = @chains.keys.select { |k| k.downcase.include? output }
       end
       return nil if keys.empty?
       while key = keys.delete_one
-        wordlist = @registry[key]
-        wordlist.delete(:nonword)
+        wordlist = @chains[key]
+        wordlist.last.delete(MARKER)
         unless wordlist.empty?
           output = key
-          word1, word2 = output.split
+          # split using / / so that we can properly catch the marker
+          word1, word2 = output.split(/ /).map {|w| w.intern}
           break
         end
       end
     end
 
     word3 = pick_word(wordlist)
-    return nil if word3 == :nonword
+    return nil if word3 == MARKER
 
     output << " #{word3}"
     word1, word2 = word2, word3
 
     (@bot.config['markov.max_words'] - 1).times do
       word3 = pick_word(word1, word2)
-      break if word3 == :nonword
+      break if word3 == MARKER
       output << " #{word3}"
       word1, word2 = word2, word3
     end
@@ -171,6 +366,8 @@ class MarkovPlugin < Plugin
       reply = _("markov is currently enabled, %{p}% chance of chipping in") % { :p => probability? }
       l = @learning_queue.length
       reply << (_(", %{l} messages in queue") % {:l => l}) if l > 0
+      l = @upgrade_queue.length
+      reply << (_(", %{l} chains to upgrade") % {:l => l}) if l > 0
     else
       reply = _("markov is currently disabled")
     end
@@ -253,7 +450,7 @@ class MarkovPlugin < Plugin
 
     word1, word2 = message.split(/\s+/)
     return unless word1 and word2
-    line = generate_string(word1, word2)
+    line = generate_string(word1.intern, word2.intern)
     return unless line
     # we do nothing if the line we return is just an initial substring
     # of the line we received
@@ -274,11 +471,11 @@ class MarkovPlugin < Plugin
 
   def rand_chat(m, params)
     # pick a random pair from the db and go from there
-    word1, word2 = :nonword, :nonword
+    word1, word2 = MARKER, MARKER
     output = Array.new
     @bot.config['markov.max_words'].times do
       word3 = pick_word(word1, word2)
-      break if word3 == :nonword
+      break if word3 == MARKER
       output << word3
       word1, word2 = word2, word3
     end
@@ -309,15 +506,26 @@ class MarkovPlugin < Plugin
 
   def learn_triplet(word1, word2, word3)
       k = "#{word1} #{word2}"
-      @registry[k] = @registry[k].push(word3)
+      @chains_mutex.synchronize do
+        total = 0
+        hash = Hash.new(0)
+        if @chains.key? k
+          t2, h2 = @chains[k]
+          total += t2
+          hash.update h2
+        end
+        hash[word3] += 1
+        total += 1
+        @chains[k] = [total, hash]
+      end
   end
 
   def learn_line(message)
-    # debug "learning #{message}"
-    wordlist = message.split(/\s+/)
+    # debug "learning #{message.inspect}"
+    wordlist = message.split(/\s+/).map { |w| w.intern }
     return unless wordlist.length >= 2
-    word1, word2 = :nonword, :nonword
-    wordlist << :nonword
+    word1, word2 = MARKER, MARKER
+    wordlist << MARKER
     wordlist.each do |word3|
       learn_triplet(word1, word2, word3)
       word1, word2 = word2, word3
