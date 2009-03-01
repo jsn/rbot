@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-01 23:50+0100\n"
 "PO-Revision-Date: 2008-06-21 15:38+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -15,6 +15,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: data/rbot/plugins/rss.rb:814
+#: data/rbot/plugins/rss.rb:868
 msgid "no such feed %{handle}"
 msgstr "aucun module %{module}"
+
+#: data/rbot/plugins/rss.rb:969
+msgid "feed %{feed} had %{num} updates, showing the latest %{max}"
+msgstr ""

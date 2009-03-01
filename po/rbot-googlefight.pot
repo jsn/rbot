@@ -16,10 +16,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/rss.rb:868
-msgid "no such feed %{handle}"
+#: data/rbot/plugins/googlefight.rb:36
+msgid " -- %{keyword} wins!"
 msgstr ""
 
-#: data/rbot/plugins/rss.rb:969
-msgid "feed %{feed} had %{num} updates, showing the latest %{max}"
+#: data/rbot/plugins/googlefight.rb:40
+msgid " -- no winner here!"
 msgstr ""

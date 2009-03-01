@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-01-22 16:32+0100\n"
+"POT-Creation-Date: 2009-03-01 23:49+0100\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
@@ -47,15 +47,15 @@ msgstr "%{user}，你並沒有 '%{command}' 權限"
 msgid "%{desc} [valid values are: %{values}]"
 msgstr "%{desc} [符合規定的值為: %{values}]"
 
-#: lib/rbot/config.rb:370
+#: lib/rbot/config.rb:372
 msgid "First time rbot configuration wizard"
 msgstr "首次使用 rbot 設定精靈"
 
-#: lib/rbot/config.rb:373
+#: lib/rbot/config.rb:375
 msgid "This wizard will ask you a few questions to get you started."
 msgstr "這個設定精靈會透過一些問句來協助你開始使用。"
 
-#: lib/rbot/config.rb:374
+#: lib/rbot/config.rb:376
 msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
@@ -953,57 +953,69 @@ msgstr ""
 msgid "one second"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1271
+#: lib/rbot/core/wordlist_ui.rb:10
+msgid "wordlist list [<pattern>] => list wordlists (matching <pattern>)"
+msgstr ""
+
+#: lib/rbot/core/wordlist_ui.rb:16
+msgid "no wordlist found"
+msgstr ""
+
+#: lib/rbot/core/wordlist_ui.rb:18
+msgid "Wordlists: %{found}"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1325
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1273
+#: lib/rbot/ircbot.rb:1327
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1276
+#: lib/rbot/ircbot.rb:1330
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1287
+#: lib/rbot/ircbot.rb:1341
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 
-#: lib/rbot/plugins.rb:341
+#: lib/rbot/plugins.rb:344
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr "用法錯誤，請用 %{command} 尋求協助"
 
-#: lib/rbot/plugins.rb:665
+#: lib/rbot/plugins.rb:707
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "%{count} 個核心模組已載入"
 
-#: lib/rbot/plugins.rb:668
+#: lib/rbot/plugins.rb:710
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "%{count} 個核心模組: %{list}"
 
-#: lib/rbot/plugins.rb:674
+#: lib/rbot/plugins.rb:716
 msgid "no core botmodules loaded"
 msgstr "未載入任何核心模組"
 
-#: lib/rbot/plugins.rb:679
+#: lib/rbot/plugins.rb:721
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "%{count} 個外掛程式已載入"
 
-#: lib/rbot/plugins.rb:682
+#: lib/rbot/plugins.rb:724
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "%{count} 個外掛程式: %{list}"
 
-#: lib/rbot/plugins.rb:693
+#: lib/rbot/plugins.rb:735
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] "%{highlight}%{count} 個外掛程式被忽略%{highlight}"
 
-#: lib/rbot/plugins.rb:698
+#: lib/rbot/plugins.rb:740
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -1014,12 +1026,12 @@ msgstr[0] ""
 "%{highlight}%{count} 個外掛程式被忽略%{highlight}: 執行 %{bold}%{command}%"
 "{bold} 以瞭解原因"
 
-#: lib/rbot/plugins.rb:708
+#: lib/rbot/plugins.rb:750
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] "%{highlight}%{count} 個外掛程式載入失敗%{highlight}"
 
-#: lib/rbot/plugins.rb:713
+#: lib/rbot/plugins.rb:755
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -1030,11 +1042,11 @@ msgstr[0] ""
 "%{highlight}%{count} 個外掛程式載入失敗%{highlight}: 執行 %{bold}%{command}%"
 "{bold} 以瞭解原因"
 
-#: lib/rbot/plugins.rb:743
+#: lib/rbot/plugins.rb:785
 msgid "no plugins failed to load"
 msgstr "沒有外掛程式載入失敗"
 
-#: lib/rbot/plugins.rb:745
+#: lib/rbot/plugins.rb:787
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
@@ -1042,24 +1054,24 @@ msgstr ""
 "%{dir} 的 %{highlight}%{plugin}%{highlight} 外掛程式發生錯誤 %{exception}: %"
 "{reason}"
 
-#: lib/rbot/plugins.rb:749
+#: lib/rbot/plugins.rb:791
 msgid "at %{backtrace}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:755
+#: lib/rbot/plugins.rb:797
 msgid "no plugins were ignored"
 msgstr "沒有外掛程式被忽略"
 
-#: lib/rbot/plugins.rb:759
+#: lib/rbot/plugins.rb:801
 msgid "overruled by previous"
 msgstr "已被前者取代"
 
-#: lib/rbot/registry.rb:20
+#: lib/rbot/registry.rb:22
 msgid ""
 "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
 msgstr ""
 
-#: lib/rbot/registry.rb:40
+#: lib/rbot/registry.rb:41
 msgid ""
 "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
 "format"
@@ -1069,9 +1081,9 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr ""
 
-#~ msgid "nick <nick> => attempt to change nick to <nick>"
-#~ msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
-
 #, fuzzy
 #~ msgid "on %{date}"
 #~ msgstr "能 %{action}"
+
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-01-22 16:32+0100\n"
+"POT-Creation-Date: 2009-03-01 23:49+0100\n"
 "PO-Revision-Date: 2008-06-23 22:27+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -50,15 +50,15 @@ msgstr "%{user}, vous n'avez pas les permissions '%{command}' ici"
 msgid "%{desc} [valid values are: %{values}]"
 msgstr "%{desc} [valeurs valides: %{values}]"
 
-#: lib/rbot/config.rb:370
+#: lib/rbot/config.rb:372
 msgid "First time rbot configuration wizard"
 msgstr "Configuration du premier lancement de rbot"
 
-#: lib/rbot/config.rb:373
+#: lib/rbot/config.rb:375
 msgid "This wizard will ask you a few questions to get you started."
 msgstr "Cet configurateur va vous poser quelques questions pour demarrer."
 
-#: lib/rbot/config.rb:374
+#: lib/rbot/config.rb:376
 msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
@@ -1042,63 +1042,75 @@ msgstr "secondes"
 msgid "one second"
 msgstr "seconde"
 
-#: lib/rbot/ircbot.rb:1271
+#: lib/rbot/core/wordlist_ui.rb:10
+msgid "wordlist list [<pattern>] => list wordlists (matching <pattern>)"
+msgstr ""
+
+#: lib/rbot/core/wordlist_ui.rb:16
+msgid "no wordlist found"
+msgstr ""
+
+#: lib/rbot/core/wordlist_ui.rb:18
+msgid "Wordlists: %{found}"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1325
 msgid "help topics: "
 msgstr "sujets d'aide: "
 
-#: lib/rbot/ircbot.rb:1273
+#: lib/rbot/ircbot.rb:1327
 msgid " (help <topic> for more info)"
 msgstr "(help <sujet> pour plus d'informations)"
 
-#: lib/rbot/ircbot.rb:1276
+#: lib/rbot/ircbot.rb:1330
 msgid "no help for topic %{topic}"
 msgstr "aucune aide pour le sujet %{topic}"
 
-#: lib/rbot/ircbot.rb:1287
+#: lib/rbot/ircbot.rb:1341
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 "Uptime %{up},%{plug} plugins actifs, %{sent} lignes envoyés, %{recv} recut."
 
-#: lib/rbot/plugins.rb:341
+#: lib/rbot/plugins.rb:344
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr "utilisation incorrecte, demandez de l'aide via '%{command}'"
 
-#: lib/rbot/plugins.rb:665
+#: lib/rbot/plugins.rb:707
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "%{count} core module chargé"
 msgstr[1] "%{count} core modules chargés"
 
-#: lib/rbot/plugins.rb:668
+#: lib/rbot/plugins.rb:710
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "%{count} core module: %{list}"
 msgstr[1] "%{count} core modules: %{list}"
 
-#: lib/rbot/plugins.rb:674
+#: lib/rbot/plugins.rb:716
 msgid "no core botmodules loaded"
 msgstr "aucuns modules du core de chargé"
 
-#: lib/rbot/plugins.rb:679
+#: lib/rbot/plugins.rb:721
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "%{count} plugin chargé"
 msgstr[1] "%{count} plugins chargés"
 
-#: lib/rbot/plugins.rb:682
+#: lib/rbot/plugins.rb:724
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "%{count} plugin: %{list}"
 msgstr[1] "%{count} plugins: %{list}"
 
-#: lib/rbot/plugins.rb:693
+#: lib/rbot/plugins.rb:735
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] "%{highlight}%{count} plugin ignoré%{highlight}"
 msgstr[1] "%{highlight}%{count} plugins ignorés%{highlight}"
 
-#: lib/rbot/plugins.rb:698
+#: lib/rbot/plugins.rb:740
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -1112,13 +1124,13 @@ msgstr[1] ""
 "%{highlight}%{count} plugins ignorés%{highlight}: utilisez %{bold}%{command}%"
 "{bold} pour voir pourquoi"
 
-#: lib/rbot/plugins.rb:708
+#: lib/rbot/plugins.rb:750
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] "%{highlight}%{count} plugin impossible à chargé%{highlight}"
 msgstr[1] "%{highlight}%{count} plugins impossibles à chargés%{highlight}"
 
-#: lib/rbot/plugins.rb:713
+#: lib/rbot/plugins.rb:755
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -1132,11 +1144,11 @@ msgstr[1] ""
 "%{highlight}%{count} plugins impossibles à chargés%{highlight}: utilisez %"
 "{bold}%{command}%{bold} pour voir pourquoi"
 
-#: lib/rbot/plugins.rb:743
+#: lib/rbot/plugins.rb:785
 msgid "no plugins failed to load"
 msgstr "aucuns plugins n'ont échoués au chargement"
 
-#: lib/rbot/plugins.rb:745
+#: lib/rbot/plugins.rb:787
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
@@ -1144,26 +1156,26 @@ msgstr ""
 "%{highlight}%{plugin}%{highlight} dans %{dir} a échoué avec l'erreur %"
 "{exception}: %{reason}"
 
-#: lib/rbot/plugins.rb:749
+#: lib/rbot/plugins.rb:791
 msgid "at %{backtrace}"
 msgstr "à %{backtrace}"
 
-#: lib/rbot/plugins.rb:755
+#: lib/rbot/plugins.rb:797
 msgid "no plugins were ignored"
 msgstr "aucun plugins n'ont été ignoré"
 
-#: lib/rbot/plugins.rb:759
+#: lib/rbot/plugins.rb:801
 msgid "overruled by previous"
 msgstr "rejeté par le precedent"
 
-#: lib/rbot/registry.rb:20
+#: lib/rbot/registry.rb:22
 msgid ""
 "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
 msgstr ""
 "mise à jour du vieux style (rbot 0.9.5 ou plus vieux) de plugin de registre "
 "au nouveau format"
 
-#: lib/rbot/registry.rb:40
+#: lib/rbot/registry.rb:41
 msgid ""
 "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
 "format"
@@ -1175,13 +1187,13 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "la tentative de récuperation marshal a échoué, essai des defauts"
 
-#~ msgid "nick <nick> => attempt to change nick to <nick>"
-#~ msgstr "nick <nick> => essaye de changer le pseudo en <nick>"
+#, fuzzy
+#~ msgid "on %{date}"
+#~ msgstr "faire %{action}"
 
 #, fuzzy
 #~ msgid "one day"
 #~ msgstr "jour"
 
-#, fuzzy
-#~ msgid "on %{date}"
-#~ msgstr "faire %{action}"
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => essaye de changer le pseudo en <nick>"

@@ -1,8 +1,12 @@
-#: data/rbot/plugins/lastfm.rb:32
+#: data/rbot/plugins/lastfm.rb:34
 msgid " and %{n} more..."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:75
+#: data/rbot/plugins/lastfm.rb:89
+msgid ", where <period> can be one of: 3|6|12 months, a year"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:92
 msgid ""
 "lastfm [<num>] events in <location> => show information on events in or near "
 "<location>. lastfm [<num>] events by <artist/group> => show information on "
@@ -10,163 +14,333 @@ msgid ""
 "is optional, defaults to %{d} and cannot be higher than %{m}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:77
+#: data/rbot/plugins/lastfm.rb:94
 msgid "lastfm artist <name> => show information on artist <name> from last.fm"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:79
+#: data/rbot/plugins/lastfm.rb:96
 msgid ""
 "lastfm album <name> => show information on album <name> from last.fm [not "
 "implemented yet]"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:81
+#: data/rbot/plugins/lastfm.rb:98
 msgid "lastfm track <name> => search tracks matching <name> on last.fm"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:83
+#: data/rbot/plugins/lastfm.rb:100
 msgid ""
-"lastfm now [<user>] => show the now playing track from last.fm.  np [<user>] "
+"lastfm now [<nick>] => show the now playing track from last.fm. np [<nick>] "
 "does the same."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:85
+#: data/rbot/plugins/lastfm.rb:102
 msgid ""
 "lastfm set user <user> => associate your current irc nick with a last.fm "
-"user. lastfm set verb <present> <past> => set your preferred now playing "
-"verb. default \"listening\" and \"listened\"."
+"user. lastfm set verb <present>, <past> => set your preferred now playing/"
+"just played verbs. default \"is listening to\" and \"listened to\"."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:87
+#: data/rbot/plugins/lastfm.rb:104
 msgid ""
-"lastfm who [<nick>] => show who <nick> is at last.fm. if <nick> is empty, "
-"show who you are at lastfm."
+"lastfm who [<nick>] => show who <nick> is on last.fm. if <nick> is empty, "
+"show who you are on lastfm."
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:89
+#: data/rbot/plugins/lastfm.rb:106
 msgid ""
-"lastfm compare <nick1> <nick2> => show musical taste compatibility between "
-"nick1 and nick2."
+"lastfm compare [<nick1>] <nick2> => show musical taste compatibility between "
+"nick1 (or user if omitted) and nick2"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:91
+#: data/rbot/plugins/lastfm.rb:108
+msgid "lastfm shouts [<nick>] => show shouts to <nick>"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:110
+msgid "lastfm friends [<nick>] => show <nick>'s friends"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:112
 msgid ""
-"lastfm [<user>] => show your or <user>'s now playing track at lastfm. np "
-"[<user>] => same as 'lastfm'. other topics: events, artist, album, track, "
-"now, set, who, compare"
+"lastfm neighbors [<nick>] => show people who share similar musical taste as "
+"<nick>"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:114
+msgid "lastfm loved[tracks] [<nick>] => show tracks that <nick> has loved"
 msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:116
-msgid "Could not retrieve events"
-msgstr ""
-
-#: data/rbot/plugins/lastfm.rb:158 data/rbot/plugins/lastfm.rb:215
-#: data/rbot/plugins/lastfm.rb:278 data/rbot/plugins/lastfm.rb:300
-#: data/rbot/plugins/lastfm.rb:319 data/rbot/plugins/lastfm.rb:333
-msgid "last.fm parsing failed"
-msgstr ""
-
-#: data/rbot/plugins/lastfm.rb:174
 msgid ""
-"%{u} doesn't exist at last.fm. Perhaps you need to: lastfm set <username>"
+"lastfm recent[tracks] [<nick>] => show tracks that <nick> has recently played"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:118
+msgid ""
+"lastfm topalbums [<nick>] [over <period>] => show <nick>'s top albums%{p}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:120
+msgid ""
+"lastfm topartists [<nick>] [over <period>] => show <nick>'s top artists%{p}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:122
+msgid ""
+"lastfm toptracks [<nick>] [over <period>] => show <nick>'s top tracks%{p}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:124
+msgid "lastfm weeklyalbumchart [<nick>] => show <nick>'s weekly album chart"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:126
+msgid "lastfm weeklyartistchart [<nick>] => show <nick>'s weekly artist chart"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:128
+msgid "lastfm weeklyartistchart [<nick>] => show <nick>'s weekly track chart"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:130
+msgid ""
+"last.fm plugin - topics: events, artist, album, track, now, set, who, "
+"compare, shouts, friends, neighbors, (loved|recent)tracks, top(albums|tracks|"
+"artists), weekly(album|artist|track)chart"
 msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:178
-msgid "Bad: %{e}"
+msgid "no events found in %{location}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:187
-msgid "Super"
+#: data/rbot/plugins/lastfm.rb:185
+msgid "no events found by %{artist}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:189
-msgid "Very High"
-msgstr ""
-
-#: data/rbot/plugins/lastfm.rb:191
-msgid "High"
-msgstr ""
-
-#: data/rbot/plugins/lastfm.rb:193
-msgid "Medium"
-msgstr ""
-
-#: data/rbot/plugins/lastfm.rb:195
-msgid "Low"
+#: data/rbot/plugins/lastfm.rb:188
+msgid "%{user} is not attending any events"
 msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:197
-msgid "Very Low"
+msgid "could not retrieve events"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:199
-msgid "%{a}'s and %{b}'s musical compatibility rating is: %{r}"
+#: data/rbot/plugins/lastfm.rb:239 data/rbot/plugins/lastfm.rb:292
+#: data/rbot/plugins/lastfm.rb:354 data/rbot/plugins/lastfm.rb:393
+#: data/rbot/plugins/lastfm.rb:412 data/rbot/plugins/lastfm.rb:464
+#: data/rbot/plugins/lastfm.rb:562
+msgid "last.fm parsing failed"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:229
-msgid "Error %{e}"
+#: data/rbot/plugins/lastfm.rb:248
+msgid "%{u} doesn't exist on last.fm"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:235
-msgid "%{u} hasn't played anything recently"
-msgstr ""
-
-#: data/rbot/plugins/lastfm.rb:255
-msgid "listening"
+#: data/rbot/plugins/lastfm.rb:251 data/rbot/plugins/lastfm.rb:302
+msgid "error: %{e}"
 msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:259
-msgid "%{u} is %{v} to \"%{t}\" by %{a} %{b}"
+msgid "Super"
 msgstr ""
 
 #: data/rbot/plugins/lastfm.rb:261
-msgid "listened"
+msgid "Very High"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:266
-msgid "%{u} %{v} to \"%{t}\" by %{a} %{b}%{p}"
+#: data/rbot/plugins/lastfm.rb:263
+msgid "High"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:273 data/rbot/plugins/lastfm.rb:294
-msgid "I had problems getting info for %{a}."
+#: data/rbot/plugins/lastfm.rb:265
+msgid "Medium"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:286
+#: data/rbot/plugins/lastfm.rb:267
+msgid "Low"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:269
+msgid "Very Low"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:272
+msgid "%{a}'s and %{b}'s musical compatibility rating is %{bold}%{r}%{bold}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:279
+msgid " and music they have in common includes: %{artists}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:297
 msgid ""
-"%{b}%{a}%{b} has been played %{c} times and is being listened to by %{l} "
-"people."
+"%{user} doesn't exist on last.fm, perhaps they need to: lastfm user "
+"<username>"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:309
+#: data/rbot/plugins/lastfm.rb:308
+msgid "%{u} hasn't played anything recently"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:328
+msgid "is listening to"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:332
+msgid "%{u} %{v} \"%{t}\" by %{a} %{b}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:334
+msgid "listened to"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:339
+msgid "%{u} %{v} \"%{t}\" by %{a} %{b} %{p}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:342 data/rbot/plugins/lastfm.rb:574
+msgid "; see %{uri} for more"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:349 data/rbot/plugins/lastfm.rb:387
+msgid "I had problems getting info for %{a}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:370
+msgid "%{b}%{a}%{b}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:372
+msgid "%{u}%{t}%{u}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:373
+msgid ""
+"%{b}%{a}%{b} <%{u}> has been played %{b}%{c}%{b} times and is being listened "
+"to by %{b}%{l}%{b} people"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:375
+msgid ". Tagged as: %{t}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:377
+msgid ". Similar artists: %{s}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:402
 msgid "%{bold}%{t}%{bold} by %{bold}%{a}%{bold} (%{n} listeners)"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:322
+#: data/rbot/plugins/lastfm.rb:415
 msgid "track %{a} not found"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:329
+#: data/rbot/plugins/lastfm.rb:429
+msgid ""
+"%{b}%{name}%{b}, %{street}, %{u}%{city}%{u}, %{country}, see %{url} for more "
+"info"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:453
+msgid " and %{maps} for maps"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:460
 msgid "I had problems getting album info"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:351
+#: data/rbot/plugins/lastfm.rb:482
 msgid "I couldn't locate: \"%{a}\" by %{r}"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:355
-msgid "The album \"%{a}\" by %{r} %{y}has been played %{c} times."
+#: data/rbot/plugins/lastfm.rb:486
+msgid "the album \"%{a}\" by %{r} %{y}has been played %{c} times"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:362
-msgid "Ok, I'll remember that %{n} is %{u} at last.fm"
+#: data/rbot/plugins/lastfm.rb:493
+msgid "okay, I'll remember that %{n} is %{u} on last.fm"
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:371
-msgid "Ok, I'll remember that %{n} prefers %{r} and %{p}."
+#: data/rbot/plugins/lastfm.rb:502
+msgid "okay, I'll remember that %{n} prefers \"%{r}\" and \"%{p}\""
 msgstr ""
 
-#: data/rbot/plugins/lastfm.rb:385
+#: data/rbot/plugins/lastfm.rb:514
+msgid "%{nick} is %{user} on last.fm"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:519
 msgid ""
-"Sorry, I don't know who %{n} is at last.fm perhaps you need to: lastfm set "
-"<username>"
+"sorry, I don't know who %{n} is on last.fm, perhaps they need to: lastfm set "
+"user <username>"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:555
+msgid "no response body"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:557
+msgid "I had problems accessing last.fm: %{e}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:582
+msgid "%{user} has no friends :("
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:584
+msgid "%{user} has %{total} friends: %{friends}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:586
+msgid "%{user} has %{total} friends, including %{friends}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:602
+msgid "%{user} has not loved any tracks"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:604
+msgid "%{user} has loved %{total} tracks: %{tracks}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:606
+msgid "%{user} has loved %{total} tracks, including %{tracks}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:621
+msgid "no one seems to share %{user}'s musical taste"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:623
+msgid "%{user}'s musical neighbours are %{nbrs}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:625
+msgid "%{user}'s musical neighbours include %{nbrs}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:651
+msgid " or more"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:657
+msgid "%{user} hasn't played anything recently"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:659
+msgid "%{user} has recently played %{tracks}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:665
+msgid "there are no shouts for %{user}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:668
+msgid "<%{author}> %{body}"
+msgstr ""
+
+#: data/rbot/plugins/lastfm.rb:697
+msgid "%{user} hasn't played anything in this period of time"
 msgstr ""

@@ -1,0 +1,68 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-01 23:50+0100\n"
+"PO-Revision-Date: 2009-03-01 23:50+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/games/hangman.rb:311
+msgid "i'm not on that channel"
+msgstr "i'm not on that channel"
+
+#: data/rbot/plugins/games/hangman.rb:316
+msgid "there's already a hangman game in progress on the channel"
+msgstr "there's already a hangman game in progress on the channel"
+
+#: data/rbot/plugins/games/hangman.rb:320
+msgid "%{nick} has started a hangman -- join the fun!"
+msgstr "%{nick} has started a hangman -- join the fun!"
+
+#: data/rbot/plugins/games/hangman.rb:344
+msgid "oh well, the answer would've been %{answer}"
+msgstr "oh well, the answer would've been %{answer}"
+
+#: data/rbot/plugins/games/hangman.rb:351
+msgid "no ongoing game"
+msgstr "no ongoing game"
+
+#: data/rbot/plugins/games/hangman.rb:369
+msgid "you nailed it!"
+msgstr "you nailed it!"
+
+#: data/rbot/plugins/games/hangman.rb:371
+msgid "you've killed the poor guy :("
+msgstr "you've killed the poor guy :("
+
+#: data/rbot/plugins/games/hangman.rb:391
+msgid "wondering what that means? try ´%{prefix}define´"
+msgstr "wondering what that means? try ´%{prefix}define´"
+
+#: data/rbot/plugins/games/hangman.rb:434
+msgid "you got %{score} points after %{games} games"
+msgstr "you got %{score} points after %{games} games"
+
+#: data/rbot/plugins/games/hangman.rb:439
+msgid "you haven't played hangman, how about playing it right now? :)"
+msgstr "you haven't played hangman, how about playing it right now? :)"
+
+#: data/rbot/plugins/games/hangman.rb:448
+msgid "%{nick} has %{score} points after %{games} games"
+msgstr "%{nick} has %{score} points after %{games} games"
+
+#: data/rbot/plugins/games/hangman.rb:454
+msgid "%{nick} hasn't played hangman :("
+msgstr "%{nick} hasn't played hangman :("
+
+#: data/rbot/plugins/games/hangman.rb:466
+msgid "%{games} games have been played on %{channel}"
+msgstr "%{games} games have been played on %{channel}"

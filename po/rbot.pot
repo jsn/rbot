@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-01-22 16:32+0100\n"
-"PO-Revision-Date: 2009-01-22 16:32+0100\n"
+"POT-Creation-Date: 2009-03-01 23:49+0100\n"
+"PO-Revision-Date: 2009-03-01 23:49+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -44,15 +44,15 @@ msgstr ""
 msgid "%{desc} [valid values are: %{values}]"
 msgstr ""
 
-#: lib/rbot/config.rb:370
+#: lib/rbot/config.rb:372
 msgid "First time rbot configuration wizard"
 msgstr ""
 
-#: lib/rbot/config.rb:373
+#: lib/rbot/config.rb:375
 msgid "This wizard will ask you a few questions to get you started."
 msgstr ""
 
-#: lib/rbot/config.rb:374
+#: lib/rbot/config.rb:376
 msgid ""
 "The rest of rbot's configuration can be manipulated via IRC once rbot is "
 "connected and you are auth'd."
@@ -925,62 +925,74 @@ msgstr ""
 msgid "one second"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1271
+#: lib/rbot/core/wordlist_ui.rb:10
+msgid "wordlist list [<pattern>] => list wordlists (matching <pattern>)"
+msgstr ""
+
+#: lib/rbot/core/wordlist_ui.rb:16
+msgid "no wordlist found"
+msgstr ""
+
+#: lib/rbot/core/wordlist_ui.rb:18
+msgid "Wordlists: %{found}"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1325
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1273
+#: lib/rbot/ircbot.rb:1327
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1276
+#: lib/rbot/ircbot.rb:1330
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1287
+#: lib/rbot/ircbot.rb:1341
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 
-#: lib/rbot/plugins.rb:341
+#: lib/rbot/plugins.rb:344
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr ""
 
-#: lib/rbot/plugins.rb:665
+#: lib/rbot/plugins.rb:707
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:668
+#: lib/rbot/plugins.rb:710
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:674
+#: lib/rbot/plugins.rb:716
 msgid "no core botmodules loaded"
 msgstr ""
 
-#: lib/rbot/plugins.rb:679
+#: lib/rbot/plugins.rb:721
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:682
+#: lib/rbot/plugins.rb:724
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:693
+#: lib/rbot/plugins.rb:735
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:698
+#: lib/rbot/plugins.rb:740
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -990,13 +1002,13 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:708
+#: lib/rbot/plugins.rb:750
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:713
+#: lib/rbot/plugins.rb:755
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -1006,34 +1018,34 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: lib/rbot/plugins.rb:743
+#: lib/rbot/plugins.rb:785
 msgid "no plugins failed to load"
 msgstr ""
 
-#: lib/rbot/plugins.rb:745
+#: lib/rbot/plugins.rb:787
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:749
+#: lib/rbot/plugins.rb:791
 msgid "at %{backtrace}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:755
+#: lib/rbot/plugins.rb:797
 msgid "no plugins were ignored"
 msgstr ""
 
-#: lib/rbot/plugins.rb:759
+#: lib/rbot/plugins.rb:801
 msgid "overruled by previous"
 msgstr ""
 
-#: lib/rbot/registry.rb:20
+#: lib/rbot/registry.rb:22
 msgid ""
 "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
 msgstr ""
 
-#: lib/rbot/registry.rb:40
+#: lib/rbot/registry.rb:41
 msgid ""
 "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
 "format"
