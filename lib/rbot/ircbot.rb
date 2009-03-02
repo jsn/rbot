@@ -1241,7 +1241,9 @@ class Bot
 
   # totally shutdown and respawn the bot
   def restart(message=nil)
-    message = "restarting, back in #{@config['server.reconnect_wait']}..." if (!message || message.empty?)
+    message = _("restarting, back in %{wait}...") % {
+      :wait => @config['server.reconnect_wait']
+    } if (!message || message.empty?)
     shutdown(message)
     sleep @config['server.reconnect_wait']
     begin
