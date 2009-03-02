@@ -242,15 +242,15 @@ class HangmanPlugin < Plugin
   def help(plugin, topic="")
     case topic
     when ""
-      return "hangman game plugin - topics: play, stop"
+      return _("hangman game plugin - topics: play, stop")
     when "play"
-      return "hangman play on <channel> with word <word> => use in private chat with the bot to start a game with custom word\n"+
-             "hangman play random [with [max|min] length [<|>|== <length>]] => hangman with a random word from #{RandomWord::SITE}\n"+
-             "hangman play with wordlist <wordlist> => hangman with random word from <wordlist>"
+      return [_("hangman play on <channel> with word <word> => use in private chat with the bot to start a game with custom word\n"),
+              _("hangman play random [with [max|min] length [<|>|== <length>]] => hangman with a random word from %{site}\n"),
+              _("hangman play with wordlist <wordlist> => hangman with random word from <wordlist>")].join
     when "stop"
-      return "hangman stop => quits the current game"
+      return _("hangman stop => quits the current game")
     when "define"
-      return "define => seeks a definition for the previous answer using google"
+      return _("define => seeks a definition for the previous answer using google")
     end
   end
 
@@ -261,7 +261,7 @@ class HangmanPlugin < Plugin
       begin
         wordlist = Wordlist.get(params[:wordlist].join("/"), :spaces => true)
       rescue
-        raise "no such wordlist"
+        raise _("no such wordlist")
       end
 
       wordlist[rand(wordlist.size)]
@@ -282,7 +282,7 @@ class HangmanPlugin < Plugin
         unless words.empty?
           words.first
         else
-          m.reply "suitable word not found in the set"
+          m.reply _("suitable word not found in the set")
           nil
         end
       else
@@ -371,7 +371,7 @@ class HangmanPlugin < Plugin
           _("you've killed the poor guy :(")
         end
 
-        again = _("go #{Bold}again#{Bold}?")
+        again = _("go %{b}again%{b}?") % { :b => Bold }
 
         scores = []
         game.scores.each do |user, score|
