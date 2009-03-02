@@ -269,18 +269,20 @@ class LastFmPlugin < Plugin
         rating = _("Very Low")
     end
 
-    reply = _("%{a}'s and %{b}'s musical compatibility rating is %{bold}%{r}%{bold}") % {
+    common_artists = unless artists.empty?
+      _(" and music they have in common includes: %{artists}") % {
+        :artists => artists.join(", ") }
+    else
+      nil
+    end
+
+    m.reply _("%{a}'s and %{b}'s musical compatibility rating is %{bold}%{r}%{bold}%{common}") % {
       :a => user1,
       :b => user2,
       :r => rating.downcase,
-      :bold => Bold
+      :bold => Bold,
+      :common => common_artists
     }
-
-    reply << _(" and music they have in common includes: %{artists}") % {
-      :artists => artists.join(", ")
-    } unless artists.empty?
-
-    m.reply reply
   end
 
   def now_playing(m, params)
@@ -583,14 +585,14 @@ class LastFmPlugin < Plugin
       elsif friends.length <= num
         reply = _("%{user} has %{total} friends: %{friends}")
       else
-        reply = _("%{user} has %{total} friends, including %{friends}")
-        reply << seemore
+        reply = _("%{user} has %{total} friends, including %{friends}%{seemore}")
       end
       m.reply reply % {
         :user => user,
         :total => friends.size,
         :friends => friends.shuffle[0, num].join(", "),
-        :uri => "http://www.last.fm/user/#{CGI.escape user}/friends"
+        :uri => "http://www.last.fm/user/#{CGI.escape user}/friends",
+        :seemore => seemore
       }
     when :lovedtracks
       loved = doc.root.get_elements("lovedtracks/track").map do |track|
@@ -603,14 +605,14 @@ class LastFmPlugin < Plugin
       elsif loved.length <= num
         reply = _("%{user} has loved %{total} tracks: %{tracks}")
       else
-        reply = _("%{user} has loved %{total} tracks, including %{tracks}")
-        reply << seemore
+        reply = _("%{user} has loved %{total} tracks, including %{tracks}%{seemore}")
       end
       m.reply reply % {
           :user => user,
           :total => loved.size,
           :tracks => loved_prep.join(", "),
-          :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved"
+          :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved",
+          :seemore => seemore
         }
     when :neighbours
       nbrs = doc.root.get_elements("neighbours/user").map do |u|
@@ -622,13 +624,13 @@ class LastFmPlugin < Plugin
       elsif nbrs.length <= num
         reply = _("%{user}'s musical neighbours are %{nbrs}")
       else
-        reply = _("%{user}'s musical neighbours include %{nbrs}")
-        reply << seemore
+        reply = _("%{user}'s musical neighbours include %{nbrs}%{seemore}")
       end
       m.reply reply % {
-          :user  => user,
-          :nbrs  => nbrs.shuffle[0, num].join(", "),
-          :uri   => "http://www.last.fm/user/#{CGI.escape user}/neighbours"
+          :user    => user,
+          :nbrs    => nbrs.shuffle[0, num].join(", "),
+          :uri     => "http://www.last.fm/user/#{CGI.escape user}/neighbours",
+          :seemore => seemore
       }
     when :recenttracks
       tracks = doc.root.get_elements("recenttracks/track").map do |track|
