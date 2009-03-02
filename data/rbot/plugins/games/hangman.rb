@@ -365,16 +365,17 @@ class HangmanPlugin < Plugin
       end
 
       if game.over?
-        str = if game.won?
+        sentence = if game.won?
           _("you nailed it!")
         elsif game.lost?
           _("you've killed the poor guy :(")
         end
 
-        str << _(" go #{Bold}again#{Bold}?")
+        again = _("go #{Bold}again#{Bold}?")
 
+        scores = []
         game.scores.each do |user, score|
-          str << " #{user.nick}: "
+          str = "#{user.nick}: "
           str << if score > 0
             Irc.color(:green)+'+'
           elsif score < 0
@@ -383,9 +384,13 @@ class HangmanPlugin < Plugin
 
           str << score.round.to_s
           str << Irc.color
+
+          scores << str
         end
 
-        m.reply str, :nick => true
+        m.reply _("%{sentence} %{again} %{scores}") % {
+          :sentence => sentence, :again => again, :scores => scores
+        }, :nick => true
 
         if rand(5).zero?
           m.reply _("wondering what that means? try ´%{prefix}define´") % {
