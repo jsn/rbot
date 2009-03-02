@@ -1,0 +1,89 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Raine Virta <rane@kapsi.fi>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-01 23:50+0100\n"
+"PO-Revision-Date: 2009-03-01 23:50+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/games/hangman.rb:311
+msgid "i'm not on that channel"
+msgstr "en ole kyseisellä kanavalla"
+
+#: data/rbot/plugins/games/hangman.rb:316
+msgid "there's already a hangman game in progress on the channel"
+msgstr "kanavalla on jo hirsipuu -peli meneillään"
+
+#: data/rbot/plugins/games/hangman.rb:320
+msgid "%{nick} has started a hangman -- join the fun!"
+msgstr "%{nick} aloitti hirsipuun -- liity hupiin!"
+
+#: data/rbot/plugins/games/hangman.rb:344
+msgid "oh well, the answer would've been %{answer}"
+msgstr "voi rähmä, oikea vastaus olisi ollut %{answer}"
+
+#: data/rbot/plugins/games/hangman.rb:351
+msgid "no ongoing game"
+msgstr "ei peliä menossa"
+
+#: data/rbot/plugins/games/hangman.rb:369
+msgid "you nailed it!"
+msgstr "oikein meni!"
+
+#: data/rbot/plugins/games/hangman.rb:371
+msgid "you've killed the poor guy :("
+msgstr "tapoit sen :("
+
+#: data/rbot/plugins/games/hangman.rb:391
+msgid "wondering what that means? try ´%{prefix}define´"
+msgstr "ihmetyttääkö sana? kokeile ´%{prefix}define´"
+
+#: data/rbot/plugins/games/hangman.rb:434
+msgid "you got %{score} points after %{games} games"
+msgstr "sinulla on %{score} pistettä %{games} pelin jälkeen"
+
+#: data/rbot/plugins/games/hangman.rb:439
+msgid "you haven't played hangman, how about playing it right now? :)"
+msgstr "et ole pelannut hirsipuuta, mitä jos pelaisit vaikka nyt? :)"
+
+#: data/rbot/plugins/games/hangman.rb:448
+msgid "%{nick} has %{score} points after %{games} games"
+msgstr "käyttäjällä %{nick} on %{score} pistettä %{games} pelin jälkeen"
+
+#: data/rbot/plugins/games/hangman.rb:454
+msgid "%{nick} hasn't played hangman :("
+msgstr "%{nick} ei ole pelannut hirsipuuta :("
+
+#: data/rbot/plugins/games/hangman.rb:466
+msgid "%{games} games have been played on %{channel}"
+msgstr "kanavalla %{channel} on pelattu %{games} peliä"
+
+msgid "go %{b}again%{b}?"
+msgstr "%{b}uudestaan?%{b}"
+
+msgid "hangman game plugin - topics: play, stop"
+msgstr "hirsipuu plugin - aiheet: play, stop"
+
+msgid "hangman play on <channel> with word <word> => use in private chat with the bot to start a game with custom word\n"
+msgstr "hangman play on <kanava> with word <sana> => käytä komentoa yksityiskeskustelussa jos haluat aloittaa pelin itse keksimälläsi sanalla\n"
+
+msgid "hangman play random [with [max|min] length [<|>|== <length>]] => hangman with a random word from %{site}\n"
+msgstr "hangman play random [with [max|min] length [<|>|== <pituus>]] => hirsipuu satunnaisella sanalla joka on noudettu osoitteesta %{site}\n"
+
+msgid "hangman play with wordlist <wordlist> => hangman with random word from <wordlist>"
+msgstr "hangman play with wordlist <sanalista> => hirsipuu satunnaisella sanalla joka on noudettu sanalistasta <sanalista>"
+
+msgid "hangman stop => quits the current game"
+msgstr "hangman stop => lopettaa nykyisen pelin"
+
+msgid "define => seeks a definition for the previous answer using google"
+msgstr "define => etsii googlesta määritelmän edelliselle oikealle vastaukselle"
