@@ -723,6 +723,20 @@ module ::Irc
       return retval
     end
 
+    # Returns a comma separated list except for the last element
+    # which is joined in with specified conjunction
+    #
+    def Utils.comma_list(words, options={})
+      defaults = { :join_with => ", ", :join_last_with => _(" and ") }
+      opts = defaults.merge(options)
+
+      if words.size < 2
+        words.last
+      else
+        [words[0..-2].join(opts[:join_with]), words.last].join(opts[:join_last_with])
+      end
+    end
+
   end
 end
 
