@@ -448,7 +448,7 @@ class MarkovPlugin < Plugin
   def random_markov(m, message)
     return unless should_talk
 
-    word1, word2 = message.split(/\s+/)
+    word1, word2 = clean_str(message).split(/\s+/)
     return unless word1 and word2
     line = generate_string(word1.intern, word2.intern)
     return unless line
@@ -494,7 +494,7 @@ class MarkovPlugin < Plugin
     return if ignore? m
 
     # in channel message, the kind we are interested in
-    message = clean_str m.plainmessage
+    message = m.plainmessage
 
     if m.action?
       message = "#{m.sourcenick} #{message}"
@@ -522,7 +522,7 @@ class MarkovPlugin < Plugin
 
   def learn_line(message)
     # debug "learning #{message.inspect}"
-    wordlist = message.split(/\s+/).map { |w| w.intern }
+    wordlist = clean_str(message).split(/\s+/).map { |w| w.intern }
     return unless wordlist.length >= 2
     word1, word2 = MARKER, MARKER
     wordlist << MARKER
