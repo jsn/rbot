@@ -271,7 +271,7 @@ class LastFmPlugin < Plugin
 
     common_artists = unless artists.empty?
       _(" and music they have in common includes: %{artists}") % {
-        :artists => artists.join(", ") }
+        :artists => Utils.comma_list(artists) }
     else
       nil
     end
@@ -590,7 +590,7 @@ class LastFmPlugin < Plugin
       m.reply reply % {
         :user => user,
         :total => friends.size,
-        :friends => friends.shuffle[0, num].join(", "),
+        :friends => Utils.comma_list(friends.shuffle[0, num]),
         :uri => "http://www.last.fm/user/#{CGI.escape user}/friends",
         :seemore => seemore
       }
@@ -610,7 +610,7 @@ class LastFmPlugin < Plugin
       m.reply reply % {
           :user => user,
           :total => loved.size,
-          :tracks => loved_prep.join(", "),
+          :tracks => Utils.comma_list(loved_prep),
           :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved",
           :seemore => seemore
         }
@@ -628,7 +628,7 @@ class LastFmPlugin < Plugin
       end
       m.reply reply % {
           :user    => user,
-          :nbrs    => nbrs.shuffle[0, num].join(", "),
+          :nbrs    => Utils.comma_list(nbrs.shuffle[0, num]),
           :uri     => "http://www.last.fm/user/#{CGI.escape user}/neighbours",
           :seemore => seemore
       }
@@ -659,7 +659,7 @@ class LastFmPlugin < Plugin
         m.reply _("%{user} hasn't played anything recently") % { :user => user }
       else
         m.reply _("%{user} has recently played %{tracks}") %
-          { :user => user, :tracks => tracks_prep.join(", ") }
+          { :user => user, :tracks => Utils.comma_list(tracks_prep) }
       end
     when :shouts
       shouts = doc.root.get_elements("shouts/shout")
