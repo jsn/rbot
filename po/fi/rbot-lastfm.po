@@ -200,8 +200,8 @@ msgid "is listening to"
 msgstr "kuuntelee"
 
 #: data/rbot/plugins/lastfm.rb:332
-msgid "%{u} %{v} \"%{t}\" by %{a} %{b}"
-msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\" [%{b}]"
+msgid "%{u} %{v} \"%{t}\" by %{a}%{b}"
+msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\"%{b}"
 
 #: data/rbot/plugins/lastfm.rb:334
 msgid "listened to"
@@ -209,7 +209,7 @@ msgstr "kuunteli"
 
 #: data/rbot/plugins/lastfm.rb:339
 msgid "%{u} %{v} \"%{t}\" by %{a} %{b} %{p}"
-msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\" [%{b}] %{p}"
+msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\"%{b} %{p}"
 
 #: data/rbot/plugins/lastfm.rb:342 data/rbot/plugins/lastfm.rb:574
 msgid "; see %{uri} for more"
@@ -356,3 +356,9 @@ msgstr "<%{author}> %{body}"
 #: data/rbot/plugins/lastfm.rb:697
 msgid "%{user} hasn't played anything in this period of time"
 msgstr "%{user} ei ole kuunnellut mitään tällä aikavälillä"
+
+msgid " [%{albumtext}, %{year}]"
+msgstr " [%{albumtext}, %{year}]"
+
+msgid " [%{albumtext}]"
+msgstr " [%{albumtext}]"
