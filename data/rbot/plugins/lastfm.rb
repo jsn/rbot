@@ -19,6 +19,8 @@ require 'rexml/document'
 require 'cgi'
 
 class ::LastFmEvent
+  attr_reader :attendance, :date
+
   def initialize(hash)
     @url = hash[:url]
     @date = hash[:date]
@@ -89,7 +91,7 @@ class LastFmPlugin < Plugin
     period = _(", where <period> can be one of: 3|6|12 months, a year")
     case (topic.intern rescue nil)
     when :event, :events
-      _("lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}") % {:d => @bot.config['lastfm.default_events'], :m => @bot.config['lastfm.max_events']}
+      _("lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}. Append 'sort by <what> [in <order> order]' to sort events. Events can by sorted by attendance or date (default) in ascending or descending order.") % {:d => @bot.config['lastfm.default_events'], :m => @bot.config['lastfm.max_events']}
     when :artist
       _("lastfm artist <name> => show information on artist <name> from last.fm")
     when :album
@@ -168,6 +170,10 @@ class LastFmPlugin < Plugin
     num = params[:num] || @bot.config['lastfm.default_events']
     num = num.to_i.clip(1, @bot.config['lastfm.max_events'])
 
+    sort_by    = params[:sort_by] || :date
+    sort_order = params[:sort_order]
+    sort_order = sort_order.to_sym unless sort_order.nil?
+
     location = params[:location]
     artist = params[:who]
     venue = params[:venue]
@@ -222,6 +228,18 @@ class LastFmPlugin < Plugin
       m.reply emptymsg
       return
     end
+
+    # sort order when sorted by date is ascending by default
+    # and descending when sorted by attendance
+    case sort_by.to_sym
+    when :attendance
+      events = events.sort_by { |e| e.attendance }.reverse
+      events.reverse! if [:ascending, :asc].include? sort_order
+    when :date
+      events = events.sort_by { |e| e.date }
+      events.reverse! if [:descending, :desc].include? sort_order
+    end
+
     events[0...num].each { |event|
       disp_events << event.to_s
     }
@@ -715,10 +733,10 @@ class LastFmPlugin < Plugin
 end
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm [:num] event[s] in *location', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] by *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] at *venue', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] [for] *who', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] in *location [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] by *who [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] at *venue [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] [for] *who [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
 plugin.map 'lastfm track *track', :action => :find_track, :thread => true
