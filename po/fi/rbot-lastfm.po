@@ -306,8 +306,8 @@ msgid "%{user} has %{total} friends: %{friends}"
 msgstr "käyttäjällä %{user} on %{total} kaveria: %{friends}"
 
 #: data/rbot/plugins/lastfm.rb:586
-msgid "%{user} has %{total} friends, including %{friends}"
-msgstr "käyttäjällä %{user} on %{total} kaveria, mm. %{friends}"
+msgid "%{user} has %{total} friends, including %{friends}%{seemore}"
+msgstr "käyttäjällä %{user} on %{total} kaveria, mm. %{friends}%{seemore}"
 
 #: data/rbot/plugins/lastfm.rb:602
 msgid "%{user} has not loved any tracks"
@@ -318,8 +318,8 @@ msgid "%{user} has loved %{total} tracks: %{tracks}"
 msgstr "%{user} on rakastunut %{total}:een kappaleeseen: "
 
 #: data/rbot/plugins/lastfm.rb:606
-msgid "%{user} has loved %{total} tracks, including %{tracks}"
-msgstr "%{user} on rakastunut %{total}:een kappaleeseen, mm. %{tracks}"
+msgid "%{user} has loved %{total} tracks, including %{tracks}%{seemore}"
+msgstr "%{user} on rakastunut %{total}:een kappaleeseen, mm. %{tracks}%{seemore}"
 
 #: data/rbot/plugins/lastfm.rb:621
 msgid "no one seems to share %{user}'s musical taste"
@@ -330,8 +330,8 @@ msgid "%{user}'s musical neighbours are %{nbrs}"
 msgstr "käyttäjän %{user} musikaalisia naapureita ovat %{nbrs}"
 
 #: data/rbot/plugins/lastfm.rb:625
-msgid "%{user}'s musical neighbours include %{nbrs}"
-msgstr "käyttäjän %{user} musikaalisia naapureita ovat mm. %{nbrs}"
+msgid "%{user}'s musical neighbours include %{nbrs}%{seemore}"
+msgstr "käyttäjän %{user} musikaalisia naapureita ovat mm. %{nbrs}%{seemore}"
 
 #: data/rbot/plugins/lastfm.rb:651
 msgid " or more"
