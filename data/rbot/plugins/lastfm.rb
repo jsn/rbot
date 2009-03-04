@@ -315,10 +315,15 @@ class LastFmPlugin < Plugin
     artist = first.elements["artist"].text
     track = first.elements["name"].text
     albumtxt = first.elements["album"].text
-    album = ""
-    if albumtxt
+    album = if albumtxt
       year = get_album(artist, albumtxt)[2]
-      album = "[#{albumtxt}, #{year}]" if year
+      if year
+        "[#{albumtxt}, #{year}]"
+      else
+        "[#{albumtxt}]"
+      end
+    else
+      nil
     end
     past = nil
     date = XPath.first(first, "//date")
