@@ -11,15 +11,15 @@ msgstr " ja %{n} muuta..."
 msgid ", where <period> can be one of: 3|6|12 months, a year"
 msgstr ", jossa <aikaväli> voi olla: 3|6|12 months, a year"
 
-#: data/rbot/plugins/lastfm.rb:92
 msgid ""
-"lastfm [<num>] events in <location> => show information on events in or near "
-"<location>. lastfm [<num>] events by <artist/group> => show information on "
-"events by <artist/group>. The number of events <num> that can be displayed "
-"is optional, defaults to %{d} and cannot be higher than %{m}"
+"lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. lastfm [<num>] events at <venue> => show information on events at specific <venue>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}. Append 'sort by <what> [in <order> order]' to sort events. Events can be sorted by attendance or date (default) in ascending or descending order."
 msgstr "lastfm [<määrä>] events in <sijainti> => näytä tietoja tapahtumista sijainnin "
 "<sijainti> lähellä. lastfm [<määrä>] events by <artisti/ryhmä> => näytä tietoja "
-"artistin tai ryhmän tapahtumista. Tapahtumia näytetään <määrä> määrä."
+"artistin tai ryhmän tapahtumista. lastfm [<määrä>] events at <paikka> => näytä tietoja "
+"tapahtumista tietyssä paikassa, esim: Hartwall Areena. Tapahtumia näytetään <määrä> määrä. "
+"Lisää loppuun 'sort by <asia> [in <järjestys> order] jos haluat järjestää tapahtumia. "
+"Tapahtumia voi järjestää osallistujien (= attendance) tai päivämäärän (= date) mukaan, "
+"nousevassa (= ascending) tai laskevassa (= descending) järjestyksessä."
 
 #: data/rbot/plugins/lastfm.rb:94
 msgid "lastfm artist <name> => show information on artist <name> from last.fm"
