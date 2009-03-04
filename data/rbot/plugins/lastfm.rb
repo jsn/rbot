@@ -318,9 +318,9 @@ class LastFmPlugin < Plugin
     album = if albumtxt
       year = get_album(artist, albumtxt)[2]
       if year
-        "[#{albumtxt}, #{year}]"
+        _(" [%{albumtext}, %{year}]") % { :albumtext => albumtxt, :year => year }
       else
-        "[#{albumtxt}]"
+        _(" [%{albumtext}]") % { :albumtext => albumtxt }
       end
     else
       nil
@@ -336,14 +336,14 @@ class LastFmPlugin < Plugin
        if @registry.has_key? "#{m.sourcenick}_verb_present"
          verb = @registry["#{m.sourcenick}_verb_present"]
        end
-       reply = _("%{u} %{v} \"%{t}\" by %{a} %{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
+       reply = _("%{u} %{v} \"%{t}\" by %{a}%{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
     else
       verb = _("listened to")
        if @registry.has_key? "#{m.sourcenick}_verb_past"
          verb = @registry["#{m.sourcenick}_verb_past"]
        end
       ago = Utils.timeago(past)
-      reply = _("%{u} %{v} \"%{t}\" by %{a} %{b} %{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
+      reply = _("%{u} %{v} \"%{t}\" by %{a}%{b} %{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
     end
 
     reply << _("; see %{uri} for more") % { :uri => "http://www.last.fm/user/#{CGI.escape user}"}
