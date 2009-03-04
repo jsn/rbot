@@ -91,7 +91,7 @@ class LastFmPlugin < Plugin
     period = _(", where <period> can be one of: 3|6|12 months, a year")
     case (topic.intern rescue nil)
     when :event, :events
-      _("lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}. Append 'sort by <what> [in <order> order]' to sort events. Events can by sorted by attendance or date (default) in ascending or descending order.") % {:d => @bot.config['lastfm.default_events'], :m => @bot.config['lastfm.max_events']}
+      _("lastfm [<num>] events in <location> => show information on events in or near <location>. lastfm [<num>] events by <artist/group> => show information on events by <artist/group>. lastfm [<num>] events at <venue> => show information on events at specific <venue>. The number of events <num> that can be displayed is optional, defaults to %{d} and cannot be higher than %{m}. Append 'sort by <what> [in <order> order]' to sort events. Events can be sorted by attendance or date (default) in ascending or descending order.") % {:d => @bot.config['lastfm.default_events'], :m => @bot.config['lastfm.max_events']}
     when :artist
       _("lastfm artist <name> => show information on artist <name> from last.fm")
     when :album
