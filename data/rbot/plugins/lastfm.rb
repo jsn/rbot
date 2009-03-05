@@ -637,8 +637,7 @@ class LastFmPlugin < Plugin
         :user => user,
         :total => friends.size,
         :friends => Utils.comma_list(friends.shuffle[0, num]),
-        :uri => "http://www.last.fm/user/#{CGI.escape user}/friends",
-        :seemore => seemore
+        :seemore => seemore % { :uri => "http://www.last.fm/user/#{CGI.escape user}/friends" }
       }
     when :lovedtracks
       loved = doc.root.get_elements("lovedtracks/track").map do |track|
@@ -653,12 +652,12 @@ class LastFmPlugin < Plugin
       else
         reply = _("%{user} has loved %{total} tracks, including %{tracks}%{seemore}")
       end
+
       m.reply reply % {
           :user => user,
           :total => loved.size,
           :tracks => Utils.comma_list(loved_prep),
-          :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved",
-          :seemore => seemore
+          :seemore => seemore % { :uri => "http://www.last.fm/user/#{CGI.escape user}/library/loved" }
         }
     when :neighbours
       nbrs = doc.root.get_elements("neighbours/user").map do |u|
@@ -675,8 +674,7 @@ class LastFmPlugin < Plugin
       m.reply reply % {
           :user    => user,
           :nbrs    => Utils.comma_list(nbrs.shuffle[0, num]),
-          :uri     => "http://www.last.fm/user/#{CGI.escape user}/neighbours",
-          :seemore => seemore
+          :seemore => seemore % { :uri => "http://www.last.fm/user/#{CGI.escape user}/neighbours" }
       }
     when :recenttracks
       tracks = doc.root.get_elements("recenttracks/track").map do |track|
