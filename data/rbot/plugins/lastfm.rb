@@ -377,14 +377,14 @@ class LastFmPlugin < Plugin
        if @registry.has_key? "#{m.sourcenick}_verb_present"
          verb = @registry["#{m.sourcenick}_verb_present"]
        end
-       reply = _("%{u} %{v} \"%{t}\" by %{a}%{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album}
+       reply = _("%{u} %{v} \"%{t}\" by %{a}%{b}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :bold => Bold}
     else
       verb = _("listened to")
        if @registry.has_key? "#{m.sourcenick}_verb_past"
          verb = @registry["#{m.sourcenick}_verb_past"]
        end
       ago = Utils.timeago(past)
-      reply = _("%{u} %{v} \"%{t}\" by %{a}%{b} %{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago}
+      reply = _("%{u} %{v} \"%{t}\" by %{a}%{b} %{p}") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago, :bold => Bold}
     end
 
     reply << _("; see %{uri} for more") % { :uri => "http://www.last.fm/user/#{CGI.escape user}"}
