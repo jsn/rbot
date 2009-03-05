@@ -208,7 +208,7 @@ msgid "listened to"
 msgstr "kuunteli"
 
 #: data/rbot/plugins/lastfm.rb:339
-msgid "%{u} %{v} \"%{t}\" by %{a} %{b} %{p}"
+msgid "%{u} %{v} \"%{t}\" by %{a}%{b} %{p}"
 msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\"%{b} %{p}"
 
 #: data/rbot/plugins/lastfm.rb:342 data/rbot/plugins/lastfm.rb:574
