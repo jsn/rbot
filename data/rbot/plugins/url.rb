@@ -31,6 +31,9 @@ class UrlPlugin < Plugin
   Config.register Config::ArrayValue.new('url.only_on_channels',
     :desc => "Show link info only on these channels",
     :default => [])
+  Config.register Config::ArrayValue.new('url.ignore',
+    :desc => "Don't show link info for urls from users represented as hostmasks on this list. Useful for ignoring other bots, for example.",
+    :default => [])
 
   def initialize
     super
@@ -125,14 +128,19 @@ class UrlPlugin < Plugin
   def handle_urls(m, params={})
     opts = {
       :display_info => @bot.config['url.display_link_info'],
-      :channels => @bot.config['url.only_on_channels']
+      :channels => @bot.config['url.only_on_channels'],
+      :ignore => @bot.config['url.ignore']
     }.merge params
     urls = opts[:urls]
     display_info= opts[:display_info]
     channels = opts[:channels]
+    ignore = opts[:ignore]
+
     unless channels.empty?
       return unless channels.map { |c| c.downcase }.include?(m.channel.downcase)
     end
+
+    ignore.each { |u| return if m.source.matches?(u) }
 
     return if urls.empty?
     debug "found urls #{urls.inspect}"
