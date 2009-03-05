@@ -733,10 +733,10 @@ class LastFmPlugin < Plugin
 end
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm [:num] event[s] in *location [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] by *who [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] at *venue [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
-plugin.map 'lastfm [:num] event[s] [for] *who [sort by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] in *location [sort[ed] by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] by *who [sort[ed] by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] at *venue [sort[ed] by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
+plugin.map 'lastfm [:num] event[s] [for] *who [sort[ed] by :sort_by] [in] [:sort_order] [order]', :action => :find_events, :requirements => { :num => /\d+/ }, :thread => true
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
 plugin.map 'lastfm track *track', :action => :find_track, :thread => true
