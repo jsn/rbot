@@ -183,7 +183,7 @@ msgstr "käyttäjien %{a} ja %{b} musikaalinen yhteensopivuus on %{bold}%{r}%{bo
 
 #: data/rbot/plugins/lastfm.rb:279
 msgid " and music they have in common includes: %{artists}"
-msgstr ", artisteja joita he molemmat kuuntelevat ovat mm. %{artists}"
+msgstr ", artisteja joita molemmat kuuntelevat ovat mm. %{artists}"
 
 #: data/rbot/plugins/lastfm.rb:297
 msgid ""
@@ -201,7 +201,7 @@ msgstr "kuuntelee"
 
 #: data/rbot/plugins/lastfm.rb:332
 msgid "%{u} %{v} \"%{t}\" by %{a}%{b}"
-msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\"%{b}"
+msgstr "%{u} %{v} artistin %{bold}%{a}%{bold} kappaletta \"%{bold}%{t}%{bold}\"%{b}"
 
 #: data/rbot/plugins/lastfm.rb:334
 msgid "listened to"
@@ -209,7 +209,7 @@ msgstr "kuunteli"
 
 #: data/rbot/plugins/lastfm.rb:339
 msgid "%{u} %{v} \"%{t}\" by %{a}%{b} %{p}"
-msgstr "%{u} %{v} artistin %{a} kappaletta \"%{t}\"%{b} %{p}"
+msgstr "%{u} %{v} artistin %{bold}%{a}%{bold} kappaletta \"%{bold}%{t}%{bold}\"%{b} %{p}"
 
 #: data/rbot/plugins/lastfm.rb:342 data/rbot/plugins/lastfm.rb:574
 msgid "; see %{uri} for more"
@@ -231,7 +231,7 @@ msgstr "%{u}%{t}%{u}"
 msgid ""
 "%{b}%{a}%{b} <%{u}> has been played %{b}%{c}%{b} times and is being listened "
 "to by %{b}%{l}%{b} people"
-msgstr "artistia %{b}%{a}%{b} <%{u}> on kuunneltu %{b}%{c}%{b} kertaa ja sillä on %{l} kuuntelijaa"
+msgstr "artistia %{b}%{a}%{b} <%{u}> on kuunneltu %{b}%{c}%{b} kertaa ja sillä on %{b}%{l}%{b} kuuntelijaa"
 
 #: data/rbot/plugins/lastfm.rb:375
 msgid ". Tagged as: %{t}"
@@ -315,7 +315,7 @@ msgstr "%{user} ei ole rakastunut yhteenkään kappaleeseen"
 
 #: data/rbot/plugins/lastfm.rb:604
 msgid "%{user} has loved %{total} tracks: %{tracks}"
-msgstr "%{user} on rakastunut %{total}:een kappaleeseen: "
+msgstr "%{user} on rakastunut %{total}:een kappaleeseen: %{tracks}"
 
 #: data/rbot/plugins/lastfm.rb:606
 msgid "%{user} has loved %{total} tracks, including %{tracks}%{seemore}"
