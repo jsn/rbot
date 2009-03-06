@@ -16,15 +16,6 @@ require 'set'
 begin
   require 'htmlentities'
 rescue LoadError
-  gems = nil
-  begin
-    gems = require 'rubygems'
-  rescue LoadError
-    gems = false
-  end
-  if gems
-    retry
-  else
     module ::Irc
       module Utils
         UNESCAPE_TABLE = {
@@ -108,7 +99,6 @@ rescue LoadError
         }
       end
     end
-  end
 end
 
 begin
@@ -121,15 +111,6 @@ begin
     end
   end
 rescue LoadError
-  gems = nil
-  begin
-    gems = require 'rubygems'
-  rescue LoadError
-    gems = false
-  end
-  if gems
-    retry
-  else
     module ::Irc
       module Utils
         # Some regular expressions to manage HTML data
@@ -150,7 +131,6 @@ rescue LoadError
         AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?\/?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?\/?>/im
       end
     end
-  end
 end
 
 module ::Irc

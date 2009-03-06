@@ -135,6 +135,12 @@ $interrupted = 0
 
 # these first
 require 'rbot/rbotconfig'
+begin
+  require 'rubygems'
+rescue LoadError
+  log "rubygems unavailable"
+end
+
 require 'rbot/load-gettext'
 require 'rbot/config'
 require 'rbot/config-compat'
