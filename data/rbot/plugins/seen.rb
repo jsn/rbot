@@ -10,10 +10,10 @@ define_structure :Saw, :nick, :time, :type, :where, :message
 class SeenPlugin < Plugin
   Config.register Config::IntegerValue.new('seen.max_results',
     :default => 3, :validate => Proc.new{|v| v >= 0},
-    :desc => "Maximum number of seen users to return in search (0 = no limit).")
+    :desc => _("Maximum number of seen users to return in search (0 = no limit)."))
 
   def help(plugin, topic="")
-    "seen <nick> => have you seen, or when did you last see <nick>"
+    _("seen <nick> => have you seen, or when did you last see <nick>")
   end
 
   def privmsg(m)
@@ -37,7 +37,7 @@ class SeenPlugin < Plugin
         end
       }
 
-      m.reply "nope!" if num_matched.zero?
+      m.reply _("nope!") if num_matched.zero?
     end
   end
 
@@ -81,61 +81,85 @@ class SeenPlugin < Plugin
       reg.last
     end
 
-    ret = "#{saw.nick} was last seen "
+    before = reg.first
+
+    formats = {
+      :normal      => _("%{nick} was last seen %{when}, %{doing}"),
+      :with_before => _("%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}")
+    }
+
+    if [:PART, :QUIT].include?(saw.type.to_sym) &&
+       [:PUBLIC, :ACTION].include?(before.type.to_sym)
+      did_before = case before.type.to_sym
+      when :PUBLIC
+        _("saying \"%{message}\"")
+      when :ACTION
+        _("doing *%{message}*")
+      end % {
+        :nick => saw.nick,
+        :message => before.message
+      }
+
+      format = :with_before
+
+      time_diff = saw.time - before.time
+      if time_diff < 300
+        time_before = _("a moment")
+      elsif time_diff < 3600
+        time_before = _("a while")
+      else
+        format = :normal
+      end
+    else
+      format = :normal
+    end
+
+    nick = saw.nick
     ago = Time.new - saw.time
 
     if (ago.to_i == 0)
-      ret << "just now, "
+      time = _("just now")
     else
-      ret << Utils.secs_to_string(ago) + " ago, "
+      time = _("%{time} ago") % { :time => Utils.secs_to_string(ago) }
     end
 
-    case saw.type.to_sym
+    doing = case saw.type.to_sym
     when :PUBLIC
-      ret << "saying \"#{saw.message}\""
+      _("saying \"%{message}\"")
     when :ACTION
-      ret << "doing #{saw.nick} #{saw.message}"
+      _("doing %{nick} %{message}")
     when :NICK
-      ret << "changing nick from #{saw.nick} to #{saw.message}"
+      _("changing nick from %{nick} to %{message}")
     when :PART
-      ret << "leaving #{saw.where}"
-      ret << " (#{saw.message})" unless saw.message.empty?
-    when :JOIN
-      ret << "joining #{saw.where}"
-    when :QUIT
-      ret << "quitting IRC (#{saw.message})"
-    when :TOPIC
-      ret << "changing the topic of #{saw.where} to \"#{saw.message}\""
-    end
-
-    case saw.type.to_sym
-    when :PART, :QUIT
-      before = reg.first
-      if before.type == "PUBLIC" || before.type == "ACTION"
-        time_diff = saw.time - before.time
-        if time_diff < 300
-          time = "a moment"
-        elsif time_diff < 3600
-          time = "a while"
-        else
-          return ret
-        end
-
-        ret << ' and %{time} before' % { :time => time }
-
-        if before.type == "PUBLIC"
-          ret << ' saying "%{message}"' % {
-            :message => before.message
-          }
-        elsif before.type == "ACTION"
-          ret << ' doing *%{message}*' % {
-            :nick => saw.nick,
-            :message => before.message
-          }
-        end
+      if saw.message.empty?
+        _("leaving %{where}")
+      else
+        _("leaving %{where} (%{message})")
       end
+    when :JOIN
+      _("joining %{where}")
+    when :QUIT
+      _("quitting IRC (%{message})")
+    when :TOPIC
+      _("changing the topic of %{where} to \"%{message}\"")
+    end % { :message => saw.message, :where => saw.where, :nick => saw.nick }
+
+    case format
+    when :normal
+      formats[:normal] % {
+        :nick  => saw.nick,
+        :when  => time,
+        :doing => doing,
+      }
+    when :with_before
+      formats[:with_before] % {
+        :nick  => saw.nick,
+        :when  => time,
+        :doing => doing,
+        :time  => time_before,
+        :did_before => did_before
+      }
     end
-    return ret
   end
 
   def store(m, saw)
