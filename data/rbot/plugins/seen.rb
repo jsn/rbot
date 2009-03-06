@@ -127,7 +127,7 @@ class SeenPlugin < Plugin
     when :PUBLIC
       _("saying \"%{message}\"")
     when :ACTION
-      _("doing %{nick} %{message}")
+      _("doing *%{message}*")
     when :NICK
       _("changing nick from %{nick} to %{message}")
     when :PART
