@@ -21,6 +21,19 @@
 
 require 'singleton'
 
+# The following monkeypatch is to fix a bug in Singleton where marshaling would
+# fail when trying to restore a marshaled Singleton due to _load being declared
+# private.
+module ::Singleton
+  public :_dump
+end
+
+class << Singleton
+  module SingletonClassMethods
+    public :_load
+  end
+end
+
 class Object
 
   # We extend the Object class with a method that
