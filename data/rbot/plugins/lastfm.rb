@@ -184,6 +184,10 @@ class LastFmPlugin < Plugin
       emptymsg = _("no events found in %{location}") % {:location => location.to_s}
     elsif venue
       venues = search_venue_by(:name => venue.to_s, :limit => 1)
+      if venues.empty?
+        m.reply _("no venue found matching %{venue}") % {:venue => venue.to_s}
+        return
+      end
       venue  = venues.first
       uri = "#{APIURL}method=venue.getevents&venue=#{venue.id}"
     elsif artist
