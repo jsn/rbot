@@ -192,7 +192,16 @@ class LastFmPlugin < Plugin
       uri = "#{APIURL}method=geo.getevents&location=#{CGI.escape location.to_s}"
       emptymsg = _("no events found in %{location}") % {:location => location.to_s}
     elsif venue
-      venues = search_venue_by(:name => venue.to_s, :limit => 1)
+      begin
+        venues = search_venue_by(:name => venue.to_s, :limit => 1)
+      rescue Exception => e
+        error e
+        m.reply _("an error occurred looking for venue %{venue}: %{e}") % {
+          :venue => venue.to_s,
+          :e => e.message
+        }
+      end
+
       if venues.empty?
         m.reply _("no venue found matching %{venue}") % {:venue => venue.to_s}
         return
