@@ -514,7 +514,9 @@ class Bot
         s = "#{not_needed ? "(?:" : ""}#{whites}(#{sub})#{ not_needed ? ")?" : ""}"
       }
       # debug "Replaced dyns: #{rx.inspect}"
-      rx.gsub!(/((?:\\ )*)\\\[/, "(?:\\1")
+      rx.gsub!(/((?:\\ )*)((?:\\\[)+)/, '\2\1')
+      # debug "Corrected optionals spacing: #{rx.inspect}"
+      rx.gsub!(/\\\[/, "(?:")
       rx.gsub!(/\\\]/, ")?")
       # debug "Delimited optionals: #{rx.inspect}"
       rx.gsub!(/(?:\\ )+/, "\\s+")
