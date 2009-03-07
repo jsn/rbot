@@ -389,7 +389,7 @@ class HangmanPlugin < Plugin
         end
 
         m.reply _("%{sentence} %{again} %{scores}") % {
-          :sentence => sentence, :again => again, :scores => scores
+          :sentence => sentence, :again => again, :scores => scores.join(' ')
         }, :nick => true
 
         if rand(5).zero?
