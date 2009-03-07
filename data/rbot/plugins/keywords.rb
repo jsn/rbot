@@ -325,6 +325,12 @@ class Keywords < Plugin
     case plugin
     when /keyword/
       case topic
+      when 'export'
+        'keyword export => exports definitions to keyword_factoids.rbot'
+      when 'stats'
+        'keyword stats => show statistics about static facts'
+      when 'wipe'
+        'keyword wipe <keyword> => forgets everything about a keyword'
       when 'lookup'
         'keyword [lookup] <keyword> => look up the definition for a keyword; writing "lookup" is optional'
       when 'set'
@@ -348,7 +354,7 @@ class Keywords < Plugin
       when '<topic>'
         '<topic> => respond by setting the topic to the rest of the definition'
       else
-        'keyword module (fact learning and regurgitation) topics: lookup, set, forget, tell, search, listen, address, <reply>, <action>, <who>, <topic>'
+        'keyword module (fact learning and regurgitation) topics: lookup, set, forget, tell, search, listen, address, stats, export, wipe, <reply>, <action>, <who>, <topic>'
       end
     when "forget"
       'forget <keyword> => forget a keyword'
