@@ -50,6 +50,15 @@ class ::LastFmEvent
 end
 
 define_structure :LastFmVenue, :id, :city, :street, :postal, :country, :name, :url, :lat, :long
+class ::Struct::LastFmVenue
+  def to_s
+    str = self.name.dup
+    if self.country
+      str << " (" << [self.city, self.country].compact.join(", ") << ")"
+    end
+    str
+  end
+end
 
 class LastFmPlugin < Plugin
   include REXML
@@ -190,6 +199,7 @@ class LastFmPlugin < Plugin
       end
       venue  = venues.first
       uri = "#{APIURL}method=venue.getevents&venue=#{venue.id}"
+      emptymsg = _("no events found at %{venue}") % {:venue => venue.to_s}
     elsif artist
       uri = "#{APIURL}method=artist.getevents&artist=#{CGI.escape artist.to_s}"
       emptymsg = _("no events found by %{artist}") % {:artist => artist.to_s}
