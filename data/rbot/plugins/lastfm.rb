@@ -757,15 +757,18 @@ end
 
 event_map_options = {
  :action => :find_events,
- :requirements => { :num => /\d+/ },
+ :requirements => {
+  :num => /\d+/,
+  :sort_order => /(?:asc|desc)(?:ending)?/
+ },
  :thread => true
 }
 
 plugin = LastFmPlugin.new
-plugin.map 'lastfm [:num] event[s] in *location [sort[ed] by :sort_by] [in] [:sort_order] [order]', event_map_options.dup
-plugin.map 'lastfm [:num] event[s] by *who [sort[ed] by :sort_by] [in] [:sort_order] [order]', event_map_options.dup
-plugin.map 'lastfm [:num] event[s] at *venue [sort[ed] by :sort_by] [in] [:sort_order] [order]', event_map_options.dup
-plugin.map 'lastfm [:num] event[s] [for] *who [sort[ed] by :sort_by] [in] [:sort_order] [order]', event_map_options.dup
+plugin.map 'lastfm [:num] event[s] in *location [sort[ed] by :sort_by] [[in] :sort_order [order]]', event_map_options.dup
+plugin.map 'lastfm [:num] event[s] by *who [sort[ed] by :sort_by] [[in] :sort_order [order]]', event_map_options.dup
+plugin.map 'lastfm [:num] event[s] at *venue [sort[ed] by :sort_by] [[in] :sort_order [order]]', event_map_options.dup
+plugin.map 'lastfm [:num] event[s] [for] *who [sort[ed] by :sort_by] [[in] :sort_order [order]]', event_map_options.dup
 plugin.map 'lastfm artist *artist', :action => :find_artist, :thread => true
 plugin.map 'lastfm album *album [by *artist]', :action => :find_album
 plugin.map 'lastfm track *track', :action => :find_track, :thread => true
