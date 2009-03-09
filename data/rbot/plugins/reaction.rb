@@ -263,18 +263,21 @@ class ReactionPlugin < Plugin
     reply = wanted.pick_reply
     debug "picked #{reply}"
     return unless reply
-    args = reply.apply(subs)
-    if args[0] == :cmd
+    act, arg = reply.apply(subs)
+    case act
+    when :cmd
       begin
         # Pass the new message back to the bot.
         # FIXME Maybe we should do it the alias way, only calling
         # @bot.plugins.privmsg() ?
-        fake_message(@bot.nick+": "+args[1], :from => m)
+        fake_message(@bot.nick+": "+arg, :from => m)
       rescue RecurseTooDeep => e
         error e
       end
+    when :reply
+      m.plainreply arg
     else
-      m.__send__(*args)
+      m.__send__(act, arg)
     end
   end
 
