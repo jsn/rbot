@@ -69,7 +69,9 @@ class ::Reaction
       @trigger << Regexp.new(rex, true)
     else
       rex.sub!(/^(["'])(.*)\1$/, '\2')
-      @trigger << Regexp.new(/\b#{Regexp.escape(rex)}(?:\b|$)/ui)
+      prepend = ( rex =~ /^\w/ ? '(?:\b)' : '')
+      append = ( rex =~ /\w$/ ? '(?:\b|$)' : '')
+      @trigger << Regexp.new(/#{prepend}#{Regexp.escape(rex)}#{append}/ui)
     end
   end
 
