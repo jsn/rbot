@@ -366,8 +366,11 @@ class RSSFeedsPlugin < Plugin
       make_stream(line1, nil, s, :author => author)
     }
     @bot.register_filter(:forum, @outkey) { |s|
-      line1 = "%{handle}%{date}%{title}%{at}%{link}"
-      make_stream(line1, nil, s)
+      author = s[:author] ? (s[:author] + " ") : ""
+      abt = s[:category] ? "on #{s[:category]} " : ""
+      line1 = "%{handle}%{date}%{author}posted %{abt}at %{link}"
+      line2 = "%{handle}%{title} - %{desc}"
+      make_stream(line1, line2, s, :author => author, :abt => abt)
     }
     @bot.register_filter(:wiki, @outkey) { |s|
       line1 = "%{handle}%{date}%{title}%{at}%{link}"
