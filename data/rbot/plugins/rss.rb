@@ -332,85 +332,41 @@ class RSSFeedsPlugin < Plugin
     DataStream.new([line1, line2].compact.join("\n") % ss, ss)
   end
 
-  # Define default RSS filters
-  #
-  # TODO: load personal ones
+  # Auxiliary method used to define rss output filters
+  def rss_type(key, &block)
+    @bot.register_filter(key, @outkey, &block)
+  end
+
+  # Define default output filters (rss types), and load custom ones.
+  # Custom filters are looked for in the plugin's default filter locations
+  # and in rss/types under botclass.
+  # Preferably, the rss_type method should be used in these files, e.g.:
+  #   rss_type :my_type do |s|
+  #     line1 = "%{handle} and some %{author} info"
+  #     make_stream(line1, nil, s)
+  #   end
+  # to define the new type 'my_type'
   def define_filters
-    @outkey = :"rss.out"
-    @bot.register_filter(:headlines, @outkey) { |s|
-      line1 = (s[:handle].empty? ? "%{date}" : "%{handle}") << "%{title}"
+    @outkey ||= :"rss.out"
+
+    # Define an HTML info filter
+    @bot.register_filter(:rss, :htmlinfo) { |s| htmlinfo_filter(s) }
+    # This is the output format used by the input filter
+    rss_type :htmlinfo do |s|
+      line1 = "%{title}%{at}%{link}"
       make_stream(line1, nil, s)
-    }
-    @bot.register_filter(:blog, @outkey) { |s|
-      author = s[:author] ? (s[:author] + " ") : ""
-      abt = s[:category] ? "about #{s[:category]} " : ""
-      line1 = "%{handle}%{date}%{author}blogged %{abt}at %{link}"
-      line2 = "%{handle}%{title} - %{desc}"
-      make_stream(line1, line2, s, :author => author, :abt => abt)
-    }
-    @bot.register_filter(:photoblog, @outkey) { |s|
-      author = s[:author] ? (s[:author] + " ") : ""
-      abt = s[:category] ? "under #{s[:category]} " : ""
-      line1 = "%{handle}%{date}%{author}added an image %{abt}at %{link}"
-      line2 = "%{handle}%{title} - %{desc}"
-      make_stream(line1, line2, s, :author => author, :abt => abt)
-    }
-    @bot.register_filter(:news, @outkey) { |s|
-      line1 = "%{handle}%{date}%{title}%{at}%{link}" % s
-      line2 = "%{handle}%{date}%{desc}" % s
-      make_stream(line1, line2, s)
-    }
-    @bot.register_filter(:git, @outkey) { |s|
-      author = s[:author].sub(/@\S+?\s*>/, "@...>") + " " if s[:author]
-      line1 = "%{handle}%{date}%{author}committed %{title}%{at}%{link}"
-      make_stream(line1, nil, s, :author => author)
-    }
-    @bot.register_filter(:forum, @outkey) { |s|
-      author = s[:author] ? (s[:author] + " ") : ""
-      abt = s[:category] ? "on #{s[:category]} " : ""
-      line1 = "%{handle}%{date}%{author}posted %{abt}at %{link}"
-      line2 = "%{handle}%{title} - %{desc}"
-      make_stream(line1, line2, s, :author => author, :abt => abt)
-    }
-    @bot.register_filter(:wiki, @outkey) { |s|
-      line1 = "%{handle}%{date}%{title}%{at}%{link}"
-      line1 << "has been edited by %{author}. %{desc}"
-      make_stream(line1, nil, s)
-    }
-    @bot.register_filter(:gmane, @outkey) { |s|
-      line1 = "%{handle}%{date}Message %{title} sent by %{author}. %{desc}"
-      make_stream(line1, nil, s)
-    }
-    @bot.register_filter(:trac, @outkey) { |s|
-      author = s[:author].sub(/@\S+?\s*>/, "@...>") + ": " if s[:author]
-      line1 = "%{handle}%{date}%{author}%{title}%{at}%{link}"
-      line2 = nil
-      unless s[:item].title =~ /^(?:Changeset \[(?:[\da-f]+)\]|\(git commit\))/
-        line2 = "%{handle}%{date}%{desc}"
-      end
-      make_stream(line1, line2, s, :author => author)
-    }
-    @bot.register_filter(:"/.", @outkey) { |s|
-      dept = "(from the #{s[:item].slash_department} dept) " rescue nil
-      sec = " in section #{s[:item].slash_section}" rescue nil
-      line1 = "%{handle}%{date}%{dept}%{title}%{at}%{link} "
-      line1 << "(posted by %{author}%{sec})"
-      make_stream(line1, nil, s, :dept => dept, :sec => sec)
-    }
-    @bot.register_filter(:default, @outkey) { |s|
+    end
+
+    # the default filter
+    rss_type :default do |s|
       line1 = "%{handle}%{date}%{title}%{at}%{link}"
       line1 << " (by %{author})" if s[:author]
       make_stream(line1, nil, s)
-    }
+    end
 
-    # Define an HTML info filter too
-    @bot.register_filter(:rss, :htmlinfo) { |s| htmlinfo_filter(s) }
-
-    # This is the output format used by the input filter
-    @bot.register_filter(:htmlinfo, @outkey) { |s|
-      line1 = "%{title}%{at}%{link}"
-      make_stream(line1, nil, s)
-    }
+    @user_types ||= datafile 'types.rb'
+    load_filters
+    load_filters :path => @user_types
   end
 
   FEED_NS = %r{xmlns.*http://(purl\.org/rss|www.w3c.org/1999/02/22-rdf)}
