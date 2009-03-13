@@ -148,6 +148,53 @@ module ::Irc
 
       register_filter(:identity) { |stream| stream }
     end
+
+    module Plugins
+      class BotModule
+        # read accessor for the default filter group for this BotModule
+        def filter_group
+          @filter_group ||= name
+        end
+
+        # write accessor for the default filter group for this BotModule
+        def filter_group=(name)
+          @filter_group = name
+        end
+
+        # define a filter defaulting to the default filter group
+        # for this BotModule
+        def define_filter(filter, &block)
+          @bot.register_filter(filter, self.filter_group, &block)
+        end
+
+        # load filters associated with the BotModule by looking in
+        # the path(s) specified by the :path option, defaulting to
+        # * Config::datadir/filters/<name>.rb
+        # * botclass/filters/<name>.rb
+        # (note that as <name> we use #dirname() rather than #name(),
+        # since we're looking for datafiles; this is only relevant
+        # for the very few plugins whose dirname differs from name)
+        def load_filters(options={})
+          case options[:path]
+          when nil
+            file = "#{self.dirname}.rb"
+            paths = [
+              File.join(Config::datadir, 'filters', file),
+              @bot.path('filters', file)
+            ]
+          when Array
+            paths = options[:path]
+          else
+            paths = [options[:path]]
+          end
+
+          paths.each do |file|
+            instance_eval(File.read(file), file) if File.exist?(file)
+          end
+        end
+      end
+    end
+
   end
 end
 
