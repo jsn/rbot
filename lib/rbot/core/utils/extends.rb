@@ -283,6 +283,16 @@ class ::String
   def ircify_html_title
     self.get_html_title.ircify_html rescue nil
   end
+
+  # This method is used to wrap a nonempty String by adding
+  # the prefix and postfix
+  def wrap_nonempty(pre, post, opts={})
+    if self.empty?
+      String.new
+    else
+      "#{pre}#{self}#{post}"
+    end
+  end
 end
 
 
