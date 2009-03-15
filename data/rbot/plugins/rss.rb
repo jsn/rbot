@@ -331,10 +331,43 @@ class RSSFeedsPlugin < Plugin
 
   # Auxiliary method used to collect two lines for rss output filters,
   # running substitutions against DataStream _s_ optionally joined
-  # with hash _h_
+  # with hash _h_.
+  #
+  # For substitutions, *_wrap keys can be used to alter the content of
+  # other nonempty keys. If the value of *_wrap is a String, it will be
+  # put before and after the corresponding key; if it's an Array, the first
+  # and second elements will be used for wrapping; if it's nil, no wrapping
+  # will be done (useful to override a default wrapping).
+  #
+  # For example:
+  # :handle_wrap => '::'::
+  #   will wrap s[:handle] by prefixing and postfixing it with '::'
+  # :date_wrap => [nil, ' :: ']::
+  #   will put ' :: ' after s[:date]
   def make_stream(line1, line2, s, h={})
     ss = s.merge(h)
-    DataStream.new([line1, line2].compact.join("\n") % ss, ss)
+    subs = {}
+    wraps = {}
+    ss.each do |k, v|
+      kk = k.to_s.chomp!('_wrap')
+      if kk
+        nk = kk.intern
+        case v
+        when String
+          wraps[nk] = ss[nk].wrap_nonempty(v, v)
+        when Array
+          wraps[nk] = ss[nk].wrap_nonempty(*v)
+        when nil
+          # do nothing
+        else
+          warning "ignoring #{v.inspect} wrapping of unknown class"
+        end
+      else
+        subs[k] = v
+      end
+    end
+    subs.merge! wraps
+    DataStream.new([line1, line2].compact.join("\n") % subs, ss)
   end
 
   # Auxiliary method used to define rss output filters
@@ -350,7 +383,25 @@ class RSSFeedsPlugin < Plugin
   #     line1 = "%{handle} and some %{author} info"
   #     make_stream(line1, nil, s)
   #   end
-  # to define the new type 'my_type'
+  # to define the new type 'my_type'. The keys available in the DataStream
+  # are:
+  # item::
+  #   the actual rss item
+  # handle::
+  #   the item handle
+  # date::
+  #   the item date
+  # title::
+  #   the item title
+  # desc, link, category, author::
+  #   the item description, link, category, author
+  # at::
+  #   the string ' @ ' if the item has both an title and a link
+  # handle_wrap, date_wrap, title_wrap, ...::
+  #   these keys can be defined to wrap the corresponding elements if they
+  #   are nonempty. By default handle is wrapped with '::', date has a ' ::'
+  #   appended and title is enbolden
+  #
   def define_filters
     @outkey ||= :"rss.out"
 
@@ -994,30 +1045,31 @@ class RSSFeedsPlugin < Plugin
     # debug item
     opts = {
       :places => feed.watchers,
-      :handle => feed.handle.empty? ? "" : "::#{feed.handle}:: ",
+      :handle => feed.handle,
       :date => false,
       :announce_method => @bot.config['rss.announce_method']
     }.merge options
 
-    date = String.new
-
     places = opts[:places]
-    handle = opts[:handle].to_s
     announce_method = opts[:announce_method]
 
+    handle = opts[:handle].to_s
+
+    date = \
     if opts[:date]
       if item.respond_to?(:updated)
-        date = make_date(item.updated.content)
+        make_date(item.updated.content)
       elsif item.respond_to?(:source) and item.source.respond_to?(:updated)
-        date = make_date(item.source.updated.content)
+        make_date(item.source.updated.content)
       elsif item.respond_to?(:pubDate)
-        date = make_date(item.pubDate)
+        make_date(item.pubDate)
       elsif item.respond_to?(:date)
-        date = make_date(item.date)
+        make_date(item.date)
       else
-        date = "(no date)"
+        "(no date)"
       end
-      date << " :: "
+    else
+      String.new
     end
 
     tit_opt = {}
@@ -1031,7 +1083,7 @@ class RSSFeedsPlugin < Plugin
       # visible in the URL anyway
       # TODO make this optional?
       base_title.sub!(/^Changeset \[([\da-f]{40})\]:/) { |c| "(git commit)"} if feed.type == 'trac'
-      title = "#{Bold}#{base_title.ircify_html(tit_opt)}#{Bold}"
+      title = base_title.ircify_html(tit_opt)
     end
 
     desc_opt = {}
@@ -1073,9 +1125,18 @@ class RSSFeedsPlugin < Plugin
     key = @bot.global_filter_name(feed.type, @outkey)
     key = @bot.global_filter_name(:default, @outkey) unless @bot.has_filter?(key)
 
-    output = @bot.filter(key, :item => item, :handle => handle, :date => date,
-                         :title => title, :desc => desc, :link => link,
-                         :category => category, :author => author, :at => at)
+    stream_hash = {
+      :item => item,
+      :handle => handle,
+      :handle_wrap => '::',
+      :date => date,
+      :date_wrap => [nil, ' :: '],
+      :title => title,
+      :title_wrap => Bold,
+      :desc => desc, :link => link,
+      :category => category, :author => author, :at => at
+    }
+    output = @bot.filter(key, stream_hash)
 
     return output if places.empty?
 
