@@ -294,6 +294,11 @@ class RSSFeedsPlugin < Plugin
     :default => true,
     :desc => "Whether to display links from the text of a feed item.")
 
+  Config.register Config::EnumValue.new('rss.announce_method',
+    :values => ['say', 'notice'],
+    :default => 'say',
+    :desc => "Whether to display links from the text of a feed item.")
+
   # Make an  'unique' ID for a given item, based on appropriate bot options
   # Currently only suppored is bot.config['rss.show_updated']: when false,
   # only the guid/link is accounted for.
@@ -593,7 +598,12 @@ class RSSFeedsPlugin < Plugin
 
     m.reply "Channel : #{title}"
     disp.each do |item|
-      printFormattedRss(feed, item, {:places=>[m.replyto],:handle=>nil,:date=>true})
+      printFormattedRss(feed, item, {
+        :places => [m.replyto],
+        :handle => nil,
+        :date => true,
+        :announce_method => :say
+      })
     end
   end
 
@@ -977,13 +987,16 @@ class RSSFeedsPlugin < Plugin
     opts = {
       :places => feed.watchers,
       :handle => feed.handle.empty? ? "" : "::#{feed.handle}:: ",
-      :date => false
+      :date => false,
+      :announce_method => @bot.config['rss.announce_method']
     }.merge options
 
     date = String.new
 
     places = opts[:places]
     handle = opts[:handle].to_s
+    announce_method = opts[:announce_method]
+
     if opts[:date]
       if item.respond_to?(:updated)
         if item.updated.content.class <= Time
@@ -1076,7 +1089,7 @@ class RSSFeedsPlugin < Plugin
 
     places.each { |loc|
       output.to_s.each_line { |line|
-        @bot.say loc, line, :overlong => :truncate
+        @bot.__send__(announce_method, loc, line, :overlong => :truncate)
       }
     }
   end
