@@ -1128,7 +1128,7 @@ class RSSFeedsPlugin < Plugin
     stream_hash = {
       :item => item,
       :handle => handle,
-      :handle_wrap => '::',
+      :handle_wrap => ['::', ':: '],
       :date => date,
       :date_wrap => [nil, ' :: '],
       :title => title,
