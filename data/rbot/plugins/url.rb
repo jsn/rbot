@@ -42,6 +42,8 @@ class UrlPlugin < Plugin
       @bot.config.items[:'url.display_link_info'].set_string(@bot.config['url.display_link_info'].to_s)
     end
     reset_no_info_hosts
+    self.filter_group = :htmlinfo
+    load_filters
   end
 
   def reset_no_info_hosts
