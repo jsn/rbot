@@ -15,8 +15,24 @@ spec = Gem::Specification.new do |s|
   EOF
   s.requirements << 'Ruby, version 1.8.0 (or newer)'
 
-  #  s.files = Dir.glob("**/*").delete_if { |item| item.include?(".svn") }
-  s.files = FileList['lib/**/*.rb', 'bin/*', 'data/rbot/**/*', 'AUTHORS', 'COPYING', 'README', 'REQUIREMENTS', 'TODO', 'ChangeLog', 'INSTALL',  'Usage_en.txt', 'setup.rb', 'po/*.pot', 'po/**/*.po'].to_a.delete_if {|item| item == ".svn"}
+  s.files = FileList[
+	  'lib/**/*.rb',
+	  'bin/*',
+	  'data/rbot/**/*',
+	  'AUTHORS',
+	  'COPYING',
+	  'README',
+	  'REQUIREMENTS',
+	  'TODO',
+	  'ChangeLog',
+	  'INSTALL',
+	  'Usage_en.txt',
+	  'setup.rb',
+	  'launch_here.rb',
+	  'po/*.pot',
+	  'po/**/*.po'
+  ]
+
   s.bindir = 'bin'
   s.executables = ['rbot', 'rbot-remote']
   s.default_executable = 'rbot'
