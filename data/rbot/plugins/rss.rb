@@ -982,6 +982,14 @@ class RSSFeedsPlugin < Plugin
       return seconds
   end
 
+  def make_date(obj)
+    if obj.kind_of? Time
+      obj.strftime("%Y/%m/%d %H:%M")
+    else
+      obj.to_s
+    end
+  end
+
   def printFormattedRss(feed, item, options={})
     # debug item
     opts = {
@@ -999,29 +1007,13 @@ class RSSFeedsPlugin < Plugin
 
     if opts[:date]
       if item.respond_to?(:updated)
-        if item.updated.content.class <= Time
-          date = item.updated.content.strftime("%Y/%m/%d %H:%M")
-        else
-          date = item.updated.content.to_s
-        end
+        date = make_date(item.updated.content)
       elsif item.respond_to?(:source) and item.source.respond_to?(:updated)
-        if item.source.updated.content.class <= Time
-          date = item.source.updated.content.strftime("%Y/%m/%d %H:%M")
-        else
-          date = item.source.updated.content.to_s
-        end
+        date = make_date(item.source.updated.content)
       elsif item.respond_to?(:pubDate)
-        if item.pubDate.class <= Time
-          date = item.pubDate.strftime("%Y/%m/%d %H:%M")
-        else
-          date = item.pubDate.to_s
-        end
+        date = make_date(item.pubDate)
       elsif item.respond_to?(:date)
-        if item.date.class <= Time
-          date = item.date.strftime("%Y/%m/%d %H:%M")
-        else
-          date = item.date.to_s
-        end
+        date = make_date(item.date)
       else
         date = "(no date)"
       end
