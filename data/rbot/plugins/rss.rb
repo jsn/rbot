@@ -972,44 +972,47 @@ class RSSFeedsPlugin < Plugin
       return seconds
   end
 
-  def printFormattedRss(feed, item, opts=nil)
+  def printFormattedRss(feed, item, options={})
     # debug item
-    places = feed.watchers
-    handle = feed.handle.empty? ? "" : "::#{feed.handle}:: "
+    opts = {
+      :places => feed.watchers,
+      :handle => feed.handle.empty? ? "" : "::#{feed.handle}:: ",
+      :date => false
+    }.merge options
+
     date = String.new
-    if opts
-      places = opts[:places] if opts.key?(:places)
-      handle = opts[:handle].to_s if opts.key?(:handle)
-      if opts.key?(:date) && opts[:date]
-        if item.respond_to?(:updated)
-          if item.updated.content.class <= Time
-            date = item.updated.content.strftime("%Y/%m/%d %H:%M")
-          else
-            date = item.updated.content.to_s
-          end
-        elsif item.respond_to?(:source) and item.source.respond_to?(:updated)
-          if item.source.updated.content.class <= Time
-            date = item.source.updated.content.strftime("%Y/%m/%d %H:%M")
-          else
-            date = item.source.updated.content.to_s
-          end
-        elsif item.respond_to?(:pubDate)
-          if item.pubDate.class <= Time
-            date = item.pubDate.strftime("%Y/%m/%d %H:%M")
-          else
-            date = item.pubDate.to_s
-          end
-        elsif item.respond_to?(:date)
-          if item.date.class <= Time
-            date = item.date.strftime("%Y/%m/%d %H:%M")
-          else
-            date = item.date.to_s
-          end
+
+    places = opts[:places]
+    handle = opts[:handle].to_s
+    if opts[:date]
+      if item.respond_to?(:updated)
+        if item.updated.content.class <= Time
+          date = item.updated.content.strftime("%Y/%m/%d %H:%M")
         else
-          date = "(no date)"
+          date = item.updated.content.to_s
         end
-        date += " :: "
+      elsif item.respond_to?(:source) and item.source.respond_to?(:updated)
+        if item.source.updated.content.class <= Time
+          date = item.source.updated.content.strftime("%Y/%m/%d %H:%M")
+        else
+          date = item.source.updated.content.to_s
+        end
+      elsif item.respond_to?(:pubDate)
+        if item.pubDate.class <= Time
+          date = item.pubDate.strftime("%Y/%m/%d %H:%M")
+        else
+          date = item.pubDate.to_s
+        end
+      elsif item.respond_to?(:date)
+        if item.date.class <= Time
+          date = item.date.strftime("%Y/%m/%d %H:%M")
+        else
+          date = item.date.to_s
+        end
+      else
+        date = "(no date)"
       end
+      date << " :: "
     end
 
     tit_opt = {}
