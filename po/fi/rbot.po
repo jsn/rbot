@@ -1144,9 +1144,6 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "marshal recovery failed, trying default"
 
-msgid " and "
-msgstr " ja "
-
 #, fuzzy
 #~ msgid "on %{date}"
 #~ msgstr "can %{action}"

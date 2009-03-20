@@ -1,3 +1,19 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Giuseppe Bilotta <giuseppe.bilotta@gmail.com>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"PO-Revision-Date: 2009-03-20 16:42+0100\n"
+"Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
+"Language-Team: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
 #: data/rbot/plugins/script.rb:91
 msgid "%{stuff} is not a script I know of"
-msgstr ""
+msgstr "%{stuff} non è uno script che conosco"

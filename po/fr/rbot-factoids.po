@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2008-06-21 15:04+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -55,8 +55,8 @@ msgstr ""
 "factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
 "<words>"
 
-#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404
-#: data/rbot/plugins/factoids.rb:436
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:409
+#: data/rbot/plugins/factoids.rb:441
 msgid "please select a fact number between 1 and %{total}"
 msgstr "veuillez selectionner un nombre entre 1 et %{total}"
 
@@ -80,7 +80,7 @@ msgstr "[%{idx}/%{total}] %{fact}"
 msgid "I know %{total} facts"
 msgstr "Je connais %{total} facts"
 
-#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:420
+#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:425
 msgid "I know nothing about %{words}"
 msgstr "Je ne connais rien à propos de %{word}"
 
@@ -90,22 +90,22 @@ msgstr ""
 "%{len} de %{total} facts se referent a %{words}, Je n'en montrerais que %"
 "{max}"
 
-#: data/rbot/plugins/factoids.rb:412
+#: data/rbot/plugins/factoids.rb:417
 msgid "I know nothing"
 msgstr "Je ne connais rien"
 
-#: data/rbot/plugins/factoids.rb:452
+#: data/rbot/plugins/factoids.rb:457
 msgid "not a date '%{dstr}'"
 msgstr "ce n'est pas une date '%{dstr}'"
 
-#: data/rbot/plugins/factoids.rb:460
+#: data/rbot/plugins/factoids.rb:465
 msgid "couldn't change learn data for fact %{fact}: %{err}"
 msgstr "impossible de changer les données de la fact %{fact}: %{err}"
 
-#: data/rbot/plugins/factoids.rb:475
+#: data/rbot/plugins/factoids.rb:480
 msgid "failed to import facts from %{fname}: %{err}"
 msgstr "impossible d'importer les facts depuis %{fname}: %{err}"
 
-#: data/rbot/plugins/factoids.rb:480
+#: data/rbot/plugins/factoids.rb:485
 msgid "%{len} facts loaded from %{fname}"
 msgstr "%{len} facts chargés depuis %{fname}"

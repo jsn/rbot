@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-01 23:49+0100\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2007-07-14 00:06-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: English\n"
@@ -732,7 +732,7 @@ msgstr "no such module %{module}"
 
 #: lib/rbot/core/config.rb:55 lib/rbot/core/config.rb:66
 #: lib/rbot/core/config.rb:88 lib/rbot/core/config.rb:101
-#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:150
+#: lib/rbot/core/config.rb:127 lib/rbot/core/config.rb:152
 msgid "no such config key %{key}"
 msgstr "no such config key %{key}"
 
@@ -745,12 +745,12 @@ msgid "possible keys: %{kl}"
 msgstr ""
 
 #: lib/rbot/core/config.rb:93 lib/rbot/core/config.rb:112
-#: lib/rbot/core/config.rb:142 lib/rbot/core/config.rb:165
+#: lib/rbot/core/config.rb:144 lib/rbot/core/config.rb:169
 msgid "this config change will take effect on the next restart"
 msgstr "this config change will take effect on the next restart"
 
 #: lib/rbot/core/config.rb:94 lib/rbot/core/config.rb:115
-#: lib/rbot/core/config.rb:143 lib/rbot/core/config.rb:166
+#: lib/rbot/core/config.rb:145 lib/rbot/core/config.rb:170
 msgid "this config change will take effect on the next rescan"
 msgstr "this config change will take effect on the next rescan"
 
@@ -758,31 +758,31 @@ msgstr "this config change will take effect on the next rescan"
 msgid "failed to set %{key}: %{error}"
 msgstr "failed to set %{key}: %{error}"
 
-#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:154
+#: lib/rbot/core/config.rb:131 lib/rbot/core/config.rb:156
 msgid "config key %{key} is not an array"
 msgstr "config key %{key} is not an array"
 
-#: lib/rbot/core/config.rb:138
+#: lib/rbot/core/config.rb:139
 msgid "failed to add %{value} to %{key}: %{error}"
 msgstr "failed to add %{value} to %{key}: %{error}"
 
-#: lib/rbot/core/config.rb:161
+#: lib/rbot/core/config.rb:164
 msgid "failed to remove %{value} from %{key}: %{error}"
 msgstr "failed to remove %{value} from %{key}: %{error}"
 
-#: lib/rbot/core/config.rb:175
+#: lib/rbot/core/config.rb:179
 msgid "saving ..."
 msgstr "saving ..."
 
-#: lib/rbot/core/config.rb:177
+#: lib/rbot/core/config.rb:181
 msgid "rescanning ..."
 msgstr "rescanning ..."
 
-#: lib/rbot/core/config.rb:179
+#: lib/rbot/core/config.rb:183
 msgid "done. %{plugin_status}"
 msgstr "done. %{plugin_status}"
 
-#: lib/rbot/core/config.rb:221
+#: lib/rbot/core/config.rb:225
 msgid ""
 "config list => list configuration modules, config list <module> => list "
 "configuration keys for module <module>"
@@ -790,41 +790,42 @@ msgstr ""
 "config list => list configuration modules, config list <module> => list "
 "configuration keys for module <module>"
 
-#: lib/rbot/core/config.rb:223
+#: lib/rbot/core/config.rb:227
 msgid "config get <key> => get configuration value for key <key>"
 msgstr "config get <key> => get configuration value for key <key>"
 
-#: lib/rbot/core/config.rb:225
+#: lib/rbot/core/config.rb:229
 msgid "reset key <key> to the default"
 msgstr "reset key <key> to the default"
 
-#: lib/rbot/core/config.rb:227
+#: lib/rbot/core/config.rb:231
 msgid ""
 "config set <key> <value> => set configuration value for key <key> to <value>"
 msgstr ""
 "config set <key> <value> => set configuration value for key <key> to <value>"
 
-#: lib/rbot/core/config.rb:229
+#: lib/rbot/core/config.rb:233
 msgid "config desc <key> => describe what key <key> configures"
 msgstr "config desc <key> => describe what key <key> configures"
 
-#: lib/rbot/core/config.rb:231
-msgid ""
-"config add <value> to <key> => add value <value> to key <key> if <key> is an "
-"array"
-msgstr ""
-"config add <value> to <key> => add value <value> to key <key> if <key> is an "
-"array"
-
-#: lib/rbot/core/config.rb:233
-msgid ""
-"config rm <value> from <key> => remove value <value> from key <key> if <key> "
-"is an array"
-msgstr ""
-"config rm <value> from <key> => remove value <value> from key <key> if <key> "
-"is an array"
-
 #: lib/rbot/core/config.rb:235
+#, fuzzy
+msgid ""
+"config add <values> to <key> => add values <values> to key <key> if <key> is "
+"an array"
+msgstr ""
+"config add <value> to <key> => add value <value> to key <key> if <key> is an "
+"array"
+
+#: lib/rbot/core/config.rb:237
+msgid ""
+"config rm <value> from <key> => remove value <value> from key <key> if <key> "
+"is an array"
+msgstr ""
+"config rm <value> from <key> => remove value <value> from key <key> if <key> "
+"is an array"
+
+#: lib/rbot/core/config.rb:239
 msgid ""
 "config module - bot configuration. usage: list, desc, get, set, unset, add, "
 "rm"
@@ -832,27 +833,27 @@ msgstr ""
 "config module - bot configuration. usage: list, desc, get, set, unset, add, "
 "rm"
 
-#: lib/rbot/core/config.rb:240
+#: lib/rbot/core/config.rb:244
 msgid "nick <newnick> => change the bot nick to <newnick>, if possible"
 msgstr "nick <nick> => attempt to change nick to <nick>"
 
-#: lib/rbot/core/config.rb:242
+#: lib/rbot/core/config.rb:246
 msgid "status => display some information on the bot's status"
 msgstr ""
 
-#: lib/rbot/core/config.rb:244
+#: lib/rbot/core/config.rb:248
 msgid "save => save current dynamic data and configuration"
 msgstr "save => save current dynamic data and configuration"
 
-#: lib/rbot/core/config.rb:246
+#: lib/rbot/core/config.rb:250
 msgid "rescan => reload modules and static facts"
 msgstr "rescan => reload modules and static facts"
 
-#: lib/rbot/core/config.rb:248
+#: lib/rbot/core/config.rb:252
 msgid "version => describes software version"
 msgstr "version => describes software version"
 
-#: lib/rbot/core/config.rb:250
+#: lib/rbot/core/config.rb:254
 msgid "config-related tasks: config, save, rescan, version, nick, status"
 msgstr "config-related tasks: config, save, rescan"
 
@@ -893,111 +894,111 @@ msgstr "%{word} learned from %{user} on %{date}"
 msgid "sorry, no %{key} data for %{user}"
 msgstr "%{word} learned from %{user} on %{date}"
 
-#: lib/rbot/core/utils/utils.rb:204
+#: lib/rbot/core/utils/utils.rb:184
 msgid "year"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:204
+#: lib/rbot/core/utils/utils.rb:184
 msgid "years"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:206
+#: lib/rbot/core/utils/utils.rb:186
 msgid "month"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:206
+#: lib/rbot/core/utils/utils.rb:186
 msgid "months"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:208
+#: lib/rbot/core/utils/utils.rb:188
 msgid "day"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:208
+#: lib/rbot/core/utils/utils.rb:188
 msgid "days"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:210
+#: lib/rbot/core/utils/utils.rb:190
 msgid "hour"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:210
+#: lib/rbot/core/utils/utils.rb:190
 msgid "hours"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:212
+#: lib/rbot/core/utils/utils.rb:192
 msgid "minute"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:212
+#: lib/rbot/core/utils/utils.rb:192
 msgid "minutes"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:214
+#: lib/rbot/core/utils/utils.rb:194
 msgid "second"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:214
+#: lib/rbot/core/utils/utils.rb:194
 msgid "seconds"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:221
+#: lib/rbot/core/utils/utils.rb:201 lib/rbot/core/utils/utils.rb:710
 msgid " and "
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:252
+#: lib/rbot/core/utils/utils.rb:232
 msgid "right now"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:256
+#: lib/rbot/core/utils/utils.rb:236
 msgid "%{d} from now"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:258
+#: lib/rbot/core/utils/utils.rb:238
 msgid "%{d} ago"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:270
+#: lib/rbot/core/utils/utils.rb:250
 msgid "%{m} years"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:272
+#: lib/rbot/core/utils/utils.rb:252
 msgid "%{m} months"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:274
+#: lib/rbot/core/utils/utils.rb:254
 msgid "%{m} weeks"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:276
+#: lib/rbot/core/utils/utils.rb:256
 msgid "%{m} days"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:278
+#: lib/rbot/core/utils/utils.rb:258
 msgid "%{m} hours"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:280
+#: lib/rbot/core/utils/utils.rb:260
 msgid "half an hour"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:283
+#: lib/rbot/core/utils/utils.rb:263
 msgid "an hour"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:285
+#: lib/rbot/core/utils/utils.rb:265
 msgid "an hour and a half"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:287
+#: lib/rbot/core/utils/utils.rb:267
 msgid "%{m} minutes"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:289
+#: lib/rbot/core/utils/utils.rb:269
 msgid "%{m} seconds"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:291
+#: lib/rbot/core/utils/utils.rb:271
 msgid "one second"
 msgstr ""
 
@@ -1013,19 +1014,23 @@ msgstr ""
 msgid "Wordlists: %{found}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1325
+#: lib/rbot/ircbot.rb:1250
+msgid "restarting, back in %{wait}..."
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1333
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1327
+#: lib/rbot/ircbot.rb:1335
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1330
+#: lib/rbot/ircbot.rb:1338
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1341
+#: lib/rbot/ircbot.rb:1349
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
@@ -1144,9 +1149,9 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "marshal recovery failed, trying default"
 
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => attempt to change nick to <nick>"
+
 #, fuzzy
 #~ msgid "on %{date}"
 #~ msgstr "can %{action}"
-
-#~ msgid "nick <nick> => attempt to change nick to <nick>"
-#~ msgstr "nick <nick> => attempt to change nick to <nick>"

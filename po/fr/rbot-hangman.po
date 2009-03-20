@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-01 23:50+0100\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2009-03-01 23:50+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -14,6 +14,44 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: data/rbot/plugins/games/hangman.rb:245
+msgid "hangman game plugin - topics: play, stop"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:247
+msgid ""
+"hangman play on <channel> with word <word> => use in private chat with the "
+"bot to start a game with custom word\n"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:248
+msgid ""
+"hangman play random [with [max|min] length [<|>|== <length>]] => hangman "
+"with a random word from %{site}\n"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:249
+msgid ""
+"hangman play with wordlist <wordlist> => hangman with random word from "
+"<wordlist>"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:251
+msgid "hangman stop => quits the current game"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:253
+msgid "define => seeks a definition for the previous answer using google"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:264
+msgid "no such wordlist"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:285
+msgid "suitable word not found in the set"
+msgstr ""
 
 #: data/rbot/plugins/games/hangman.rb:311
 msgid "i'm not on that channel"
@@ -43,26 +81,34 @@ msgstr ""
 msgid "you've killed the poor guy :("
 msgstr ""
 
+#: data/rbot/plugins/games/hangman.rb:374
+msgid "go %{b}again%{b}?"
+msgstr ""
+
 #: data/rbot/plugins/games/hangman.rb:391
+msgid "%{sentence} %{again} %{scores}"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:396
 msgid "wondering what that means? try ´%{prefix}define´"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:434
+#: data/rbot/plugins/games/hangman.rb:439
 msgid "you got %{score} points after %{games} games"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:439
+#: data/rbot/plugins/games/hangman.rb:444
 msgid "you haven't played hangman, how about playing it right now? :)"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:448
+#: data/rbot/plugins/games/hangman.rb:453
 msgid "%{nick} has %{score} points after %{games} games"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:454
+#: data/rbot/plugins/games/hangman.rb:459
 msgid "%{nick} hasn't played hangman :("
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:466
+#: data/rbot/plugins/games/hangman.rb:471
 msgid "%{games} games have been played on %{channel}"
 msgstr ""

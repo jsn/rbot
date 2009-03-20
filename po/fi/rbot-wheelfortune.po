@@ -1,0 +1,205 @@
+# Finnish translations for PACKAGE package.
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"PO-Revision-Date: 2009-03-20 15:57+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/games/wheelfortune.rb:54
+msgid " [Letters called so far: %{red}%{letters}%{nocolor}]"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:240
+msgid ""
+"wof [<channel>] play [<name>] for <single> to <max> => starts a wheel-of-"
+"fortune game on channel <channel> (default: current channel), named <name> "
+"(default: wheelfortune.game_name config setting, or the last game name used "
+"by the user), with <single> points per round. the game is won when a player "
+"reachers <max> points. vowels cost <single>*<single>/<max> points. The user "
+"that starts the game is the game manager and must set up the clues and "
+"answers in private. All the other users have to learn the answer to each "
+"clue by saying single consonants or the whole sentence. Every time a "
+"consonant is guessed, the bot will reveal the partial answer, showing the "
+"missing letters as * (asterisks)."
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:242
+msgid ""
+"wof <channel> [category: <cat>,] clue: <clue>, answer: <ans> => set up a new "
+"question for the wheel-of-fortune game being played on channel <channel>. "
+"This command must be sent in private by the game manager. The category <cat> "
+"can be omitted. If you make mistakes, you can use 'wof replace' (see help) "
+"before the question gets asked"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:244
+msgid ""
+"wof <channel> replace <round> [category: <cat>,] [clue: <clue>,] [answer: "
+"<ans>] => fix the question for round <round> of the wheel-of-fortune game "
+"being played on <channel> by replacing the category and/or clue and/or answer"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:246
+msgid ""
+"wof cancel => cancels the wheel-of-fortune being played on the current "
+"channel"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:248
+msgid ""
+"wof buy <vowel> => buy the vowel <vowel>: the user buying the vowel will "
+"lose points equal to the vowel price, and the corresponding vowel will be "
+"revealed in the answer (if present)"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:250
+msgid ""
+"wof: wheel-of-fortune plugin. topics: play, category, clue, answer, replace, "
+"cancel, buy"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:257
+msgid "you must specify a channel"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:263
+msgid "there's already a %{name} game on %{chan}, managed by %{who}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:277
+msgid ""
+"%{who} just created a new %{name} game to %{max} points (%{single} per "
+"question, %{price} per vowel)"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:284
+msgid ""
+"ok, the game has been created. now add clues and answers with \"wof %{chan} "
+"[category: <category>,] clue: <clue>, answer: <ans>\". if the clue and "
+"answer don't fit in one line, add the answer separately with \"wof %{chan} "
+"answer <answer>\""
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:292
+#: data/rbot/plugins/games/wheelfortune.rb:353
+#: data/rbot/plugins/games/wheelfortune.rb:423
+#: data/rbot/plugins/games/wheelfortune.rb:536
+#: data/rbot/plugins/games/wheelfortune.rb:573
+msgid "there's no %{name} game running on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:301
+msgid "you can't add questions to the %{name} game on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:311
+#: data/rbot/plugins/games/wheelfortune.rb:394
+msgid "sorry, the answer cannot contain the '*' character"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:318
+msgid "ok, clue added for %{name} round %{count} on %{chan}: %{catclue}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:320
+msgid ""
+"there's already a pending clue for %{name} round %{count} on %{chan}: %"
+"{catclue}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:333
+msgid ""
+"ok, QA added for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:335
+msgid "there's no pending clue for %{name} on %{chan}!"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:346
+msgid ""
+"something went wrong, I can't seem to understand what you're trying to set up"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:362
+msgid "you can't replace questions to the %{name} game on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:375
+msgid ""
+"there are no questions in the %{name} game on %{chan} which can be replaced"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:380
+msgid ""
+"you can only replace questions between rounds %{min} and %{max} in the %"
+"{name} game on %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:409
+msgid ""
+"ok, replaced QA for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:435
+#: data/rbot/plugins/games/wheelfortune.rb:542
+msgid ""
+"there are no %{name} questions for %{chan}, I'm waiting for %{who} to add "
+"them"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:443
+msgid "%{bold}%{color}%{name}%{bold}, round %{count}:%{nocolor} %{qa}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:458
+msgid "no scores"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:479
+msgid "You must buy the %{vowel}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:489
+msgid "%{who} got it! The answer was: %{ans}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:495
+msgid ""
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %"
+"{count} rounds!\n"
+"The final score is"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:506
+msgid ""
+"%{bold}%{color}%{name}%{bold}, round %{count}%{nocolor} -- score so far:"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:552
+msgid "%{who} buys a %{vowel} for %{price} points"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:560
+msgid ""
+"you can't buy a %{vowel}, %{who}: it costs %{price} points and you only have "
+"%{score}"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:583
+msgid "you can't cancel the current game"
+msgstr ""
+
+#: data/rbot/plugins/games/wheelfortune.rb:590
+msgid "%{name} game cancelled after %{count} rounds. Partial score:"
+msgstr ""

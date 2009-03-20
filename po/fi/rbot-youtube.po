@@ -1,0 +1,58 @@
+# Finnish translations for PACKAGE package.
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"PO-Revision-Date: 2009-03-20 15:57+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/youtube.rb:33
+msgid ""
+"Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %"
+"{duration}. %{views} views, faved %{faves} times. %{desc}"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:77 data/rbot/plugins/youtube.rb:107
+msgid "unknown duration"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:183
+msgid ""
+"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%"
+"{duration}). %{views} views, faved %{faves} times. %{desc}"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:186
+msgid ""
+"\n"
+" -- also available at: "
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:193
+msgid "couldn't retrieve video info"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:203
+msgid "error looking for %{what} on youtube: %{e}"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:211
+msgid "no videos found for %{what}"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:215
+msgid "One video found for %{what}: %{show}"
+msgstr ""
+
+#: data/rbot/plugins/youtube.rb:222
+msgid "Videos for %{what}: %{shorts}"
+msgstr ""

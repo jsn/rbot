@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-07-07 18:02+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2007-07-09 01:39-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Chinese\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: data/rbot/plugins/spell.rb:12
 msgid ""
-"Command line used to call the spell.program. Use %s as a placeholder for the "
+"Command line used to call the spell.path. Use %s as a placeholder for the "
 "executable name"
 msgstr ""
 

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2008-06-21 14:42+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -15,12 +15,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: data/rbot/plugins/dictclient.rb:57
+#: data/rbot/plugins/dictclient.rb:61
 msgid "Hostname or hostname:port of the DICT server used to lookup words"
 msgstr ""
 "Hostname or hostname:port du serveur DICT utilisé pour chercher les mots"
 
-#: data/rbot/plugins/dictclient.rb:60
+#: data/rbot/plugins/dictclient.rb:64
 msgid ""
 "When multiple databases reply a number of definitions that above this limit, "
 "only the database names will be listed. Otherwise, the full definitions from "
@@ -30,22 +30,22 @@ msgstr ""
 "grand que cette limite, seulement le nom des bases de données sera listé. "
 "Sinon, la definition complete de chaque base de donnée sera renvoyé"
 
-#: data/rbot/plugins/dictclient.rb:63
+#: data/rbot/plugins/dictclient.rb:67
 msgid "Each definition is truncated to this length"
 msgstr "Chaques definitions seront coupé à cette taille"
 
-#: data/rbot/plugins/dictclient.rb:66
+#: data/rbot/plugins/dictclient.rb:70
 msgid "Format of headwords; <word> will be replaced with the actual word"
 msgstr "Format des mots; <word> sera remplacé par le mot actuel"
 
-#: data/rbot/plugins/dictclient.rb:69
+#: data/rbot/plugins/dictclient.rb:73
 msgid ""
 "Format of database names; <database> will be replaced with the database name"
 msgstr ""
 "Format du nom des bases de données; <database> sera remplacé par le nom de "
 "la base de donnée"
 
-#: data/rbot/plugins/dictclient.rb:72
+#: data/rbot/plugins/dictclient.rb:76
 msgid ""
 "Format of definitions. <word> will be replaced with the formatted headword, "
 "<def> will be replaced with the truncated definition, and <database> with "
@@ -55,7 +55,7 @@ msgstr ""
 "remplacé par la definition coupée, et <database> par le nom de la base de "
 "donnée"
 
-#: data/rbot/plugins/dictclient.rb:75
+#: data/rbot/plugins/dictclient.rb:79
 msgid ""
 "Format of match results. <matches> will be replaced with the formatted "
 "headwords, <database> with the formatted database name"
@@ -63,7 +63,7 @@ msgstr ""
 "Format des resultats correspondants. <matches> sera remplacé par le mot "
 "formaté, <database> avec le nom de la base de donnée"
 
-#: data/rbot/plugins/dictclient.rb:95
+#: data/rbot/plugins/dictclient.rb:99
 msgid ""
 "An error occured connecting to the DICT server. Check the dictclient.server "
 "configuration or retry later"
@@ -71,15 +71,15 @@ msgstr ""
 "Il y a eu une erreur lors de la conenction au serveur DICT. Verifiez la "
 "configuration du dictclient.server ou reessayez plus tard"
 
-#: data/rbot/plugins/dictclient.rb:97
+#: data/rbot/plugins/dictclient.rb:101
 msgid "A protocol error occured"
 msgstr "Il y a eu une erreur de protocole"
 
-#: data/rbot/plugins/dictclient.rb:99
+#: data/rbot/plugins/dictclient.rb:103
 msgid "An error occured"
 msgstr "Il y a eu une erreur"
 
-#: data/rbot/plugins/dictclient.rb:121
+#: data/rbot/plugins/dictclient.rb:125
 msgid ""
 "Many definitions for %{phrase} were found in %{databases}. Use 'define "
 "<phrase> from <database> to view a definition."
@@ -87,29 +87,29 @@ msgstr ""
 "Plusieurs definitions pour %{phrase} ont été trouvés dans %{databases}. "
 "Utilisez 'define <phrase> from <database> pour voir une definition."
 
-#: data/rbot/plugins/dictclient.rb:138
+#: data/rbot/plugins/dictclient.rb:142
 msgid "No definition for %{phrase} found from %{database}."
 msgstr "Aucune definition pour %{phrase} trouvée dans %{database}."
 
-#: data/rbot/plugins/dictclient.rb:159
+#: data/rbot/plugins/dictclient.rb:163
 msgid "Nothing matched %{query} from %{database} using %{strategy}"
 msgstr ""
 "Rien ne correspond a  %{query} dans %{database} en utilisant %{strategy}"
 
-#: data/rbot/plugins/dictclient.rb:169
+#: data/rbot/plugins/dictclient.rb:173
 msgid "Databases: %{list}"
 msgstr "Bases de données: %{list}"
 
-#: data/rbot/plugins/dictclient.rb:177
+#: data/rbot/plugins/dictclient.rb:181
 msgid "Strategies: %{list}"
 msgstr "Strategies: %{list}"
 
-#: data/rbot/plugins/dictclient.rb:186
+#: data/rbot/plugins/dictclient.rb:190
 msgid "define <phrase> [from <database>] => Show definition of a phrase"
 msgstr ""
 "define <phrase> [from <base de donnée>] => Affiche la definition de phrase"
 
-#: data/rbot/plugins/dictclient.rb:188
+#: data/rbot/plugins/dictclient.rb:192
 msgid ""
 "match <phrase> [using <strategy>] [from <database>] => Show phrases matching "
 "the given pattern"
@@ -117,7 +117,7 @@ msgstr ""
 "match <phrase> [using <strategy>] [from <base de donnée>] => Affiche les "
 "phrases correspondantes au schema fournit"
 
-#: data/rbot/plugins/dictclient.rb:190
+#: data/rbot/plugins/dictclient.rb:194
 msgid ""
 "dictclient databases => List databases; dictclient strategies => List "
 "strategies"
@@ -125,7 +125,7 @@ msgstr ""
 "dictclient databases => Liste les bases de données; dictclient strategies => "
 "Liste les strategies"
 
-#: data/rbot/plugins/dictclient.rb:192
+#: data/rbot/plugins/dictclient.rb:196
 msgid ""
 "look up phrases on the configured DICT server. topics: define, match, server "
 "information"

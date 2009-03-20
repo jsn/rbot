@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-11-11 20:21+0100\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2008-06-19 19:27+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -450,25 +450,25 @@ msgstr ""
 "le regole, 'help uno admin' per i comandi di amministrazione, 'help uno "
 "score' per le regole sui punteggi. Comandi di gioco: %{cmds}."
 
-#: data/rbot/plugins/games/uno.rb:891
+#: data/rbot/plugins/games/uno.rb:892
 msgid "you already picked a card"
 msgstr "hai già pescato una carta"
 
-#: data/rbot/plugins/games/uno.rb:898 data/rbot/plugins/games/uno.rb:905
-#: data/rbot/plugins/games/uno.rb:911 data/rbot/plugins/games/uno.rb:917
-#: data/rbot/plugins/games/uno.rb:933
+#: data/rbot/plugins/games/uno.rb:899 data/rbot/plugins/games/uno.rb:906
+#: data/rbot/plugins/games/uno.rb:912 data/rbot/plugins/games/uno.rb:918
+#: data/rbot/plugins/games/uno.rb:934
 msgid "It's not your turn"
 msgstr "non è il tuo turno"
 
-#: data/rbot/plugins/games/uno.rb:930
+#: data/rbot/plugins/games/uno.rb:931
 msgid "previous move cannot be challenged"
 msgstr "la mossa precedente non può essere contestata"
 
-#: data/rbot/plugins/games/uno.rb:944
+#: data/rbot/plugins/games/uno.rb:945
 msgid "it's your turn, sleepyhead"
 msgstr "è il tuo turno, dormiglione"
 
-#: data/rbot/plugins/games/uno.rb:953
+#: data/rbot/plugins/games/uno.rb:957
 msgid ""
 "There is already an %{uno} game running here, managed by %{who}. say 'jo' to "
 "join in"
@@ -476,108 +476,108 @@ msgstr ""
 "C'è già una partita di %{uno} in corso qui, gestita da %{who}. scrivi 'jo' "
 "per partecipare"
 
-#: data/rbot/plugins/games/uno.rb:961
+#: data/rbot/plugins/games/uno.rb:965
 msgid "Ok, created %{uno} game on %{channel}, say 'jo' to join in"
 msgstr ""
 "Ok, creata partita di %{uno} in %{channel}, scrivi 'jo' per partecipare"
 
-#: data/rbot/plugins/games/uno.rb:969 data/rbot/plugins/games/uno.rb:989
-#: data/rbot/plugins/games/uno.rb:1125 data/rbot/plugins/games/uno.rb:1133
-#: data/rbot/plugins/games/uno.rb:1141
+#: data/rbot/plugins/games/uno.rb:973 data/rbot/plugins/games/uno.rb:993
+#: data/rbot/plugins/games/uno.rb:1129 data/rbot/plugins/games/uno.rb:1137
+#: data/rbot/plugins/games/uno.rb:1145
 msgid "There is no %{uno} game running here"
 msgstr "Non ci sono partite di %{uno} in corso qui"
 
-#: data/rbot/plugins/games/uno.rb:979
+#: data/rbot/plugins/games/uno.rb:983
 msgid "%{uno} game ownership transferred from %{old} to %{nick}"
 msgstr "gestione della partita di %{uno} trasferita da %{old} a %{nick}"
 
-#: data/rbot/plugins/games/uno.rb:983
+#: data/rbot/plugins/games/uno.rb:987
 msgid "who is this %{nick} you want me to transfer game ownership to?"
 msgstr ""
 "e chi sarebbe questo %{nick} a cui vuoi che trasferisca la gestione della "
 "partita?"
 
-#: data/rbot/plugins/games/uno.rb:1067
+#: data/rbot/plugins/games/uno.rb:1071
 msgid "%{nf} %{uno} games completed over %{np} games played. "
 msgstr "%{nf} partite di %{uno} completate su %{np} partite giocate. "
 
-#: data/rbot/plugins/games/uno.rb:1072
+#: data/rbot/plugins/games/uno.rb:1076
 msgid "%{cgt} game time for completed games"
 msgstr "%{cgt} di tempo di gioco per le partite completate"
 
-#: data/rbot/plugins/games/uno.rb:1076
+#: data/rbot/plugins/games/uno.rb:1080
 msgid " on %{tgt} total game time. "
 msgstr " su %{tgt} di tempo di gioco complessivo. "
 
-#: data/rbot/plugins/games/uno.rb:1082
+#: data/rbot/plugins/games/uno.rb:1086
 msgid "%{avg} average game time for completed games"
 msgstr "%{avg} tempo medio di gioco per le partite completate"
 
-#: data/rbot/plugins/games/uno.rb:1085
+#: data/rbot/plugins/games/uno.rb:1089
 msgid ", %{tavg} for all games"
 msgstr ", %{tavg} per tutte le partite"
 
-#: data/rbot/plugins/games/uno.rb:1090
+#: data/rbot/plugins/games/uno.rb:1094
 msgid "nobody has played %{uno} on %{chan} yet"
 msgstr "nessuno ha giocato ad %{uno} su %{chan} ancora"
 
-#: data/rbot/plugins/games/uno.rb:1101
+#: data/rbot/plugins/games/uno.rb:1105
 msgid "%{nick} never played %{uno} here"
 msgstr "%{nick} non ha mai giocato ad %{uno} qui"
 
-#: data/rbot/plugins/games/uno.rb:1110
+#: data/rbot/plugins/games/uno.rb:1114
 msgid "%{nick} played %{np} %{uno} games here, "
 msgstr "%{nick} ha giocato %{np} partite di %{uno} qui, "
 
-#: data/rbot/plugins/games/uno.rb:1113
+#: data/rbot/plugins/games/uno.rb:1117
 msgid "forfeited %{nf} games, "
 msgstr "lasciato %{nf} partite, "
 
-#: data/rbot/plugins/games/uno.rb:1114
+#: data/rbot/plugins/games/uno.rb:1118
 msgid "won %{nw} games"
 msgstr "vinto %{nw} partite"
 
-#: data/rbot/plugins/games/uno.rb:1116
+#: data/rbot/plugins/games/uno.rb:1120
 msgid " with %{score} total points"
 msgstr " con %{score} punti totali"
 
-#: data/rbot/plugins/games/uno.rb:1118
+#: data/rbot/plugins/games/uno.rb:1122
 msgid " and an average of %{avg} points per opponent"
 msgstr " ed una media di %{avg} punti per avversario"
 
-#: data/rbot/plugins/games/uno.rb:1145
+#: data/rbot/plugins/games/uno.rb:1149
 msgid "%{num} cards in stock: %{stock}"
 msgstr "%{num} carte nel mazzo: %{stock}"
 
-#: data/rbot/plugins/games/uno.rb:1161
+#: data/rbot/plugins/games/uno.rb:1165
 msgid "no %{uno} games were completed here"
 msgstr "nessuna partita di %{uno} è stata completata qui"
 
-#: data/rbot/plugins/games/uno.rb:1169
+#: data/rbot/plugins/games/uno.rb:1173
 msgid "%{uno} %{num} highest scores: "
 msgstr "%{uno} %{num} punteggi migliori: "
 
-#: data/rbot/plugins/games/uno.rb:1178
+#: data/rbot/plugins/games/uno.rb:1182
 msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} points"
 msgstr "%{i}. %{b}%{nick}%{b} con %{b}%{score}%{b} punti"
 
-#: data/rbot/plugins/games/uno.rb:1185 data/rbot/plugins/games/uno.rb:1207
+#: data/rbot/plugins/games/uno.rb:1189 data/rbot/plugins/games/uno.rb:1211
 msgid "%{i}. %{nick} ( %{score} )"
 msgstr "%{i}. %{nick} ( %{score} )"
 
-#: data/rbot/plugins/games/uno.rb:1191
+#: data/rbot/plugins/games/uno.rb:1195
 msgid "%{uno} %{num} most wins: "
 msgstr "%{uno} %{num} maggior numero di vittorie: "
 
-#: data/rbot/plugins/games/uno.rb:1200
+#: data/rbot/plugins/games/uno.rb:1204
 msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} wins"
 msgstr "%{i}. %{b}%{nick}%{b} con %{b}%{score}%{b} vittorie"
 
-#: data/rbot/plugins/games/uno.rb:1213
+#: data/rbot/plugins/games/uno.rb:1217
 msgid "uh, what kind of score list did you want, again?"
 msgstr "uh, che tipo di punteggi volevi vedere?"
 
-#: data/rbot/plugins/games/uno.rb:1214
+#: data/rbot/plugins/games/uno.rb:1218
 msgid ""
 " I can only show the top scores (with top) and the most wins (with topwin)"
 msgstr ""

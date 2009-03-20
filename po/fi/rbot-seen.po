@@ -1,10 +1,29 @@
+# Gettext template file for rbot
+# Copyright (C) 2007 Tom Gilbert
+# This file is distributed under the same license as the rbot package.
+# Raine Virta <rane@kapsi.fi>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-20 16:03+0100\n"
+"PO-Revision-Date: 2009-03-20 15:59+0100\n"
+"Last-Translator: Raine Virta <rane@kapsi.fi\n"
+"Language-Team: Finnish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: data/rbot/plugins/seen.rb:13
 msgid "Maximum number of seen users to return in search (0 = no limit)."
-msgstr "Kuinka monta käyttäjää haun tulisi maksimissaan palauttaa (0 = ei rajaa)"
+msgstr ""
+"Kuinka monta käyttäjää haun tulisi maksimissaan palauttaa (0 = ei rajaa)"
 
 #: data/rbot/plugins/seen.rb:16
 msgid "seen <nick> => have you seen, or when did you last see <nick>"
-msgstr "seen <nimi> => kertoo onko ja jos on, niin milloin <nimi> on viimeksi näkynyt"
+msgstr ""
+"seen <nimi> => kertoo onko ja jos on, niin milloin <nimi> on viimeksi näkynyt"
 
 #: data/rbot/plugins/seen.rb:40
 msgid "nope!"
@@ -15,16 +34,18 @@ msgid "%{nick} was last seen %{when}, %{doing}"
 msgstr "%{nick} nähtiin viimeksi %{when} %{doing}"
 
 #: data/rbot/plugins/seen.rb:88
-msgid "%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}"
-msgstr "%{nick} nähtiin viimeksi %{when} %{doing} ja %{time} ennen %{did_before}"
+msgid ""
+"%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}"
+msgstr ""
+"%{nick} nähtiin viimeksi %{when} %{doing} ja %{time} ennen %{did_before}"
 
 #: data/rbot/plugins/seen.rb:95 data/rbot/plugins/seen.rb:128
 msgid "saying \"%{message}\""
 msgstr "sanomassa \"%{message}\""
 
 #: data/rbot/plugins/seen.rb:97
-msgid "doing *%{message}*"
-msgstr "tekemässä *%{message}*"
+msgid "doing *%{nick} %{message}*"
+msgstr "tekemässä *%{nick} %{message}*"
 
 #: data/rbot/plugins/seen.rb:107
 msgid "a moment"
@@ -41,6 +62,10 @@ msgstr "ihan äsken"
 #: data/rbot/plugins/seen.rb:123
 msgid "%{time} ago"
 msgstr "%{time} sitten"
+
+#: data/rbot/plugins/seen.rb:130
+msgid "doing *%{message}*"
+msgstr "tekemässä *%{message}*"
 
 #: data/rbot/plugins/seen.rb:132
 msgid "changing nick from %{nick} to %{message}"

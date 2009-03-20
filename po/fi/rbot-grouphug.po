@@ -1,0 +1,35 @@
+# Finnish translations for PACKAGE package.
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"PO-Revision-Date: 2009-03-20 15:57+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/grouphug.rb:23
+msgid ""
+"Grouphug plugin. Confess! Usage: 'confess' for random confession, 'confess "
+"<number>' for specific one, 'confess <confession>' to share your own "
+"confession. Confessions must be at least 10 words."
+msgstr ""
+
+#: data/rbot/plugins/grouphug.rb:30
+msgid "Confession must be at least 10 words. You need %{m} more."
+msgstr ""
+
+#: data/rbot/plugins/grouphug.rb:44
+msgid "Confession posted: http://beta.grouphug.us/confessions/%{n}"
+msgstr ""
+
+#: data/rbot/plugins/grouphug.rb:46
+msgid "I couldn't share your confession."
+msgstr ""

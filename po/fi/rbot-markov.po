@@ -1,0 +1,91 @@
+# Finnish translations for PACKAGE package.
+# Copyright (C) 2009 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"PO-Revision-Date: 2009-03-20 15:57+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/markov.rb:366
+msgid "markov is currently enabled, %{p}% chance of chipping in"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:368
+msgid ", %{l} messages in queue"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:370
+msgid ", %{l} chains to upgrade"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:372
+msgid "markov is currently disabled"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:396
+msgid "%{u} removed"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:398
+msgid "not found in list"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:403
+msgid "%{u} already in list"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:406
+msgid "%{u} added to markov ignore list"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:409
+msgid "give the name of a person or channel to ignore"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:412
+msgid "I'm ignoring %{ignored}"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:414
+msgid ""
+"have markov ignore the input from a hostmask or a channel. usage: markov "
+"ignore add <mask or channel>; markov ignore remove <mask or channel>; markov "
+"ignore list"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:428
+msgid "markov has a %{prob}% chance of chipping in"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:468 data/rbot/plugins/markov.rb:485
+msgid "I can't :("
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:542
+msgid "no such file"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:547
+msgid "the file is empty!"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:574
+msgid "example matches for that pattern at lines %{range} include: %{lines}"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:579
+msgid "the pattern doesn't match anything at lines %{range}"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:584
+msgid "learning from the file without a pattern would learn, for example: "
+msgstr ""

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2007-07-09 01:39-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Chinese\n"
@@ -15,10 +15,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/keywords.rb:457
+#: data/rbot/plugins/keywords.rb:461
 msgid "couldn't find keyword %{key}"
 msgstr ""
 
-#: data/rbot/plugins/keywords.rb:506
+#: data/rbot/plugins/keywords.rb:510
 msgid "failed to export keywords as factoids (%{err})"
 msgstr ""

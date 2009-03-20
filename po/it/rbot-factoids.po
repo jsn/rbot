@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2008-06-20 01:10+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -55,8 +55,8 @@ msgstr ""
 "factoids plugin: learn that <factoid>, forget that <factoids>, facts about "
 "<words>"
 
-#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:404
-#: data/rbot/plugins/factoids.rb:436
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:409
+#: data/rbot/plugins/factoids.rb:441
 msgid "please select a fact number between 1 and %{total}"
 msgstr "per favore seleziona un numero di fatto tra 1 e %{total}"
 
@@ -80,7 +80,7 @@ msgstr "[%{idx}/%{total}] %{fact}"
 msgid "I know %{total} facts"
 msgstr "conosco %{total} fatti"
 
-#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:420
+#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:425
 msgid "I know nothing about %{words}"
 msgstr "non so niente circa %{words}"
 
@@ -89,22 +89,22 @@ msgid "%{len} out of %{total} facts refer to %{words}, I'll only show %{max}"
 msgstr ""
 "%{len} di %{total} fatti si riferiscono a %{words}, ne mostrerò solo %{max}"
 
-#: data/rbot/plugins/factoids.rb:412
+#: data/rbot/plugins/factoids.rb:417
 msgid "I know nothing"
 msgstr "non so niente"
 
-#: data/rbot/plugins/factoids.rb:452
+#: data/rbot/plugins/factoids.rb:457
 msgid "not a date '%{dstr}'"
 msgstr "'%{dstr}' non è una data"
 
-#: data/rbot/plugins/factoids.rb:460
+#: data/rbot/plugins/factoids.rb:465
 msgid "couldn't change learn data for fact %{fact}: %{err}"
 msgstr "non sono riuscito a cambiare i dati per il fatto %{fact}: %{err}"
 
-#: data/rbot/plugins/factoids.rb:475
+#: data/rbot/plugins/factoids.rb:480
 msgid "failed to import facts from %{fname}: %{err}"
 msgstr "impossibile importare i fatti da %{fname}: %{err}"
 
-#: data/rbot/plugins/factoids.rb:480
+#: data/rbot/plugins/factoids.rb:485
 msgid "%{len} facts loaded from %{fname}"
 msgstr "%{len} fatti caricati da %{fname}"

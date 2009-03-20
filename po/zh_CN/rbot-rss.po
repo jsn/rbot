@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-01 23:50+0100\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2007-07-09 01:39-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Chinese\n"
@@ -15,10 +15,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/rss.rb:868
+#: data/rbot/plugins/rss.rb:888
 msgid "no such feed %{handle}"
 msgstr ""
 
-#: data/rbot/plugins/rss.rb:969
+#: data/rbot/plugins/rss.rb:989
 msgid "feed %{feed} had %{num} updates, showing the latest %{max}"
 msgstr ""

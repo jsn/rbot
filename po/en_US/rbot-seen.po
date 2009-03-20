@@ -1,0 +1,72 @@
+#: data/rbot/plugins/seen.rb:13
+msgid "Maximum number of seen users to return in search (0 = no limit)."
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:16
+msgid "seen <nick> => have you seen, or when did you last see <nick>"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:40
+msgid "nope!"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:87
+msgid "%{nick} was last seen %{when}, %{doing}"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:88
+msgid ""
+"%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:95 data/rbot/plugins/seen.rb:128
+msgid "saying \"%{message}\""
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:97
+msgid "doing *%{nick} %{message}*"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:107
+msgid "a moment"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:109
+msgid "a while"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:121
+msgid "just now"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:123
+msgid "%{time} ago"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:130
+msgid "doing *%{message}*"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:132
+msgid "changing nick from %{nick} to %{message}"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:135
+msgid "leaving %{where}"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:137
+msgid "leaving %{where} (%{message})"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:140
+msgid "joining %{where}"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:142
+msgid "quitting IRC (%{message})"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:144
+msgid "changing the topic of %{where} to \"%{message}\""
+msgstr ""
