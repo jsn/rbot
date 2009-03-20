@@ -94,7 +94,7 @@ class SeenPlugin < Plugin
       when :PUBLIC
         _("saying \"%{message}\"")
       when :ACTION
-        _("doing *%{message}*")
+        _("doing *%{nick} %{message}*")
       end % {
         :nick => saw.nick,
         :message => before.message
