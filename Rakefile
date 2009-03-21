@@ -4,54 +4,16 @@ require 'rake/gempackagetask'
 
 task :default => [:buildext]
 
-spec = Gem::Specification.new do |s|
-  s.name = 'rbot'
-  s.version = '0.9.15'
-  s.summary = <<-EOF
-    A modular ruby IRC bot.
-  EOF
-  s.description = <<-EOF
-    A modular ruby IRC bot specifically designed for ease of extension via plugins.
-  EOF
-  s.requirements << 'Ruby, version 1.8.0 (or newer)'
-
-  s.files = FileList[
-	  'lib/**/*.rb',
-	  'bin/*',
-	  'data/rbot/**/*',
-	  'AUTHORS',
-	  'COPYING',
-	  'README',
-	  'REQUIREMENTS',
-	  'TODO',
-	  'ChangeLog',
-	  'INSTALL',
-	  'Usage_en.txt',
-	  'setup.rb',
-	  'launch_here.rb',
-	  'po/*.pot',
-	  'po/**/*.po'
-  ]
-
-  s.bindir = 'bin'
-  s.executables = ['rbot', 'rbot-remote']
-  s.default_executable = 'rbot'
-  s.extensions = 'Rakefile'
-
-#  s.autorequire = 'rbot/ircbot'
-  s.has_rdoc = true
-  s.rdoc_options = ['--exclude', 'post-install.rb',
-  '--title', 'rbot API Documentation', '--main', 'README', 'README']
-
-  s.author = 'Tom Gilbert'
-  s.email = 'tom@linuxbrit.co.uk'
-  s.homepage = 'http://ruby-rbot.org'
-  s.rubyforge_project = 'rbot'
-end
-
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.need_zip = true
-  pkg.need_tar = true
+SPECFILE = 'rbot.gemspec'
+# The Rakefile is also used after installing the gem, to build
+# the .mo files. Since in this case the SPECFILE is not available,
+# we must (and can) skip defining the gem packaging tasks.
+if File.exist? SPECFILE
+  spec = eval(File.read(SPECFILE), nil, SPECFILE)
+  Rake::GemPackageTask.new(spec) do |pkg|
+    pkg.need_zip = true
+    pkg.need_tar = true
+  end
 end
 
 # normalize a po/pot file

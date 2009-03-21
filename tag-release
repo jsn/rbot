@@ -18,7 +18,7 @@ echo "Version: $VERSION"
 
 sed -i -e "/^\$version =/ c \$version = '$FULLVERSION'" launch_here.rb
 sed -i -e "/^\$version ||=/ c \$version ||= '$FULLVERSION'" bin/rbot
-sed -i -e "/^  s.version =/ c \  s.version = '$VERSION'" Rakefile
+sed -i -e "/^  s.version =/ c \  s.version = '$VERSION'" rbot.gemspec
 
 NOGIT=${FULLVERSION/-git/}
 if [ $NOGIT == $FULLVERSION ]; then
