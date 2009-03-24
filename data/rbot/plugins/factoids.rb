@@ -341,7 +341,7 @@ class FactoidsPlugin < Plugin
     if params[:words].nil_or_empty? and params[:rx].nil_or_empty?
       m.reply _("I know %{total} facts" % { :total => total })
     else
-      if params[:words].empty?
+      unless params.key? :words and not params[:words].empty?
         rx = Regexp.new(params[:rx].to_s, true)
       else
         rx = words2rx(params[:words])
