@@ -535,8 +535,6 @@ class Bot
       return nil, "template #{@template} is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
       return nil, "template #{@template} is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
 
-      options = {}
-
       matching = @regexp.match(m.message)
       return nil, "#{m.message.inspect} doesn't match #{@template} (#{@regexp})" unless matching
       return nil, "#{m.message.inspect} only matches #{@template} (#{@regexp}) partially: #{matching[0].inspect}" unless matching[0] == m.message
@@ -544,6 +542,8 @@ class Bot
       debug_match = matching[1..-1].collect{ |d| d.inspect}.join(', ')
       debug "#{m.message.inspect} matched #{@regexp} with #{debug_match}"
       debug "Associating #{debug_match} with dyn items #{@dyn_items.join(', ')}"
+
+      options = @defaults.dup
 
       @dyn_items.each_with_index { |it, i|
         next if i == 0
