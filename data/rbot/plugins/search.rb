@@ -21,6 +21,7 @@ GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h2 class=r[^>]*><b>(.+?)</b>}
 GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
 GOOGLE_DEF_RESULT = %r{<p> (Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
+GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 class SearchPlugin < Plugin
   Config.register Config::IntegerValue.new('google.hits',
@@ -228,6 +229,32 @@ class SearchPlugin < Plugin
     params[:firstpar] = @bot.config['wikipedia.first_par']
     return google(m, params)
   end
+
+  def time(m, params)
+    where = params[:words].to_s
+    where.sub!(/^\s*in\s*/, '')
+    searchfor = CGI.escape("time in " + where)
+    url = GOOGLE_SEARCH + searchfor
+
+    begin
+      html = @bot.httputil.get(url)
+    rescue => e
+      m.reply "Error googletiming #{where}"
+      return
+    end
+
+    debug html
+    results = html.scan(GOOGLE_TIME_RESULT)
+    debug "results: #{results.inspect}"
+
+    if results.length != 1
+      m.reply "Couldn't find the time for #{where} on Google"
+      return
+    end
+
+    time = results[0][0].ircify_html
+    m.reply "#{time}"
+  end
 end
 
 plugin = SearchPlugin.new
@@ -241,4 +268,5 @@ plugin.map "gdef *words", :action => 'gdef', :threaded => true
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
 plugin.map "wp *words", :action => 'wikipedia', :threaded => true
 plugin.map "unpedia *words", :action => 'unpedia', :threaded => true
+plugin.map "time *words", :action => 'time', :threaded => true
 
