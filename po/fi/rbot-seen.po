@@ -81,7 +81,7 @@ msgstr "lähtemässä kanavalta %{where} (%{message})"
 
 #: data/rbot/plugins/seen.rb:140
 msgid "joining %{where}"
-msgstr "liittymässä kanavalle %{where}"
+msgstr "liittyessään kanavalle %{where}"
 
 #: data/rbot/plugins/seen.rb:142
 msgid "quitting IRC (%{message})"
