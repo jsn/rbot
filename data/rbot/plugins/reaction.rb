@@ -204,6 +204,8 @@ class ReactionPlugin < Plugin
       help(:react)
     when :remove, :delete, :rm, :del
       "reaction #{topic} <trigger> [<n>] => removes reactions to expression <trigger>. If <n> (a positive integer) is specified, only remove the n-th reaction, otherwise remove the trigger completely"
+    when :move
+      "reaction move <trigger> to <other> => move all reactions to <trigger> to the new trigger <other>"
     when :chance, :chances
       "reaction chances are expressed either in terms of percentage (like 30%) or in terms of floating point numbers (like 0.3), and are clipped to be " +
       "between 0 and 1 (i.e. 0% and 100%). A reaction can have multiple replies, each with a different chance; if the total of the chances is less than one, " +
@@ -225,7 +227,7 @@ class ReactionPlugin < Plugin
     when :show
       "reaction show <trigger>: list the programmed replies to trigger <trigger>"
     else
-      "reaction topics: add, remove, delete, rm, del, triggers, replies, chance, list, show"
+      "reaction topics: add, remove, delete, rm, del, move, triggers, replies, chance, list, show"
     end
   end
 
