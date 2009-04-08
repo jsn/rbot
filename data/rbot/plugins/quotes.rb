@@ -126,6 +126,17 @@ class QuotePlugin < Plugin
     end
   end
 
+  def listquotes(source, channel, regexp)
+    return nil unless(@lists.has_key?(channel))
+    return nil unless(@lists[channel].length > 0)
+    matches = @lists[channel].compact.find_all {|a| a.quote =~ /#{regexp}/i }
+    if matches.length > 0
+      return matches
+    else
+      return nil
+    end
+  end
+
   def help(plugin, topic="")
     case plugin
     when "addquote"
@@ -136,6 +147,8 @@ class QuotePlugin < Plugin
       _("getquote [<channel>] [<num>] => get quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately. Without <num>, a random quote will be returned.") % { :nick => @bot.nick }
     when "searchquote"
       _("searchquote [<channel>] <regexp> => search for quote from <channel> that matches <regexp>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
+    when "listquotes"
+      _("listquotes [<channel>] <regexp> => list the quotes from <channel> that match <regexp>. You only need to supply <channel> if you are addressing %{nick} privately.") % { :nick => @bot.nick }
     when "topicquote"
       _("topicquote [<channel>] [<num>] => set topic to quote from <channel> with number <num>. You only need to supply <channel> if you are addressing %{nick} privately. Without <num>, a random quote will be set.") % { :nick => @bot.nick }
     when "countquote"
@@ -147,7 +160,7 @@ class QuotePlugin < Plugin
     when "lastquote"
       _("lastquote [<channel>] => show the last quote in a given channel. You only need to supply <channel> if you are addressing %{nick} privately") % { :nick => @bot.nick }
     else
-      _("Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, topicquote, countquote, whoquote, whenquote, lastquote") % { :nick => @bot.nick }
+      _("Quote module (Quote storage and retrieval) topics: addquote, delquote, getquote, searchquote, listquotes, topicquote, countquote, whoquote, whenquote, lastquote") % { :nick => @bot.nick }
     end
   end
 
@@ -224,6 +237,20 @@ class QuotePlugin < Plugin
     end
   end
 
+  def cmd_listquotes(m, p)
+    channel = p[:channel] || m.channel.to_s
+    reg = p[:reg].to_s
+    if quotes = listquotes(m.source, channel, reg)
+      m.reply _("%{total} quotes matching %{reg} found: %{list}") % {
+        :total => quotes.size,
+        :reg => reg,
+        :list => quotes.map {|q| q.num }.join(', ')
+      }
+    else
+      m.reply _("quote not found!")
+    end
+  end
+
   def cmd_countquote(m, p)
     channel = p[:channel] || m.channel.to_s
     reg = p[:reg] ? p[:reg].to_s : nil
@@ -278,6 +305,7 @@ plugin.map "getquote :channel [:num]", :action => :cmd_getquote, :requirements =
 plugin.map "whoquote :channel :num", :action => :cmd_whoquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::who!'
 plugin.map "whenquote :channel :num", :action => :cmd_whenquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::view::when!'
 plugin.map "searchquote :channel *reg", :action => :cmd_searchquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::search!'
+plugin.map "listquotes :channel *reg", :action => :cmd_listquotes, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::list!'
 plugin.map "countquote :channel [*reg]", :action => :cmd_countquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::count!'
 plugin.map "topicquote :channel [:num]", :action => :cmd_topicquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN, :num => /^\d+$/ }, :auth_path => '!quote::other::topic!'
 plugin.map "lastquote :channel", :action => :cmd_lastquote, :requirements => { :channel => Regexp::Irc::GEN_CHAN }, :auth_path => '!quote::other::view::last!'
@@ -291,6 +319,7 @@ plugin.map "getquote [:num]", :action => :cmd_getquote, :private => false, :requ
 plugin.map "whoquote :num", :action => :cmd_whoquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::view::who!'
 plugin.map "whenquote :num", :action => :cmd_whenquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::view::when!'
 plugin.map "searchquote *reg", :action => :cmd_searchquote, :private => false, :auth_path => '!quote::view::search!'
+plugin.map "listquotes *reg", :action => :cmd_listquotes, :private => false, :auth_path => '!quote::view::list!'
 plugin.map "countquote [*reg]", :action => :cmd_countquote, :private => false, :auth_path => '!quote::view::count!'
 plugin.map "topicquote [:num]", :action => :cmd_topicquote, :private => false, :requirements => { :num => /^\d+$/ }, :auth_path => '!quote::topic!'
 plugin.map "lastquote", :action => :cmd_lastquote, :private => false, :auth_path => '!quote::view::last!'
