@@ -293,6 +293,25 @@ module ::Irc
       }
     end
 
+    # Try executing an external program, returning true if the run was successful
+    # and false otherwise
+    def Utils.try_exec(command, *args)
+      IO.popen("-") { |p|
+        if p.nil?
+          begin
+            $stderr.reopen($stdout)
+            exec(command, *args)
+          rescue Exception => e
+            Kernel::exit! 1
+          end
+          Kernel::exit! 1
+        else
+          debug p.readlines
+        end
+      }
+      debug $?
+      return $?.success?
+    end
 
     # Safely (atomically) save to _file_, by passing a tempfile to the block
     # and then moving the tempfile to its final location when done.
