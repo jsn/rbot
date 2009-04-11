@@ -87,7 +87,7 @@ class KarmaPlugin < Plugin
 
       if op && arg
         ac[arg] ||= 0
-        ac[arg] += (op == '--' ? -1 : 1)
+        ac[arg] += (op == '--' ? -1 : 1) unless arg.downcase == m.sourcenick.downcase
         op = arg = nil
       end
     end
