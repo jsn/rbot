@@ -58,10 +58,10 @@ class FigletPlugin < Plugin
 
   def test_figlet
     #check that figlet is present
-    @has[:figlet] = !!(Utils.safe_exec("#{figlet_path} -v") ; $?)
+    @has[:figlet] = Utils.try_exec("#{figlet_path} -v")
 
     # check that figlet actually has the font installed
-    @has[:figlet_font] = !!(Utils.safe_exec("#{figlet_path} -f #{figlet_font} test test test") ; $?)
+    @has[:figlet_font] = Utils.try_exec("#{figlet_path} -f #{figlet_font} test test test")
 
     # set the commandline params
     @params[:figlet] = ['-k', '-w', MAX_WIDTH.to_s, '-C', 'utf8']
@@ -72,10 +72,10 @@ class FigletPlugin < Plugin
 
   def test_toilet
     #check that toilet is present
-    @has[:toilet] = !!(Utils.safe_exec("#{toilet_path} -v") ; $?)
+    @has[:toilet] = Utils.try_exec("#{toilet_path} -v")
 
     # check that toilet actually has the font installed
-    @has[:toilet_font] = !!(Utils.safe_exec("#{toilet_path} -f #{toilet_font} test test test") ; $?)
+    @has[:toilet_font] = Utils.try_exec("#{toilet_path} -f #{toilet_font} test test test")
 
     # set the commandline params
     @params[:toilet] = ['-k', '-w', MAX_WIDTH.to_s, '-E', 'utf8', '--irc']
