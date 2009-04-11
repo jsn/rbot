@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+<!--
+
+Process this file with an XSLT processor: `xsltproc \
+-''-nonet /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/\
+manpages/docbook.xsl manpage.dbk'.  A manual page
+<package>.<section> will be generated.  You may view the
+manual page with: nroff -man <package>.<section> | less'.  A
+typical entry in a Makefile or Makefile.am is:
+
+DB2MAN=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/\
+manpages/docbook.xsl
+XP=xsltproc -''-nonet
+
+manpage.1: manpage.dbk
+        $(XP) $(DB2MAN) $<
+    
+The xsltproc binary is found in the xsltproc package.  The
+XSL files are in docbook-xsl.  Please remember that if you
+create the nroff version in one of the debian/rules file
+targets (such as build), you will need to include xsltproc
+and docbook-xsl in your Build-Depends control field.
+
+-->
+
+  <!-- Fill in your name for FIRSTNAME and SURNAME. -->
+  <!ENTITY dhfirstname "<firstname>Marc</firstname>">
+  <!ENTITY dhsurname   "<surname>Dequ\[`e]nes</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!ENTITY dhdate      "<date>20090401</date>">
+  <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
+       allowed: see man(7), man(1). -->
+  <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
+  <!ENTITY dhemail     "<email>Duck@DuckCorp.org</email>">
+  <!ENTITY dhusername  "Marc Dequ\[`e]nes (Duck)">
+  <!ENTITY dhucpackage "<refentrytitle>RBOT</refentrytitle>">
+  <!ENTITY dhpackage   "rbot">
+
+  <!ENTITY debian      "<productname>Debian</productname>">
+  <!ENTITY gnu         "<acronym>GNU</acronym>">
+  <!ENTITY gpl         "&gnu; <acronym>GPL</acronym>">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2004-2009</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    &dhdate;
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhpackage;</refname>
+
+    <refpurpose>IRC bot written in ruby</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+
+        <group choice="opt">
+           <group choice="req">
+	  	<arg><option>-d</option></arg>
+	  	<arg><option>--debug</option></arg>
+           </group>
+           <group choice="req">
+	  	<arg><option>-h</option></arg>
+	  	<arg><option>--help</option></arg>
+           </group>
+           <group choice="req">
+	  	<arg><option>-v</option></arg>
+	  	<arg><option>--version</option></arg>
+           </group>
+           <group choice="req">
+	  	<arg><option>-l LEVEL</option></arg>
+	  	<arg><option>--loglevel LEVEL</option></arg>
+           </group>
+           <group choice="req">
+	  	<arg><option>-b</option></arg>
+	  	<arg><option>--background</option></arg>
+           </group>
+           <group choice="req">
+	  	<arg><option>-p PIDFILE</option></arg>
+	  	<arg><option>--pidfile PIDFILE</option></arg>
+           </group>
+	</group>
+
+	<arg choice="opt" rep="norepeat">confdir</arg>
+
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>DESCRIPTION</title>
+
+    <para><command>&dhpackage;</command> starts the Rbot (ruby IRC bot).</para>
+
+  </refsect1>
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <para>This program follow the usual &gnu; command line syntax,
+      with long options starting with two dashes (`-').  A summary of
+      options is included below.</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-d</option></term>
+        <term><option>--debug</option></term>
+        <listitem>
+          <para>Display debug information (very verbose).</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-h</option></term>
+        <term><option>--help</option></term>
+        <listitem>
+          <para>Show summary of options.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-v</option></term>
+        <term><option>--version</option></term>
+        <listitem>
+          <para>Display version information.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-l <parameter>LEVEL</parameter></option></term>
+        <term><option>--loglevel <parameter>LEVEL</parameter></option></term>
+        <listitem>
+          <para>
+             Sets the minimum log level verbosity. Possible values for the
+             loglevel are 0 (DEBUG), 1 (INFO), 2 (WARN), 3 (ERROR), 4
+             (FATAL). The default loglevel is 1 (INFO messages). The logfile
+             is located at BOTDIR/BOTNAME.log and doesn't contain IRC logs
+             (which are located at BOTDIR/logs/*), but only rbot diagnostic
+             messages.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-b</option></term>
+        <term><option>--background</option></term>
+        <listitem>
+          <para>Background (daemonize) the bot.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-p <parameter>PIDFILE</parameter></option></term>
+        <term><option>--pidfile <parameter>PIDFILE</parameter></option></term>
+        <listitem>
+          <para>Write the bot pid to PIDFILE. The default pidfile is BOTDIR/rbot.pid.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><parameter>CONFDIR</parameter></term>
+        <listitem>
+          <para>Path to the directory where are stored the bot's configuration files. The default config directory is ~/.rbot.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>This manual page was written by &dhusername; &dhemail; for
+      the &debian; system (but may be used by others).  Permission is
+      granted to copy, distribute and/or modify this document under
+      the terms of the &gnu; General Public License, Version 3 or
+      any later version published by the Free Software Foundation.
+    </para>
+	<para>
+	  On Debian systems, the complete text of the GNU General Public
+	  License can be found in /usr/share/common-licenses/GPL.
+	</para>
+
+  </refsect1>
+</refentry>
+
