@@ -377,7 +377,7 @@ class RSSFeedsPlugin < Plugin
 
   # Define default output filters (rss types), and load custom ones.
   # Custom filters are looked for in the plugin's default filter locations
-  # and in rss/types under botclass.
+  # and in rss/types.rb under botclass.
   # Preferably, the rss_type method should be used in these files, e.g.:
   #   rss_type :my_type do |s|
   #     line1 = "%{handle} and some %{author} info"
