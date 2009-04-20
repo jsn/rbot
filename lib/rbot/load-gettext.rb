@@ -22,25 +22,33 @@ begin
 
   include GetText
 
-  add_default_locale_path(File.join(Irc::Bot::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo"))
+  rbot_locale_path = File.join(Irc::Bot::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo")
+  if gettext_version < [2, 0, 0]
+    add_default_locale_path(rbot_locale_path)
+  else
+    LocalePath.add_default_rule(rbot_locale_path)
+  end
 
   if GetText.respond_to? :cached=
     GetText.cached = false
+  elsif TextDomain.respond_to? :cached=
+    TextDomain.cached = false
   else
     warning 'This version of ruby-gettext does not support non-cached mode; mo files are not reloaded when setting language'
   end
   bindtextdomain 'rbot'
 
   module GetText
-    # patch for ruby-gettext 1.8.0 up to 1.10.0 (and more?) to cope with anonymous
-    # modules used by rbot
-    # FIXME remove the patch when ruby-gettext is fixed, or rbot switches to named modules
-    if !instance_methods.include?('orig_bound_targets')
+    # patch for ruby-gettext 1.x to cope with anonymous modules used by rbot.
+    # bound_targets and related methods are not used nor present in 2.x, and
+    # this patch is not needed
+    if instance_methods.include?('bound_targets') and not instance_methods.include?('orig_bound_targets')
       alias :orig_bound_targets :bound_targets
-    end
-    def bound_targets(*a)  # :nodoc:
-      bt = orig_bound_targets(*a) rescue []
-      bt.empty? ? orig_bound_targets(Object) : bt
+
+      def bound_targets(*a)  # :nodoc:
+        bt = orig_bound_targets(*a) rescue []
+        bt.empty? ? orig_bound_targets(Object) : bt
+      end
     end
 
     require 'stringio'
