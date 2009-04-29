@@ -374,5 +374,7 @@ class TranslatorPlugin < Plugin
 end
 
 plugin = TranslatorPlugin.new
+plugin.map 'translate [:from] [:to] *phrase',
+           :action => :cmd_translator, :thread => true
 plugin.map 'translator [:from] [:to] *phrase',
            :action => :cmd_translator, :thread => true
