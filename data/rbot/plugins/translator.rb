@@ -318,6 +318,10 @@ class TranslatorPlugin < Plugin
     end
   end
 
+  def languages
+    @languages ||= @translators.map { |t| t.last.directions.keys }.flatten.uniq
+  end
+
   def update_default
     @default_translators = bot.config['translator.default_list'] & @translators.keys
   end
@@ -374,7 +378,9 @@ class TranslatorPlugin < Plugin
 end
 
 plugin = TranslatorPlugin.new
+req = Hash[*%w(from to).map { |e| [e.to_sym, /#{plugin.languages.join("|")}/] }.flatten]
+
 plugin.map 'translate [:from] [:to] *phrase',
-           :action => :cmd_translator, :thread => true
+           :action => :cmd_translator, :thread => true, :requirements => req
 plugin.map 'translator [:from] [:to] *phrase',
-           :action => :cmd_translator, :thread => true
+           :action => :cmd_translator, :thread => true, :requirements => req
