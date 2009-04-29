@@ -266,6 +266,9 @@ class TranslatorPlugin < Plugin
   Config.register Config::IntegerValue.new('translator.timeout',
     :default => 30, :validate => Proc.new{|v| v > 0},
     :desc => _("Number of seconds to wait for the translation service before timeout"))
+  Config.register Config::StringValue.new('translator.destination',
+    :default => "en",
+    :desc => _("Default destination language to be used with translate command"))
 
   TRANSLATORS = {
     'nifty' => NiftyTranslator,
@@ -320,8 +323,9 @@ class TranslatorPlugin < Plugin
   end
 
   def cmd_translator(m, params)
-    from, to = params[:from], params[:to]
-    translator = @default_translators.find {|t| @translators[t].support?(from, to)}
+    params[:to] = @bot.config['translator.destination'] if params[:to].nil?
+
+    translator = @default_translators.find {|t| @translators[t].support?(params[:from], params[:to])}
     if translator
       cmd_translate m, params.merge({:translator => translator, :show_provider => true})
     else
@@ -362,5 +366,5 @@ class TranslatorPlugin < Plugin
 end
 
 plugin = TranslatorPlugin.new
-plugin.map 'translator :from :to *phrase',
+plugin.map 'translator :from [:to] *phrase',
            :action => :cmd_translator, :thread => true
