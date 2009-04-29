@@ -353,7 +353,7 @@ class TranslatorPlugin < Plugin
         end
         m.reply(if params[:show_provider]
                   _('%{translation} (provided by %{translator})') %
-                    {:translation => translation, :translator => tname}
+                    {:translation => translation, :translator => tname.gsub("_", " ")}
                 else
                   translation
                 end)
