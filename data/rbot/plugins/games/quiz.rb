@@ -33,9 +33,6 @@ define_structure :QuizBundle, :question, :answer
 define_structure :PlayerStats, :score, :jokers, :jokers_time
 # Why do we still need jokers_time? //Firetech
 
-# Maximum number of jokers a player can gain
-Max_Jokers = 3
-
 # Control codes
 Color = "\003"
 Bold = "\002"
@@ -163,6 +160,11 @@ class QuizPlugin < Plugin
   Config.register Config::ArrayValue.new('quiz.sources',
     :default => ['quiz.rbot'],
     :desc => "List of files and URLs that will be used to retrieve quiz questions")
+
+
+  Config.register Config::IntegerValue.new('quiz.max_jokers',
+    :default => 3,
+    :desc => "Maximum number of jokers a player can gain")
 
   def initialize()
     super
@@ -406,7 +408,7 @@ class QuizPlugin < Plugin
       player.score = player.score + points
 
       # Reward player with a joker every X points
-      if player.score % 15 == 0 and player.jokers < Max_Jokers
+      if player.score % 15 == 0 and player.jokers < @bot.config['quiz.max_jokers']
         player.jokers += 1
         m.reply "#{nick} gains a new joker. Rejoice :)"
       end
@@ -899,7 +901,7 @@ class QuizPlugin < Plugin
     debug q.rank_table.inspect
 
     nick = params[:nick]
-    val = [params[:jokers].to_i, Max_Jokers].min
+    val = [params[:jokers].to_i, @bot.config['quiz.max_jokers']].min
     if q.registry.has_key?(nick)
       player = q.registry[nick]
       player.jokers = val
