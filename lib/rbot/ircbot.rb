@@ -211,9 +211,14 @@ class Bot
     @client.user
   end
 
-  # bot User in the client/server connection
+  # bot nick in the client/server connection
   def nick
     myself.nick
+  end
+
+  # bot channels in the client/server connection
+  def channels
+    myself.channels
   end
 
   # nick wanted by the bot. This defaults to the irc.nick config value,
