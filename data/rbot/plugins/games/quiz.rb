@@ -218,8 +218,7 @@ class QuizPlugin < Plugin
 
         # Local data
         begin
-          file = File.new( path, File::RDONLY )
-          data << "\n\n" << file.read
+          data << "\n\n" << File.read(path)
         rescue
           m.reply "Failed to read from local database file #{p}, skipping."
         end
