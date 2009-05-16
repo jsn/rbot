@@ -174,6 +174,13 @@ module ::RSS
       :dc_creator => %w{dc_creator}
     }.each { |name, chain| def_bang name, chain }
 
+    def categories!
+      cats = categories.map do |c|
+        blank2nil { c.content rescue c rescue nil }
+      end.compact
+      cats.empty? ? nil : cats
+    end
+
     protected
     def blank2nil(&block)
       x = yield
@@ -1112,6 +1119,7 @@ class RSSFeedsPlugin < Plugin
     link = item.link!
     link.strip! if link
 
+    categories = item.categories!
     category = item.category! || item.dc_subject!
     category.strip! if category
     author = item.dc_creator! || item.author!
@@ -1134,6 +1142,7 @@ class RSSFeedsPlugin < Plugin
       :title => title,
       :title_wrap => Bold,
       :desc => desc, :link => link,
+      :categories => categories,
       :category => category, :author => author, :at => at
     }
     output = @bot.filter(key, stream_hash)
