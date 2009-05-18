@@ -62,11 +62,11 @@ class YouTubePlugin < Plugin
       :title =>  (e.elements["media:group/media:title"].text rescue nil),
       :desc =>   (e.elements["media:group/media:description"].text rescue nil),
       :cat => (e.elements["media:group/media:category"].text rescue nil),
-      :seconds => (e.elements["media:group/yt:duration/@seconds"].value.to_i rescue nil),
-      :url => (e.elements["media:group/media:player/@url"].value rescue nil),
-      :rating => (("%s/%s" % [e.elements["gd:rating/@average"].value, e.elements["gd:rating/@max"].value]) rescue nil),
-      :views => (e.elements["yt:statistics/@viewCount"].value rescue nil),
-      :faves => (e.elements["yt:statistics/@favoriteCount"].value rescue nil)
+      :seconds => (e.elements["media:group/yt:duration/"].attributes["seconds"].to_i rescue nil),
+      :url => (e.elements["media:group/media:player/"].attributes["url"] rescue nil),
+      :rating => (("%s/%s" % [e.elements["gd:rating"].attributes["average"], e.elements["gd:rating/@max"].value]) rescue nil),
+      :views => (e.elements["yt:statistics"].attributes["viewCount"] rescue nil),
+      :faves => (e.elements["yt:statistics"].attributes["favoriteCount"] rescue nil)
     }
     if vid[:desc]
       vid[:desc].gsub!(/\s+/m, " ")
@@ -77,12 +77,12 @@ class YouTubePlugin < Plugin
       vid[:duration] = _("unknown duration")
     end
     e.elements.each("media:group/media:content") { |c|
-      if url = (c.elements["@url"].value rescue nil)
-        type = c.elements["@type"].value rescue nil
-        medium = c.elements["@medium"].value rescue nil
-        expression = c.elements["@expression"].value rescue nil
-        seconds = c.elements["@duration"].value.to_i rescue nil
-        fmt = case num_fmt = (c.elements["@yt:format"].value rescue nil)
+      if url = (c.attributes["url"] rescue nil)
+        type = c.attributes["type"] rescue nil
+        medium = c.attributes["medium"] rescue nil
+        expression = c.attributes["expression"] rescue nil
+        seconds = c.attributes["duration"].to_i rescue nil
+        fmt = case num_fmt = (c.attributes["yt:format"] rescue nil)
               when "1"
                 "h263+amr"
               when "5"
