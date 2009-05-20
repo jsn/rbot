@@ -45,6 +45,8 @@ class SearchPlugin < Plugin
       "gcalc <equation> => use the google calculator to find the answer to <equation>"
     when "gdef"
       "gdef <term(s)> => use the google define mechanism to find a definition of <term(s)>"
+    when "gtime"
+      "gtime <location> => use the google clock to find the current time at <location>"
     when "wp"
       "wp [<code>] <string> => search for <string> on Wikipedia. You can select a national <code> to only search the national Wikipedia"
     when "unpedia"
@@ -230,7 +232,7 @@ class SearchPlugin < Plugin
     return google(m, params)
   end
 
-  def time(m, params)
+  def gtime(m, params)
     where = params[:words].to_s
     where.sub!(/^\s*in\s*/, '')
     searchfor = CGI.escape("time in " + where)
@@ -265,8 +267,8 @@ plugin.map "lucky *words", :action => 'lucky', :threaded => true
 plugin.map "gcount *words", :action => 'gcount', :threaded => true
 plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
 plugin.map "gdef *words", :action => 'gdef', :threaded => true
+plugin.map "gtime *words", :action => 'gtime', :threaded => true
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
 plugin.map "wp *words", :action => 'wikipedia', :threaded => true
 plugin.map "unpedia *words", :action => 'unpedia', :threaded => true
-plugin.map "time *words", :action => 'time', :threaded => true
 
