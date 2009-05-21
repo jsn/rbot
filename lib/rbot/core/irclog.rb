@@ -47,7 +47,7 @@ class IrcLogModule < CoreBotModule
   end
 
   def timestamp(time)
-    return time.strftime @bot.config['irclog.timestamp_format']
+    return time.strftime(@bot.config['irclog.timestamp_format'])
   end
 
   def event_irclog_list_changed(nolist, dolist)
@@ -289,7 +289,7 @@ class IrcLogModule < CoreBotModule
           # If it's a file, we rename to filename.old.filedate
           up = dir.dup
           until File.exist? up
-            up.replace File.dirname up
+            up.replace(File.dirname(up))
           end
           unless File.directory? up
             backup = up.dup

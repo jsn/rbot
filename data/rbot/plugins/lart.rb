@@ -45,8 +45,8 @@ class LartPlugin < Plugin
       @oldpraise = datafile 'praise'
     end
 
-    @lartfile.replace(datafile "larts-#{lang}")
-    @praisefile.replace(datafile "praises-#{lang}")
+    @lartfile.replace(datafile("larts-#{lang}"))
+    @praisefile.replace(datafile("praises-#{lang}"))
     @larts.clear
     @praises.clear
     if File.exists? @lartfile

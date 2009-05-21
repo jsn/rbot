@@ -390,7 +390,7 @@ class ShiritoriPlugin < Plugin
       if ruleset.has_key?(:wordlist_file)
         begin
           ruleset[:words] =
-            File.new(datafile ruleset[:wordlist_file]).grep(
+            File.new(datafile(ruleset[:wordlist_file])).grep(
               ruleset[:listen]) {|l| ruleset[:normalize].call l.chomp}
         rescue
           raise "unable to load word list"

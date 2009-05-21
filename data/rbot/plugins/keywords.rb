@@ -138,7 +138,7 @@ class Keywords < Plugin
   # have been added
   def scan
     # first scan for old DBHash files, and convert them
-    Dir[datafile '*'].each {|f|
+    Dir[datafile('*')].each {|f|
       next unless f =~ /\.db$/
       log "upgrading keyword db #{f} (rbot 0.9.5 or prior) database format"
       newname = f.gsub(/\.db$/, ".kdb")
@@ -153,7 +153,7 @@ class Keywords < Plugin
     }
 
     # then scan for current DBTree files, and load them
-    Dir[@bot.path 'keywords', '*'].each {|f|
+    Dir[@bot.path('keywords', '*')].each {|f|
       next unless f =~ /\.kdb$/
       hsh = DBTree.new @bot, f, true
       key = File.basename(f).gsub(/\.kdb$/, "")
@@ -162,7 +162,7 @@ class Keywords < Plugin
     }
 
     # then scan for non DB files, and convert/import them and delete
-    Dir[@bot.path 'keywords', '*'].each {|f|
+    Dir[@bot.path('keywords', '*')].each {|f|
       next if f =~ /\.kdb$/
       next if f =~ /CVS$/
       log "auto converting keywords from #{f}"
@@ -202,7 +202,7 @@ class Keywords < Plugin
       File.rename(olds, olds + ".old")
     end
 
-    olds.replace(@bot.path 'keyword.db')
+    olds.replace(@bot.path('keyword.db'))
     if File.exist? olds
       log "upgrading old keywords (rbot 0.9.9 or prior) database format"
       old = BDB::CIBtree.open olds, nil, "r+", 0600
@@ -221,7 +221,7 @@ class Keywords < Plugin
   end
 
   def oldsave
-    File.open(@bot.path "keywords.rbot", "w") do |file|
+    File.open(@bot.path("keywords.rbot"), "w") do |file|
       @keywords.each do |key, value|
         file.puts "#{key}<=#{value.type}=>#{value.dump}"
       end

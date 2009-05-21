@@ -789,7 +789,7 @@ class Bot
       missing = Dir.chdir(template_dir) { Dir.glob('*/**') } - Dir.chdir(@botclass) { Dir.glob('*/**') }
       missing.map do |f|
         dest = File.join(@botclass, f)
-        FileUtils.mkdir_p(File.dirname dest)
+        FileUtils.mkdir_p(File.dirname(dest))
         FileUtils.cp File.join(template_dir, f), dest
       end
     else

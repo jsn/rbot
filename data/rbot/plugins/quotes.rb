@@ -16,7 +16,7 @@ class QuotePlugin < Plugin
     super
     @lists = Hash.new
     @changed = Hash.new
-    Dir[datafile '*'].each {|f|
+    Dir[datafile('*')].each {|f|
       next if File.directory?(f)
       channel = File.basename(f)
       @lists[channel] = Array.new if(!@lists.has_key?(channel))
@@ -36,7 +36,7 @@ class QuotePlugin < Plugin
       begin
         if @changed[channel]
           debug "Writing new quotefile for channel #{channel} ..."
-          Utils.safe_save(datafile channel) {|file|
+          Utils.safe_save(datafile(channel)) {|file|
             quotes.compact.each {|q|
               file.puts "#{q.num} | #{q.date} | #{q.source} | #{q.quote}"
             }
