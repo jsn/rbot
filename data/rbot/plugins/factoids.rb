@@ -349,7 +349,11 @@ class FactoidsPlugin < Plugin
       known = @factoids.grep(rx)
       reply = []
       if known.empty?
-        reply << _("I know nothing about %{words}" % params)
+        if params.key? :words
+          reply << _("I know nothing about %{words}" % params)
+        else params.key? :rx
+          reply << _("I know nothing matching %{rx}" % params)
+        end
       else
         max_facts = @bot.config['factoids.search_results']
         len = known.length
