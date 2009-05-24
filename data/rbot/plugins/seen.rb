@@ -81,14 +81,16 @@ class SeenPlugin < Plugin
       reg.last
     end
 
-    before = reg.first
+    if reg.kind_of? Array
+      before = reg.first
+    end
 
     formats = {
       :normal      => _("%{nick} was last seen %{when}, %{doing}"),
       :with_before => _("%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}")
     }
 
-    if [:PART, :QUIT].include?(saw.type.to_sym) &&
+    if before && [:PART, :QUIT].include?(saw.type.to_sym) &&
        [:PUBLIC, :ACTION].include?(before.type.to_sym)
       did_before = case before.type.to_sym
       when :PUBLIC
