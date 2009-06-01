@@ -175,6 +175,7 @@ module ::RSS
     }.each { |name, chain| def_bang name, chain }
 
     def categories!
+      return nil unless self.respond_to? :categories
       cats = categories.map do |c|
         blank2nil { c.content rescue c rescue nil }
       end.compact
