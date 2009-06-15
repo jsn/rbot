@@ -78,10 +78,10 @@ class DeliciousPlugin < Plugin
       tags.tr(',', ' ').split(/\s+/).each do |t|
         if t.sub!(/^!/, '')
           case t
-          when 'nolog', 'no-log', 'dont-log', 'dontlog', 'skip':
+          when 'nolog', 'no-log', 'dont-log', 'dontlog', 'skip'
             debug "skipping #{url} on user request"
             return
-          when 'private', 'unshared', 'not-shared', 'notshared', 'hide':
+          when 'private', 'unshared', 'not-shared', 'notshared', 'hide'
             debug "hiding #{url} on user request"
             opts[:shared] = 'no'
           end

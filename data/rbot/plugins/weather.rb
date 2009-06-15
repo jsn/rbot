@@ -35,9 +35,9 @@ class CurrentConditions
             end
         rescue OpenURI::HTTPError => e
             case e
-            when /304/:
+            when /304/
                 @iscached = true
-            when /404/:
+            when /404/
                 raise "Data for #{@station} not found"
             else
                 raise "Error retrieving data: #{e}"

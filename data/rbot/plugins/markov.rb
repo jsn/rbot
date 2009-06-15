@@ -388,7 +388,7 @@ class MarkovPlugin < Plugin
     action = params[:action]
     user = params[:option]
     case action
-    when 'remove':
+    when 'remove'
       if @bot.config['markov.ignore'].include? user
         s = @bot.config['markov.ignore']
         s.delete user
@@ -397,7 +397,7 @@ class MarkovPlugin < Plugin
       else
         m.reply _("not found in list")
       end
-    when 'add':
+    when 'add'
       if user
         if @bot.config['markov.ignore'].include?(user)
           m.reply _("%{u} already in list") % { :u => user }
@@ -408,7 +408,7 @@ class MarkovPlugin < Plugin
       else
         m.reply _("give the name of a person or channel to ignore")
       end
-    when 'list':
+    when 'list'
       m.reply _("I'm ignoring %{ignored}") % { :ignored => @bot.config['markov.ignore'].join(", ") }
     else
       m.reply _("have markov ignore the input from a hostmask or a channel. usage: markov ignore add <mask or channel>; markov ignore remove <mask or channel>; markov ignore list")
