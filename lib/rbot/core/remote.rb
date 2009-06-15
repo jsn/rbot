@@ -136,7 +136,7 @@ class Bot
       raise "Botmodule #{botmodule.name} tried to unmap #{tmpl.inspect} that was handled by #{tmpl.botmodule}" unless tmpl.botmodule == botmodule.name
       debug "Unmapping #{tmpl.inspect}"
       @templates[handle] = nil
-      @templates.clear unless @templates.nitems > 0
+      @templates.clear unless @templates.compact.size > 0
     end
 
     # We redefine the handle() method from MessageMapper, taking into account

@@ -80,7 +80,7 @@ class QuotePlugin < Plugin
       end
     else
       # random quote
-      return @lists[channel].compact[rand(@lists[channel].nitems)],
+      return @lists[channel].compact.pick_one,
       @lists[channel].length - 1
     end
   end
