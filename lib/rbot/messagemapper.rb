@@ -384,7 +384,7 @@ class Bot
       mul = multi? ? " multi" : " single"
       opt = optional? ? " optional" : " needed"
       if @regexp
-        reg = " regexp=%s index=%d" % [@regexp, @index]
+        reg = " regexp=%s index=%s" % [@regexp, @index]
       else
         reg = nil
       end
