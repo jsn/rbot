@@ -98,6 +98,11 @@ rescue LoadError => e
   exit 2
 end
 
+# ruby 1.9 specific fixes
+unless RUBY_VERSION < '1.9'
+  require 'rbot/compat19'
+end
+
 if ($opts["version"])
   puts "rbot #{$version}"
   exit 0
