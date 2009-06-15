@@ -845,7 +845,7 @@ class Bot
       }
     end
     @default_send_options.update opts unless opts.empty?
-    end
+  end
 
   # checks if we should be quiet on a channel
   def quiet_on?(channel)
