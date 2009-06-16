@@ -125,6 +125,45 @@ class ::Array
     end
   end
 
+  # This method is an advanced version of #join
+  # allowing fine control of separators:
+  #
+  #   [1,2,3].conjoin(', ', ' and ')
+  #   => "1, 2 and 3
+  #
+  #   [1,2,3,4].conjoin{ |i, a, b| i % 2 == 0 ? '.' : '-' }
+  #   => "1.2-3.4"
+  #
+  # Code lifted from the ruby facets project:
+  # <http://facets.rubyforge.org>
+  # git-rev: c8b7395255b977d3c7de268ff563e3c5bc7f1441
+  # file: lib/core/facets/array/conjoin.rb
+  def conjoin(*args, &block)
+    return first.to_s if size < 2
+
+    sep = []
+
+    if block_given?
+      (size - 1).times do |i|
+        sep << yield(i, *slice(i, 2))
+      end
+    else
+      options = (Hash === args.last) ? args.pop : {}
+      separator = args.shift || ""
+      options[-1] = args.shift unless args.empty?
+
+      sep = [separator] * (size - 1)
+
+      if options.key?(:last)
+        options[-1] = options.delete(:last)
+      end
+      options[-1] ||= _(" and ")
+
+      options.each{ |i, s| sep[i] = s }
+    end
+
+    zip(sep).join
+  end
 end
 
 # Extensions to the Range class
