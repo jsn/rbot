@@ -48,8 +48,14 @@ class ::String
       dests = pars.split($;,2).first
       penalty += dests.split(',').size
     when :WHO
-      # I'm too lazy to implement this one correctly
-      penalty += 5
+      args = parts.split
+      if args.length > 0
+        penalty += args.inject(0){ |sum,x| sum += ((x.length > 4) ? 3 : 5) }
+      else
+        penalty += 10
+      end
+    when :PART
+      penalty += 4
     when :AWAY, :JOIN, :VERSION, :TIME, :TRACE, :WHOIS, :DNS
       penalty += 2
     when :INVITE, :NICK
