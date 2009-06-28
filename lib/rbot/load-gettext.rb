@@ -42,7 +42,7 @@ begin
     # patch for ruby-gettext 1.x to cope with anonymous modules used by rbot.
     # bound_targets and related methods are not used nor present in 2.x, and
     # this patch is not needed
-    if methods.include? 'bound_targets'
+    if method_defined? :bound_targets
       alias :orig_bound_targets :bound_targets
 
       def bound_targets(*a)  # :nodoc:

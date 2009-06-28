@@ -23,7 +23,7 @@ $log_thread = nil
 
 require 'pp'
 
-unless Kernel.instance_methods.include?("pretty_inspect")
+unless Kernel.respond_to? :pretty_inspect
   def pretty_inspect
     PP.pp(self, '')
   end

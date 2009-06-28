@@ -25,7 +25,7 @@ require 'zlib'
 module ::Net
   class HTTPResponse
     attr_accessor :no_cache
-    if !instance_methods.include?('raw_body')
+    unless method_defined? :raw_body
       alias :raw_body :body
     end
 
