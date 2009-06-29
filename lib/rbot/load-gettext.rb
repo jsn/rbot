@@ -10,6 +10,11 @@ end
 
 # try to load gettext, or provide fake getttext functions
 begin
+# workaround for gettext not checking empty LANGUAGE
+if ENV["LANGUAGE"] and ENV["LANGUAGE"].empty?
+  ENV.delete "LANGUAGE"
+end
+
   require 'gettext/version'
 
   gettext_version = GetText::VERSION.split('.').map {|n| n.to_i}
