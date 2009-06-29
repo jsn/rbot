@@ -124,7 +124,9 @@ class ::Array
       replace shuffle
     end
   end
+end
 
+module ::Enumerable
   # This method is an advanced version of #join
   # allowing fine control of separators:
   #
@@ -139,12 +141,14 @@ class ::Array
   # git-rev: c8b7395255b977d3c7de268ff563e3c5bc7f1441
   # file: lib/core/facets/array/conjoin.rb
   def conjoin(*args, &block)
-    return first.to_s if size < 2
+    num = count - 1
+
+    return first.to_s if num < 1
 
     sep = []
 
     if block_given?
-      (size - 1).times do |i|
+      num.times do |i|
         sep << yield(i, *slice(i, 2))
       end
     else
@@ -152,7 +156,7 @@ class ::Array
       separator = args.shift || ""
       options[-1] = args.shift unless args.empty?
 
-      sep = [separator] * (size - 1)
+      sep = [separator] * num
 
       if options.key?(:last)
         options[-1] = options.delete(:last)
