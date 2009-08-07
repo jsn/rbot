@@ -52,6 +52,57 @@ class Bot
   #   {:option => "bar", :otheroption => "baz"}
   # See the #map method for more details.
   class MessageMapper
+
+    class Failure
+      STRING   = "template %{template} failed to recognize message %{message}"
+      FRIENDLY = "I failed to understand the command"
+      attr_reader :template
+      attr_reader :message
+      def initialize(tmpl, msg)
+        @template = tmpl
+        @message = msg
+      end
+
+      def to_s
+        STRING % {
+          :template => template.template,
+          :regexp => template.regexp,
+          :message => message.message,
+          :action => template.options[:action]
+        }
+      end
+    end
+
+    # failures with a friendly message
+    class FriendlyFailure < Failure
+      def friendly
+        self.class::FRIENDLY rescue FRIENDLY
+      end
+    end
+
+    class NotPrivateFailure < FriendlyFailure
+      STRING   = "template %{template} is not configured for private messages"
+      FRIENDLY = "the command must not be given in private"
+    end
+
+    class NotPublicFailure < FriendlyFailure
+      STRING   = "template %{template} is not configured for public messages"
+      FRIENDLY = "the command must not be given in public"
+    end
+
+    class NoMatchFailure < Failure
+      STRING = "%{message} does not match %{template} (%{regex})"
+    end
+
+    class PartialMatchFailure < Failure
+      STRING = "%{message} only matches %{template} (%{regex}) partially"
+    end
+
+    class NoActionFailure < FriendlyFailure
+      STRING   = "%{template} calls undefined action %{action}"
+      FRIENDLY = "uh-ho, somebody forgot to tell me how to do that ..."
+    end
+
     # used to set the method name used as a fallback for unmatched messages.
     # The default fallback is a method called "usage".
     attr_writer :fallback
@@ -194,13 +245,13 @@ class Bot
       return false if @templates.empty?
       failures = []
       @templates.each do |tmpl|
-        options, failure = tmpl.recognize(m)
-        if options.nil?
-          failures << [tmpl, failure]
+        options = tmpl.recognize(m)
+        if options.kind_of? Failure
+          failures << options
         else
           action = tmpl.options[:action]
           unless @parent.respond_to?(action)
-            failures << [tmpl, "class does not respond to action #{action}"]
+            failures << NoActionFailure.new(tmpl, m)
             next
           end
           auth = tmpl.options[:full_auth_path]
@@ -228,13 +279,13 @@ class Bot
           return false
         end
       end
-      failures.each {|f, r|
-        debug "#{f.inspect} => #{r}"
+      failures.each {|r|
+        debug "#{r.template.inspect} => #{r}"
       }
       debug "no handler found, trying fallback"
       if @fallback && @parent.respond_to?(@fallback)
         if m.bot.auth.allow?(@fallback, m.source, m.replyto)
-          @parent.send(@fallback, m, {})
+          @parent.send(@fallback, m, {:failures => failures})
           return true
         end
       end
@@ -531,13 +582,12 @@ class Bot
 
       debug "Testing #{m.message.inspect} against #{self.inspect}"
 
-      # Early out
-      return nil, "template #{@template} is not configured for private messages" if @options.has_key?(:private) && !@options[:private] && m.private?
-      return nil, "template #{@template} is not configured for public messages" if @options.has_key?(:public) && !@options[:public] && !m.private?
-
       matching = @regexp.match(m.message)
-      return nil, "#{m.message.inspect} doesn't match #{@template} (#{@regexp})" unless matching
-      return nil, "#{m.message.inspect} only matches #{@template} (#{@regexp}) partially: #{matching[0].inspect}" unless matching[0] == m.message
+      return MessageMapper::NoMatchFailure.new(self, m) unless matching
+      return MessageMapper::PartialMatchFailure.new(self, m) unless matching[0] == m.message
+
+      return MessageMapper::NotPrivateFailure.new(self, m) if @options.has_key?(:private) && !@options[:private] && m.private?
+      return MessageMapper::NotPublicFailure.new(self, m) if @options.has_key?(:public) && !@options[:public] && !m.private?
 
       debug_match = matching[1..-1].collect{ |d| d.inspect}.join(', ')
       debug "#{m.message.inspect} matched #{@regexp} with #{debug_match}"
@@ -589,7 +639,7 @@ class Bot
       }
 
       options.delete_if {|k, v| v.nil?} # Remove nil values.
-      return options, nil
+      return options
     end
 
     def inspect

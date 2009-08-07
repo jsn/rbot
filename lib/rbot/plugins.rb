@@ -341,6 +341,15 @@ module Plugins
     # MessageMapper uses 'usage' as its default fallback method.
     #
     def usage(m, params = {})
+      if params[:failures].respond_to? :find
+        friendly = params[:failures].find do |f|
+          f.kind_of? MessageMapper::FriendlyFailure
+        end
+        if friendly
+          m.reply friendly.friendly
+          return
+        end
+      end
       m.reply(_("incorrect usage, ask for help using '%{command}'") % {:command => "#{@bot.nick}: help #{m.plugin}"})
     end
 
