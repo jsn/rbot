@@ -30,7 +30,7 @@ class NickServPlugin < Plugin
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_ident_request", v },
     :desc => _("String to look for to see if the nick server is asking us to identify"))
   Config.register Config::StringValue.new('nickserv.nick_avail',
-    :default => "not (currently )?online|killed|recovered|disconnesso|libero",
+    :default => "not (currently )?online|killed|ghosted|recovered|disconnesso|libero",
     :requires_restart => false,
     :on_change => Proc.new { |bot, v| bot.plugins.delegate "set_nick_avail", v },
     :desc => _("String to look for to see if the nick server is informing us that our nick is now available"))
