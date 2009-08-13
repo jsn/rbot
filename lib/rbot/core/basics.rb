@@ -73,6 +73,10 @@ class BasicsModule < CoreBotModule
     @bot.restart param[:msg].to_s
   end
 
+  def bot_reconnect(m, param)
+    @bot.reconnect param[:msg].to_s
+  end
+
   def bot_hide(m, param)
     @bot.join 0
   end
@@ -133,6 +137,8 @@ class BasicsModule < CoreBotModule
       _("quit [<message>] => quit IRC with message <message>")
     when "restart"
       _("restart => completely stop and restart the bot (including reconnect)")
+    when "reconnect"
+      _("reconnect => ask the bot to disconnect and then connect again")
     when "join"
       _("join <channel> [<key>] => join channel <channel> with secret key <key> if specified. #{@bot.myself} also responds to invites if you have the required access level")
     when "part"
@@ -170,6 +176,10 @@ basics.map "quit *msg",
   :auth_path => 'quit'
 basics.map "restart *msg",
   :action => 'bot_restart',
+  :defaults => { :msg => nil },
+  :auth_path => 'quit'
+basics.map "reconnect *msg",
+  :action => 'bot_reconnect',
   :defaults => { :msg => nil },
   :auth_path => 'quit'
 
