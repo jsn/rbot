@@ -468,11 +468,6 @@ class Bot
       exit 2
     end
 
-    # Time at which the last PING was sent
-    @last_ping = nil
-    # Time at which the last line was RECV'd from the server
-    @last_rec = nil
-
     @startup_time = Time.new
 
     begin
@@ -906,6 +901,9 @@ class Bot
 
   # connect the bot to IRC
   def connect
+    # make sure we don't have any spurious ping checks running
+    # (and initialize the vars if this is the first time we connect)
+    stop_server_pings
     begin
       quit if $interrupted > 0
       @socket.connect
