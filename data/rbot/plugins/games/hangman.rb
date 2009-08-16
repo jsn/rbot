@@ -63,7 +63,7 @@ class Hangman
 end
 
 class Hangman
-  attr_reader :misses, :guesses, :word, :letters, :scores
+  attr_reader :misses, :guesses, :word, :scores
 
   STAGES = [' (x_x) ', ' (;_;) ', ' (>_<) ', ' (-_-) ', ' (o_~) ', ' (^_^) ', '\(^o^)/']
   HEALTH = STAGES.size-1

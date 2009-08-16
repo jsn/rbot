@@ -468,6 +468,11 @@ class Bot
       exit 2
     end
 
+    # Time at which the last PING was sent
+    @last_ping = nil
+    # Time at which the last line was RECV'd from the server
+    @last_rec = nil
+
     @startup_time = Time.new
 
     begin
