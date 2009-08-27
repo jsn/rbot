@@ -169,9 +169,17 @@ class UrlPlugin < Plugin
         # with the last character stripped. this might generate invalid URIs
         # (e.g. because "some.url" gets chopped to some.url%2, so catch that too
         if e.message =~ /\(404 - Not Found\)/i or e.kind_of?(URI::InvalidURIError)
-          # chop off last character, and retry if we still have enough string to
-          # look like a minimal URL
-          retry if urlstr.chop! and urlstr =~ /^https?:\/\/./
+          # chop off last non-word character from the unescaped version of
+          # the URL, and retry if we still have enough string to look like a
+          # minimal URL
+          unescaped = URI.unescape(urlstr)
+          debug "Unescaped: #{unescaped}"
+          if unescaped.sub!(/\W$/,'') and unescaped =~ /^https?:\/\/./
+            urlstr.replace URI.escape(unescaped, OUR_UNSAFE)
+            retry
+          else
+            debug "Not retrying #{unescaped}"
+          end
         end
         reply = "Error #{e.message}"
       end
