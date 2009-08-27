@@ -10,7 +10,7 @@
 
 module ::Irc
   module Utils
-    module Time
+    module ParseTime
       FLOAT_RX = /((?:\d*\.)?\d+)/
 
       ONE_TO_NINE = {
@@ -80,7 +80,7 @@ module ::Irc
       UNITSPEC_RX = /(s(?:ec(?:ond)?s?)?|m(?:in(?:ute)?s?)?|h(?:(?:ou)?rs?)?|d(?:ays?)?|weeks?)/
 
       # str must much UNITSPEC_RX
-      def Time.time_unit(str)
+      def ParseTime.time_unit(str)
         case str[0,1].intern
         when :s
           1
@@ -96,7 +96,7 @@ module ::Irc
       end
 
       # example: half an hour, two and a half weeks, 5 seconds, an hour and 5 minutes
-      def Time.parse_period(str)
+      def ParseTime.parse_period(str)
         clean = str.gsub(/\s+/, ' ').strip
 
         sofar = 0
@@ -104,12 +104,12 @@ module ::Irc
           if clean.sub!(/^(#{FRACTION_RX})\s+#{UNITSPEC_RX}/, '')
             # fraction followed by unit
             num = FRACTIONS[$1.intern]
-            unit = Time.time_unit($2)
+            unit = ParseTime.time_unit($2)
           elsif clean.sub!(/^#{FLOAT_RX}\s*(?:\s+and\s+(#{FRACTION_RX})\s+)?#{UNITSPEC_RX}/, '')
             # float plus optional fraction followed by unit
             num = $1.to_f
             frac = $2
-            unit = Time.time_unit($3)
+            unit = ParseTime.time_unit($3)
             clean.strip!
             if frac.nil? and clean.sub!(/^and\s+(#{FRACTION_RX})/, '')
               frac = $1
@@ -129,7 +129,7 @@ module ::Irc
               end
             end
           frac = $5
-          unit = Time.time_unit($6)
+          unit = ParseTime.time_unit($6)
           clean.strip!
           if frac.nil? and clean.sub!(/^and\s+(#{FRACTION_RX})/, '')
             frac = $1
@@ -155,8 +155,8 @@ module ::Irc
         hour = $1.to_i
         min = $2.to_i
         sec = $3.to_i
-        now = ::Time.now
-        later = ::Time.mktime(now.year, now.month, now.day, hour, min, sec)
+        now = Time.now
+        later = Time.mktime(now.year, now.month, now.day, hour, min, sec)
 
         # if the given hour is earlier than current hour, given timestr
         # must have been meant to be in the future
@@ -172,11 +172,11 @@ module ::Irc
         if ampm == "pm"
           hour += 12
         end
-        now = ::Time.now
-        later = ::Time.mktime(now.year, now.month, now.day, hour, min, now.sec)
+        now = Time.now
+        later = Time.mktime(now.year, now.month, now.day, hour, min, now.sec)
         return later - now
       else
-        Time.parse_period(str)
+        ParseTime.parse_period(str)
       end
     end
 
