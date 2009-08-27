@@ -217,16 +217,16 @@ class ReactionPlugin < Plugin
       "If prefixed by 'act:' (e.g. act:/(order|command)s/) the bot will only respond if a CTCP ACTION matches the trigger"
     when :reply, :replies
       "reaction replies are simply messages that the bot will reply when a trigger is matched. " +
-      "Replies can be prefixed by 'act:' (e.g. act:goes shopping) to signify that the bot should act instead of saying the message. " +
-      "Replies can be prefixed by 'cmd:' or 'command:' (e.g. cmd:lart %{who}) to issue a command to the bot. " +
-      "Replies can use the %{key} syntax to access one of the following keys: " +
-      "who (the user that said the trigger), bot (the bot's own nick), " +
-      "target (the first word following the trigger), what (whatever follows target), " +
+      "Replies prefixed by 'act:' (e.g. act:goes shopping) signify that the bot should act instead of saying the message. " +
+      "Replies prefixed by 'cmd:' or 'command:' (e.g. cmd:lart %{who}) issue a command to the bot. " +
+      "Replies can use the %{key} syntax to access the following keys: " +
+      "who (user that said the trigger), bot (bot's own nick), " +
+      "target (first word following the trigger), what (whatever follows target), " +
       "before (everything that precedes the trigger), after, (everything that follows the trigger), " +
-      "match (the actual matched text), match1, match2, ... (the i-th capture). " +
-      "Replies can be prefixed by 'ruby:' (e.g. ruby:m.reply 'Hello ' + subs[:who]) to have short ruby code in there, " +
-      "in which case %{key} substitution does not take place, but the subs hash can be used by the code. " +
-      "Be warned that creating ruby replies can open unexpected security holes."
+      "match (matched text), match1, match2, ... (the i-th capture). " +
+      "Replies prefixed by 'ruby:' (e.g. ruby:m.reply 'Hello ' + subs[:who]) are interpreted as ruby code. " +
+      "No %{key} substitution is done in this case, use the subs hash in the code instead. " +
+      "Be warned that creating ruby replies can open unexpected security holes in the bot."
     when :list
       "reaction list [n]: lists the n-the page of programmed reactions (30 reactions are listed per page)"
     when :show
