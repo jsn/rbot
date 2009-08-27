@@ -83,6 +83,8 @@ class ::Reaction
       act = :act
     elsif rex.sub!(/^(?:cmd|command):/,'')
       act = :cmd
+    elsif rex.sub!(/^ruby:/,'')
+      act = :ruby
     end
     @replies << Reply.new(self, act, rex, *args)
     make_ranges
@@ -221,7 +223,10 @@ class ReactionPlugin < Plugin
       "who (the user that said the trigger), bot (the bot's own nick), " +
       "target (the first word following the trigger), what (whatever follows target), " +
       "before (everything that precedes the trigger), after, (everything that follows the trigger), " +
-      "match (the actual matched text), match1, match2, ... (the i-th capture)"
+      "match (the actual matched text), match1, match2, ... (the i-th capture). " +
+      "Replies can be prefixed by 'ruby:' (e.g. ruby:m.reply 'Hello ' + subs[:who]) to have short ruby code in there, " +
+      "in which case %{key} substitution does not take place, but the subs hash can be used by the code. " +
+      "Be warned that creating ruby replies can open unexpected security holes."
     when :list
       "reaction list [n]: lists the n-the page of programmed reactions (30 reactions are listed per page)"
     when :show
@@ -267,6 +272,13 @@ class ReactionPlugin < Plugin
     return unless reply
     act, arg = reply.apply(subs)
     case act
+    when :ruby
+      begin
+        # no substitutions for ruby code
+        eval(reply.reply)
+      rescue Exception => e
+        error e
+      end
     when :cmd
       begin
         # Pass the new message back to the bot.
@@ -300,20 +312,41 @@ class ReactionPlugin < Plugin
       pct = pct.to_f.clip(0,1)
     end
 
+    new_reaction = false
+
     reaction = find_reaction(trigger)
     if not reaction
       reaction = Reaction.new(trigger)
       @reactions << reaction
-      m.reply "Ok, I'll start reacting to #{reaction.raw_trigger}"
+      new_reaction = true
     end
+
     found = reaction.find_reply(reply)
     if found
-      found.pct = pct
-      found.author = m.sourcenick
-      found.date = Time.now
-      found.channel = m.channel
+      # ruby replies need special permission
+      if found.act != :ruby or @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
+        found.pct = pct
+        found.author = m.sourcenick
+        found.date = Time.now
+        found.channel = m.channel
+      else
+        m.reply _("Sorry, you're not allowed to change ruby replies here")
+        return
+      end
     else
       found = reaction.add_reply(reply, pct, m.sourcenick, Time.now, m.channel)
+      if found.act == :ruby and not @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
+        m.reply _("Sorry, you're not allowed to add ruby replies here")
+        reaction.rm_reply(reaction.replies.length)
+        if new_reaction
+          @reactions.delete(reaction)
+        end
+        return
+      end
+    end
+
+    if new_reaction
+      m.reply "Ok, I'll start reacting to #{reaction.raw_trigger}"
     end
     m.reply "I'll react to #{reaction.raw_trigger} with #{reaction.raw_replies.last} (#{(reaction.replies.last.pct * 100).to_i}%)"
   end
@@ -402,6 +435,9 @@ plugin = ReactionPlugin.new
 
 plugin.map plugin.add_syntax, :action => 'handle_add',
   :requirements => { :trigger => plugin.trigger_syntax }
+
+# ruby reactions are security holes, so give stricter permission
+plugin.default_auth('react::ruby', false)
 
 plugin.map 'reaction list [:page]', :action => 'handle_list',
   :requirements => { :page => /^\d+$/ }
