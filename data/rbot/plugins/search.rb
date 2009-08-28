@@ -73,10 +73,11 @@ class SearchPlugin < Plugin
     url = GOOGLE_WAP_SEARCH + site + searchfor
 
     hits = params[:hits] || @bot.config['google.hits']
+    hits = 1 if params[:lucky]
 
     first_pars = params[:firstpar] || @bot.config['google.first_par']
 
-    single = (hits == 1 and first_pars == 1)
+    single = params[:lucky] || (hits == 1 and first_pars == 1)
 
     begin
       wml = @bot.httputil.get(url)
@@ -98,11 +99,15 @@ class SearchPlugin < Plugin
       t = Utils.decode_html_entities res[2].gsub(filter, '').strip
       u = URI.unescape(res[0] || res[1])
       urls.push(u)
-      single ? u : "#{n}. #{Bold}#{t}#{Bold}: #{u}"
+      "%{n}%{b}%{t}%{b}%{sep}%{u}" % {
+        :n => (single ? "" : "#{n}. "),
+        :sep => (single ? " -- " : ": "),
+        :b => Bold, :t => t, :u => u
+      }
     }.join(" | ")
 
     if params[:lucky]
-      m.reply urls.first
+      m.reply results.first
       return
     end
 
