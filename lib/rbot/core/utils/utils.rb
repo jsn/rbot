@@ -102,7 +102,12 @@ rescue LoadError
 end
 
 begin
-  require 'hpricot'
+  begin
+    require 'hpricot'
+  rescue LoadError
+    require 'nokogiri/hpricot'
+    ::Hpricot = Nokogiri::Hpricot
+  end
   module ::Irc
     module Utils
       AFTER_PAR_PATH = /^(?:div|span)$/
