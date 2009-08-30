@@ -640,7 +640,7 @@ class HttpUtil
     opts = {:method => :post, :body => data, :cache => false}.merge(options)
     begin
       resp = get_response(uri, opts, &block)
-      raise 'http error' unless Net::HTTPOK === resp
+      raise 'http error' unless Net::HTTPOK === resp or Net::HTTPCreated === resp
       return resp
     rescue Exception => e
       error e
