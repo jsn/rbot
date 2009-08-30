@@ -88,6 +88,7 @@ class UrlPlugin < Plugin
       debug "+ getting info for #{url.request_uri}"
       info = @bot.filter(:htmlinfo, url)
       debug info
+      logopts[:htmlinfo] = info
       resp = info[:headers]
 
       logopts[:title] = title = info[:title]
