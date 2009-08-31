@@ -59,6 +59,10 @@ class SearchPlugin < Plugin
 
   def google(m, params)
     what = params[:words].to_s
+    if what.match(/^define:/)
+      return google_define(m, what, params)
+    end
+
     searchfor = CGI.escape what
     # This method is also called by other methods to restrict searching to some sites
     if params[:site]
@@ -122,6 +126,34 @@ class SearchPlugin < Plugin
     return unless first_pars > 0
 
     Utils.get_first_pars urls, first_pars, :message => m
+
+  end
+
+  def google_define(m, what, params)
+    begin
+      wml = @bot.httputil.get(GOOGLE_SEARCH + CGI.escape(what))
+      raise unless wml
+    rescue => e
+      m.reply "error googling for #{what}"
+      return
+    end
+
+    begin
+      related_index = wml.index(/Related phrases:/, 0)
+      raise unless related_index
+      defs_index = wml.index(/Definitions of <b>/, related_index)
+      raise unless defs_index
+      defs_end = wml.index(/<input/, defs_index)
+      raise unless defs_end
+    rescue => e
+      m.reply "no results found for #{what}"
+      return
+    end
+
+    related = wml[related_index...defs_index]
+    defs = wml[defs_index...defs_end]
+
+    m.reply defs.ircify_html(:a_href => Underline), :split_at => (Underline + ' ')
 
   end
 
