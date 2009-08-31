@@ -21,7 +21,7 @@ GOOGLE_WAP_SEARCH = "http://www.google.com/m/search?hl=en&q="
 GOOGLE_WAP_LINK = /<a href="(?:.*?u=(.*?)|(http:\/\/.*?))">(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h2 class=r[^>]*><b>(.+?)</b>}
 GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
-GOOGLE_DEF_RESULT = %r{<p> (Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
+GOOGLE_DEF_RESULT = %r{<a href="([^"]*)"[^>]*>(Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 class SearchPlugin < Plugin
@@ -212,10 +212,21 @@ class SearchPlugin < Plugin
       return
     end
 
-    head = results[0][0].ircify_html
-    text = results[0][1].ircify_html
-    link = results[0][2]
+    gdef_link = "http://www.google.com" + CGI.unescapeHTML(results[0][0]) # could be used to extract all defs
+    head = results[0][1].ircify_html
+    text = results[0][2].ircify_html
+    link = results[0][3]
     m.reply "#{head} -- #{link}\n#{text}"
+
+    ### gdef_link could be used for something like
+    # html_defs = @bot.httputil.get(gdef_link)
+    # related_index = html_defs.index(/Related phrases:/, 0)
+    # defs_index = html_defs.index(/Definitions of <b>/, related_index)
+
+    # related = html_defs[related_index..defs_index]
+    # defs = html_defs[defs_index..-1]
+
+    # m.reply defs.gsub('  <br/>','<li>').ircify_html
   end
 
   def wikipedia(m, params)
