@@ -582,7 +582,7 @@ module Plugins
             "#{fname}#{$1}#{$3}"
           }
         }
-        msg = err.to_str.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
+        msg = err.to_s.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
           "#{fname}#{$1}#{$3}"
         }
         newerr = err.class.new(msg)
