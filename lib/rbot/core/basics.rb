@@ -30,7 +30,11 @@ class BasicsModule < CoreBotModule
   # identification. Observe that this means the bot may not connect any channels
   # until the 'identified' method gets delegated
   def connect
-    join_channels unless @bot.config['irc.join_after_identify']
+    if @bot.config['irc.join_after_identify']
+      log "waiting for identififcation before JOINing default channels"
+    else
+      join_channels
+    end
   end
 
   def ctcp_listen(m)
