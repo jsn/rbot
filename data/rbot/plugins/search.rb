@@ -91,11 +91,14 @@ class SearchPlugin < Plugin
       return
     end
     results = wml.scan(GOOGLE_WAP_LINK)
+
     if results.length == 0
       m.reply "no results found for #{what}"
       return
     end
+
     single ||= (results.length==1)
+
     urls = Array.new
     n = 0
     results = results[0...hits].map { |res|
@@ -108,20 +111,22 @@ class SearchPlugin < Plugin
         :sep => (single ? " -- " : ": "),
         :b => Bold, :t => t, :u => u
       }
-    }.join(" | ")
+    }
 
     if params[:lucky]
       m.reply results.first
       return
     end
 
+    result_string = results.join(" | ")
+
     # If we return a single, full result, change the output to a more compact representation
     if single
-      m.reply "Result for %s: %s -- %s" % [what, results, Utils.get_first_pars(urls, first_pars)], :overlong => :truncate
+      m.reply "Result for %s: %s -- %s" % [what, result_string, Utils.get_first_pars(urls, first_pars)], :overlong => :truncate
       return
     end
 
-    m.reply "Results for #{what}: #{results}", :split_at => /\s+\|\s+/
+    m.reply "Results for #{what}: #{result_string}", :split_at => /\s+\|\s+/
 
     return unless first_pars > 0
 
