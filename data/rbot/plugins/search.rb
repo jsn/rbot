@@ -103,7 +103,7 @@ class SearchPlugin < Plugin
     n = 0
     results = results[0...hits].map { |res|
       n += 1
-      t = Utils.decode_html_entities res[2].gsub(filter, '').strip
+      t = res[2].ircify_html(:img => "[%{src} %{alt} %{dimensions}]").strip
       u = URI.unescape(res[0] || res[1])
       urls.push(u)
       "%{n}%{b}%{t}%{b}%{sep}%{u}" % {
