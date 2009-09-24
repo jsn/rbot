@@ -245,6 +245,29 @@ class ::String
       warning "unknown :a_href option #{val} passed to ircify_html" if val
     end
 
+    # If opts[:img] is defined, it should be a String. Each image
+    # will be replaced by the string itself, replacing occurrences of
+    # %{alt} %{dimensions} and %{src} with the alt text, image dimensions
+    # and URL
+    if val = opts[:img]
+      if val.kind_of? String
+        txt.gsub!(/<img\s+(.*?)\s*\/?>/) do |imgtag|
+          attrs = Hash.new
+          imgtag.scan(/([[:alpha:]]+)\s*=\s*(['"])?(.*?)\2/) do |key, quote, value|
+            k = key.downcase.intern rescue 'junk'
+            attrs[k] = value
+          end
+          attrs[:alt] ||= attrs[:title]
+          attrs[:width] ||= '...'
+          attrs[:height] ||= '...'
+          attrs[:dimensions] ||= "#{attrs[:width]}x#{attrs[:height]}"
+          val % attrs
+        end
+      else
+        warning ":img option is not a string"
+      end
+    end
+
     # Paragraph and br tags are converted to whitespace
     txt.gsub!(/<\/?(p|br)(?:\s+[^>]*)?\s*\/?\s*>/i, ' ')
     txt.gsub!("\n", ' ')
