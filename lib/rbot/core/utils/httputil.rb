@@ -190,7 +190,7 @@ class HttpUtil
     Bot::Config.register Bot::Config::IntegerValue.new('http.max_cache_time',
       :default => 60*24,
       :desc => "After how many minutes since first use a cached document is considered to be expired")
-    Bot::Config.register Bot::Config::IntegerValue.new('http.no_expire_cache',
+    Bot::Config.register Bot::Config::BooleanValue.new('http.no_expire_cache',
       :default => false,
       :desc => "Set this to true if you want the bot to never expire the cached pages")
     Bot::Config.register Bot::Config::IntegerValue.new('http.info_bytes',
