@@ -940,17 +940,22 @@ class Bot
       disconnect(message)
     end
 
-    if will_wait
-      log "\n\nDisconnected\n\n"
+    begin
+      if will_wait
+        log "\n\nDisconnected\n\n"
 
-      quit if $interrupted > 0
+        quit if $interrupted > 0
 
-      log "\n\nWaiting to reconnect\n\n"
-      sleep @config['server.reconnect_wait']
-      sleep 10*@config['server.reconnect_wait'] if too_fast
+        log "\n\nWaiting to reconnect\n\n"
+        sleep @config['server.reconnect_wait']
+        sleep 10*@config['server.reconnect_wait'] if too_fast
+      end
+
+      connect
+    rescue Exception => e
+      will_wait = true
+      retry
     end
-
-    connect
   end
 
   # begin event handling loop
