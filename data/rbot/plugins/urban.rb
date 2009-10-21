@@ -21,7 +21,9 @@ class UrbanPlugin < Plugin
 
     notfound = s.match %r{<i>.*?</i> isn't defined}
 
-    numpages = s[%r{<div id='paginator'>.*?</div>}m].scan(/\d+/).collect {|x| x.to_i}.max || 1
+    numpages = if s[%r{<div id='paginator'>.*?</div>}m]
+      $&.scan(/\d+/).collect {|x| x.to_i}.max
+    else 1 end
 
     rv = Array.new
     s.scan(%r{<td class='index'[^>]*>.*?(\d+)\..*?</td>.*?<td class='word'>(?:<a.*?>)?([^>]+)(?:</a>)?</td>.*?<div class='definition'>(.+?)</div>.*?<div class='example'>(.+?)</div>}m) do |num, wrd, desc, ex|
