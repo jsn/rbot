@@ -19,7 +19,7 @@ class UrbanPlugin < Plugin
     s = @bot.httputil.get(u)
     return m.reply("Couldn't get the urban dictionary definition for #{word}") if s.nil?
 
-    notfound = s.match %r{<div style="color: #669FCE"><i>.*?</i> isn't defined}
+    notfound = s.match %r{<i>.*?</i> isn't defined}
 
     numpages = s[%r{<div id='paginator'>.*?</div>}m].scan(/\d+/).collect {|x| x.to_i}.max || 1
 
