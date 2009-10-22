@@ -22,7 +22,7 @@ class UrbanPlugin < Plugin
     notfound = s.match %r{<i>.*?</i> isn't defined}
 
     numpages = if s[%r{<div id='paginator'>.*?</div>}m]
-      $&.scan(/\d+/).collect {|x| x.to_i}.max
+      $&.scan(/\d+/).collect {|x| x.to_i}.max || 1
     else 1 end
 
     rv = Array.new
