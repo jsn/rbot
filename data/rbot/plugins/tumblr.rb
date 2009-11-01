@@ -116,7 +116,7 @@ class TumblrPlugin < Plugin
     if @registry.key? channel
       m.reply _("%{chan} already has credentials configured" % { :chan => channel })
     else
-      group = params[:group] || channel[1..-1]
+      group = params[:group] || Channel.npname(channel)
       group << ".tumblr.com" unless group.match(/\.tumblr\.com/)
       @registry[channel] = {
         :email => CGI.escape(params[:email]),
