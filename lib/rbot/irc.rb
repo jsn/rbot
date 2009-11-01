@@ -1323,6 +1323,13 @@ module Irc
   #
   class Channel
 
+    # Return the non-prefixed part of a channel name.
+    # Also works with ## channels found on some networks
+    # (e.g. FreeNode)
+    def self.npname(str)
+      return str.to_s.sub(/^[&#+!]+/,'')
+    end
+
     include ServerOrCasemap
     attr_reader :name, :topic, :mode, :users
     alias :to_s :name
