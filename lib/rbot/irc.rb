@@ -1381,7 +1381,7 @@ module Irc
     #
     def initialize(name, topic=nil, users=[], opts={})
       raise ArgumentError, "Channel name cannot be empty" if name.to_s.empty?
-      warn "Unknown channel prefix #{name[0].chr}" if name !~ /^[&#+!]/
+      warn "Unknown channel prefix #{name[0,1]}" if name !~ /^[&#+!]/
       raise ArgumentError, "Invalid character in #{name.inspect}" if name =~ /[ \x07,]/
 
       init_server_or_casemap(opts)
@@ -1418,31 +1418,31 @@ module Irc
     # The channel prefix
     #
     def prefix
-      name[0].chr
+      name[0,1]
     end
 
     # A channel is local to a server if it has the '&' prefix
     #
     def local?
-      name[0] == 0x26
+      name[0,1] == '&'
     end
 
     # A channel is modeless if it has the '+' prefix
     #
     def modeless?
-      name[0] == 0x2b
+      name[0,1] == '+'
     end
 
     # A channel is safe if it has the '!' prefix
     #
     def safe?
-      name[0] == 0x21
+      name[0,1] == '!'
     end
 
     # A channel is normal if it has the '#' prefix
     #
     def normal?
-      name[0] == 0x23
+      name[0,1] == '#'
     end
 
     # Create a new mode
@@ -1818,7 +1818,7 @@ module Irc
         return ex
       else
 
-        prefix = name[0].chr
+        prefix = name[0,1]
 
         # Give a warning if the new Channel goes over some server limits.
         #
