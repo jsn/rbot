@@ -86,7 +86,7 @@ class DicePlugin < Plugin
   def privmsg(m)
     # If either not given parameters or given incorrect parameters, return with
     # the help message
-    unless m.params && m.params =~ /^\d*d\d+(\s*[-]\s*(\d+|\d*d\d)+)*$/
+    unless m.params && m.params =~ /^\d*d\d+(\s*[+-]\s*(\d+|\d*d\d)+)*$/
       m.reply "incorrect usage: " + help(m.plugin)
       return
     end
