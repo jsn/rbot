@@ -172,7 +172,7 @@ class Bot
           auth = tmpl.options[:full_auth_path]
           debug "checking auth for #{auth}"
           # We check for private permission
-          if m.bot.auth.allow?(auth, m.source, '?')
+          if m.bot.auth.permit?(m.source, auth, '?')
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
             return :return => botmodule.send(action, m, options)
           end
