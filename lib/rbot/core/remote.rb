@@ -160,13 +160,13 @@ class Bot
         # Skip this element if it was unmapped
         next unless tmpl
         botmodule = @parent.plugins[tmpl.botmodule]
-        options, failure = tmpl.recognize(m)
-        if options.nil?
-          failures << [tmpl, failure]
+        options = tmpl.recognize(m)
+        if options.kind_of? Failure
+          failures << options
         else
           action = tmpl.options[:action]
           unless botmodule.respond_to?(action)
-            failures << [tmpl, "#{botmodule} does not respond to action #{action}"]
+            failures << NoActionFailure.new(tmpl, m)
             next
           end
           auth = tmpl.options[:full_auth_path]
@@ -182,8 +182,8 @@ class Bot
           return false
         end
       end
-      failures.each {|f, r|
-        debug "#{f.inspect} => #{r}"
+      failures.each {|r|
+        debug "#{r.template.inspect} => #{r}"
       }
       debug "no handler found"
       return false
