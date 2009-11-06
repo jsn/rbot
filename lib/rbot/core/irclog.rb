@@ -263,7 +263,7 @@ class IrcLogModule < CoreBotModule
       else
         where_str = where.downcase.gsub(/[:!?$*()\/\\<>|"']/, "_")
       end
-      return unless can_log_on(where_str)
+      next unless can_log_on(where_str)
 
       # close the previous logfile if we're rotating
       if @logs.has_key? where_str
