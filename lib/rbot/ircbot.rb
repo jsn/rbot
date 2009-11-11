@@ -757,6 +757,10 @@ class Bot
       m.users = data[:users]
       @plugins.delegate "names", m
     }
+    @client[:nosuchtarget] = proc { |data|
+      m = NoSuchTargetMessage.new(self, server, server, data[:target], data[:message])
+      @plugins.delegate "nosuchtarget", m
+    }
     @client[:error] = proc { |data|
       raise ServerError, data[:message]
     }

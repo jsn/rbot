@@ -661,6 +661,18 @@ module Irc
   class PartMessage < JoinMessage
   end
 
+  # class to handle ERR_NOSUCHNICK and ERR_NOSUCHCHANNEL
+  class NoSuchTargetMessage < BasicUserMessage
+    # the channel or nick that was not found
+    attr_reader :target
+
+    def initialize(bot, server, source, target, message='')
+      super(bot, server, source, target, message)
+
+      @target = target
+    end
+  end
+
   class UnknownMessage < BasicUserMessage
   end
 end

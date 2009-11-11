@@ -1344,17 +1344,19 @@ module Irc
           data[:channel].url=data[:url].dup
           handle(:channel_url, data)
         when ERR_NOSUCHNICK
-          data[:nick] = argv[1]
-          if user = @server.get_user(data[:nick])
+          data[:target] = argv[1]
+          data[:message] = argv[2]
+          handle(:nosuchtarget, data)
+          if user = @server.get_user(data[:target])
             @server.delete_user(user)
           end
-          handle(:nosuchnick, data)
         when ERR_NOSUCHCHANNEL
-          data[:channel] = argv[1]
-          if channel = @server.get_channel(data[:channel])
+          data[:target] = argv[1]
+          data[:message] = argv[2]
+          handle(:nosuchtarget, data)
+          if channel = @server.get_channel(data[:target])
             @server.delete_channel(channel)
           end
-          handle(:nosuchchannel, data)
         else
           warning "Unknown message #{serverstring.inspect}"
           handle(:unknown, data)
