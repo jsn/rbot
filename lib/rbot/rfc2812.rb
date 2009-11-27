@@ -967,6 +967,9 @@ module Irc
       # This is used by some messages to build lists of users that
       # will be delegated when the ENDOF... message is received
       @tmpusers = []
+
+      # Same as above, just for bans
+      @tmpbans = []
     end
 
     # Clear the server and reset the user
@@ -1180,6 +1183,17 @@ module Irc
           data[:users] = @tmpusers
           handle(:names, data)
           @tmpusers = Array.new
+        when RPL_BANLIST
+          data[:channel] = @server.channel(argv[1])
+          data[:mask] = argv[2]
+          data[:by] = argv[3]
+          data[:at] = argv[4]
+          @tmpbans << data
+        when RPL_ENDOFBANLIST
+          data[:channel] = @server.channel(argv[1])
+          data[:bans] = @tmpbans
+          handle(:banlist, data)
+          @tmpbans = Array.new
         when RPL_LUSERCLIENT
           # ":There are <integer> users and <integer>
           # services on <integer> servers"

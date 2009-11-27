@@ -757,6 +757,11 @@ class Bot
       m.users = data[:users]
       @plugins.delegate "names", m
     }
+    @client[:banlist] = proc { |data|
+      m = BanlistMessage.new(self, server, server, data[:channel])
+      m.bans = data[:bans]
+      @plugins.delegate "banlist", m
+    }
     @client[:nosuchtarget] = proc { |data|
       m = NoSuchTargetMessage.new(self, server, server, data[:target], data[:message])
       @plugins.delegate "nosuchtarget", m

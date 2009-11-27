@@ -605,6 +605,22 @@ module Irc
     end
   end
 
+  # class to manager Ban list replies
+  class BanlistMessage < BasicUserMessage
+    # the bans
+    attr_accessor :bans
+
+    def initialize(bot, server, source, target, message="")
+      super(bot, server, source, target, message)
+      @bans = []
+    end
+
+    def inspect
+      fields = ' bans=' << bans.inspect
+      super(fields)
+    end
+  end
+
   class QuitMessage < BasicUserMessage
     attr_accessor :was_on
     def initialize(bot, server, source, target, message="")
