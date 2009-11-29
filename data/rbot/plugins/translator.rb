@@ -341,7 +341,7 @@ class TranslatorPlugin < Plugin
     if translator
       cmd_translate m, params.merge({:translator => translator, :show_provider => true})
     else
-      m.reply _('None of the default translators (translator.default_list) supports translating from %{source} to %{target}') % {:source => from, :target => to}
+      m.reply _('None of the default translators (translator.default_list) supports translating from %{source} to %{target}') % {:source => params[:from], :target => params[:to]}
     end
   end
 
