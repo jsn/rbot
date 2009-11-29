@@ -182,35 +182,29 @@ end
 class GoogleTranslator < Translator
   INFO = 'Google Translate <http://www.google.com/translate_t>'
 
+  LANGUAGES =
+    %w[af sq am ar hy az eu be bn bh bg my ca chr zh zh_CN zh_TW hr
+    cs da dv en eo et tl fi fr gl ka de el gn gu iw hi hu is id iu
+    ga it ja kn kk km ko lv lt mk ms ml mt mr mn ne no or ps fa pl
+    pt_PT pa ro ru sa sr sd si sk sl es sw sv tg ta tl te th bo tr
+    uk ur uz ug vi cy yi auto]
   def initialize(cache={})
-    require 'mechanize'
-    load_form!
-
-    # we can probably safely assume that google translate is able to translate from
-    # any language in the source lang drop down list to any language in the target one
-    # so we create the language pairs based on that assumption
-    sl = @source_list.options.map { |o| o.value.sub('-', '_') }
-    tl = @target_list.options.map { |o| o.value.sub('-', '_') }
-    super(Translator::Direction.all_from_to(tl, sl), cache)
-  end
-
-  def load_form!
-    agent = WWW::Mechanize.new
-    # without faking the user agent, Google Translate will serve non-UTF-8 text
-    agent.user_agent_alias = 'Linux Konqueror'
-    @form = agent.get('http://www.google.com/translate_t').
-            forms_with(:action => '/translate_t').first
-    @source_list = @form.fields_with(:name => 'sl').last
-    @target_list = @form.fields_with(:name => 'tl').last
+    require "uri"
+    require "json"
+    super(Translator::Direction.all_to_all(LANGUAGES), cache)
   end
 
   def do_translate(text, from, to)
-    load_form!
+    langpair = [from == 'auto' ? '' : from, to].map { |e| e.tr('_', '-') }.join("|")
+    raw_json = Irc::Utils.bot.httputil.get_response(URI.escape(
+               "http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=#{text}&langpair=#{langpair}")).body
+    response = JSON.parse(raw_json)
 
-    @source_list.value = from.sub('_', '-')
-    @target_list.value = to.sub('_', '-')
-    @form.fields_with(:name => 'text').last.value = text
-    @form.submit.parser.search('div#result_box').inner_html
+    if response["responseStatus"] != 200
+      raise Translator::NoTranslationError, response["responseDetails"]
+    else
+      response["responseData"]["translatedText"]
+    end
   end
 end
 
