@@ -322,15 +322,8 @@ class TranslatorPlugin < Plugin
 
   def cmd_translator(m, params)
     params[:to] = @bot.config['translator.destination'] if params[:to].nil?
-
-    # Use google translate as translator if source language has not been given
-    # and auto-detect it
-    if params[:from].nil?
-      params[:from] = "auto"
-      translator = "google_translate"
-    else
-      translator = @default_translators.find {|t| @translators[t].support?(params[:from], params[:to])}
-    end
+    params[:from] ||= 'auto'
+    translator = @default_translators.find {|t| @translators[t].support?(params[:from], params[:to])}
 
     if translator
       cmd_translate m, params.merge({:translator => translator, :show_provider => true})
