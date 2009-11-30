@@ -284,6 +284,8 @@ class TranslatorPlugin < Plugin
       rescue Exception
         warning _("Translator %{name} cannot be used: %{reason}") %
                {:name => name, :reason => $!}
+        map "#{name} [*args]", :action => :failed_translator,
+                               :defaults => {:name => name, :reason => $!}
       end
     end
 
@@ -293,6 +295,11 @@ class TranslatorPlugin < Plugin
       :desc => _("List of translators to try in order when translator name not specified"),
       :on_change => Proc.new {|bot, v| update_default})
     update_default
+  end
+
+  def failed_translator(m, params)
+    m.reply _("Translator %{name} cannot be used: %{reason}") %
+            {:name => params[:name], :reason => params[:reason]}
   end
 
   def help(plugin, topic=nil)
