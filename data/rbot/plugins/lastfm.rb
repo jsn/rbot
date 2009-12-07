@@ -17,6 +17,7 @@
 
 module Spotify
   def self.get(service, method, query, page=1)
+    query.tr!('-','')
     url = URI.escape("http://ws.spotify.com/#{service}/1/#{method}?q=#{query}&page=#{page}")
     xml = Irc::Utils.bot.httputil.get_response(url).body
     return REXML::Document.new(xml).root
