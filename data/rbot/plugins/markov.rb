@@ -35,6 +35,10 @@ class MarkovPlugin < Plugin
     :default => true,
     :validate => Proc.new { |v| v >= 0 },
     :desc => "Wait short time before contributing to conversation.")
+   Config.register Config::IntegerValue.new('markov.answer_addressed',
+    :default => 50,
+    :validate => Proc.new { |v| (0..100).include? v },
+    :desc => "Probability of answer when addressed by nick")
 
   MARKER = :"\r\n"
 
@@ -396,7 +400,8 @@ class MarkovPlugin < Plugin
 
   def ignore?(m=nil)
     return false unless m
-    return true if m.address? or m.private?
+    return true if m.private?
+    return true if m.prefixed?
     @bot.config['markov.ignore'].each do |mask|
       return true if m.channel.downcase == mask.downcase
       return true if m.source.matches?(mask)
@@ -525,7 +530,7 @@ class MarkovPlugin < Plugin
   end
 
   def random_markov(m, message)
-    return unless should_talk
+    return unless (should_talk or (m.address? and  @bot.config['markov.answer_addressed'] > rand(100)))
 
     word1, word2 = clean_str(message).split(/\s+/)
     return unless word1 and word2
