@@ -506,6 +506,16 @@ class MarkovPlugin < Plugin
     return false
   end
 
+  # Generates all sequence pairs from array
+  # seq_pairs [1,2,3,4] == [ [1,2], [2,3], [3,4]]
+  def seq_pairs(arr)
+    res = []
+    0.upto(arr.size-2) do |i|
+      res << [arr[i], arr[i+1]]
+    end
+    res
+  end
+
   def set_delay(m, params)
     if params[:delay] == "off"
       @bot.config["markov.delay"] = 0
@@ -532,14 +542,32 @@ class MarkovPlugin < Plugin
   def random_markov(m, message)
     return unless (should_talk or (m.address? and  @bot.config['markov.answer_addressed'] > rand(100)))
 
-    word1, word2 = clean_str(message).split(/\s+/)
-    return unless word1 and word2
-    line = generate_string(word1.intern, word2.intern)
-    return unless line
-    # we do nothing if the line we return is just an initial substring
-    # of the line we received
-    return if message.index(line) == 0
-    reply_delay m, line
+    words = clean_str(message).split(/\s+/)
+    if words.length < 2
+      line = generate_string words.first, nil
+
+      if line
+        return if message.index(line) == 0
+        reply_delay m, line
+        return
+      end
+    else
+      pairs = seq_pairs(words).sort_by { rand }
+      pairs.each do |word1, word2|
+        line = generate_string(word1.intern, word2.intern)
+        if line and message.index(line) != 0
+          reply_delay m, line
+          return
+        end
+      end
+      words.sort_by { rand }.each do |word|
+        line = generate_string word.first, nil
+        if line and message.index(line) != 0
+          reply_delay m, line
+          return
+        end
+      end
+    end
   end
 
   def chat(m, params)
