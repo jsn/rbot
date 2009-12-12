@@ -20,6 +20,9 @@ class MarkovPlugin < Plugin
   Config.register Config::ArrayValue.new('markov.ignore',
     :default => [],
     :desc => "Hostmasks and channel names markov should NOT learn from (e.g. idiot*!*@*, #privchan).")
+  Config.register Config::ArrayValue.new('markov.readonly',
+    :default => [],
+    :desc => "Hostmasks and channel names markov should NOT talk to (e.g. idiot*!*@*, #privchan).")
   Config.register Config::IntegerValue.new('markov.max_words',
     :default => 50,
     :validate => Proc.new { |v| (0..100).include? v },
@@ -340,6 +343,17 @@ class MarkovPlugin < Plugin
       else
         "ignore hostmasks or channels -- topics: add, remove, list"
       end
+    when "readonly"
+      case subtopic
+      when "add"
+        "markov readonly add <hostmask|channel> => read-only a hostmask or a channel"
+      when "list"
+        "markov readonly list => show read-only hostmasks and channels"
+      when "remove"
+        "markov readonly remove <hostmask|channel> => unreadonly a hostmask or channel"
+      else
+        "restrict hostmasks or channels to read only -- topics: add, remove, list"
+      end
     when "status"
       "markov status => show if markov is enabled, probability and amount of messages in queue for learning"
     when "probability"
@@ -390,6 +404,15 @@ class MarkovPlugin < Plugin
     return false
   end
 
+  def readonly?(m=nil)
+    return false unless m
+    @bot.config['markov.readonly'].each do |mask|
+      return true if m.channel.downcase == mask.downcase
+      return true if m.source.matches?(mask)
+    end
+    return false
+  end
+
   def ignore(m, params)
     action = params[:action]
     user = params[:option]
@@ -418,6 +441,37 @@ class MarkovPlugin < Plugin
       m.reply _("I'm ignoring %{ignored}") % { :ignored => @bot.config['markov.ignore'].join(", ") }
     else
       m.reply _("have markov ignore the input from a hostmask or a channel. usage: markov ignore add <mask or channel>; markov ignore remove <mask or channel>; markov ignore list")
+    end
+  end
+
+  def readonly(m, params)
+    action = params[:action]
+    user = params[:option]
+    case action
+    when 'remove'
+      if @bot.config['markov.readonly'].include? user
+        s = @bot.config['markov.readonly']
+        s.delete user
+        @bot.config['markov.readonly'] = s
+        m.reply _("%{u} removed") % { :u => user }
+      else
+        m.reply _("not found in list")
+      end
+    when 'add'
+      if user
+        if @bot.config['markov.readonly'].include?(user)
+          m.reply _("%{u} already in list") % { :u => user }
+        else
+          @bot.config['markov.readonly'] = @bot.config['markov.readonly'].push user
+          m.reply _("%{u} added to markov readonly list") % { :u => user }
+        end
+      else
+        m.reply _("give the name of a person or channel to read only")
+      end
+    when 'list'
+      m.reply _("I'm only reading %{readonly}") % { :readonly => @bot.config['markov.readonly'].join(", ") }
+    else
+      m.reply _("have markov not answer to input from a hostmask or a channel. usage: markov readonly add <mask or channel>; markov readonly remove <mask or channel>; markov readonly list")
     end
   end
 
@@ -524,8 +578,9 @@ class MarkovPlugin < Plugin
     end
 
     learn message
-    random_markov(m, message) unless m.replied?
+    random_markov(m, message) unless readonly? m or m.replied?
   end
+
 
   def learn_triplet(word1, word2, word3)
       k = "#{word1} #{word2}"
@@ -627,6 +682,9 @@ plugin.map 'markov delay', :action => "set_delay"
 plugin.map 'markov ignore :action :option', :action => "ignore"
 plugin.map 'markov ignore :action', :action => "ignore"
 plugin.map 'markov ignore', :action => "ignore"
+plugin.map 'markov readonly :action :option', :action => "readonly"
+plugin.map 'markov readonly :action', :action => "readonly"
+plugin.map 'markov readonly', :action => "readonly"
 plugin.map 'markov enable', :action => "enable"
 plugin.map 'markov disable', :action => "disable"
 plugin.map 'markov status', :action => "status"
