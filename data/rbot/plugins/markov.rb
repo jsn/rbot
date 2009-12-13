@@ -27,7 +27,7 @@ class MarkovPlugin < Plugin
     :default => 50,
     :validate => Proc.new { |v| (0..100).include? v },
     :desc => "Maximum number of words the bot should put in a sentence")
-  Config.register Config::IntegerValue.new('markov.learn_delay',
+  Config.register Config::FloatValue.new('markov.learn_delay',
     :default => 0.5,
     :validate => Proc.new { |v| v >= 0 },
     :desc => "Time the learning thread spends sleeping after learning a line. If set to zero, learning from files can be very CPU intensive, but also faster.")
