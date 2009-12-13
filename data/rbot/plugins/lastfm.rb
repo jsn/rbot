@@ -15,24 +15,6 @@
 #
 # License:: GPL v2
 
-module Spotify
-  def self.get(service, method, query, page=1)
-    query.tr!('-','')
-    url = "http://ws.spotify.com/#{service}/1/#{method}?q=#{CGI.escape(query)}&page=#{page}"
-    xml = Irc::Utils.bot.httputil.get_response(url).body
-    return REXML::Document.new(xml).root
-  end
-
-  # returns a Spotify URL, e.g. 'http://open.spotify.com/track/3y6EhoUO3A8bPr3zt3Tm9b'
-  def self.search(method, query, page=1)
-    doc = get(:search, method, query, page)
-    return nil if doc.elements["opensearch:totalResults"].text.to_i.zero?
-    uri = doc.elements[method.to_s].attributes["href"]
-    id  = uri[uri.rindex(':')+1..-1]
-    return URI.escape("http://open.spotify.com/#{method}/#{id}")
-  end
-end
-
 require 'rexml/document'
 require 'cgi'
 
@@ -405,8 +387,10 @@ class LastFmPlugin < Plugin
       reply = _("%{u} %{v} \"%{t}\" by %{bold}%{a}%{bold}%{b} %{p};") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago, :bold => Bold}
     end
 
-    if (spotify_url = Spotify.search(:track, "#{artist} #{track}"))
-      reply << _(" [%{u}%{url}%{u}]") % {:u => Underline, :url => spotify_url}
+    if Object.const_defined?('Spotify')
+      if track = Spotify.search(:track, "#{artist} #{track}")
+        reply << _(" [%{u}%{url}%{u}]") % {:u => Underline, :url => track.url}
+      end
     end
 
     reply << _(" -- see %{uri} for more") % { :uri => "http://www.last.fm/user/#{CGI.escape user}"}
