@@ -16,7 +16,11 @@ class SpotifyPlugin < Plugin
 
   def search(m, params)
     method = params[:method] || 'track'
-    result = Spotify.search(method, params[:query].to_s)
+    begin
+      result = Spotify.search(method, params[:query].to_s)
+    rescue
+      m.reply "problems connecting to Spotify"
+    end
 
     if result.nil?
       m.reply "no results"

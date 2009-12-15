@@ -71,7 +71,8 @@ module ::Spotify
   def self.get(service, method, query, page=1)
     query.tr!('-','')
     url = "http://ws.spotify.com/#{service}/1/#{method}?q=#{CGI.escape(query)}&page=#{page}"
-    xml = Irc::Utils.bot.httputil.get_response(url).body
+    xml = Irc::Utils.bot.httputil.get(url)
+    raise unless xml
     return REXML::Document.new(xml).root
   end
 
