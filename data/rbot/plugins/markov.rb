@@ -258,16 +258,16 @@ class MarkovPlugin < Plugin
     debug 'learning thread closed'
   end
 
-  # if passed a pair, pick a word from the registry using the pair as key.
-  # otherwise, pick a word from an given list
+  # pick a word from the registry using the pair as key.
   def pick_word(word1, word2=MARKER, chainz=@chains)
-    if word1.kind_of? Array
-      wordlist = word1
-    else
-      k = "#{word1} #{word2}"
-      return MARKER unless chainz.key? k
-      wordlist = chainz[k]
-    end
+    k = "#{word1} #{word2}"
+    return MARKER unless chainz.key? k
+    wordlist = chainz[k]
+    pick_word_from_list wordlist
+  end
+
+  # pick a word from weighted hash
+  def pick_word_from_list(wordlist)
     total = wordlist.first
     hash = wordlist.last
     return MARKER if total == 0
