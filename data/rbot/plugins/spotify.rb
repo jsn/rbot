@@ -10,6 +10,14 @@
 # License:: GPL v2
 
 class SpotifyPlugin < Plugin
+  def initialize
+    super
+
+    unless Object.const_defined?('Spotify')
+      raise 'Spotify module not found (lib_spotify plugin probably not enabled)'
+    end
+  end
+
   def help(plugin, topic)
     _("spotify plugin - usage: spotify <spotify>, spotify artist <artist>, spotify album <album>")
   end
