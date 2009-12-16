@@ -598,8 +598,8 @@ class MarkovPlugin < Plugin
       message = "#{m.sourcenick} #{message}"
     end
 
-    learn message
     random_markov(m, message) unless readonly? m or m.replied?
+    learn message
   end
 
 
