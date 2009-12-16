@@ -224,7 +224,10 @@ class MarkovPlugin < Plugin
 
     @chains = @registry.sub_registry('v2')
     @chains.set_default([])
+    @rchains = @registry.sub_registry('v2r')
+    @rchains.set_default([])
     @chains_mutex = Mutex.new
+    @rchains_mutex = Mutex.new
 
     @upgrade_queue = Queue.new
     @upgrade_thread = nil
@@ -257,13 +260,13 @@ class MarkovPlugin < Plugin
 
   # if passed a pair, pick a word from the registry using the pair as key.
   # otherwise, pick a word from an given list
-  def pick_word(word1, word2=MARKER)
+  def pick_word(word1, word2=MARKER, chainz=@chains)
     if word1.kind_of? Array
       wordlist = word1
     else
       k = "#{word1} #{word2}"
-      return MARKER unless @chains.key? k
-      wordlist = @chains[k]
+      return MARKER unless chainz.key? k
+      wordlist = chainz[k]
     end
     total = wordlist.first
     hash = wordlist.last
@@ -284,53 +287,36 @@ class MarkovPlugin < Plugin
   def generate_string(word1, word2)
     # limit to max of markov.max_words words
     if word2
-      output = "#{word1} #{word2}"
+      output = [word1, word2]
     else
-      output = word1.to_s
-    end
-
-    if @chains.key? output
-      wordlist = @chains[output]
-      wordlist.last.delete(MARKER)
-    else
-      output.downcase!
+      output = word1
       keys = []
       @chains.each_key(output) do |key|
-        if key.downcase.include? output
-          keys << key
-        else
-          break
-        end
-      end
-      if keys.empty?
-        keys = @chains.keys.select { |k| k.downcase.include? output }
+      	if key.downcase.include? output
+      		keys << key
+      	else
+      		break
+      	end
       end
       return nil if keys.empty?
-      while key = keys.delete_one
-        wordlist = @chains[key]
-        wordlist.last.delete(MARKER)
-        unless wordlist.empty?
-          output = key
-          # split using / / so that we can properly catch the marker
-          word1, word2 = output.split(/ /).map {|w| w.intern}
-          break
-        end
+      output = keys[rand(keys.size)].split(/ /)
+     end
+    output = output.split(/ /) unless output.is_a? Array
+    input = [word1, word2]
+    while output.length < @bot.config['markov.max_words'] and (output.first != MARKER or output.last != MARKER) do
+      if output.last != MARKER
+        output << pick_word(output[-2], output[-1])
+      end
+      if output.first != MARKER
+        output.insert 0, pick_word(output[0], output[1], @rchains)
       end
     end
-
-    word3 = pick_word(wordlist)
-    return nil if word3 == MARKER
-
-    output << " #{word3}"
-    word1, word2 = word2, word3
-
-    (@bot.config['markov.max_words'] - 1).times do
-      word3 = pick_word(word1, word2)
-      break if word3 == MARKER
-      output << " #{word3}"
-      word1, word2 = word2, word3
-    end
-    return output
+    output.delete MARKER
+    if output == input
+      nil
+    else
+	   output.join(" ")
+	 end
   end
 
   def help(plugin, topic="")
@@ -549,8 +535,7 @@ class MarkovPlugin < Plugin
     if words.length < 2
       line = generate_string words.first, nil
 
-      if line
-        return if message.index(line) == 0
+      if line and message.index(line) != 0
         reply_delay m, line
         return
       end
@@ -620,6 +605,7 @@ class MarkovPlugin < Plugin
 
   def learn_triplet(word1, word2, word3)
       k = "#{word1} #{word2}"
+      rk = "#{word2} #{word3}"
       @chains_mutex.synchronize do
         total = 0
         hash = Hash.new(0)
@@ -632,14 +618,28 @@ class MarkovPlugin < Plugin
         total += 1
         @chains[k] = [total, hash]
       end
+      @rchains_mutex.synchronize do
+        # Reverse
+        total = 0
+        hash = Hash.new(0)
+        if @rchains.key? rk
+          t2, h2 = @rchains[rk]
+          total += t2
+          hash.update h2
+        end
+        hash[word1] += 1
+        total += 1
+        @rchains[rk] = [total, hash]
+      end
   end
+
 
   def learn_line(message)
     # debug "learning #{message.inspect}"
     wordlist = clean_str(message).split(/\s+/).reject do |w|
-      @config['markov.ignore_patterns'].map do |pat|
+      @bot.config['markov.ignore_patterns'].map do |pat|
         w =~ Regexp.new(pat.to_s)
-      end.filter{|v| v}.size == 0
+      end.select{|v| v}.size != 0
     end.map { |w| w.intern }
     return unless wordlist.length >= 2
     word1, word2 = MARKER, MARKER
