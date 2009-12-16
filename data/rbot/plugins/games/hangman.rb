@@ -246,7 +246,7 @@ class HangmanPlugin < Plugin
     when "play"
       return [_("hangman play on <channel> with word <word> => use in private chat with the bot to start a game with custom word\n"),
               _("hangman play random [with [max|min] length [<|>|== <length>]] => hangman with a random word from %{site}\n"),
-              _("hangman play with wordlist <wordlist> => hangman with random word from <wordlist>")].join
+              _("hangman play with wordlist <wordlist> => hangman with random word from <wordlist>")].join % { :site => RandomWord::SITE }
     when "stop"
       return _("hangman stop => quits the current game")
     when "define"
