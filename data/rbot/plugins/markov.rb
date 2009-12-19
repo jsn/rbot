@@ -253,9 +253,13 @@ class MarkovPlugin < Plugin
     end
 
     debug 'closing learning thread'
+    @learning_queue.clear
     @learning_queue.push nil
     @learning_thread.join
     debug 'learning thread closed'
+    @chains.close
+    @rchains.close
+    super
   end
 
   # pick a word from the registry using the pair as key.
