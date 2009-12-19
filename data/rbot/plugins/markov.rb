@@ -226,8 +226,6 @@ class MarkovPlugin < Plugin
     @chains.set_default([])
     @rchains = @registry.sub_registry('v2r')
     @rchains.set_default([])
-    @chains_mutex = Mutex.new
-    @rchains_mutex = Mutex.new
 
     @upgrade_queue = Queue.new
     @upgrade_thread = nil
@@ -610,31 +608,27 @@ class MarkovPlugin < Plugin
   def learn_triplet(word1, word2, word3)
       k = "#{word1} #{word2}"
       rk = "#{word2} #{word3}"
-      @chains_mutex.synchronize do
-        total = 0
-        hash = Hash.new(0)
-        if @chains.key? k
-          t2, h2 = @chains[k]
-          total += t2
-          hash.update h2
-        end
-        hash[word3] += 1
-        total += 1
-        @chains[k] = [total, hash]
+      total = 0
+      hash = Hash.new(0)
+      if @chains.key? k
+        t2, h2 = @chains[k]
+        total += t2
+        hash.update h2
       end
-      @rchains_mutex.synchronize do
-        # Reverse
-        total = 0
-        hash = Hash.new(0)
-        if @rchains.key? rk
-          t2, h2 = @rchains[rk]
-          total += t2
-          hash.update h2
-        end
-        hash[word1] += 1
-        total += 1
-        @rchains[rk] = [total, hash]
+      hash[word3] += 1
+      total += 1
+      @chains[k] = [total, hash]
+      # Reverse
+      total = 0
+      hash = Hash.new(0)
+      if @rchains.key? rk
+        t2, h2 = @rchains[rk]
+        total += t2
+        hash.update h2
       end
+      hash[word1] += 1
+      total += 1
+      @rchains[rk] = [total, hash]
   end
 
 
