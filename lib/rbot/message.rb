@@ -403,19 +403,27 @@ module Irc
       reply string, {:nick => true}.merge(options)
     end
 
+    # Same as nickreply, but always prepend the target's nick.
+    def nickreply!(string, options={})
+      reply string, {:nick => true, :forcenick => true}.merge(options)
+    end
+
     # The general way to reply to a command. The following options are available:
     # :nick [false, true, :auto]
     #   state if the nick of the user calling the command should be prepended
     #   :auto uses core.reply_with_nick
+    #
+    # :forcenick [false, true]
+    #   if :nick is true, always prepend the target's nick, even if the nick
+    #   already appears in the reply. Defaults to false.
     #
     # :to [:private, :public, :auto]
     #   where should the bot reply?
     #   :private always reply to the nick
     #   :public reply to the channel (if available)
     #   :auto uses core.private_replies
-
     def reply(string, options={})
-      opts = {:nick => :auto, :to => :auto}.merge options
+      opts = {:nick => :auto, :forcenick => false, :to => :auto}.merge options
 
       if opts[:nick] == :auto
         opts[:nick] = @bot.config['core.reply_with_nick']
@@ -429,7 +437,8 @@ module Irc
 
       if (opts[:nick] &&
           opts[:to] != :private &&
-          string !~ /(?:^|\W)#{Regexp.escape(@source.to_s)}(?:$|\W)/)
+          (string !~ /(?:^|\W)#{Regexp.escape(@source.to_s)}(?:$|\W)/ ||
+            opts[:forcenick]))
         string = "#{@source}#{@bot.config['core.nick_postfix']} #{string}"
       end
       to = (opts[:to] == :private) ? source : @channel
