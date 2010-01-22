@@ -203,7 +203,8 @@ class GoogleTranslator < Translator
     if response["responseStatus"] != 200
       raise Translator::NoTranslationError, response["responseDetails"]
     else
-      response["responseData"]["translatedText"]
+      translation = response["responseData"]["translatedText"]
+      return Utils.decode_html_entities(translation)
     end
   end
 end
