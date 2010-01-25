@@ -365,9 +365,12 @@ class MarkovPlugin < Plugin
     end
   end
 
-  def clean_str(s)
-    str = s.dup
-    str.gsub!(/^\S+[:,;]/, "")
+  def clean_message(m)
+    str = m.plainmessage.dup
+    str =~ /^(\S+)([:,;])/
+    if $1 and m.target.is_a? Irc::Channel and m.target.user_nicks.include? $1.downcase
+      str.gsub!(/^(\S+)([:,;])\s+/, "")
+    end
     str.gsub!(/\s{2,}/, ' ') # fix for two or more spaces
     return str.strip
   end
@@ -533,7 +536,7 @@ class MarkovPlugin < Plugin
   def random_markov(m, message)
     return unless should_talk(m)
 
-    words = clean_str(message).split(/\s+/)
+    words = clean_message(m).split(/\s+/)
     if words.length < 2
       line = generate_string words.first, nil
 
@@ -601,7 +604,7 @@ class MarkovPlugin < Plugin
     end
 
     random_markov(m, message) unless readonly? m or m.replied?
-    learn message
+    learn clean_message(m)
   end
 
 
@@ -634,7 +637,7 @@ class MarkovPlugin < Plugin
 
   def learn_line(message)
     # debug "learning #{message.inspect}"
-    wordlist = clean_str(message).split(/\s+/).reject do |w|
+    wordlist = message.split(/\s+/).reject do |w|
       @bot.config['markov.ignore_patterns'].map do |pat|
         w =~ Regexp.new(pat.to_s)
       end.select{|v| v}.size != 0
