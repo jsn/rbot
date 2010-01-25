@@ -490,9 +490,9 @@ class MarkovPlugin < Plugin
     m.okay
   end
 
-  def should_talk
+  def should_talk(m)
     return false unless @bot.config['markov.enabled']
-    prob = probability?
+    prob = m.address? ? @bot.config['markov.answer_addressed'] : probability?
     return true if prob > rand(100)
     return false
   end
@@ -531,7 +531,7 @@ class MarkovPlugin < Plugin
   end
 
   def random_markov(m, message)
-    return unless (should_talk or (m.address? and  @bot.config['markov.answer_addressed'] > rand(100)))
+    return unless should_talk(m)
 
     words = clean_str(message).split(/\s+/)
     if words.length < 2
