@@ -32,7 +32,7 @@ class MarkovPlugin < Plugin
     :validate => Proc.new { |v| v >= 0 },
     :desc => "Time the learning thread spends sleeping after learning a line. If set to zero, learning from files can be very CPU intensive, but also faster.")
    Config.register Config::IntegerValue.new('markov.delay',
-    :default => true,
+    :default => 5,
     :validate => Proc.new { |v| v >= 0 },
     :desc => "Wait short time before contributing to conversation.")
    Config.register Config::IntegerValue.new('markov.answer_addressed',
@@ -522,7 +522,7 @@ class MarkovPlugin < Plugin
   def reply_delay(m, line)
     m.replied = true
     if @bot.config['markov.delay'] > 0
-      @bot.timer.add_once(@bot.config['markov.delay']) {
+      @bot.timer.add_once(1 + rand(@bot.config['markov.delay'])) {
         m.reply line, :nick => false, :to => :public
       }
     else
