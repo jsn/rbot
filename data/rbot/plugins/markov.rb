@@ -294,15 +294,15 @@ class MarkovPlugin < Plugin
       output = word1
       keys = []
       @chains.each_key(output) do |key|
-      	if key.downcase.include? output
-      		keys << key
-      	else
-      		break
-      	end
+        if key.downcase.include? output
+          keys << key
+        else
+          break
+        end
       end
       return nil if keys.empty?
       output = keys[rand(keys.size)].split(/ /)
-     end
+    end
     output = output.split(/ /) unless output.is_a? Array
     input = [word1, word2]
     while output.length < @bot.config['markov.max_words'] and (output.first != MARKER or output.last != MARKER) do
@@ -317,8 +317,8 @@ class MarkovPlugin < Plugin
     if output == input
       nil
     else
-	   output.join(" ")
-	 end
+      output.join(" ")
+    end
   end
 
   def help(plugin, topic="")
