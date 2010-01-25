@@ -159,7 +159,11 @@ module Irc
       ret << ' plainmessage=' << plainmessage.inspect
       ret << fields if fields
       ret << ' (identified)' if identified?
-      ret << ' (addressed to me)' if address?
+      if address?
+        ret << ' (addressed to me'
+        ret << ', with prefix' if prefixed?
+        ret << ')'
+      end
       ret << ' (replied)' if replied?
       ret << ' (ignored)' if ignored?
       ret << ' (in thread)' if in_thread?
@@ -179,6 +183,7 @@ module Irc
       @bot = bot
       @source = source
       @address = false
+      @prefixed = false
       @target = target
       @message = message || ""
       @replied = false
@@ -235,6 +240,12 @@ module Irc
     # a kick message when bot was kicked etc.
     def address?
       return @address
+    end
+
+    # returns true if the messaged was addressed to the bot via the address
+    # prefix. This can be used to tell appart "!do this" from "botname, do this"
+    def prefixed?
+      return @prefixed
     end
 
     # strip mIRC colour escapes from a string
@@ -342,6 +353,7 @@ module Irc
       bot.config['core.address_prefix'].each {|mprefix|
         if @message.gsub!(/^#{Regexp.escape(mprefix)}\s*/, "")
           @address = true
+          @prefixed = true
           break
         end
       }
