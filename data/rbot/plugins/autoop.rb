@@ -1,10 +1,15 @@
 class AutoOP < Plugin
   Config.register Config::BooleanValue.new('autoop.on_nick',
     :default => true,
-    :desc => "Determines if the bot should auto-op when someone changes nick and the new nick matches a listed netmask")
+    :desc => "Determines if the bot should auto-op when someone changes nick " +
+             "and the new nick matches a listed netmask")
 
   def help(plugin, topic="")
-    return "perform autoop based on hostmask - usage: add <hostmask> [channel channel ...], rm <hostmask> [channel], list - list current ops. If you don't specify which channels, all channels are assumed"
+    return "perform autoop based on hostmask - usage:"
+         + "add <hostmask> [channel channel ...], rm <hostmask> [channel], "
+         + "list - list current ops, restore [channel] - op anybody that would "
+         +    "have been opped if they had just joined. "
+         + "If you don't specify which channels, all channels are assumed"
   end
 
   def join(m)
@@ -85,6 +90,31 @@ class AutoOP < Plugin
       m.reply "No entries"
     end
   end
+
+  def restore(m, params)
+    chan = params[:channel]
+    if chan == nil
+      if m.public?
+        chan = m.channel
+      else
+        m.reply _("Either specify a channel to restore, or ask in public")
+      end
+    end
+
+    current_non_ops = @bot.server.channel(chan).users.select { |u|
+      u.is_op?(chan) == nil and u.nick != @bot.nick
+    }
+
+    @registry.each { |mask,channels|
+      if channels.empty? || channels.include?(chan)
+        current_non_ops.each { |victim|
+          if victim.matches?(mask.to_irc_netmask(:server => m.server))
+            @bot.mode(chan, "+o", victim)
+          end
+        }
+      end
+    }
+  end
 end
 
 plugin = AutoOP.new
@@ -92,5 +122,6 @@ plugin = AutoOP.new
 plugin.map 'autoop list', :action => 'list'
 plugin.map 'autoop add :mask [*channels]', :action => 'add'
 plugin.map 'autoop rm :mask [*channels]', :action => 'rm'
+plugin.map 'autoop restore [:channel]', :action => 'restore'
 
 plugin.default_auth('*',false)
