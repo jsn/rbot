@@ -4,12 +4,20 @@ class AutoOP < Plugin
     :desc => "Determines if the bot should auto-op when someone changes nick " +
              "and the new nick matches a listed netmask")
 
+  Config.register Config::StringValue.new('autoop.seed_format',
+    :default => "*!%{user}@*",
+    :desc => "Hostmask format used when seeding channels. Recognized tokens: " +
+             "nick, user, host")
+
   def help(plugin, topic="")
-    return "perform autoop based on hostmask - usage:"
-         + "add <hostmask> [channel channel ...], rm <hostmask> [channel], "
-         + "list - list current ops, restore [channel] - op anybody that would "
-         +    "have been opped if they had just joined. "
-         + "If you don't specify which channels, all channels are assumed"
+    return "perform autoop based on hostmask - usage:" +
+           "add <hostmask> [channel channel ...], rm <hostmask> [channel], " +
+             "If you don't specify which channels, all channels are assumed, " +
+           "list - list current ops, " +
+           "restore [channel] - op anybody that would " +
+             "have been opped if they had just joined, " +
+           "seed [channel] - Find current ops and make sure they will " +
+             "continue to be autoopped"
   end
 
   def join(m)
@@ -60,6 +68,55 @@ class AutoOP < Plugin
         m.okay
       end
     end
+  end
+
+  def seed(m, params)
+    chan = params[:channel]
+    if chan == nil
+      if m.public?
+        chan = m.channel
+      else
+        m.reply _("Either specify a channel to seed, or ask in public")
+      end
+    end
+
+    current_ops = @bot.server.channel(chan).users.select { |u|
+        u.is_op?(chan) and u.nick != @bot.nick
+    }
+
+    netmasks = current_ops.map { |u|
+      @bot.config['autoop.seed_format'] % {
+        :user => u.user,
+        :nick => u.nick,
+        :host => u.host
+      }
+    }.uniq
+
+    to_add = netmasks.select { |mask|
+        @registry.key?(mask) == false or @registry[mask].empty? == false
+    }
+
+    if to_add.empty?
+      m.reply _("Nobody to add")
+      return
+    end
+
+    results = []
+    to_add.each { |mask|
+      if @registry.key? mask
+        if @registry[mask].include? chan
+          next
+        else
+          current_channels = @registry[mask].dup
+          @registry[mask] = ([chan] | current_channels).uniq
+          results << _("Added #{mask} in #{chan}")
+        end
+      else
+        @registry[mask] = [chan]
+        results << _("Created autoop entry for #{mask} and added #{chan}")
+      end
+    }
+    m.reply results.join ". "
   end
 
   def rm(m, params)
@@ -122,6 +179,7 @@ plugin = AutoOP.new
 plugin.map 'autoop list', :action => 'list'
 plugin.map 'autoop add :mask [*channels]', :action => 'add'
 plugin.map 'autoop rm :mask [*channels]', :action => 'rm'
+plugin.map 'autoop seed [:channel]', :action => 'seed'
 plugin.map 'autoop restore [:channel]', :action => 'restore'
 
 plugin.default_auth('*',false)
