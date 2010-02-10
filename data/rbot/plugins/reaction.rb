@@ -301,6 +301,12 @@ class ReactionPlugin < Plugin
     }
   end
 
+  def can_add?(m, reaction)
+    return false if reaction.act == :ruby and @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
+    return false if reaction.act == :cmd and @bot.auth.permit?(m.source, "reaction::react::cmd", m.channel)
+    return true
+  end
+
   def handle_add(m, params)
     trigger = params[:trigger].to_s
     reply = params[:reply].to_s
@@ -324,19 +330,23 @@ class ReactionPlugin < Plugin
     found = reaction.find_reply(reply)
     if found
       # ruby replies need special permission
-      if found.act != :ruby or @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
+      if can_add?(m, found)
         found.pct = pct
         found.author = m.sourcenick
         found.date = Time.now
         found.channel = m.channel
       else
-        m.reply _("Sorry, you're not allowed to change ruby replies here")
+        m.reply _("Sorry, you're not allowed to change %{act} replies here") % {
+          :act => found.act
+        }
         return
       end
     else
       found = reaction.add_reply(reply, pct, m.sourcenick, Time.now, m.channel)
-      if found.act == :ruby and not @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
-        m.reply _("Sorry, you're not allowed to add ruby replies here")
+      if can_add?(m, found)
+        m.reply _("Sorry, you're not allowed to add %{act} replies here") % {
+          :act => found.act
+        }
         reaction.rm_reply(reaction.replies.length)
         if new_reaction
           @reactions.delete(reaction)
@@ -438,6 +448,8 @@ plugin.map plugin.add_syntax, :action => 'handle_add',
 
 # ruby reactions are security holes, so give stricter permission
 plugin.default_auth('react::ruby', false)
+# cmd reactions can be security holes too
+plugin.default_auth('react::cmd', false)
 
 plugin.map 'reaction list [:page]', :action => 'handle_list',
   :requirements => { :page => /^\d+$/ }
