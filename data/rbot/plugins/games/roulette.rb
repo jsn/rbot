@@ -1,4 +1,4 @@
-define_structure :RouletteHistory, :games, :shots, :deaths, :misses, :wins
+define_structure :RouletteHistory, :games, :shots, :deaths, :misses, :wins, :points
 
 class RoulettePlugin < Plugin
   Config.register Config::BooleanValue.new('roulette.autospin',
@@ -37,14 +37,14 @@ class RoulettePlugin < Plugin
     if @registry.has_key?("player " + m.sourcenick)
       playerdata = @registry["player " + m.sourcenick]
     else
-      playerdata = RouletteHistory.new(0,0,0,0,0)
+      playerdata = RouletteHistory.new(0,0,0,0,0,0)
     end
 
     totals = nil
     if @registry.has_key?("totals")
       totals = @registry["totals"]
     else
-      totals = RouletteHistory.new(0,0,0,0,0)
+      totals = RouletteHistory.new(0,0,0,0,0,0)
     end
 
     if @last == m.sourcenick and not @bot.config['roulette.twice_in_a_row']
@@ -61,8 +61,9 @@ class RoulettePlugin < Plugin
     totals.shots += 1
 
     shot = @chambers.pop
+    chamberNo = 6 - @chambers.length
     if shot
-      m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => *BANG*"
+      m.reply "#{m.sourcenick}: chamber #{chamberNo} of 6 => *BANG*"
       playerdata.deaths += 1
       totals.deaths += 1
       @players.each {|plyr|
@@ -77,8 +78,9 @@ class RoulettePlugin < Plugin
       @last = ''
       @bot.kick(m.replyto, m.sourcenick, "*BANG*") if @bot.config['roulette.kick']
     else
-      m.reply "#{m.sourcenick}: chamber #{6 - @chambers.length} of 6 => +click+"
+      m.reply "#{m.sourcenick}: chamber #{chamberNo} of 6 => +click+"
       playerdata.misses += 1
+      playerdata.points += 2**chamberNo
       totals.misses += 1
     end
 
@@ -106,7 +108,7 @@ class RoulettePlugin < Plugin
     if @registry.has_key?("totals")
       totals = @registry["totals"]
     else
-      totals = RouletteHistory.new(0,0,0,0,0)
+      totals = RouletteHistory.new(0,0,0,0,0,0)
     end
 
     @players.each {|plyr|
@@ -216,6 +218,33 @@ class RoulettePlugin < Plugin
       m.reply "roulette stats: #{total_games} games completed, #{total_shots} shots fired at #{total_players} players. Luckiest: #{h_luck_percent[0].join(',')} (#{sprintf '%.1f', h_luck_percent[1]}% clicks). Unluckiest: #{l_luck_percent[0].join(',')} (#{sprintf '%.1f', l_luck_percent[1]}% clicks). Highest survival rate: #{h_win_percent[0].join(',')} (#{sprintf '%.1f', h_win_percent[1]}%). Lowest survival rate: #{l_win_percent[0].join(',')} (#{sprintf '%.1f', l_win_percent[1]}%). Most wins: #{won_most[0].join(',')} (#{won_most[1]}). Most deaths: #{died_most[0].join(',')} (#{died_most[1]})."
     end
   end
+
+  # Figure out who the winnar is!
+  def hof(m, params)
+    fool = m.sourcenick
+    tmpKey = params[:key].to_s
+    targetKey = tmpKey.to_sym
+    m.reply("Checking out the #{tmpKey} HoF...")
+    tmp = @registry.to_hash
+    tmp.delete("totals")
+    sorted = tmp.sort { |a,b| b[1][targetKey] <=> a[1][targetKey] }
+
+    winnersLeft = 5
+
+    winners = []
+    sorted.each do |player|
+      playerName = player[0].split(" ")[1]
+      if player[0] == "totals" or playerName == ""
+        next
+      end
+      winners << "#{playerName} has #{player[1][targetKey]}"
+      winnersLeft -= 1
+      if winnersLeft == 0
+        break
+      end
+    end
+    m.reply(winners.join(" | "))
+  end
 end
 
 plugin = RoulettePlugin.new
@@ -227,5 +256,6 @@ plugin.map 'roulette spin', :action => 'spin'
 plugin.map 'roulette stats :player', :action => 'playerstats'
 plugin.map 'roulette stats', :action => 'stats'
 plugin.map 'roulette clearstats', :action => 'clearstats'
+plugin.map 'roulette hof :key', :action => 'hof', :defaults => {:key => "points"}, :requirements => {:key => /^(?:games|shots|deaths|misses|wins|points)$/}
 plugin.map 'roulette'
 
