@@ -343,7 +343,7 @@ class ReactionPlugin < Plugin
       end
     else
       found = reaction.add_reply(reply, pct, m.sourcenick, Time.now, m.channel)
-      if can_add?(m, found)
+      unless can_add?(m, found)
         m.reply _("Sorry, you're not allowed to add %{act} replies here") % {
           :act => found.act
         }
