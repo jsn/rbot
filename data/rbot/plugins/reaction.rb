@@ -302,9 +302,10 @@ class ReactionPlugin < Plugin
   end
 
   def can_add?(m, reaction)
-    return false if reaction.act == :ruby and @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
-    return false if reaction.act == :cmd and @bot.auth.permit?(m.source, "reaction::react::cmd", m.channel)
-    return true
+    return true if reaction.act == :reply
+    return true if reaction.act == :ruby and @bot.auth.permit?(m.source, "reaction::react::ruby", m.channel)
+    return true if reaction.act == :cmd and @bot.auth.permit?(m.source, "reaction::react::cmd", m.channel)
+    return false
   end
 
   def handle_add(m, params)
