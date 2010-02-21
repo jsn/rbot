@@ -51,7 +51,7 @@ class NickServPlugin < Plugin
   def help(plugin, topic="")
     case topic
     when ""
-      return _("nickserv plugin: handles nickserv protected IRC nicks. topics password, register, identify, listnicks")
+      return _("nickserv plugin: handles nickserv protected IRC nicks. topics: password, register, identify, listnicks")
     when "password"
       return _("nickserv password [<nick>] <passwd>: remember the password for nick <nick> and use it to identify in future")
     when "register"
