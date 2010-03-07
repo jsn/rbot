@@ -77,7 +77,7 @@ module ::Irc
 
       FRACTION_RX = Regexp.new FRACTIONS.keys.join('|')
 
-      UNITSPEC_RX = /(s(?:ec(?:ond)?s?)?|m(?:in(?:ute)?s?)?|h(?:(?:ou)?rs?)?|d(?:ays?)?|weeks?)/
+      UNITSPEC_RX = /(years?|months?|s(?:ec(?:ond)?s?)?|m(?:in(?:ute)?s?)?|h(?:(?:ou)?rs?)?|d(?:ays?)?|weeks?)/
 
       # str must much UNITSPEC_RX
       def ParseTime.time_unit(str)
@@ -85,13 +85,21 @@ module ::Irc
         when :s
           1
         when :m
-          60
+          if str[1,1] == 'o'
+            # months
+            3600*24*30
+          else
+            #minutes
+            60
+          end
         when :h
           3600
         when :d
           3600*24
         when :w
           3600*24*7
+        when :y
+          3600*24*365
         end
       end
 
@@ -128,15 +136,15 @@ module ::Irc
                 num += ONE_TO_NINE[$4.intern]
               end
             end
-          frac = $5
-          unit = ParseTime.time_unit($6)
-          clean.strip!
-          if frac.nil? and clean.sub!(/^and\s+(#{FRACTION_RX})/, '')
-            frac = $1
-          end
-          if frac
-            num += FRACTIONS[frac.intern]
-          end
+            frac = $5
+            unit = ParseTime.time_unit($6)
+            clean.strip!
+            if frac.nil? and clean.sub!(/^and\s+(#{FRACTION_RX})/, '')
+              frac = $1
+            end
+            if frac
+              num += FRACTIONS[frac.intern]
+            end
           else
             raise "invalid time string: #{clean} (parsed #{sofar} so far)"
           end
