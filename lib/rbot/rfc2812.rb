@@ -1331,7 +1331,7 @@ module Irc
         when RPL_WHOISCHANNELS
           @whois ||= Hash.new
           @whois[:nick] = argv[1]
-          @whois[:channels] = []
+          @whois[:channels] ||= []
           user = @server.user(@whois[:nick])
           argv[-1].split.each do |prechan|
             pfx = prechan.scan(/[#{@server.supports[:prefix][:prefixes].join}]/)
