@@ -69,6 +69,20 @@ class BasicsModule < CoreBotModule
     end
   end
 
+  def bot_channel_list(m, param)
+    ret = _('I am in: ')
+    # sort the channels by the base name and then map with prefixes for the
+    # mode and display.
+    ret << @bot.channels.compact.sort { |a,b|
+        a.name.downcase <=> b.name.downcase
+    }.map { |c|
+        c.modes_of(@bot.myself).map{ |mo|
+          m.server.prefix_for_mode(mo)
+        }.to_s + c.name
+    }.join(', ')
+    m.reply ret
+  end
+
   def bot_quit(m, param)
     @bot.quit param[:msg].to_s
   end
@@ -211,6 +225,9 @@ basics.map "join :chan :pass",
 basics.map "part :chan",
   :action => 'bot_part',
   :defaults => {:chan => nil},
+  :auth_path => 'move'
+basics.map "channels",
+  :action => 'bot_channel_list',
   :auth_path => 'move'
 basics.map "hide",
   :action => 'bot_hide',
