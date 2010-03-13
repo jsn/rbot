@@ -8,6 +8,25 @@
 define_structure :Saw, :nick, :time, :type, :where, :message
 
 class SeenPlugin < Plugin
+
+  MSG_PUBLIC = N_("saying \"%{message}\" in %{where}")
+  MSG_ACTION = N_("doing *%{nick} %{message}* in %{where}")
+  MSG_NICK = N_("changing nick from %{nick} to %{message}")
+  MSG_PART = N_("leaving %{where} (%{message})")
+  MSG_PART_EMPTY = N_("leaving %{where}")
+  MSG_JOIN = N_("joining %{where}")
+  MSG_QUIT = N_("quitting IRC (%{message})")
+  MSG_TOPIC = N_("changing the topic of %{where} to \"%{message}\"")
+
+  CHANPRIV_CHAN      = N_("a private channel")
+  CHANPRIV_MSG_TOPIC  = N_("changing the topic of %{where}")
+
+  MSGPRIV_MSG_PUBLIC = N_("speaking in %{where}")
+  MSGPRIV_MSG_ACTION = N_("doing something in %{where}")
+
+  FORMAT_NORMAL = N_("%{nick} was last seen %{when}, %{doing}")
+  FORMAT_WITH_BEFORE = N_("%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}")
+
   Config.register Config::IntegerValue.new('seen.max_results',
     :default => 3, :validate => Proc.new{|v| v >= 0},
     :desc => _("Maximum number of seen users to return in search (0 = no limit)."))
@@ -85,21 +104,36 @@ class SeenPlugin < Plugin
       before = reg.first
     end
 
+    # TODO: a message should not be disclosed if:
+    # - it was said in a channel that was/is invite-only, private or secret
+    # - UNLESS the requester is also in the channel now, or the request is made
+    #   in the channel?
+    msg_privacy = false
+    # TODO: a channel or it's topic should not be disclosed if:
+    # - the channel was/is private or secret
+    # - UNLESS the requester is also in the channel now, or the request is made
+    #   in the channel?
+    chan_privacy = false
+
+    # What should be displayed for channel?
+    where = chan_privacy ? _(CHANPRIV_CHAN) : saw.where
+
     formats = {
-      :normal      => _("%{nick} was last seen %{when}, %{doing}"),
-      :with_before => _("%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}")
+      :normal      => _(FORMAT_NORMAL),
+      :with_before => _(FORMAT_WITH_BEFORE)
     }
 
     if before && [:PART, :QUIT].include?(saw.type.to_sym) &&
        [:PUBLIC, :ACTION].include?(before.type.to_sym)
       did_before = case before.type.to_sym
       when :PUBLIC
-        _("saying \"%{message}\"")
+        _(msg_privacy ? MSGPRIV_MSG_PUBLIC : MSG_PUBLIC)
       when :ACTION
-        _("doing *%{nick} %{message}*")
+        _(msg_privacy ? MSGPRIV_MSG_ACTION : MSG_ACTION)
       end % {
         :nick => saw.nick,
-        :message => before.message
+        :message => before.message,
+        :where => where
       }
 
       format = :with_before
@@ -127,24 +161,24 @@ class SeenPlugin < Plugin
 
     doing = case saw.type.to_sym
     when :PUBLIC
-      _("saying \"%{message}\" in %{where}")
+      _(msg_privacy ? MSGPRIV_MSG_PUBLIC : MSG_PUBLIC)
     when :ACTION
-      _("doing *%{nick} %{message}* in %{where}")
+      _(msg_privacy ? MSGPRIV_MSG_ACTION : MSG_ACTION)
     when :NICK
-      _("changing nick from %{nick} to %{message}")
+      _(MSG_NICK)
     when :PART
       if saw.message.empty?
-        _("leaving %{where}")
+        _(MSG_PART_EMPTY)
       else
-        _("leaving %{where} (%{message})")
+        _(MSG_PART)
       end
     when :JOIN
-      _("joining %{where}")
+      _(MSG_JOIN)
     when :QUIT
-      _("quitting IRC (%{message})")
+      _(MSG_QUIT)
     when :TOPIC
-      _("changing the topic of %{where} to \"%{message}\"")
-    end % { :message => saw.message, :where => saw.where, :nick => saw.nick }
+      _(chan_privacy ? CHANPRIV_MSG_TOPIC : MSG_TOPIC)
+    end % { :message => saw.message, :where => where, :nick => saw.nick }
 
     case format
     when :normal
@@ -165,6 +199,9 @@ class SeenPlugin < Plugin
   end
 
   def store(m, saw)
+    # TODO: we need to store the channel state INVITE/SECRET/PRIVATE here, in
+    # some symbolic form, so that we know the prior state of the channel when
+    # it comes time to display.
     reg = @registry[saw.nick]
 
     if reg && reg.is_a?(Array)
