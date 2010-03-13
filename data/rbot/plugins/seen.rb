@@ -127,9 +127,9 @@ class SeenPlugin < Plugin
 
     doing = case saw.type.to_sym
     when :PUBLIC
-      _("saying \"%{message}\"")
+      _("saying \"%{message}\" in %{where}")
     when :ACTION
-      _("doing *%{message}*")
+      _("doing *%{nick} %{message}* in %{where}")
     when :NICK
       _("changing nick from %{nick} to %{message}")
     when :PART
