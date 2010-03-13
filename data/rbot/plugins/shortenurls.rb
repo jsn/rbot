@@ -22,6 +22,10 @@ class ShortenURLs < Plugin
     :default => ['rubyurl', 'shorterlink'],
     :requires_rescan => true,
     :desc => "List of nonfunctioning shorturl services")
+  Config.register Config::StringValue.new('shortenurls.favorite_service',
+    :default => 'tinyurl',
+    :desc => "Default shortening service. Probably only applies when other plugins " +
+             "use this one for shortening")
 
   attr_accessor :services
   def initialize
@@ -56,7 +60,14 @@ class ShortenURLs < Plugin
       return nil
     end
 
-    service = (params[:service] || m.plugin).to_sym
+    if params.has_key? :service
+      service = params[:service]
+    elsif m != nil and m.plugin != nil
+      service = m.plugin
+    else
+      service = @bot.config['shortenurls.favorite_service']
+    end
+    service = service.to_sym
     service = :rubyurl if service == :shorturl
 
     tried = []

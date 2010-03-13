@@ -15,6 +15,12 @@ class UrlPlugin < Plugin
   Config.register Config::IntegerValue.new('url.display_link_info',
     :default => 0,
     :desc => "Get the title of links pasted to the channel and display it (also tells if the link is broken or the site is down). Do it for at most this many links per line (set to 0 to disable)")
+  Config.register Config::BooleanValue.new('url.auto_shorten',
+    :default => false,
+    :desc => "Automatically spit out shortened URLs when they're seen. Check shortenurls for config options")
+  Config.register Config::IntegerValue.new('url.auto_shorten_min_length',
+    :default => 48,
+    :desc => "Minimum length of URL to auto-shorten.  Only has an effect when url.auto_shorten is true.")
   Config.register Config::BooleanValue.new('url.titles_only',
     :default => false,
     :desc => "Only show info for links that have <title> tags (in other words, don't display info for jpegs, mpegs, etc.)")
@@ -153,6 +159,11 @@ class UrlPlugin < Plugin
     urls.each do |urlstr|
       debug "working on #{urlstr}"
       next unless urlstr =~ /^https?:\/\/./
+      if @bot.config['url.auto_shorten'] == true and
+         urlstr.length >= @bot.config['url.auto_shorten_min_length']
+        m.reply(bot.plugins['shortenurls'].shorten(nil, {:url=>urlstr, :called=>true}))
+        next
+      end
       title = nil
       debug "Getting title for #{urlstr}..."
       reply = nil
