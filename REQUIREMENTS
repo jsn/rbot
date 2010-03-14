@@ -2,7 +2,12 @@ Ruby modules needed for rbot
 ============================
 
 Core requirements
-      bdb (berkley db)      http://raa.ruby-lang.org/project/bdb/
+      tokyocabinet          for "tc" DB adaptor
+                            http://1978th.net/tokyocabinet/
+                            you can install Ruby bindings via "gem install tokyocabinet",
+                            but this still requires libtokyocabinet to be installed system-wide
+      bdb (berkeley db)      for "bdb" DB adaptor or converting from it
+                            http://raa.ruby-lang.org/project/bdb/
                             (which requires libdb4.x or better, formerly from
                             www.sleepycat.com, now at
                             http://www.oracle.com/technology/products/berkeley-db/index.html)
@@ -11,6 +16,7 @@ Core requirements
                             have a libdb-ruby packaged (or similar).
                             For Windows instructions, check at the bottom
                             of this file.
+
       net/http 1.2+
       net/https             (for debian, this will also need libopenssl-ruby)
       socket

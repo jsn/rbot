@@ -420,9 +420,9 @@ class Bot
     Config.register Config::StringValue.new('core.db',
       :default => "bdb",
       :wizard => true, :default => "bdb",
-      :validate => Proc.new { |v| ["bdb"].include? v },
+      :validate => Proc.new { |v| ["bdb", "tc"].include? v },
       :requires_restart => true,
-      :desc => "DB adaptor to use for storing settings and plugin data. Options are: bdb (Berkeley DB, stable adaptor, but troublesome to install and unmaintained)")
+      :desc => "DB adaptor to use for storing settings and plugin data. Options are: bdb (Berkeley DB, stable adaptor, but troublesome to install and unmaintained), tc (Tokyo Cabinet, new adaptor, fast and furious, but may be not available and contain bugs)")
 
     @argv = params[:argv]
     @run_dir = params[:run_dir] || Dir.pwd
@@ -494,6 +494,8 @@ class Bot
     case @config["core.db"]
       when "bdb"
         require 'rbot/registry/bdb'
+      when "tc"
+         require 'rbot/registry/tc'
       else
         raise _("Unknown DB adaptor: %s") % @config["core.db"]
     end
