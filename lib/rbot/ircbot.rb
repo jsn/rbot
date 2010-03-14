@@ -153,8 +153,7 @@ require 'rbot/timer'
 require 'rbot/plugins'
 require 'rbot/message'
 require 'rbot/language'
-require 'rbot/dbhash'
-require 'rbot/registry'
+require 'rbot/registry/bdb'
 
 module Irc
 
