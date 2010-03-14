@@ -153,7 +153,6 @@ require 'rbot/timer'
 require 'rbot/plugins'
 require 'rbot/message'
 require 'rbot/language'
-require 'rbot/registry/bdb'
 
 module Irc
 
@@ -418,6 +417,12 @@ class Bot
         bot.socket.penalty_pct = v
       },
       :desc => "Percentage of IRC penalty to consider when sending messages to prevent being disconnected for excess flood. Set to 0 to disable penalty control.")
+    Config.register Config::StringValue.new('core.db',
+      :default => "bdb",
+      :wizard => true, :default => "bdb",
+      :validate => Proc.new { |v| ["bdb"].include? v },
+      :requires_restart => true,
+      :desc => "DB adaptor to use for storing settings and plugin data. Options are: bdb (Berkeley DB, stable adaptor, but troublesome to install and unmaintained)")
 
     @argv = params[:argv]
     @run_dir = params[:run_dir] || Dir.pwd
@@ -485,6 +490,12 @@ class Bot
 
     if @config['core.run_as_daemon']
       $daemonize = true
+    end
+    case @config["core.db"]
+      when "bdb"
+        require 'rbot/registry/bdb'
+      else
+        raise _("Unknown DB adaptor: %s") % @config["core.db"]
     end
 
     @logfile = @config['log.file']
