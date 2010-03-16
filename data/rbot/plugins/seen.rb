@@ -125,6 +125,9 @@ class SeenPlugin < Plugin
 
     if before && [:PART, :QUIT].include?(saw.type.to_sym) &&
        [:PUBLIC, :ACTION].include?(before.type.to_sym)
+      # TODO see chan_privacy
+      prev_chan_privacy = false
+      prev_where = prev_chan_privacy ? _(CHANPRIV_CHAN) : before.where
       did_before = case before.type.to_sym
       when :PUBLIC
         _(msg_privacy ? MSGPRIV_MSG_PUBLIC : MSG_PUBLIC)
@@ -133,7 +136,7 @@ class SeenPlugin < Plugin
       end % {
         :nick => saw.nick,
         :message => before.message,
-        :where => where
+        :where => prev_where
       }
 
       format = :with_before
