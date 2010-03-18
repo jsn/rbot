@@ -389,7 +389,7 @@ class HttpUtil
       end
     end
 
-    h = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_port)
+    h = Net::HTTP.new(uri.host, uri.port, proxy_host, proxy_port, proxy_user, proxy_pass)
     h.use_ssl = true if uri.scheme == "https"
 
     h.read_timeout = opts[:read_timeout]
