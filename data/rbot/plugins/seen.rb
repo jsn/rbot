@@ -30,6 +30,9 @@ class SeenPlugin < Plugin
   Config.register Config::IntegerValue.new('seen.max_results',
     :default => 3, :validate => Proc.new{|v| v >= 0},
     :desc => _("Maximum number of seen users to return in search (0 = no limit)."))
+  Config.register Config::ArrayValue.new('seen.ignore_patterns',
+    :default => [ "^no u$" ],
+    :desc => _("Strings/regexes that you'd like to ignore for 'last message' purposes"))
 
   def help(plugin, topic="")
     _("seen <nick> => have you seen, or when did you last see <nick>")
@@ -67,6 +70,10 @@ class SeenPlugin < Plugin
     case m
     when PrivMessage
       return if m.private?
+      @bot.config['seen.ignore_patterns'].each { |regex|
+        return if m.message =~ /#{regex}/
+      }
+
       type = m.action? ? 'ACTION' : 'PUBLIC'
       store m, Saw.new(m.sourcenick.dup, now, type,
                        m.target.to_s, m.message.dup)
