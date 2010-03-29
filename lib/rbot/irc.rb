@@ -1668,7 +1668,7 @@ module Irc
     def parse_isupport(line)
       debug "Parsing ISUPPORT #{line.inspect}"
       ar = line.split(' ')
-      reparse = ""
+      reparse = []
       ar.each { |en|
         prekey, val = en.split('=', 2)
         if prekey =~ /^-(.*)/
@@ -1680,7 +1680,11 @@ module Irc
         case key
         when :casemapping
           noval_warn(key, val) {
-            @supports[key] = val.to_irc_casemap
+            if val == 'charset'
+              reparse << "CASEMAPPING=(charset)"
+            else
+              @supports[key] = val.to_irc_casemap
+            end
           }
         when :chanlimit, :idchan, :maxlist, :targmax
           noval_warn(key, val) {
@@ -1718,7 +1722,7 @@ module Irc
           @supports[key] = val
         when :maxchannels
           noval_warn(key, val) {
-            reparse += "CHANLIMIT=(chantypes):#{val} "
+            reparse << "CHANLIMIT=(chantypes):#{val} "
           }
         when :maxtargets
           noval_warn(key, val) {
@@ -1759,8 +1763,12 @@ module Irc
           @supports[key] =  val.nil? ? true : val
         end
       }
-      reparse.gsub!("(chantypes)",@supports[:chantypes])
-      parse_isupport(reparse) unless reparse.empty?
+      unless reparse.empty?
+        reparse_str = reparse.join(" ")
+        reparse_str.gsub!("(chantypes)",@supports[:chantypes])
+        reparse_str.gsub!("(charset)",@supports[:charset] || 'rfc1459')
+        parse_isupport(reparse_str)
+      end
     end
 
     # Returns the casemap of the server.
