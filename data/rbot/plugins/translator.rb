@@ -275,7 +275,7 @@ class TranslatorPlugin < Plugin
 
   def initialize
     super
-
+    @failed_translators = []
     @translators = {}
     TRANSLATORS.each_pair do |name, c|
       begin
@@ -283,6 +283,8 @@ class TranslatorPlugin < Plugin
         map "#{name} :from :to *phrase",
           :action => :cmd_translate, :thread => true
       rescue Exception
+        @failed_translators << { :name => name, :reason => $!.to_s }
+
         warning _("Translator %{name} cannot be used: %{reason}") %
                {:name => name, :reason => $!}
         map "#{name} [*args]", :action => :failed_translator,
@@ -304,19 +306,43 @@ class TranslatorPlugin < Plugin
   end
 
   def help(plugin, topic=nil)
-    if @translators.has_key?(plugin)
-      translator = @translators[plugin]
-      _('%{translator} <from> <to> <phrase> => Look up phrase using %{info}, supported from -> to languages: %{directions}') % {
-        :translator => plugin,
-        :info => translator.class::INFO,
-        :directions => translator.directions.map do |source, targets|
-                         _('%{source} -> %{targets}') %
-                         {:source => source, :targets => targets.to_a.join(', ')}
-                       end.join(' | ')
-      }
+    case (topic.intern rescue nil)
+    when :failed
+      unless @failed_translators.empty?
+        failed_list = @failed_translators.map { |t| _("%{bold}%{translator}%{bold}: %{reason}") % {
+          :translator => t[:name],
+          :reason => t[:reason],
+          :bold => Bold
+        }}
+
+        _("Failed translators: %{list}") % { :list => failed_list.join(", ") }
+      else
+        _("None of the translators failed")
+      end
     else
-      _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. If "translator" is used in place of the translator name, the first translator in translator.default_list which supports the specified direction will be picked automatically. Use "help <translator>" to look up supported from and to languages') %
-        {:translators => @translators.keys.join(', ')}
+      if @translators.has_key?(plugin)
+        translator = @translators[plugin]
+        _('%{translator} <from> <to> <phrase> => Look up phrase using %{info}, supported from -> to languages: %{directions}') % {
+          :translator => plugin,
+          :info => translator.class::INFO,
+          :directions => translator.directions.map do |source, targets|
+                           _('%{source} -> %{targets}') %
+                           {:source => source, :targets => targets.to_a.join(', ')}
+                         end.join(' | ')
+        }
+      else
+        help_str = _('Command: <translator> <from> <to> <phrase>, where <translator> is one of: %{translators}. If "translator" is used in place of the translator name, the first translator in translator.default_list which supports the specified direction will be picked automatically. Use "help <translator>" to look up supported from and to languages') %
+                     {:translators => @translators.keys.join(', ')}
+
+        help_str << "\n" + _("%{bold}Note%{bold}: %{failed_amt} translators failed, see %{reverse}%{prefix}help translate failed%{reverse} for details") % {
+          :failed_amt => @failed_translators.size,
+          :bold => Bold,
+          :reverse => Reverse,
+          :prefix => @bot.config['core.address_prefix'].first
+        }
+
+        help_str
+      end
     end
   end
 
