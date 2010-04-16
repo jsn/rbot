@@ -362,7 +362,20 @@ class TranslatorPlugin < Plugin
     if translator
       cmd_translate m, params.merge({:translator => translator, :show_provider => true})
     else
-      m.reply _('None of the default translators (translator.default_list) supports translating from %{source} to %{target}') % {:source => params[:from], :target => params[:to]}
+      # When translate command is used without source language, "auto" as source
+      # language is assumed. It means that google translator is used and we let google
+      # figure out what the source language is.
+      #
+      # Problem is that the google translator will fail if the system that the bot is
+      # running on does not have the json gem installed.
+      if params[:from] == 'auto'
+        m.reply _("Unable to auto-detect source language due to broken google translator, see %{reverse}%{prefix}help translate failed%{reverse} for details") % {
+          :reverse => Reverse,
+          :prefix => @bot.config['core.address_prefix'].first
+        }
+      else
+        m.reply _('None of the default translators (translator.default_list) supports translating from %{source} to %{target}') % {:source => params[:from], :target => params[:to]}
+      end
     end
   end
 
