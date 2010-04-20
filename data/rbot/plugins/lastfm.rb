@@ -387,7 +387,7 @@ class LastFmPlugin < Plugin
       reply = _("%{u} %{v} \"%{t}\" by %{bold}%{a}%{bold}%{b} %{p};") % {:u => user, :v => verb, :t => track, :a => artist, :b => album, :p => ago, :bold => Bold}
     end
 
-    if Object.const_defined?('Spotify')
+    if @bot.plugins['spotify'] && Object.const_defined?('Spotify')
       if track = Spotify.search(:track, "#{artist} #{track}")
         reply << _(" [%{u}%{url}%{u}]") % {:u => Underline, :url => track.url}
       end
