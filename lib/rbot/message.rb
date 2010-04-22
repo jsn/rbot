@@ -30,7 +30,7 @@ module Irc
   end
 
 
-  # Define standard IRC attriubtes (not so standard actually,
+  # Define standard IRC attributes (not so standard actually,
   # but the closest thing we have ...)
   Bold = "\002"
   Underline = "\037"
