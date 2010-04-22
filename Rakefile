@@ -195,4 +195,4 @@ desc 'Generate mo files'
 task :makemo =>
   FileList['po/*/*.po'].pathmap('%{^po,data/locale}d/LC_MESSAGES/%n.mo')
 
-
+Dir['tasks/**/*.rake'].each { |t| load t }
