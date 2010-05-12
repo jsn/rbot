@@ -585,7 +585,24 @@ module Plugins
         msg = err.to_s.gsub(/^\(eval\)(:\d+)(:in `.*')?(:.*)?/) { |m|
           "#{fname}#{$1}#{$3}"
         }
-        newerr = err.class.new(msg)
+        begin
+          newerr = err.class.new(msg)
+        rescue ArgumentError => err_in_err
+          # Somebody should hang the ActiveSupport developers by their balls
+          # with barbed wire. Their MissingSourceFile extension to LoadError
+          # _expects_ a second argument, breaking the usual Exception interface
+          # (instead, the smart thing to do would have been to make the second
+          # parameter optional and run the code in the from_message method if
+          # it was missing).
+          # Anyway, we try to cope with this in the simplest possible way. On
+          # the upside, this new block can be extended to handle other similar
+          # idiotic approaches
+          if err.class.respond_to? :from_message
+            newerr = err.class.from_message(msg)
+          else
+            raise err_in_err
+          end
+        end
         newerr.set_backtrace(bt)
         return newerr
       end
