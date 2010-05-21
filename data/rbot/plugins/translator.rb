@@ -215,18 +215,24 @@ class BabelfishTranslator < Translator
 
   def initialize(cache)
     require 'mechanize'
-    form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
-           forms_with(:name => 'frmTrText').first
-    lang_list = form.fields_with(:name => 'lp').first
+    (_, lang_list) = parse_page
     language_pairs = lang_list.options.map {|o| o.value.split('_')}.
                                            reject {|p| p.empty?}
     super(Translator::Direction.pairs(language_pairs), cache)
   end
 
-  def do_translate(text, from, to)
-    @form ||= WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
-              forms_with(:name => 'frmTrText').first
+  def parse_page
+    form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
+           forms_with(:name => 'frmTrText').first
+    lang_list = form.fields_with(:name => 'lp').first
+    [form, lang_list]
+  end
 
+  def do_translate(text, from, to)
+    unless @form && @lang_list
+      @form, @lang_list = parse_page
+    end
+    
     if @form.fields_with(:name => 'trtext').empty?
       @form.add_field!('trtext', text)
     else
