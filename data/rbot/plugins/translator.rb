@@ -110,12 +110,12 @@ class NiftyTranslator < Translator
   def initialize(cache={})
    require 'mechanize'
    super(Translator::Direction.all_from_to(%w[ja en zh_CN ko], %w[ja]), cache)
-    @form = WWW::Mechanize.new.
-            get('http://nifty.amikai.com/amitext/indexUTF8.jsp').
-            forms_with(:name => 'translateForm').last
   end
 
   def do_translate(text, from, to)
+    @form ||= WWW::Mechanize.new.
+              get('http://nifty.amikai.com/amitext/indexUTF8.jsp').
+              forms_with(:name => 'translateForm').last
     @radio = @form.radiobuttons_with(:name => 'langpair').first
     @radio.value = "#{from},#{to}".upcase
     @radio.check
@@ -215,16 +215,18 @@ class BabelfishTranslator < Translator
 
   def initialize(cache)
     require 'mechanize'
-
-    @form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
-            forms_with(:name => 'frmTrText').first
-    @lang_list = @form.fields_with(:name => 'lp').first
-    language_pairs = @lang_list.options.map {|o| o.value.split('_')}.
-                                            reject {|p| p.empty?}
+    form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
+           forms_with(:name => 'frmTrText').first
+    lang_list = form.fields_with(:name => 'lp').first
+    language_pairs = lang_list.options.map {|o| o.value.split('_')}.
+                                           reject {|p| p.empty?}
     super(Translator::Direction.pairs(language_pairs), cache)
   end
 
   def do_translate(text, from, to)
+    @form ||= WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
+              forms_with(:name => 'frmTrText').first
+
     if @form.fields_with(:name => 'trtext').empty?
       @form.add_field!('trtext', text)
     else
@@ -278,17 +280,10 @@ class TranslatorPlugin < Plugin
     @failed_translators = []
     @translators = {}
     TRANSLATORS.each_pair do |name, c|
-      begin
+      watch_for_fail(name) do
         @translators[name] = c.new(@registry.sub_registry(name))
         map "#{name} :from :to *phrase",
           :action => :cmd_translate, :thread => true
-      rescue Exception
-        @failed_translators << { :name => name, :reason => $!.to_s }
-
-        warning _("Translator %{name} cannot be used: %{reason}") %
-               {:name => name, :reason => $!}
-        map "#{name} [*args]", :action => :failed_translator,
-                               :defaults => {:name => name, :reason => $!}
       end
     end
 
@@ -298,6 +293,19 @@ class TranslatorPlugin < Plugin
       :desc => _("List of translators to try in order when translator name not specified"),
       :on_change => Proc.new {|bot, v| update_default})
     update_default
+  end
+
+  def watch_for_fail(name, &block)
+    begin
+      yield
+    rescue Exception
+      @failed_translators << { :name => name, :reason => $!.to_s }
+
+      warning _("Translator %{name} cannot be used: %{reason}") %
+             {:name => name, :reason => $!}
+      map "#{name} [*args]", :action => :failed_translator,
+                             :defaults => {:name => name, :reason => $!}
+    end
   end
 
   def failed_translator(m, params)
@@ -385,25 +393,27 @@ class TranslatorPlugin < Plugin
     translator = @translators[tname]
     from, to, phrase = params[:from], params[:to], params[:phrase].to_s
     if translator
-      begin
-        translation = Timeout.timeout(@bot.config['translator.timeout']) do
-          translator.translate(phrase, from, to)
-        end
-        m.reply(if params[:show_provider]
-                  _('%{translation} (provided by %{translator})') %
-                    {:translation => translation, :translator => tname.gsub("_", " ")}
-                else
-                  translation
-                end)
+      watch_for_fail(tname) do
+        begin
+          translation = Timeout.timeout(@bot.config['translator.timeout']) do
+            translator.translate(phrase, from, to)
+          end
+          m.reply(if params[:show_provider]
+                    _('%{translation} (provided by %{translator})') %
+                      {:translation => translation, :translator => tname.gsub("_", " ")}
+                  else
+                    translation
+                  end)
 
-      rescue Translator::UnsupportedDirectionError
-        m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
-                {:translator => tname, :source => from, :target => to}
-      rescue Translator::NoTranslationError
-        m.reply _('%{translator} failed to provide a translation') %
-                {:translator => tname}
-      rescue Timeout::Error
-        m.reply _('The translator timed out')
+        rescue Translator::UnsupportedDirectionError
+          m.reply _("%{translator} doesn't support translating from %{source} to %{target}") %
+                  {:translator => tname, :source => from, :target => to}
+        rescue Translator::NoTranslationError
+          m.reply _('%{translator} failed to provide a translation') %
+                  {:translator => tname}
+        rescue Timeout::Error
+          m.reply _('The translator timed out')
+        end
       end
     else
       m.reply _('No translator called %{name}') % {:name => tname}
