@@ -1,4 +1,4 @@
 #!/bin/sh
 rm -rf doc
-rdoc -a -i 'lib' --exclude 'post-install.rb' --main README --title "rbot - The Ruby IRC bot" -o doc lib bin/rbot README
+rdoc -a -i 'lib' --exclude 'post-install.rb' --main README.rdoc --title "rbot - The Ruby IRC bot" -o doc lib bin/rbot README.rdoc
 
