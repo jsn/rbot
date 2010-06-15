@@ -10,6 +10,9 @@
 # encoding. The plugin takes care of translation to/from utf-8 on server IO,
 # if necessary (translation charsets are configurable).
 
+# TODO autoconfigure using server-provided allowed charset when these are
+# available, see also comment in irc.rb
+
 require 'iconv'
 
 class UnicodePlugin < CoreBotModule

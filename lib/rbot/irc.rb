@@ -273,7 +273,13 @@ class String
   # This method returns the Irc::Casemap whose name is the receiver
   #
   def to_irc_casemap
-    Irc::Casemap.get(self) rescue raise TypeError, "Unkown Irc::Casemap #{self.inspect}"
+    begin
+      Irc::Casemap.get(self)
+    rescue
+      # raise TypeError, "Unkown Irc::Casemap #{self.inspect}"
+      error "Unkown Irc::Casemap #{self.inspect} requested, defaulting to rfc1459"
+      Irc::Casemap.get('rfc1459')
+    end
   end
 
   # This method returns a string which is the downcased version of the
@@ -1683,6 +1689,10 @@ module Irc
             if val == 'charset'
               reparse << "CASEMAPPING=(charset)"
             else
+              # TODO some servers offer non-standard CASEMAPPINGs in the form
+              # locale.charset[-options], which indicate an extended set of
+              # allowed characters (mostly for nicks). This might be supported
+              # with hooks for the unicode core module
               @supports[key] = val.to_irc_casemap
             end
           }
