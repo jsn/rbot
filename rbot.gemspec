@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'rbot'
-  s.version = '0.9.14'
+  s.version = '0.9.15'
   s.summary = <<-EOF
     A modular ruby IRC bot.
   EOF
