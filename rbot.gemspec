@@ -15,7 +15,9 @@ Gem::Specification.new do |s|
 	  'data/rbot/**/*',
 	  'AUTHORS',
 	  'COPYING',
-	  'README',
+	  'COPYING.rbot',
+	  'GPLv2',
+	  'README.rdoc',
 	  'REQUIREMENTS',
 	  'TODO',
 	  'ChangeLog',
@@ -35,7 +37,7 @@ Gem::Specification.new do |s|
 #  s.autorequire = 'rbot/ircbot'
   s.has_rdoc = true
   s.rdoc_options = ['--exclude', 'post-install.rb',
-  '--title', 'rbot API Documentation', '--main', 'README', 'README']
+  '--title', 'rbot API Documentation', '--main', 'README.rdoc', 'README.rdoc']
 
   s.author = 'Tom Gilbert'
   s.email = 'tom@linuxbrit.co.uk'
