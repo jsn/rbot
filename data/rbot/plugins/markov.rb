@@ -637,7 +637,7 @@ class MarkovPlugin < Plugin
 
   def learn_line(message)
     # debug "learning #{message.inspect}"
-    wordlist = message.split(/\s+/).reject do |w|
+    wordlist = message.strip.split(/\s+/).reject do |w|
       @bot.config['markov.ignore_patterns'].map do |pat|
         w =~ Regexp.new(pat.to_s)
       end.select{|v| v}.size != 0
