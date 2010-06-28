@@ -97,7 +97,7 @@ task :define_po_rules do
   end
 
   # generate English po files
-  file(%r'^po/en_US/.+\.po$' => pot_for_po) do |t|
+  file(%r'^po/en/.+\.po$' => pot_for_po) do |t|
     po_file, pot_file = t.name, t.source
     if MSGEN
       sh "#{MSGEN} --output-file=#{po_file} #{pot_file}"
