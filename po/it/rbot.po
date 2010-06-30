@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
 "PO-Revision-Date: 2009-03-20 16:28+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -330,10 +330,11 @@ msgstr ""
 "create, list, destroy"
 
 #: lib/rbot/core/auth.rb:408
+#, fuzzy
 msgid ""
 "auth <masterpassword>: log in as the bot owner; other commands: login, "
 "whoami, permissions syntax, permissions [re]set, permissions view, user, "
-"meet, hello, allow, prevent"
+"meet, hello, allow, deny"
 msgstr ""
 "auth <masterpassword>: ti identifica come il padrone del bot; altri comandi: "
 "login, whoami, permission syntax, permissions [re]set, permissions view, "
@@ -668,25 +669,33 @@ msgstr "elaboro i dati da importare ..."
 msgid "failed to parse data: %{exception}"
 msgstr "impossibile elaborare i dati: %{exception}"
 
-#: lib/rbot/core/basics.rb:133
+#: lib/rbot/core/basics.rb:73
+msgid "I am in: "
+msgstr ""
+
+#: lib/rbot/core/basics.rb:155
 msgid "quit [<message>] => quit IRC with message <message>"
 msgstr "quit [<messaggio>] => esce da IRC con il messaggio <messaggio>"
 
-#: lib/rbot/core/basics.rb:135
+#: lib/rbot/core/basics.rb:157
 msgid "restart => completely stop and restart the bot (including reconnect)"
 msgstr ""
 "restart => ferma il bot completamente e lo riavvia (facendolo anche "
 "ricollegare)"
 
-#: lib/rbot/core/basics.rb:139
+#: lib/rbot/core/basics.rb:159
+msgid "reconnect => ask the bot to disconnect and then connect again"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:163
 msgid "part"
 msgstr "esci"
 
-#: lib/rbot/core/basics.rb:141
+#: lib/rbot/core/basics.rb:165
 msgid "hide => part all channels"
 msgstr "hide => lascia tutti i canali"
 
-#: lib/rbot/core/basics.rb:143
+#: lib/rbot/core/basics.rb:167
 msgid ""
 "say <channel>|<nick> <message> => say <message> to <channel> or in private "
 "message to <nick>"
@@ -694,7 +703,7 @@ msgstr ""
 "say <canale>|<nick> <messaggio> => invia <messaggio> nel <canale> o in "
 "unmessagio privato a <nick>"
 
-#: lib/rbot/core/basics.rb:145
+#: lib/rbot/core/basics.rb:169
 msgid ""
 "action <channel>|<nick> <message> => does a /me <message> to <channel> or in "
 "private message to <nick>"
@@ -702,7 +711,7 @@ msgstr ""
 "action <canale>|<nick> <messaggio> => invia un /me <messaggio> nel <canale> "
 "o inmessaggi privato a <nick>"
 
-#: lib/rbot/core/basics.rb:147
+#: lib/rbot/core/basics.rb:171
 msgid ""
 "quiet [in here|<channel>] => with no arguments, stop speaking in all "
 "channels, if \"in here\", stop speaking in this channel, or stop speaking in "
@@ -712,7 +721,7 @@ msgstr ""
 "canali, se si specifica \"in here\", smette di parlare in questo canale, "
 "oppure smette di parlare in <canale>"
 
-#: lib/rbot/core/basics.rb:149
+#: lib/rbot/core/basics.rb:173
 msgid ""
 "talk [in here|<channel>] => with no arguments, resume speaking in all "
 "channels, if \"in here\", resume speaking in this channel, or resume "
@@ -722,11 +731,11 @@ msgstr ""
 "canali, se \"in here\", ricomincia a parlare in questo canale, oppure "
 "ricomincia a parlare in <canale>"
 
-#: lib/rbot/core/basics.rb:151
+#: lib/rbot/core/basics.rb:175
 msgid "ping => replies with a pong"
 msgstr "ping => risponde con un pong"
 
-#: lib/rbot/core/basics.rb:153
+#: lib/rbot/core/basics.rb:177
 msgid ""
 "mode <channel> <mode> <nicks> => set channel modes for <nicks> on <channel> "
 "to <mode>"
@@ -734,7 +743,7 @@ msgstr ""
 "mode <canale> <mode> <nicks> => imposta i modi del canale per <nicks> nel "
 "<canale> "
 
-#: lib/rbot/core/basics.rb:159
+#: lib/rbot/core/basics.rb:183
 msgid ""
 "%{name}: quit, restart, join, part, hide, save, say, action, topic, quiet, "
 "talk, ping, mode"
@@ -923,6 +932,11 @@ msgstr "dati %{key} per %{user}: %{data}"
 msgid "sorry, no %{key} data for %{user}"
 msgstr "spiacente, nessun dato %{key} per %{user} "
 
+#: lib/rbot/core/utils/extends.rb:164 lib/rbot/core/utils/utils.rb:201
+#: lib/rbot/core/utils/utils.rb:729
+msgid " and "
+msgstr " e "
+
 #: lib/rbot/core/utils/utils.rb:184
 msgid "year"
 msgstr "anno"
@@ -970,10 +984,6 @@ msgstr "secondo"
 #: lib/rbot/core/utils/utils.rb:194
 msgid "seconds"
 msgstr "secondi"
-
-#: lib/rbot/core/utils/utils.rb:201 lib/rbot/core/utils/utils.rb:710
-msgid " and "
-msgstr " e "
 
 #: lib/rbot/core/utils/utils.rb:232
 msgid "right now"
@@ -1045,68 +1055,72 @@ msgstr "nessun elenco di parole trovato"
 msgid "Wordlists: %{found}"
 msgstr "Elenchi di parole: %{found}"
 
-#: lib/rbot/ircbot.rb:1250
+#: lib/rbot/ircbot.rb:500
+msgid "Unknown DB adaptor: %s"
+msgstr ""
+
+#: lib/rbot/ircbot.rb:1284
 msgid "restarting, back in %{wait}..."
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1333
+#: lib/rbot/ircbot.rb:1367
 msgid "help topics: "
 msgstr "argomenti: "
 
-#: lib/rbot/ircbot.rb:1335
+#: lib/rbot/ircbot.rb:1369
 msgid " (help <topic> for more info)"
 msgstr " (help <argomento> per ulteriori informazioni)"
 
-#: lib/rbot/ircbot.rb:1338
+#: lib/rbot/ircbot.rb:1372
 msgid "no help for topic %{topic}"
 msgstr "nessun aiuto disponibile su %{topic}"
 
-#: lib/rbot/ircbot.rb:1349
+#: lib/rbot/ircbot.rb:1383
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
 "Attivo da %{up}, %{plug} plugin attivi, %{sent} righe spedite, %{recv} righe "
 "ricevute."
 
-#: lib/rbot/plugins.rb:344
+#: lib/rbot/plugins.rb:353
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr "uso errato, chiedi aiuto con '%{command}'"
 
-#: lib/rbot/plugins.rb:707
+#: lib/rbot/plugins.rb:733
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "%{count} moduli di base caricati"
 msgstr[1] "%{count} modulo di base caricato"
 
-#: lib/rbot/plugins.rb:710
+#: lib/rbot/plugins.rb:736
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "%{count} moduli di base: %{list}"
 msgstr[1] "%{count} modulo di base: %{list}"
 
-#: lib/rbot/plugins.rb:716
+#: lib/rbot/plugins.rb:742
 msgid "no core botmodules loaded"
 msgstr "nessun modulo di base caricato"
 
-#: lib/rbot/plugins.rb:721
+#: lib/rbot/plugins.rb:747
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "%{count} plugin caricati"
 msgstr[1] "%{count} plugin caricato"
 
-#: lib/rbot/plugins.rb:724
+#: lib/rbot/plugins.rb:750
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "%{count} plugin: %{list}"
 msgstr[1] "%{count} plugin: %{list}"
 
-#: lib/rbot/plugins.rb:735
+#: lib/rbot/plugins.rb:761
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] "%{highlight}%{count} plugin ignorati%{highlight}"
 msgstr[1] "%{highlight}%{count} plugin ignorato%{highlight}"
 
-#: lib/rbot/plugins.rb:740
+#: lib/rbot/plugins.rb:766
 msgid ""
 "%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
 "{bold} to see why"
@@ -1120,13 +1134,13 @@ msgstr[1] ""
 "%{highlight}%{count} plugin ignorato%{highlight}: usa %{bold}%{command}%"
 "{bold} per vedere perché"
 
-#: lib/rbot/plugins.rb:750
+#: lib/rbot/plugins.rb:776
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] "%{highlight}caricamento di %{count} plugin fallito%{highlight}"
 msgstr[1] "%{highlight}caricamento di %{count} plugin fallito%{highlight}"
 
-#: lib/rbot/plugins.rb:755
+#: lib/rbot/plugins.rb:781
 msgid ""
 "%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
 "{command}%{bold} to see why"
@@ -1140,11 +1154,11 @@ msgstr[1] ""
 "%{highlight}caricamento di %{count} plugin fallito%{highlight}: usa %{bold}%"
 "{command}%{bold} per vedere perché"
 
-#: lib/rbot/plugins.rb:785
+#: lib/rbot/plugins.rb:811
 msgid "no plugins failed to load"
 msgstr "nessun plugin ha fallito il caricamento"
 
-#: lib/rbot/plugins.rb:787
+#: lib/rbot/plugins.rb:813
 msgid ""
 "%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
 "{reason}"
@@ -1152,26 +1166,26 @@ msgstr ""
 "%{highlight}%{plugin}%{highlight} in %{dir} fallito con errore %{exception}: "
 "%{reason}"
 
-#: lib/rbot/plugins.rb:791
+#: lib/rbot/plugins.rb:817
 msgid "at %{backtrace}"
 msgstr "in %{backtrace}"
 
-#: lib/rbot/plugins.rb:797
+#: lib/rbot/plugins.rb:823
 msgid "no plugins were ignored"
 msgstr "nessun plugin ignorato"
 
-#: lib/rbot/plugins.rb:801
+#: lib/rbot/plugins.rb:827
 msgid "overruled by previous"
 msgstr "preceduto da un omonimo"
 
-#: lib/rbot/registry.rb:22
+#: lib/rbot/registry/bdb.rb:226 lib/rbot/registry/tc.rb:198
 msgid ""
 "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
 msgstr ""
 "aggiornamento del registro dei plugin (versione 0.9.5 o precedente) al nuovo "
 "formato"
 
-#: lib/rbot/registry.rb:41
+#: lib/rbot/registry/bdb.rb:245 lib/rbot/registry/tc.rb:222
 msgid ""
 "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
 "format"
@@ -1179,6 +1193,6 @@ msgstr ""
 "aggiornamento del registro dei plugin (versione 0.9.9 o precedente) al nuovo "
 "formato"
 
-#: lib/rbot/registry.rb:190
+#: lib/rbot/registry/bdb.rb:394 lib/rbot/registry/tc.rb:368
 msgid "marshal recovery failed, trying default"
 msgstr "recupero dati marshal fallito, tento di usare il valore predefinito"

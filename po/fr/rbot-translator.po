@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
 "PO-Revision-Date: 2008-06-21 15:49+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -19,22 +19,39 @@ msgstr ""
 msgid "Cannot translate empty string"
 msgstr "Impossible de traduire une chaine vide"
 
-#: data/rbot/plugins/translator.rb:268
+#: data/rbot/plugins/translator.rb:271
 msgid "Number of seconds to wait for the translation service before timeout"
 msgstr ""
 "Nombre de secondes a attendre du service de traduction avant le timeout"
 
-#: data/rbot/plugins/translator.rb:288
-msgid "Translator %{name} cannot be used: %{reason}"
-msgstr "Traducteur %{name} ne peut être utilisé: %{reason}"
+#: data/rbot/plugins/translator.rb:274
+msgid "Default destination language to be used with translate command"
+msgstr ""
 
-#: data/rbot/plugins/translator.rb:296
+#: data/rbot/plugins/translator.rb:299
 msgid "List of translators to try in order when translator name not specified"
 msgstr ""
 "Liste des traducteurs à essayer dans l'ordre lorsque qu'aucun nom n'est "
 "spécifié"
 
-#: data/rbot/plugins/translator.rb:304
+#: data/rbot/plugins/translator.rb:310 data/rbot/plugins/translator.rb:318
+msgid "Translator %{name} cannot be used: %{reason}"
+msgstr "Traducteur %{name} ne peut être utilisé: %{reason}"
+
+#: data/rbot/plugins/translator.rb:326
+msgid "%{bold}%{translator}%{bold}: %{reason}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:332
+msgid "Failed translators: %{list}"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:334
+#, fuzzy
+msgid "None of the translators failed"
+msgstr "Le traducteur n'a pas repondu"
+
+#: data/rbot/plugins/translator.rb:339
 msgid ""
 "%{translator} <from> <to> <phrase> => Look up phrase using %{info}, "
 "supported from -> to languages: %{directions}"
@@ -42,11 +59,11 @@ msgstr ""
 "%{translator} <depuis> <vers> <phrase> => Regarde si une phrase en utilisant "
 "%{info}, supprote depuis  -> vers langages: %{directions}"
 
-#: data/rbot/plugins/translator.rb:308
+#: data/rbot/plugins/translator.rb:343
 msgid "%{source} -> %{targets}"
 msgstr "%{source} -> %{targets}"
 
-#: data/rbot/plugins/translator.rb:313
+#: data/rbot/plugins/translator.rb:348
 msgid ""
 "Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
 "{translators}. If \"translator\" is used in place of the translator name, "
@@ -60,7 +77,19 @@ msgstr ""
 "direction de traduction sera pris automatiquement. Utilisez \"help "
 "<translator>\" pour voir les supporte de langues."
 
-#: data/rbot/plugins/translator.rb:328
+#: data/rbot/plugins/translator.rb:351
+msgid ""
+"%{bold}Note%{bold}: %{failed_amt} translators failed, see %{reverse}%{prefix}"
+"help translate failed%{reverse} for details"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:386
+msgid ""
+"Unable to auto-detect source language due to broken google translator, see %"
+"{reverse}%{prefix}help translate failed%{reverse} for details"
+msgstr ""
+
+#: data/rbot/plugins/translator.rb:391
 msgid ""
 "None of the default translators (translator.default_list) supports "
 "translating from %{source} to %{target}"
@@ -68,23 +97,23 @@ msgstr ""
 "Aucun des traducteurs par defaut (translator.default_list)  ne supporte la "
 "traduction depuis %{source} vers %{target}"
 
-#: data/rbot/plugins/translator.rb:343
+#: data/rbot/plugins/translator.rb:408
 msgid "%{translation} (provided by %{translator})"
 msgstr "%{translation} (fournit par %{translator})"
 
-#: data/rbot/plugins/translator.rb:350
+#: data/rbot/plugins/translator.rb:415
 msgid "%{translator} doesn't support translating from %{source} to %{target}"
 msgstr ""
 "%{translator} ne supporte pas la traduction depuis %{source} vers %{target}"
 
-#: data/rbot/plugins/translator.rb:353
+#: data/rbot/plugins/translator.rb:418
 msgid "%{translator} failed to provide a translation"
 msgstr "%{translator} à été incapable de fournir une traduction"
 
-#: data/rbot/plugins/translator.rb:356
+#: data/rbot/plugins/translator.rb:421
 msgid "The translator timed out"
 msgstr "Le traducteur n'a pas repondu"
 
-#: data/rbot/plugins/translator.rb:359
+#: data/rbot/plugins/translator.rb:425
 msgid "No translator called %{name}"
 msgstr "Aucun traducteur nommé %{name}"

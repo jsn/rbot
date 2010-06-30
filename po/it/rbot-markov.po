@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-01 23:50+0100\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
 "PO-Revision-Date: 2009-03-20 16:25+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
@@ -15,78 +15,104 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/markov.rb:366
+#: data/rbot/plugins/markov.rb:384
 msgid "markov is currently enabled, %{p}% chance of chipping in"
 msgstr ""
 "markov è attualmente attivo, con una probabilità del %{prob}% di intervenire"
 
-#: data/rbot/plugins/markov.rb:368
+#: data/rbot/plugins/markov.rb:386
 msgid ", %{l} messages in queue"
 msgstr ", %{l} messaggi in coda"
 
-#: data/rbot/plugins/markov.rb:370
+#: data/rbot/plugins/markov.rb:388
 msgid ", %{l} chains to upgrade"
 msgstr ", %{l} catene da aggiornare"
 
-#: data/rbot/plugins/markov.rb:372
+#: data/rbot/plugins/markov.rb:390
 msgid "markov is currently disabled"
 msgstr "markov è attualmente disabilitato"
 
-#: data/rbot/plugins/markov.rb:396
+#: data/rbot/plugins/markov.rb:424 data/rbot/plugins/markov.rb:455
 msgid "%{u} removed"
 msgstr "%{u} rimosso"
 
-#: data/rbot/plugins/markov.rb:398
+#: data/rbot/plugins/markov.rb:426 data/rbot/plugins/markov.rb:457
 msgid "not found in list"
 msgstr "non trovato nella lista"
 
-#: data/rbot/plugins/markov.rb:403
+#: data/rbot/plugins/markov.rb:431 data/rbot/plugins/markov.rb:462
 msgid "%{u} already in list"
 msgstr "%{u} è già nella lista"
 
-#: data/rbot/plugins/markov.rb:406
+#: data/rbot/plugins/markov.rb:434
 msgid "%{u} added to markov ignore list"
 msgstr "%{u} aggiunto alla lista da ignorare per markov"
 
-#: data/rbot/plugins/markov.rb:409
+#: data/rbot/plugins/markov.rb:437
 msgid "give the name of a person or channel to ignore"
 msgstr "fornisci il nome della persona o del canale da ignorare"
 
-#: data/rbot/plugins/markov.rb:412
+#: data/rbot/plugins/markov.rb:440
 msgid "I'm ignoring %{ignored}"
 msgstr "Sto ignorando %{ignored}"
 
-#: data/rbot/plugins/markov.rb:414
+#: data/rbot/plugins/markov.rb:442
 msgid ""
 "have markov ignore the input from a hostmask or a channel. usage: markov "
 "ignore add <mask or channel>; markov ignore remove <mask or channel>; markov "
 "ignore list"
 msgstr ""
 
-#: data/rbot/plugins/markov.rb:428
+#: data/rbot/plugins/markov.rb:465
+#, fuzzy
+msgid "%{u} added to markov readonly list"
+msgstr "%{u} aggiunto alla lista da ignorare per markov"
+
+#: data/rbot/plugins/markov.rb:468
+#, fuzzy
+msgid "give the name of a person or channel to read only"
+msgstr "fornisci il nome della persona o del canale da ignorare"
+
+#: data/rbot/plugins/markov.rb:471
+#, fuzzy
+msgid "I'm only reading %{readonly}"
+msgstr "Sto ignorando %{ignored}"
+
+#: data/rbot/plugins/markov.rb:473
+msgid ""
+"have markov not answer to input from a hostmask or a channel. usage: markov "
+"readonly add <mask or channel>; markov readonly remove <mask or channel>; "
+"markov readonly list"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:487
 msgid "markov has a %{prob}% chance of chipping in"
 msgstr "markov ha una probabilità del %{prob}% di intervenire"
 
-#: data/rbot/plugins/markov.rb:468 data/rbot/plugins/markov.rb:485
+#: data/rbot/plugins/markov.rb:518
+msgid "Message delay is %{delay}"
+msgstr ""
+
+#: data/rbot/plugins/markov.rb:571 data/rbot/plugins/markov.rb:588
 msgid "I can't :("
 msgstr "non posso :("
 
-#: data/rbot/plugins/markov.rb:542
+#: data/rbot/plugins/markov.rb:661
 msgid "no such file"
 msgstr "il file non esiste"
 
-#: data/rbot/plugins/markov.rb:547
+#: data/rbot/plugins/markov.rb:666
 msgid "the file is empty!"
 msgstr "il file è vuoto!"
 
-#: data/rbot/plugins/markov.rb:574
+#: data/rbot/plugins/markov.rb:693
 msgid "example matches for that pattern at lines %{range} include: %{lines}"
 msgstr "esempi di cattura per quel pattern nelle righe %{range}: %{lines}"
 
-#: data/rbot/plugins/markov.rb:579
+#: data/rbot/plugins/markov.rb:698
 msgid "the pattern doesn't match anything at lines %{range}"
 msgstr "il patter non cattura nulla alle righe %{range}"
 
-#: data/rbot/plugins/markov.rb:584
+#: data/rbot/plugins/markov.rb:703
 msgid "learning from the file without a pattern would learn, for example: "
 msgstr "imparare senza pattern dal file darebbe ad esempio:"

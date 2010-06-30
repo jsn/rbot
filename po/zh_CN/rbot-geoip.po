@@ -1,0 +1,3 @@
+#: data/rbot/plugins/geoip.rb:191
+msgid "The owner configured me to use an API that doesn't exist, bug them!"
+msgstr ""

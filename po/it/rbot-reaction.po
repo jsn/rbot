@@ -1,0 +1,7 @@
+#: data/rbot/plugins/reaction.rb:341
+msgid "Sorry, you're not allowed to change %{act} replies here"
+msgstr ""
+
+#: data/rbot/plugins/reaction.rb:349
+msgid "Sorry, you're not allowed to add %{act} replies here"
+msgstr ""

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
 "PO-Revision-Date: 2008-06-21 16:31+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
@@ -56,7 +56,7 @@ msgstr ""
 
 #: data/rbot/plugins/nickserv.rb:54
 msgid ""
-"nickserv plugin: handles nickserv protected IRC nicks. topics password, "
+"nickserv plugin: handles nickserv protected IRC nicks. topics: password, "
 "register, identify, listnicks"
 msgstr ""
 

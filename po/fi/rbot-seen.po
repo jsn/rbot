@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 16:03+0100\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
 "PO-Revision-Date: 2009-03-20 15:59+0100\n"
 "Last-Translator: Raine Virta <rane@kapsi.fi\n"
 "Language-Team: Finnish\n"
@@ -15,78 +15,98 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: data/rbot/plugins/seen.rb:12
+#, fuzzy
+msgid "saying \"%{message}\" in %{where}"
+msgstr "sanomassa \"%{message}\""
+
 #: data/rbot/plugins/seen.rb:13
-msgid "Maximum number of seen users to return in search (0 = no limit)."
-msgstr ""
-"Kuinka monta käyttäjää haun tulisi maksimissaan palauttaa (0 = ei rajaa)"
+#, fuzzy
+msgid "doing *%{nick} %{message}* in %{where}"
+msgstr "tekemässä *%{nick} %{message}*"
+
+#: data/rbot/plugins/seen.rb:14
+msgid "changing nick from %{nick} to %{message}"
+msgstr "vaihtamassa nick %{nick} to %{message}"
+
+#: data/rbot/plugins/seen.rb:15
+msgid "leaving %{where} (%{message})"
+msgstr "lähtemässä kanavalta %{where} (%{message})"
 
 #: data/rbot/plugins/seen.rb:16
-msgid "seen <nick> => have you seen, or when did you last see <nick>"
+msgid "leaving %{where}"
+msgstr "lähtemässä kanavalta %{where}"
+
+#: data/rbot/plugins/seen.rb:17
+msgid "joining %{where}"
+msgstr "liittyessään kanavalle %{where}"
+
+#: data/rbot/plugins/seen.rb:18
+msgid "quitting IRC (%{message})"
+msgstr "sulkemassa irkki (%{message})"
+
+#: data/rbot/plugins/seen.rb:19
+msgid "changing the topic of %{where} to \"%{message}\""
+msgstr "vaihtamassa kanavan %{where} topic: \"%{message}\""
+
+#: data/rbot/plugins/seen.rb:21
+msgid "a private channel"
 msgstr ""
-"seen <nimi> => kertoo onko ja jos on, niin milloin <nimi> on viimeksi näkynyt"
 
-#: data/rbot/plugins/seen.rb:40
-msgid "nope!"
-msgstr "ei ole näkynyt :/"
+#: data/rbot/plugins/seen.rb:22
+#, fuzzy
+msgid "changing the topic of %{where}"
+msgstr "vaihtamassa kanavan %{where} topic: \"%{message}\""
 
-#: data/rbot/plugins/seen.rb:87
+#: data/rbot/plugins/seen.rb:24
+#, fuzzy
+msgid "speaking in %{where}"
+msgstr "lähtemässä kanavalta %{where}"
+
+#: data/rbot/plugins/seen.rb:25
+#, fuzzy
+msgid "doing something in %{where}"
+msgstr "liittyessään kanavalle %{where}"
+
+#: data/rbot/plugins/seen.rb:27
 msgid "%{nick} was last seen %{when}, %{doing}"
 msgstr "%{nick} nähtiin viimeksi %{when} %{doing}"
 
-#: data/rbot/plugins/seen.rb:88
+#: data/rbot/plugins/seen.rb:28
 msgid ""
 "%{nick} was last seen %{when}, %{doing} and %{time} before %{did_before}"
 msgstr ""
 "%{nick} nähtiin viimeksi %{when} %{doing} ja %{time} ennen %{did_before}"
 
-#: data/rbot/plugins/seen.rb:95 data/rbot/plugins/seen.rb:128
-msgid "saying \"%{message}\""
-msgstr "sanomassa \"%{message}\""
+#: data/rbot/plugins/seen.rb:32
+msgid "Maximum number of seen users to return in search (0 = no limit)."
+msgstr ""
+"Kuinka monta käyttäjää haun tulisi maksimissaan palauttaa (0 = ei rajaa)"
 
-#: data/rbot/plugins/seen.rb:97
-msgid "doing *%{nick} %{message}*"
-msgstr "tekemässä *%{nick} %{message}*"
+#: data/rbot/plugins/seen.rb:35
+msgid "seen <nick> => have you seen, or when did you last see <nick>"
+msgstr ""
+"seen <nimi> => kertoo onko ja jos on, niin milloin <nimi> on viimeksi näkynyt"
 
-#: data/rbot/plugins/seen.rb:107
+#: data/rbot/plugins/seen.rb:59
+msgid "nope!"
+msgstr "ei ole näkynyt :/"
+
+#: data/rbot/plugins/seen.rb:146
 msgid "a moment"
 msgstr "hetkeä"
 
-#: data/rbot/plugins/seen.rb:109
+#: data/rbot/plugins/seen.rb:148
 msgid "a while"
 msgstr "jonkun aikaa"
 
-#: data/rbot/plugins/seen.rb:121
+#: data/rbot/plugins/seen.rb:160
 msgid "just now"
 msgstr "ihan äsken"
 
-#: data/rbot/plugins/seen.rb:123
+#: data/rbot/plugins/seen.rb:162
 msgid "%{time} ago"
 msgstr "%{time} sitten"
 
-#: data/rbot/plugins/seen.rb:130
-msgid "doing *%{message}*"
-msgstr "tekemässä *%{message}*"
-
-#: data/rbot/plugins/seen.rb:132
-msgid "changing nick from %{nick} to %{message}"
-msgstr "vaihtamassa nick %{nick} to %{message}"
-
-#: data/rbot/plugins/seen.rb:135
-msgid "leaving %{where}"
-msgstr "lähtemässä kanavalta %{where}"
-
-#: data/rbot/plugins/seen.rb:137
-msgid "leaving %{where} (%{message})"
-msgstr "lähtemässä kanavalta %{where} (%{message})"
-
-#: data/rbot/plugins/seen.rb:140
-msgid "joining %{where}"
-msgstr "liittyessään kanavalle %{where}"
-
-#: data/rbot/plugins/seen.rb:142
-msgid "quitting IRC (%{message})"
-msgstr "sulkemassa irkki (%{message})"
-
-#: data/rbot/plugins/seen.rb:144
-msgid "changing the topic of %{where} to \"%{message}\""
-msgstr "vaihtamassa kanavan %{where} topic: \"%{message}\""
+#~ msgid "doing *%{message}*"
+#~ msgstr "tekemässä *%{message}*"
