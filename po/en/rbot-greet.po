@@ -1,0 +1,32 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
+"PO-Revision-Date: 2010-06-30 09:58+0200\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/greet.rb:14
+msgid "Greet people on these channels."
+msgstr "Greet people on these channels."
+
+#: data/rbot/plugins/greet.rb:18
+msgid ""
+"By default, greetings are fetched from lang files. You can use this to "
+"specify custom messages, use %s to represent a nick."
+msgstr ""
+"By default, greetings are fetched from lang files. You can use this to "
+"specify custom messages, use %s to represent a nick."
+
+#: data/rbot/plugins/greet.rb:22
+msgid "Greet with delay so that the greeting seems human-like."
+msgstr "Greet with delay so that the greeting seems human-like."

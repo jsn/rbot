@@ -1,0 +1,43 @@
+# Italian translations for PACKAGE package.
+# Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2010-06-30 09:58+0200\n"
+"PO-Revision-Date: 2010-06-30 09:58+0200\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/rbot/plugins/tumblr.rb:78 data/rbot/plugins/tumblr.rb:97
+#: data/rbot/plugins/tumblr.rb:113
+msgid "Please specify a channel"
+msgstr ""
+
+#: data/rbot/plugins/tumblr.rb:82 data/rbot/plugins/tumblr.rb:101
+msgid "No tumblr credentials set for %{chan}"
+msgstr ""
+
+#: data/rbot/plugins/tumblr.rb:88
+msgid "<hidden>"
+msgstr ""
+
+#: data/rbot/plugins/tumblr.rb:91
+msgid ""
+"Links on %{chan} will go to %{group} using account %{email} and password %"
+"{pwd}"
+msgstr ""
+
+#: data/rbot/plugins/tumblr.rb:107
+msgid "Links on %{chan} will not be posted to tumblr anymore"
+msgstr ""
+
+#: data/rbot/plugins/tumblr.rb:117
+msgid "%{chan} already has credentials configured"
+msgstr ""
