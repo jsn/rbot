@@ -330,7 +330,6 @@ msgstr ""
 "create, list, destroy"
 
 #: lib/rbot/core/auth.rb:408
-#, fuzzy
 msgid ""
 "auth <masterpassword>: log in as the bot owner; other commands: login, "
 "whoami, permissions syntax, permissions [re]set, permissions view, user, "
@@ -338,7 +337,7 @@ msgid ""
 msgstr ""
 "auth <masterpassword>: ti identifica come il padrone del bot; altri comandi: "
 "login, whoami, permission syntax, permissions [re]set, permissions view, "
-"user, meet, hello, allow, prevent"
+"user, meet, hello, allow, deny"
 
 #: lib/rbot/core/auth.rb:410
 msgid ""

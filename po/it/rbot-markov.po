@@ -64,19 +64,16 @@ msgid ""
 msgstr ""
 
 #: data/rbot/plugins/markov.rb:465
-#, fuzzy
 msgid "%{u} added to markov readonly list"
-msgstr "%{u} aggiunto alla lista da ignorare per markov"
+msgstr "%{u} aggiunto alla lista di sola lettura per markov"
 
 #: data/rbot/plugins/markov.rb:468
-#, fuzzy
 msgid "give the name of a person or channel to read only"
-msgstr "fornisci il nome della persona o del canale da ignorare"
+msgstr "fornisci il nome della persona o del canale da leggere solamente"
 
 #: data/rbot/plugins/markov.rb:471
-#, fuzzy
 msgid "I'm only reading %{readonly}"
-msgstr "Sto ignorando %{ignored}"
+msgstr "Sono in sola lettura %{readonly}"
 
 #: data/rbot/plugins/markov.rb:473
 msgid ""
