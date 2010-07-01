@@ -4,3 +4,4 @@ data/locale
 .config
 InstalledFiles
 lib/rbot/pkgconfig.rb
+man/*.1
