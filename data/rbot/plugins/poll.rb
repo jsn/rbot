@@ -109,14 +109,6 @@ class PollPlugin < Plugin
     init_reg_entry :last_poll_id, 0
   end
 
-  MULTIPLIERS = {
-    :seconds => 1,
-    :minutes => 60,
-    :hours   => 60*60,
-    :days    => 24*60*60,
-    :weeks   => 7*24*60*60
-  }
-
   def authors_running_count(victim)
     return @registry[:running].values.collect { |p|
       if p.author == victim
