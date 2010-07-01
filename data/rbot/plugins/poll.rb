@@ -137,30 +137,50 @@ class PollPlugin < Plugin
       return
     end
 
-    input_blob = params[:blob].join(" ")
-    quote_character = input_blob[0].chr()
+    input_blob = params[:blob].to_s.strip
+    quote_character = input_blob[0,1]
     chunks = input_blob.split(/#{quote_character}\s+#{quote_character}/)
     if chunks.length <= 2
       m.reply _("This isn't a dictatorship!")
       return
     end
 
-    question = chunks[0].gsub(/"/, '')
-    question = question + "?" if question[-1].chr != "?"
-    answers = chunks[1, chunks.length()-1].map { |a| a.gsub(/"/, '') }
+    # grab the question, removing the leading quote character
+    question = chunks[0][1..-1].strip
+    question << "?" unless question[-1,1] == "?"
+    answers = chunks[1..-1].map { |a| a.strip }
 
-    params[:duration] = params[:duration].join(' ')
-    if params[:duration] == ''
+    # if the last answer terminates with a quote character,
+    # there is no time specification, so strip the quote character
+    # and assume default duration
+    if answers.last[-1,1] == quote_character
+      answers.last.chomp!(quote_character)
+      time_word = :for
       target_duration = @bot.config['poll.default_duration']
     else
-      target_duration = params[:duration]
+      last_quote = answers.last.rindex(quote_character)
+      time_spec = answers.last[(last_quote+1)..-1].strip
+      answers.last[last_quote..-1] = String.new
+      answers.last.strip!
+      # now answers.last is really the (cleaned-up) last answer,
+      # while time_spec holds the (cleaned-up) time spec, which
+      # should start with 'for' or 'until'
+      time_word, target_duration = time_spec.split(/\s+/, 2)
+      time_word = time_word.strip.intern rescue nil
     end
 
-    val, units = target_duration.split(' ')
-    if MULTIPLIERS.has_key? units.to_sym
-      duration = val.to_i * MULTIPLIERS[units.to_sym]
+    case time_word
+    when :for
+      duration = Utils.parse_time_offset(target_duration) rescue nil
     else
-      m.reply _("I don't understand the #{Bold}#{units}#{NormalText} unit")
+      # TODO "until <some moment in time>"
+      duration = nil
+    end
+
+    unless duration
+      m.reply _("I don't understand the time spec %{timespec}") % {
+        :timespec => "'#{time_word} #{target_duration}'"
+      }
       return
     end
 
@@ -304,7 +324,7 @@ class PollPlugin < Plugin
 end
 
 plugin = PollPlugin.new
-plugin.map 'poll start *blob [for *duration]', :action => 'start'
+plugin.map 'poll start *blob', :action => 'start'
 plugin.map 'poll list', :action => 'list'
 plugin.map 'poll info :id', :action => 'info'
 plugin.map 'poll vote :id :choice', :action => 'record_vote', :threaded => true
