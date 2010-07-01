@@ -8,6 +8,10 @@
 #
 # Submit a poll question to a channel, wait for glorious outcome.
 #
+# TODO better display for start/end times
+# TODO 'until ...' time spec
+# TODO early poll termination
+# TODO option to inform people about running polls on join (if they haven't voted yet)
 
 class ::Poll
   attr_accessor :id, :author, :channel, :running, :ends_at, :started
