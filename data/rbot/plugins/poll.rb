@@ -48,11 +48,13 @@ class ::Poll
 
   def record_vote(voter, choice)
     if @running == false
-      return _("Poll's closed!")
+      return _("poll's closed!")
     end
 
     if @voters.has_key? voter
-      return _("You already voted for #{@voters[voter]}!")
+      return _("you already voted for %{vote}!") % {
+        :vote => @voters[voter]
+      }
     end
 
     choice.upcase!
@@ -60,9 +62,13 @@ class ::Poll
       @answers[choice][:count] += 1
       @voters[voter] = choice
 
-      return _("Recorded your vote for #{choice}: #{@answers[choice][:value]}")
+      return _("recorded your vote for %{choice}: %{value}") % {
+        :value => @answers[choice][:value]
+      }
     else
-      return _("Don't have an option #{choice}")
+      return _("don't have an option %{choice}") % {
+        :choice => choice
+      }
     end
   end
 
@@ -77,7 +83,7 @@ class ::Poll
   end
 
   def options
-    options = _("Options are: ")
+    options = _("options are: ")
     @answers.each { |letter, info|
       options << "#{Bold}#{letter}#{NormalText}) #{info[:value]} "
     }
@@ -125,7 +131,9 @@ class PollPlugin < Plugin
 
     max_concurrent = @bot.config['poll.max_concurrent_polls']
     if authors_running_count(author) == max_concurrent
-      m.reply _("Sorry, you're already at the limit (#{max_concurrent}) polls")
+      m.reply _("Sorry, you're already at the limit (%{limit}) polls") % {
+        :limit => max_concurrent
+      }
       return
     end
 
@@ -178,15 +186,24 @@ class PollPlugin < Plugin
 
     poll = Poll.new(m, question, answers, duration)
 
-    m.reply _("New poll from #{author}: #{Bold}#{question}#{NormalText}")
+    m.reply _("new poll from %{author}: %{question}") % {
+      :author => author,
+      :question => "#{Bold}#{question}#{Bold}"
+    }
     m.reply poll.options
 
     poll.id = @registry[:last_poll_id] + 1
     poll.start!
-    command = _("poll vote #{poll.id} <SINGLE-LETTER>")
-    m.reply _("You have #{Bold}#{target_duration}#{NormalText} to: " +
-            "#{Bold}/msg #{@bot.nick} #{command}#{NormalText} or " +
-            "#{Bold}#{@bot.config['core.address_prefix']}#{command}#{NormalText} ")
+    command = _("poll vote %{id} <SINGLE-LETTER>") % {
+      :id => poll.id
+    }
+    instructions = _("you have %{duration}, vote with ")
+    instructions << _("%{priv} or %{public}")
+    m.reply instructions % {
+      :duration => "#{Bold}#{target_duration}#{Bold}",
+      :priv => "#{Bold}/msg #{@bot.nick} #{command}#{Bold}",
+      :public => "#{Bold}#{@bot.config['core.address_prefix'].first}#{command}#{Bold}"
+    }
 
     running = @registry[:running]
     running[poll.id] = poll
@@ -202,7 +219,9 @@ class PollPlugin < Plugin
     return if poll == nil
     poll.stop!
 
-    @bot.say(poll.channel, _("Let's find the answer to: #{Bold}#{poll.question}#{NormalText}"))
+    @bot.say(poll.channel, _("let's find the answer to: %{q}") % {
+      :q => "#{Bold}#{poll.question}#{Bold}"
+    })
 
     sorted = poll.answers.sort { |a,b| b[1][:count]<=>a[1][:count] }
 
@@ -210,10 +229,10 @@ class PollPlugin < Plugin
     winner_info << sorted.inject(0) { |accum, choice| accum + choice[1][:count] }
 
     if winner_info[2] == 0
-      poll.outcome = _("Nobody voted")
+      poll.outcome = _("nobody voted")
     else
       if sorted[0][1][:count] == sorted[1][1][:count]
-        poll.outcome = _("No clear winner: ") +
+        poll.outcome = _("no clear winner: ") +
           sorted.select { |a|
             a[1][:count] > 0
           }.collect { |a|
@@ -221,10 +240,14 @@ class PollPlugin < Plugin
           }.join(", ")
       else
         winning_pct = "%3.0f%%" % [ 100 * (winner_info[1][:count] / winner_info[2]) ]
-        poll.outcome = _("The winner was choice #{winner_info[0]}: " +
-                       "'#{winner_info[1][:value]}' " +
-                       "with #{winner_info[1][:count]} " +
-                       "vote#{winner_info[1][:count] > 1 ? 's' : ''} (#{winning_pct})")
+        poll.outcome = n_("the winner was choice %{choice}: %{value} with %{count} vote (%{pct})",
+                          "the winner was choice %{choice}: %{value} with %{count} votes (%{pct})",
+                          winner_info[1][:count]) % {
+          :choice => winner_info[0],
+          :value => winner_info[1][:value],
+          :count => winner_info[1][:count],
+          :pct => winning_pct
+        }
       end
     end
 
@@ -243,12 +266,14 @@ class PollPlugin < Plugin
 
   def list(m, params)
     if @registry[:running].keys.length == 0
-      m.reply _("No polls running right now")
+      m.reply _("no polls running right now")
       return
     end
 
     @registry[:running].each { |id, p|
-      m.reply _("#{p.author}'s poll \"#{p.question}\" (id ##{p.id}) runs until #{p.ends_at}")
+      m.reply _("%{author}'s poll \"%{question}\" (id #%{id}) runs until %{end}") % {
+        :author => p.author, :question => p.question, :id => p.id, :end => p.ends_at
+      }
     }
   end
 
@@ -276,31 +301,40 @@ class PollPlugin < Plugin
     elsif @registry[:archives].has_key? params[:id]
       poll = @registry[:archives][params[:id]]
     else
-      m.reply _("Sorry, couldn't find poll ##{Bold}#{params[:id]}#{NormalText}")
+      m.reply _("sorry, couldn't find poll %{b}#%{id}%{b}") % {
+        :bold => Bold,
+        :id => params[:id]
+      }
       return
     end
 
-    to_reply = _("Poll ##{poll.id} was asked by #{Bold}#{poll.author}#{NormalText} " +
-                 "in #{Bold}#{poll.channel}#{NormalText} #{poll.started}.")
+    to_reply = _("poll #%{id} was asked by %{bold}%{author}%{bold} in %{bold}%{channel}%{bold} %{started}.")
+    options = ''
+    outcome = ''
     if poll.running
       to_reply << _(" It's still running!")
       if poll.voters.has_key? m.sourcenick
-        to_reply << _(" Be patient, it'll end #{poll.ends_at}")
+        to_reply << _(" Be patient, it'll end %{end}")
       else
-        to_reply << _(" You have until #{poll.ends_at} to vote if you haven't!")
-        to_reply << " #{poll.options}"
+        to_reply << _(" You have until %{poll.ends_at} to vote if you haven't!")
+        options << " #{poll.options}"
       end
     else
-      to_reply << " #{poll.outcome}"
+      outcome << " #{poll.outcome}"
     end
 
-    m.reply _(to_reply)
+    m.reply (to_reply % {
+      :bold => Bold,
+      :id => poll.id, :author => poll.author, :channel => poll.channel,
+      :started => poll.started,
+      :end => poll.ends_at
+    }) + options + outcome
   end
 
   def help(plugin,topic="")
     case topic
     when "start"
-      _("poll start 'my question' 'answer1' 'answer2' ['answer3' ...] " +
+      _("poll [start] 'my question' 'answer1' 'answer2' ['answer3' ...] " +
         "[for 5 minutes] : Start a poll for the given duration. " +
         "If you don't specify a duration the default will be used.")
     when "list"
