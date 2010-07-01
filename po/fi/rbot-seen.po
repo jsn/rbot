@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2010-06-30 09:58+0200\n"
+"POT-Creation-Date: 2010-07-02 00:17+0200\n"
 "PO-Revision-Date: 2009-03-20 15:59+0100\n"
 "Last-Translator: Raine Virta <rane@kapsi.fi\n"
 "Language-Team: Finnish\n"
@@ -84,27 +84,31 @@ msgstr ""
 "Kuinka monta käyttäjää haun tulisi maksimissaan palauttaa (0 = ei rajaa)"
 
 #: data/rbot/plugins/seen.rb:35
+msgid "Strings/regexes that you'd like to ignore for 'last message' purposes"
+msgstr ""
+
+#: data/rbot/plugins/seen.rb:38
 msgid "seen <nick> => have you seen, or when did you last see <nick>"
 msgstr ""
 "seen <nimi> => kertoo onko ja jos on, niin milloin <nimi> on viimeksi näkynyt"
 
-#: data/rbot/plugins/seen.rb:59
+#: data/rbot/plugins/seen.rb:62
 msgid "nope!"
 msgstr "ei ole näkynyt :/"
 
-#: data/rbot/plugins/seen.rb:146
+#: data/rbot/plugins/seen.rb:153
 msgid "a moment"
 msgstr "hetkeä"
 
-#: data/rbot/plugins/seen.rb:148
+#: data/rbot/plugins/seen.rb:155
 msgid "a while"
 msgstr "jonkun aikaa"
 
-#: data/rbot/plugins/seen.rb:160
+#: data/rbot/plugins/seen.rb:167
 msgid "just now"
 msgstr "ihan äsken"
 
-#: data/rbot/plugins/seen.rb:162
+#: data/rbot/plugins/seen.rb:169
 msgid "%{time} ago"
 msgstr "%{time} sitten"
 

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2010-07-02 00:17+0200\n"
 "PO-Revision-Date: 2009-03-20 15:57+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -53,8 +53,8 @@ msgid ""
 "<words>"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:409
-#: data/rbot/plugins/factoids.rb:441
+#: data/rbot/plugins/factoids.rb:292 data/rbot/plugins/factoids.rb:413
+#: data/rbot/plugins/factoids.rb:445
 msgid "please select a fact number between 1 and %{total}"
 msgstr ""
 
@@ -78,30 +78,34 @@ msgstr ""
 msgid "I know %{total} facts"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:352 data/rbot/plugins/factoids.rb:425
+#: data/rbot/plugins/factoids.rb:353 data/rbot/plugins/factoids.rb:429
 msgid "I know nothing about %{words}"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:357
+#: data/rbot/plugins/factoids.rb:355
+msgid "I know nothing matching %{rx}"
+msgstr ""
+
+#: data/rbot/plugins/factoids.rb:361
 msgid "%{len} out of %{total} facts refer to %{words}, I'll only show %{max}"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:417
+#: data/rbot/plugins/factoids.rb:421
 msgid "I know nothing"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:457
+#: data/rbot/plugins/factoids.rb:461
 msgid "not a date '%{dstr}'"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:465
+#: data/rbot/plugins/factoids.rb:469
 msgid "couldn't change learn data for fact %{fact}: %{err}"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:480
+#: data/rbot/plugins/factoids.rb:484
 msgid "failed to import facts from %{fname}: %{err}"
 msgstr ""
 
-#: data/rbot/plugins/factoids.rb:485
+#: data/rbot/plugins/factoids.rb:489
 msgid "%{len} facts loaded from %{fname}"
 msgstr ""

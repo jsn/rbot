@@ -1163,9 +1163,9 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "marshal recovery failed, trying default"
 
-#~ msgid "nick <nick> => attempt to change nick to <nick>"
-#~ msgstr "nick <nick> => attempt to change nick to <nick>"
-
 #, fuzzy
 #~ msgid "on %{date}"
 #~ msgstr "can %{action}"
+
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => attempt to change nick to <nick>"

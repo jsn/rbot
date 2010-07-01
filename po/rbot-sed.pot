@@ -16,14 +16,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/autoop.rb:79
-msgid "Either specify a channel to seed, or ask in public"
+#: data/rbot/plugins/sed.rb:47
+msgid "meant"
 msgstr ""
 
-#: data/rbot/plugins/autoop.rb:100
-msgid "Nobody to add"
-msgstr ""
-
-#: data/rbot/plugins/autoop.rb:157
-msgid "Either specify a channel to restore, or ask in public"
+#: data/rbot/plugins/sed.rb:49
+msgid "You did something wrong... Try s/you/me/ or tell me \"help sed\""
 msgstr ""

@@ -1,0 +1,131 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2010-07-02 00:17+0200\n"
+"PO-Revision-Date: 2010-07-02 00:17+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: data/rbot/plugins/poll.rb:55
+msgid "poll's closed!"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:59
+msgid "you already voted for %{vote}!"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:69
+msgid "recorded your vote for %{choice}: %{value}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:73
+msgid "don't have an option %{choice}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:90
+msgid "options are: "
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:101
+msgid "How many polls a user can have running at once"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:104
+msgid "How long a poll will accept answers, by default."
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:107
+msgid "Should we save results until we see the nick of the pollster?"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:138
+msgid "Sorry, you're already at the limit (%{limit}) polls"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:148
+msgid "This isn't a dictatorship!"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:185
+msgid "I don't understand the time spec %{timespec}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:193
+msgid "new poll from %{author}: %{question}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:201
+msgid "poll vote %{id} <SINGLE-LETTER>"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:204
+msgid "you have %{duration}, vote with "
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:205
+msgid "%{priv} or %{public}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:226
+msgid "let's find the answer to: %{q}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:236
+msgid "nobody voted"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:239
+msgid "no clear winner: "
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:249
+msgid "the winner was choice %{choice}: %{value} with %{count} vote (%{pct})"
+msgid_plural ""
+"the winner was choice %{choice}: %{value} with %{count} votes (%{pct})"
+msgstr[0] ""
+msgstr[1] ""
+
+#: data/rbot/plugins/poll.rb:273
+msgid "no polls running right now"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:319
+msgid " It's still running!"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:321
+msgid " Be patient, it'll end %{end}"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:323
+msgid " You have until %{poll.ends_at} to vote if you haven't!"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:341
+msgid ""
+"poll [start] 'my question' 'answer1' 'answer2' ['answer3' ...] [for 5 "
+"minutes] : Start a poll for the given duration. If you don't specify a "
+"duration the default will be used."
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:345
+msgid "poll list : Give some info about currently active polls"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:349
+msgid "vote"
+msgstr ""
+
+#: data/rbot/plugins/poll.rb:351
+msgid "Hold informative polls: poll start|list|info|vote"
+msgstr ""

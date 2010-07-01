@@ -1099,9 +1099,9 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr ""
 
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"
+
 #, fuzzy
 #~ msgid "on %{date}"
 #~ msgstr "能 %{action}"
-
-#~ msgid "nick <nick> => attempt to change nick to <nick>"
-#~ msgstr "nick <nick> => 嘗試把暱稱改為 <nick>"

@@ -1206,13 +1206,13 @@ msgstr ""
 msgid "marshal recovery failed, trying default"
 msgstr "la tentative de récuperation marshal a échoué, essai des defauts"
 
-#, fuzzy
-#~ msgid "on %{date}"
-#~ msgstr "faire %{action}"
+#~ msgid "nick <nick> => attempt to change nick to <nick>"
+#~ msgstr "nick <nick> => essaye de changer le pseudo en <nick>"
 
 #, fuzzy
 #~ msgid "one day"
 #~ msgstr "jour"
 
-#~ msgid "nick <nick> => attempt to change nick to <nick>"
-#~ msgstr "nick <nick> => essaye de changer le pseudo en <nick>"
+#, fuzzy
+#~ msgid "on %{date}"
+#~ msgstr "faire %{action}"
