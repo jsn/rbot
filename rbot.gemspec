@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   EOF
   s.requirements << 'Ruby, version 1.8.0 (or newer)'
 
-  s.files = Dir[
+  s.files = FileList[
 	  'lib/**/*.rb',
 	  'bin/*',
 	  'data/rbot/**/*',
@@ -23,6 +23,8 @@ Gem::Specification.new do |s|
 	  'ChangeLog',
 	  'INSTALL',
 	  'Usage_en.txt',
+	  'man/rbot.1',
+	  'man/rbot-remote.1',
 	  'setup.rb',
 	  'launch_here.rb',
 	  'po/*.pot',

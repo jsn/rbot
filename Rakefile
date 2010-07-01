@@ -4,6 +4,10 @@ require 'rake/gempackagetask'
 
 task :default => [:buildext]
 
+rule '.1' => ['.xml'] do |t|
+  sh "xsltproc -nonet -o #{t.name} /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/manpages/docbook.xsl #{t.source}"
+end
+
 SPECFILE = 'rbot.gemspec'
 # The Rakefile is also used after installing the gem, to build
 # the .mo files. Since in this case the SPECFILE is not available,
