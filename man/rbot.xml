@@ -28,86 +28,110 @@ and docbook-xsl in your Build-Depends control field.
 
   <!-- Fill in your name for FIRSTNAME and SURNAME. -->
   <!ENTITY dhfirstname "<firstname>Marc</firstname>">
-  <!ENTITY dhsurname   "<surname>Dequ\[`e]nes</surname>">
+  <!ENTITY dhsurname   "<surname>Dequènes</surname>">
+  <!ENTITY gbgname     "<firstname>Giuseppe</firstname>">
+  <!ENTITY gbfname     "<surname>Bilotta</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>20090401</date>">
+  <!ENTITY dhdate      "<date>20100701</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
   <!ENTITY dhemail     "<email>Duck@DuckCorp.org</email>">
-  <!ENTITY dhusername  "Marc Dequ\[`e]nes (Duck)">
-  <!ENTITY dhucpackage "<refentrytitle>RBOT</refentrytitle>">
+  <!ENTITY gbemail     "<email>giuseppe.bilotta@gmail.com</email>">
+  <!ENTITY dhusername  "Marc Dequènes (Duck)">
+  <!ENTITY gbusername  "Giuseppe Bilotta">
+  <!ENTITY dhucapp     "<refentrytitle>RBOT</refentrytitle>">
+  <!ENTITY dhapp       "rbot">
   <!ENTITY dhpackage   "rbot">
+  <!ENTITY dhpackageversion "0.9.15">
 
   <!ENTITY debian      "<productname>Debian</productname>">
   <!ENTITY gnu         "<acronym>GNU</acronym>">
   <!ENTITY gpl         "&gnu; <acronym>GPL</acronym>">
 ]>
 
-<refentry>
+<refentry id="&dhapp;.1">
+
   <refentryinfo>
-    <address>
-      &dhemail;
-    </address>
-    <author>
-      &dhfirstname;
-      &dhsurname;
-    </author>
+    <productname>&dhapp;</productname>
+    <authorgroup>
+      <author>
+        &dhfirstname;
+        &dhsurname;
+        &dhemail;
+        <contrib>&debian; package maintainer</contrib>
+      </author>
+      <author>
+        &gbgname;
+        &gbfname;
+        &gbemail;
+        <contrib>&dhapp; maintainer</contrib>
+      </author>
+    </authorgroup>
     <copyright>
       <year>2004-2009</year>
       <holder>&dhusername;</holder>
     </copyright>
+    <copyright>
+      <year>2010</year>
+      <holder>&gbusername;</holder>
+    </copyright>
     &dhdate;
   </refentryinfo>
-  <refmeta>
-    &dhucpackage;
 
+  <refmeta>
+    &dhucapp;
     &dhsection;
+    <refmiscinfo class="manual">&dhapp; man page</refmiscinfo>
+    <refmiscinfo class="source">&dhpackage;</refmiscinfo>
+    <refmiscinfo class="version">&dhpackageversion;</refmiscinfo>
   </refmeta>
+
   <refnamediv>
-    <refname>&dhpackage;</refname>
+    <refname>&dhapp;</refname>
 
     <refpurpose>IRC bot written in ruby</refpurpose>
   </refnamediv>
+
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>&dhpackage;</command>
+      <command>&dhapp;</command>
 
-        <group choice="opt">
-           <group choice="req">
-	  	<arg><option>-d</option></arg>
-	  	<arg><option>--debug</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-h</option></arg>
-	  	<arg><option>--help</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-v</option></arg>
-	  	<arg><option>--version</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-l LEVEL</option></arg>
-	  	<arg><option>--loglevel LEVEL</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-b</option></arg>
-	  	<arg><option>--background</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-p PIDFILE</option></arg>
-	  	<arg><option>--pidfile PIDFILE</option></arg>
-           </group>
-	</group>
+      <group choice="opt">
+        <group choice="req">
+          <arg><option>-d</option></arg>
+          <arg><option>--debug</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-h</option></arg>
+          <arg><option>--help</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-v</option></arg>
+          <arg><option>--version</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-l LEVEL</option></arg>
+          <arg><option>--loglevel LEVEL</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-b</option></arg>
+          <arg><option>--background</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-p PIDFILE</option></arg>
+          <arg><option>--pidfile PIDFILE</option></arg>
+        </group>
+      </group>
 
-	<arg choice="opt" rep="norepeat">confdir</arg>
+      <arg choice="opt" rep="norepeat">confdir</arg>
 
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
     <title>DESCRIPTION</title>
 
-    <para><command>&dhpackage;</command> starts the Rbot (ruby IRC bot).</para>
+    <para><command>&dhapp;</command> starts the Rbot (ruby IRC bot).</para>
 
   </refsect1>
   <refsect1>
@@ -147,12 +171,12 @@ and docbook-xsl in your Build-Depends control field.
         <term><option>--loglevel <parameter>LEVEL</parameter></option></term>
         <listitem>
           <para>
-             Sets the minimum log level verbosity. Possible values for the
-             loglevel are 0 (DEBUG), 1 (INFO), 2 (WARN), 3 (ERROR), 4
-             (FATAL). The default loglevel is 1 (INFO messages). The logfile
-             is located at BOTDIR/BOTNAME.log and doesn't contain IRC logs
-             (which are located at BOTDIR/logs/*), but only rbot diagnostic
-             messages.
+            Sets the minimum log level verbosity. Possible values for the
+            loglevel are 0 (DEBUG), 1 (INFO), 2 (WARN), 3 (ERROR), 4
+            (FATAL). The default loglevel is 1 (INFO messages). The logfile
+            is located at BOTDIR/BOTNAME.log and doesn't contain IRC logs
+            (which are located at BOTDIR/logs/*), but only rbot diagnostic
+            messages.
           </para>
         </listitem>
       </varlistentry>
@@ -174,7 +198,7 @@ and docbook-xsl in your Build-Depends control field.
       </varlistentry>
 
       <varlistentry>
-        <term><parameter>CONFDIR</parameter></term>
+        <term><parameter>BOTDIR</parameter></term>
         <listitem>
           <para>Path to the directory where are stored the bot's configuration files. The default config directory is ~/.rbot.</para>
         </listitem>
@@ -182,7 +206,7 @@ and docbook-xsl in your Build-Depends control field.
     </variablelist>
   </refsect1>
   <refsect1>
-    <title>AUTHOR</title>
+    <title>VERSION</title>
 
     <para>This manual page was written by &dhusername; &dhemail; for
       the &debian; system (but may be used by others).  Permission is
@@ -190,10 +214,10 @@ and docbook-xsl in your Build-Depends control field.
       the terms of the &gnu; General Public License, Version 3 or
       any later version published by the Free Software Foundation.
     </para>
-	<para>
-	  On Debian systems, the complete text of the GNU General Public
-	  License can be found in /usr/share/common-licenses/GPL.
-	</para>
+    <para>
+      On Debian systems, the complete text of the GNU General Public
+      License can be found in /usr/share/common-licenses/GPL.
+    </para>
 
   </refsect1>
 </refentry>

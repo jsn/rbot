@@ -28,92 +28,116 @@ and docbook-xsl in your Build-Depends control field.
 
   <!-- Fill in your name for FIRSTNAME and SURNAME. -->
   <!ENTITY dhfirstname "<firstname>Marc</firstname>">
-  <!ENTITY dhsurname   "<surname>Dequ\[`e]nes</surname>">
+  <!ENTITY dhsurname   "<surname>Dequènes</surname>">
+  <!ENTITY gbgname     "<firstname>Giuseppe</firstname>">
+  <!ENTITY gbfname     "<surname>Bilotta</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>20090401</date>">
+  <!ENTITY dhdate      "<date>20100701</date>">
   <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
        allowed: see man(7), man(1). -->
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
   <!ENTITY dhemail     "<email>Duck@DuckCorp.org</email>">
-  <!ENTITY dhusername  "Marc Dequ\[`e]nes (Duck)">
-  <!ENTITY dhucpackage "<refentrytitle>RBOT-REMOTE</refentrytitle>">
-  <!ENTITY dhpackage   "rbot-remote">
+  <!ENTITY gbemail     "<email>giuseppe.bilotta@gmail.com</email>">
+  <!ENTITY dhusername  "Marc Dequènes (Duck)">
+  <!ENTITY gbusername  "Giuseppe Bilotta">
+  <!ENTITY dhucapp     "<refentrytitle>RBOT-REMOTE</refentrytitle>">
+  <!ENTITY dhapp       "rbot-remote">
+  <!ENTITY dhpackage   "rbot">
+  <!ENTITY dhpackageversion "0.9.15">
 
   <!ENTITY debian      "<productname>Debian</productname>">
   <!ENTITY gnu         "<acronym>GNU</acronym>">
   <!ENTITY gpl         "&gnu; <acronym>GPL</acronym>">
 ]>
 
-<refentry>
+<refentry id="&dhapp;.1">
+
   <refentryinfo>
-    <address>
-      &dhemail;
-    </address>
-    <author>
-      &dhfirstname;
-      &dhsurname;
-    </author>
+    <productname>&dhapp;</productname>
+    <authorgroup>
+      <author>
+        &dhfirstname;
+        &dhsurname;
+        &dhemail;
+        <contrib>&debian; package maintainer</contrib>
+      </author>
+      <author>
+        &gbgname;
+        &gbfname;
+        &gbemail;
+        <contrib>&dhapp; maintainer</contrib>
+      </author>
+    </authorgroup>
     <copyright>
       <year>2004-2009</year>
       <holder>&dhusername;</holder>
     </copyright>
+    <copyright>
+      <year>2010</year>
+      <holder>&gbusername;</holder>
+    </copyright>
     &dhdate;
   </refentryinfo>
-  <refmeta>
-    &dhucpackage;
 
+  <refmeta>
+    &dhucapp;
     &dhsection;
+    <refmiscinfo class="manual">&dhapp; man page</refmiscinfo>
+    <refmiscinfo class="source">&dhpackage;</refmiscinfo>
+    <refmiscinfo class="version">&dhpackageversion;</refmiscinfo>
   </refmeta>
+
   <refnamediv>
-    <refname>&dhpackage;</refname>
+    <refname>&dhapp;</refname>
 
     <refpurpose>IRC bot written in ruby</refpurpose>
   </refnamediv>
+
   <refsynopsisdiv>
     <cmdsynopsis>
-      <command>&dhpackage;</command>
+      <command>&dhapp;</command>
 
+      <group choice="req">
         <group choice="req">
-           <group choice="req">
-	  	<arg><option>-u USER</option></arg>
-	  	<arg><option>--user USER</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-p PASSWORD</option></arg>
-	  	<arg><option>--password PASSWORD</option></arg>
-           </group>
-	</group>
-        <group choice="opt">
-           <group choice="req">
-	  	<arg><option>-d DEST</option></arg>
-	  	<arg><option>--destination DEST</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-r DRB_URI</option></arg>
-	  	<arg><option>--uri DRB_URI</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-h</option></arg>
-	  	<arg><option>--help</option></arg>
-           </group>
-           <group choice="req">
-	  	<arg><option>-a</option></arg>
-	  	<arg><option>--about</option></arg>
-           </group>
-	</group>
+          <arg><option>-u USER</option></arg>
+          <arg><option>--user USER</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-p PASSWORD</option></arg>
+          <arg><option>--password PASSWORD</option></arg>
+        </group>
+      </group>
+      <group choice="opt">
+        <group choice="req">
+          <arg><option>-d DEST</option></arg>
+          <arg><option>--destination DEST</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-r DRB_URI</option></arg>
+          <arg><option>--uri DRB_URI</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-h</option></arg>
+          <arg><option>--help</option></arg>
+        </group>
+        <group choice="req">
+          <arg><option>-a</option></arg>
+          <arg><option>--about</option></arg>
+        </group>
+      </group>
 
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
     <title>DESCRIPTION</title>
 
-    <para><command>&dhpackage;</command> is a proof-of-concept example for
+    <para><command>&dhapp;</command> is a proof-of-concept example for
       rbot druby-based api. This program reads lines of text from the standard
       input and sends them to a specified irc channel or user via rbot.
     </para>
 
-    <para>Make sure you have remotectl.rb plugin loaded and assigned the needed
-       rights to the user before use.
+    <para>Make sure you have the remotectl plugin loaded and assigned the needed
+      rights to the user before use.
     </para>
 
   </refsect1>
@@ -175,7 +199,7 @@ and docbook-xsl in your Build-Depends control field.
     </variablelist>
   </refsect1>
   <refsect1>
-    <title>AUTHOR</title>
+    <title>VERSION</title>
 
     <para>This manual page was written by &dhusername; &dhemail; for
       the &debian; system (but may be used by others).  Permission is
@@ -183,10 +207,10 @@ and docbook-xsl in your Build-Depends control field.
       the terms of the &gnu; General Public License, Version 3 or
       any later version published by the Free Software Foundation.
     </para>
-	<para>
-	  On Debian systems, the complete text of the GNU General Public
-	  License can be found in /usr/share/common-licenses/GPL.
-	</para>
+    <para>
+      On Debian systems, the complete text of the GNU General Public
+      License can be found in /usr/share/common-licenses/GPL.
+    </para>
 
   </refsect1>
 </refentry>
