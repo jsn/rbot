@@ -7,6 +7,26 @@ require 'rexml/document'
 
 class FreshmeatPlugin < Plugin
   include REXML
+
+  Config.register Config::StringValue.new('freshmeat.api_token',
+    :desc => "Auth token for freshmeat API requests. Without this, no freshmeat calls will be made. Find it in your freshmeat user account settings.",
+    :default => "")
+
+  def api_token
+    return @bot.config['freshmeat.api_token']
+  end
+
+  # Checks if an API token is configure, warns if not, returns true or false
+  def check_api_token(m=nil)
+    if api_token.empty?
+      if m
+        m.reply _("you must set the configuration value freshmeat.api_token to a valid freshmeat auth token, otherwise I cannot make requests to the site")
+      end
+      return false
+    end
+    return true
+  end
+
   def help(plugin, topic="")
     "freshmeat search [<max>=4] <string> => search freshmeat for <string>, freshmeat [<max>=4] => return up to <max> freshmeat headlines"
   end
@@ -41,12 +61,13 @@ class FreshmeatPlugin < Plugin
   end
 
   def search_freshmeat(m, params)
+    return unless check_api_token(m)
     max = params[:limit].to_i
     search = params[:search].to_s
     max = 8 if max > 8
-    xml = @bot.httputil.get("http://freshmeat.net/search-xml/?orderby=locate_projectname_full_DESC&q=#{CGI.escape(search)}")
+    xml = @bot.httputil.get("http://freshmeat.net/search.xml?auth_code=#{api_token}&q=#{CGI.escape(search)}")
     unless xml
-      m.reply "search for #{search} failed"
+      m.reply "search for #{search} failed (is the API token configured correctly?)"
       return
     end
     doc = nil
@@ -65,13 +86,15 @@ class FreshmeatPlugin < Plugin
     title_width = 0
     url_width = 0
     done = 0
-    doc.elements.each("*/match") {|e|
-      name = e.elements["projectname_short"].text
-      url = "http://freshmeat.net/projects/#{name}/"
-      desc = e.elements["desc_short"].text
-      title = e.elements["projectname_full"].text
-      #title_width = title.length if title.length > title_width
+    doc.elements.each("hash/projects/project") {|e|
+      title = e.elements["name"].text
+      title_width = title.length if title.length > title_width
+
+      url = "http://freshmeat.net/projects/#{e.elements['permalink'].text}"
       url_width = url.length if url.length > url_width
+
+      desc = e.elements["oneliner"].text
+
       matches << [title, url, desc]
       done += 1
       break if done >= max
@@ -79,23 +102,26 @@ class FreshmeatPlugin < Plugin
     if matches.length == 0
       m.reply "not found: #{search}"
     end
+
+    title_width += 2 # for bold
+
     matches.each {|mat|
-      title = mat[0]
+      title = Bold + mat[0] + Bold
       url = mat[1]
       desc = mat[2]
-      desc.gsub!(/(.{#{max_width - 3 - url_width}}).*/, '\1..')
-      reply = sprintf("%s | %s", url.ljust(url_width), desc)
-      m.reply reply
+      reply = sprintf("%s | %s | %s", title.ljust(title_width), url.ljust(url_width), desc)
+      m.reply reply, :overlong => :truncate
     }
   end
 
+  # We do manual parsing so that we can work even with the RSS plugin not loaded
   def freshmeat(m, params)
     max = params[:limit].to_i
     max = 8 if max > 8
     begin
-      xml = @bot.httputil.get('http://freshmeat.net/backend/fm-releases-global.xml')
+      xml = @bot.httputil.get('http://freshmeat.net/?format=atom')
       unless xml
-        m.reply "freshmeat news parse failed"
+        m.reply _("couldn't retrieve freshmeat news feed")
         return
       end
       doc = Document.new xml
@@ -112,22 +138,22 @@ class FreshmeatPlugin < Plugin
     max_width = 60
     title_width = 0
     done = 0
-    doc.elements.each("*/channel/item") {|e|
-      desc = e.elements["description"].text.ircify_html
-      title = e.elements["title"].text.ircify_html
-      #title.gsub!(/\s+\(.*\)\s*$/, "")
-      title.strip!
+    doc.elements.each("feed/entry") {|e|
+      # TODO desc should be replaced by the oneliner, but this means one more hit per project
+      # so we clip out all of the description and leave just the 'changes' part
+      desc = e.elements["content"].text.ircify_html.sub(/.*?#{Bold}Changes:#{Bold}/,'').strip
+      title = e.elements["title"].text.ircify_html.strip
       title_width = title.length if title.length > title_width
       matches << [title, desc]
       done += 1
       break if done >= max
     }
+    title_width += 2
     matches.each {|mat|
-      title = mat[0]
-      #desc = mat[1]
-      #desc.gsub!(/(.{#{max_width - 3 - title_width}}).*/, '\1..')
-      #reply = sprintf("%#{title_width}s | %s", title, desc)
-      m.reply title
+      title = Bold + mat[0] + Bold
+      desc = mat[1]
+      reply = sprintf("%s | %s", title.ljust(title_width), desc)
+      m.reply reply, :overlong => :truncate
     }
   end
 end
