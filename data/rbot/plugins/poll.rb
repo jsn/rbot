@@ -316,7 +316,7 @@ class PollPlugin < Plugin
 end
 
 plugin = PollPlugin.new
-plugin.map 'poll start *blob', :action => 'start'
 plugin.map 'poll list', :action => 'list'
 plugin.map 'poll info :id', :action => 'info'
 plugin.map 'poll vote :id :choice', :action => 'record_vote', :threaded => true
+plugin.map 'poll [start] *blob', :action => 'start'
