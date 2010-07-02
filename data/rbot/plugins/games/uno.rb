@@ -750,6 +750,11 @@ class UnoGame
 
   def end_game(halted = false)
     runtime = @start_time ? Time.now -  @start_time : 0
+    if @join_timer
+      @bot.timer.remove(@join_timer)
+      announce _("game start countdown stopped")
+      @join_timer = nil
+    end
     if halted
       if @start_time
         announce _("%{uno} game halted after %{time}") % {
