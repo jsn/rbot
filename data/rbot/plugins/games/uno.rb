@@ -211,6 +211,13 @@ class UnoGame
     @bot.notice player.user, msg, opts
   end
 
+  def notify_error(player, msg, opts={})
+    announce _("you can't do that, %{p}") % {
+      :p => player.user
+    }
+    notify player, msg, opts
+  end
+
   def make_base_stock
     @base_stock = COLORS.inject([]) do |list, clr|
       VALUES.each do |n|
@@ -397,7 +404,7 @@ class UnoGame
     if cards = p.has_card?(short)
       debug cards
       unless can_play(cards.first)
-        announce _("you can't play that card")
+        notify_error p, _("you can't play that card")
         return
       end
       if cards.length >= toplay
@@ -451,10 +458,10 @@ class UnoGame
           announce _("%{p}, choose a color with: co r|b|g|y") % { :p => p }
         end
       else
-        announce _("you don't have two cards of that kind")
+        notify_error p, _("you don't have two cards of that kind")
       end
     else
-      announce _("you don't have that card")
+      notify_error p, _("you don't have that card")
     end
   end
 
