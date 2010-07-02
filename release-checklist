@@ -1,0 +1,16 @@
+Pre-release checklist:
+ * Update .po files (rake updatepo). Remember to add any new po(t) files.
+
+Release checklist:
+ * prepare a changelog from git shortlog
+ * tag the release with (./tag-release <version>). The script takes care of everything, including building the package
+ * git push, with tags
+ * upload packages to website's download folder
+ * update milestones and versions on the website
+ * prepare announcement on the website (use the changelog prepared before)
+ * change the website front page
+ * update the IRC topic
+ * [jsn] upload the gem (gem push rbot-<version>.gem)
+ * [jsn] update release info on rubyforge (needs release notes and changelog, take from announcement)
+ * [jsn] update release info on freshmeat (needs changes summary, see above)
+ * write a journal entry on ohloh.net about #rbot <version> being released
