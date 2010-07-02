@@ -397,10 +397,24 @@ class UnoGame
       toplay = (full == short) ? 1 : 2
     end
     debug [full, short, jolly, jcolor, toplay].inspect
-    # r7r7 -> r7r7, r7, nil, nil
-    # r7 -> r7, r7, nil, nil
-    # w -> w, nil, w, nil
-    # wg -> wg, nil, w, g
+    # r7r7 -> r7r7, r7, nil, nil, 2
+    # r7 -> r7, r7, nil, nil, 1
+    # w -> w, nil, w, nil, 1
+    # wg -> wg, nil, w, g, 1
+
+    # if @color is nil, the player just played a wild without specifying
+    # a color. (s)he should now use "co <colorname>", but we allow him to
+    # replay the wild _and_ specify the color, without actually replaying
+    # the card (which would otherwise happen if the player has another wild)
+    if @color.nil?
+      if jcolor
+        choose_color(p.user, jcolor)
+      else
+        announce _("you already played your card, ") + _("%{p}, choose a color with: co r|b|g|y") % { :p => p }
+      end
+      return
+    end
+
     if cards = p.has_card?(short)
       debug cards
       unless can_play(cards.first)
