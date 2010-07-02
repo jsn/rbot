@@ -119,7 +119,7 @@ msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:575
 msgid "%{uno} playing turn: %{players}"
-msgstr "%{count} plugin: %{list}"
+msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:584
 msgid "it's %{player}'s turn"
