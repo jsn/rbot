@@ -241,8 +241,6 @@ class HangmanPlugin < Plugin
 
   def help(plugin, topic="")
     case topic
-    when ""
-      return _("hangman game plugin - topics: play, stop")
     when "play"
       return [_("hangman play on <channel> with word <word> => use in private chat with the bot to start a game with custom word\n"),
               _("hangman play random [with [max|min] length [<|>|== <length>]] => hangman with a random word from %{site}\n"),
@@ -251,6 +249,8 @@ class HangmanPlugin < Plugin
       return _("hangman stop => quits the current game")
     when "define"
       return _("define => seeks a definition for the previous answer using google")
+    else
+      return _("hangman game plugin - topics: play, stop, define")
     end
   end
 
@@ -496,4 +496,4 @@ plugin.map "hangman stop", :action => 'stop'
 
 plugin.map "hangman score [:nick]", :action => 'score'
 plugin.map "hangman stats", :action => 'stats'
-plugin.map "define", :action => 'define'
+plugin.map "hangman define", :action => 'define'
