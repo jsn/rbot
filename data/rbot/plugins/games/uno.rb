@@ -329,7 +329,7 @@ class UnoGame
   def next_turn(opts={})
     @players << @players.shift
     @player_has_picked = false
-    show_turn
+    show_turn unless opts[:silent]
   end
 
   def can_play(card)
@@ -699,11 +699,18 @@ class UnoGame
     }
     case @players.length
     when 2
-      if p == @players.first
-        next_turn
+      if @join_timer
+        @bot.timer.remove(@join_timer)
+        announce _("game start countdown stopped")
+        @join_timer = nil
       end
-      end_game
-      return
+      if p == @players.first
+        next_turn :silent => @start_time.nil?
+      end
+      if @start_time
+        end_game
+        return
+      end
     when 1
       end_game(true)
       return
