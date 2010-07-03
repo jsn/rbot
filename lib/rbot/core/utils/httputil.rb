@@ -409,8 +409,28 @@ class HttpUtil
       if resp.key?('location')
         raise 'Too many redirections' if opts[:max_redir] <= 0
         yield resp if opts[:yield] == :all && block_given?
+        # some servers actually provide unescaped location, e.g.
+        # http://ulysses.soup.io/post/60734021/Image%20curve%20ball
+        # rediects to something like
+        # http://ulysses.soup.io/post/60734021/Image curve ball?sessid=8457b2a3752085cca3fb1d79b9965446
+        # causing the URI parser to (obviously) complain. We cannot just
+        # escape blindly, as this would make a mess of already-escaped
+        # locations, so we only do it if the URI.parse fails
         loc = resp['location']
-        new_loc = URI.join(uri.to_s, loc) rescue URI.parse(loc)
+        escaped = false
+        debug "redirect location: #{loc.inspect}"
+        begin
+          new_loc = URI.join(uri.to_s, loc) rescue URI.parse(loc)
+        rescue
+          if escaped
+            raise $!
+          else
+            loc = URI.escape(loc)
+            escaped = true
+            debug "escaped redirect location: #{loc.inspect}"
+            retry
+          end
+        end
         new_opts = opts.dup
         new_opts[:max_redir] -= 1
         case opts[:method].to_s.downcase.intern
