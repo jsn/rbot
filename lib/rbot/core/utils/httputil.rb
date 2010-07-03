@@ -438,9 +438,23 @@ class HttpUtil
           new_opts[:method] = :get
         end
         if resp['set-cookie']
-          debug "setting cookie #{resp['set-cookie']}"
-          new_opts[:headers] ||= Hash.new
-          new_opts[:headers]['Cookie'] = resp['set-cookie']
+          debug "set cookie request for #{resp['set-cookie']}"
+          cookie, cookie_flags = (resp['set-cookie']+'; ').split('; ', 2)
+          domain = uri.host
+          cookie_flags.scan(/(\S+)=(\S+);/) { |key, val|
+            if key.intern == :domain
+              domain = val
+              break
+            end
+          }
+          debug "cookie domain #{domain} / #{new_loc.host}"
+          if new_loc.host.rindex(domain) == new_loc.host.length - domain.length
+            debug "setting cookie"
+            new_opts[:headers] ||= Hash.new
+            new_opts[:headers]['Cookie'] = cookie
+          else
+            debug "cookie is for another domain, ignoring"
+          end
         end
         debug "following the redirect to #{new_loc}"
         return get_response(new_loc, new_opts, &block)
