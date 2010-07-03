@@ -115,9 +115,21 @@ class FreshmeatPlugin < Plugin
   end
 
   # We do manual parsing so that we can work even with the RSS plugin not loaded
-  def freshmeat(m, params)
+  def freshmeat_rss(m, params)
     max = params[:limit].to_i
     max = 8 if max > 8
+
+    text = _("retrieving freshmeat news from the RSS")
+    reason = ""
+    case params[:api_token]
+    when :missing
+      reason = _(" because no API token is configured")
+    when :wrong
+      reason = _(" because the configured API token is wrong")
+    end
+
+    m.reply text + reason
+
     begin
       xml = @bot.httputil.get('http://freshmeat.net/?format=atom')
       unless xml
@@ -130,6 +142,7 @@ class FreshmeatPlugin < Plugin
         return
       end
     rescue
+      error $!
       m.reply "freshmeat news parse failed"
       return
     end
@@ -153,6 +166,75 @@ class FreshmeatPlugin < Plugin
       title = Bold + mat[0] + Bold
       desc = mat[1]
       reply = sprintf("%s | %s", title.ljust(title_width), desc)
+      m.reply reply, :overlong => :truncate
+    }
+  end
+
+  def freshmeat(m, params)
+    # use the RSS if no API token is defined
+    return freshmeat_rss(m, params.merge(:api_token => :missing)) unless check_api_token
+    xml = @bot.httputil.get("http://freshmeat.net/index.xml?auth_code=#{api_token}")
+    # use the RSS if we couldn't get the XML
+    return freshmeat_rss(m, params.merge(:api_token => :wrong)) unless xml
+
+    max = params[:limit].to_i
+    max = 8 if max > 8
+    begin
+      doc = Document.new xml
+      unless doc
+        m.reply "freshmeat news parse failed"
+        return
+      end
+    rescue
+      error $!
+      m.reply "freshmeat news parse failed"
+      return
+    end
+
+    matches = Array.new
+    title_width = 0
+    url_width = 0
+    time_width = 0
+    done = 0
+    now = Time.now
+    doc.elements.each("releases/release") {|e|
+      approved = e.elements["approved-at"].text.strip
+      date = Time.parse(approved) rescue nil
+      timeago = date ? (Utils.timeago(date, :start_date => now) rescue nil) : approved
+      time_width = timeago.length if timeago.length > time_width
+
+      changelog = e.elements["changelog"].text.ircify_html
+
+      title = e.elements["project/name"].text.ircify_html
+      title_width = title.length if title.length > title_width
+      url = "http://freshmeat.net/projects/#{e.elements['project/permalink'].text}"
+      url_width = url.length if url.length > url_width
+
+      desc = e.elements["project/oneliner"].text.ircify_html
+
+      matches << [title, timeago, desc, url, changelog]
+
+      done += 1
+      break if done >= max
+    }
+
+    if matches.empty?
+      m.reply _("no news in freshmeat!")
+      return
+    end
+
+    title_width += 2
+    matches.each {|mat|
+      title = Bold + mat[0] + Bold
+      timeago = mat[1]
+      desc = mat[2]
+      url = mat[3]
+      changelog = mat[4]
+      reply = sprintf("%s | %s | %s | %s",
+        timeago.rjust(time_width),
+        title.ljust(title_width),
+        url.ljust(url_width),
+        desc)
       m.reply reply, :overlong => :truncate
     }
   end
