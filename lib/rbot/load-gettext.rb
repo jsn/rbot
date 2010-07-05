@@ -58,6 +58,41 @@ end
 
     require 'stringio'
 
+    # GetText 2.1.0 does not provide current_textdomain_info,
+    # so we adapt the one from 1.9.10
+    # TODO we would _really_ like to have a future-proof version of this,
+    # but judging by the ruby gettext source code, this isn't going to
+    # happen anytime soon.
+    if not respond_to? :current_textdomain_info
+      # Show the current textdomain information. This function is for debugging.
+      # * options: options as a Hash.
+      #   * :with_messages - show informations with messages of the current mo file. Default is false.
+      #   * :out - An output target. Default is STDOUT.
+      #   * :with_paths - show the load paths for mo-files.
+      def current_textdomain_info(options = {})
+        opts = {:with_messages => false, :with_paths => false, :out => STDOUT}.merge(options)
+        ret = nil
+        # this is for 2.1.0
+        TextDomainManager.each_textdomains(self) {|textdomain, lang|
+          opts[:out].puts "TextDomain name: #{textdomain.name.inspect}"
+          opts[:out].puts "TextDomain current locale: #{lang.to_s.inspect}"
+          opts[:out].puts "TextDomain current mo path: #{textdomain.instance_variable_get(:@locale_path).current_path(lang).inspect}"
+          if opts[:with_paths]
+            opts[:out].puts "TextDomain locale file paths:"
+            textdomain.locale_paths.each do |v|
+              opts[:out].puts "  #{v}"
+            end
+          end
+          if opts[:with_messages]
+            opts[:out].puts "The messages in the mo file:"
+            textdomain.current_mo.each{|k, v|
+              opts[:out].puts "  \"#{k}\": \"#{v}\""
+            }
+          end
+        }
+      end
+    end
+
     # This method is used to output debug information on the GetText
     # textdomain, and it's called by the language setting routines
     # in rbot
@@ -66,7 +101,8 @@ end
         gettext_info = StringIO.new
         current_textdomain_info(:out => gettext_info) # fails sometimes
       rescue Exception
-        warning "gettext failed to set call textdomain info. maybe an mo file doesn't exist for your locale."
+        warning "failed to retrieve textdomain info. maybe an mo file doesn't exist for your locale."
+        debug $!
       ensure
         gettext_info.string.each_line { |l| debug l}
       end
