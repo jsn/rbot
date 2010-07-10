@@ -244,6 +244,7 @@ class UnoGame
   end
 
   def start_game
+    @join_timer = nil
     debug "Starting game"
     @players.shuffle!
     show_order
