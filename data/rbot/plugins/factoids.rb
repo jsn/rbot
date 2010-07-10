@@ -260,7 +260,14 @@ class FactoidsPlugin < Plugin
   end
 
   def help(plugin, topic="")
-    _("factoids plugin: learn that <factoid>, forget that <factoids>, facts about <words>")
+    case plugin
+    when 'learn'
+      _("learn that <factoid> => learn a factoid")
+    when 'forget'
+      _("forget fact <#num> => forget factoid number #num ; forget about <factoid> => forget a factoid")
+    else
+      _("factoids plugin: learn that <factoid>, forget that <factoid>, facts about <words>")
+    end
   end
 
   def learn(m, params)
