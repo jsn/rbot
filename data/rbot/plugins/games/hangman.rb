@@ -248,7 +248,7 @@ class HangmanPlugin < Plugin
     when "stop"
       return _("hangman stop => quits the current game")
     when "define"
-      return _("define => seeks a definition for the previous answer using google")
+      return _("hangman define => seeks a definition for the previous answer using google")
     else
       return _("hangman game plugin - topics: play, stop, define")
     end
@@ -393,8 +393,8 @@ class HangmanPlugin < Plugin
         }, :nick => true
 
         if rand(5).zero?
-          m.reply _("wondering what that means? try ´%{prefix}define´") % {
-            :prefix => @bot.config['core.address_prefix']
+          m.reply _("wondering what that means? try ´%{prefix}hangman define´") % {
+            :prefix => @bot.config['core.address_prefix'].first
           }
         end
 
