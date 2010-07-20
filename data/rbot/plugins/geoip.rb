@@ -183,32 +183,30 @@ class GeoIpPlugin < Plugin
       }
     rescue GeoIP::InvalidHostError, RuntimeError
       if nick
-        return _("#{nick}'s location could not be resolved")
+        return _("%{nick}'s location could not be resolved") % { :nick => nick }
       else
-        return _("#{host} could not be resolved")
+        return _("%{host} could not be resolved") % { :host => host }
       end
     rescue GeoIP::BadAPIError
       return _("The owner configured me to use an API that doesn't exist, bug them!")
     end
 
-    res = _("%{thing} is #{nick ? "from" : "located in"}") % {
-      :thing   => (nick ? nick : Resolv::getaddress(host)),
-      :country => geo[:country]
+    location = []
+    location << geo[:city] unless geo[:city].nil_or_empty?
+    location << geo[:region] unless geo[:region].nil_or_empty? or geo[:region] == geo[:city]
+    location << geo[:country] unless geo[:country].nil_or_empty?
+
+    if nick
+      res = _("%{nick} is from %{location}")
+    else
+      res = _("%{host} is located in %{location}")
+    end
+
+    return res % {
+      :nick => nick,
+      :host => host,
+      :location => location.join(', ')
     }
-
-    res << " %{city}" % {
-      :city => geo[:city]
-    } unless geo[:city].to_s.empty?
-
-    res << " %{region}," % {
-      :region  => geo[:region]
-    } unless geo[:region].to_s.empty? || geo[:region] == geo[:city]
-
-    res << " %{country}" % {
-      :country => geo[:country]
-    }
-
-    return res
   end
 end
 
