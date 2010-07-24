@@ -176,9 +176,9 @@ class Imdb
       end
 
       plot = nil
-      data = grab_info(/Plot (?:Outline|Summary)/, resp.body)
+      data = grab_info(/Plot(?: (?:Outline|Summary))?/, resp.body)
       if data
-        plot = "Plot: " + data.ircify_html.gsub(/\s+more$/,'')
+        plot = "Plot: " + data.ircify_html.gsub(/\s+more\s*$/,'').gsub(/\s+Full summary » \| Full synopsis »\s*$/,'')
       end
 
       info << ["Ratings: " << ratings, "Genre: " << genre.join('/') , plot].compact.join(". ")
