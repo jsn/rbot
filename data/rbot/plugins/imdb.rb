@@ -99,7 +99,7 @@ class Imdb
   end
 
   def grab_info(info, body)
-    /<div (?:id="\S+-info" )?class="info">\s+<h5>#{info}:<\/h5>\s+(.*?)<\/div>/mi.match(body)[1] rescue nil
+    /<div (?:id="\S+-info" )?class="info">\s*<h5>#{info}:<\/h5>\s*(.*?)<\/div>/mi.match(body)[1] rescue nil
   end
 
   def fix_article(org_tit)
