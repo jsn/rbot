@@ -479,8 +479,13 @@ class HangmanPlugin < Plugin
 
   def define(m, params)
     if game = @games.previous(m.replyto)
-      return unless res = Google.define(game.word)
-      m.reply "#{Bold}#{game.word}#{Bold} -- #{res}"
+      if res = Google.define(game.word)
+        m.reply "#{Bold}#{game.word}#{Bold} -- #{res}"
+      else
+        m.reply _("looks like google has no definition for %{word}") % { :word => game.word }
+      end
+    else
+      m.reply _("no hangman game was played here recently, what do you want me to define?")
     end
   end
 end
