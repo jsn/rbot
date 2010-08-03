@@ -28,7 +28,7 @@ module Google
 
   def self.define(phrase)
     raw = Net::HTTP.get(URI.parse(URL+CGI.escape(phrase)))
-    res = raw.scan(REGEX).flatten.map { |e| e.strip }
+    res = raw.scan(REGEX).flatten.map { |e| e.ircify_html }
 
     res.empty? ? false : res.last
   end
