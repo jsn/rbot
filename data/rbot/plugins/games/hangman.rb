@@ -303,11 +303,11 @@ class HangmanPlugin < Plugin
       target = if m.public?
         m.channel
       else
-        params[:channel]
+        @bot.server.channel(params[:channel])
       end
 
       # is the bot on the channel?
-      unless @bot.server.channels.names.include?(target.to_s)
+      unless @bot.myself.channels.include?(target)
         m.reply _("i'm not on that channel")
         return
       end
