@@ -752,6 +752,12 @@ class UnoGame
   def replace_player(old, new)
     # The new user
     user = channel.get_user(new)
+    if not user
+      announce _("there is no '%{nick}' here") % {
+        :nick => new
+      }
+      return
+    end
     if p = get_player(user)
       announce _("%{p} is already playing %{uno} here") % {
         :p => p, :uno => UNO
