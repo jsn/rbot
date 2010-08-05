@@ -756,13 +756,13 @@ class UnoGame
       announce _("there is no '%{nick}' here") % {
         :nick => new
       }
-      return
+      return false
     end
     if p = get_player(user)
       announce _("%{p} is already playing %{uno} here") % {
         :p => p, :uno => UNO
       }
-      return
+      return false
     end
     # We scan the player list of the player with the old nick, instead
     # of using get_player, in case of IRC drops etc
@@ -772,12 +772,13 @@ class UnoGame
         announce _("%{p} takes %{b}%{old}%{b}'s place at %{uno}") % {
           :p => p, :b => Bold, :old => old, :uno => UNO
         }
-        return
+        return true
       end
     end
     announce _("%{b}%{old}%{b} isn't playing %{uno} here") % {
       :uno => UNO, :b => Bold, :old => old
     }
+    return false
   end
 
   def end_game(halted = false)
