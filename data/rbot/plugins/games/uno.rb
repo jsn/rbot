@@ -544,6 +544,10 @@ class UnoGame
       }
       deal(p, @picker)
       @picker = 0
+      # make sure that if this is the "pick and pass" after a W+4,
+      # then the following player cannot do a challenge:
+      @last_discard = nil
+      @last_color = nil
     else
       if @player_has_picked
         announce _("%{p} passes turn") % { :p => p }
