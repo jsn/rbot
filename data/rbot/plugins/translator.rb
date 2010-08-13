@@ -39,6 +39,14 @@ class Translator
     @cache = cache
   end
 
+  # Many translators use Mechanize, which changed namespace around version 1.0
+  # To support both pre-1.0 and post-1.0 namespaces, we use these auxiliary
+  # method. The translator still needs to require 'mechanize' on initialization
+  # if it needs it.
+  def mechanize
+    return Mechanize if defined? Mechanize
+    return WWW::Mechanize
+  end
 
   # whether the translator supports this direction
   def support?(from, to)
@@ -113,7 +121,7 @@ class NiftyTranslator < Translator
   end
 
   def do_translate(text, from, to)
-    @form ||= WWW::Mechanize.new.
+    @form ||= mechanize.new.
               get('http://nifty.amikai.com/amitext/indexUTF8.jsp').
               forms_with(:name => 'translateForm').last
     @radio = @form.radiobuttons_with(:name => 'langpair').first
@@ -150,7 +158,7 @@ class ExciteTranslator < Translator
   end
 
   def open_form(name)
-    WWW::Mechanize.new.get("http://www.excite.co.jp/world/#{name}").
+    mechanize.new.get("http://www.excite.co.jp/world/#{name}").
                    forms_with(:name => 'world').first
   end
 
@@ -222,7 +230,7 @@ class BabelfishTranslator < Translator
   end
 
   def parse_page
-    form = WWW::Mechanize.new.get('http://babelfish.altavista.com/babelfish/').
+    form = mechanize.new.get('http://babelfish.altavista.com/babelfish/').
            forms_with(:name => 'frmTrText').first
     lang_list = form.fields_with(:name => 'lp').first
     [form, lang_list]
