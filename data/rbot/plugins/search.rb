@@ -90,7 +90,7 @@ class SearchPlugin < Plugin
       m.reply "error googling for #{what}"
       return
     end
-    results = wml.scan(GOOGLE_WAP_LINK)
+    results = wml.match('<p align="center">').pre_match.scan(GOOGLE_WAP_LINK)
 
     if results.length == 0
       m.reply "no results found for #{what}"
