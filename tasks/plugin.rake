@@ -47,7 +47,7 @@ plugin.map "#{plugin_name} [:arg]", :action => 'example'
     f << plugin_template
   end
 
-  puts "Plugin skeleton for #{class_name} written!"
+  puts "Plugin skeleton for #{class_name} written to #{file_path}!"
   puts "Now issue `rescan` on the bot and use the command `help #{plugin_name}` to see that the plugin works."
   puts
 end
