@@ -16,6 +16,7 @@ module RandomWord
 
   def self.get(count=1)
     res = Net::HTTP.post_form(URI.parse(SITE), {'numwords' => count})
+    raise _("random word generator site failed with #{res.code} - #{res.message}") unless Net::HTTPSuccess === res
     words = res.body.scan(%r{<a.*?\?w=(.*?)\n}).flatten
 
     count == 1 ? words.first : words
