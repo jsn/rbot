@@ -401,8 +401,12 @@ class AuthModule < CoreBotModule
         return _("user list : lists all the botusers")
       when "destroy"
         return _("user destroy <botuser> : destroys <botuser>. This function %{highlight}must%{highlight} be called in two steps. On the first call <botuser> is queued for destruction. On the second call, which must be in the form 'user confirm destroy <botuser>', the botuser will be destroyed. If you want to cancel the destruction, issue the command 'user cancel destroy <botuser>'") % {:highlight => Bold}
+      when "export"
+        return _("user export [to <filename>]: exports user data to file <filename> (default: new-auth.users)")
+      when "import"
+        return _("user import [from <filename>]: import user data from file <filename> (default: new-auth.users)")
       else
-        return _("user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy")
+        return _("user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, list, destroy, import, export")
       end
     when "auth"
       return _("auth <masterpassword>: log in as the bot owner; other commands: login, whoami, permissions syntax, permissions [re]set, permissions view, user, meet, hello, allow, deny")
