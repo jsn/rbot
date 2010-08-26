@@ -13,7 +13,7 @@ class DiggPlugin < Plugin
   def digg(m, params)
     max = params[:limit].to_i
     debug "max is #{max}"
-    xml = @bot.httputil.get('http://digg.com/rss/index.xml')
+    xml = @bot.httputil.get('http://services.digg.com/2.0/story.getTopNews?type=rss')
     unless xml
       m.reply "digg news unavailable"
       return
