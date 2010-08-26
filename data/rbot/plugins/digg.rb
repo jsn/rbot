@@ -15,7 +15,7 @@ class DiggPlugin < Plugin
     debug "max is #{max}"
     xml = @bot.httputil.get('http://digg.com/rss/index.xml')
     unless xml
-      m.reply "digg news parse failed"
+      m.reply "digg news unavailable"
       return
     end
     doc = Document.new xml
