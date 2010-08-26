@@ -32,7 +32,7 @@ class DiggPlugin < Plugin
     max = 8 if max > 8
     matches = Array.new
     doc.elements.each("rss/channel/item") {|e|
-      matches << [ e.elements["title"].text,
+      matches << [ e.elements["title"].text.strip,
                    Time.parse(e.elements["pubDate"].text).strftime('%a @ %I:%M%p') ]
       done += 1
       break if done >= max
