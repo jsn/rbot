@@ -19,7 +19,7 @@ GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
 GOOGLE_WAP_SEARCH = "http://www.google.com/m/search?hl=en&q="
 # GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
 GOOGLE_WAP_LINK = /<a href="(?:.*?u=(.*?)|(http:\/\/.*?))">(.*?)<\/a>/im
-GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h2 class=r[^>]*><b>(.+?)</b>}
+GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h[1-6] class=r[^>]*><b>(.+?)</b>}
 GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
 GOOGLE_DEF_RESULT = %r{<a href="([^"]*)"[^>]*>(Web definitions for .*?)<br/>(.*?)<br/>(.*?)\s-\s+<a href}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
