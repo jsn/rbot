@@ -162,13 +162,14 @@ module ::RSS
       end
     end
 
+    # Atom categories are squashed to their label only
     {
       :link => %w{link.href link},
       :guid => %w{guid.content guid},
       :content => %w{content.content content},
       :description => %w{description.content description},
       :title => %w{title.content title},
-      :category => %w{category.content category},
+      :category => %w{category.content category.label category},
       :dc_subject => %w{dc_subject},
       :author => %w{author.name.content author.name author},
       :dc_creator => %w{dc_creator}
@@ -177,7 +178,7 @@ module ::RSS
     def categories!
       return nil unless self.respond_to? :categories
       cats = categories.map do |c|
-        blank2nil { c.content rescue c rescue nil }
+        blank2nil { c.content rescue c.label rescue c rescue nil }
       end.compact
       cats.empty? ? nil : cats
     end
