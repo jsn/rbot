@@ -5,7 +5,7 @@
 #
 # Author:: Carter Parks (carterparks) <carter@carterparks.com>
 # Author:: Giuseppe "Oblomov" Bilotta <giuseppe.bilotta@gmail.com>
-# Author:: "NeoLobster" <neolobster@snugglenets.com>
+# Author:: NeoLobster <neolobster@snugglenets.com>
 #
 # Copyright:: (C) 2007 Carter Parks
 # Copyright:: (C) 2007 Giuseppe Bilotta
@@ -170,11 +170,16 @@ class TwitterPlugin < Plugin
 
   def pin(m, params)
      unless @registry.has_key?(m.sourcenick + "_request_token")
-       m.reply "You must first use twitter authorize to get the PIN"
+       m.reply "You must first use twitter authorize to get an authorization URL, which you can use to get a PIN for me to use to verify your Twitter account"
        return false
      end
      @request_token = YAML::load(@registry[m.sourcenick + "_request_token"])
-     @access_token = @request_token.get_access_token( { :oauth_verifier => params[:pin] } )
+     begin
+       @access_token = @request_token.get_access_token( { :oauth_verifier => params[:pin] } )
+     rescue
+       m.reply "Error: There was a problem registering your Twitter account. Please make sure you have the right PIN. If the problem persists, use twitter authorize again to get a new PIN"
+       return false
+     end
      @registry[m.sourcenick + "_access_token"] = YAML::dump(@access_token)
      m.reply "Okay, you're all set"
   end
