@@ -13,7 +13,12 @@
 # Users can setup their twitter username and password and then begin updating
 # twitter whenever
 
-require 'oauth'
+begin
+  require 'oauth'
+rescue LoadError
+  error "OAuth module could not be loaded, twits will not be submitted and protected twits will not be accessible"
+end
+
 require 'yaml'
 require 'rexml/rexml'
 
@@ -37,6 +42,8 @@ class TwitterPlugin < Plugin
   def initialize
     super
 
+    @has_oauth = defined? OAuth
+
     class << @registry
       def store(val)
         val
@@ -47,6 +54,10 @@ class TwitterPlugin < Plugin
     end
   end
 
+  def report_oauth_missing(m, failed_action)
+    m.reply [failed_action, "I cannot authenticate to Twitter (OAuth not available)"].join(' because ')
+  end
+
   def help(plugin, topic="")
     return "twitter status [nick] => show nick's (or your) status, use 'twitter friends status [nick]' to also show the friends' timeline | twitter update [status] => updates your status on twitter | twitter authorize => Generates an authorization URL which will give you a PIN to authorize the bot to use your twitter account. | twitter pin [pin] => Finishes bot authorization using the PIN provided by the URL from twitter authorize. | twitter deauthorize => Makes the bot forget your Twitter account. | twitter actions [on|off] => enable/disable twitting of actions (/me does ...)"
   end
@@ -54,12 +65,17 @@ class TwitterPlugin < Plugin
   # update the status on twitter
   def get_status(m, params)
     friends = params[:friends]
+
     if @registry.has_key?(m.sourcenick + "_access_token")
       @access_token = YAML::load(@registry[m.sourcenick + "_access_token"])
       nick = params[:nick] || @access_token.params[:screen_name]
     else
       if friends
-        m.reply "You are not authorized with Twitter. Please use 'twitter authorize' first to use this feature."
+        if @has_oauth
+          m.reply "You are not authorized with Twitter. Please use 'twitter authorize' first to use this feature."
+        else
+          report_oauth_missing(m, "I cannot retrieve your friends status")
+        end
         return false
       end
       nick = params[:nick]
@@ -72,7 +88,7 @@ class TwitterPlugin < Plugin
 
     count = @bot.config['twitter.friends_status_count']
     user = URI.escape(nick)
-    if @registry.has_key?(m.sourcenick + "_access_token")
+    if @has_oauth and @registry.has_key?(m.sourcenick + "_access_token")
         if friends
           #no change to count variable
           uri = "https://api.twitter.com/1/statuses/friends_timeline.xml?count=#{count}"
@@ -147,6 +163,11 @@ class TwitterPlugin < Plugin
   end
 
   def authorize(m, params)
+    unless @has_oauth
+      report_oauth_missing(m, "we can't complete the authorization process")
+      return false
+    end
+
     #remove all old authorization data
     if @registry.has_key?(m.sourcenick + "_request_token")
       @registry.delete(m.sourcenick + "_request_token")
@@ -186,6 +207,11 @@ class TwitterPlugin < Plugin
 
   # update the status on twitter
   def update_status(m, params)
+    unless @has_oauth
+      report_oauth_missing(m, "I cannot update your status")
+      return false
+    end
+
     unless @registry.has_key?(m.sourcenick + "_access_token")
        m.reply "You must first authorize your Twitter account before tweeting."
        return false;
@@ -219,7 +245,10 @@ class TwitterPlugin < Plugin
   end
 
   # update on ACTION if the user has enabled the option
+  # Possible TODO: move the has_oauth check further down and alert
+  # the user the first time we do not update because of the missing oauth
   def ctcp_listen(m)
+    return unless @has_oauth
     return unless m.action?
     return unless @registry[m.sourcenick + "_actions"]
     update_status(m, :status => m.message, :notify => true)
