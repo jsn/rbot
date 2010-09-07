@@ -66,7 +66,7 @@ class TimePlugin < Plugin
           zone =  @registry[ zone ]
           m.reply getTime( m,  zone )
         else
-          m.reply "#{zone} is an unknown time."
+          parse(m, params)
         end
       end
     else
@@ -121,6 +121,53 @@ class TimePlugin < Plugin
   def resetZone( m, user )
     @registry.delete(user)
     m.reply "Ok, I've forgotten #{user}'s timezone"
+  end
+
+  def parse(m, params)
+    require 'time'
+    str = params[:where].to_s
+    now = Time.now
+
+    begin
+      time = begin
+        Time.parse str
+      rescue ArgumentError => e
+        # Handle 28/9/1978, which is a valid date representation at least in Italy
+        if e.message == 'argument out of range'
+          str.tr!('/', '-')
+          Time.parse str
+        else
+          raise
+        end
+      end
+
+      offset = (time - now).abs
+      raise if offset < 0.1
+    rescue => e
+      m.reply _("unintelligible time")
+      return
+    end
+
+    if zone = @registry[m.sourcenick]
+      time = time.convert_zone(zone)
+    end
+
+    m.reply _("%{time} %{w} %{str}") % {
+      :time => time.strftime(_("%a, %d %b %Y %H:%M:%S %Z %z")),
+      :str  => Utils.timeago(time),
+      :w    => time >= now ? _("is") : _("was")
+    }
+  end
+end
+
+class ::Time
+  def convert_zone(to_zone)
+    original_zone = ENV["TZ"]
+    utc_time = dup.gmtime
+    ENV["TZ"] = to_zone
+    to_zone_time = utc_time.localtime
+    ENV["TZ"] = original_zone
+    return to_zone_time
   end
 end
 
