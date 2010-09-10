@@ -138,7 +138,11 @@ class TwitterPlugin < Plugin
         end
         return false
       end
-      m.reply texts.reverse.join("\n")
+      if texts.empty?
+        m.reply "No status updates!"
+      else
+        m.reply texts.reverse.join("\n")
+      end
       return true
     else
       if friends
