@@ -130,7 +130,13 @@ class TimePlugin < Plugin
 
     begin
       time = begin
-        Time.parse str
+        if zone = @registry[m.sourcenick]
+          on_timezone(zone) {
+            Time.parse str
+          }
+        else
+          Time.parse str
+        end
       rescue ArgumentError => e
         # Handle 28/9/1978, which is a valid date representation at least in Italy
         if e.message == 'argument out of range'
@@ -157,6 +163,13 @@ class TimePlugin < Plugin
       :str  => Utils.timeago(time),
       :w    => time >= now ? _("is") : _("was")
     }
+  end
+
+  def on_timezone(to_zone)
+    original_zone = ENV["TZ"]
+    ENV["TZ"] = to_zone
+    return yield
+    ENV["TZ"] = original_zone
   end
 end
 
