@@ -4,15 +4,24 @@
 # :title: Time Zone Plugin for rbot
 #
 # Author:: Ian Monroe <ian@monroe.nu>
+# Author:: Raine Virta <raine.virta@gmail.com>
 # Copyright:: (C) 2006 Ian Monroe
+# Copyright:: (C) 2010 Raine Virta
 # License:: MIT license
 
 require 'tzinfo'
 
 class TimePlugin < Plugin
-
   def help(plugin, topic="")
-  "time <time zone> to get the local time of a certain location. <time zone> can be <Continent/City> or <two character country code>. time <nick> to see the local time of that person if their time zone is set. time admin set <nick> <time zone> to set the time zone for another user. time [admin] reset [nick] to let the bot forget about the tzinfo about someone"
+    case topic
+    when "set"
+      _("usage: time set <Continent>/<City> -- setting your location allows the bot to calibrate time replies into your time zone, and other people to figure out what time it is for you")
+    else
+      _("usage: time <timestamp|time zone|nick> -- %{b}timestamp%{b}: get info about a specific time, relative to your own time zone | %{b}time zone%{b}: get local time of a certain location, <time zone> can be '<Continent>/<City>' or a two character country code | %{b}nick%{b}: get local time of another person, given they have set their location | see `%{prefix}help time set` on how to set your location") % {
+        :b => Bold,
+        :prefix => @bot.config['core.address_prefix'].first
+      }
+    end
   end
 
   def initialize
