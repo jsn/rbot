@@ -192,14 +192,19 @@ class TwitterPlugin < Plugin
       return false
     end
 
-    @consumer = OAuth::Consumer.new(key, secret, {   
+    @consumer = OAuth::Consumer.new(key, secret, {
       :site => "https://api.twitter.com",
       :request_token_path => "/oauth/request_token",
       :access_token_path => "/oauth/access_token",
       :authorize_path => "/oauth/authorize"
-      } )
-    @request_token = @consumer.get_request_token
-    @registry[m.sourcenick + "_request_token"] = YAML::dump(@request_token)        
+    } )
+    begin
+      @request_token = @consumer.get_request_token
+    rescue OAuth::Unauthorized
+      m.reply _("My authorization failed! Did you block me? Or is my Twitter Consumer Key/Secret pair incorrect?")
+      return false
+    end
+    @registry[m.sourcenick + "_request_token"] = YAML::dump(@request_token)
     m.reply "Go to this URL to get your authorization PIN, then use 'twitter pin <pin>' to finish authorization: " + @request_token.authorize_url
   end
 
