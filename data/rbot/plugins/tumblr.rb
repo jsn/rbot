@@ -20,12 +20,17 @@ require 'cgi'
 class TumblrPlugin < Plugin
   RBOT = CGI.escape("rbot #{$version.split.first}")
   WRITE_URL = "http://www.tumblr.com/api/write"
+  REBLOG_URL = "http://www.tumblr.com/api/reblog"
+  READ_URL = "http://%{user}.tumblr.com/api/read?id=%{id}"
   LOGIN = "email=%{email}&password=%{pwd}&group=%{group}&format=markdown&generator=" + RBOT
   PHOTO = "&type=photo&source=%{src}&click-through-url=%{src}"
   VIDEO = "&type=video&embed=%{src}"
   CAPTION = "&caption=%{desc}"
   LINK = "&type=link&url=%{src}"
-  DESC = "&name=%{desc}"
+  NAME = "&name=%{name}"
+  DESC = "&description=%{desc}"
+  REBLOG = "&post-id=%{id}&reblog-key=%{reblog}"
+  COMMENT = "&comment=%{desc}"
 
   def help(plugin, topic="")
     case topic
@@ -50,25 +55,65 @@ class TumblrPlugin < Plugin
     if line and nick = options[:nick]
       line = "<#{nick}> #{line}"
     end
+    html_line = line ? CGI.escapeHTML(line) : line
 
     req = LOGIN % account
-    type = options[:htmlinfo][:headers]['content-type'].first rescue nil
-    case type
-    when /^image\/.*/
-      data = PHOTO
-      data << CAPTION if line
-    else
-      if url.match(%r{^http://(\w+\.)?youtube\.com/watch.*})
-        data = VIDEO
-        data << CAPTION if line
-      else
-        data = LINK
-        data << DESC if line
+    ready = false
+    api_url = WRITE_URL
+    tumblr = options[:htmlinfo][:headers]['x-tumblr-user'].to_s rescue nil
+    if tumblr
+      id = url.match(/\/post\/(\d+)/)
+      if id
+        id = id[1]
+
+        read_url = READ_URL % { :user => tumblr, :id => id}
+        # TODO seems to return 503 a little too frequently
+        xml = @bot.httputil.get(read_url)
+
+        if xml
+          reblog = REXML::Document.new(xml).elements["//post"].attributes["reblog-key"] rescue nil
+          if reblog and not reblog.empty?
+            api_url = REBLOG_URL
+            data = REBLOG
+            data << COMMENT
+            html_line = CGI.escapeHTML("(via <a href=%{url}>%{tumblr}</a>" % {
+              :url => url, :tumblr => tmblr
+            }) unless html_line
+            req << (data % {
+              :id => id,
+              :reblog => reblog,
+              :desc => CGI.escape(htmlline)
+            })
+            ready = true
+          end
+        end
       end
     end
-    req << (data % { :src => CGI.escape(url), :desc => CGI.escape(line) })
+
+    if not ready
+      type = options[:htmlinfo][:headers]['content-type'].first rescue nil
+      case type
+      when /^image\/.*/
+        data = PHOTO
+        data << CAPTION if line
+      else
+        if url.match(%r{^http://(\w+\.)?youtube\.com/watch.*})
+          data = VIDEO
+          data << CAPTION if line
+        else
+          data = LINK
+          data << NAME if line
+        end
+      end
+      req << (data % {
+        :src => CGI.escape(url),
+        :desc => CGI.escape(html_line),
+        :name => CGI.escape(line)
+      })
+    end
+
     debug "posting #{req.inspect}"
-    resp  = @bot.httputil.post(WRITE_URL, req)
+    resp  = @bot.httputil.post(api_url, req)
     debug "tumblr response: #{resp.inspect}"
   end
 
