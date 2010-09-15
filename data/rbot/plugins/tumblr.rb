@@ -9,7 +9,7 @@
 #
 # Submit URLs to channel-specific tumblr accounts
 #
-# TODO support video better (e.g. Vimeo or anything else with embed)
+# TODO support other video providers (maybe detect embed codes?)
 # TODO support image better (e.g. pages with a single big image)
 # TODO customize caption/description format
 # TODO do not reblog own posts (maybe?)
@@ -97,7 +97,7 @@ class TumblrPlugin < Plugin
         data = PHOTO
         data << CAPTION if line
       else
-        if url.match(%r{^http://(\w+\.)?youtube\.com/watch.*})
+        if url.match(%r{^http://(\w+\.)?(youtube\.com/watch.*|vimeo.com/\d+)})
           data = VIDEO
           data << CAPTION if line
         else
