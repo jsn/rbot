@@ -9,10 +9,10 @@
 #
 # Submit URLs to channel-specific tumblr accounts
 #
-# TODO reblog tumblr URLs
 # TODO support video better (e.g. Vimeo or anything else with embed)
 # TODO support image better (e.g. pages with a single big image)
 # TODO customize caption/description format
+# TODO do not reblog own posts (maybe?)
 
 require 'rexml/document'
 require 'cgi'
