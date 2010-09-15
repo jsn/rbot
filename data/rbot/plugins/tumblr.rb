@@ -31,6 +31,7 @@ class TumblrPlugin < Plugin
   DESC = "&description=%{desc}"
   REBLOG = "&post-id=%{id}&reblog-key=%{reblog}"
   COMMENT = "&comment=%{desc}"
+  TAGS = "&tags=%{tags}"
 
   def help(plugin, topic="")
     case topic
@@ -56,6 +57,7 @@ class TumblrPlugin < Plugin
       line = "<#{nick}> #{line}"
     end
     html_line = line ? CGI.escapeHTML(line) : line
+    tags = line ? line.scan(/\[([^\]]+)\]/).flatten : []
 
     req = LOGIN % account
     ready = false
@@ -105,9 +107,11 @@ class TumblrPlugin < Plugin
           data << NAME if line
         end
       end
+      data << TAGS unless tags.empty?
       req << (data % {
         :src => CGI.escape(url),
         :desc => CGI.escape(html_line),
+        :tags => CGI.escape(tags.join(',')),
         :name => CGI.escape(line)
       })
     end
