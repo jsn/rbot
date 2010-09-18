@@ -83,7 +83,7 @@ class TimePlugin < Plugin
         zone = @registry[ m.sourcenick ]
         m.reply "#{m.sourcenick}: #{getTime( m,  zone )}"
       else
-        m.reply "#{m.sourcenick}: use time set <Continent/City> to set your timezone."
+        m.reply "#{m.sourcenick}: use time set <Continent/City> to set your time zone."
       end
     end
   end
@@ -120,16 +120,16 @@ class TimePlugin < Plugin
     begin
       getTime( m,  zone )
     rescue TZInfo::InvalidTimezoneIdentifier
-      m.reply "#{zone} is an invalid timezone. Format is Continent/City or a two character country code."
+      m.reply "#{zone} is an invalid time zone. Format is Continent/City or a two character country code."
       return
     end
     @registry[ user ] = zone
-    m.reply "Ok, I'll remember that #{user} is on the #{zone} timezone"
+    m.reply "Ok, I'll remember that #{user} is on the #{zone} time zone"
   end
 
   def resetZone( m, user )
     @registry.delete(user)
-    m.reply "Ok, I've forgotten #{user}'s timezone"
+    m.reply "Ok, I've forgotten #{user}'s time zone"
   end
 
   def parse(m, params)
