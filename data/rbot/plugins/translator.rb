@@ -433,11 +433,30 @@ class TranslatorPlugin < Plugin
       m.reply _('No translator called %{name}') % {:name => tname}
     end
   end
+
+  # URL translation has nothing to do with Translators so let's make it
+  # separate, and Google exclusive for now
+  def cmd_translate_url(m, params)
+    params[:to] = @bot.config['translator.destination'] if params[:to].nil?
+    params[:from] ||= 'auto'
+
+    translate_url = "http://translate.google.com/translate?sl=%{from}&tl=%{to}&u=%{url}" % {
+      :from => params[:from],
+      :to   => params[:to],
+      :url  => CGI.escape(params[:url].to_s)
+    }
+
+    m.reply(translate_url)
+  end
 end
 
 plugin = TranslatorPlugin.new
 req = Hash[*%w(from to).map { |e| [e.to_sym, /#{plugin.languages.join("|")}/] }.flatten]
 
+plugin.map 'translate [:from] [:to] *url',
+           :action => :cmd_translate_url, :requirements => req.merge(:url => %r{^https?://.*})
+plugin.map 'translator [:from] [:to] *url',
+           :action => :cmd_translate_url, :requirements => req.merge(:url => %r{^https?://.*})
 plugin.map 'translate [:from] [:to] *phrase',
            :action => :cmd_translator, :thread => true, :requirements => req
 plugin.map 'translator [:from] [:to] *phrase',
