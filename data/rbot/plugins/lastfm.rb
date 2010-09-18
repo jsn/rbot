@@ -337,8 +337,9 @@ class LastFmPlugin < Plugin
     end
     if xml.class == Net::HTTPBadRequest
       if doc.root.elements["error"].attributes["code"] == "6" then
-        m.reply _("%{user} doesn't exist on last.fm, perhaps they need to: lastfm user <username>") % {
-          :user => user
+        m.reply _("%{user} doesn't exist on last.fm, perhaps they need to: %{prefix}lastfm set user <username>") % {
+          :user => user,
+          :prefix => @bot.config['core.address_prefix'].first
         }
         return
       else
