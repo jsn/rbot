@@ -191,8 +191,8 @@ class Bot
     # NB this function is called _early_ in init(), pretty much all you have to
     # work with is @bot.botclass.
     def upgrade_data
+      oldreg = @bot.path 'registry.db'
       if defined? DBHash
-        oldreg = @bot.path 'registry.db'
         newreg = @bot.path 'plugin_registry.db'
         if File.exist?(oldreg)
           log _("upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format")
@@ -206,7 +206,7 @@ class Bot
           File.rename(oldreg, oldreg + ".old")
         end
       else
-        warning "Won't upgrade data: BDB not installed"
+        warning "Won't upgrade data: BDB not installed" if File.exist? oldreg
       end
     end
 
