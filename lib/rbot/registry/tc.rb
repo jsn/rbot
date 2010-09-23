@@ -212,6 +212,10 @@ class Bot
 
     def upgrade_data2
       oldreg = @bot.path 'plugin_registry.db'
+      if not defined? BDB
+        warning "Won't upgrade data: BDB not installed" if File.exist? oldreg
+        return
+      end
       newdir = @bot.path 'registry'
       if File.exist?(oldreg)
         Dir.mkdir(newdir) unless File.exist?(newdir)
