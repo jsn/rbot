@@ -235,8 +235,8 @@ class Bot
             }
           end
           unless dbs.has_key?(prefix)
-            log _("creating db #{@bot.botclass}/registry/#{prefix}.db")
-            dbs[prefix] = TokyoCabinet::CIBDB.open("#{@bot.botclass}/registry/#{prefix}.db",
+            log _("creating db #{@bot.botclass}/registry/#{prefix}.tdb")
+            dbs[prefix] = TokyoCabinet::CIBDB.open("#{@bot.botclass}/registry/#{prefix}.tdb",
              TokyoCabinet::CIBDB::OREADER | TokyoCabinet::CIBDB::OCREAT | TokyoCabinet::CIBDB::OWRITER)
           end
           dbs[prefix][key] = v
