@@ -84,7 +84,7 @@ class TumblrPlugin < Plugin
             req << (data % {
               :id => id,
               :reblog => reblog,
-              :desc => CGI.escape(htmlline)
+              :desc => CGI.escape(html_line)
             })
             ready = true
           end
