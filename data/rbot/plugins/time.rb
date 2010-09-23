@@ -83,7 +83,7 @@ class TimePlugin < Plugin
         zone = @registry[ m.sourcenick ]
         m.reply "#{m.sourcenick}: #{getTime( m,  zone )}"
       else
-        m.reply "#{m.sourcenick}: use time set <Continent/City> to set your time zone."
+        m.reply "#{m.sourcenick}: use time set <Continent>/<City> to set your time zone."
       end
     end
   end
@@ -92,7 +92,7 @@ class TimePlugin < Plugin
     if params[:where].size > 0 then
       s = setZone( m, m.sourcenick, params[:where].join('_') )
     else
-      m.reply "Requires Continent/City or country code"
+      m.reply "Requires <Continent>/<City> or country code"
     end
   end
 
@@ -104,7 +104,7 @@ class TimePlugin < Plugin
     if params[:who] and params[:where].size > 0 then
       s = setZone( m, params[:who], params[:where].join('_') )
     else
-      m.reply "Requires a nick and the Continent/City or country code"
+      m.reply "Requires a nick and the <Continent>/<City> or country code"
     end
   end
 
@@ -120,7 +120,7 @@ class TimePlugin < Plugin
     begin
       getTime( m,  zone )
     rescue TZInfo::InvalidTimezoneIdentifier
-      m.reply "#{zone} is an invalid time zone. Format is Continent/City or a two character country code."
+      m.reply "#{zone} is an invalid time zone. Format is <Continent>/<City> or a two character country code."
       return
     end
     @registry[ user ] = zone
