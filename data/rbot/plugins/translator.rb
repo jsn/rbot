@@ -453,10 +453,10 @@ end
 plugin = TranslatorPlugin.new
 req = Hash[*%w(from to).map { |e| [e.to_sym, /#{plugin.languages.join("|")}/] }.flatten]
 
-plugin.map 'translate [:from] [:to] *url',
-           :action => :cmd_translate_url, :requirements => req.merge(:url => %r{^https?://.*})
-plugin.map 'translator [:from] [:to] *url',
-           :action => :cmd_translate_url, :requirements => req.merge(:url => %r{^https?://.*})
+plugin.map 'translate [:from] [:to] :url',
+           :action => :cmd_translate_url, :requirements => req.merge(:url => %r{^https?://[^\s]*})
+plugin.map 'translator [:from] [:to] :url',
+           :action => :cmd_translate_url, :requirements => req.merge(:url => %r{^https?://[^\s]*})
 plugin.map 'translate [:from] [:to] *phrase',
            :action => :cmd_translator, :thread => true, :requirements => req
 plugin.map 'translator [:from] [:to] *phrase',
