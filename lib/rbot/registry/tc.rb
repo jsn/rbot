@@ -197,12 +197,10 @@ class Bot
         if File.exist?(oldreg)
           log _("upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format")
           old = ::BDB::Hash.open(oldreg, nil, "r+", 0600)
-          new = TokyoCabinet::CIBDB.new
-          new.open(name, TokyoCabinet::CIBDB::OREADER | TokyoCabinet::CIBDB::OCREAT | TokyoCabinet::CIBDB::OWRITER)
-          old.each_key do |k|
-            new.outlist k
-            new.putlist k, (old.duplicates(k, false))
-          end
+          new = ::BDB::CIBtree.open(newreg, nil, ::BDB::CREATE | ::BDB::EXCL, 0600)
+          old.each {|k,v|
+            new[k] = v
+          }
           old.close
           new.close
           File.rename(oldreg, oldreg + ".old")
