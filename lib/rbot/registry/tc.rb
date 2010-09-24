@@ -5,6 +5,17 @@
 
 begin
   require 'bdb'
+  if BDB::VERSION_MAJOR < 4
+    fatal "Your bdb (Berkeley DB) version #{BDB::VERSION} is too old!"
+    fatal "rbot will only run with bdb version 4 or higher, please upgrade."
+    fatal "For maximum reliability, upgrade to version 4.2 or higher."
+    raise BDB::Fatal, BDB::VERSION + " is too old"
+  end
+
+  if BDB::VERSION_MAJOR == 4 and BDB::VERSION_MINOR < 2
+    warning "Your bdb (Berkeley DB) version #{BDB::VERSION} may not be reliable."
+    warning "If possible, try upgrade version 4.2 or later."
+  end
 rescue LoadError
   warning "rbot couldn't load the bdb module. Old registries won't be upgraded"
 rescue Exception => e
@@ -12,17 +23,7 @@ rescue Exception => e
 end
 
 
-if BDB::VERSION_MAJOR < 4
-  fatal "Your bdb (Berkeley DB) version #{BDB::VERSION} is too old!"
-  fatal "rbot will only run with bdb version 4 or higher, please upgrade."
-  fatal "For maximum reliability, upgrade to version 4.2 or higher."
-  raise BDB::Fatal, BDB::VERSION + " is too old"
-end
 
-if BDB::VERSION_MAJOR == 4 and BDB::VERSION_MINOR < 2
-  warning "Your bdb (Berkeley DB) version #{BDB::VERSION} may not be reliable."
-  warning "If possible, try upgrade version 4.2 or later."
-end
 
 require 'tokyocabinet'
 
