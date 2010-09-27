@@ -29,6 +29,8 @@ require 'tokyocabinet'
 
 module Irc
 
+  class DBFatal < Exception ; end
+
   if defined? BDB
   # DBHash is for tying a hash to disk (using bdb).
   # Call it with an identifier, for example "mydata". It'll look for

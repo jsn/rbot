@@ -1017,8 +1017,8 @@ class Bot
         quit_msg = "server ERROR: " + e.message
         too_fast = e.message.index("reconnect too fast")
         retry
-      rescue BDB::Fatal => e
-        fatal "fatal bdb error: #{e.pretty_inspect}"
+      rescue DBFatal => e
+        fatal "fatal db error: #{e.pretty_inspect}"
         DBTree.stats
         # Why restart? DB problems are serious stuff ...
         # restart("Oops, we seem to have registry problems ...")

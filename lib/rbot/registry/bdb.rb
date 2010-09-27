@@ -15,6 +15,10 @@ if not defined? BDB
   exit 2
 end
 
+module Irc
+  DBFatal = BDB::Fatal
+end
+
 if BDB::VERSION_MAJOR < 4
   fatal "Your bdb (Berkeley DB) version #{BDB::VERSION} is too old!"
   fatal "rbot will only run with bdb version 4 or higher, please upgrade."
