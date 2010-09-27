@@ -159,8 +159,12 @@ class TimePlugin < Plugin
       offset = (time - now).abs
       raise if offset < 0.1
     rescue => e
-      m.reply _("unintelligible time")
-      return
+      if str.match(/^\d+$/)
+        time = Time.at(str.to_i)
+      else
+        m.reply _("unintelligible time")
+        return
+      end
     end
 
     if zone = @registry[m.sourcenick]
