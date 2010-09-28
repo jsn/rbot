@@ -90,7 +90,7 @@ class TwitterPlugin < Plugin
       return false
     end
 
-    count = @bot.config['twitter.friends_status_count']
+    count = friends ? @bot.config['twitter.friends_status_count'] : @bot.config['twitter.status_count']
     user = URI.escape(nick)
     if @has_oauth and @registry.has_key?(m.sourcenick + "_access_token")
         if friends
@@ -98,7 +98,6 @@ class TwitterPlugin < Plugin
           uri = "https://api.twitter.com/1/statuses/friends_timeline.xml?count=#{count}"
           response = @access_token.get(uri).body
         else
-          count = @bot.config['twitter.status_count']
           uri = "https://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=#{count}"
           response = @access_token.get(uri).body
         end
