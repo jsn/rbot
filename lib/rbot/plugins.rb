@@ -941,7 +941,7 @@ module Plugins
           rescue Exception => err
             raise if err.kind_of?(SystemExit)
             error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
-            raise if err.kind_of?(BDB::Fatal)
+            raise if err.kind_of?(DBFatal)
           end
         }
       else
@@ -957,7 +957,7 @@ module Plugins
             rescue Exception => err
               raise if err.kind_of?(SystemExit)
               error report_error("#{p.botmodule_class} #{p.name} #{method}() failed:", err)
-              raise if err.kind_of?(BDB::Fatal)
+              raise if err.kind_of?(DBFatal)
             end
           end
         }
@@ -987,7 +987,7 @@ module Plugins
             rescue Exception => err
               raise if err.kind_of?(SystemExit)
               error report_error("#{p.botmodule_class} #{p.name} privmsg() failed:", err)
-              raise if err.kind_of?(BDB::Fatal)
+              raise if err.kind_of?(DBFatal)
             end
             debug "Successfully delegated #{m.inspect}"
             return true
