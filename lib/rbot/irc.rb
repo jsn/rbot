@@ -1525,7 +1525,6 @@ module Irc
   class Server
 
     attr_reader :hostname, :version, :usermodes, :chanmodes
-    alias :to_s :hostname
     attr_reader :supports, :capabilities
 
     attr_reader :channels, :users
@@ -1554,6 +1553,10 @@ module Irc
       str << " @channels=#{chans}"
       str << " @users=#{users}"
       str << ">"
+    end
+
+    def to_s
+      hostname.nil? ? "<no hostname>" : hostname
     end
 
     # Create a new Server, with all instance variables reset to nil (for
