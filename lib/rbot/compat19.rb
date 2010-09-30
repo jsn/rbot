@@ -45,6 +45,8 @@ module MonitorMixin
       begin
         @cond.wait(@monitor.instance_variable_get("@mon_mutex"), timeout)
         return true
+      rescue TimeoutError
+        return false
       ensure
         @monitor.__send__(:mon_enter_for_cond, count)
       end
