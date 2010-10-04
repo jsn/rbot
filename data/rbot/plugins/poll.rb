@@ -327,12 +327,12 @@ class PollPlugin < Plugin
       outcome << " #{poll.outcome}"
     end
 
-    m.reply (to_reply % {
+    m.reply((to_reply % {
       :bold => Bold,
       :id => poll.id, :author => poll.author, :channel => poll.channel,
       :started => poll.started,
       :end => poll.ends_at
-    }) + options + outcome
+    }) + options + outcome)
   end
 
   def help(plugin,topic="")
