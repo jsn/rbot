@@ -382,7 +382,7 @@ class TranslatorPlugin < Plugin
     translator = @default_translators.find {|t| @translators[t].support?(params[:from], params[:to])}
 
     if translator
-      cmd_translate m, params.merge({:translator => translator, :show_provider => true})
+      cmd_translate m, params.merge({:translator => translator, :show_provider => false})
     else
       # When translate command is used without source language, "auto" as source
       # language is assumed. It means that google translator is used and we let google
