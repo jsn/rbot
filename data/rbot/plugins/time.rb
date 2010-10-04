@@ -181,8 +181,9 @@ class TimePlugin < Plugin
   def on_timezone(to_zone)
     original_zone = ENV["TZ"]
     ENV["TZ"] = to_zone
-    return yield
+    ret = yield
     ENV["TZ"] = original_zone
+    return ret
   end
 end
 
