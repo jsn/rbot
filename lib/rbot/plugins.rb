@@ -573,6 +573,7 @@ module Plugins
         return :loaded
       rescue Exception => err
         # rescue TimeoutError, StandardError, NameError, LoadError, SyntaxError => err
+        raise if err.kind_of? DBFatal
         error report_error("#{desc}#{fname} load failed", err)
         bt = err.backtrace.select { |line|
           line.match(/^(\(eval\)|#{fname}):\d+/)
