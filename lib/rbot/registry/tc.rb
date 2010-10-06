@@ -405,7 +405,7 @@ class Bot
     # just like Hash#each
     def each(set=nil, bulk=0, &block)
       return nil unless File.exist?(@filename)
-      registry.fwmkeys(set).each {|key|
+      registry.fwmkeys(set.to_s).each {|key|
         block.call(key, restore(registry[key]))
       }
     end
@@ -413,7 +413,7 @@ class Bot
     # just like Hash#each_key
     def each_key(set=nil, bulk=0, &block)
       return nil unless File.exist?(@filename)
-      registry.fwmkeys(set).each do |key|
+      registry.fwmkeys(set.to_s).each do |key|
         block.call(key)
       end
     end
@@ -421,7 +421,7 @@ class Bot
     # just like Hash#each_value
     def each_value(set=nil, bulk=0, &block)
       return nil unless File.exist?(@filename)
-      registry.fwmkeys(set).each do |key|
+      registry.fwmkeys(set.to_s).each do |key|
         block.call(restore(registry[key]))
       end
     end
