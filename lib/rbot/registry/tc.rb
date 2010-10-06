@@ -131,7 +131,7 @@ module Irc
       if File.exists? oldbasename and defined? BDB
         # upgrading
         warning "Upgrading old database #{oldbasename}..."
-        oldb = ::BDB::Btree.open(oldbasename, nil, "r", 0600)
+        oldb = ::BDB::CIBtree.open(oldbasename, nil, "r", 0600)
         oldb.each_key do |k|
           @db.outlist k
           @db.putlist k, (oldb.duplicates(k, false))
