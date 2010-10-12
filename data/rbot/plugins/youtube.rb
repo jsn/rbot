@@ -27,7 +27,7 @@ class YouTubePlugin < Plugin
   def youtube_filter(s)
     loc = Utils.check_location(s, /youtube\.com/)
     return nil unless loc
-    if s[:text].include? '<div id="watch-vid-title"'
+    if s[:text].include? '<link rel="alternate" type="text/xml+oembed"'
       vid = @bot.filter(:"youtube.video", s)
       return nil unless vid
       content = _("Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %{duration}. %{views} views, faved %{faves} times. %{desc}") % vid
