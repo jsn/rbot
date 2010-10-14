@@ -172,7 +172,7 @@ class SearchPlugin < Plugin
     searchfor = CGI.escape(what)
 
     debug "Getting gcalc thing: #{searchfor.inspect}"
-    url = GOOGLE_SEARCH + searchfor
+    url = GOOGLE_WAP_SEARCH + searchfor
 
     begin
       html = @bot.httputil.get(url)
@@ -183,17 +183,16 @@ class SearchPlugin < Plugin
 
     debug "#{html.size} bytes of html recieved"
 
-    results = html.scan(GOOGLE_CALC_RESULT)
-    debug "results: #{results.inspect}"
+    intro, result, junk = html.split(/\s*<br\/>\s*/, 3)
+    debug "result: #{result.inspect}"
 
-    if results.length != 1
+    unless result.include? '='
       m.reply "couldn't calculate #{what}"
       return
     end
 
-    result = results[0][0].ircify_html
     debug "replying with: #{result.inspect}"
-    m.reply "#{result}"
+    m.reply result.ircify_html
   end
 
   def gcount(m, params)
