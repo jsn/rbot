@@ -13,11 +13,12 @@
 
 class Imdb
   IMDB = "http://www.imdb.com"
-  TITLE_OR_NAME_MATCH = /<a href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
-  TITLE_MATCH = /<a href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
-  NAME_MATCH = /<a href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
-  CREDIT_NAME_MATCH = /#{NAME_MATCH}<\/td><td[^>]+> \.\.\. <\/td><td[^>]+>(.+?)<\/td>/
+  TITLE_OR_NAME_MATCH = /<a\s+href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  TITLE_MATCH = /<a\s+href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  NAME_MATCH = /<a\s+href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  CREDIT_NAME_MATCH = /#{NAME_MATCH}\s*<\/td>\s*<td[^>]+>\s*\.\.\.\s*<\/td>\s*<td[^>]+>\s*(.+?)\s*<\/td>/m
   FINAL_ARTICLE_MATCH = /, ([A-Z]\S{0,2})$/
+  DESC_MATCH = /<meta name="description" content="(.*?)\. (.*?)\. (.*?)\."\s*\/>/
 
   MATCHER = {
     :title => TITLE_MATCH,
@@ -99,7 +100,7 @@ class Imdb
   end
 
   def grab_info(info, body)
-    /<div (?:id="\S+-info" )?class="info">\s*<h5>#{info}:<\/h5>\s*(.*?)<\/div>/mi.match(body)[1] rescue nil
+    /<div (?:id="\S+-info" )?class="(?:txt-block|see-more inline canwrap)">\s*<h[45](?: class="inline")?>\s*#{info}:\s*<\/h[45]>\s*(.*?)<\/div>/mi.match(body)[1] rescue nil
   end
 
   def fix_article(org_tit)
@@ -134,13 +135,16 @@ class Imdb
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
-      title_date = m[1]
-      pre_title, date, extra = title_date.scan(/^(.*)\((\d\d\d\d(?:\/[IV]+)?)\)\s*(.+)?$/).first
+      title_date = m[1].ircify_html
+      debug title_date
+      # note that the date dash for series is a - (ndash), not a - (minus sign)
+      pre_title, extra, date, junk = title_date.scan(/^(.*)\((.+?\s+)?(\d\d\d\d(?:–(?:\d\d\d\d)?)?(?:\/[IV]+)?)\)\s*(.+)?$/).first
+      extra.strip! if extra
       pre_title.strip!
-      title = fix_article(pre_title.ircify_html)
+      title = fix_article(pre_title)
 
       dir = nil
-      data = grab_info(/Directors?/, resp.body)
+      data = grab_info(/(?:Director|Creator)s?/, resp.body)
       if data
         dir = data.scan(NAME_MATCH).map { |url, name|
           name.ircify_html
@@ -165,21 +169,24 @@ class Imdb
       end
 
       ratings = "no votes"
-      m = /<b>([0-9.]+)\/10<\/b>\n?\r?\s+[^<]+<a href="ratings"[^>]+>([0-9,]+) votes?<\/a>/.match(resp.body)
+      m = resp.body.match(/<b>([0-9.]+)<\/b><span [^>]+>\/10<\/span><\/span>\s*[^<]+<a\s+[^>]*href="ratings"[^>]+>([0-9,]+) votes?<\/a>/m)
       if m
         ratings = "#{m[1]}/10 (#{m[2]} voters)"
       end
 
       genre = Array.new
-      resp.body.scan(/<a href="\/Sections\/Genres\/[^\/]+\/">([^<]+)<\/a>/) do |gnr|
+      resp.body.scan(/<a href="\/genre\/[^"]+">([^<]+)<\/a>/) do |gnr|
         genre << gnr
       end
 
-      plot = nil
-      data = grab_info(/Plot(?: (?:Outline|Summary))?/, resp.body)
-      if data
-        plot = "Plot: " + data.ircify_html.gsub(/\s+more\s*$/,'').gsub(/\s+Full summary » \| Full synopsis »\s*$/,'')
-      end
+      plot = resp.body.match(DESC_MATCH)[3] rescue nil
+      # TODO option to extract the long storyline
+      # data = resp.body.match(/<h2>Storyline<\/h2>\s+/m).post_match.match(/<\/p>/).pre_match rescue nil
+      # if data
+      #   data.sub!(/<em class="nobr">Written by.*$/m, '')
+      #   plot = data.ircify_html.gsub(/\s+more\s*$/,'').gsub(/\s+Full summary » \| Full synopsis »\s*$/,'')
+      # end
+      plot = "Plot: #{plot}" if plot
 
       info << ["Ratings: " << ratings, "Genre: " << genre.join('/') , plot].compact.join(". ")
 
@@ -203,9 +210,9 @@ class Imdb
     if resp.code == "200"
       m = /<title>([^<]*)<\/title>/.match(resp.body)
       return nil if !m
-      name = m[1]
+      name = m[1].sub(/ - IMDb/, '')
 
-      info << "#{name}"
+      info << name
       info.last << " : http://www.imdb.com#{sr}" unless opts[:nourl]
 
       return info if opts[:name_only]
