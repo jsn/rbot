@@ -16,11 +16,13 @@ class Imdb
   TITLE_OR_NAME_MATCH = /<a\s+href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   TITLE_MATCH = /<a\s+href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   NAME_MATCH = /<a\s+href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  CHAR_MATCH = /<a\s+href="(\/character\/ch[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   CREDIT_NAME_MATCH = /#{NAME_MATCH}\s*<\/td>\s*<td[^>]+>\s*\.\.\.\s*<\/td>\s*<td[^>]+>\s*(.+?)\s*<\/td>/m
   FINAL_ARTICLE_MATCH = /, ([A-Z]\S{0,2})$/
   DESC_MATCH = /<meta name="description" content="(.*?)\. (.*?)\. (.*?)\."\s*\/>/
 
   MATCHER = {
+    :character => CHAR_MATCH,
     :title => TITLE_MATCH,
     :name => NAME_MATCH,
     :both => TITLE_OR_NAME_MATCH
@@ -53,6 +55,9 @@ class Imdb
     matcher = MATCHER[opts[:type]]
 
     if resp.code == "200"
+      if opts[:all]
+        return resp.body.scan(matcher).map { |m| m.first }.compact.uniq
+      end
       m = []
       m << matcher.match(resp.body) if @bot.config['imdb.popular']
       if resp.body.match(/\(Exact Matches\)<\/b>/) and @bot.config['imdb.exact']
@@ -364,14 +369,18 @@ class Imdb
   end
 
   def name_in_movie(name_urls, movie_urls)
+    debug name_urls
     info = []
     movie_urls.each { |movie|
       title_info = info_title(movie, :title_only => true)
       valid = []
 
       data = @bot.httputil.get(IMDB + movie + "fullcredits")
-      data.scan(CREDIT_NAME_MATCH).each { |url, name, role|
-        valid << [url, name.ircify_html, role.ircify_html] if name_urls.include?(url)
+      data.scan(CREDIT_NAME_MATCH).each { |url, name, role_data|
+        ch_url, role = role_data.scan(CHAR_MATCH).first
+        debug [ch_url, role]
+        wanted = name_urls.include?(url) || name_urls.include?(ch_url)
+        valid << [url, name.ircify_html, role.ircify_html] if wanted
       }
       valid.each { |url, name, role|
         info << "%s : %s was %s in %s" % [name, IMDB + url, role, title_info]
@@ -516,17 +525,23 @@ class ImdbPlugin < Plugin
   # Find the character played by :who in :movie
   #
   def character(m, params)
-    who = params[:who].to_s
     movie = params[:movie].to_s
-
-    name_urls = i.search(who, :type => :name)
-    unless name_urls
-      m.reply "nothing found about #{who}, sorry"
+    movie_urls = i.search(movie, :type => :title)
+    unless movie_urls
+      m.reply "movie #{who} not found, sorry"
       return
     end
 
-    movie_urls = i.search(movie, :type => :title)
-    unless movie_urls
+    if params[:actor]
+      who = params[:actor].to_s
+      type = :name
+    else
+      who = params[:character].to_s
+      type = :character
+    end
+
+    name_urls = i.search(who, :type => type, :all => true)
+    unless name_urls
       m.reply "nothing found about #{who}, sorry"
       return
     end
@@ -557,7 +572,7 @@ plugin = ImdbPlugin.new
 
 plugin.map "imdb [:type] *what", :requirements => { :type => /name|title/ }, :defaults => { :type => 'both' }
 plugin.map "movies :prefix *who in [the] :years [as :role]", :requirements => { :prefix => /with|by|from/, :years => /'?\d+s?/ }
-plugin.map "character [played] by *who in *movie"
-plugin.map "character of *who in *movie"
+plugin.map "character [played] by *actor in *movie"
+plugin.map "character of *character in *movie"
 plugin.map "characters in *movie", :action => :imdb
 
