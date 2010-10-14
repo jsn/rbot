@@ -275,10 +275,12 @@ module ::Irc
     # Execute an external program, returning a String obtained by redirecting
     # the program's standards errors and output
     #
+    # TODO: find a way to expose some common errors (e.g. Errno::NOENT)
+    # to the caller
     def Utils.safe_exec(command, *args)
-      IO.popen("-") { |p|
+      output = IO.popen("-") { |p|
         if p
-          return p.readlines.join("\n")
+          break p.readlines.join("\n")
         else
           begin
             $stderr.reopen($stdout)
@@ -291,6 +293,8 @@ module ::Irc
           Kernel::exit! 1
         end
       }
+      raise "safe execution of #{command} returned #{$?}" unless $?.success?
+      return output
     end
 
     # Try executing an external program, returning true if the run was successful
