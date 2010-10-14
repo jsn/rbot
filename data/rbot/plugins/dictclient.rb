@@ -17,6 +17,11 @@
 # requires Ruby/DICT <http://www.caliban.org/ruby/ruby-dict.shtml>
 begin
   require 'dict'
+  class ::DICTError
+    def initialize(msg, code = 1)
+      super(msg)
+    end
+  end
 rescue LoadError
   raise LoadError, "Ruby/DICT not found, grab it from http://www.caliban.org/ruby/ruby-dict.shtml"
 end
