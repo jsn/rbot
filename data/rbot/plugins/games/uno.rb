@@ -382,7 +382,7 @@ class UnoGame
   def play_card(source, cards)
     debug "Playing card #{cards}"
     p = get_player(source)
-    shorts = cards.gsub(/\s+/,'').match(/^(?:([rbgy]\+?\d){1,2}|([rbgy][rs])|(w(?:\+4)?)([rbgy])?)$/).to_a
+    shorts = cards.gsub(/\s+/,'').match(/^(?:([rbgy]\+?\d)\1|([rbgy][rs])|(w(?:\+4)?)([rbgy])?)$/).to_a
     debug shorts.inspect
     if shorts.empty?
       announce _("what cards were that again?")
