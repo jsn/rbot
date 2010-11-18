@@ -928,7 +928,7 @@ class RSSFeedsPlugin < Plugin
         debug "fetching #{feed}"
 
         first_run = !feed.last_success
-        if (@bot.config['rss.announce_timeout'] > 0 &&
+        if (!first_run && @bot.config['rss.announce_timeout'] > 0 &&
            (Time.now - feed.last_success > @bot.config['rss.announce_timeout']))
           debug "#{feed} wasn't polled for too long, supressing output"
           first_run = true
