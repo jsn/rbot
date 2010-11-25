@@ -781,15 +781,28 @@ class RSSFeedsPlugin < Plugin
     end
     case params[:what].intern
     when :handle
-      new = params[:new].downcase
-      if @feeds.key?(new) and @feeds[new]
+      # preserve rename case, but beware of key
+      realnew = params[:new]
+      new = realnew.downcase
+      if feed.handle.downcase == new
+        if feed.handle == realnew
+          m.reply _("You want me to rename %{handle} to itself?") % {
+            :handle => feed.handle
+          }
+          return false
+        else
+          feed.mutex.synchronize do
+            feed.handle = realnew
+          end
+        end
+      elsif @feeds.key?(new) and @feeds[new]
         m.reply "There already is a feed with handle #{new}"
         return
       else
         feed.mutex.synchronize do
           @feeds[new] = feed
           @feeds.delete(handle)
-          feed.handle = new
+          feed.handle = realnew
         end
         handle = new
       end
