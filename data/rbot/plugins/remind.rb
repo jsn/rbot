@@ -8,6 +8,10 @@ class RemindPlugin < Plugin
     Utils.parse_time_offset(timestr)
   end
 
+  class UnparsedPeriodError < RuntimeError ; end
+  class NegativePeriodError < RuntimeError ; end
+  class ShortRepeatError < RuntimeError ; end
+
   def initialize
     super
     @reminders = Hash.new
@@ -24,17 +28,20 @@ class RemindPlugin < Plugin
   def help(plugin, topic="")
     "reminder plugin: remind <who> [about] <message> in <time>, remind <who> [about] <message> every <time>, remind <who> [about] <message> at <time>, remind <who> no more [about] <message>, remind <who> no more. Generally <who> should be 'me', but you can remind others (nick or channel) if you have remind_others auth"
   end
-  def add_reminder(who, subject, timestr, repeat=false)
+  def add_reminder(m, who, subject, timestr, repeat=false)
     begin
       period = timestr_offset(timestr)
     rescue RuntimeError
-      return "couldn't parse that time string (#{timestr}) :("
+      raise UnparsedPeriodError
     end
+    raise NegativePeriodError if period <= 0
+    raise ShortRepeatError if period < 30 && repeat
+
     if(period <= 0)
       return "that time is in the past! (#{timestr})"
     end
     if(period < 30 && repeat)
-      return "repeats of less than 30 seconds are forbidden"
+      return
     end
     if(!@reminders.has_key?(who))
       @reminders[who] = Hash.new
@@ -53,8 +60,10 @@ class RemindPlugin < Plugin
         @bot.say who, "reminder (#{tstr}): #{subject}"
       }
     end
-    return false
+
+    m.okay
   end
+
   def del_reminder(who, subject=nil)
     if(subject)
       if(@reminders.has_key?(who) && @reminders[who].has_key?(subject))
@@ -80,33 +89,47 @@ class RemindPlugin < Plugin
     who = params.has_key?(:who) ? params[:who] : m.sourcenick
     string = params[:string].to_s
     debug "in remind, string is: #{string}"
-    if(string =~ /^(.*)\s+in\s+(.*)$/)
-      subject = $1
-      period = $2
-      if(err = add_reminder(who, subject, period))
-        m.reply "incorrect usage: " + err
-        return
+    tried = []
+
+    begin
+      if !tried.include?(:in) and string =~ /^(.*)\s+in\s+(.*)$/
+        subject = $1
+        period = $2
+        tried << :in
+        add_reminder(m, who, subject, period)
+        return true
       end
-    elsif(string =~ /^(.*)\s+every\s+(.*)$/)
-      subject = $1
-      period = $2
-      if(err = add_reminder(who, subject, period, true))
-        m.reply "incorrect usage: " + err
-        return
+
+      if !tried.include?(:every) and string =~ /^(.*)\s+every\s+(.*)$/
+        subject = $1
+        period = $2
+        tried << :every
+        add_reminder(m, who, subject, period, true)
+        return true
       end
-    elsif(string =~ /^(.*)\s+at\s+(.*)$/)
-      subject = $1
-      time = $2
-      if(err = add_reminder(who, subject, time))
-        m.reply "incorrect usage: " + err
-        return
+
+      if !tried.include?(:at) and string =~ /^(.*)\s+at\s+(.*)$/
+        subject = $1
+        time = $2
+        tried << :at
+        add_reminder(m, who, subject, time)
+        return true
       end
-    else
+
       usage(m)
-      return
+      return false
+    rescue NegativePeriodError
+      m.reply "that time is in the past! (#{timestr})"
+      return false
+    rescue ShortRepeatError
+      m.reply "repeats of less than 30 seconds are forbidden"
+      return false
+    rescue UnparsedPeriodError
+      retry
     end
-    m.okay
+
   end
+
   def no_more(m, params)
     who = params.has_key?(:who) ? params[:who] : m.sourcenick
     deleted = params.has_key?(:string) ?
