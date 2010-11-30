@@ -87,7 +87,7 @@ class ::Poll
   end
 
   def options
-    options = _("options are: ")
+    options = _("options are: ").dup
     @answers.each { |letter, info|
       options << "#{Bold}#{letter}#{NormalText}) #{info[:value]} "
     }
@@ -201,7 +201,7 @@ class PollPlugin < Plugin
     command = _("poll vote %{id} <SINGLE-LETTER>") % {
       :id => poll.id
     }
-    instructions = _("you have %{duration}, vote with ")
+    instructions = _("you have %{duration}, vote with ").dup
     instructions << _("%{priv} or %{public}")
     m.reply instructions % {
       :duration => "#{Bold}#{target_duration}#{Bold}",
