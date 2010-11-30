@@ -67,6 +67,7 @@ class ::Poll
       @voters[voter] = choice
 
       return _("recorded your vote for %{choice}: %{value}") % {
+        :choice => choice,
         :value => @answers[choice][:value]
       }
     else
