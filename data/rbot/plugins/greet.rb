@@ -24,6 +24,7 @@ class GreetPlugin < Plugin
 
 
   def join(m)
+    return if m.source == @bot.myself
     return unless @bot.config['greet.channels'].include?(m.channel.to_s)
 
     greeting = if @bot.config['greet.messages'].empty?
