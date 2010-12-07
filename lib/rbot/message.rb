@@ -72,7 +72,7 @@ module Irc
     :dark_gray  => 14,
     :lightgray  => 15,
     :light_gray => 15,
-    :white      => 16
+    :white      => 0
   }
 
   # Convert a String or Symbol into a color number
