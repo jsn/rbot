@@ -175,11 +175,11 @@ class AuthModule < CoreBotModule
       next if val.perm.empty?
       case k
       when :*
-        str << _("on any channel: ")
+        str << _("on any channel: ").dup
       when :"?"
-        str << _("in private: ")
+        str << _("in private: ").dup
       else
-        str << _("on #{k}: ")
+        str << _("on #{k}: ").dup
       end
       sub = []
       val.perm.each { |cmd, bool|
