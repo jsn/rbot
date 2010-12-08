@@ -331,10 +331,10 @@ class UnoGame
     else
       @special = false
     end
-    @must_play = nil
   end
 
   def next_turn(opts={})
+    @must_play = nil
     @players << @players.shift
     @player_has_picked = false
     show_turn unless opts[:silent]
