@@ -498,6 +498,7 @@ class UnoGame
     lp.cards.each do |c|
       if c.color == @last_color and not c.special?
         legal = false
+        break
       end
     end
     if legal
