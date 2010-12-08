@@ -220,8 +220,8 @@ class AuthModule < CoreBotModule
     auth = nil
     if cmds.has_key?(k)
       cmds[k][:botmodule].handler.each do |tmpl|
-        options, failure = tmpl.recognize(pseudo)
-        next if options.nil?
+        options = tmpl.recognize(pseudo)
+        next if options.kind_of? MessageMapper::Failure
         auth = tmpl.options[:full_auth_path]
         break
       end
