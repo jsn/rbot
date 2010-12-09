@@ -689,6 +689,13 @@ class UnoGame
         return
       end
     end
+    if @last_discard
+      announce _("you can't join now, %{p}, a %{card} was just played, wait until next turn") % {
+        :card => @discard,
+        :p => user
+      }
+      return
+    end
     cards = 7
     if @start_time
       cards = (@players.inject(0) do |s, pl|
