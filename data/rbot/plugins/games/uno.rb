@@ -605,6 +605,12 @@ class UnoGame
   end
 
   def show_turn(opts={})
+    if @players.empty?
+      announce _("nobody is playing %{uno} yet!") % {
+        :uno => UNO
+      }
+      return false
+    end
     cards = true
     cards = opts[:cards] if opts.key?(:cards)
     player = @players.first
