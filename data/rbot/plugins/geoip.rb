@@ -44,11 +44,16 @@ module ::GeoIP
     return YAML::load(yaml)
   end
 
-  def self.blogama(ip)
-    url = "http://ipinfodb.com/ip_query.php?ip="
-    debug "Requesting #{url+ip}"
+  IPINFODB_URL = "http://api.ipinfodb.com/v2/ip_query.php?key=%{key}&ip=%{ip}"
 
-    xml = Irc::Utils.bot.httputil.get(url+ip)
+  def self.ipinfodb(ip)
+    url = IPINFODB_URL % {
+      :ip => ip,
+      :key => Irc::Utils.bot.config['geoip.ipinfodb_key']
+    }
+    debug "Requesting #{url}"
+
+    xml = Irc::Utils.bot.httputil.get(url)
 
     if xml
       obj = REXML::Document.new(xml)
@@ -75,7 +80,7 @@ module ::GeoIP
     end
 
     jump_table = {
-        "blogama" => Proc.new { |ip| blogama(ip) },
+        "ipinfodb" => Proc.new { |ip| ipinfodb(ip) },
         "kapsi" => Proc.new { |ip| kapsi(ip) },
         "geoiptool" => Proc.new { |ip| geoiptool(ip) },
     }
@@ -107,8 +112,11 @@ end
 
 class GeoIpPlugin < Plugin
   Config.register Config::ArrayValue.new('geoip.sources',
-      :default => [ "blogama", "kapsi", "geoiptool" ],
-      :desc => "Which API to use for lookups. Supported values: blogama, kapsi, geoiptool")
+      :default => [ "ipinfodb", "kapsi", "geoiptool" ],
+      :desc => "Which API to use for lookups. Supported values: ipinfodb, kapsi, geoiptool")
+  Config.register Config::StringValue.new('geoip.ipinfodb_key',
+      :default => "",
+      :desc => "API key for the IPinfoDB geolocation service")
 
   def help(plugin, topic="")
     "geoip [<user|hostname|ip>] => returns the geographic location of whichever has been given -- note: user can be anyone on the network"
