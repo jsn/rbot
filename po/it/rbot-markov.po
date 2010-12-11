@@ -18,7 +18,7 @@ msgstr ""
 #: data/rbot/plugins/markov.rb:384
 msgid "markov is currently enabled, %{p}% chance of chipping in"
 msgstr ""
-"markov è attualmente attivo, con una probabilità del %{prob}% di intervenire"
+"markov è attualmente attivo, con una probabilità del %{p}% di intervenire"
 
 #: data/rbot/plugins/markov.rb:386
 msgid ", %{l} messages in queue"
@@ -112,4 +112,4 @@ msgstr "il patter non cattura nulla alle righe %{range}"
 
 #: data/rbot/plugins/markov.rb:703
 msgid "learning from the file without a pattern would learn, for example: "
-msgstr "imparare senza pattern dal file darebbe ad esempio:"
+msgstr "imparare senza pattern dal file darebbe ad esempio: "
