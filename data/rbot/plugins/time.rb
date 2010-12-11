@@ -66,25 +66,40 @@ class TimePlugin < Plugin
   end
 
   def showTime(m, params)
-    zone = params[:where].join('_')
-    if params[:where].size > 0 then
-      begin
-        m.reply getTime( m,  zone )
-      rescue TZInfo::InvalidTimezoneIdentifier
-        if @registry.has_key?( zone ) then
-          zone =  @registry[ zone ]
-          m.reply getTime( m,  zone )
-        else
-          parse(m, params)
-        end
-      end
+    nick = nil
+    zone = nil
+    speaker = false
+    case params[:where].size
+    when 0
+      nick = m.sourcenick
+      speaker = true
+    when 1
+      zone = params[:where].first
+      nick = m.channel.get_user(zone)
+      speaker = (nick == m.sourcenick)
     else
-      if @registry.has_key?( m.sourcenick) then
-        zone = @registry[ m.sourcenick ]
-        m.reply "#{m.sourcenick}: #{getTime( m,  zone )}"
+      zone = params[:where].join('_')
+    end
+
+    # now we have a non-nil nick iff we want user information
+    if nick
+      if @registry.has_key? nick
+        zone = @registry[nick]
       else
-        m.reply "#{m.sourcenick}: use time set <Continent>/<City> to set your time zone."
+        if speaker
+          msg = _("I don't know where you are, use %{pfx}time set <Continent>/<City> to let me know")
+        else
+          msg = _("I don't know where %{nick} is, (s)he should use %{pfx}time set <Continent>/<City> to let me know")
+        end
+        m.reply(msg % { :pfx => @bot.config['core.address_prefix'].first, :nick => nick })
+        return false
       end
+    end
+
+    begin
+      m.reply getTime( m,  zone )
+    rescue TZInfo::InvalidTimezoneIdentifier
+      parse(m, params)
     end
   end
 
