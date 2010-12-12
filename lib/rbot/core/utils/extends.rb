@@ -108,6 +108,17 @@ class ::Array
     self.delete_at(index)
   end
 
+  # This method deletes a given object _el_ if it's found at the given
+  # position _pos_. The position can be either an integer or a range.
+  def delete_if_at(el, pos)
+    idx = self.index(el)
+    if pos === idx
+      self.delete_at(idx)
+    else
+      nil
+    end
+  end
+
   # shuffle and shuffle! are defined in Ruby >= 1.8.7
 
   # This method returns a new array with the same items as
