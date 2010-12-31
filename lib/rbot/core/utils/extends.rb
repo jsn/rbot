@@ -510,12 +510,16 @@ module ::Irc
           new_m = o[:class].new(o[:bot], o[:server], o[:source], o[:target], string)
           new_m.recurse_depth = o[:depth]
           if from
-            # the created message will reply to the originating message
+            # the created message will reply to the originating message, but we
+            # must remember to set 'replied' on the fake message too, to
+            # prevent infinite loops that could be created for example with the reaction
+            # plugin by setting up a reaction to ping with cmd:ping
             class << new_m
               self
             end.send(:define_method, :reply) do |*args|
               debug "replying to '#{from.message}' with #{args.first}"
               from.reply(*args)
+              new_m.replied = true
             end
             # the created message will follow originating message's in_thread
             new_m.in_thread = from.in_thread if from.respond_to?(:in_thread)

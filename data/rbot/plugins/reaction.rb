@@ -238,7 +238,7 @@ class ReactionPlugin < Plugin
 
   def unreplied(m)
     return unless PrivMessage === m
-    debug "testing #{m} for reactions"
+    debug "testing #{m.inspect} for reactions"
     return if @reactions.empty?
     candidates = @reactions.map { |react|
       blob = react === m
