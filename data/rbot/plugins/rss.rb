@@ -151,6 +151,28 @@ module ::RSS
     SlashModel::ELEMENTS.collect! {|name| "#{SLASH_PREFIX}_#{name}"}
   end
 
+  if self.const_defined? :Atom
+    # There are improper Atom feeds around that use the non-standard
+    # 'modified' element instead of the correct 'updated' one. Let's
+    # support it too.
+    module Atom
+      class Feed
+        class Modified < RSS::Element
+          include CommonModel
+          include DateConstruct
+        end
+        __send__("install_have_child_element",
+                 "modified", URI, nil, "modified", :content)
+
+        class Entry
+          Modified = Feed::Modified
+          __send__("install_have_child_element",
+                   "modified", URI, nil, "modified", :content)
+        end
+      end
+    end
+  end
+
   class Element
     class << self
       def def_bang(name, chain)
