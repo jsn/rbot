@@ -1079,8 +1079,10 @@ class RSSFeedsPlugin < Plugin
 
     date = \
     if opts[:date]
-      if item.respond_to?(:updated)
+      if item.respond_to?(:updated) and item.updated
         make_date(item.updated.content)
+      elsif item.respond_to?(:modified) and item.modified
+        make_date(item.modified.content)
       elsif item.respond_to?(:source) and item.source.respond_to?(:updated)
         make_date(item.source.updated.content)
       elsif item.respond_to?(:pubDate)
