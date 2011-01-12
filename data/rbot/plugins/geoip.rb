@@ -70,6 +70,12 @@ module ::GeoIP
     end
   end
 
+  JUMP_TABLE = {
+    "ipinfodb" => Proc.new { |ip| ipinfodb(ip) },
+    "kapsi" => Proc.new { |ip| kapsi(ip) },
+    "geoiptool" => Proc.new { |ip| geoiptool(ip) },
+  }
+
   def self.resolve(hostname, api)
     raise InvalidHostError unless valid_host?(hostname)
 
@@ -79,15 +85,9 @@ module ::GeoIP
       raise InvalidHostError
     end
 
-    jump_table = {
-        "ipinfodb" => Proc.new { |ip| ipinfodb(ip) },
-        "kapsi" => Proc.new { |ip| kapsi(ip) },
-        "geoiptool" => Proc.new { |ip| geoiptool(ip) },
-    }
+    raise BadAPIError unless JUMP_TABLE.key?(api)
 
-    raise BadAPIError unless jump_table.key?(api)
-
-    return jump_table[api].call(ip)
+    return JUMP_TABLE[api].call(ip)
   end
 end
 
@@ -153,7 +153,7 @@ class GeoIpPlugin < Plugin
       if m.replyto.class == Channel
 
         # check if there is an user on the channel with nick same as input given
-        user = m.replyto.users.find { |user| user.nick == params[:input] }
+        user = m.replyto.users.find { |usr| usr.nick == params[:input] }
 
         if user
           m.reply host2output(user.host, user.nick)

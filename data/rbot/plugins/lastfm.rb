@@ -194,11 +194,11 @@ class LastFmPlugin < Plugin
     elsif venue
       begin
         venues = search_venue_by(:name => venue.to_s, :limit => 1)
-      rescue Exception => e
-        error e
+      rescue Exception => err
+        error err
         m.reply _("an error occurred looking for venue %{venue}: %{e}") % {
           :venue => venue.to_s,
-          :e => e.message
+          :e => err.message
         }
       end
 
@@ -453,11 +453,11 @@ class LastFmPlugin < Plugin
     if results > 0
       begin
         hits = []
-        doc.root.each_element("results/trackmatches/track") do |track|
+        doc.root.each_element("results/trackmatches/track") do |trck|
           hits << _("%{bold}%{t}%{bold} by %{bold}%{a}%{bold} (%{n} listeners)") % {
-            :t => track.elements["name"].text,
-            :a => track.elements["artist"].text,
-            :n => track.elements["listeners"].text,
+            :t => trck.elements["name"].text,
+            :a => trck.elements["artist"].text,
+            :n => trck.elements["listeners"].text,
             :bold => Bold
           }
         end
@@ -608,8 +608,8 @@ class LastFmPlugin < Plugin
     begin
       res = @bot.httputil.get_response(uri)
       raise _("no response body") unless res.body
-    rescue Exception => e
-        m.reply _("I had problems accessing last.fm: %{e}") % {:e => e.message}
+    rescue Exception => err
+        m.reply _("I had problems accessing last.fm: %{e}") % {:e => err.message}
         return
     end
     doc = Document.new(res.body)

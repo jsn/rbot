@@ -75,9 +75,9 @@ class SlashdotPlugin < Plugin
     debug xml.inspect
     begin
       doc = Document.new xml
-    rescue REXML::ParseException => e
-      warning e.inspect
-      m.reply "couldn't parse output XML: #{e.class}"
+    rescue REXML::ParseException => err
+      warning err.inspect
+      m.reply "couldn't parse output XML: #{err.class}"
       return
     end
     unless doc

@@ -34,7 +34,7 @@ class UrbanPlugin < Plugin
     return m.reply("#{Bold}#{word}#{Bold} not found") if rv.empty?
 
     if notfound
-      suggestions = rv.map { |s| Underline + s[1] + Underline }.uniq.join ', '
+      suggestions = rv.map { |str| Underline + str[1] + Underline }.uniq.join ', '
       m.reply "#{Bold}#{word}#{Bold} not found. maybe you mean #{suggestions}?"
       return
     end

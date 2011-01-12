@@ -90,8 +90,8 @@ class Bot
       #
       def initialize(cmd)
         cmdpath = sanitize_command_path(cmd).split('::')
-        seq = cmdpath.inject(["*"]) { |list, cmd|
-          list << (list.length > 1 ? list.last + "::" : "") + cmd
+        seq = cmdpath.inject(["*"]) { |list, cc|
+          list << (list.length > 1 ? list.last + "::" : "") + cc
         }
         @path = seq.map { |k|
           k.to_sym

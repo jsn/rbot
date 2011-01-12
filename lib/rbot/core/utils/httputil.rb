@@ -531,8 +531,6 @@ class HttpUtil
       :method => :GET
     }.merge(options)
 
-    resp = nil
-
     req_class = case opts[:method].to_s.downcase.intern
                 when :head, :"net::http::head"
                   opts[:max_redir] = -1

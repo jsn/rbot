@@ -309,8 +309,8 @@ class Imdb
       }
     end
 
-    urls.map { |url|
-      info = info_name(url, :movies_by_year => true)
+    urls.map { |u|
+      info = info_name(u, :movies_by_year => true)
 
       debug info.inspect
 

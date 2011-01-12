@@ -772,9 +772,9 @@ class UnoGame
       }
       return false
     end
-    if p = get_player(user)
+    if pl = get_player(user)
       announce _("%{p} is already playing %{uno} here") % {
-        :p => p, :uno => UNO
+        :p => pl, :uno => UNO
       }
       return false
     end
@@ -831,12 +831,12 @@ class UnoGame
       deal(p, @picker)
       @picker = 0
     end
-    score = @players.inject(0) do |sum, p|
-      if p.cards.length > 0
+    score = @players.inject(0) do |sum, pl|
+      if pl.cards.length > 0
         announce _("%{p} still had %{cards}") % {
-          :p => p, :cards => p.cards.join(' ')
+          :p => pl, :cards => pl.cards.join(' ')
         }
-        sum += p.cards.inject(0) do |cs, c|
+        sum += pl.cards.inject(0) do |cs, c|
           cs += c.score
         end
       end

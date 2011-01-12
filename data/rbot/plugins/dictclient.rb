@@ -91,7 +91,7 @@ class DictClientPlugin < Plugin
   # the DICT object is automatically disconnected. the return value of the block
   # is returned from this method.
   # if an IRC message argument is passed, the error message will be replied
-  def with_dict(m=nil &block)
+  def with_dict(m=nil, &block)
     server, port = @bot.config['dictclient.server'].split ':' if @bot.config['dictclient.server']
     server ||= 'dict.org'
     port ||= DICT::DEFAULT_PORT
@@ -159,7 +159,7 @@ class DictClientPlugin < Plugin
       if results
         results.collect {|database, matches|
           @bot.config['dictclient.match_format'].gsub(
-            '<matches>', matches.collect {|m| format_headword m}.join(', ')
+            '<matches>', matches.collect {|hit| format_headword hit}.join(', ')
           ).gsub(
             '<database>', format_database(database)
           )

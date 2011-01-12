@@ -65,7 +65,7 @@ class FactoidsPlugin < Plugin
     def index(f)
       fact = f.to_s
       return if fact.empty?
-      self.map { |f| f[:fact] }.index(fact)
+      self.map { |fs| fs[:fact] }.index(fact)
     end
 
     def delete(f)

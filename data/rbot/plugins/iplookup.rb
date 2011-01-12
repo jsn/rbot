@@ -116,12 +116,12 @@ module ArinWhois
     def get_parsed_data
       return unless chunks = parse_chunks
 
-      results = split_array_at(parse_chunks) {|chunk|chunk.customer?}
-      results.map do |chunks|
+      results = split_array_at(chunks) {|chunk|chunk.customer?}
+      results.map do |data|
         {
-          :customer => chunks.select{|x|x.customer?}[0],
-          :net      => chunks.select{|x|x.network?}[0],
-          :contacts => chunks.select{|x|x.contact?}
+          :customer => data.select{|x|x.customer?}[0],
+          :net      => data.select{|x|x.network?}[0],
+          :contacts => data.select{|x|x.contact?}
         }
       end
     end

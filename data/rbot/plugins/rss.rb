@@ -935,8 +935,8 @@ class RSSFeedsPlugin < Plugin
       stop_watches
 
       # Read watches from list.
-      watchlist.each{ |handle, feed|
-        watchRss(feed, m)
+      watchlist.each{ |hndl, fd|
+        watchRss(fd, m)
       }
       m.okay if m
     end

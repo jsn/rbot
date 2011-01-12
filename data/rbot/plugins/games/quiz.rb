@@ -285,8 +285,10 @@ class QuizPlugin < Plugin
       jokers = q.registry[nick].jokers
 
       rank = 0
-      q.rank_table.each_index { |rank| break if nick.downcase == q.rank_table[rank][0].downcase }
-      rank += 1
+      q.rank_table.each do |place|
+        rank += 1
+        break if nick.downcase == place[0].downcase
+      end
 
       m.reply "#{nick}'s score is: #{score}    Rank: #{rank}    Jokers: #{jokers}"
     else
@@ -313,45 +315,41 @@ class QuizPlugin < Plugin
       stats = q.registry[nick]
 
       # Find player in table
-      found_player = false
-      i = 0
-      q.rank_table.each_index do |i|
-        if nick.downcase == q.rank_table[i][0].downcase
-          found_player = true
+      old_rank = nil
+      q.rank_table.each_with_index do |place, i|
+        if nick.downcase == place[0].downcase
+          old_rank = i
           break
         end
       end
 
       # Remove player from old position
-      if found_player
-        old_rank = i
-        q.rank_table.delete_at( i )
-      else
-        old_rank = nil
+      if old_rank
+        q.rank_table.delete_at( old_rank )
       end
 
       # Insert player at new position
-      inserted = false
-      q.rank_table.each_index do |i|
-        if stats.score > q.rank_table[i][1].score
+      new_rank = nil
+      q.rank_table.each_with_index do |place, i|
+        if stats.score > place[1].score
           q.rank_table[i,0] = [[nick, stats]]
-          inserted = true
+          new_rank = i
           break
         end
       end
 
       # If less than all other players' scores, append to table
-      unless inserted
-        i += 1 unless q.rank_table.empty?
+      unless new_rank
+        new_rank = q.rank_table.length
         q.rank_table << [nick, stats]
       end
 
       # Print congratulations/condolences if the player's rank has changed
-      unless old_rank.nil?
-        if i < old_rank
-          m.reply "#{nick} ascends to rank #{i + 1}. Congratulations :)"
-        elsif i > old_rank
-          m.reply "#{nick} slides down to rank #{i + 1}. So Sorry! NOT. :p"
+      if old_rank
+        if new_rank < old_rank
+          m.reply "#{nick} ascends to rank #{new_rank + 1}. Congratulations :)"
+        elsif new_rank > old_rank
+          m.reply "#{nick} slides down to rank #{new_rank + 1}. So Sorry! NOT. :p"
         end
       end
     else

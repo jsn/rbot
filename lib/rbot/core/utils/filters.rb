@@ -177,10 +177,10 @@ module ::Irc
         def load_filters(options={})
           case options[:path]
           when nil
-            file = "#{self.dirname}.rb"
+            us = "#{self.dirname}.rb"
             paths = [
-              File.join(Config::datadir, 'filters', file),
-              @bot.path('filters', file)
+              File.join(Config::datadir, 'filters', us),
+              @bot.path('filters', us)
             ]
           when Array
             paths = options[:path]

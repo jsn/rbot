@@ -14,10 +14,10 @@ class Wordlist
     @@wordlist_base ||= Utils.bot.path 'wordlists'
   end
 
-  def self.get(path, options={})
+  def self.get(where, options={})
     opts = { :spaces => false }.merge(options)
 
-    wordlist_path = File.join(wordlist_base, path)
+    wordlist_path = File.join(wordlist_base, where)
     raise "wordlist not found: #{wordlist_path}" unless File.exist?(wordlist_path)
 
     # Location is a directory -> combine all lists beneath it
