@@ -18,7 +18,9 @@ end
   require 'gettext/version'
 
   gettext_version = GetText::VERSION.split('.').map {|n| n.to_i}
-  include Comparable # for Array#>=
+  class ::Array
+    include Comparable # for Array#>=
+  end
   unless gettext_version >= [1, 8, 0]
     raise GetTextVersionError, "Unsupported ruby-gettext version installed: #{gettext_version.join '.'}; supported versions are 1.8.0 and above"
   end
