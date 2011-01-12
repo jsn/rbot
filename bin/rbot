@@ -89,18 +89,18 @@ if File.directory? "#{defaultlib}/rbot"
     $:.unshift defaultlib
   end
 end
-  
+
 begin
+  # ruby 1.9 specific fixes
+  unless RUBY_VERSION < '1.9'
+    require 'rbot/compat19'
+  end
+
   require 'rbot/ircbot'
 rescue LoadError => e
   puts "Error: couldn't find the rbot/ircbot module (or one of its dependencies)\n"
   puts e
   exit 2
-end
-
-# ruby 1.9 specific fixes
-unless RUBY_VERSION < '1.9'
-  require 'rbot/compat19'
 end
 
 if ($opts["version"])
