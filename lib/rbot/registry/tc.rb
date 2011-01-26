@@ -146,19 +146,43 @@ module Irc
       return @db.send(method, *args, &block)
     end
 
+    # Since TokyoCabinet does not have the concept of an environment, we have to do the
+    # database management ourselves. In particular, we have to keep a list of open
+    # registries to be sure we to close all of them on exit
+    @@bot_registries={ }
+    def self.close_bot_registries
+      @@bot_registries.each { |name, reg| reg.close }
+      @@bot_registries.clear
+    end
+
     def DBTree.create_db(name)
       debug "DBTree: creating empty db #{name}"
+      if @@bot_registries.key? name
+        error "DBTree: creating assumingly allocated db #{name}?!"
+        return @@bot_registries[name]
+      end
       db = TokyoCabinet::CIBDB.new
       res = db.open(name, TokyoCabinet::CIBDB::OREADER | TokyoCabinet::CIBDB::OCREAT | TokyoCabinet::CIBDB::OWRITER)
-       warning "DBTree: creating empty db #{name}: #{db.errmsg(db.ecode) unless res}"
+      if res
+        @@bot_registries[name] = db
+      else
+        error "DBTree: creating empty db #{name}: #{db.errmsg(db.ecode)}"
+      end
       return db
     end
 
     def DBTree.open_db(name)
       debug "DBTree: opening existing db #{name}"
+      if @@bot_registries.key? name
+        return @@bot_registries[name]
+      end
       db = TokyoCabinet::CIBDB.new
       res = db.open(name, TokyoCabinet::CIBDB::OREADER | TokyoCabinet::CIBDB::OWRITER)
-       warning "DBTree:opening db #{name}: #{db.errmsg(db.ecode) unless res}"
+      if res
+        @@bot_registries[name] = db
+      else
+        error "DBTree: opening db #{name}: #{db.errmsg(db.ecode)}"
+      end
       return db
     end
 
@@ -171,7 +195,7 @@ module Irc
     end
 
     def DBTree.cleanup_env()
-      # no-op
+      DBTree.close_bot_registries
     end
 
   end
