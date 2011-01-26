@@ -71,6 +71,11 @@ class WeatherPlugin < Plugin
   Config.register Config::BooleanValue.new('weather.advisory',
     :default => true,
     :desc => "Should the bot report special weather advisories when any is present?")
+  Config.register Config::EnumValue.new('weather.units',
+    :values => ['metric', 'english', 'both'],
+    :default => 'both',
+    :desc => "Units to be used by default in Weather Underground reports")
+
 
   def help(plugin, topic="")
     case topic
@@ -125,15 +130,14 @@ class WeatherPlugin < Plugin
     end
 
     wu_units = String.new
-    if units
-      case units.to_sym
-      when :english, :metric
-        wu_units = "_#{units}"
-      when :both
-      else
-        m.reply "Ignoring unknown units #{units}"
-        wu_units = String.new
-      end
+
+    units ||= @bot.config['weather.units']
+    case units.to_sym
+    when :english, :metric
+      wu_units = "_#{units}"
+    when :both
+    else
+      m.reply "Ignoring unknown units #{units}"
     end
 
     case service
