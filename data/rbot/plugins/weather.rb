@@ -98,32 +98,19 @@ class WeatherPlugin < Plugin
   end
 
   def weather(m, params)
-    if params[:where].empty?
-      if @registry.has_key?(m.sourcenick)
-        where = @registry[m.sourcenick]
-        debug "Loaded weather info #{where.inspect} for #{m.sourcenick}"
+    where = params[:where].to_s
+    service = params[:service].to_sym rescue nil
+    units = params[:units]
 
-        service = where.first.to_sym
-        loc = where[1].to_s
-        units = params[:units] || where[2] rescue nil
-      else
-        debug "No weather info for #{m.sourcenick}"
-        m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
-        return
-      end
-    else
-      where = params[:where]
-      if ['nws','station'].include?(where.first)
-        service = where.first.to_sym
-        loc = where[1].to_s
-      else
-        service = :wu
-        loc = where.to_s
-      end
-      units = params[:units]
+    if where.empty? or !service or !units and @registry.has_key?(m.sourcenick)
+      reg = @registry[m.sourcenick]
+      debug "loaded weather info #{reg.inspect} for #{m.sourcenick}"
+      service = reg.first.to_sym if !service
+      where = reg[1].to_s if where.empty?
+      units = reg[2] rescue nil
     end
 
-    if loc.empty?
+    if where.empty?
       debug "No weather location found for #{m.sourcenick}"
       m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
       return
@@ -131,8 +118,7 @@ class WeatherPlugin < Plugin
 
     wu_units = String.new
 
-    units ||= @bot.config['weather.units']
-    case units.to_sym
+    case (units || @bot.config['weather.units']).to_sym
     when :english, :metric
       wu_units = "_#{units}"
     when :both
@@ -142,14 +128,19 @@ class WeatherPlugin < Plugin
 
     case service
     when :nws
-      nws_describe(m, loc)
+      nws_describe(m, where)
     when :station
-      wu_station(m, loc, wu_units)
+      wu_station(m, where, wu_units)
     when :wu
-      wu_weather(m, loc, wu_units)
+      wu_weather(m, where, wu_units)
+    when :google
+      google_weather(m, where)
+    else
+      m.reply "I don't know the weather service #{service}, sorry"
+      return
     end
 
-    @registry[m.sourcenick] = [service, loc, units]
+    @registry[m.sourcenick] = [service, where, units]
   end
 
   def nws_describe(m, where)
@@ -291,7 +282,94 @@ class WeatherPlugin < Plugin
     }
     return result.join('; ')
   end
+
+  # TODO allow units choice other than lang, find how the API does it
+  def google_weather(m, where)
+    botlang = @bot.config['core.language'].intern
+    if Language::Lang2Locale.key?(botlang)
+      lang = Language::Lang2Locale[botlang].sub(/.UTF.?8$/,'')
+    else
+      lang = botlang.to_s[0,2]
+    end
+
+    debug "Google weather with language #{lang}"
+    xml = @bot.httputil.get("http://www.google.com/ig/api?hl=#{lang}&weather=#{CGI.escape where}")
+    debug xml
+    weather = REXML::Document.new(xml).root.elements["weather"]
+    begin
+      error = weather.elements["problem_cause"]
+      if error
+        ermsg = error.attributes["data"]
+        ermsg = _("no reason specified") if ermsg.empty?
+        raise ermsg
+      end
+      city = weather.elements["forecast_information/city"].attributes["data"]
+      date = Time.parse(weather.elements["forecast_information/current_date_time"].attributes["data"])
+      units = weather.elements["forecast_information/unit_system"].attributes["data"].intern
+      current_conditions = weather.elements["current_conditions"]
+      foreconds = weather.elements.to_a("forecast_conditions")
+
+      conds = []
+      current_conditions.each { |el|
+        name = el.name.intern
+        value = el.attributes["data"].dup
+        debug [name, value]
+        case name
+        when :icon
+          next
+        when :temp_f
+          next if units == :SI
+          value << "°F"
+        when :temp_c
+          next if units == :US
+          value << "°C"
+        end
+        conds << value
+      }
+
+      forecasts = []
+      foreconds.each { |forecast|
+        cond = []
+        forecast.each { |el|
+          name = el.name.intern
+          value = el.attributes["data"]
+          case name
+          when :icon
+            next
+          when :high, :low
+            value << (units == :SI ? "°C" : "°F")
+            value << " |" if name == :low
+          when :condition
+            value = "(#{value})"
+          end
+          cond << value
+        }
+        forecasts << cond.join(' ')
+      }
+
+      m.reply _("Google weather info for %{city} on %{date}: %{conds}. Three-day forecast: %{forecast}") % {
+        :city => city,
+        :date => date,
+        :conds => conds.join(', '),
+        :forecast => forecasts.join('; ')
+      }
+    rescue => e
+      debug e
+      m.reply _("Google weather failed: %{e}") % { :e => e}
+    end
+
+  end
+
 end
 
 plugin = WeatherPlugin.new
-plugin.map 'weather :units *where', :defaults => {:where => false, :units => false}, :requirements => {:units => /metric|english|both/}
+plugin.map 'weather :units :service *where',
+  :defaults => {
+    :where => false,
+    :units => false,
+    :service => false
+  },
+  :requirements => {
+    :units => /metric|english|both/,
+    :service => /wu|nws|station|google/
+  }
