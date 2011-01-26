@@ -341,7 +341,7 @@ class ::String
   # This method will strip all HTML crud from the receiver
   #
   def riphtml
-    self.gsub(/<[^>]+>/, '').gsub(/&amp;/,'&').gsub(/&quot;/,'"').gsub(/&lt;/,'<').gsub(/&gt;/,'>').gsub(/&ellip;/,'...').gsub(/&apos;/, "'").gsub("\n",'')
+    Utils.decode_html_entities(self.gsub("\n",' ').gsub(/<\s*br\s*\/?\s*>/, ' ').gsub(/<[^>]+>/, '')).gsub(/\s+/,' ')
   end
 
   # This method tries to find an HTML title in the string,
