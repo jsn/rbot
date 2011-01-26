@@ -23,6 +23,7 @@ rescue LoadError
     'raquo' => '»',
     'quot' => '"',
     'apos' => '\'',
+    'deg' => '°',
     'micro' => 'µ',
     'copy' => '©',
     'trade' => '™',
