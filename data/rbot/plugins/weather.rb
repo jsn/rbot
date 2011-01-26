@@ -223,18 +223,6 @@ class WeatherPlugin < Plugin
     end
   end
 
-  def wu_clean(stuff)
-    txt = stuff
-    txt.gsub!(/[\n\s]+/,' ')
-    txt.gsub!(/&nbsp;/, ' ')
-    txt.gsub!(/&#176;/, ' ') # degree sign
-    txt.gsub!(/<\/?b>/,'')
-    txt.gsub!(/<\/?span[^<>]*?>/,'')
-    txt.gsub!(/<img\s*[^<>]*?>/,'')
-    txt.gsub!(/<br\s?\/?>/,'')
-    txt
-  end
-
   def wu_weather_multi(m, xml)
     # debug xml
     stations = xml.scan(/<td>\s*(?:<a href="([^?"]+\?feature=[^"]+)"\s*[^>]*><img [^>]+><\/a>\s*)?<a href="\/(?:global\/stations|US\/(\w\w))\/([^"]*?)\.html">(.*?)<\/a>\s*:\s*(.*?)<\/td>/m)
@@ -247,9 +235,9 @@ class WeatherPlugin < Plugin
       par = ar[3]
       w = ar[4]
       if state # US station
-        (warning ? "*" : "") + ("%s, %s (%s): %s" % [loc, state, par, wu_clean(w)])
+        (warning ? "*" : "") + ("%s, %s (%s): %s" % [loc, state, par, w.ircify_html])
       else # non-US station
-        (warning ? "*" : "") + ("station %s (%s): %s" % [loc, par, wu_clean(w)])
+        (warning ? "*" : "") + ("station %s (%s): %s" % [loc, par, w.ircify_html])
       end
     }
     m.reply stations.join("; ")
@@ -289,17 +277,17 @@ class WeatherPlugin < Plugin
   end
 
   def wu_weather_filter(stuff)
-    txt = wu_clean(stuff)
-
     result = Array.new
-    if txt.match(/<\/a>\s*Updated:\s*(.*?)\s*Observed at\s*(.*?)\s*<\/td>/)
-      result << ("Weather info for %s (updated on %s)" % [$2, $1])
+    if stuff.match(/<\/a>\s*Updated:\s*(.*?)\s*Observed at\s*(.*?)\s*<\/td>/)
+      result << ("Weather info for %s (updated on %s)" % [$2.ircify_html, $1.ircify_html])
     end
-    txt.scan(/<tr>\s*<td>\s*(.*?)\s*<\/td>\s*<td>\s*(.*?)\s*<\/td>\s*<\/tr>/) { |k, v|
-      next if v.empty?
-      next if ["-", "- approx.", "N/A", "N/A approx."].include?(v)
-      next if k == "Raw METAR"
-      result << ("%s: %s" % [k, v])
+    stuff.scan(/<tr>\s*<td>\s*(.*?)\s*<\/td>\s*<td>\s*(.*?)\s*<\/td>\s*<\/tr>/m) { |k, v|
+      kk = k.riphtml
+      vv = v.riphtml
+      next if vv.empty?
+      next if ["-", "- approx.", "N/A", "N/A approx."].include?(vv)
+      next if kk == "Raw METAR"
+      result << ("%s: %s" % [kk, vv])
     }
     return result.join('; ')
   end
