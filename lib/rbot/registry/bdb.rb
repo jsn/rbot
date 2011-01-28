@@ -146,6 +146,10 @@ module Irc
     end
 
     def DBTree.cleanup_logs()
+      if @@env.nil?
+        debug "No BDB environment, skipping checkpoint"
+        return
+      end
       begin
         debug "DBTree: checkpointing ..."
         @@env.checkpoint
@@ -166,6 +170,10 @@ module Irc
     end
 
     def DBTree.stats()
+      if @@env.nil?
+        debug "No BDB environment, no stats"
+        return
+      end
       begin
         debug "General stats:"
         debug @@env.stat
@@ -181,6 +189,10 @@ module Irc
     end
 
     def DBTree.cleanup_env()
+      if @@env.nil?
+        debug "No BDB environment, skipping cleanup"
+        return
+      end
       begin
         debug "DBTree: checking transactions ..."
         has_active_txn = @@env.txn_stat["st_nactive"] > 0
