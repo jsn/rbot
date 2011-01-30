@@ -110,6 +110,14 @@ class WeatherPlugin < Plugin
       units = reg[2] rescue nil
     end
 
+    if !service
+      if where.sub!(/^station\s+/,'')
+        service = :nws
+      else
+        service = :wu
+      end
+    end
+
     if where.empty?
       debug "No weather location found for #{m.sourcenick}"
       m.reply "I don't know where you are yet, #{m.sourcenick}. See 'help weather nws' or 'help weather wu' for additional help"
