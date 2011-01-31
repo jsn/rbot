@@ -6,7 +6,7 @@
 begin
   require 'bdb'
 rescue LoadError
-  fatal "rbot couldn't load the bdb module, perhaps you need to install it? try: http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb"
+  fatal "rbot couldn't load the bdb module, perhaps you need to install it? try http://www.ruby-lang.org/en/raa-list.rhtml?name=bdb or http://github.com/knu/ruby-bdb"
 rescue Exception => e
   fatal "rbot couldn't load the bdb module: #{e.pretty_inspect}"
 end

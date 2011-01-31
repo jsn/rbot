@@ -186,14 +186,14 @@ class Bot
   attr_reader :socket
 
   # bot's object registry, plugins get an interface to this for persistant
-  # storage (hash interface tied to a bdb file, plugins use Accessors to store
+  # storage (hash interface tied to a db file, plugins use Accessors to store
   # and restore objects in their own namespaces.)
   attr_reader :registry
 
   # bot's plugins. This is an instance of class Plugins
   attr_reader :plugins
 
-  # bot's httputil help object, for fetching resources via http. Sets up
+  # bot's httputil helper object, for fetching resources via http. Sets up
   # proxies etc as defined by the bot configuration/environment
   attr_accessor :httputil
 
@@ -491,11 +491,12 @@ class Bot
     if @config['core.run_as_daemon']
       $daemonize = true
     end
+
     case @config["core.db"]
       when "bdb"
         require 'rbot/registry/bdb'
       when "tc"
-         require 'rbot/registry/tc'
+        require 'rbot/registry/tc'
       else
         raise _("Unknown DB adaptor: %s") % @config["core.db"]
     end

@@ -331,7 +331,7 @@ class RSSFeedsPlugin < Plugin
     :desc => "Whether to display links from the text of a feed item.")
 
   # Make an  'unique' ID for a given item, based on appropriate bot options
-  # Currently only suppored is bot.config['rss.show_updated']: when false,
+  # Currently only supported is bot.config['rss.show_updated']: when false,
   # only the guid/link is accounted for.
 
   def make_uid(item)
