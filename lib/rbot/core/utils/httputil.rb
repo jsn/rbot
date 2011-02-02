@@ -14,8 +14,18 @@ require 'iconv'
 begin
   require 'net/https'
 rescue LoadError => e
-  error "Couldn't load 'net/https':  #{e.pretty_inspect}"
+  error "Couldn't load 'net/https':  #{e}"
   error "Secured HTTP connections will fail"
+  # give a nicer error than "undefined method `use_ssl='"
+  ::Net::HTTP.class_eval <<-EOC
+    define_method :use_ssl= do |val|
+      # does anybody really set it to false?
+      break if !val
+      raise _("I can't do secure HTTP, sorry (%{msg})") % {
+        :msg => e.message
+      }
+    end
+  EOC
 end
 
 # To handle Gzipped pages
