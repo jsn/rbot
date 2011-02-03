@@ -258,13 +258,17 @@ class QuizPlugin < Plugin
 
 
   # Returns new Quiz instance for channel, or existing one
+  # Announce errors if a message is passed as second parameter
   #
-  def create_quiz( channel )
+  def create_quiz(channel, m=nil)
     unless @quizzes.has_key?( channel )
       @quizzes[channel] = Quiz.new( channel, @registry )
     end
 
     if @quizzes[channel].has_errors
+      m.reply _("Sorry, the quiz database for %{chan} seems to be corrupt") % {
+        :chan => channel
+      } if m
       return nil
     else
       return @quizzes[channel]
@@ -274,11 +278,8 @@ class QuizPlugin < Plugin
 
   def say_score( m, nick )
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     if q.registry.has_key?( nick )
       score = q.registry[nick].score
@@ -460,11 +461,8 @@ class QuizPlugin < Plugin
       end
     end
 
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     if q.question
       m.reply "#{Bold}#{Color}03Current question: #{Color}#{Bold}#{q.question}"
@@ -608,11 +606,8 @@ class QuizPlugin < Plugin
   def cmd_joker( m, params )
     chan = m.channel
     nick = m.sourcenick.to_s
-    q = create_quiz(chan)
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz(chan, m)
+    return unless q
 
     if q.question == nil
       m.reply "#{nick}: There is no open question."
@@ -658,11 +653,8 @@ class QuizPlugin < Plugin
 
   def cmd_top5( m, params )
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     if q.rank_table.empty?
       m.reply "There are no scores known yet!"
@@ -684,11 +676,8 @@ class QuizPlugin < Plugin
     num = params[:number].to_i
     return if num < 1 or num > 50
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     if q.rank_table.empty?
       m.reply "There are no scores known yet!"
@@ -729,11 +718,8 @@ class QuizPlugin < Plugin
 
   def cmd_autoask( m, params )
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     params[:enable] ||= 'status'
 
@@ -757,11 +743,8 @@ class QuizPlugin < Plugin
 
   def cmd_autoask_delay( m, params )
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     delay = params[:time].to_i
     q.registry_conf["autoask_delay"] = delay
@@ -770,11 +753,8 @@ class QuizPlugin < Plugin
 
   def cmd_transfer( m, params )
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     debug q.rank_table.inspect
 
@@ -833,11 +813,8 @@ class QuizPlugin < Plugin
 
   def cmd_del_player( m, params )
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     debug q.rank_table.inspect
 
@@ -874,11 +851,9 @@ class QuizPlugin < Plugin
 
   def cmd_set_score(m, params)
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
+
     debug q.rank_table.inspect
 
     nick = params[:nick]
@@ -897,11 +872,9 @@ class QuizPlugin < Plugin
 
   def cmd_set_jokers(m, params)
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
+
     debug q.rank_table.inspect
 
     nick = params[:nick]
@@ -919,11 +892,8 @@ class QuizPlugin < Plugin
 
   def cmd_cleanup(m, params)
     chan = m.channel
-    q = create_quiz( chan )
-    if q.nil?
-      m.reply "Sorry, the quiz database for #{chan} seems to be corrupt"
-      return
-    end
+    q = create_quiz( chan, m )
+    return unless q
 
     null_players = []
     q.registry.each { |nick, player|
