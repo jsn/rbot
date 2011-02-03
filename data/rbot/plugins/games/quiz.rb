@@ -175,6 +175,22 @@ class QuizPlugin < Plugin
     @ask_mutex = Mutex.new
   end
 
+  def cleanup
+    @ask_mutex.synchronize do
+      # purge all waiting timers
+      @waiting.each do |chan, t|
+        @bot.timer.remove t.first
+        @bot.say chan, _("stopped quiz timer")
+      end
+      @waiting.clear
+    end
+    chans = @quizzes.keys
+    @quizzes.clear
+    chans.each do |chan|
+      @bot.say chan, _("quiz stopped")
+    end
+  end
+
   # Function that returns whether a char is a "separator", used for hints
   #
   def is_sep( ch )
