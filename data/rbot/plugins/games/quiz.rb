@@ -735,6 +735,8 @@ class QuizPlugin < Plugin
       return
     end
 
+    params[:enable] ||= 'status'
+
     case params[:enable].downcase
     when "on", "true"
       q.registry_conf["autoask"] = true
@@ -743,8 +745,13 @@ class QuizPlugin < Plugin
     when "off", "false"
       q.registry_conf["autoask"] = false
       m.reply "Disabled autoask mode."
+    when "status"
+      m.reply _("Autoask is %{status}, the delay is %{time}") % {
+        :status => q.registry_conf["autoask"],
+        :time => Utils.secs_to_string(q.registry_conf["autoask_delay"]),
+      }
     else
-      m.reply "Invalid autoask parameter. Use 'on' or 'off'."
+      m.reply "Invalid autoask parameter. Use 'on' or 'off' to set it, 'status' to check the current status."
     end
   end
 
@@ -760,7 +767,6 @@ class QuizPlugin < Plugin
     q.registry_conf["autoask_delay"] = delay
     m.reply "Autoask delay now #{q.registry_conf['autoask_delay']} seconds"
   end
-
 
   def cmd_transfer( m, params )
     chan = m.channel
@@ -967,7 +973,7 @@ plugin.map 'quiz stats',            :action => 'cmd_stats'
 plugin.map 'quiz stop', :action => :stop
 
 # Admin commands
-plugin.map 'quiz autoask :enable',  :action => 'cmd_autoask', :auth_path => 'edit'
+plugin.map 'quiz autoask [:enable]',  :action => 'cmd_autoask', :auth_path => 'edit'
 plugin.map 'quiz autoask delay :time',  :action => 'cmd_autoask_delay', :auth_path => 'edit', :requirements => {:time => /\d+/}
 plugin.map 'quiz transfer :source :dest :score :jokers', :action => 'cmd_transfer', :auth_path => 'edit', :defaults => {:score => '-1', :jokers => '-1'}
 plugin.map 'quiz deleteplayer :nick', :action => 'cmd_del_player', :auth_path => 'edit'
