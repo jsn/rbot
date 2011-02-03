@@ -731,19 +731,26 @@ class QuizPlugin < Plugin
 
     params[:enable] ||= 'status'
 
+    reg = q.registry_conf
+
     case params[:enable].downcase
     when "on", "true"
-      q.registry_conf["autoask"] = true
+      reg["autoask"] = true
       m.reply "Enabled autoask mode."
+      reg["autoask_delay"] = 0 unless reg.has_key("autoask_delay")
       cmd_quiz( m, nil ) if q.question == nil
     when "off", "false"
-      q.registry_conf["autoask"] = false
+      reg["autoask"] = false
       m.reply "Disabled autoask mode."
     when "status"
-      m.reply _("Autoask is %{status}, the delay is %{time}") % {
-        :status => q.registry_conf["autoask"],
-        :time => Utils.secs_to_string(q.registry_conf["autoask_delay"]),
-      }
+      if reg.has_key? "autoask"
+        m.reply _("autoask is %{status}, the delay is %{time}") % {
+          :status => reg["autoask"],
+          :time => Utils.secs_to_string(reg["autoask_delay"]),
+        }
+      else
+        m.reply _("autoask is not configured here")
+      end
     else
       m.reply "Invalid autoask parameter. Use 'on' or 'off' to set it, 'status' to check the current status."
     end
@@ -756,7 +763,7 @@ class QuizPlugin < Plugin
 
     delay = params[:time].to_i
     q.registry_conf["autoask_delay"] = delay
-    m.reply "Autoask delay now #{q.registry_conf['autoask_delay']} seconds"
+    m.reply "autoask delay now #{q.registry_conf['autoask_delay']} seconds"
   end
 
   def cmd_transfer( m, params )
