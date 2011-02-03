@@ -302,8 +302,8 @@ class QuizPlugin < Plugin
     if topic == "admin"
       _("Quiz game aministration commands (requires authentication): ") + [
         _("'quiz autoask <on/off>' => enable/disable autoask mode"),
-        _("'quiz autoask delay <secs>' => delay next quiz by <secs> seconds when in autoask mode"),
-        _("'quiz autoskip <on/off>' => enable/disable autoskip mode (autoskip implies instant autoask)"),
+        _("'quiz autoask delay <time>' => delay next quiz by <time> when in autoask mode"),
+        _("'quiz autoskip <on/off>' => enable/disable autoskip mode (autoskip implies autoask)"),
         _("'quiz autoskip delay <time>' => wait <time> before skipping to next quiz when in autoskip mode"),
         _("'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points and [jokers] jokers from <source> to <dest> (default is entire score and all jokers)"),
         _("'quiz setscore <player> <score>' => set <player>'s score to <score>"),
@@ -368,6 +368,23 @@ class QuizPlugin < Plugin
     end
   end
 
+
+  def setup_ask_timer(m, q)
+    chan = m.channel
+    delay = q.registry_conf["autoask_delay"]
+    if delay > 0
+      m.reply "#{Bold}#{Color}03Next question in #{Bold}#{delay}#{Bold} seconds"
+      timer = @bot.timer.add_once(delay) {
+        @ask_mutex.synchronize do
+        @waiting.delete(chan)
+        end
+      cmd_quiz( m, nil)
+      }
+      @waiting[chan] = [timer, :ask]
+    else
+      cmd_quiz( m, nil )
+    end
+  end
 
   # Reimplemented from Plugin
   #
@@ -436,23 +453,8 @@ class QuizPlugin < Plugin
 
       q.question = nil
 
-      # autoskip implies autoask with 0 delay TODO customize?
-      if q.registry_conf['autoskip']
-        cmd_quiz(m, nil)
-      elsif q.registry_conf["autoask"]
-        delay = q.registry_conf["autoask_delay"]
-        if delay > 0
-          m.reply "#{Bold}#{Color}03Next question in #{Bold}#{delay}#{Bold} seconds"
-          timer = @bot.timer.add_once(delay) {
-            @ask_mutex.synchronize do
-              @waiting.delete(chan)
-            end
-            cmd_quiz( m, nil)
-          }
-          @waiting[chan] = [timer, :ask]
-        else
-          cmd_quiz( m, nil )
-        end
+      if q.registry_conf['autoskip'] or q.registry_conf["autoask"]
+        setup_ask_timer(m, q)
       end
     else
       # First try is used, and it wasn't the answer.
@@ -556,7 +558,7 @@ class QuizPlugin < Plugin
         @ask_mutex.synchronize do
           @waiting.delete(chan)
         end
-        cmd_quiz(m, nil)
+        setup_ask_timer(m, q)
       end
       @waiting[chan] = [timer, :skip]
     end
@@ -806,7 +808,25 @@ class QuizPlugin < Plugin
     q = create_quiz( chan, m )
     return unless q
 
-    delay = params[:time].to_i
+    time = params[:time].to_s
+    if time =~ /^-?\d+$/
+      delay = time.to_i
+    else
+      begin
+        delay = Utils.parse_time_offset(time)
+      rescue RuntimeError
+        m.reply _("I couldn't understand that delay expression, sorry")
+        return
+      end
+    end
+
+    if delay < 0
+      m.reply _("wait, you want me to ask the next question %{abs} BEFORE the previous one gets solved?") % {
+        :abs => Utils.secs_to_string(-delay)
+      }
+      return
+    end
+
     q.registry_conf["autoask_delay"] = delay
     m.reply "autoask delay now #{q.registry_conf['autoask_delay']} seconds"
   end
@@ -827,7 +847,8 @@ class QuizPlugin < Plugin
       m.reply "Enabled autoskip mode."
       # default: 1 minute (TODO customize with a global config key)
       reg["autoskip_delay"] = 60 unless reg.has_key("autoskip_delay")
-      cmd_quiz( m, nil ) if q.question == nil
+      # also set a default autoask delay
+      reg["autoask_delay"] = 0 unless reg.has_key("autoask_delay")
     when "off", "false"
       reg["autoskip"] = false
       m.reply "Disabled autoskip mode."
@@ -1070,7 +1091,7 @@ plugin.map 'quiz stop', :action => :stop
 
 # Admin commands
 plugin.map 'quiz autoask [:enable]',  :action => 'cmd_autoask', :auth_path => 'edit'
-plugin.map 'quiz autoask delay :time',  :action => 'cmd_autoask_delay', :auth_path => 'edit', :requirements => {:time => /\d+/}
+plugin.map 'quiz autoask delay *time',  :action => 'cmd_autoask_delay', :auth_path => 'edit'
 plugin.map 'quiz autoskip [:enable]',  :action => 'cmd_autoskip', :auth_path => 'edit'
 plugin.map 'quiz autoskip delay *time',  :action => 'cmd_autoskip_delay', :auth_path => 'edit'
 plugin.map 'quiz transfer :source :dest :score :jokers', :action => 'cmd_transfer', :auth_path => 'edit', :defaults => {:score => '-1', :jokers => '-1'}
