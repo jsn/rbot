@@ -649,7 +649,7 @@ class AuthModule < CoreBotModule
     if !nick
       # we are actually responding to a 'hello' command
       unless m.botuser.transient?
-        m.reply @bot.lang.get('hello_X') % m.botuser
+        m.reply @bot.lang.get('hello_X') % m.botuser, :nick => false
         return
       end
       nick = m.sourcenick
@@ -668,7 +668,7 @@ class AuthModule < CoreBotModule
       met = @bot.auth.make_permanent(irc_user, buname)
       @bot.auth.set_changed
       call_event(:botuser,:post_perm, {:irc_user => irc_user, :bot_user => buname})
-      m.reply @bot.lang.get('hello_X') % met
+      m.reply @bot.lang.get('hello_X') % met, :nick => false
       @bot.say nick, _("you are now registered as %{buname}. I created a random password for you : %{pass} and you can change it at any time by telling me 'user set password <password>' in private" % {
         :buname => buname,
         :pass => met.password
