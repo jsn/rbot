@@ -92,18 +92,15 @@ class TwitterPlugin < Plugin
 
     count = friends ? @bot.config['twitter.friends_status_count'] : @bot.config['twitter.status_count']
     user = URI.escape(nick)
+    # receive the public timeline per default (this works even without an access_token)
+    uri = "https://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=#{count}&include_rts=true"
     if @has_oauth and @registry.has_key?(m.sourcenick + "_access_token")
         if friends
           #no change to count variable
-          uri = "https://api.twitter.com/1/statuses/friends_timeline.xml?count=#{count}"
-          response = @access_token.get(uri).body
-        else
-          uri = "https://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=#{count}"
-          response = @access_token.get(uri).body
+          uri = "https://api.twitter.com/1/statuses/friends_timeline.xml?count=#{count}&include_rts=true"
         end
+        response = @access_token.get(uri).body
     else
-       #unauthorized user, will try to get from public timeline the old way
-       uri = "http://twitter.com/statuses/user_timeline/#{user}.xml?count=#{count}"
        response = @bot.httputil.get(uri, :cache => false)
     end
     debug response
