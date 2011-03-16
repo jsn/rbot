@@ -33,6 +33,7 @@ rescue LoadError
     'gt' => '>',
     'hellip' => '…',
     'nbsp' => ' ',
+    'ndash' => '–',
     'Agrave' => 'À',
     'Aacute' => 'Á',
     'Acirc' => 'Â',
