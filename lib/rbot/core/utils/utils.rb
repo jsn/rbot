@@ -338,11 +338,21 @@ module ::Irc
     # Decode HTML entities in the String _str_, using HTMLEntities if the
     # package was found, or UNESCAPE_TABLE otherwise.
     #
-    def Utils.decode_html_entities(str)
-      if defined? ::HTMLEntities
-        return HTMLEntities.decode_entities(str)
+
+    if defined? ::HTMLEntities
+      if ::HTMLEntities.respond_to? :decode_entities
+        def Utils.decode_html_entities(str)
+          return HTMLEntities.decode_entities(str)
+        end
       else
-        str.gsub(/(&(.+?);)/) {
+        @@html_entities = HTMLEntities.new
+        def Utils.decode_html_entities(str)
+          return @@html_entities.decode str
+        end
+      end
+    else
+      def Utils.decode_html_entities(str)
+        return str.gsub(/(&(.+?);)/) {
           symbol = $2
           # remove the 0-paddng from unicode integers
           if symbol =~ /^#(\d+)$/
