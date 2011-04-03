@@ -984,8 +984,8 @@ class Bot
   def mainloop
     while true
       too_fast = false
+      quit_msg = nil
       begin
-        quit_msg = nil
         reconnect(quit_msg, too_fast)
         quit if $interrupted > 0
         while @socket.connected?
