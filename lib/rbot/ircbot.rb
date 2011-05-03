@@ -732,6 +732,11 @@ class Bot
       m = WhoisMessage.new(self, server, source, target, data[:whois])
       @plugins.delegate "whois", m
     }
+    @client[:list] = proc {|data|
+      source = data[:source]
+      m = ListMessage.new(self, server, source, source, data[:list])
+      @plugins.delegate "irclist", m
+    }
     @client[:join] = proc {|data|
       m = JoinMessage.new(self, server, data[:source], data[:channel], data[:message])
       sendq("MODE #{data[:channel]}", nil, 0) if m.address?

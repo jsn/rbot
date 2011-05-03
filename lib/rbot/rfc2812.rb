@@ -946,6 +946,9 @@ module Irc
   ERR_NOSERVICEHOST=492
   RPL_DATASTR=290
 
+  # A structure to hold LIST data, in the Irc namespace
+  ListData = Struct.new :channel, :users, :topic
+
   # Implements RFC 2812 and prior IRC RFCs.
   #
   # Clients should register Proc{}s to handle the various server events, and
@@ -1344,6 +1347,18 @@ module Irc
 
             @whois[:channels] << [chan, modes]
           end
+        when RPL_LISTSTART
+          # ignore
+        when RPL_LIST
+          @list ||= Hash.new
+          chan = argv[1]
+          users = argv[2]
+          topic = argv[3]
+          @list[chan] = ListData.new(chan, users, topic)
+        when RPL_LISTEND
+          @list ||= Hash.new
+          data[:list] = @list
+          handle(:list, data)
         when RPL_CHANNELMODEIS
           parse_mode(serverstring, argv[1..-1], data)
           handle(:mode, data)

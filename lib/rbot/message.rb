@@ -612,6 +612,21 @@ module Irc
     end
   end
 
+  # class to manage LIST replies
+  class ListMessage < BasicUserMessage
+    attr_accessor :list
+    def initialize(bot, server, source, target, list=Hash.new)
+      super(bot, server, source, target, "")
+      @list = []
+    end
+
+    def inspect
+      fields = ' list=' << list.inspect
+      super(fields)
+    end
+  end
+
+
   # class to manage NAME replies
   class NamesMessage < BasicUserMessage
     attr_accessor :users
