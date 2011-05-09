@@ -211,7 +211,7 @@ class WeatherPlugin < Plugin
           m.reply "couldn't parse weather data from #{where}"
         end
         wu_out_special(m, xml)
-      when /<a href="\/(?:global\/stations|US\/\w\w)\//
+      when /<a href="\/auto\/mobile[^\/]+\/(?:global\/stations|[A-Z][A-Z])\//
         wu_weather_multi(m, xml)
       else
         debug xml
@@ -224,7 +224,7 @@ class WeatherPlugin < Plugin
 
   def wu_weather_multi(m, xml)
     # debug xml
-    stations = xml.scan(/<td>\s*(?:<a href="([^?"]+\?feature=[^"]+)"\s*[^>]*><img [^>]+><\/a>\s*)?<a href="\/(?:global\/stations|US\/(\w\w))\/([^"]*?)\.html">(.*?)<\/a>\s*:\s*(.*?)<\/td>/m)
+    stations = xml.scan(/<td>\s*(?:<a href="([^?"]+\?feature=[^"]+)"\s*[^>]*><img [^>]+><\/a>\s*)?<a href="\/auto\/mobile[^\/]+\/(?:global\/stations|([A-Z][A-Z]))\/([^"]*?)\.html">(.*?)<\/a>\s*:\s*(.*?)<\/td>/m)
     # debug stations
     m.reply "multiple stations available, use 'weather station <code>' or 'weather <city, state>' as appropriate, for one of the following (current temp shown):"
     stations.map! { |ar|
