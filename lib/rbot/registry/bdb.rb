@@ -36,7 +36,7 @@ module BDB
   class CIBtree < Btree
     def bdb_bt_compare(a, b)
       if a == nil || b == nil
-        warning "CIBTree: comparing #{a.inspect} (#{self[a].inspect}) with #{b.inspect} (#{self[b].inspect})"
+        warning "CIBTree: comparing key #{a.inspect} with #{b.inspect}"
       end
       (a||'').downcase <=> (b||'').downcase
     end
