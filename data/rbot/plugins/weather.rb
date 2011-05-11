@@ -17,7 +17,7 @@ require 'rexml/document'
 class CurrentConditions
     def initialize(station)
         @station = station
-        @url = "http://www.nws.noaa.gov/data/current_obs/#{@station.upcase}.xml"
+        @url = "http://www.nws.noaa.gov/data/current_obs/#{URI.encode @station.upcase}.xml"
         @etag = String.new
         @mtime = Time.mktime(0)
         @current_conditions = String.new
