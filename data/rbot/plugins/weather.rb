@@ -48,16 +48,22 @@ class CurrentConditions
         cc_doc.elements.each do |c|
             cc[c.name.to_sym] = c.text
         end
-        "At #{cc[:observation_time_rfc822]}, the wind was #{cc[:wind_string]} at #{cc[:location]} (#{cc[:station_id]}). The temperature was #{cc[:temperature_string]}#{heat_index_or_wind_chill(cc)}, and the pressure was #{cc[:pressure_string]}. The relative humidity was #{cc[:relative_humidity]}%. Current conditions are #{cc[:weather]} with #{cc[:visibility_mi]}mi visibility."
+        cc[:time] = cc[:observation_time_rfc822]
+        cc[:wind] = cc[:wind_string]
+        cc[:temperature] = cc[:temperature_string]
+        cc[:heatindexorwindchill] = heat_index_or_wind_chill(cc)
+        cc[:pressure] = cc[:pressure_string]
+
+        _("At %{time} the conditions at %{location} (%{station_id}) were %{weather} with a visibility of %{visibility_mi}mi. The wind was %{wind} with %{relative_humidity}%% relative humidity. The temperature was %{temperature}%{heatindexorwindchill}, and the pressure was %{pressure}.") % cc
     end
 private
     def heat_index_or_wind_chill(cc)
         hi = cc[:heat_index_string]
         wc = cc[:windchill_string]
-        if hi != 'NA' then
-            " with a heat index of #{hi}"
-        elsif wc != 'NA' then
-            " with a windchill of #{wc}"
+        if hi and hi != 'NA' then
+            _(" with a heat index of %{hi}") % { :hi => hi }
+        elsif wc and wc != 'NA' then
+            _(" with a windchill of %{wc}") % { :wc => wc }
         else
             ""
         end
