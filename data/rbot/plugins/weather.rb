@@ -15,35 +15,33 @@ require 'rexml/document'
 
 # Wraps NOAA National Weather Service information
 class CurrentConditions
+  @@bot = Irc::Utils.bot
     def initialize(station)
         @station = station
         @url = "http://www.nws.noaa.gov/data/current_obs/#{URI.encode @station.upcase}.xml"
-        @etag = String.new
-        @mtime = Time.mktime(0)
         @current_conditions = String.new
-        @iscached = false
     end
     def update
-        begin
-            open(@url,"If-Modified-Since" => @mtime.rfc2822) do |feed|
-            # open(@url,"If-None-Match"=>@etag) do |feed|
-                @etag = feed.meta['etag']
-                @mtime = feed.last_modified
-                cc_doc = (REXML::Document.new feed).root
-                @iscached = false
-                @current_conditions = parse(cc_doc)
-            end
-        rescue OpenURI::HTTPError => e
-            case e
-            when /304/
-                @iscached = true
-            when /404/
-                raise "Data for #{@station} not found"
-            else
-                raise "Error retrieving data: #{e}"
-            end
+      begin
+        resp = @@bot.httputil.get_response(@url)
+        case resp
+        when Net::HTTPSuccess
+          cc_doc = (REXML::Document.new resp.body).root
+          @current_conditions = parse(cc_doc)
+        else
+          raise Net::HTTPError.new(_("couldn't get data for %{station} (%{message})") % {
+            :station => @station, :message => resp.message
+          }, resp)
         end
-        @current_conditions # +" Cached? "+ ((@iscached) ? "Y" : "N")
+      rescue => e
+        if Net::HTTPError === e
+          raise
+        else
+          error e
+          raise "error retrieving data: #{e}"
+        end
+      end
+      @current_conditions
     end
     def parse(cc_doc)
         cc = Hash.new
@@ -161,6 +159,9 @@ class WeatherPlugin < Plugin
       begin
         m.reply met.update
         @nws_cache[where] = met
+      rescue Net::HTTPError => e
+        m.reply _("%{error}, will try WU service") % { :error => e.message }
+        wu_weather(m, where)
       rescue => e
         m.reply e.message
       end
@@ -169,7 +170,7 @@ class WeatherPlugin < Plugin
     end
   end
 
-  def wu_station(m, where, units)
+  def wu_station(m, where, units="")
     begin
       xml = @bot.httputil.get(@wu_station_url % [units, CGI.escape(where)])
       case xml
@@ -192,7 +193,7 @@ class WeatherPlugin < Plugin
     end
   end
 
-  def wu_weather(m, where, units)
+  def wu_weather(m, where, units="")
     begin
       xml = @bot.httputil.get(@wu_url % [units, CGI.escape(where)])
       case xml
