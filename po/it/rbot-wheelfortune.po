@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2008-06-30 10:58+0200\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -115,8 +116,8 @@ msgid ""
 "answer don't fit in one line, add the answer separately with \"wof %{chan} "
 "answer <answer>\""
 msgstr ""
-"ok, la partita è stata creata. ora aggiungi indizi e risposte con \"wof %"
-"{chan} [category: <categoria>,] clue: <indizio>, answer: <risp>\". se "
+"ok, la partita è stata creata. ora aggiungi indizi e risposte con \"wof "
+"%{chan} [category: <categoria>,] clue: <indizio>, answer: <risp>\". se "
 "indizio e risposta non rientrano in un rigo, aggiungi la risposta "
 "separatamente con \"wof %{chan} answer <risposta>\""
 
@@ -143,18 +144,18 @@ msgstr "ok, indizio aggiunto per %{name} round %{count} su %{chan}: %{catclue}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:320
 msgid ""
-"there's already a pending clue for %{name} round %{count} on %{chan}: %"
-"{catclue}"
+"there's already a pending clue for %{name} round %{count} on %{chan}: "
+"%{catclue}"
 msgstr ""
-"c'è già un indizio incompleto per %{name} round %{count} su %{chan}: %"
-"{catclue}"
+"c'è già un indizio incompleto per %{name} round %{count} su %{chan}: "
+"%{catclue}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:333
 msgid ""
 "ok, QA added for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
 msgstr ""
-"ok, domanda e risposta aggiuna per %{name} round %{count} su %{chan}: %"
-"{catclue} => %{ans}"
+"ok, domanda e risposta aggiuna per %{name} round %{count} su %{chan}: "
+"%{catclue} => %{ans}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:335
 msgid "there's no pending clue for %{name} on %{chan}!"
@@ -176,8 +177,8 @@ msgstr "non ci sono domande sostituibili per la partita di %{name} su %{chan}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:380
 msgid ""
-"you can only replace questions between rounds %{min} and %{max} in the %"
-"{name} game on %{chan}"
+"you can only replace questions between rounds %{min} and %{max} in the "
+"%{name} game on %{chan}"
 msgstr ""
 "puoi sostituire le domande solo per i round dal %{min} al %{max} nella "
 "partita di %{name} su %{chan}"
@@ -186,8 +187,8 @@ msgstr ""
 msgid ""
 "ok, replaced QA for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
 msgstr ""
-"ok, ho sostituito domanda e risposta per %{name} round %{count} su %{chan}: %"
-"{catclue} => %{ans}"
+"ok, ho sostituito domanda e risposta per %{name} round %{count} su %{chan}: "
+"%{catclue} => %{ans}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:435
 #: data/rbot/plugins/games/wheelfortune.rb:542
@@ -216,12 +217,12 @@ msgstr "%{who} ha indovinato! La risposta era: %{ans}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:495
 msgid ""
-"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %"
-"{count} rounds!\n"
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after "
+"%{count} rounds!\n"
 "The final score is"
 msgstr ""
-"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}vince%{bold} dopo %"
-"{count} round!\n"
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}vince%{bold} dopo "
+"%{count} round!\n"
 "Il punteggio finale è"
 
 #: data/rbot/plugins/games/wheelfortune.rb:506

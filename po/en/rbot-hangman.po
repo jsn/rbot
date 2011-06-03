@@ -6,109 +6,121 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
 "PO-Revision-Date: 2009-03-01 23:50+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: data/rbot/plugins/games/hangman.rb:245
-msgid "hangman game plugin - topics: play, stop"
-msgstr ""
-
-#: data/rbot/plugins/games/hangman.rb:247
+#: data/rbot/plugins/games/hangman.rb:246
 msgid ""
 "hangman play on <channel> with word <word> => use in private chat with the "
 "bot to start a game with custom word\n"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:248
+#: data/rbot/plugins/games/hangman.rb:247
 msgid ""
 "hangman play random [with [max|min] length [<|>|== <length>]] => hangman "
 "with a random word from %{site}\n"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:249
+#: data/rbot/plugins/games/hangman.rb:248
 msgid ""
 "hangman play with wordlist <wordlist> => hangman with random word from "
 "<wordlist>"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:251
+#: data/rbot/plugins/games/hangman.rb:250
 msgid "hangman stop => quits the current game"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:253
-msgid "define => seeks a definition for the previous answer using google"
+#: data/rbot/plugins/games/hangman.rb:252
+msgid ""
+"hangman define => seeks a definition for the previous answer using google"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:264
+#: data/rbot/plugins/games/hangman.rb:254
+msgid "hangman game plugin - topics: play, stop, define"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:265
 msgid "no such wordlist"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:285
+#: data/rbot/plugins/games/hangman.rb:286
 msgid "suitable word not found in the set"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:311
+#: data/rbot/plugins/games/hangman.rb:312
 msgid "i'm not on that channel"
 msgstr "i'm not on that channel"
 
-#: data/rbot/plugins/games/hangman.rb:316
+#: data/rbot/plugins/games/hangman.rb:317
 msgid "there's already a hangman game in progress on the channel"
 msgstr "there's already a hangman game in progress on the channel"
 
-#: data/rbot/plugins/games/hangman.rb:320
+#: data/rbot/plugins/games/hangman.rb:321
 msgid "%{nick} has started a hangman -- join the fun!"
 msgstr "%{nick} has started a hangman -- join the fun!"
 
-#: data/rbot/plugins/games/hangman.rb:344
+#: data/rbot/plugins/games/hangman.rb:345
 msgid "oh well, the answer would've been %{answer}"
 msgstr "oh well, the answer would've been %{answer}"
 
-#: data/rbot/plugins/games/hangman.rb:351
+#: data/rbot/plugins/games/hangman.rb:352
 msgid "no ongoing game"
 msgstr "no ongoing game"
 
-#: data/rbot/plugins/games/hangman.rb:369
+#: data/rbot/plugins/games/hangman.rb:370
 msgid "you nailed it!"
 msgstr "you nailed it!"
 
-#: data/rbot/plugins/games/hangman.rb:371
+#: data/rbot/plugins/games/hangman.rb:372
 msgid "you've killed the poor guy :("
 msgstr "you've killed the poor guy :("
 
-#: data/rbot/plugins/games/hangman.rb:374
+#: data/rbot/plugins/games/hangman.rb:375
 msgid "go %{b}again%{b}?"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:391
+#: data/rbot/plugins/games/hangman.rb:392
 msgid "%{sentence} %{again} %{scores}"
 msgstr ""
 
-#: data/rbot/plugins/games/hangman.rb:396
-msgid "wondering what that means? try ´%{prefix}define´"
+#: data/rbot/plugins/games/hangman.rb:397
+#, fuzzy
+msgid "wondering what that means? try ´%{prefix}hangman define´"
 msgstr "wondering what that means? try ´%{prefix}define´"
 
-#: data/rbot/plugins/games/hangman.rb:439
+#: data/rbot/plugins/games/hangman.rb:440
 msgid "you got %{score} points after %{games} games"
 msgstr "you got %{score} points after %{games} games"
 
-#: data/rbot/plugins/games/hangman.rb:444
+#: data/rbot/plugins/games/hangman.rb:445
 msgid "you haven't played hangman, how about playing it right now? :)"
 msgstr "you haven't played hangman, how about playing it right now? :)"
 
-#: data/rbot/plugins/games/hangman.rb:453
+#: data/rbot/plugins/games/hangman.rb:454
 msgid "%{nick} has %{score} points after %{games} games"
 msgstr "%{nick} has %{score} points after %{games} games"
 
-#: data/rbot/plugins/games/hangman.rb:459
+#: data/rbot/plugins/games/hangman.rb:460
 msgid "%{nick} hasn't played hangman :("
 msgstr "%{nick} hasn't played hangman :("
 
-#: data/rbot/plugins/games/hangman.rb:471
+#: data/rbot/plugins/games/hangman.rb:472
 msgid "%{games} games have been played on %{channel}"
 msgstr "%{games} games have been played on %{channel}"
+
+#: data/rbot/plugins/games/hangman.rb:486
+msgid "looks like google has no definition for %{word}"
+msgstr ""
+
+#: data/rbot/plugins/games/hangman.rb:489
+msgid ""
+"no hangman game was played here recently, what do you want me to define?"
+msgstr ""

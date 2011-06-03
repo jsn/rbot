@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2008-06-21 14:58+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -63,8 +64,8 @@ msgstr "hm, quelquechose est faux en verifiant %{word}"
 #: data/rbot/plugins/games/azgame.rb:241
 msgid "no A-Z game running here, can't check if %{word} is valid, can I?"
 msgstr ""
-"aucun jeu A-Z n'est demarrer pour le moment, impossible de verifier si %"
-"{word} est valide"
+"aucun jeu A-Z n'est demarrer pour le moment, impossible de verifier si "
+"%{word} est valide"
 
 #: data/rbot/plugins/games/azgame.rb:245
 msgid "I only accept single words composed by letters only, sorry"

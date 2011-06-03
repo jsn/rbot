@@ -1,0 +1,129 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
+"PO-Revision-Date: 2011-06-03 12:39+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: data/rbot/plugins/games/quiz.rb:183
+msgid "stopped quiz timer"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:190
+msgid "quiz stopped"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:285
+msgid "Sorry, the quiz database for %{chan} seems to be corrupt"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:319
+msgid "Quiz game aministration commands (requires authentication): "
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:320
+msgid "'quiz autoask <on/off>' => enable/disable autoask mode"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:321
+msgid ""
+"'quiz autoask delay <time>' => delay next quiz by <time> when in autoask mode"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:322
+msgid ""
+"'quiz autoskip <on/off>' => enable/disable autoskip mode (autoskip implies "
+"autoask)"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:323
+msgid ""
+"'quiz autoskip delay <time>' => wait <time> before skipping to next quiz "
+"when in autoskip mode"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:324
+msgid ""
+"'quiz transfer <source> <dest> [score] [jokers]' => transfer [score] points "
+"and [jokers] jokers from <source> to <dest> (default is entire score and all "
+"jokers)"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:325
+msgid "'quiz setscore <player> <score>' => set <player>'s score to <score>"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:326
+msgid ""
+"'quiz setjokers <player> <jokers>' => set <player>'s number of jokers to "
+"<jokers>"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:327
+msgid ""
+"'quiz deleteplayer <player>' => delete one player from the rank table (only "
+"works when score and jokers are set to 0)"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:328
+msgid "'quiz cleanup' => remove players with no points and no jokers"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:570
+msgid "Nobody managed to answer in %{time}! Skipping to the next question ..."
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:589
+msgid "you can't make me solve a quiz in autoskip mode, sorry"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:664
+msgid "I'll skip to the next question as soon as the timeout expires, not now"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:810
+msgid "autoask is %{status}, the delay is %{time}"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:815
+msgid "autoask is not configured here"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:834 data/rbot/plugins/games/quiz.rb:897
+msgid "I couldn't understand that delay expression, sorry"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:840
+msgid ""
+"wait, you want me to ask the next question %{abs} BEFORE the previous one "
+"gets solved?"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:873
+msgid "autoskip is %{status}, the delay is %{time}"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:878
+msgid "autoskip is not configured here"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:903
+msgid ""
+"wait, you want me to skip to the next question %{abs} BEFORE the previous "
+"one?"
+msgstr ""
+
+#: data/rbot/plugins/games/quiz.rb:908
+msgid "sure, I'll ask all the questions at the same time! </sarcasm>"
+msgstr ""

@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -37,8 +38,8 @@ msgstr ""
 #: data/rbot/plugins/quotes.rb:149
 msgid ""
 "searchquote [<channel>] <regexp> => search for quote from <channel> that "
-"matches <regexp>. You only need to supply <channel> if you are addressing %"
-"{nick} privately."
+"matches <regexp>. You only need to supply <channel> if you are addressing "
+"%{nick} privately."
 msgstr ""
 
 #: data/rbot/plugins/quotes.rb:151
@@ -51,8 +52,8 @@ msgstr ""
 #: data/rbot/plugins/quotes.rb:153
 msgid ""
 "topicquote [<channel>] [<num>] => set topic to quote from <channel> with "
-"number <num>. You only need to supply <channel> if you are addressing %"
-"{nick} privately. Without <num>, a random quote will be set."
+"number <num>. You only need to supply <channel> if you are addressing "
+"%{nick} privately. Without <num>, a random quote will be set."
 msgstr ""
 
 #: data/rbot/plugins/quotes.rb:155

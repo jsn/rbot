@@ -60,8 +60,8 @@ msgstr ""
 
 #: data/rbot/plugins/translator.rb:348
 msgid ""
-"Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
-"{translators}. If \"translator\" is used in place of the translator name, "
+"Command: <translator> <from> <to> <phrase>, where <translator> is one of: "
+"%{translators}. If \"translator\" is used in place of the translator name, "
 "the first translator in translator.default_list which supports the specified "
 "direction will be picked automatically. Use \"help <translator>\" to look up "
 "supported from and to languages"
@@ -75,8 +75,8 @@ msgstr ""
 
 #: data/rbot/plugins/translator.rb:386
 msgid ""
-"Unable to auto-detect source language due to broken google translator, see %"
-"{reverse}%{prefix}help translate failed%{reverse} for details"
+"Unable to auto-detect source language due to broken google translator, see "
+"%{reverse}%{prefix}help translate failed%{reverse} for details"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:391

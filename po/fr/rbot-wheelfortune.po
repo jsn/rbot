@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2008-06-21 18:15+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -106,8 +107,8 @@ msgid ""
 "%{who} just created a new %{name} game to %{max} points (%{single} per "
 "question, %{price} per vowel)"
 msgstr ""
-"%{who} viens juste de créer un nouveau jeu %{name} à %{max} points (%"
-"{single} par question, %{price} par voyelle)"
+"%{who} viens juste de créer un nouveau jeu %{name} à %{max} points "
+"(%{single} par question, %{price} par voyelle)"
 
 #: data/rbot/plugins/games/wheelfortune.rb:284
 msgid ""
@@ -144,11 +145,11 @@ msgstr "ok, indice ajouté pour %{name} tour %{count} sur %{chan}: %{catclue}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:320
 msgid ""
-"there's already a pending clue for %{name} round %{count} on %{chan}: %"
-"{catclue}"
+"there's already a pending clue for %{name} round %{count} on %{chan}: "
+"%{catclue}"
 msgstr ""
-"il y a déjà un indice en suspend pour %{name} tour %{count} sur %{chan}: %"
-"{catclue}"
+"il y a déjà un indice en suspend pour %{name} tour %{count} sur %{chan}: "
+"%{catclue}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:333
 msgid ""
@@ -179,18 +180,18 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:380
 msgid ""
-"you can only replace questions between rounds %{min} and %{max} in the %"
-"{name} game on %{chan}"
+"you can only replace questions between rounds %{min} and %{max} in the "
+"%{name} game on %{chan}"
 msgstr ""
-"vous pouvez seulement remplacer les questions entre les tours %{min} et %"
-"{max} dans le jeu %{name} sur %{chan}"
+"vous pouvez seulement remplacer les questions entre les tours %{min} et "
+"%{max} dans le jeu %{name} sur %{chan}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:409
 msgid ""
 "ok, replaced QA for %{name} round %{count} on %{chan}: %{catclue} => %{ans}"
 msgstr ""
-"ok, remplaçons QA pour %{name} tour %{count} sur %{chan}: %{catclue} => %"
-"{ans}"
+"ok, remplaçons QA pour %{name} tour %{count} sur %{chan}: %{catclue} => "
+"%{ans}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:435
 #: data/rbot/plugins/games/wheelfortune.rb:542
@@ -219,12 +220,12 @@ msgstr "%{who} le prend! La reponse etais: %{ans}"
 
 #: data/rbot/plugins/games/wheelfortune.rb:495
 msgid ""
-"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %"
-"{count} rounds!\n"
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after "
+"%{count} rounds!\n"
 "The final score is"
 msgstr ""
-"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}gagne%{bold} après %"
-"{count} tours!\n"
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}gagne%{bold} après "
+"%{count} tours!\n"
 "Le score final est:"
 
 #: data/rbot/plugins/games/wheelfortune.rb:506

@@ -31,8 +31,8 @@ msgstr ""
 
 #: data/rbot/plugins/tumblr.rb:91
 msgid ""
-"Links on %{chan} will go to %{group} using account %{email} and password %"
-"{pwd}"
+"Links on %{chan} will go to %{group} using account %{email} and password "
+"%{pwd}"
 msgstr ""
 
 #: data/rbot/plugins/tumblr.rb:107

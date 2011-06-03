@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2010-06-30 09:58+0200\n"
-"PO-Revision-Date: 2010-06-30 09:58+0200\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
+"PO-Revision-Date: 2011-06-03 12:39+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/geoip.rb:191
+#: data/rbot/plugins/geoip.rb:194
+msgid "%{nick}'s location could not be resolved"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:196
+msgid "%{host} could not be resolved"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:199
 msgid "The owner configured me to use an API that doesn't exist, bug them!"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:208
+msgid "%{nick} is from %{location}"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:210
+msgid "%{host} is located in %{location}"
 msgstr ""

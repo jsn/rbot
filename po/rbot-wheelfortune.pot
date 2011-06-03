@@ -114,8 +114,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:320
 msgid ""
-"there's already a pending clue for %{name} round %{count} on %{chan}: %"
-"{catclue}"
+"there's already a pending clue for %{name} round %{count} on %{chan}: "
+"%{catclue}"
 msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:333
@@ -143,8 +143,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:380
 msgid ""
-"you can only replace questions between rounds %{min} and %{max} in the %"
-"{name} game on %{chan}"
+"you can only replace questions between rounds %{min} and %{max} in the "
+"%{name} game on %{chan}"
 msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:409
@@ -177,8 +177,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:495
 msgid ""
-"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %"
-"{count} rounds!\n"
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after "
+"%{count} rounds!\n"
 "The final score is"
 msgstr ""
 

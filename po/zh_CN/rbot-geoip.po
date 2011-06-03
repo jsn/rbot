@@ -1,3 +1,19 @@
-#: data/rbot/plugins/geoip.rb:191
+#: data/rbot/plugins/geoip.rb:194
+msgid "%{nick}'s location could not be resolved"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:196
+msgid "%{host} could not be resolved"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:199
 msgid "The owner configured me to use an API that doesn't exist, bug them!"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:208
+msgid "%{nick} is from %{location}"
+msgstr ""
+
+#: data/rbot/plugins/geoip.rb:210
+msgid "%{host} is located in %{location}"
 msgstr ""

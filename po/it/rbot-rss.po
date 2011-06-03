@@ -6,19 +6,24 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
 "PO-Revision-Date: 2009-03-20 16:26+0100\n"
 "Last-Translator: Giuseppe Bilotta <giuseppe.bilotta@gmail.com>\n"
 "Language-Team: it\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/rss.rb:888
+#: data/rbot/plugins/rss.rb:811
+msgid "You want me to rename %{handle} to itself?"
+msgstr ""
+
+#: data/rbot/plugins/rss.rb:932
 msgid "no such feed %{handle}"
 msgstr "non esiste alcun feed %{handle}"
 
-#: data/rbot/plugins/rss.rb:989
+#: data/rbot/plugins/rss.rb:1033
 msgid "feed %{feed} had %{num} updates, showing the latest %{max}"
 msgstr "il feed %{feed} ha %{num} aggiornamenti, mostro gli ultimi %{max}"

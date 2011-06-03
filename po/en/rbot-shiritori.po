@@ -6,10 +6,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2007-07-14 00:06-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: English\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -25,11 +26,11 @@ msgstr "No one has given the first word yet. Say the first word to start."
 
 #: data/rbot/plugins/games/shiritori.rb:213
 msgid ""
-"Poor %{current_player} is playing alone! Anyone care to join? %"
-"{previous_word} -> %{current_word}"
+"Poor %{current_player} is playing alone! Anyone care to join? "
+"%{previous_word} -> %{current_word}"
 msgstr ""
-"Poor %{current_player} is playing alone! Anyone care to join? %"
-"{previous_word} -> %{current_word}"
+"Poor %{current_player} is playing alone! Anyone care to join? "
+"%{previous_word} -> %{current_word}"
 
 #: data/rbot/plugins/games/shiritori.rb:244
 msgid "%{player} took too long and is out of the game. Try again next game!"

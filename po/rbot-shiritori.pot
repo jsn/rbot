@@ -26,8 +26,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:213
 msgid ""
-"Poor %{current_player} is playing alone! Anyone care to join? %"
-"{previous_word} -> %{current_word}"
+"Poor %{current_player} is playing alone! Anyone care to join? "
+"%{previous_word} -> %{current_word}"
 msgstr ""
 
 #: data/rbot/plugins/games/shiritori.rb:244

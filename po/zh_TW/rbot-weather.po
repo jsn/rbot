@@ -1,0 +1,37 @@
+#: data/rbot/plugins/weather.rb:32
+msgid "couldn't get data for %{station} (%{message})"
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:57
+msgid ""
+"At %{time} the conditions at %{location} (%{station_id}) were %{weather} "
+"with a visibility of %{visibility_mi}mi. The wind was %{wind} with "
+"%{relative_humidity}%% relative humidity. The temperature was "
+"%{temperature}%{heatindexorwindchill}, and the pressure was %{pressure}."
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:64
+msgid " with a heat index of %{hi}"
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:66
+msgid " with a windchill of %{wc}"
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:169
+msgid "%{error}, will try WU service"
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:318
+msgid "no reason specified"
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:365
+msgid ""
+"Google weather info for %{city} on %{date}: %{conds}. Three-day forecast: "
+"%{forecast}"
+msgstr ""
+
+#: data/rbot/plugins/weather.rb:373
+msgid "Google weather failed: %{e}"
+msgstr ""

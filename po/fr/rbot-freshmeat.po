@@ -1,0 +1,25 @@
+#: data/rbot/plugins/freshmeat.rb:23
+msgid ""
+"you must set the configuration value freshmeat.api_token to a valid "
+"freshmeat auth token, otherwise I cannot make requests to the site"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:122
+msgid "retrieving freshmeat news from the RSS"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:126
+msgid " because no API token is configured"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:128
+msgid " because the configured API token is wrong"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:136
+msgid "couldn't retrieve freshmeat news feed"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:222
+msgid "no news in freshmeat!"
+msgstr ""

@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2010-06-30 09:58+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,11 +31,11 @@ msgstr "<hidden>"
 
 #: data/rbot/plugins/tumblr.rb:91
 msgid ""
-"Links on %{chan} will go to %{group} using account %{email} and password %"
-"{pwd}"
+"Links on %{chan} will go to %{group} using account %{email} and password "
+"%{pwd}"
 msgstr ""
-"Links on %{chan} will go to %{group} using account %{email} and password %"
-"{pwd}"
+"Links on %{chan} will go to %{group} using account %{email} and password "
+"%{pwd}"
 
 #: data/rbot/plugins/tumblr.rb:107
 msgid "Links on %{chan} will not be posted to tumblr anymore"

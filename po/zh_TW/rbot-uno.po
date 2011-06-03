@@ -6,524 +6,550 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
 "PO-Revision-Date: 2007-07-09 01:24-0400\n"
 "Last-Translator: Liang-Bin Hsueh <hlb@handlino.com>\n"
 "Language-Team: Chinese\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: data/rbot/plugins/games/uno.rb:243
+#: data/rbot/plugins/games/uno.rb:215
+msgid "you can't do that, %{p}"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:251
 msgid "%{p} deals the first card from the stock"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:266
+#: data/rbot/plugins/games/uno.rb:274
 msgid "no time"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:278
+#: data/rbot/plugins/games/uno.rb:286
 msgid "Playing order was reversed!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:280
+#: data/rbot/plugins/games/uno.rb:288
 msgid "%{cp} bounces the pick to %{np}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:291
+#: data/rbot/plugins/games/uno.rb:299
 msgid "%{p} skips a turn!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:380
+#: data/rbot/plugins/games/uno.rb:388
 msgid "what cards were that again?"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:400
-msgid "you can't play that card"
-msgstr ""
-
-#: data/rbot/plugins/games/uno.rb:427
-msgid "%{p} plays %{card} twice!"
-msgstr ""
-
-#: data/rbot/plugins/games/uno.rb:432
-msgid "%{p} plays %{card}"
-msgstr ""
-
-#: data/rbot/plugins/games/uno.rb:435
-msgid "%{p} has %{uno}!"
-msgstr ""
-
-#: data/rbot/plugins/games/uno.rb:451
+#: data/rbot/plugins/games/uno.rb:414 data/rbot/plugins/games/uno.rb:473
 msgid "%{p}, choose a color with: co r|b|g|y"
 msgstr ""
 
+#: data/rbot/plugins/games/uno.rb:414
+msgid "you already played your card, "
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:422
+msgid "you can't play that card"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:449
+msgid "%{p} plays %{card} twice!"
+msgstr ""
+
 #: data/rbot/plugins/games/uno.rb:454
-msgid "you don't have two cards of that kind"
+msgid "%{p} plays %{card}"
 msgstr ""
 
 #: data/rbot/plugins/games/uno.rb:457
+msgid "%{p} has %{uno}!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:476
+msgid "you don't have two cards of that kind"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:479
 msgid "you don't have that card"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:467
+#: data/rbot/plugins/games/uno.rb:489
 msgid "%{cp} challenges %{lp}'s %{card}!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:471
+#: data/rbot/plugins/games/uno.rb:493
 msgid "%{p} has %{cards}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:483
+#: data/rbot/plugins/games/uno.rb:506
 msgid "%{lp}'s move was legal, %{cp} must pick %{b}%{n}%{b} cards!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:492
+#: data/rbot/plugins/games/uno.rb:515
 msgid ""
 "%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and "
 "play again!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:520
+#: data/rbot/plugins/games/uno.rb:543
 msgid "%{p} passes turn, and has to pick %{b}%{n}%{b} cards!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:527
+#: data/rbot/plugins/games/uno.rb:554
 msgid "%{p} passes turn"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:529
+#: data/rbot/plugins/games/uno.rb:556
 msgid "you need to pick a card first"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:539
+#: data/rbot/plugins/games/uno.rb:566
 msgid "you can't pick a color now, %{p}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:554
+#: data/rbot/plugins/games/uno.rb:581
 msgid "what color is that?"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:557
+#: data/rbot/plugins/games/uno.rb:584
 msgid "color is now %{c}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:565
+#: data/rbot/plugins/games/uno.rb:592
 msgid "This %{uno} game has been going on for %{time}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:570
+#: data/rbot/plugins/games/uno.rb:597
 msgid "The game hasn't started yet"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:575
+#: data/rbot/plugins/games/uno.rb:602
 msgid "%{uno} playing turn: %{players}"
 msgstr "%{count} 個外掛程式: %{list}"
 
-#: data/rbot/plugins/games/uno.rb:584
+#: data/rbot/plugins/games/uno.rb:609
+msgid "nobody is playing %{uno} yet!"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:617
 msgid "it's %{player}'s turn"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:594
+#: data/rbot/plugins/games/uno.rb:627
 msgid "next player must respond correctly or pick %{b}%{n}%{b} cards"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:601
+#: data/rbot/plugins/games/uno.rb:634
 msgid "Current discard: %{card} %{c}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:610
+#: data/rbot/plugins/games/uno.rb:643
 msgid "Your cards: %{cards}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:626
+#: data/rbot/plugins/games/uno.rb:659
 msgid "%{player} picks a card"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:636
+#: data/rbot/plugins/games/uno.rb:669
 msgid "Shuffling discarded cards"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:639
+#: data/rbot/plugins/games/uno.rb:672
 msgid "No more cards!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:645
+#: data/rbot/plugins/games/uno.rb:678
 msgid "You picked %{picked}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:652
+#: data/rbot/plugins/games/uno.rb:685
 msgid "you're already in the game, %{p}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:659
+#: data/rbot/plugins/games/uno.rb:692
 msgid "you dropped from the game, %{p}, you can't get back in"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:673
+#: data/rbot/plugins/games/uno.rb:699
+msgid ""
+"you can't join now, %{p}, a %{card} was just played, wait until next turn"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:713
 msgid "%{p} joins this game of %{uno}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:681
+#: data/rbot/plugins/games/uno.rb:721
 msgid "game will start in 20 seconds"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:692
+#: data/rbot/plugins/games/uno.rb:732
 msgid "%{p} isn't playing %{uno}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:697
+#: data/rbot/plugins/games/uno.rb:737
 msgid "%{p} gives up this game of %{uno}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:723
+#: data/rbot/plugins/games/uno.rb:744 data/rbot/plugins/games/uno.rb:802
+msgid "game start countdown stopped"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:770
+msgid "there is no '%{nick}' here"
+msgstr ""
+
+#: data/rbot/plugins/games/uno.rb:776
 msgid "%{p} is already playing %{uno} here"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:733
+#: data/rbot/plugins/games/uno.rb:786
 msgid "%{p} takes %{b}%{old}%{b}'s place at %{uno}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:739
+#: data/rbot/plugins/games/uno.rb:792
 msgid "%{b}%{old}%{b} isn't playing %{uno} here"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:748
+#: data/rbot/plugins/games/uno.rb:807
 msgid "%{uno} game halted after %{time}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:753
+#: data/rbot/plugins/games/uno.rb:812
 msgid "%{uno} game halted before it could start"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:758
+#: data/rbot/plugins/games/uno.rb:817
 msgid "%{uno} game finished after %{time}! The winner is %{p}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:769
+#: data/rbot/plugins/games/uno.rb:828
 msgid "%{p} has to pick %{b}%{n}%{b} cards!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:777
+#: data/rbot/plugins/games/uno.rb:836
 msgid "%{p} still had %{cards}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:789
+#: data/rbot/plugins/games/uno.rb:848
 msgid "%{p} wins with %{b}%{score}%{b} points!"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:819
+#: data/rbot/plugins/games/uno.rb:878
 msgid "'jo' to join in"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:820
+#: data/rbot/plugins/games/uno.rb:879
 msgid ""
 "'pl <card>' to play <card>: e.g. 'pl g7' to play Green 7, or 'pl rr' to play "
 "Red Reverse, or 'pl y2y2' to play both Yellow 2 cards"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:821
+#: data/rbot/plugins/games/uno.rb:880
 msgid "'pe' to pick a card"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:822
+#: data/rbot/plugins/games/uno.rb:881
 msgid "'pa' to pass your turn"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:823
+#: data/rbot/plugins/games/uno.rb:882
 msgid ""
 "'co <color>' to pick a color after playing a Wild: e.g. 'co g' to select "
 "Green (or 'pl w+4 g' to select the color when playing the Wild)"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:824
+#: data/rbot/plugins/games/uno.rb:883
 msgid "'ca' to show current cards"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:825
+#: data/rbot/plugins/games/uno.rb:884
 msgid "'cd' to show the current discard"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:826
+#: data/rbot/plugins/games/uno.rb:885
 msgid "'ch' to challenge a Wild +4"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:827
+#: data/rbot/plugins/games/uno.rb:886
 msgid "'od' to show the playing order"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:828
+#: data/rbot/plugins/games/uno.rb:887
 msgid "'ti' to show play time"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:829
+#: data/rbot/plugins/games/uno.rb:888
 msgid "'tu' to show whose turn it is"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:832
+#: data/rbot/plugins/games/uno.rb:891
 msgid ""
 "A Wild +4 can only be played legally if you don't have normal (not special) "
 "cards of the current color. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:833
+#: data/rbot/plugins/games/uno.rb:892
 msgid "The next player can challenge a W+4 by using the 'ch' command. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:834
+#: data/rbot/plugins/games/uno.rb:893
 msgid ""
 "If the W+4 play was illegal, the player who played it must pick the W+4, "
 "pick 4 cards from the stock, and play a legal card. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:835
+#: data/rbot/plugins/games/uno.rb:894
 msgid ""
 "If the W+4 play was legal, the challenger must pick 6 cards instead of 4."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:837
+#: data/rbot/plugins/games/uno.rb:896
 msgid ""
 "play all your cards, one at a time, by matching either the color or the "
 "value of the currently discarded card. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:838
+#: data/rbot/plugins/games/uno.rb:897
 msgid ""
 "cards with special effects: Skip (next player skips a turn), Reverse "
 "(reverses the playing order), +2 (next player has to take 2 cards). "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:839
+#: data/rbot/plugins/games/uno.rb:898
 msgid ""
 "Wilds can be played on any card, and you must specify the color for the next "
 "card. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:840
+#: data/rbot/plugins/games/uno.rb:899
 msgid ""
 "Wild +4 also forces the next player to take 4 cards, but it can only be "
 "played if you can't play a color card. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:841
+#: data/rbot/plugins/games/uno.rb:900
 msgid ""
 "you can play another +2 or +4 card on a +2 card, and a +4 on a +4, forcing "
 "the first player who can't play one to pick the cumulative sum of all cards. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:842
+#: data/rbot/plugins/games/uno.rb:901
 msgid ""
 "you can also play a Reverse on a +2 or +4, bouncing the effect back to the "
 "previous player (that now comes next). "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:845
+#: data/rbot/plugins/games/uno.rb:904
 msgid ""
 "The points won with a game of %{uno} are totalled from the cards remaining "
 "in the hands of the other players."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:846
+#: data/rbot/plugins/games/uno.rb:905
 msgid ""
 "Each normal (not special) card is worth its face value (from 0 to 9 points)."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:847
+#: data/rbot/plugins/games/uno.rb:906
 msgid "Each colored special card (+2, Reverse, Skip) is worth 20 points."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:848
+#: data/rbot/plugins/games/uno.rb:907
 msgid "Each Wild and Wild +4 is worth 50 points."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:853
+#: data/rbot/plugins/games/uno.rb:912
 msgid ""
 "You can see the scoring table with 'uno top N' where N is the number of top "
 "scores to show."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:855
+#: data/rbot/plugins/games/uno.rb:914
 msgid ""
 "You can see the winners table with 'uno topwin N' where N is the number of "
 "top winners to show."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:858
+#: data/rbot/plugins/games/uno.rb:917
 msgid "There are 108 cards in a standard %{uno} deck."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:859
+#: data/rbot/plugins/games/uno.rb:918
 msgid ""
 "For each color (Blue, Green, Red, Yellow) there are 19 numbered cards (from "
 "0 to 9), with two of each number except for 0."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:860
+#: data/rbot/plugins/games/uno.rb:919
 msgid ""
 "There are also 6 special cards for each color, two each of +2, Reverse, Skip."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:861
+#: data/rbot/plugins/games/uno.rb:920
 msgid "Finally, there are 4 Wild and 4 Wild +4 cards."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:864
+#: data/rbot/plugins/games/uno.rb:923
 msgid ""
 "The game manager (the user that started the game) can execute the following "
 "commands to manage it: "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:866
+#: data/rbot/plugins/games/uno.rb:925
 msgid ""
 "'uno drop <user>' to drop a user from the game (any user can drop itself "
 "using 'uno drop')"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:867
+#: data/rbot/plugins/games/uno.rb:926
 msgid ""
 "'uno replace <old> [with] <new>' to replace a player with someone else "
 "(useful in case of disconnects)"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:868
+#: data/rbot/plugins/games/uno.rb:927
 msgid "'uno transfer [to] <nick>' to transfer game ownership to someone else"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:869
+#: data/rbot/plugins/games/uno.rb:928
 msgid "'uno end' to end the game before its natural completion"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:872
+#: data/rbot/plugins/games/uno.rb:931
 msgid ""
 "%{uno} game. !uno to start a game. see 'help uno rules' for the rules, 'help "
 "uno admin' for admin commands, 'help uno score' for scoring rules. In-game "
 "commands: %{cmds}."
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:892
+#: data/rbot/plugins/games/uno.rb:951
 msgid "you already picked a card"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:899 data/rbot/plugins/games/uno.rb:906
-#: data/rbot/plugins/games/uno.rb:912 data/rbot/plugins/games/uno.rb:918
-#: data/rbot/plugins/games/uno.rb:934
+#: data/rbot/plugins/games/uno.rb:958 data/rbot/plugins/games/uno.rb:965
+#: data/rbot/plugins/games/uno.rb:971 data/rbot/plugins/games/uno.rb:977
+#: data/rbot/plugins/games/uno.rb:993
 msgid "It's not your turn"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:931
+#: data/rbot/plugins/games/uno.rb:990
 msgid "previous move cannot be challenged"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:945
+#: data/rbot/plugins/games/uno.rb:1004
 msgid "it's your turn, sleepyhead"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:957
+#: data/rbot/plugins/games/uno.rb:1016
 msgid ""
 "There is already an %{uno} game running here, managed by %{who}. say 'jo' to "
 "join in"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:965
+#: data/rbot/plugins/games/uno.rb:1024
 msgid "Ok, created %{uno} game on %{channel}, say 'jo' to join in"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:973 data/rbot/plugins/games/uno.rb:993
-#: data/rbot/plugins/games/uno.rb:1129 data/rbot/plugins/games/uno.rb:1137
-#: data/rbot/plugins/games/uno.rb:1145
+#: data/rbot/plugins/games/uno.rb:1032 data/rbot/plugins/games/uno.rb:1052
+#: data/rbot/plugins/games/uno.rb:1188 data/rbot/plugins/games/uno.rb:1196
+#: data/rbot/plugins/games/uno.rb:1204
 msgid "There is no %{uno} game running here"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:983
+#: data/rbot/plugins/games/uno.rb:1042
 msgid "%{uno} game ownership transferred from %{old} to %{nick}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:987
+#: data/rbot/plugins/games/uno.rb:1046
 msgid "who is this %{nick} you want me to transfer game ownership to?"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1071
+#: data/rbot/plugins/games/uno.rb:1130
 msgid "%{nf} %{uno} games completed over %{np} games played. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1076
+#: data/rbot/plugins/games/uno.rb:1135
 msgid "%{cgt} game time for completed games"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1080
+#: data/rbot/plugins/games/uno.rb:1139
 msgid " on %{tgt} total game time. "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1086
+#: data/rbot/plugins/games/uno.rb:1145
 msgid "%{avg} average game time for completed games"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1089
+#: data/rbot/plugins/games/uno.rb:1148
 msgid ", %{tavg} for all games"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1094
+#: data/rbot/plugins/games/uno.rb:1153
 msgid "nobody has played %{uno} on %{chan} yet"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1105
+#: data/rbot/plugins/games/uno.rb:1164
 msgid "%{nick} never played %{uno} here"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1114
+#: data/rbot/plugins/games/uno.rb:1173
 msgid "%{nick} played %{np} %{uno} games here, "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1117
+#: data/rbot/plugins/games/uno.rb:1176
 msgid "forfeited %{nf} games, "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1118
+#: data/rbot/plugins/games/uno.rb:1177
 msgid "won %{nw} games"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1120
+#: data/rbot/plugins/games/uno.rb:1179
 msgid " with %{score} total points"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1122
+#: data/rbot/plugins/games/uno.rb:1181
 msgid " and an average of %{avg} points per opponent"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1149
+#: data/rbot/plugins/games/uno.rb:1208
 msgid "%{num} cards in stock: %{stock}"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1165
+#: data/rbot/plugins/games/uno.rb:1224
 msgid "no %{uno} games were completed here"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1173
+#: data/rbot/plugins/games/uno.rb:1232
 msgid "%{uno} %{num} highest scores: "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1182
+#: data/rbot/plugins/games/uno.rb:1241
 msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} points"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1189 data/rbot/plugins/games/uno.rb:1211
+#: data/rbot/plugins/games/uno.rb:1248 data/rbot/plugins/games/uno.rb:1270
 msgid "%{i}. %{nick} ( %{score} )"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1195
+#: data/rbot/plugins/games/uno.rb:1254
 msgid "%{uno} %{num} most wins: "
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1204
+#: data/rbot/plugins/games/uno.rb:1263
 msgid "%{i}. %{b}%{nick}%{b} with %{b}%{score}%{b} wins"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1217
+#: data/rbot/plugins/games/uno.rb:1276
 msgid "uh, what kind of score list did you want, again?"
 msgstr ""
 
-#: data/rbot/plugins/games/uno.rb:1218
+#: data/rbot/plugins/games/uno.rb:1277
 msgid ""
 " I can only show the top scores (with top) and the most wins (with topwin)"
 msgstr ""

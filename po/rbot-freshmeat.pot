@@ -1,0 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: rbot\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
+"PO-Revision-Date: 2011-06-03 12:39+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: data/rbot/plugins/freshmeat.rb:23
+msgid ""
+"you must set the configuration value freshmeat.api_token to a valid "
+"freshmeat auth token, otherwise I cannot make requests to the site"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:122
+msgid "retrieving freshmeat news from the RSS"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:126
+msgid " because no API token is configured"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:128
+msgid " because the configured API token is wrong"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:136
+msgid "couldn't retrieve freshmeat news feed"
+msgstr ""
+
+#: data/rbot/plugins/freshmeat.rb:222
+msgid "no news in freshmeat!"
+msgstr ""

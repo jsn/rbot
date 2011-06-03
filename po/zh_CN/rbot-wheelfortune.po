@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2007-07-09 01:39-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Chinese\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -113,8 +114,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:320
 msgid ""
-"there's already a pending clue for %{name} round %{count} on %{chan}: %"
-"{catclue}"
+"there's already a pending clue for %{name} round %{count} on %{chan}: "
+"%{catclue}"
 msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:333
@@ -142,8 +143,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:380
 msgid ""
-"you can only replace questions between rounds %{min} and %{max} in the %"
-"{name} game on %{chan}"
+"you can only replace questions between rounds %{min} and %{max} in the "
+"%{name} game on %{chan}"
 msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:409
@@ -176,8 +177,8 @@ msgstr ""
 
 #: data/rbot/plugins/games/wheelfortune.rb:495
 msgid ""
-"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after %"
-"{count} rounds!\n"
+"%{bold}%{color}%{name}%{bold}%{nocolor}: %{who} %{bold}wins%{bold} after "
+"%{count} rounds!\n"
 "The final score is"
 msgstr ""
 

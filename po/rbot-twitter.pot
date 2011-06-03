@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2009-03-20 15:57+0100\n"
-"PO-Revision-Date: 2009-03-20 15:57+0100\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
+"PO-Revision-Date: 2011-06-03 12:39+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,10 +16,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: data/rbot/plugins/twitter.rb:191
+#: data/rbot/plugins/twitter.rb:200
+msgid ""
+"My authorization failed! Did you block me? Or is my Twitter Consumer Key/"
+"Secret pair incorrect?"
+msgstr ""
+
+#: data/rbot/plugins/twitter.rb:283
 msgid "actions will be twitted"
 msgstr ""
 
-#: data/rbot/plugins/twitter.rb:193
+#: data/rbot/plugins/twitter.rb:285
 msgid "actions will not be twitted"
 msgstr ""

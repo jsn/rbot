@@ -10,6 +10,7 @@ msgstr ""
 "PO-Revision-Date: 2009-03-20 15:57+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -59,8 +60,8 @@ msgstr ""
 
 #: data/rbot/plugins/translator.rb:348
 msgid ""
-"Command: <translator> <from> <to> <phrase>, where <translator> is one of: %"
-"{translators}. If \"translator\" is used in place of the translator name, "
+"Command: <translator> <from> <to> <phrase>, where <translator> is one of: "
+"%{translators}. If \"translator\" is used in place of the translator name, "
 "the first translator in translator.default_list which supports the specified "
 "direction will be picked automatically. Use \"help <translator>\" to look up "
 "supported from and to languages"
@@ -74,8 +75,8 @@ msgstr ""
 
 #: data/rbot/plugins/translator.rb:386
 msgid ""
-"Unable to auto-detect source language due to broken google translator, see %"
-"{reverse}%{prefix}help translate failed%{reverse} for details"
+"Unable to auto-detect source language due to broken google translator, see "
+"%{reverse}%{prefix}help translate failed%{reverse} for details"
 msgstr ""
 
 #: data/rbot/plugins/translator.rb:391

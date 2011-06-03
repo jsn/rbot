@@ -1,0 +1,48 @@
+#: data/rbot/plugins/time.rb:18
+msgid ""
+"usage: time set <Continent>/<City> -- setting your location allows the bot "
+"to calibrate time replies into your time zone, and other people to figure "
+"out what time it is for you"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:20
+msgid ""
+"usage: time <timestamp|time zone|nick> -- %{b}timestamp%{b}: get info about "
+"a specific time, relative to your own time zone | %{b}time zone%{b}: get "
+"local time of a certain location, <time zone> can be '<Continent>/<City>' or "
+"a two character country code | %{b}nick%{b}: get local time of another "
+"person, given they have set their location | see `%{prefix}help time set` on "
+"how to set your location"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:90
+msgid ""
+"I don't know where you are, use %{pfx}time set <Continent>/<City> to let me "
+"know"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:92
+msgid ""
+"I don't know where %{nick} is, (s)he should use %{pfx}time set <Continent>/"
+"<City> to let me know"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:180
+msgid "unintelligible time"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:189
+msgid "%{time} %{w} %{str}"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:190
+msgid "%a, %d %b %Y %H:%M:%S %Z %z"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:192
+msgid "is"
+msgstr ""
+
+#: data/rbot/plugins/time.rb:192
+msgid "was"
+msgstr ""

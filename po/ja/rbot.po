@@ -6,10 +6,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2010-06-30 09:58+0200\n"
+"POT-Creation-Date: 2011-06-03 12:39+0200\n"
 "PO-Revision-Date: 2007-07-09 01:36-0400\n"
 "Last-Translator: Yaohan Chen <yaohan.chen@gmail.com>\n"
 "Language-Team: Japanese\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -267,8 +268,8 @@ msgstr ""
 
 #: lib/rbot/core/auth.rb:403
 msgid ""
-"user destroy <botuser> : destroys <botuser>. This function %{highlight}must%"
-"{highlight} be called in two steps. On the first call <botuser> is queued "
+"user destroy <botuser> : destroys <botuser>. This function %{highlight}must"
+"%{highlight} be called in two steps. On the first call <botuser> is queued "
 "for destruction. On the second call, which must be in the form 'user confirm "
 "destroy <botuser>', the botuser will be destroyed. If you want to cancel the "
 "destruction, issue the command 'user cancel destroy <botuser>'"
@@ -276,321 +277,333 @@ msgstr ""
 
 #: lib/rbot/core/auth.rb:405
 msgid ""
-"user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, "
-"list, destroy"
+"user export [to <filename>]: exports user data to file <filename> (default: "
+"new-auth.users)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:408
+#: lib/rbot/core/auth.rb:407
+msgid ""
+"user import [from <filename>]: import user data from file <filename> "
+"(default: new-auth.users)"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:409
+msgid ""
+"user topics: show, enable|disable, add|rm netmask, set, reset, tell, create, "
+"list, destroy, import, export"
+msgstr ""
+
+#: lib/rbot/core/auth.rb:412
 msgid ""
 "auth <masterpassword>: log in as the bot owner; other commands: login, "
 "whoami, permissions syntax, permissions [re]set, permissions view, user, "
 "meet, hello, allow, deny"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:410
+#: lib/rbot/core/auth.rb:414
 msgid ""
 "meet <nick> [as <user>]: creates a bot user for nick, calling it user "
 "(defaults to the nick itself)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:412
+#: lib/rbot/core/auth.rb:416
 msgid "hello: creates a bot user for the person issuing the command"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:415
+#: lib/rbot/core/auth.rb:419
 msgid ""
 "allow <user> to do <sample command> [<where>]: gives botuser <user> the "
 "permissions to execute a command such as the provided sample command"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:416 lib/rbot/core/auth.rb:424
+#: lib/rbot/core/auth.rb:420 lib/rbot/core/auth.rb:428
 msgid "(in private or in channel, according to the optional <where>)."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:417 lib/rbot/core/auth.rb:425
+#: lib/rbot/core/auth.rb:421 lib/rbot/core/auth.rb:429
 msgid ""
 "<sample command> should be a full command, not just the command keyword --"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:418
+#: lib/rbot/core/auth.rb:422
 msgid "correct: allow user to do addquote stuff --"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:419
+#: lib/rbot/core/auth.rb:423
 msgid "wrong: allow user to do addquote."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:423
+#: lib/rbot/core/auth.rb:427
 msgid ""
 "deny <user> from doing <sample command> [<where>]: removes from botuser "
 "<user> the permissions to execute a command such as the provided sample "
 "command"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:426
+#: lib/rbot/core/auth.rb:430
 msgid "correct: deny user from doing addquote stuff --"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:427
+#: lib/rbot/core/auth.rb:431
 msgid "wrong: deny user from doing addquote."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:430
+#: lib/rbot/core/auth.rb:434
 msgid ""
 "auth commands: auth, login, whoami, who, permission[s], user, meet, hello, "
 "allow, deny"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:435
+#: lib/rbot/core/auth.rb:439
 msgid "sorry, I need more arguments to %{command}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:439
+#: lib/rbot/core/auth.rb:443
 msgid "I can only %{command} these: %{arguments}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:474
+#: lib/rbot/core/auth.rb:478
 msgid "no such bot user %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:477
+#: lib/rbot/core/auth.rb:481
 msgid "you can't mess with %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:489
+#: lib/rbot/core/auth.rb:493
 msgid "you can't see the properties of %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:498
+#: lib/rbot/core/auth.rb:502
 msgid "no way I'm telling you the master password!"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:499
+#: lib/rbot/core/auth.rb:503
 msgid "you can't ask for someone else's password"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:501
+#: lib/rbot/core/auth.rb:505
 msgid ""
 "c'mon, you can't be asking me seriously to tell you the password in public!"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:502
+#: lib/rbot/core/auth.rb:506
 msgid "the password for %{user} is %{password}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:516
+#: lib/rbot/core/auth.rb:520
 msgid "can %{action}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:518
+#: lib/rbot/core/auth.rb:522
 msgid "can not %{action}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:522
+#: lib/rbot/core/auth.rb:526
 msgid "knows no netmasks"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:524
+#: lib/rbot/core/auth.rb:528
 msgid "knows %{netmasks}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:531 lib/rbot/core/auth.rb:558
-#: lib/rbot/core/auth.rb:576 lib/rbot/core/auth.rb:608
+#: lib/rbot/core/auth.rb:535 lib/rbot/core/auth.rb:562
+#: lib/rbot/core/auth.rb:580 lib/rbot/core/auth.rb:612
 msgid "you can't change the default user"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:532 lib/rbot/core/auth.rb:560
-#: lib/rbot/core/auth.rb:578 lib/rbot/core/auth.rb:610
+#: lib/rbot/core/auth.rb:536 lib/rbot/core/auth.rb:564
+#: lib/rbot/core/auth.rb:582 lib/rbot/core/auth.rb:614
 msgid "you can't edit %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:547 lib/rbot/core/auth.rb:594
+#: lib/rbot/core/auth.rb:551 lib/rbot/core/auth.rb:598
 msgid "I ignored %{things} because %{reason}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:551 lib/rbot/core/auth.rb:598
+#: lib/rbot/core/auth.rb:555 lib/rbot/core/auth.rb:602
 msgid "I haven't changed anything"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:569
+#: lib/rbot/core/auth.rb:573
 msgid "is that a joke? setting the password in public?"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:601
+#: lib/rbot/core/auth.rb:605
 msgid "the password for %{user} is now %{password}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:615
+#: lib/rbot/core/auth.rb:619
 msgid ""
 "I can only add/remove netmasks. See +help user add+ for more instructions"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:636
+#: lib/rbot/core/auth.rb:640
 msgid "sorry, I don't know how to %{request}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:639
+#: lib/rbot/core/auth.rb:643
 msgid "couldn't %{cmd}: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:668
+#: lib/rbot/core/auth.rb:672
 msgid ""
-"you are now registered as %{buname}. I created a random password for you : %"
-"{pass} and you can change it at any time by telling me 'user set password "
+"you are now registered as %{buname}. I created a random password for you : "
+"%{pass} and you can change it at any time by telling me 'user set password "
 "<password>' in private"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:675
+#: lib/rbot/core/auth.rb:679
 msgid "but I already know %{buname}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:677
+#: lib/rbot/core/auth.rb:681
 msgid "I had problems meeting %{nick}: %{e}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:686
+#: lib/rbot/core/auth.rb:690
 msgid "couldn't find botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:688
+#: lib/rbot/core/auth.rb:692
 msgid "I'm not telling the master password to anyone, pal"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:689
+#: lib/rbot/core/auth.rb:693
 msgid "the password for botuser %{user} is %{password}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:692
+#: lib/rbot/core/auth.rb:696
 msgid "I told %{user} that %{message}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:698
+#: lib/rbot/core/auth.rb:702
 msgid "are you nuts, creating a botuser with a publicly known password?"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:703
+#: lib/rbot/core/auth.rb:707
 msgid "failed to create %{user}: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:707
+#: lib/rbot/core/auth.rb:711
 msgid "created botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:715
+#: lib/rbot/core/auth.rb:719
 msgid " (queued for destruction)"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:718
+#: lib/rbot/core/auth.rb:722
 msgid "I have no botusers other than the default ones"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:719
+#: lib/rbot/core/auth.rb:723
 #, fuzzy
 msgid "botuser: %{list}"
 msgid_plural "botusers: %{list}"
 msgstr[0] "プラグイン%{count}個：%{list}"
 
-#: lib/rbot/core/auth.rb:726
+#: lib/rbot/core/auth.rb:730
 msgid "You can't destroy %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:736
+#: lib/rbot/core/auth.rb:740
 msgid "no such botuser %{user}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:743
+#: lib/rbot/core/auth.rb:747
 msgid "%{user} removed from the destruction queue"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:745
+#: lib/rbot/core/auth.rb:749
 msgid "%{user} was not queued for destruction"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:750
+#: lib/rbot/core/auth.rb:754
 msgid ""
 "%{user} already queued for destruction, use %{highlight}user confirm destroy "
 "%{user}%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:753
+#: lib/rbot/core/auth.rb:757
 msgid ""
-"%{user} queued for destruction, use %{highlight}user confirm destroy %{user}%"
-"{highlight} to destroy it"
+"%{user} queued for destruction, use %{highlight}user confirm destroy "
+"%{user}%{highlight} to destroy it"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:757
+#: lib/rbot/core/auth.rb:761
 msgid "%{user} is not queued for destruction yet"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:766 lib/rbot/core/auth.rb:806
+#: lib/rbot/core/auth.rb:770 lib/rbot/core/auth.rb:810
 msgid "failed: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:768
+#: lib/rbot/core/auth.rb:772
 msgid "botuser %{user} destroyed"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:775
+#: lib/rbot/core/auth.rb:779
 msgid "please don't touch the default users"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:784
+#: lib/rbot/core/auth.rb:788
 msgid "no such botuser %{source}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:786
+#: lib/rbot/core/auth.rb:790
 msgid "botuser %{dest} exists already"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:809
+#: lib/rbot/core/auth.rb:813
 msgid "botuser %{source} copied to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:812
+#: lib/rbot/core/auth.rb:816
 msgid "botuser %{source} renamed to %{dest}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:832
+#: lib/rbot/core/auth.rb:836
 msgid "selecting data to export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:848
+#: lib/rbot/core/auth.rb:852
 msgid "preparing data for export ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:871
+#: lib/rbot/core/auth.rb:875
 msgid "failed to prepare data: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:876
+#: lib/rbot/core/auth.rb:880
 msgid "exporting to %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:883
+#: lib/rbot/core/auth.rb:887
 msgid "failed to export users: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:887 lib/rbot/core/auth.rb:965
+#: lib/rbot/core/auth.rb:891 lib/rbot/core/auth.rb:969
 msgid "done"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:904
+#: lib/rbot/core/auth.rb:908
 msgid "reading %{file} ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:908
+#: lib/rbot/core/auth.rb:912
 msgid "failed to import from: %{exception}"
 msgstr ""
 
-#: lib/rbot/core/auth.rb:915
+#: lib/rbot/core/auth.rb:919
 msgid "selecting data to import ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:925
+#: lib/rbot/core/auth.rb:929
 msgid "parsing data from import ..."
 msgstr ""
 
-#: lib/rbot/core/auth.rb:945
+#: lib/rbot/core/auth.rb:949
 msgid "failed to parse data: %{exception}"
 msgstr ""
 
@@ -610,8 +623,12 @@ msgstr ""
 msgid "reconnect => ask the bot to disconnect and then connect again"
 msgstr ""
 
-#: lib/rbot/core/basics.rb:163
+#: lib/rbot/core/basics.rb:161
 msgid "part"
+msgstr ""
+
+#: lib/rbot/core/basics.rb:163
+msgid "part <channel> => part channel <channel>"
 msgstr ""
 
 #: lib/rbot/core/basics.rb:165
@@ -827,112 +844,112 @@ msgstr "「{word}」は %{user} さんに%{date}に教えてもらいました"
 msgid "sorry, no %{key} data for %{user}"
 msgstr "「{word}」は %{user} さんに%{date}に教えてもらいました"
 
-#: lib/rbot/core/utils/extends.rb:164 lib/rbot/core/utils/utils.rb:201
-#: lib/rbot/core/utils/utils.rb:729
+#: lib/rbot/core/utils/extends.rb:175 lib/rbot/core/utils/utils.rb:203
+#: lib/rbot/core/utils/utils.rb:745
 msgid " and "
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:184
+#: lib/rbot/core/utils/utils.rb:186
 msgid "year"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:184
+#: lib/rbot/core/utils/utils.rb:186
 msgid "years"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:186
+#: lib/rbot/core/utils/utils.rb:188
 msgid "month"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:186
+#: lib/rbot/core/utils/utils.rb:188
 msgid "months"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:188
+#: lib/rbot/core/utils/utils.rb:190
 msgid "day"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:188
+#: lib/rbot/core/utils/utils.rb:190
 msgid "days"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:190
+#: lib/rbot/core/utils/utils.rb:192
 msgid "hour"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:190
+#: lib/rbot/core/utils/utils.rb:192
 msgid "hours"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:192
+#: lib/rbot/core/utils/utils.rb:194
 msgid "minute"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:192
+#: lib/rbot/core/utils/utils.rb:194
 msgid "minutes"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:194
+#: lib/rbot/core/utils/utils.rb:196
 msgid "second"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:194
+#: lib/rbot/core/utils/utils.rb:196
 msgid "seconds"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:232
+#: lib/rbot/core/utils/utils.rb:234
 msgid "right now"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:236
+#: lib/rbot/core/utils/utils.rb:238
 msgid "%{d} from now"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:238
+#: lib/rbot/core/utils/utils.rb:240
 msgid "%{d} ago"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:250
+#: lib/rbot/core/utils/utils.rb:252
 msgid "%{m} years"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:252
+#: lib/rbot/core/utils/utils.rb:254
 msgid "%{m} months"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:254
+#: lib/rbot/core/utils/utils.rb:256
 msgid "%{m} weeks"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:256
+#: lib/rbot/core/utils/utils.rb:258
 msgid "%{m} days"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:258
+#: lib/rbot/core/utils/utils.rb:260
 msgid "%{m} hours"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:260
+#: lib/rbot/core/utils/utils.rb:262
 msgid "half an hour"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:263
+#: lib/rbot/core/utils/utils.rb:265
 msgid "an hour"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:265
+#: lib/rbot/core/utils/utils.rb:267
 msgid "an hour and a half"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:267
+#: lib/rbot/core/utils/utils.rb:269
 msgid "%{m} minutes"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:269
+#: lib/rbot/core/utils/utils.rb:271
 msgid "%{m} seconds"
 msgstr ""
 
-#: lib/rbot/core/utils/utils.rb:271
+#: lib/rbot/core/utils/utils.rb:273
 msgid "one second"
 msgstr ""
 
@@ -948,27 +965,27 @@ msgstr ""
 msgid "Wordlists: %{found}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:500
+#: lib/rbot/ircbot.rb:501
 msgid "Unknown DB adaptor: %s"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1284
+#: lib/rbot/ircbot.rb:1290
 msgid "restarting, back in %{wait}..."
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1367
+#: lib/rbot/ircbot.rb:1373
 msgid "help topics: "
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1369
+#: lib/rbot/ircbot.rb:1375
 msgid " (help <topic> for more info)"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1372
+#: lib/rbot/ircbot.rb:1378
 msgid "no help for topic %{topic}"
 msgstr ""
 
-#: lib/rbot/ircbot.rb:1383
+#: lib/rbot/ircbot.rb:1389
 msgid ""
 "Uptime %{up}, %{plug} plugins active, %{sent} lines sent, %{recv} received."
 msgstr ""
@@ -977,92 +994,92 @@ msgstr ""
 msgid "incorrect usage, ask for help using '%{command}'"
 msgstr ""
 
-#: lib/rbot/plugins.rb:733
+#: lib/rbot/plugins.rb:734
 msgid "%{count} core module loaded"
 msgid_plural "%{count} core modules loaded"
 msgstr[0] "コアモジュール%{count}個をロードしました"
 
-#: lib/rbot/plugins.rb:736
+#: lib/rbot/plugins.rb:737
 msgid "%{count} core module: %{list}"
 msgid_plural "%{count} core modules: %{list}"
 msgstr[0] "コアモジュール%{count}個：%{list}"
 
-#: lib/rbot/plugins.rb:742
+#: lib/rbot/plugins.rb:743
 msgid "no core botmodules loaded"
 msgstr "コアモジュールロードしていません"
 
-#: lib/rbot/plugins.rb:747
+#: lib/rbot/plugins.rb:748
 msgid "%{count} plugin loaded"
 msgid_plural "%{count} plugins loaded"
 msgstr[0] "プラグインを%{count}個ロードしました"
 
-#: lib/rbot/plugins.rb:750
+#: lib/rbot/plugins.rb:751
 msgid "%{count} plugin: %{list}"
 msgid_plural "%{count} plugins: %{list}"
 msgstr[0] "プラグイン%{count}個：%{list}"
 
-#: lib/rbot/plugins.rb:761
+#: lib/rbot/plugins.rb:762
 #, fuzzy
 msgid "%{highlight}%{count} plugin ignored%{highlight}"
 msgid_plural "%{highlight}%{count} plugins ignored%{highlight}"
 msgstr[0] "プラグイン%{count}個：%{list}"
 
-#: lib/rbot/plugins.rb:766
+#: lib/rbot/plugins.rb:767
 msgid ""
-"%{highlight}%{count} plugin ignored%{highlight}: use %{bold}%{command}%"
-"{bold} to see why"
+"%{highlight}%{count} plugin ignored%{highlight}: use "
+"%{bold}%{command}%{bold} to see why"
 msgid_plural ""
-"%{highlight}%{count} plugins ignored%{highlight}: use %{bold}%{command}%"
-"{bold} to see why"
+"%{highlight}%{count} plugins ignored%{highlight}: use "
+"%{bold}%{command}%{bold} to see why"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:776
+#: lib/rbot/plugins.rb:777
 msgid "%{highlight}%{count} plugin failed to load%{highlight}"
 msgid_plural "%{highlight}%{count} plugins failed to load%{highlight}"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:781
+#: lib/rbot/plugins.rb:782
 msgid ""
-"%{highlight}%{count} plugin failed to load%{highlight}: use %{bold}%"
-"{command}%{bold} to see why"
+"%{highlight}%{count} plugin failed to load%{highlight}: use "
+"%{bold}%{command}%{bold} to see why"
 msgid_plural ""
-"%{highlight}%{count} plugins failed to load%{highlight}: use %{bold}%"
-"{command}%{bold} to see why"
+"%{highlight}%{count} plugins failed to load%{highlight}: use "
+"%{bold}%{command}%{bold} to see why"
 msgstr[0] ""
 
-#: lib/rbot/plugins.rb:811
+#: lib/rbot/plugins.rb:812
 msgid "no plugins failed to load"
 msgstr ""
 
-#: lib/rbot/plugins.rb:813
+#: lib/rbot/plugins.rb:814
 msgid ""
-"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: %"
-"{reason}"
+"%{highlight}%{plugin}%{highlight} in %{dir} failed with error %{exception}: "
+"%{reason}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:817
+#: lib/rbot/plugins.rb:818
 msgid "at %{backtrace}"
 msgstr ""
 
-#: lib/rbot/plugins.rb:823
+#: lib/rbot/plugins.rb:824
 msgid "no plugins were ignored"
 msgstr ""
 
-#: lib/rbot/plugins.rb:827
+#: lib/rbot/plugins.rb:828
 msgid "overruled by previous"
 msgstr ""
 
-#: lib/rbot/registry/bdb.rb:226 lib/rbot/registry/tc.rb:198
+#: lib/rbot/registry/bdb.rb:242 lib/rbot/registry/tc.rb:225
 msgid ""
 "upgrading old-style (rbot 0.9.5 or earlier) plugin registry to new format"
 msgstr ""
 
-#: lib/rbot/registry/bdb.rb:245 lib/rbot/registry/tc.rb:222
+#: lib/rbot/registry/bdb.rb:261 lib/rbot/registry/tc.rb:251
 msgid ""
 "upgrading previous (rbot 0.9.9 or earlier) plugin registry to new split "
 "format"
 msgstr ""
 
-#: lib/rbot/registry/bdb.rb:394 lib/rbot/registry/tc.rb:368
+#: lib/rbot/registry/bdb.rb:410 lib/rbot/registry/tc.rb:397
 msgid "marshal recovery failed, trying default"
 msgstr ""

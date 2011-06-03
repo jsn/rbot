@@ -6,10 +6,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: rbot\n"
-"POT-Creation-Date: 2008-06-20 01:49+0200\n"
+"POT-Creation-Date: 2009-03-20 15:57+0100\n"
 "PO-Revision-Date: 2008-06-21 16:07+0100\n"
 "Last-Translator: Lagrange Marc <markocpc@gmail.com>\n"
 "Language-Team: French\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -17,11 +18,11 @@ msgstr ""
 
 #: data/rbot/plugins/youtube.rb:33
 msgid ""
-"Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: %"
-"{duration}. %{views} views, faved %{faves} times. %{desc}"
+"Category: %{cat}. Rating: %{rating}. Author: %{author}. Duration: "
+"%{duration}. %{views} views, faved %{faves} times. %{desc}"
 msgstr ""
-"Categorie: %{cat}. Note: %{rating}. Autheur: %{author}. Durée: %{duration}. %"
-"{views} vues, favoris %{faves} fois. %{desc}"
+"Categorie: %{cat}. Note: %{rating}. Autheur: %{author}. Durée: %{duration}. "
+"%{views} vues, favoris %{faves} fois. %{desc}"
 
 #: data/rbot/plugins/youtube.rb:77 data/rbot/plugins/youtube.rb:107
 msgid "unknown duration"
@@ -29,11 +30,11 @@ msgstr "durée inconnue"
 
 #: data/rbot/plugins/youtube.rb:183
 msgid ""
-"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} (%"
-"{duration}). %{views} views, faved %{faves} times. %{desc}"
+"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} by %{author} "
+"(%{duration}). %{views} views, faved %{faves} times. %{desc}"
 msgstr ""
-"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} par %{author} (%"
-"{duration}). %{views} vues, favoris %{faves} fois. %{desc}"
+"%{bold}%{title}%{bold} [%{cat}] %{rating} @ %{url} par %{author} "
+"(%{duration}). %{views} vues, favoris %{faves} fois. %{desc}"
 
 #: data/rbot/plugins/youtube.rb:186
 msgid ""
