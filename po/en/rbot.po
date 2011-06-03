@@ -567,16 +567,16 @@ msgid ""
 "%{user} already queued for destruction, use %{highlight}user confirm destroy "
 "%{user}%{highlight} to destroy it"
 msgstr ""
-"%{user} already queued for destruction, use %{highlight}user destroy %{user} "
-"<password>%{highlight} to destroy it"
+"%{user} already queued for destruction, use %{highlight}user confirm destroy "
+"%{user}%{highlight} to destroy it"
 
 #: lib/rbot/core/auth.rb:757
 msgid ""
 "%{user} queued for destruction, use %{highlight}user confirm destroy "
 "%{user}%{highlight} to destroy it"
 msgstr ""
-"%{user} queued for destruction, use %{highlight}user destroy %{user} "
-"<password>%{highlight} to destroy it"
+"%{user} queued for destruction, use %{highlight}user confirm destroy "
+"%{user}%{highlight} to destroy it"
 
 #: lib/rbot/core/auth.rb:761
 msgid "%{user} is not queued for destruction yet"
