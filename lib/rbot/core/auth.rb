@@ -729,7 +729,7 @@ class AuthModule < CoreBotModule
     buname = params[:name]
     return m.reply(_("You can't destroy %{user}") % {:user => buname}) if
            ["everyone", "owner"].include?(buname)
-    mod = params[:modifier].to_sym rescue nil
+    mod = params[:modifier].nil_or_empty? ? nil : params[:modifier].to_sym
 
     buser_array = @bot.auth.save_array
     buser_hash = buser_array.inject({}) { |h, u|
