@@ -259,6 +259,12 @@ class Bot
           if m.bot.auth.allow?(auth, m.source, m.replyto)
             debug "template match found and auth'd: #{action.inspect} #{options.inspect}"
             if !m.in_thread && (tmpl.options[:thread] || tmpl.options[:threaded])
+              # since the message action is in a separate thread, the message may be
+              # delegated to unreplied() before the thread has a chance to actually
+              # mark it as replied. since threading is used mostly for commands that
+              # are known to take some processing time (e.g. download a web page) before
+              # giving an output, we just mark these as 'replied' here
+              m.replied = true
               Thread.new do
                 begin
                   @parent.send(action, m, options)
