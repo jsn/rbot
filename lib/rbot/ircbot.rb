@@ -940,8 +940,11 @@ class Bot
       quit if $interrupted > 0
       @socket.connect
       @last_rec = Time.now
-    rescue => e
-      raise e.class, "failed to connect to IRC server at #{@socket.server_uri}: #{e}"
+    rescue Exception => e
+      uri = @socket.server_uri || '<unknown>'
+      error "failed to connect to IRC server at #{uri}"
+      error e
+      raise
     end
     quit if $interrupted > 0
 

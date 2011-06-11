@@ -401,6 +401,7 @@ module Irc
         error "error while shutting down: #{e.pretty_inspect}"
       end
       @sock = nil
+      @server_uri = nil
       @sendq.clear
     end
 
