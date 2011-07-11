@@ -117,15 +117,19 @@ module Irc
       if absfilename && File.exist?(key)
         # db already exists, use it
         @db = DBTree.open_db(key)
+        @fname = key.dup
       elsif absfilename
         # create empty db
         @db = DBTree.create_db(key)
+        @fname = key.dup
       elsif File.exist? relfilename
         # db already exists, use it
         @db = DBTree.open_db relfilename
+        @fname = relfilename.dup
       else
         # create empty db
         @db = DBTree.create_db relfilename
+        @fname = relfilename.dup
       end
       oldbasename = (absfilename ? key : relfilename).gsub(/\.tdb$/, ".db")
       if File.exists? oldbasename and defined? BDB
@@ -153,6 +157,14 @@ module Irc
     def self.close_bot_registries
       @@bot_registries.each { |name, reg| reg.close }
       @@bot_registries.clear
+    end
+
+    def close
+      db = @@bot_registries.delete(@fname)
+      if db != @db
+        error "We think we have #{@db} from #{@fname}, TC pseudo-env gives us #{db}"
+      end
+      @db.close
     end
 
     def DBTree.create_db(name)
