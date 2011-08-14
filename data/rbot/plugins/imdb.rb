@@ -175,13 +175,13 @@ class Imdb
       end
 
       ratings = "no votes"
-      m = resp.body.match(/<b>([0-9.]+)<\/b><span [^>]+>\/10<\/span><\/span>\s*[^<]+<a\s+[^>]*href="ratings"[^>]+>([0-9,]+) votes?<\/a>/m)
+      m = resp.body.match(/Users rated this ([0-9.]+)\/10 \(([0-9,]+) votes\)/m)
       if m
         ratings = "#{m[1]}/10 (#{m[2]} voters)"
       end
 
       genre = Array.new
-      resp.body.scan(/<a href="\/genre\/[^"]+">([^<]+)<\/a>/) do |gnr|
+      resp.body.scan(/<a href="\/genre\/[^"]+"[^>]+>([^<]+)<\/a>/) do |gnr|
         genre << gnr
       end
 
