@@ -103,6 +103,10 @@ class BasicsModule < CoreBotModule
     @bot.say param[:where], param[:what].to_s
   end
 
+  def bot_notify(m, param)
+    @bot.notice param[:where], param[:what].to_s
+  end
+
   def bot_action(m, param)
     @bot.action param[:where], param[:what].to_s
   end
@@ -210,6 +214,9 @@ basics.map "talk [in] [:where]",
 
 basics.map "say :where *what",
   :action => 'bot_say',
+  :auth_path => 'talk::do'
+basics.map "notify :where *what",
+  :action => 'bot_notify',
   :auth_path => 'talk::do'
 basics.map "action :where *what",
   :action => 'bot_action',
