@@ -1033,7 +1033,7 @@ module Irc
       data[:serverstring] = serverstring
 
       unless serverstring.chomp =~ /^(:(\S+)\s)?(\S+)(\s(.*))?$/
-        raise "Unparseable Server Message!!!: #{serverstring.inspect}"
+        raise ServerError, "Unparseable Server Message!!!: #{serverstring.inspect}"
       end
 
       prefix, command, params = $2, $3, $5
