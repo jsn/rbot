@@ -959,7 +959,7 @@ class Bot
   end
 
   # disconnect the bot from IRC, if connected, and then connect (again)
-  def reconnect(message=nil, too_fast=false)
+  def reconnect(message=nil, too_fast=0)
     # we will wait only if @last_rec was not nil, i.e. if we were connected or
     # got disconnected by a network error
     # if someone wants to manually call disconnect() _and_ reconnect(), they
@@ -978,11 +978,17 @@ class Bot
 
         log "\n\nWaiting to reconnect\n\n"
         sleep @config['server.reconnect_wait']
-        sleep 10*@config['server.reconnect_wait'] if too_fast
+        if too_fast > 0
+          tf = too_fast*@config['server.reconnect_wait']
+          tfu = Utils.secs_to_string(tf)
+          log "Will sleep for an extra #{tf}s (#{tfu})"
+          sleep tf
+        end
       end
 
       connect
     rescue Exception => e
+      error e
       will_wait = true
       retry
     end
@@ -991,11 +997,13 @@ class Bot
   # begin event handling loop
   def mainloop
     while true
-      too_fast = false
+      too_fast = 0
       quit_msg = nil
+      valid_recv = false # did we receive anything (valid) from the server yet?
       begin
         reconnect(quit_msg, too_fast)
         quit if $interrupted > 0
+        valid_recv = false
         while @socket.connected?
           quit if $interrupted > 0
 
@@ -1007,6 +1015,8 @@ class Bot
             break unless reply = @socket.gets
             @last_rec = Time.now
             @client.process reply
+            valid_recv = true
+            too_fast = 0
           else
             ping_server
           end
@@ -1021,10 +1031,39 @@ class Bot
       rescue Errno::ETIMEDOUT, Errno::ECONNABORTED, TimeoutError, SocketError => e
         error "network exception: #{e.pretty_inspect}"
         quit_msg = e.to_s
+        too_fast += 10 if valid_recv
+      rescue ServerMessageParseError => e
+        # if the bot tried reconnecting too often, we can get forcefully
+        # disconnected by the server, while still receiving an empty message
+        # wait at least 10 minutes in this case
+        if e.message.empty?
+          oldtf = too_fast
+          too_fast = [too_fast, 300].max
+          too_fast*= 2
+          log "Empty message from server, extra delay multiplier #{oldtf} -> #{too_fast}"
+        end
+        quit_msg = "Unparseable Server Message: #{e.message.inspect}"
+        retry
       rescue ServerError => e
-        # received an ERROR from the server
         quit_msg = "server ERROR: " + e.message
-        too_fast = e.message.index("reconnect too fast")
+        debug quit_msg
+        idx = e.message.index("connect too fast")
+        debug "'connect too fast' @ #{idx}"
+        if idx
+          oldtf = too_fast
+          too_fast += (idx+1)*2
+          log "Reconnecting too fast, extra delay multiplier #{oldtf} -> #{too_fast}"
+        end
+        idx = e.message.index(/a(uto)kill/i)
+        debug "'autokill' @ #{idx}"
+        if idx
+          # we got auto-killed. since we don't have an easy way to tell
+          # if it's permanent or temporary, we just set a rather high
+          # reconnection timeout
+          oldtf = too_fast
+          too_fast += (idx+1)*5
+          log "Killed by server, extra delay multiplier #{oldtf} -> #{too_fast}"
+        end
         retry
       rescue DBFatal => e
         fatal "fatal db error: #{e.pretty_inspect}"

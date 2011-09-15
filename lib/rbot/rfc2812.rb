@@ -6,6 +6,9 @@
 # This module defines the Irc::Client class, a class that can handle and
 # dispatch messages based on RFC 2821 (Internet Relay Chat: Client Protocol)
 
+class ServerMessageParseError < ServerError
+end
+
 module Irc
   # - The server sends Replies 001 to 004 to a user upon
   #   successful registration.
@@ -1033,7 +1036,7 @@ module Irc
       data[:serverstring] = serverstring
 
       unless serverstring.chomp =~ /^(:(\S+)\s)?(\S+)(\s(.*))?$/
-        raise ServerError, "Unparseable Server Message!!!: #{serverstring.inspect}"
+        raise ServerMessageParseError, (serverstring.chomp rescue serverstring)
       end
 
       prefix, command, params = $2, $3, $5

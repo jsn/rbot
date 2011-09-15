@@ -214,7 +214,10 @@ class Timer
   end
 
   def stop
-    raise 'already stopped' unless @thread
+    unless @thread
+      warning 'trying to stop already stopped timer'
+      return
+    end
     debug "stopping timer #{self}..."
     @stopping = true
     self.synchronize { @tick.signal }
