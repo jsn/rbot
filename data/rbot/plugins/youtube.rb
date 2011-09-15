@@ -12,7 +12,7 @@ class YouTubePlugin < Plugin
   YOUTUBE_SEARCH = "http://gdata.youtube.com/feeds/api/videos?vq=%{words}&orderby=relevance"
   YOUTUBE_VIDEO = "http://gdata.youtube.com/feeds/api/videos/%{id}"
 
-  YOUTUBE_VIDEO_URLS = %r{youtube.com/(?:watch\?v=|v/)(.*?)(&.*)?$}
+  YOUTUBE_VIDEO_URLS = %r{youtube.com/(?:watch\?(?:.*&)?v=|v/)(.*?)(&.*)?$}
 
   Config.register Config::IntegerValue.new('youtube.hits',
     :default => 3,
