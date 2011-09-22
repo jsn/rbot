@@ -515,7 +515,7 @@ class UnoGame
       announce _("%{lp}'s move was %{b}not%{b} legal, %{lp} must pick %{b}%{n}%{b} cards and play again!") % {
         :cp => cp, :lp => lp, :b => Bold, :n => @picker
       }
-      lp.cards << @discard # put the W+4 back in place
+      played = @discard # store the misplayed W+4
 
       # reset the discard
       @color = @last_color.dup
@@ -527,7 +527,10 @@ class UnoGame
 
       # force the player to play the current cards
       @must_play = lp.cards.dup
+      # but not the same (type of) card he misplayed, though
+      @must_play.delete(played)
 
+      lp.cards << played # reinstate the W+4 in the list of player cards
       # give him the penalty cards
       deal(lp, @picker)
       @picker = 0
