@@ -175,9 +175,13 @@ class Imdb
       end
 
       ratings = "no votes"
-      m = resp.body.match(/Users rated this ([0-9.]+)\/10 \(([0-9,]+) votes\)/m)
-      if m
-        ratings = "#{m[1]}/10 (#{m[2]} voters)"
+      # parse imdb rating value:
+      if resp.body.match(/itemprop="ratingValue">([^<]+)</)
+        ratings = "#{$1}/10"
+      end
+      # parse imdb rating count:
+      if resp.body.match(/itemprop="ratingCount">([^<]+)</)
+        ratings += " (#{$1} voters)"
       end
 
       genre = Array.new
