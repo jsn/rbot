@@ -987,6 +987,11 @@ class Bot
       end
 
       connect
+    rescue DBFatal => e
+      fatal "fatal db error: #{e.pretty_inspect}"
+      DBTree.stats
+      log_session_end
+      exit 2
     rescue Exception => e
       error e
       will_wait = true
