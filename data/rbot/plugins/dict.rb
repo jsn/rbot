@@ -141,15 +141,20 @@ class DictPlugin < Plugin
         url << "?view=uk"
       end
       h = @bot.httputil.get(url, :max_redir => 5)
-      if h and h.match(/<h2>#{word}<\/h2>(.*)Perform/m)
-        m.reply("#{word} : #{url}") unless justcheck
-        defn = $1
+      if h
+	defs = h.split("<span class=\"definition\">")
+	defs = defs[1..-1].map {|d| d.split("</span>")[0]}
+        if defs.size == 0
+	  return false if justcheck
+	  m.reply "#{word} not found"
+	  return false
+	end
+	m.reply("#{word}: #{url}") unless justcheck
+	defn = defs[0]
         m.reply("#{Bold}%s#{Bold}: %s" % [word, defn.ircify_html(:nbsp => :space)], :overlong => :truncate)
         return true
       end
     }
-    return false if justcheck
-    m.reply "#{word} not found"
   end
 
   def is_british?(word)
