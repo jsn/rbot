@@ -726,6 +726,11 @@ class MarkovPlugin < Plugin
     m.reply "Markov status: chains: #{@chains.length} forward, #{@rchains.length} reverse, queued phrases: #{@learning_queue.size}"
   end
 
+  def learn_url(m, params)
+    Utils.safe_exec("w3m -cols 10000 -dump '#{params[:url]}'").split(/[\r\n]+/).each {|l| @learning_queue.push l }
+    m.okay
+  end
+
 end
 
 plugin = MarkovPlugin.new
