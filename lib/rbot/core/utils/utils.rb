@@ -127,7 +127,7 @@ rescue LoadError
 
         # Some blogging and forum platforms use spans or divs with a 'body' or 'message' or 'text' in their class
         # to mark actual text
-        AFTER_PAR1_REGEX = /<\w+\s+[^>]*(?:body|message|text)[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
+        AFTER_PAR1_REGEX = /<\w+\s+[^>]*(?:body|message|text|post)[^>]*>.*?<\/?(?:p|div|html|body|table|td|tr)(?:\s+[^>]*)?>/im
 
         # At worst, we can try stuff which is comprised between two <br>
         AFTER_PAR2_REGEX = /<br(?:\s+[^>]*)?\/?>.*?<\/?(?:br|p|div|html|body|table|td|tr)(?:\s+[^>]*)?\/?>/im
@@ -493,7 +493,11 @@ module ::Irc
 
     # HTML first par grabber without hpricot
     def Utils.ircify_first_html_par_woh(xml_org, opts={})
-      xml = xml_org.gsub(/<!--.*?-->/m, '').gsub(/<script(?:\s+[^>]*)?>.*?<\/script>/im, "").gsub(/<style(?:\s+[^>]*)?>.*?<\/style>/im, "")
+      xml = xml_org.gsub(/<!--.*?-->/m,
+                         "").gsub(/<script(?:\s+[^>]*)?>.*?<\/script>/im,
+                         "").gsub(/<style(?:\s+[^>]*)?>.*?<\/style>/im,
+                         "").gsub(/<select(?:\s+[^>]*)?>.*?<\/select>/im,
+                         "")
 
       strip = opts[:strip]
       strip = Regexp.new(/^#{Regexp.escape(strip)}/) if strip.kind_of?(String)
