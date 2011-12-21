@@ -39,6 +39,29 @@ class TwitterPlugin < Plugin
       :default => 3, :validate => Proc.new { |v| v > 0 && v <= 10},
       :desc => "Maximum number of status updates shown by 'twitter friends status'")
 
+  def twitter_filter(s)
+    loc = Utils.check_location(s, Regexp.new('twitter\.com/#!/.*/status/\d+'))
+    return nil unless loc
+    id = loc.first.match(/\/status\/(\d+)/)[1]
+    xml = @bot.httputil.get('http://api.twitter.com/1/statuses/show.xml?id=' + id)
+    return nil unless xml
+    root = REXML::Document.new(xml).root
+    status = {
+      :date => (Time.parse(root.elements["created_at"].text) rescue "<unknown>"),
+      :id => (root.elements["id"].text rescue "<unknown>"),
+      :text => (root.elements["text"].text.ircify_html rescue "<error>"),
+      :source => (root.elements["source"].text rescue "<unknown>"),
+      :user => (root.elements["user/name"].text rescue "<unknown>"),
+      :user_nick => (root.elements["user/screen_name"] rescue "<unknown>")
+      # TODO other entries
+    }
+    status[:nicedate] = String === status[:date] ? status[:date] : Utils.timeago(status[:date])
+    return {
+      :title => "#{status[:user]}/#{status[:id]}",
+      :content => "#{status[:text]} (#{status[:nicedate]} via #{status[:source]})"
+    }
+  end
+
   def initialize
     super
 
@@ -52,6 +75,8 @@ class TwitterPlugin < Plugin
         val
       end
     end
+
+    @bot.register_filter(:twitter, :htmlinfo) { |s| twitter_filter(s) }
   end
 
   def report_oauth_missing(m, failed_action)
