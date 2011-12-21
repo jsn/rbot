@@ -188,5 +188,5 @@ plugin.map 'tumblr configure [:channel]', :action => :configuration
 plugin.map 'tumblr deconfigure [:channel]', :action => :deconfigure
 plugin.map 'tumblr configure [:channel] :email :pwd [:group]',
   :action => :configure,
-  :requirements => {:channel => Regexp::Irc::GEN_CHAN, :email => /.+@.+/, :group => /[A-Za-z-]+/}
+  :requirements => {:channel => Regexp::Irc::GEN_CHAN, :email => /\S+@\S+/, :group => /[A-Za-z-.]+/}
 
