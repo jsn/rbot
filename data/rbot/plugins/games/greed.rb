@@ -20,92 +20,90 @@ class Greed < Plugin
     "Simple dice game. Rules: https://en.wikipedia.org/wiki/Greed_(dice_game)"
   end
 
-  def diceroll
+  SCORING = [
+    [ [1,2,3,4,5,6], 1200 ],
+    [ [2,2,3,3,4,4], 800 ],
+    [ [1]*6, 8000 ],
+    [ [1]*5, 4000 ],
+    [ [1]*4, 2000 ],
+    [ [1]*3, 1000 ],
+    [ [1],    100 ],
+    [ [2]*6, 1600 ],
+    [ [2]*5,  800 ],
+    [ [2]*4,  400 ],
+    [ [2]*3,  200 ],
+    [ [3]*6, 2400 ],
+    [ [3]*5, 1200 ],
+    [ [3]*4,  600 ],
+    [ [3]*3,  300 ],
+    [ [4]*6, 3200 ],
+    [ [4]*5, 1600 ],
+    [ [4]*4,  800 ],
+    [ [4]*3,  400 ],
+    [ [5]*6, 4000 ],
+    [ [5]*5, 2000 ],
+    [ [5]*4, 1000 ],
+    [ [5]*3,  500 ],
+    [ [5],     50 ],
+    [ [6]*6, 4800 ],
+    [ [6]*5, 2400 ],
+    [ [6]*4, 1200 ],
+    [ [6]*3,  600 ],
+  ]
+
+  def diceroll(ndice=6)
     dice = Array.new
-    for i in 0..5 do
-      dice[i] = rand(6) + 1
+    ndice.times do
+      dice << rand(6) + 1
     end
     dice.sort
   end
 
   def scores
     roll = diceroll
-    one =  two = three = four = five = six = score = 0
-    roll.each do |x|
-      case x
-      when 1
-        one += 1
-        if one == 3
-          score += 1000
-        elsif one == 6
-          score += 7000
-        else
-          score += 100
-        end
-      when 2
-        two += 1
-        if two == 3
-          score += 200
-        elsif two == 4
-          score += 400
-        end
-      when 3
-        three += 1
-        if three == 3
-          score += 300
-        elsif three == 5
-          score += 1200
-        end
-      when 4
-        four += 1
-        if four == 3
-          score += 400
-        elsif four == 6
-          score += 3600
-        end
-      when 5
-        five += 1
-        if five == 3
-          score += 500
-        else
-          score += 50
-        end
-      when 6
-        six += 6
-        if six == 3
-          score += 600
-        end
+    score = 0
+    groups = []
+    remain = roll.dup
+    SCORING.each do |dice, dscore|
+      idx = remain.index(dice.first)
+      if idx and remain[idx,dice.size] == dice
+        groups << [dice, dscore]
+        remain -= dice
+        score += dscore
       end
     end
-    if roll == [1,2,3,4,5,6]
-      score = 1200
-    elsif roll == [2,2,3,3,4,4]
-      score = 800
-    end
-    [score, roll]
+    groups << [remain, 0]
+    [roll, score, groups]
   end
 
   def greed(m, params)
     player = scores
-    mhash = {m.sourcenick => player[0]}
+    mhash = {m.sourcenick => player[1]}
     @scoreboard.merge! mhash
-    m.reply "You have #{player[0]} points. (#{player[1].join(" ")})"
+    m.reply _("you rolled (%{roll}) for %{pts} points (%{groups})") % {
+      :roll => player[0].join(' '),
+      :pts => player[1],
+      :groups => player[2].map { |d, s| "#{d.join(' ')} => #{s}"}.join(', ')
+    }
     if params[:single] == "bot"
       bot = scores
-      m.reply "I have #{bot[0]} points. (#{bot[1].join(" ")})"
-      if player[0] < bot[0]
-        m.reply "Bot wins!"
+      m.reply _("I rolled (%{roll}) for %{pts} points (%{groups})") % {
+        :roll => bot[0].join(' '),
+        :pts => bot[1],
+        :groups => bot[2].map { |d, s| "#{d.join(' ')} => #{s}"}.join(', ')
+      }
+      if player[1] < bot[1]
+        m.reply _("I win!")
       else
-        m.reply "Human player wins!"
+        m.reply _("You win!")
       end
     end
     if @scoreboard.values.size == 2
-      if @scoreboard.values[0] > @scoreboard.values[1]
-        m.reply "#{@scoreboard.keys.first} wins!"
-      else
-        m.reply "#{@scoreboard.keys.last} wins!"
-      end
-    @scoreboard.clear
+      m.reply _("%{who} wins!") % {
+        :who => @scoreboard.values[0] > @scoreboard.values[1] ?
+                @scoreboard.keys.first : @scoreboard.keys.last
+      }
+      @scoreboard.clear
     end
   end
 end
