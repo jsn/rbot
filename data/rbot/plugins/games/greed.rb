@@ -25,7 +25,7 @@ class Greed < Plugin
     for i in 0..5 do
       dice[i] = rand(6) + 1
     end
-    dice
+    dice.sort
   end
 
   def scores
@@ -77,9 +77,9 @@ class Greed < Plugin
         end
       end
     end
-    if roll.sort == [1,2,3,4,5,6]
+    if roll == [1,2,3,4,5,6]
       score = 1200
-    elsif roll.sort == [2,2,3,3,4,4]
+    elsif roll == [2,2,3,3,4,4]
       score = 800
     end
     [score, roll]
@@ -89,10 +89,10 @@ class Greed < Plugin
     player = scores
     mhash = {m.sourcenick => player[0]}
     @scoreboard.merge! mhash
-    m.reply "You have #{player[0]} points. (#{player[1].join("-")})"
+    m.reply "You have #{player[0]} points. (#{player[1].join(" ")})"
     if params[:single] == "bot"
       bot = scores
-      m.reply "I have #{bot[0]} points. (#{bot[1].join("-")})"
+      m.reply "I have #{bot[0]} points. (#{bot[1].join(" ")})"
       if player[0] < bot[0]
         m.reply "Bot wins!"
       else
