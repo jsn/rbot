@@ -14,6 +14,7 @@ class Greed < Plugin
   def initialize
     super
     @scoreboard = {}
+    @players = []
   end
 
   def help(plugin, topic="")
@@ -79,6 +80,11 @@ class Greed < Plugin
   def greed(m, params)
     player = scores
     mhash = {m.sourcenick => player[1]}
+    @players.push mhash.to_a[0][0]
+    if @players[-1] == @players[-2]
+      m.reply _("Oh you, %{who}! You can't go twice in a row!") % {:who => @players[-1]}
+      return
+    end
     @scoreboard.merge! mhash
     m.reply _("you rolled (%{roll}) for %{pts} points (%{groups})") % {
       :roll => player[0].join(' '),
@@ -97,6 +103,8 @@ class Greed < Plugin
       else
         m.reply _("You win!")
       end
+      @players.clear
+      return
     end
     if @scoreboard.values.size == 2
       m.reply _("%{who} wins!") % {
@@ -104,6 +112,7 @@ class Greed < Plugin
                 @scoreboard.keys.first : @scoreboard.keys.last
       }
       @scoreboard.clear
+      @players.clear
     end
   end
 end
