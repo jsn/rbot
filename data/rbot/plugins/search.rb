@@ -183,13 +183,15 @@ class SearchPlugin < Plugin
 
     debug "#{html.size} bytes of html recieved"
 
-    intro, result, junk = html.split(/\s*<br\/>\s*/, 3)
-    debug "result: #{result.inspect}"
+    splits = html.split(/\s*<br\/>\s*/)
+    candidates = splits.select { |section| section.include? ' = ' }
+    debug "candidates: #{candidates.inspect}"
 
-    unless result.include? '='
+    if candidates.empty?
       m.reply "couldn't calculate #{what}"
       return
     end
+    result = candidates.first
 
     debug "replying with: #{result.inspect}"
     m.reply result.ircify_html
