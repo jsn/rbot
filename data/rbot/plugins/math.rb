@@ -39,6 +39,11 @@ class MathPlugin < Plugin
       expr.gsub!(/\b#{k}\b/, v)
     }
 
+    # ruby doesn't like floating-point values without a 0
+    # in front of them, so find any non-digit followed by
+    # a .<digits> and insert a 0 before the .
+    expr.gsub!(/(\D|^)(\.\d+)/,'\10\2')
+
     while expr =~ /(exp ([\w\d]+))/
       exp = $1
       val = Math.exp($2).to_s
