@@ -10,7 +10,13 @@
 require 'resolv'
 require 'net/http'
 require 'cgi'
-require 'iconv'
+begin
+  require 'iconv'
+rescue LoadError => e
+  error "Couldn't load 'iconv':  #{e}"
+  error "Non-UTF-8 webpages will not be properly supported"
+end
+
 begin
   require 'net/https'
 rescue LoadError => e
@@ -66,6 +72,7 @@ module ::Net
 
     def body_to_utf(str)
       charsets = self.body_charset(str) or return str
+      return str unless defined? Iconv
 
       charsets.reverse_each do |charset|
         # XXX: this one is really ugly, but i don't know how to make it better
@@ -122,7 +129,7 @@ module ::Net
       when /^(?:iso-8859-\d+|windows-\d+|utf-8|utf8)$/i
         # B0rked servers (Freshmeat being one of them) sometimes return the charset
         # in the content-encoding; in this case we assume that the document has
-        # a standarc content-encoding
+        # a standard content-encoding
         old_hsh = self.to_hash
         self['content-type']= self['content-type']+"; charset="+method.downcase
         warning "Charset vs content-encoding confusion, trying to recover: from\n#{old_hsh.pretty_inspect}to\n#{self.to_hash.pretty_inspect}"
