@@ -17,6 +17,9 @@ Core requirements
                             For Windows instructions, check at the bottom
                             of this file.
 
+      iconv                 this is needed by the httputil object and by the IRC engine
+                            to ensure consistent encoding across the bot
+
       net/http 1.2+
       net/https             (for debian, this will also need libopenssl-ruby)
       socket
