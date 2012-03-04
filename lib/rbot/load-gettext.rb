@@ -43,7 +43,29 @@ end
   else
     warning 'This version of ruby-gettext does not support non-cached mode; mo files are not reloaded when setting language'
   end
-  bindtextdomain 'rbot'
+
+  begin
+    bindtextdomain 'rbot'
+  rescue NoMethodError => e
+    error e
+    warning 'Trying to work around RubyGems/GetText incompatibility'
+    module ::Gem
+      def self.all_load_paths
+        result = []
+
+        Gem.path.each do |gemdir|
+          each_load_path all_partials(gemdir) do |load_path|
+            result << load_path
+          end
+        end
+
+        result
+      end
+    end
+    retry
+  end
+
+
 
   module GetText
     # patch for ruby-gettext 1.x to cope with anonymous modules used by rbot.
