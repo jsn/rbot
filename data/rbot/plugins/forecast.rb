@@ -20,13 +20,13 @@ class LatLong
     # [+return+] latitude,longitude
     def get_lat_long(loc)
         loc = url_encode(loc)
-        url="http://api.local.yahoo.com/MapsService/V1/geocode?appid=mrchucho_rbot_weather&location=#{loc}"
+        url="http://where.yahooapis.com/geocode?appid=mrchucho_rbot_weather&location=#{loc}"
         lat,long = 0,0
         begin
             open(url) do |xmldoc|
                 results = (REXML::Document.new xmldoc).root
-                lat = results.elements["//Latitude/text()"].to_s
-                long = results.elements["//Longitude/text()"].to_s
+                lat = results.elements["//latitude/text()"].to_s
+                long = results.elements["//longitude/text()"].to_s
             end
         rescue => err
             raise err #?
@@ -36,7 +36,7 @@ class LatLong
 end
 
 class Forecast
-    WSDL_URI="http://www.nws.noaa.gov/forecasts/xml/SOAP_server/ndfdXMLserver.php?wsdl"
+    WSDL_URI="http://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl"
     def initialize(lat,long)
         @lat,@long=lat,long
         # this extra step is for backward/forward compatibility
@@ -50,7 +50,7 @@ class Forecast
 private
     def retrieve
         forecast = @forecaster.NDFDgenByDay(
-            @lat,@long,Time.now.strftime("%Y-%m-%d"),2,"24 hourly")
+            @lat,@long,Time.now.strftime("%Y-%m-%d"),2,"e","24 hourly")
         (REXML::Document.new(forecast)).root
     end
     def parse(xml)
