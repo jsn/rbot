@@ -735,6 +735,7 @@ end
 
 plugin = MarkovPlugin.new
 plugin.map 'markov delay :delay', :action => "set_delay"
+plugin.map 'markov learn_url :url', :action => "learn_url"
 plugin.map 'markov delay', :action => "set_delay"
 plugin.map 'markov ignore :action :option', :action => "ignore"
 plugin.map 'markov ignore :action', :action => "ignore"
