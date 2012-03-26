@@ -130,7 +130,9 @@ class WeatherPlugin < Plugin
 
     wu_units = String.new
 
-    case (units || @bot.config['weather.units']).to_sym
+    units = @bot.config['weather.units'] unless units
+
+    case units.to_sym
     when :english, :metric
       wu_units = "_#{units}"
     when :both
