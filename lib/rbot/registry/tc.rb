@@ -376,6 +376,7 @@ class Bot
       # debug "closing registry #{registry}"
       return if !@registry
       registry.close
+      @registry = nil
     end
 
     # convert value to string form for storing in the registry
