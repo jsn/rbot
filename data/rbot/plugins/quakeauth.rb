@@ -79,6 +79,7 @@ class QPlugin < Plugin
         @bot.say @source, "username or password incorrect" if @source
       when /you are now logged in/i
         @bot.say @source, "authed successfully" if @source
+        @bot.plugins.delegate('identified')
       when /auth is not available/
         @bot.say @source, "already authed" if @source
       end
