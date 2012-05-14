@@ -17,11 +17,10 @@
 
 GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
 GOOGLE_WAP_SEARCH = "http://www.google.com/m/search?hl=en&q="
-# GOOGLE_WAP_LINK = /<a accesskey="(\d)" href=".*?u=(.*?)">(.*?)<\/a>/im
-GOOGLE_WAP_LINK = /<a href="(?:.*?u=(.*?)|(http:\/\/.*?))">(.*?)<\/a>/im
+GOOGLE_WAP_LINK = /result">(?:<div[^>]*>)?<a href="([^"]+)"[^>]*>(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h[1-6] class=r[^>]*><b>(.+?)</b>}
 GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
-GOOGLE_DEF_RESULT = %r{<br/>\s*(.*?)\s*<br/>\s*(.*?)<a href="(/dictionary\?[^"]*)"[^>]*>(More »)\s*</a>\s*<br/>}
+GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 class SearchPlugin < Plugin
@@ -90,7 +89,7 @@ class SearchPlugin < Plugin
       m.reply "error googling for #{what}"
       return
     end
-    results = wml.match('<p align="center">').pre_match.scan(GOOGLE_WAP_LINK)
+    results = wml.scan(GOOGLE_WAP_LINK)
 
     if results.length == 0
       m.reply "no results found for #{what}"
@@ -98,27 +97,46 @@ class SearchPlugin < Plugin
     end
 
     single ||= (results.length==1)
+    pretty = []
 
-    urls = Array.new
-    n = 0
-    results = results[0...hits].map { |res|
-      n += 1
-      t = res[2].ircify_html(:img => "[%{src} %{alt} %{dimensions}]").strip
-      u = URI.unescape(res[0] || res[1])
-      urls.push(u)
-      "%{n}%{b}%{t}%{b}%{sep}%{u}" % {
-        :n => (single ? "" : "#{n}. "),
-        :sep => (single ? " -- " : ": "),
-        :b => Bold, :t => t, :u => u
-      }
-    }
+    begin
+      urls = Array.new
 
-    if params[:lucky]
-      m.reply results.first
+      debug results
+      results.each do |res|
+        t = res[1].ircify_html(:img => "[%{src} %{alt} %{dimensions}]").strip
+        u = res[0]
+        if u.sub!(%r{^http://www.google.com/aclk\?},'')
+          u = CGI::parse(u)['adurl'].first
+          debug "skipping ad for #{u}"
+          next
+        elsif u.sub!(%r{^http://www.google.com/gwt/x\?},'')
+          u = CGI::parse(u)['u'].first
+        elsif u.sub!(%r{^/url\?},'')
+          u = CGI::parse(u)['q'].first
+        end
+        urls.push(u)
+        pretty.push("%{n}%{b}%{t}%{b}%{sep}%{u}" % {
+          :n => (single ? "" : "#{urls.length}. "),
+          :sep => (single ? " -- " : ": "),
+          :b => Bold, :t => t, :u => u
+        })
+        break if urls.length == hits
+      end
+    rescue => e
+      m.reply "failed to understand what google found for #{what}"
+      error e
+      debug wml
+      debug results
       return
     end
 
-    result_string = results.join(" | ")
+    if params[:lucky]
+      m.reply pretty.first
+      return
+    end
+
+    result_string = pretty.join(" | ")
 
     # If we return a single, full result, change the output to a more compact representation
     if single
@@ -182,16 +200,16 @@ class SearchPlugin < Plugin
     end
 
     debug "#{html.size} bytes of html recieved"
+    debug html
 
-    splits = html.split(/\s*<br\/>\s*/)
-    candidates = splits.select { |section| section.include? ' = ' }
+    candidates = html.match(/font-weight:bold">(.*?)<\/(?:span|div)>/)
     debug "candidates: #{candidates.inspect}"
 
-    if candidates.empty?
+    if candidates.nil?
       m.reply "couldn't calculate #{what}"
       return
     end
-    result = candidates.first
+    result = candidates[1]
 
     debug "replying with: #{result.inspect}"
     m.reply result.ircify_html
@@ -250,20 +268,9 @@ class SearchPlugin < Plugin
       return
     end
 
-    gdef_link = "http://www.google.com" + CGI.unescapeHTML(results[0][2]) # could be used to extract all defs
     head = results[0][0].ircify_html
     text = results[0][1].ircify_html
     m.reply "#{head} -- #{text}"
-
-    ### gdef_link could be used for something like
-    # html_defs = @bot.httputil.get(gdef_link)
-    # related_index = html_defs.index(/Related phrases:/, 0)
-    # defs_index = html_defs.index(/Definitions of <b>/, related_index)
-
-    # related = html_defs[related_index..defs_index]
-    # defs = html_defs[defs_index..-1]
-
-    # m.reply defs.gsub('  <br/>','<li>').ircify_html
   end
 
   def wikipedia(m, params)
