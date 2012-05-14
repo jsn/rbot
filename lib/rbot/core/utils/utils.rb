@@ -355,7 +355,10 @@ module ::Irc
         return str.gsub(/(&(.+?);)/) {
           symbol = $2
           # remove the 0-paddng from unicode integers
-          if symbol =~ /^#(\d+)$/
+          case symbol
+          when /^#x([0-9a-fA-F]+)$/
+            symbol = $1.to_i(16).to_s
+          when /^#(\d+)$/
             symbol = $1.to_i.to_s
           end
 
