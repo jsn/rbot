@@ -29,7 +29,11 @@ end
 
   include GetText
 
-  rbot_locale_path = File.join(Irc::Bot::Config.datadir, "../locale/%{locale}/LC_MESSAGES/%{name}.mo")
+  rbot_locale_path = File.join(Irc::Bot::Config.datadir,
+    gettext_version < [2, 2, 0] ?
+      "../locale/%{locale}/LC_MESSAGES/%{name}.mo" :
+      "../locale/%{lang}/LC_MESSAGES/%{name}.mo")
+
   if gettext_version < [2, 0, 0]
     add_default_locale_path(rbot_locale_path)
   else
