@@ -183,6 +183,9 @@ class MarkovPlugin < Plugin
     @upgrade_queue.push nil
 
     @upgrade_thread = Thread.new do
+      @registry.recovery = Proc.new { |val|
+        return [val]
+      }
       logfile = File.open(@bot.path('markov-conversion.log'), 'a')
       logfile.puts "=== conversion thread started #{Time.now} ==="
       while k = @upgrade_queue.pop
@@ -199,6 +202,7 @@ class MarkovPlugin < Plugin
       end
       logfile.puts "=== conversion thread stopped #{Time.now} ==="
       logfile.close
+      @registry.recovery = nil
     end
     @upgrade_thread.priority = -1
   end
