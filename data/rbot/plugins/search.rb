@@ -17,7 +17,7 @@
 
 GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
 GOOGLE_WAP_SEARCH = "http://www.google.com/m/search?hl=en&q="
-GOOGLE_WAP_LINK = /result">(?:<div[^>]*>)?<a href="([^"]+)"[^>]*>(.*?)<\/a>/im
+GOOGLE_WAP_LINK = /"r">(?:<div[^>]*>)?<a href="([^"]+)"[^>]*>(.*?)<\/a>/im
 GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h[1-6] class=r[^>]*><b>(.+?)</b>}
 GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
 GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
