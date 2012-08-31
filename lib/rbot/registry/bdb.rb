@@ -409,7 +409,7 @@ class Bot
             return @recovery.call(val)
           rescue Exception => ee
             error _("marshal recovery failed, trying default")
-            debug ee
+            error ee
           end
         end
         return default
