@@ -18,7 +18,7 @@
 GOOGLE_SEARCH = "http://www.google.com/search?oe=UTF-8&q="
 GOOGLE_WAP_SEARCH = "http://www.google.com/m/search?hl=en&q="
 GOOGLE_WAP_LINK = /"r">(?:<div[^>]*>)?<a href="([^"]+)"[^>]*>(.*?)<\/a>/im
-GOOGLE_CALC_RESULT = %r{<img src=/images/calc_img\.gif(?: width=40 height=30 alt="")?>.*?<h[1-6] class=r[^>]*><b>(.+?)</b>}
+GOOGLE_CALC_RESULT = %r{<h[1-6] class="r" [^>]*>(.+?)</h}
 GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <b>(.*)<\/b> for}
 GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
@@ -202,7 +202,7 @@ class SearchPlugin < Plugin
     debug "#{html.size} bytes of html recieved"
     debug html
 
-    candidates = html.match(/font-weight:bold">(.*?)<\/(?:span|div)>/)
+    candidates = html.match(GOOGLE_CALC_RESULT)
     debug "candidates: #{candidates.inspect}"
 
     if candidates.nil?
