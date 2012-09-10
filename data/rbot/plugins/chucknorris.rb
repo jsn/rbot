@@ -11,7 +11,7 @@ class ChuckNorrisPlugin < Plugin
   def initialize
     if path = find_facts_file('chucknorris.yml.gz')
       fyml = Zlib::GzipReader.open(path)
-    elsif path = find_facts_File('chucknorris.yml')
+    elsif path = find_facts_file('chucknorris.yml')
       fyml = open(path)
     else
       raise "Error: Couldn't find chucknorris.yml[.gz]"
