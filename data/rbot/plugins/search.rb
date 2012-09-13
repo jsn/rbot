@@ -23,6 +23,8 @@ GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <
 GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
+DDG_API_SEARCH = "http://api.duckduckgo.com/?format=xml&no_html=1&no_redirect=0&q="
+
 class SearchPlugin < Plugin
   Config.register Config::IntegerValue.new('duckduckgo.hits',
     :default => 3, :validate => Proc.new{|v| v > 0},
@@ -63,20 +65,18 @@ class SearchPlugin < Plugin
   end
 
   def duckduckgo(m, params)
-    terms = params[:words].to_s
-    # DuckDuckGo is picky about white spaces
-    # in the url, so we can't use CGI.escape.
-    terms.gsub!(/\%/, '%25') if terms.include? "%"
-    terms.gsub!(/\+|\s\+\s|\s\+|\+\s/, ' %2B ') if terms.include? "+"
-    terms.gsub!(/\-|\s\-\s|\s\-|\-\s/, ' %2D ') if terms.include? "-"
-    terms.gsub!(/\!/, '%21') if terms.include? "!"
-    terms.gsub!(/\%/, ' %') if terms.include? "%"
-    feed = Net::HTTP.get 'api.duckduckgo.com',
-           "/?q=#{terms}&format=xml&skip_disambig=1&no_html=1&no_redirect=0"
-    if feed.nil? or feed.empty?
-      m.reply "error connecting"
+    what = params[:words].to_s
+    terms = CGI.escape what
+    url = DDG_API_SEARCH + terms
+    begin
+      feed = @bot.httputil.get(url)
+      raise unless feed
+    rescue => e
+      m.reply "error duckduckgoing for #{what}"
       return
     end
+    debug feed
+
     xml = REXML::Document.new feed
     heading = xml.elements['//Heading/text()'].to_s
     # answer is returned for calculations
