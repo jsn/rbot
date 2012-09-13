@@ -23,12 +23,15 @@ GOOGLE_COUNT_RESULT = %r{<font size=-1>Results <b>1<\/b> - <b>10<\/b> of about <
 GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
-DDG_API_SEARCH = "http://api.duckduckgo.com/?format=xml&no_html=1&no_redirect=0&q="
+DDG_API_SEARCH = "http://api.duckduckgo.com/?format=xml&no_html=1&skip_disambig=1&no_redirect=0&q="
 
 class SearchPlugin < Plugin
   Config.register Config::IntegerValue.new('duckduckgo.hits',
     :default => 3, :validate => Proc.new{|v| v > 0},
     :desc => "Number of hits to return from searches")
+  Config.register Config::IntegerValue.new('duckduckgo.first_par',
+    :default => 0,
+    :desc => "When set to n > 0, the bot will return the first paragraph from the first n search hits")
   Config.register Config::IntegerValue.new('google.hits',
     :default => 3,
     :desc => "Number of hits to return from Google searches")
@@ -68,6 +71,11 @@ class SearchPlugin < Plugin
     what = params[:words].to_s
     terms = CGI.escape what
     url = DDG_API_SEARCH + terms
+
+    hits = @bot.config['duckduckgo.hits']
+    first_pars = params[:firstpar] || @bot.config['duckduckgo.first_par']
+    single = params[:lucky] || (hits == 1 and first_pars == 1)
+
     begin
       feed = @bot.httputil.get(url)
       raise unless feed
@@ -81,39 +89,84 @@ class SearchPlugin < Plugin
     heading = xml.elements['//Heading/text()'].to_s
     # answer is returned for calculations
     answer = xml.elements['//Answer/text()'].to_s
-    if heading.empty? and answer.empty?
+    # abstract is returned for definitions etc
+    abstract = xml.elements['//AbstractText/text()'].to_s
+    unless abstract.empty?
+      absrc = xml.elements['//AbstractSource/text()']
+      aburl = xml.elements['//AbstractURL/text()']
+    end
+    # but also definition (yes, you can have both, see e.g. printf)
+    definition = xml.elements['//Definition/text()'].to_s
+    unless definition.empty?
+      defsrc = xml.elements['//Definition/@source/text()'].to_s
+      defurl = xml.elements['//Definition/@url/text()'].to_s
+    end
+
+    if heading.empty? and answer.empty? and abstract.empty? and definition.empty?
       m.reply "no results"
       return
     end
-    if terms =~ /^define/
-      if heading.empty?
-        m.reply "no definition found"
-        return
-      end
-      # Format and return a different string if it is a definition search.
-      definition = xml.elements['//AbstractText/text()'].to_s
-      source = " -- #{xml.elements['//AbstractURL/text()']}"
-      m.reply Bold + heading + ": " + Bold + definition + source
-    elsif heading.empty?
-      # return a calculation
+
+    # if we got a one-shot answer (e.g. a calculation, return it)
+    unless answer.empty?
       m.reply answer
-    else
-      # else, return a zeroclick search
-      links, text = [], []
-      hits = @bot.config['duckduckgo.hits']
-      xml.elements.each("//RelatedTopics/RelatedTopic/FirstURL") { |element|
-        links << element.text
-      }
-      xml.elements.each("//RelatedTopics/RelatedTopic/Text") { |element|
-        text << " #{element.text}"
-      }
-      num = 0
-      m.reply Bold + heading + ": " + Bold
-      until num >= hits
-        m.reply links[num] + text[num]
-        num += 1
-      end
+      return
     end
+
+    # otherwise, return the abstract, followed by as many hits as found
+    unless heading.empty? or abstract.empty?
+      m.reply "%{bold}%{heading}:%{bold} %{abstract} -- %{absrc} %{aburl}" % {
+        :bold => Bold, :heading => heading,
+        :abstract => abstract, :absrc => absrc, :aburl => aburl
+      }
+    end
+    unless heading.empty? or definition.empty?
+      m.reply "%{bold}%{heading}:%{bold} %{abstract} -- %{absrc} %{aburl}" % {
+        :bold => Bold, :heading => heading,
+        :abstract => definition, :absrc => defsrc, :aburl => defurl
+      }
+    end
+    # return zeroclick search results
+    links, texts = [], []
+    xml.elements.each("//Results/Result/FirstURL") { |element|
+      links << element.text
+      break if links.size == hits
+    }
+    return if links.empty?
+
+    xml.elements.each("//Results/Result/Text") { |element|
+      texts << " #{element.text}"
+      break if links.size == hits
+    }
+    # TODO see treatment of `single` in google search
+
+    single ||= (links.length == 1)
+    pretty = []
+    links.each_with_index do |u, i|
+      t = texts[i]
+      pretty.push("%{n}%{b}%{t}%{b}%{sep}%{u}" % {
+        :n => (single ? "" : "#{i}. "),
+        :sep => (single ? " -- " : ": "),
+        :b => Bold, :t => t, :u => u
+      })
+    end
+
+    result_string = pretty.join(" | ")
+
+    # If we return a single, full result, change the output to a more compact representation
+    if single
+      fp = first_pars > 0 ? " --  #{Utils.get_first_pars(links, first_pars)}" : ""
+      m.reply("Result for %{what}: %{string}%{fp}" % {
+        :what => what, :string => result_string, :fp => fp
+      }, :overlong => :truncate)
+      return
+    end
+
+    m.reply "Results for #{what}: #{result_string}", :split_at => /\s+\|\s+/
+
+    return unless first_pars > 0
+
+    Utils.get_first_pars urls, first_pars, :message => m
   end
 
   def google(m, params)
