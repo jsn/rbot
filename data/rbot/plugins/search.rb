@@ -24,6 +24,9 @@ GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 class SearchPlugin < Plugin
+  Config.register Config::IntegerValue.new('duckduckgo.hits',
+    :default => 3, :validate => Proc.new{|v| v > 0},
+    :desc => "Number of hits to return from searches")
   Config.register Config::IntegerValue.new('google.hits',
     :default => 3,
     :desc => "Number of hits to return from Google searches")
@@ -39,6 +42,9 @@ class SearchPlugin < Plugin
 
   def help(plugin, topic="")
     case topic
+    when "ddg"
+      "Use '#{topic} <string>' to return a search or calculation from " +
+      "DuckDuckGo. Use #{topic} define <string> to return a definition."
     when "search", "google"
       "#{topic} <string> => search google for <string>"
     when "gcalc"
@@ -52,7 +58,61 @@ class SearchPlugin < Plugin
     when "unpedia"
       "unpedia <string> => search for <string> on Uncyclopedia"
     else
-      "search <string> (or: google <string>) => search google for <string> | wp <string> => search for <string> on Wikipedia | unpedia <string> => search for <string> on Uncyclopedia"
+      "search <string> (or: google <string>) => search google for <string> | ddg <string> to search DuckDuckGo | wp <string> => search for <string> on Wikipedia | unpedia <string> => search for <string> on Uncyclopedia"
+    end
+  end
+
+  def duckduckgo(m, params)
+    terms = params[:words].to_s
+    # DuckDuckGo is picky about white spaces
+    # in the url, so we can't use CGI.escape.
+    terms.gsub!(/\%/, '%25') if terms.include? "%"
+    terms.gsub!(/\+|\s\+\s|\s\+|\+\s/, ' %2B ') if terms.include? "+"
+    terms.gsub!(/\-|\s\-\s|\s\-|\-\s/, ' %2D ') if terms.include? "-"
+    terms.gsub!(/\!/, '%21') if terms.include? "!"
+    terms.gsub!(/\%/, ' %') if terms.include? "%"
+    feed = Net::HTTP.get 'api.duckduckgo.com',
+           "/?q=#{terms}&format=xml&skip_disambig=1&no_html=1&no_redirect=0"
+    if feed.nil? or feed.empty?
+      m.reply "error connecting"
+      return
+    end
+    xml = REXML::Document.new feed
+    heading = xml.elements['//Heading/text()'].to_s
+    # answer is returned for calculations
+    answer = xml.elements['//Answer/text()'].to_s
+    if heading.empty? and answer.empty?
+      m.reply "no results"
+      return
+    end
+    if terms =~ /^define/
+      if heading.empty?
+        m.reply "no definition found"
+        return
+      end
+      # Format and return a different string if it is a definition search.
+      definition = xml.elements['//AbstractText/text()'].to_s
+      source = " -- #{xml.elements['//AbstractURL/text()']}"
+      m.reply Bold + heading + ": " + Bold + definition + source
+    elsif heading.empty?
+      # return a calculation
+      m.reply answer
+    else
+      # else, return a zeroclick search
+      links, text = [], []
+      hits = @bot.config['duckduckgo.hits']
+      xml.elements.each("//RelatedTopics/RelatedTopic/FirstURL") { |element|
+        links << element.text
+      }
+      xml.elements.each("//RelatedTopics/RelatedTopic/Text") { |element|
+        text << " #{element.text}"
+      }
+      num = 0
+      m.reply Bold + heading + ": " + Bold
+      until num >= hits
+        m.reply links[num] + text[num]
+        num += 1
+      end
     end
   end
 
@@ -323,6 +383,7 @@ end
 
 plugin = SearchPlugin.new
 
+plugin.map "ddg *words", :action => 'duckduckgo'
 plugin.map "search *words", :action => 'google', :threaded => true
 plugin.map "google *words", :action => 'google', :threaded => true
 plugin.map "lucky *words", :action => 'lucky', :threaded => true
@@ -333,4 +394,3 @@ plugin.map "gtime *words", :action => 'gtime', :threaded => true
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
 plugin.map "wp *words", :action => 'wikipedia', :threaded => true
 plugin.map "unpedia *words", :action => 'unpedia', :threaded => true
-
