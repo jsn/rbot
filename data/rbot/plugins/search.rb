@@ -24,6 +24,10 @@ GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 DDG_API_SEARCH = "http://api.duckduckgo.com/?format=xml&no_html=1&skip_disambig=1&no_redirect=0&q="
+
+WOLFRAM_API_SEARCH = "http://api.wolframalpha.com/v2/query?input=%{terms}&appid=%{key}&format=plaintext"
+           "&scantimeout=3.0&podtimeout=4.0&formattimeout=8.0&parsetimeout=5.0"
+           "&excludepodid=SeriesRepresentations:*"
 WOLFRAM_API_KEY = "4EU37Y-TX9WJG3JH3"
 
 class SearchPlugin < Plugin
@@ -390,15 +394,21 @@ class SearchPlugin < Plugin
   end
 
   def wolfram(m, params)
-    terms = CGI.escape(params[:words].to_s)
-    feed = Net::HTTP.get 'api.wolframalpha.com',
-           "/v2/query?input=#{terms}&appid=#{WOLFRAM_API_KEY}&format=plaintext"
-           "&scantimeout=3.0&podtimeout=4.0&formattimeout=8.0&parsetimeout=5.0"
-           "&excludepodid=SeriesRepresentations:*"
-    if feed.nil? or feed.empty?
-      m.reply "error connecting"
+    what = params[:words].to_s
+    terms = CGI.escape what
+    url = WOLFRAM_API_SEARCH % {
+      :terms => terms, :key => WOLFRAM_API_KEY
+    }
+
+    begin
+      feed = @bot.httputil.get(url)
+      raise unless feed
+    rescue => e
+      m.reply "error asking WolframAlfa about #{what}"
       return
     end
+    debug feed
+
     xml = REXML::Document.new feed
     if xml.elements['/queryresult'].attributes['error'] == "true"
       m.reply xml.elements['/queryresult/error/text()'].to_s
