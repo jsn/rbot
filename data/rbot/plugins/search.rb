@@ -479,7 +479,7 @@ end
 
 plugin = SearchPlugin.new
 
-plugin.map "ddg *words", :action => 'duckduckgo'
+plugin.map "ddg *words", :action => 'duckduckgo', :threaded => true
 plugin.map "search *words", :action => 'google', :threaded => true
 plugin.map "google *words", :action => 'google', :threaded => true
 plugin.map "lucky *words", :action => 'lucky', :threaded => true
@@ -487,7 +487,7 @@ plugin.map "gcount *words", :action => 'gcount', :threaded => true
 plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
 plugin.map "gdef *words", :action => 'gdef', :threaded => true
 plugin.map "gtime *words", :action => 'gtime', :threaded => true
-plugin.map "wa *words", :action => 'wolfram'
+plugin.map "wa *words", :action => 'wolfram', :threaded => true
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
 plugin.map "wp *words", :action => 'wikipedia', :threaded => true
 plugin.map "unpedia *words", :action => 'unpedia', :threaded => true
