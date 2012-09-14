@@ -24,6 +24,7 @@ GOOGLE_DEF_RESULT = %r{onebox_result">\s*(.*?)\s*<br/>\s*(.*?)<table}
 GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 DDG_API_SEARCH = "http://api.duckduckgo.com/?format=xml&no_html=1&skip_disambig=1&no_redirect=0&q="
+WOLFRAM_API_KEY = "4EU37Y-TX9WJG3JH3"
 
 class SearchPlugin < Plugin
   Config.register Config::IntegerValue.new('duckduckgo.hits',
@@ -58,12 +59,14 @@ class SearchPlugin < Plugin
       "gdef <term(s)> => use the google define mechanism to find a definition of <term(s)>"
     when "gtime"
       "gtime <location> => use the google clock to find the current time at <location>"
+    when "wa"
+      "wa <string> => searches WolframAlpha for <string>"
     when "wp"
       "wp [<code>] <string> => search for <string> on Wikipedia. You can select a national <code> to only search the national Wikipedia"
     when "unpedia"
       "unpedia <string> => search for <string> on Uncyclopedia"
     else
-      "search <string> (or: google <string>) => search google for <string> | ddg <string> to search DuckDuckGo | wp <string> => search for <string> on Wikipedia | unpedia <string> => search for <string> on Uncyclopedia"
+      "search <string> (or: google <string>) => search google for <string> | ddg <string> to search DuckDuckGo | wp <string> => search for <string> on Wikipedia | wa <string> => search for <string> on WolframAlpha | unpedia <string> => search for <string> on Uncyclopedia"
     end
   end
 
@@ -386,6 +389,36 @@ class SearchPlugin < Plugin
     m.reply "#{head} -- #{text}"
   end
 
+  def wolfram(m, params)
+    terms = CGI.escape(params[:words].to_s)
+    feed = Net::HTTP.get 'api.wolframalpha.com',
+           "/v2/query?input=#{terms}&appid=#{WOLFRAM_API_KEY}&format=plaintext"
+           "&scantimeout=3.0&podtimeout=4.0&formattimeout=8.0&parsetimeout=5.0"
+           "&excludepodid=SeriesRepresentations:*"
+    if feed.nil? or feed.empty?
+      m.reply "error connecting"
+      return
+    end
+    xml = REXML::Document.new feed
+    if xml.elements['/queryresult'].attributes['error'] == "true"
+      m.reply xml.elements['/queryresult/error/text()'].to_s
+      return
+    end
+    unless xml.elements['/queryresult'].attributes['success'] == "true"
+      m.reply "no data available"
+      return
+    end
+    answer = []
+    xml.elements.each("//pod/subpod/plaintext") { |element|
+      answer << element.text
+    }
+    # strip spaces and line breaks
+    answer[1].gsub!(/\n/, Bold + ' :: ' + Bold )
+    answer[1].gsub!(/\t/, ' ')
+    answer[1].gsub!(/\s+/, ' ')
+    m.reply answer[1].to_s
+  end
+
   def wikipedia(m, params)
     lang = params[:lang]
     site = "#{lang.nil? ? '' : lang + '.'}wikipedia.org"
@@ -444,6 +477,7 @@ plugin.map "gcount *words", :action => 'gcount', :threaded => true
 plugin.map "gcalc *words", :action => 'gcalc', :threaded => true
 plugin.map "gdef *words", :action => 'gdef', :threaded => true
 plugin.map "gtime *words", :action => 'gtime', :threaded => true
+plugin.map "wa *words", :action => 'wolfram'
 plugin.map "wp :lang *words", :action => 'wikipedia', :requirements => { :lang => /^\w\w\w?$/ }, :threaded => true
 plugin.map "wp *words", :action => 'wikipedia', :threaded => true
 plugin.map "unpedia *words", :action => 'unpedia', :threaded => true
