@@ -98,15 +98,28 @@ class SearchPlugin < Plugin
     answer = xml.elements['//Answer/text()'].to_s
     # abstract is returned for definitions etc
     abstract = xml.elements['//AbstractText/text()'].to_s
+    abfrom = ""
     unless abstract.empty?
-      absrc = xml.elements['//AbstractSource/text()']
-      aburl = xml.elements['//AbstractURL/text()']
+      absrc = xml.elements['//AbstractSource/text()'].to_s
+      aburl = xml.elements['//AbstractURL/text()'].to_s
+      unless absrc.empty? and aburl.empty?
+        abfrom = " --"
+        abfrom << " " << absrc unless absrc.empty?
+        abfrom << " " << aburl unless aburl.empty?
+      end
     end
+
     # but also definition (yes, you can have both, see e.g. printf)
     definition = xml.elements['//Definition/text()'].to_s
+    deffrom = ""
     unless definition.empty?
       defsrc = xml.elements['//Definition/@source/text()'].to_s
       defurl = xml.elements['//Definition/@url/text()'].to_s
+      unless defsrc.empty? and defurl.empty?
+        deffrom = " --"
+        deffrom << " " << defsrc unless defsrc.empty?
+        deffrom << " " << defurl unless defurl.empty?
+      end
     end
 
     if heading.empty? and answer.empty? and abstract.empty? and definition.empty?
@@ -122,15 +135,15 @@ class SearchPlugin < Plugin
 
     # otherwise, return the abstract, followed by as many hits as found
     unless heading.empty? or abstract.empty?
-      m.reply "%{bold}%{heading}:%{bold} %{abstract} -- %{absrc} %{aburl}" % {
+      m.reply "%{bold}%{heading}:%{bold} %{abstract}%{abfrom}" % {
         :bold => Bold, :heading => heading,
-        :abstract => abstract, :absrc => absrc, :aburl => aburl
+        :abstract => abstract, :abfrom => abfrom
       }
     end
     unless heading.empty? or definition.empty?
-      m.reply "%{bold}%{heading}:%{bold} %{abstract} -- %{absrc} %{aburl}" % {
+      m.reply "%{bold}%{heading}:%{bold} %{abstract}%{abfrom}" % {
         :bold => Bold, :heading => heading,
-        :abstract => definition, :absrc => defsrc, :aburl => defurl
+        :abstract => definition, :abfrom => deffrom
       }
     end
     # return zeroclick search results
