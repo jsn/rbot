@@ -321,7 +321,7 @@ class PollPlugin < Plugin
       if poll.voters.has_key? m.sourcenick
         to_reply << _(" Be patient, it'll end %{end}")
       else
-        to_reply << _(" You have until %{poll.ends_at} to vote if you haven't!")
+        to_reply << _(" You have until %{end} to vote if you haven't!")
         options << " #{poll.options}"
       end
     else
