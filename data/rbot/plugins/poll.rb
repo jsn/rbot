@@ -236,7 +236,9 @@ class PollPlugin < Plugin
     return if poll == nil
     poll.stop!
 
-    @bot.say(poll.channel, _("let's find the answer to: %{q}") % {
+    dest = poll.channel ? poll.channel : poll.author
+
+    @bot.say(dest, _("let's find the answer to: %{q}") % {
       :q => "#{Bold}#{poll.question}#{Bold}"
     })
 
@@ -268,7 +270,7 @@ class PollPlugin < Plugin
       end
     end
 
-    @bot.say poll.channel, poll.outcome
+    @bot.say dest, poll.outcome
 
     # Now that we're done, move it to the archives
     archives = @registry[:archives]
@@ -342,7 +344,8 @@ class PollPlugin < Plugin
 
     m.reply((to_reply % {
       :bold => Bold,
-      :id => poll.id, :author => poll.author, :channel => poll.channel,
+      :id => poll.id, :author => poll.author,
+      :channel => (poll.channel ? poll.channel : _("private")),
       :started => poll.started,
       :end => poll.ends_at
     }) + options + outcome)
