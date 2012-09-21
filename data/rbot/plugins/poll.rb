@@ -118,6 +118,18 @@ class PollPlugin < Plugin
     init_reg_entry :running, Hash.new
     init_reg_entry :archives, Hash.new
     init_reg_entry :last_poll_id, 0
+    running = @registry[:running]
+    now = Time.now
+    running.each do |id, poll|
+      duration = poll.ends_at - Time.now
+      if duration > 0
+        # keep the poll running
+        @bot.timer.add_once(duration) { count_votes(poll.id) }
+      else
+        # the poll expired while the bot was out, end it
+        count_votes(poll.id)
+      end
+    end
   end
 
   def authors_running_count(victim)
