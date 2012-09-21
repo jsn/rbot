@@ -327,7 +327,7 @@ class PollPlugin < Plugin
       return
     end
 
-    to_reply = _("poll #%{id} was asked by %{bold}%{author}%{bold} in %{bold}%{channel}%{bold} %{started}.")
+    to_reply = _("poll #%{id} was asked by %{bold}%{author}%{bold} in %{bold}%{channel}%{bold} %{started}.").dup
     options = ''
     outcome = ''
     if poll.running
