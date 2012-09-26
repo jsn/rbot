@@ -354,7 +354,7 @@ class LastFmPlugin < Plugin
     end
     first = doc.root.elements[1].elements[1]
     now = first.attributes["nowplaying"]
-    artist = first.elements["artist"].text
+    artist = first.elements["artist/name"].text
     track = first.elements["name"].text
     albumtxt = first.elements["album"].text
     album = if albumtxt
@@ -412,7 +412,7 @@ class LastFmPlugin < Plugin
     tags_xml = @bot.httputil.get("#{APIURL}method=artist.gettoptags&artist=#{CGI.escape params[:artist].to_s}")
     tags_doc = Document.new tags_xml
 
-    first = info_doc.root.elements["artist"]
+    first = info_doc.root.elements["artist/name"]
     artist = first.elements["name"].text
     url = first.elements["url"].text
     stats = {}
@@ -456,7 +456,7 @@ class LastFmPlugin < Plugin
         doc.root.each_element("results/trackmatches/track") do |trck|
           hits << _("%{bold}%{t}%{bold} by %{bold}%{a}%{bold} (%{n} listeners)") % {
             :t => trck.elements["name"].text,
-            :a => trck.elements["artist"].text,
+            :a => trck.elements["artist/name"].text,
             :n => trck.elements["listeners"].text,
             :bold => Bold
           }
@@ -685,7 +685,7 @@ class LastFmPlugin < Plugin
       }
     when :recenttracks
       tracks = doc.root.get_elements("recenttracks/track").map do |track|
-        [track.elements["artist"].text, track.elements["name"].text].join(" - ")
+        [track.elements["artist/name"].text, track.elements["name"].text].join(" - ")
       end
 
       counts = []
@@ -730,7 +730,7 @@ class LastFmPlugin < Plugin
         case action
         when :weeklytrackchart, :weeklyalbumchart
           format = "%{artist} - %{title} (%{bold}%{plays}%{bold})"
-          artist = item.elements["artist"].text
+          artist = item.elements["artist/name"].text
         when :weeklyartistchart, :topartists
           format = "%{artist} (%{bold}%{plays}%{bold})"
           artist = item.elements["name"].text
