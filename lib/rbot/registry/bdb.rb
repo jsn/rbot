@@ -12,7 +12,7 @@ rescue Exception => e
 end
 
 if not defined? BDB
-  exit 2
+  fatal "A bdb module was found, but it doesn't seem to be one I know about, sorry"
 end
 
 module Irc
