@@ -133,7 +133,7 @@ class Imdb
     resp = nil
     begin
       # movie urls without tailing / trigger a redirect
-      sr += '/' if sr[-1] != '/'
+      sr += '/' if sr[-1,1] != '/'
       resp = @bot.httputil.get_response(IMDB + sr, :max_redir => -1)
     rescue Exception => e
       error e.message
