@@ -15,7 +15,7 @@ class Imdb
   IMDB = "http://www.imdb.com"
   TITLE_OR_NAME_MATCH = /<a\s+href="(\/(?:title|name)\/(?:tt|nm)[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   TITLE_MATCH = /<a\s+href="(\/title\/tt[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
-  NAME_MATCH = /<a\s+href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
+  NAME_MATCH = /<a\s+onclick="[^"]+"\s+href="(\/name\/nm[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   CHAR_MATCH = /<a\s+href="(\/character\/ch[0-9]+\/?)[^"]*"(?:[^>]*)>([^<]*)<\/a>/
   CREDIT_NAME_MATCH = /#{NAME_MATCH}\s*<\/td>\s*<td[^>]+>\s*\.\.\.\s*<\/td>\s*<td[^>]+>\s*(.+?)\s*<\/td>/m
   FINAL_ARTICLE_MATCH = /, ([A-Z]\S{0,2})$/
@@ -33,8 +33,12 @@ class Imdb
   end
 
   def search(rawstr, rawopts={})
+    # allow the user to search directly for (movie) IDs
+    if rawstr.match /$tt\d+^/ then
+      return ["/movie/#{rawstr}/"]
+    end
     str = CGI.escape(rawstr)
-    str << ";site=aka" if @bot.config['imdb.aka']
+    str << "&site=aka" if @bot.config['imdb.aka']
     opts = rawopts.dup
     opts[:type] = :both unless opts[:type]
     return do_search(str, opts)
@@ -128,6 +132,8 @@ class Imdb
   def info_title(sr, opts={})
     resp = nil
     begin
+      # movie urls without tailing / trigger a redirect
+      sr += '/' if sr[-1] != '/'
       resp = @bot.httputil.get_response(IMDB + sr, :max_redir => -1)
     rescue Exception => e
       error e.message
@@ -185,7 +191,7 @@ class Imdb
       end
 
       genre = Array.new
-      resp.body.scan(/<a href="\/genre\/[^"]+"[^>]+>([^<]+)<\/a>/) do |gnr|
+      resp.body.scan(/<a\s+onclick="[^"]+"\s+href="\/genre\/[^"]+"\s+>([^<]+)<\/a>/) do |gnr|
         genre << gnr
       end
 
