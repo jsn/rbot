@@ -436,9 +436,15 @@ class SearchPlugin < Plugin
       answer_type << element.attributes['title']
       answer << element.elements['subpod/plaintext'].text
     }
+    # find the first non-nil answer
     n = 1
-    while answer[n].nil? and n < 5
+    answer[1..-1].each { |a|
+      break unless a.nil?
       n += 1
+    }
+    if answer[n].nil?
+      m.reply "no results"
+      return
     end
     # strip spaces, pipes, and line breaks
     sep = "#{Bold} :: #{Bold}"
