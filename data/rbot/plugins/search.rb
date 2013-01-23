@@ -431,20 +431,20 @@ class SearchPlugin < Plugin
       m.reply "no data available"
       return
     end
-    answer = []
-    xml.elements.each("//pod/subpod/plaintext") { |element|
-      answer << element.text
+    answer_type, answer = [], []
+    xml.elements.each("//pod") { |element|
+      answer_type << element.attributes['title']
+      answer << element.elements['subpod/plaintext'].text
     }
-    # search the first 5 pods until a result is found
     n = 1
     while answer[n].nil? and n < 5
       n += 1
     end
-    # strip spaces and line breaks
-    answer[n].gsub!(/\n/, Bold + ' :: ' + Bold )
-    answer[n].gsub!(/\t/, ' ')
-    answer[n].gsub!(/\s+/, ' ')
-    m.reply answer[n]
+    # strip spaces, pipes, and line breaks
+    sep = "#{Bold} :: #{Bold}"
+    chars = [ [/\n/, sep], [/\t/, " "], [/\s+/, " "], ["|", "-"] ]
+    chars.each { |c| answer[n].gsub!(c[0], c[1]) }
+    m.reply answer_type[n] + sep + answer[n]
   end
 
   def wikipedia(m, params)
