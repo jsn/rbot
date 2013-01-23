@@ -435,11 +435,16 @@ class SearchPlugin < Plugin
     xml.elements.each("//pod/subpod/plaintext") { |element|
       answer << element.text
     }
+    # search the first 5 pods until a result is found
+    n = 1
+    while answer[n].nil? and n < 5
+      n += 1
+    end
     # strip spaces and line breaks
-    answer[1].gsub!(/\n/, Bold + ' :: ' + Bold )
-    answer[1].gsub!(/\t/, ' ')
-    answer[1].gsub!(/\s+/, ' ')
-    m.reply answer[1].to_s
+    answer[n].gsub!(/\n/, Bold + ' :: ' + Bold )
+    answer[n].gsub!(/\t/, ' ')
+    answer[n].gsub!(/\s+/, ' ')
+    m.reply answer[n]
   end
 
   def wikipedia(m, params)
