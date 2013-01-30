@@ -25,8 +25,8 @@ GOOGLE_TIME_RESULT = %r{alt="Clock"></td><td valign=[^>]+>(.+?)<(br|/td)>}
 
 DDG_API_SEARCH = "http://api.duckduckgo.com/?format=xml&no_html=1&skip_disambig=1&no_redirect=0&q="
 
-WOLFRAM_API_SEARCH = "http://api.wolframalpha.com/v2/query?input=%{terms}&appid=%{key}&format=plaintext"
-           "&scantimeout=3.0&podtimeout=4.0&formattimeout=8.0&parsetimeout=5.0"
+WOLFRAM_API_SEARCH = "http://api.wolframalpha.com/v2/query?input=%{terms}&appid=%{key}&format=plaintext" +
+           "&scantimeout=3.0&podtimeout=4.0&formattimeout=8.0&parsetimeout=5.0" +
            "&excludepodid=SeriesRepresentations:*"
 WOLFRAM_API_KEY = "4EU37Y-TX9WJG3JH3"
 
