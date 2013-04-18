@@ -143,7 +143,7 @@ module ArinWhois
 module_function
 
   def raw_whois(query_string, host)
-    s = TCPsocket.open(host, 43)
+    s = TCPSocket.open(host, 43)
     s.write(query_string+"\n")
     ret = s.read
     s.close
