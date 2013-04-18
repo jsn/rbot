@@ -16,7 +16,7 @@ class #{class_name} < Plugin
     when 'hello'
       _("hello, this is an example topic of my new plugin! :)")
     else
-      _("#{plugin_name} plugin — topics: %{list}") % {
+      _("#{plugin_name} plugin - topics: %{list}") % {
         :list => topics.join(", ")
       }
     end
