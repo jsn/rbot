@@ -100,7 +100,7 @@ module ArinWhois
     def parse_chunks
       return if @data =~ /^No match found /
       chunks = @data.gsub(/^# ARIN WHOIS database, last updated.+/m, '').scan(/(([^\n]+\n)+\n)/m)
-      chunks.map do |chunk|
+      chunks = chunks.map do |chunk|
         result = Chunk.new
 
         chunk[0].scan(/([A-Za-z]+?):(.*)/).each do |tuple|
@@ -110,6 +110,7 @@ module ArinWhois
 
         result
       end
+      chunks.reject(&:empty?)
     end
 
 
@@ -131,9 +132,12 @@ module ArinWhois
       return unless datas = get_parsed_data
 
       datas_with_bitmasks = datas.map do |data|
-        bitmask = data[:net]['CIDR'].split('/')[1].to_i
+        next unless data[:customer]
+        next unless net_data = data[:net]
+        bitmask = net_data['CIDR'].split('/')[1].to_i
         [bitmask, data]
       end
+      datas_with_bitmasks.compact!
       #datas_with_bitmasks.sort.each{|x|puts x[0]}
       winner = datas_with_bitmasks.sort[-1][1]
     end
@@ -147,11 +151,11 @@ module_function
     s.write(query_string+"\n")
     ret = s.read
     s.close
-    return ret
+    ret
   end
 
   def lookup(ip)
-    data = raw_whois("+#{ip}", 'whois.arin.net')
+    data = raw_whois("+ n #{ip}", 'whois.arin.net')
     arin = ArinWhoisParser.new data
     arin.get_most_specific_owner
   end
