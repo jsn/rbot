@@ -17,10 +17,13 @@ class NotePlugin < Plugin
 
   def message(m)
     begin
-      return unless @registry.has_key? m.sourcenick
+      nick = m.sourcenick.downcase
+      # Keys are case insensitive to avoid storing a message
+      # for <person> instead of <Person> or visa-versa.
+      return unless @registry.has_key? nick
       pub = []
       priv = []
-      @registry[m.sourcenick].each do |n|
+      @registry[nick].each do |n|
         s = "[#{n.time.strftime('%H:%M')}] <#{n.from}> #{n.text}"
         (n.private ? priv : pub).push s
       end
@@ -32,7 +35,7 @@ class NotePlugin < Plugin
       if !priv.empty?
         @bot.say m.sourcenick, "you have notes! " + priv.join(' ')
       end
-      @registry.delete m.sourcenick
+      @registry.delete nick
     rescue Exception => e
       m.reply e.message
     end
@@ -40,11 +43,12 @@ class NotePlugin < Plugin
 
   def note(m, params)
     begin
-      q = @registry[params[:nick]] || Array.new
+      nick = params[:nick].downcase
+      q = @registry[nick] || Array.new
       s = params[:string].to_s.strip
       raise 'cowardly discarding the empty note' if s.empty?
       q.push Note.new(Time.now, m.sourcenick, m.private?, s)
-      @registry[params[:nick]] = q
+      @registry[nick] = q
       m.okay
     rescue Exception => e
       m.reply "error: #{e.message}"
