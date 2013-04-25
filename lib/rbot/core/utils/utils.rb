@@ -198,7 +198,7 @@ module ::Irc
       when 0
         raise "Empty ret array!"
       when 1
-        return ret.to_s
+        return ret[0].to_s
       else
         return [ret[0, ret.length-1].join(", ") , ret[-1]].join(_(" and "))
       end
