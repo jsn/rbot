@@ -431,15 +431,27 @@ class SearchPlugin < Plugin
       m.reply "no data available"
       return
     end
-    answer = []
-    xml.elements.each("//pod/subpod/plaintext") { |element|
-      answer << element.text
+    answer_type, answer = [], []
+    xml.elements.each("//pod") { |element|
+      answer_type << element.attributes['title']
+      answer << element.elements['subpod/plaintext'].text
     }
-    # strip spaces and line breaks
-    answer[1].gsub!(/\n/, Bold + ' :: ' + Bold )
-    answer[1].gsub!(/\t/, ' ')
-    answer[1].gsub!(/\s+/, ' ')
-    m.reply answer[1].to_s
+    # find the first answer that isn't nil,
+    # starting on the second pod in the array
+    n = 1
+    answer[1..-1].each { |a|
+      break unless a.nil?
+      n += 1
+    }
+    if answer[n].nil?
+      m.reply "no results"
+      return
+    end
+    # strip spaces, pipes, and line breaks
+    sep = Bold + ' :: ' + Bold
+    chars = [ [/\n/, sep], [/\t/, " "], [/\s+/, " "], ["|", "-"] ]
+    chars.each { |c| answer[n].gsub!(c[0], c[1]) }
+    m.reply answer_type[n] + sep + answer[n]
   end
 
   def wikipedia(m, params)
