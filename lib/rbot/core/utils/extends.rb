@@ -119,22 +119,22 @@ class ::Array
     end
   end
 
+  # Taken from Ruby backports:
   # shuffle and shuffle! are defined in Ruby >= 1.8.7
 
-  # This method returns a new array with the same items as
-  # the receiver, but shuffled
-  unless method_defined? :shuffle
-    def shuffle
-      sort_by { rand }
-    end
-  end
+  # This method returns a new array with the
+  # same items as the receiver, but shuffled
+  def shuffle
+    dup.shuffle!
+  end unless method_defined? :shuffle
 
-  # This method shuffles the items in the array
-  unless method_defined? :shuffle!
-    def shuffle!
-      replace shuffle
+  def shuffle!
+    size.times do |i|
+      r = i + Kernel.rand(size - i)
+      self[i], self[r] = self[r], self[i]
     end
-  end
+    self
+  end unless method_defined? :shuffle!
 end
 
 module ::Enumerable
