@@ -9,10 +9,26 @@
 # License:: MIT license
 
 class NotePlugin < Plugin
+
   Note = Struct.new('Note', :time, :from, :private, :text)
 
-  def help(plugin, topic="")
-    "note <nick> <string> => stores a note (<string>) for <nick>"
+  def initialize
+    super
+    return if @registry.nil? or @registry.length < 1
+    debug 'Checking registry for old-formatted notes...'
+    n = 0
+    @registry.dup.each_key do |key|
+      unless key == key.downcase
+        @registry[key.downcase] = @registry[key] + @registry[key.downcase]
+        @registry.delete key
+        n += 1
+      end
+    end
+    debug "#{n} entries converted and merged."
+  end
+
+  def help(plugin, topic='')
+    'note <nick> <string> => stores a note (<string>) for <nick>'
   end
 
   def message(m)
@@ -33,7 +49,7 @@ class NotePlugin < Plugin
       end
 
       if !priv.empty?
-        @bot.say m.sourcenick, "you have notes! " + priv.join(' ')
+        @bot.say m.sourcenick, 'you have notes! ' + priv.join(' ')
       end
       @registry.delete nick
     rescue Exception => e
