@@ -14,12 +14,12 @@ class NotePlugin < Plugin
 
   def initialize
     super
-    return if @registry.nil? or @registry.length < 1
+    return if @registry.length < 1
     debug 'Checking registry for old-formatted notes...'
     n = 0
     @registry.dup.each_key do |key|
       unless key == key.downcase
-        @registry[key.downcase] = @registry[key] + @registry[key.downcase]
+        @registry[key.downcase] = @registry[key] + (@registry[key.downcase] || [])
         @registry.delete key
         n += 1
       end
