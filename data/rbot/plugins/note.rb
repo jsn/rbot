@@ -12,14 +12,18 @@ class NotePlugin < Plugin
 
   Note = Struct.new('Note', :time, :from, :private, :text)
 
+  Config.register Config::BooleanValue.new 'note.private_message',
+    :default => false,
+    :desc => 'Send all notes in private messages instead of channel messages.'
+
   def initialize
     super
-    return if @registry.nil? or @registry.length < 1
+    return if @registry.length < 1
     debug 'Checking registry for old-formatted notes...'
     n = 0
     @registry.dup.each_key do |key|
       unless key == key.downcase
-        @registry[key.downcase] = @registry[key] + @registry[key.downcase]
+        @registry[key.downcase] = @registry[key] + (@registry[key.downcase] || [])
         @registry.delete key
         n += 1
       end
@@ -40,15 +44,18 @@ class NotePlugin < Plugin
       pub = []
       priv = []
       @registry[nick].each do |n|
-        s = "[#{n.time.strftime('%H:%M')}] <#{n.from}> #{n.text}"
-        (n.private ? priv : pub).push s
+        s = "[#{n.time.strftime('%b-%e %H:%M')}] <#{n.from}> #{n.text}"
+        unless n.private or @bot.config['note.private_message']
+          pub << s
+        else
+          priv << s
+        end
       end
-      if !pub.empty?
+      unless pub.empty?
         @bot.say m.replyto, "#{m.sourcenick}, you have notes! " +
           pub.join(' ')
       end
-
-      if !priv.empty?
+      unless priv.empty?
         @bot.say m.sourcenick, 'you have notes! ' + priv.join(' ')
       end
       @registry.delete nick
