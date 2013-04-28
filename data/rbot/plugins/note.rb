@@ -44,7 +44,7 @@ class NotePlugin < Plugin
       pub = []
       priv = []
       @registry[nick].each do |n|
-        s = "[#{n.time.strftime('%H:%M')}] <#{n.from}> #{n.text}"
+        s = "[#{n.time.strftime('%b-%e %H:%M')}] <#{n.from}> #{n.text}"
         unless n.private or @bot.config['note.private_message']
           pub << s
         else
