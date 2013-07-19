@@ -42,6 +42,9 @@ Plugin requirements
 (these are all optional, if you don't have them, the plugins just won't
 function)
 
+twitter:
+      oauth, oauth2, json (<ruby1.9) 
+
 bash, digg, slashdot, freshmeat, forecast:
       REXML
 rss:
