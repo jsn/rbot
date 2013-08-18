@@ -560,6 +560,7 @@ class AzGamePlugin < Plugin
         debug "getting random word from dictionary, matching #{random}"
         p = @bot.httputil.get(rules[:url] % CGI.escape(random))
         debug p
+        raise 'unable to get search results' if not p.match /Search results for/i
         lemmi = Array.new
         good = rules[:good]
         # We look for a lemma composed by a single word and of length at least two
