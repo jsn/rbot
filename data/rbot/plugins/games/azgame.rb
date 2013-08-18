@@ -145,7 +145,7 @@ class AzGamePlugin < Plugin
       :good => /(?:singular )?noun|verb|adj/,
       :first => 'abacus',
       :last => 'zuni',
-      :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st",
+      :url => "http://www.chambers.co.uk/search.php?query=%s&title=21st",
       :listener => /^[a-z]+$/
     },
     }
