@@ -145,7 +145,7 @@ class AzGamePlugin < Plugin
       :good => /(?:singular )?noun|verb|adj/,
       :first => 'abacus',
       :last => 'zuni',
-      :url => "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st",
+      :url => "http://www.chambers.co.uk/search.php?query=%s&title=21st",
       :listener => /^[a-z]+$/
     },
     }
@@ -560,6 +560,7 @@ class AzGamePlugin < Plugin
         debug "getting random word from dictionary, matching #{random}"
         p = @bot.httputil.get(rules[:url] % CGI.escape(random))
         debug p
+        raise 'unable to get search results' if not p.match /id="fullsearchresults"/i
         lemmi = Array.new
         good = rules[:good]
         # We look for a lemma composed by a single word and of length at least two
