@@ -12,7 +12,11 @@ class ConditionVariable
     begin
       # TODO: mutex should not be used
       @waiters_mutex.synchronize do
-        @waiters.push(Thread.current)
+        if @waiters.instance_of? Hash # ruby 2.0.0?
+          @waiters[Thread.current] = true
+        else
+          @waiters.push(Thread.current)
+        end
       end
       if timeout
         elapsed = mutex.sleep timeout if timeout > 0.0
