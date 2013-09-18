@@ -278,6 +278,18 @@ class Bot
     Config.register Config::BooleanValue.new('server.ssl',
       :default => false, :requires_restart => true, :wizard => true,
       :desc => "Use SSL to connect to this server?")
+    Config.register Config::BooleanValue.new('server.ssl_verify',
+      :default => false, :requires_restart => true,
+      :desc => "Verify the SSL connection?",
+      :wizard => true)
+    Config.register Config::StringValue.new('server.ssl_ca_file',
+      :default => default_ssl_ca_file, :requires_restart => true,
+      :desc => "The CA file used to verify the SSL connection.",
+      :wizard => true)
+    Config.register Config::StringValue.new('server.ssl_ca_path',
+      :default => '', :requires_restart => true,
+      :desc => "Alternativly a directory that includes CA PEM files used to verify the SSL connection.",
+      :wizard => true)
     Config.register Config::StringValue.new('server.password',
       :default => false, :requires_restart => true,
       :desc => "Password for connecting to this server (if required)",
@@ -608,7 +620,12 @@ class Bot
         debug "server.list is now #{@config['server.list'].inspect}"
     end
 
-    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], :ssl => @config['server.ssl'], :penalty_pct =>@config['send.penalty_pct'])
+    @socket = Irc::Socket.new(@config['server.list'], @config['server.bindhost'], 
+                              :ssl => @config['server.ssl'],
+                              :ssl_verify => @config['server.ssl_verify'],
+                              :ssl_ca_file => @config['server.ssl_ca_file'],
+                              :ssl_ca_path => @config['server.ssl_ca_path'],
+                              :penalty_pct => @config['send.penalty_pct'])
     @client = Client.new
 
     @plugins.scan
@@ -802,6 +819,17 @@ class Bot
       :truncate_text => @config['send.truncate_text'].dup
 
     trap_signals
+  end
+
+  # Determine (if possible) a valid path to a CA certificate bundle. 
+  def default_ssl_ca_file
+    [ '/etc/ssl/certs/ca-certificates.crt', # Ubuntu/Debian
+      '/etc/ssl/certs/ca-bundle.crt', # Amazon Linux
+      '/etc/ssl/ca-bundle.pem', # OpenSUSE
+      '/etc/pki/tls/certs/ca-bundle.crt' # Fedora/RHEL
+    ].find do |file|
+      File.readable? file
+    end
   end
 
   def repopulate_botclass_directory

@@ -285,6 +285,9 @@ module Irc
       @lines_sent = 0
       @lines_received = 0
       @ssl = opts[:ssl]
+      @ssl_verify = opts[:ssl_verify]
+      @ssl_ca_file = opts[:ssl_ca_file]
+      @ssl_ca_path = opts[:ssl_ca_path]
       @penalty_pct = opts[:penalty_pct] || 100
     end
 
@@ -331,7 +334,13 @@ module Irc
       if(@ssl)
         require 'openssl'
         ssl_context = OpenSSL::SSL::SSLContext.new()
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        if @ssl_verify
+          ssl_context.ca_file = @ssl_ca_file if @ssl_ca_file and not @ssl_ca_file.empty?
+          ssl_context.ca_path = @ssl_ca_path if @ssl_ca_path and not @ssl_ca_path.empty?
+          ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER 
+        else
+          ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
         sock = OpenSSL::SSL::SSLSocket.new(sock, ssl_context)
         sock.sync_close = true
         sock.connect
