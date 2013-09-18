@@ -801,8 +801,7 @@ class Bot
       :purge_split => @config['send.purge_split'],
       :truncate_text => @config['send.truncate_text'].dup
 
-    @signals = []
-    trap_sigs
+    trap_signals
   end
 
   def repopulate_botclass_directory
@@ -905,34 +904,32 @@ class Bot
   end
 
   # things to do when we receive a signal
-  def handle_sigs
-    while sig = @signals.shift
-      func = case sig
-             when 'SIGHUP'
-               :restart
-             when 'SIGUSR1'
-               :reconnect
-             else
-               :quit
-             end
-      debug "received #{sig}, queueing #{func}"
-      # this is not an interruption if we just need to reconnect
-      $interrupted += 1 unless func == :reconnect
-      self.send(func) unless @quit_mutex.locked?
-      debug "interrupted #{$interrupted} times"
-      if $interrupted >= 3
-        debug "drastic!"
-        log_session_end
-        exit 2
-      end
+  def handle_signal(sig)
+    func = case sig
+           when 'SIGHUP'
+             :restart
+           when 'SIGUSR1'
+             :reconnect
+           else
+             :quit
+           end
+    debug "received #{sig}, queueing #{func}"
+    # this is not an interruption if we just need to reconnect
+    $interrupted += 1 unless func == :reconnect
+    self.send(func) unless @quit_mutex.locked?
+    debug "interrupted #{$interrupted} times"
+    if $interrupted >= 3
+      debug "drastic!"
+      log_session_end
+      exit 2
     end
   end
 
   # trap signals
-  def trap_sigs
+  def trap_signals
     begin
       %w(SIGINT SIGTERM SIGHUP SIGUSR1).each do |sig|
-        trap(sig) { @signals << sig }
+        trap(sig) { Thread.new { handle_signal sig } }
       end
     rescue ArgumentError => e
       debug "failed to trap signals (#{e.pretty_inspect}): running on Windows?"
@@ -997,6 +994,9 @@ class Bot
       end
 
       connect
+    rescue SystemExit
+      log_session_end
+      exit 0
     rescue DBFatal => e
       fatal "fatal db error: #{e.pretty_inspect}"
       DBTree.stats
@@ -1016,12 +1016,10 @@ class Bot
       quit_msg = nil
       valid_recv = false # did we receive anything (valid) from the server yet?
       begin
-        handle_sigs
         reconnect(quit_msg, too_fast)
         quit if $interrupted > 0
         valid_recv = false
         while @socket.connected?
-          handle_sigs
           quit if $interrupted > 0
 
           # Wait for messages and process them as they arrive. If nothing is
@@ -1322,7 +1320,11 @@ class Bot
       save
       debug "\tcleaning up ..."
       @save_mutex.synchronize do
-        @plugins.cleanup
+        begin
+          @plugins.cleanup
+        rescue
+          debug "\tignoring cleanup error: #{$!}"
+        end
       end
       # debug "\tstopping timers ..."
       # @timer.stop
