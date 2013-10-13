@@ -26,7 +26,7 @@ class UrbanPlugin < Plugin
     else 1 end
 
     rv = Array.new
-    s.scan(%r{<td class='index'[^>]*>.*?(\d+)\..*?</td>.*?<td class='word'[^>]*>.*?<span>(.*?)</span>.*?<div class="definition">(.+?)</div>.*?<div class="example">(.+?)</div>}m) do |num, wrd, desc, ex|
+    s.scan(%r{<div class='word'[^>]*>.*?<a class="index"[^>]*>.*?(\d+)\..*?</a>.*?<span>(.*?)</span>.*?<div class="definition">(.+?)</div>.*?<div class="example">(.+?)</div>}m) do |num, wrd, desc, ex|
       rv << [num.to_i, wrd.strip, desc.strip, ex.strip]
     end
 
