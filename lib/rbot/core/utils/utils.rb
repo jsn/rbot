@@ -1,3 +1,4 @@
+# encoding: UTF-8
 #-- vim:sw=2:et
 #++
 #
