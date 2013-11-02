@@ -303,20 +303,30 @@ module Irc
       @conn_count += 1
       @server_uri = URI.parse(srv_uri)
       @server_uri.port = 6667 if !@server_uri.port
+
       debug "connection attempt \##{@conn_count} (#{@server_uri.host}:#{@server_uri.port})"
+
+      # if the host is a bracketed (IPv6) address, strip the brackets
+      # since Ruby doesn't like them in the Socket host parameter
+      # FIXME it would be safer to have it check for a valid
+      # IPv6 bracketed address rather than just stripping the brackets
+      srv_host = @server_uri.host
+      if srv_host.match(/\A\[(.*)\]\z/)
+        srv_host = $1
+      end
 
       if(@host)
         begin
-          sock=TCPSocket.new(@server_uri.host, @server_uri.port, @host)
+          sock=TCPSocket.new(srv_host, @server_uri.port, @host)
         rescue ArgumentError => e
           error "Your version of ruby does not support binding to a "
           error "specific local address, please upgrade if you wish "
           error "to use HOST = foo"
           error "(this option has been disabled in order to continue)"
-          sock=TCPSocket.new(@server_uri.host, @server_uri.port)
+          sock=TCPSocket.new(srv_host, @server_uri.port)
         end
       else
-        sock=TCPSocket.new(@server_uri.host, @server_uri.port)
+        sock=TCPSocket.new(srv_host, @server_uri.port)
       end
       if(@ssl)
         require 'openssl'
