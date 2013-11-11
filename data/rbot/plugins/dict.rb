@@ -58,7 +58,7 @@ class DictPlugin < Plugin
     @dmurlrx = %r{http://(?:www|old\.)?demauroparavia\.it/(\d+)}
     @dmwapurl = "http://wap.demauroparavia.it/index.php?lemma=%s"
     @dmwaplemma = "http://wap.demauroparavia.it/lemma.php?ID=%s"
-    @oxurl = "http://www.askoxford.com/concise_oed/%s"
+    @oxurl = "http://www.oxforddictionaries.com/definition/english/%s"
     @chambersurl = "http://www.chambersharrap.co.uk/chambers/features/chref/chref.py/main?query=%s&title=21st"
     @littreurl = "http://francois.gannaz.free.fr/Littre/xmlittre.php?requete=%s"
 
