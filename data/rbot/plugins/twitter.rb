@@ -39,25 +39,25 @@ class TwitterPlugin < Plugin
     :desc => "Maximum number of status updates shown by 'twitter [home|mentions|retweets] status'")
 
   def twitter_filter(s)
-    loc = Utils.check_location(s, Regexp.new('twitter\.com/#!/.*/status/\d+'))
+    loc = Utils.check_location(s, Regexp.new('twitter\.com/(#!/)?.*/status/\d+'))
     return nil unless loc
     id = loc.first.match(/\/status\/(\d+)/)[1]
 
-    response = @app_access_token.get('/1.1/statuses/show/'+id).body
+    response = @app_access_token.get('/1.1/statuses/show/'+id+'.json').body
     begin
-      tweet = JSON.parse(response).first
+      tweet = JSON.parse(response)
       status = {
         :date => (Time.parse(tweet["created_at"]) rescue "<unknown>"),
-        :id => (tweet["id"].text rescue "<unknown>"),
+        :id => (tweet["id_str"] rescue "<unknown>"),
         :text => (tweet["text"].ircify_html rescue "<error>"),
-        :source => (tweet["source"].text rescue "<unknown>"),
+        :source => (tweet["source"].ircify_html rescue "<unknown>"),
         :user => (tweet["user"]["name"] rescue "<unknown>"),
         :user_nick => (tweet["user"]["screen_name"] rescue "<unknown>")
         # TODO other entries
       }
       status[:nicedate] = String === status[:date] ? status[:date] : Utils.timeago(status[:date])
       return {
-        :title => "#{status[:user]}/#{status[:id]}",
+        :title => "@#{status[:user_nick]}: #{status[:text]}",
         :content => "#{status[:text]} (#{status[:nicedate]} via #{status[:source]})"
       }
     rescue
