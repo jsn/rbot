@@ -38,26 +38,35 @@ class TwitterPlugin < Plugin
     :default => 3, :validate => Proc.new { |v| v > 0 && v <= 10},
     :desc => "Maximum number of status updates shown by 'twitter [home|mentions|retweets] status'")
 
-  def twitter_filter(s)
-    loc = Utils.check_location(s, Regexp.new('twitter\.com/#!/.*/status/\d+'))
-    return nil unless loc
-    id = loc.first.match(/\/status\/(\d+)/)[1]
+  URL_PATTERN = %r{twitter\.com/([^/]+)(?:/status/(\d+))?}
 
-    response = @app_access_token.get('/1.1/statuses/show/'+id).body
+  def twitter_filter(s)
+    loc = Utils.check_location(s, URL_PATTERN)
+    return nil unless loc
+    matches = loc.first.match URL_PATTERN
+    if matches[2] # status id matched
+      id = matches[2]
+      url = '/1.1/statuses/show/%s.json' % id
+    else # no status id, get the latest status of that user
+      user = matches[1]
+      url = '/1.1/statuses/user_timeline.json?screen_name=%s&count=1&include_rts=true' % user
+    end
+    response = @app_access_token.get(url).body
     begin
-      tweet = JSON.parse(response).first
+      tweet = JSON.parse(response)
+      tweet = tweet.first if tweet.instance_of? Array
       status = {
         :date => (Time.parse(tweet["created_at"]) rescue "<unknown>"),
-        :id => (tweet["id"].text rescue "<unknown>"),
+        :id => (tweet["id_str"] rescue "<unknown>"),
         :text => (tweet["text"].ircify_html rescue "<error>"),
-        :source => (tweet["source"].text rescue "<unknown>"),
+        :source => (tweet["source"].ircify_html rescue "<unknown>"),
         :user => (tweet["user"]["name"] rescue "<unknown>"),
         :user_nick => (tweet["user"]["screen_name"] rescue "<unknown>")
         # TODO other entries
       }
       status[:nicedate] = String === status[:date] ? status[:date] : Utils.timeago(status[:date])
       return {
-        :title => "#{status[:user]}/#{status[:id]}",
+        :title => "@#{status[:user_nick]}",
         :content => "#{status[:text]} (#{status[:nicedate]} via #{status[:source]})"
       }
     rescue
