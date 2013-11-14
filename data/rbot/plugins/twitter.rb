@@ -57,7 +57,7 @@ class TwitterPlugin < Plugin
       }
       status[:nicedate] = String === status[:date] ? status[:date] : Utils.timeago(status[:date])
       return {
-        :title => "@#{status[:user_nick]}: #{status[:text]}",
+        :title => "@#{status[:user_nick]}",
         :content => "#{status[:text]} (#{status[:nicedate]} via #{status[:source]})"
       }
     rescue
