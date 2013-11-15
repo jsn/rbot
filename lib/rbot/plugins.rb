@@ -588,7 +588,7 @@ module Plugins
         }
         begin
           newerr = err.class.new(msg)
-        rescue ArgumentError => err_in_err
+        rescue ArgumentError => aerr_in_err
           # Somebody should hang the ActiveSupport developers by their balls
           # with barbed wire. Their MissingSourceFile extension to LoadError
           # _expects_ a second argument, breaking the usual Exception interface
@@ -601,7 +601,15 @@ module Plugins
           if err.class.respond_to? :from_message
             newerr = err.class.from_message(msg)
           else
-            raise err_in_err
+            raise aerr_in_err
+          end
+        rescue NoMethodError => nmerr_in_err
+          # Another braindead extension to StandardError, OAuth2::Error,
+          # doesn't get a string as message, but a response
+          if err.respond_to? :response
+            newerr = err.class.new(err.response)
+          else
+            raise nmerr_in_err
           end
         end
         newerr.set_backtrace(bt)
@@ -678,7 +686,13 @@ module Plugins
             end
           end
 
-          did_it = load_botmodule_file("#{dir}/#{file}", "plugin")
+          begin
+            did_it = load_botmodule_file("#{dir}/#{file}", "plugin")
+          rescue Exception => e
+            error e
+            did_it = e
+          end
+
           case did_it
           when Symbol
             processed[file.intern] = did_it
