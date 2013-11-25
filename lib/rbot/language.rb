@@ -78,7 +78,7 @@ class Bot
       lang_str = language.to_s.downcase.gsub(/\s+/,'_')
       lang_sym = lang_str.intern
       if defined?(GetText) and Lang2Locale.key?(lang_sym)
-        setlocale(Lang2Locale[lang_sym])
+        GetText.set_locale(Lang2Locale[lang_sym])
         debug "locale set to #{locale}"
         rbot_gettext_debug
       else
