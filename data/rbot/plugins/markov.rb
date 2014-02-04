@@ -734,10 +734,16 @@ class MarkovPlugin < Plugin
     m.reply "Markov status: chains: #{@chains.length} forward, #{@rchains.length} reverse, queued phrases: #{@learning_queue.size}"
   end
 
+  def learn_url(m, params)
+    Utils.safe_exec("w3m -cols 10000 -dump '#{params[:url]}'").split(/[\r\n]+/).each {|l| @learning_queue.push l }
+    m.okay
+  end
+
 end
 
 plugin = MarkovPlugin.new
 plugin.map 'markov delay :delay', :action => "set_delay"
+plugin.map 'markov learn_url :url', :action => "learn_url"
 plugin.map 'markov delay', :action => "set_delay"
 plugin.map 'markov ignore :action :option', :action => "ignore"
 plugin.map 'markov ignore :action', :action => "ignore"
