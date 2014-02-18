@@ -66,6 +66,9 @@ def rawlog(level, message=nil, who_pos=1)
     qmsg.push [level, l.chomp, who]
     who = ' ' * who.size
   }
+  if level == Logger::Severity::ERROR or level == Logger::Severity::FATAL and not $daemonize
+    $stderr.puts str
+  end
   $log_queue.push qmsg
 end
 
