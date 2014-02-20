@@ -600,6 +600,10 @@ module Plugins
           # idiotic approaches
           if err.class.respond_to? :from_message
             newerr = err.class.from_message(msg)
+          elsif ([:file, :line, :column, :offset, :problem, :context] & err.methods).length == 6
+            # Another ‘brillian’ overload, this time from Psych::SyntaxError
+            # In this case we'll just leave the message as-is
+            newerr = err.dup
           else
             raise aerr_in_err
           end
