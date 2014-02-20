@@ -1,18 +1,18 @@
 --- 
 :"generic-in": 
 - salve
-- ehila'
+- "ehila'"
 - ehilà
 - ola'
 - olà
 - yo
-- ue'
+- "ue'"
 - uè
 :"morning-in": 
 - "'giorno"
 - giorno
 - buon giorno
-- buon di'
+- "buon di'"
 - buon dì
 - buondì
 - buongiorno
@@ -43,7 +43,7 @@
 - gente
 - tutti
 - raga
-- raga'
+- "raga'"
 - ragà
 - ragazzi
 - ragazze
