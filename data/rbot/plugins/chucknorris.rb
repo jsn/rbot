@@ -19,7 +19,7 @@ class ChuckNorrisPlugin < Plugin
 
     debug "+ [chucknorris] Loading #{path}..."
 
-    @@facts = YAML.load(fyml).map{|fact,(score,votes)| votes >= MIN_VOTES ? [score,fact] : nil}.compact
+    @@facts = YAML.load(fyml.read).map{|fact,(score,votes)| votes >= MIN_VOTES ? [score,fact] : nil}.compact
     debug "+ [chucknorris] #{@@facts.length} Chuck Norris facts loaded..."
     debug "  Random fact: #{@@facts[rand(@@facts.size)].inspect}"
 
