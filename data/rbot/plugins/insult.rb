@@ -234,6 +234,7 @@ class InsultPlugin < Plugin
     else
       msgto = m.channel
     end
+    msgto = m.source.to_s if not msgto
 
     insult = generate_insult
     @bot.say msgto, prefix + insult + suffix
