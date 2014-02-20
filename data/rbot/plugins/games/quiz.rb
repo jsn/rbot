@@ -507,7 +507,7 @@ class QuizPlugin < Plugin
 
     if q.question
       m.reply "#{Bold}#{Color}03Current question: #{Color}#{Bold}#{q.question}"
-      m.reply "Hint: #{q.hint}" if q.hinted
+      m.reply "Hint: #{q.hint.join}" if q.hinted
       return
     end
 
@@ -630,7 +630,7 @@ class QuizPlugin < Plugin
         end while is_sep(q.answer_array[index]) and not q.all_seps
         q.hint[index] = q.answer_array[index]
       end
-      m.reply "Hint: #{q.hint}"
+      m.reply "Hint: #{q.hint.join}"
       q.hinted = true
 
       # FIXME 2.0 UTF-8
