@@ -93,6 +93,8 @@ end
 begin
   # ruby 1.9 specific fixes
   unless RUBY_VERSION < '1.9'
+    Encoding.default_internal = Encoding::UTF_8
+    Encoding.default_external = Encoding::UTF_8
     require 'rbot/compat19'
   end
 
