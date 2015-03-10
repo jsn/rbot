@@ -1,45 +1,4 @@
 = rbot - The Ruby IRC bot
 
-rbot is a ruby IRC bot. Think of him as a ruby bot framework with a highly
-modular design based around plugins.
-
-== rbot features
-
-* Runtime configuration via irc chat
-* User authentication and access levels for using different bot features
-* Built in infobot-style keywords.
-* Support for underlying fact database (infobot fact files), which can
-  be overridden or supplemented by runtime keyword controls
-* Multi-language support - comes with english, dutch, german, french, italian
-  japanese, chinese, russian and finnish definitions so far - more translations welcome
-* Powerful plugin architecture, comes with plugins for:
-  - RSS feed updates
-  - IMDb queries
-  - Translator with multitude of services, it's easy as <code>!translate Ein Automobil</code>
-  - Last.fm
-  - Google searching
-  - URL information
-  - Seen +nick+?
-    * <code>rbot: seen tango? <rbot> tango_ was last seen 20 minutes and 7 seconds ago, joining #rbot</code>
-  - Reminders
-    * Example: <code>remind me about pizza in the oven in 15 minutes</code>
-  - Checking the weather
-  - Doing math
-  - GeoIP lookup
-  - Lots of games, including uno, hangman, azgame and roshambo
-  - Karma
-  - Per-channel quote storage, searching and retrieval
-  - Check the spelling of a word
-  - RPG dice rolling
-  - larting people
-  - Conversation stats — also, rbot log format is supported by {pisg}[http://pisg.sourceforge.net/]
-  - more... 
-
-Thanks are owed to the infobot developers - several of rbot's features are
-inspired by infobot and so are some of the default plugins. Thanks are also
-owed to RADKade1, as rbot's quote plugin is a direct reimplementation of his
-"quotesaq" - simply because it's a great quote interface.
-
-Mainly, rbot's fun to play with, although the plugin architecture can be used
-to write very useful modules
+rbot development continues in a different repository: {ruby-rbot/rbot}[https://github.com/ruby-rbot/rbot/].
 
